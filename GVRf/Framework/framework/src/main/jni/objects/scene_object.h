@@ -80,7 +80,6 @@ public:
     }
 
     bool attachComponent(Component* component);
-    bool detachComponent(Component* component);
     Component* detachComponent(long long type);
     Component* getComponent(long long type) const;
     void getAllComponents(std::vector<Component*>& components, long long type);
@@ -110,11 +109,6 @@ public:
     }
     void setTransformDirty() {
     	transform_dirty_ = true;
-        Transform* t = transform();
-        if (t)
-        {
-            t->invalidate();
-        }
     }
 
     bool isTransformDirty() {
@@ -145,7 +139,6 @@ public:
     bool intersectsBoundingVolume(float rox, float roy, float roz, float rdx,
             float rdy, float rdz);
     bool intersectsBoundingVolume(SceneObject *scene_object);
-
     void dirtyHierarchicalBoundingVolume();
     BoundingVolume& getBoundingVolume();
     void onTransformChanged();

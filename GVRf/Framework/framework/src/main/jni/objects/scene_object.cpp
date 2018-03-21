@@ -71,37 +71,32 @@ bool SceneObject::attachComponent(Component* component) {
     return true;
 }
 
-bool SceneObject::detachComponent(Component* component) {
-    auto it = std::find(components_.begin(), components_.end(), component);
-    if (it == components_.end())
-        return false;
-    SceneObject* par = parent();
-    if (par)
-    {
-        Scene* scene = Scene::main_scene();
-        SceneObject* root = scene->getRoot();
-        if (scene != NULL)
-        {
-            while (par)
-            {
-                if (par == root)
-                {
-                    component->onRemovedFromScene(scene);
-                    break;
-                }
-                par = par->parent();
-            }
-        }
-    }
-    (*it)->set_owner_object(NULL);
-    components_.erase(it);
-    return true;
-}
 
-Component* SceneObject::detachComponent(long long type) {
-    for (auto it = components_.begin(); it != components_.end(); ++it) {
-        if ((*it)->getType() == type) {
+Component* SceneObject::detachComponent(long long type)
+{
+    for (auto it = components_.begin(); it != components_.end(); ++it)
+    {
+        if ((*it)->getType() == type)
+        {
             Component* component = *it;
+            SceneObject* par = parent();
+            if (par)
+            {
+                Scene* scene = Scene::main_scene();
+                SceneObject* root = scene->getRoot();
+                if (scene != NULL)
+                {
+                    while (par)
+                    {
+                        if (par == root)
+                        {
+                            component->onRemovedFromScene(scene);
+                            break;
+                        }
+                        par = par->parent();
+                    }
+                }
+            }
             component->set_owner_object(NULL);
             components_.erase(it);
             return component;
@@ -178,7 +173,6 @@ void SceneObject::onAddedToScene(Scene* scene)
  */
 bool SceneObject::onAddChild(SceneObject* addme, SceneObject* root)
 {
-    bounding_volume_dirty_ = true;
     if (addme == this)
     {
         std::string error =  "SceneObject::addChildObject() : cycle of scene objects is not allowed.";
@@ -254,7 +248,13 @@ void SceneObject::removeChildObject(SceneObject* child) {
 }
 
 void SceneObject::onTransformChanged() {
+    Transform* t = transform();
+    if (t)
+    {
+        t->invalidate();
+    }
     setTransformDirty();
+    dirtyHierarchicalBoundingVolume();
     if (getChildrenCount() > 0)
     {
         std::lock_guard<std::mutex> lock(children_mutex_);
@@ -472,7 +472,7 @@ bool SceneObject::intersectsBoundingVolume(SceneObject *scene_object) {
 
 
 BoundingVolume& SceneObject::getBoundingVolume() {
-    if (!bounding_volume_dirty_ && !transform_dirty_) {
+    if (!bounding_volume_dirty_) {
         return transformed_bounding_volume_;
     }
     RenderData* rdata = render_data();

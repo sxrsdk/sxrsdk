@@ -27,10 +27,8 @@ import org.gearvrf.utility.Log;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * Contains a the hierarchy of visible objects, a camera and processes events.
@@ -139,21 +137,35 @@ public class GVRScene extends GVRHybridObject implements PrettyPrint, IScriptabl
      * Remove all scene objects.
      */
     public void removeAllSceneObjects() {
-        GVRCameraRig rig = getMainCameraRig();
-        GVRSceneObject head = rig.getOwnerObject();
+        final GVRCameraRig rig = getMainCameraRig();
+        final GVRSceneObject head = rig.getOwnerObject();
         rig.removeAllChildren();
+        final GVRSceneObject oldRoot = mSceneRoot;
 
-        for (GVRSceneObject child : mSceneRoot.getChildren()) {
-            child.getParent().removeChildObject(child);
-        }
         NativeScene.removeAllSceneObjects(getNative());
+
         mSceneRoot = new GVRSceneObject(getGVRContext());
-        mSceneRoot.addChildObject(head);
+        if (null != head) {
+            head.getParent().removeChildObject(head);
+            mSceneRoot.addChildObject(head);
+        }
         NativeScene.addSceneObject(getNative(), mSceneRoot.getNative());
+
+        final int numControllers = getGVRContext().getInputManager().clear();
+        if (numControllers > 0)
+        {
+            getGVRContext().getInputManager().selectController();
+        }
 
         getGVRContext().runOnGlThread(new Runnable() {
             @Override
             public void run() {
+                //to prevent components from being deleted concurrently
+                for (final GVRSceneObject child : oldRoot.getChildren()) {
+                    child.detachAllComponents();
+                    child.getParent().removeChildObject(child);
+                }
+
                 NativeScene.deleteLightsAndDepthTextureOnRenderThread(getNative());
             }
         });
@@ -475,7 +487,7 @@ public class GVRScene extends GVRHybridObject implements PrettyPrint, IScriptabl
      * 
      * @return array of lights or null if no lights in scene.
      */
-    public GVRLightBase[] getLightList()
+    public GVRLight[] getLightList()
     {
         return NativeScene.getLightList(getNative());
     }
@@ -661,7 +673,7 @@ class NativeScene {
 
     static native long ctor();
 
-    static native void setJava(long scene, Object javaScene);
+    static native void setJava(long scene, GVRScene javaScene);
 
     static native void addSceneObject(long scene, long sceneObject);
    
@@ -687,7 +699,7 @@ class NativeScene {
 
     static native void clearLights(long scene);
 
-    static native GVRLightBase[] getLightList(long scene);
+    static native GVRLight[] getLightList(long scene);
 
     static native void setMainScene(long scene);
     

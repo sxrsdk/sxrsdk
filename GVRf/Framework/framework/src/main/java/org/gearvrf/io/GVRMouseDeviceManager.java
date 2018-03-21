@@ -17,7 +17,6 @@ package org.gearvrf.io;
 
 
 import org.gearvrf.GVRContext;
-import org.gearvrf.GVRCursorController;
 import org.gearvrf.GVRPerspectiveCamera;
 import org.gearvrf.GVRScene;
 import org.gearvrf.utility.Log;
@@ -201,13 +200,16 @@ final class GVRMouseDeviceManager {
             if (action == MotionEvent.ACTION_DOWN)
             {
                 setKeyEvent(BUTTON_1_DOWN);
-                setActive(true);
+                if ((mTouchButtons & e.getButtonState()) != 0)
+                {
+                    setActive(true);
+                }
             }
             else if (action == MotionEvent.ACTION_UP)
             {
                 setKeyEvent(BUTTON_1_UP);
                 setActive(false);
-            }
+             }
             setMotionEvent(e);
             if (mCursorControl == CursorControl.CURSOR_DEPTH_FROM_CONTROLLER)
             {

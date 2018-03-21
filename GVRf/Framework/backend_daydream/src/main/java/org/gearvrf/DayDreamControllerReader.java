@@ -2,8 +2,7 @@ package org.gearvrf;
 
 import android.graphics.PointF;
 
-import org.gearvrf.io.GearCursorController;
-import org.gearvrf.utility.Log;
+import org.gearvrf.io.GVRGearCursorController;
 import org.joml.Math;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -17,13 +16,14 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-class DayDreamControllerReader implements GearCursorController.ControllerReader {
+class DayDreamControllerReader implements GVRGearCursorController.ControllerReader {
 
     private ControllerManager mControllerManager;
     private Controller mController;
     private int mConnectionState = ConnectionStates.DISCONNECTED;
     private FloatBuffer readbackBuffer = null;
     private GVRActivity mActivity = null;
+    private final float OCULUS_SCALE = 256.0f;
 
     DayDreamControllerReader(GVRActivity gvrActivity) {
         EventListener listener = new EventListener();
@@ -67,15 +67,15 @@ class DayDreamControllerReader implements GearCursorController.ControllerReader 
     @Override
     public int getKey() {
         if(mController.appButtonState)
-            return GearCursorController.CONTROLLER_KEYS.BUTTON_A.getNumVal();
+            return GVRGearCursorController.CONTROLLER_KEYS.BUTTON_A.getNumVal();
         if(mController.clickButtonState)
-            return GearCursorController.CONTROLLER_KEYS.BUTTON_ENTER.getNumVal();
+            return GVRGearCursorController.CONTROLLER_KEYS.BUTTON_ENTER.getNumVal();
         if(mController.volumeUpButtonState)
-            return GearCursorController.CONTROLLER_KEYS.BUTTON_VOLUME_UP.getNumVal();
+            return GVRGearCursorController.CONTROLLER_KEYS.BUTTON_VOLUME_UP.getNumVal();
         if(mController.volumeDownButtonState)
-            return GearCursorController.CONTROLLER_KEYS.BUTTON_VOLUME_DOWN.getNumVal();
+            return GVRGearCursorController.CONTROLLER_KEYS.BUTTON_VOLUME_DOWN.getNumVal();
         if(mController.homeButtonState)
-            return GearCursorController.CONTROLLER_KEYS.BUTTON_HOME.getNumVal();
+            return GVRGearCursorController.CONTROLLER_KEYS.BUTTON_HOME.getNumVal();
 
         return 0;
     }
@@ -89,7 +89,7 @@ class DayDreamControllerReader implements GearCursorController.ControllerReader 
 
     @Override
     public void updateTouchpad(PointF pt) {
-        pt.set(mController.touch.x, mController.touch.y);
+        pt.set(mController.touch.x * OCULUS_SCALE, mController.touch.y * OCULUS_SCALE);
     }
 
     @Override

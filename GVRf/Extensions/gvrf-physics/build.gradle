@@ -7,8 +7,7 @@ repositories {
 }
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    compileSdkVersion 26
 
     defaultConfig {
         minSdkVersion 21
@@ -16,7 +15,11 @@ android {
 
         ndk {
             moduleName "gvrf-physics"
-            abiFilter "armeabi-v7a"
+            if (rootProject.hasProperty("ARM64")) {
+                abiFilters = ['arm64-v8a']
+            } else {
+                abiFilters = ['armeabi-v7a']
+            }
         }
         externalNativeBuild {
             cmake {

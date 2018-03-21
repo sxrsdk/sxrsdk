@@ -59,12 +59,12 @@ namespace gvr
     RenderTarget* GLRenderer::createRenderTarget(RenderTexture* renderTexture, const RenderTarget* renderTarget){
         return new GLRenderTarget(renderTexture, renderTarget);
     }
-    RenderTexture* GLRenderer::createRenderTexture(const RenderTextureInfo& renderTextureInfo){
+    RenderTexture* GLRenderer::createRenderTexture(const RenderTextureInfo* renderTextureInfo){
 
-        if(renderTextureInfo.useMultiview)
-            return  new GLMultiviewRenderTexture(renderTextureInfo.fdboWidth,renderTextureInfo.fboHeight,renderTextureInfo.multisamples,2, renderTextureInfo.fboId, renderTextureInfo.texId);
+        if(renderTextureInfo->useMultiview)
+            return  new GLMultiviewRenderTexture(renderTextureInfo->fdboWidth,renderTextureInfo->fboHeight,renderTextureInfo->multisamples,2, renderTextureInfo->fboId, renderTextureInfo->texId);
 
-        return new GLNonMultiviewRenderTexture(renderTextureInfo.fdboWidth,renderTextureInfo.fboHeight,renderTextureInfo.multisamples,renderTextureInfo.fboId, renderTextureInfo.texId);
+        return new GLNonMultiviewRenderTexture(renderTextureInfo->fdboWidth,renderTextureInfo->fboHeight,renderTextureInfo->multisamples,renderTextureInfo->fboId, renderTextureInfo->texId);
     }
     void GLRenderer::clearBuffers(const Camera &camera) const
     {
@@ -148,9 +148,9 @@ namespace gvr
         return createRenderTexture(width, height, sample_count, jcolor_format, jdepth_format, resolve_depth, texparams, number_views);
     }
 
-    RenderTexture* GLRenderer::createRenderTexture(int width, int height, int sample_count, int layers)
+    RenderTexture* GLRenderer::createRenderTexture(int width, int height, int sample_count, int layers, int depthformat)
     {
-        RenderTexture* tex = new GLNonMultiviewRenderTexture(width, height, sample_count, layers, DepthFormat::DEPTH_24_STENCIL_8);
+        RenderTexture* tex = new GLNonMultiviewRenderTexture(width, height, sample_count, layers, depthformat);
         return tex;
     }
 
@@ -199,7 +199,7 @@ namespace gvr
     }
 
 
-    void GLRenderer::renderRenderTarget(Scene* scene, RenderTarget* renderTarget,
+    void GLRenderer::renderRenderTarget(Scene* scene, jobject javaSceneObject, RenderTarget* renderTarget,
                             ShaderManager* shader_manager,
                             RenderTexture* post_effect_render_texture_a,
                             RenderTexture* post_effect_render_texture_b)
@@ -216,6 +216,8 @@ namespace gvr
         GL(glDisable(GL_POLYGON_OFFSET_FILL));
         Camera* camera = renderTarget->getCamera();
         RenderState rstate = renderTarget->getRenderState();
+        //@todo makes it clear this is a hack
+        rstate.javaSceneObject = javaSceneObject;
         RenderData* post_effects = camera->post_effect_data();
         rstate.scene = scene;
         rstate.shader_manager = shader_manager;
@@ -230,7 +232,7 @@ namespace gvr
             if(rstate.is_multiview)
                 rstate.render_mask = RenderData::RenderMaskBit::Right | RenderData::RenderMaskBit::Left;
 
-            rstate.uniforms.u_right = rstate.render_mask & RenderData::RenderMaskBit::Right;
+            rstate.uniforms.u_right = ((camera->render_mask() & RenderData::RenderMaskBit::Right) != 0) ? 1 : 0;
             rstate.material_override = NULL;
             GL(glEnable (GL_BLEND));
             GL(glBlendEquation (GL_FUNC_ADD));
@@ -409,14 +411,13 @@ namespace gvr
         }
     }
 
-
     /**
      * Generate shadow maps for all the lights that cast shadows.
      * The scene is rendered from the viewpoint of the light using a
      * special depth shader (GVRDepthShader) to create the shadow map.
      * @see Renderer::renderShadowMap Light::makeShadowMap
      */
-    void GLRenderer::makeShadowMaps(Scene* scene, ShaderManager* shader_manager)
+    void GLRenderer::makeShadowMaps(Scene* scene, jobject javaSceneObject, ShaderManager* shader_manager)
     {
         checkGLError("makeShadowMaps");
         const std::vector<Light*> lights = scene->getLightList();
@@ -426,7 +427,7 @@ namespace gvr
         glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFB);
         glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFB);
         for (auto it = lights.begin(); it != lights.end(); ++it) {
-            (*it)->makeShadowMap(scene, shader_manager, texIndex);
+            (*it)->makeShadowMap(scene, javaSceneObject, shader_manager, texIndex);
             ++texIndex;
         }
         glBindFramebuffer(GL_READ_FRAMEBUFFER, readFB);
@@ -491,31 +492,34 @@ namespace gvr
                 pass->set_material(bbox_material);
                 bounding_box_render_data->set_mesh(bounding_box_mesh);
                 bounding_box_render_data->add_pass(pass);
+                if (bounding_box_render_data->isValid(this, rstate) >= 0)
+                {
+                    GLuint* query = scene_object->get_occlusion_array();
 
-                GLuint *query = scene_object->get_occlusion_array();
+                    glDepthFunc(GL_LEQUAL);
+                    glEnable(GL_DEPTH_TEST);
+                    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
-                glDepthFunc(GL_LEQUAL);
-                glEnable(GL_DEPTH_TEST);
-                glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+                    rstate.uniforms.u_model = scene_object->transform()->getModelMatrix();
+                    rstate.uniforms.u_mv = rstate.uniforms.u_view * rstate.uniforms.u_model;
+                    rstate.uniforms.u_mv_it = glm::inverseTranspose(rstate.uniforms.u_mv);
+                    rstate.uniforms.u_mvp = rstate.uniforms.u_proj * rstate.uniforms.u_mv;
 
-                rstate.uniforms.u_model = scene_object->transform()->getModelMatrix();
-                rstate.uniforms.u_mv = rstate.uniforms.u_view * rstate.uniforms.u_model;
-                rstate.uniforms.u_mv_it = glm::inverseTranspose(rstate.uniforms.u_mv);
-                rstate.uniforms.u_mvp = rstate.uniforms.u_proj * rstate.uniforms.u_mv;
+                    //Issue the query only with a bounding box
+                    glBeginQuery(GL_ANY_SAMPLES_PASSED, query[0]);
+                    renderWithShader(rstate, bboxShader, bounding_box_render_data,
+                                     bounding_box_render_data->material(0), 0);
+                    glEndQuery(GL_ANY_SAMPLES_PASSED);
+                    scene_object->set_query_issued(true);
 
-                //Issue the query only with a bounding box
-                glBeginQuery(GL_ANY_SAMPLES_PASSED, query[0]);
-                renderWithShader(rstate, bboxShader, bounding_box_render_data, bounding_box_render_data->material(0), 0);
-                glEndQuery(GL_ANY_SAMPLES_PASSED);
-                scene_object->set_query_issued(true);
+                    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-                glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
-                //Delete the generated bounding box mesh
-                delete bounding_box_mesh;
-                delete bbox_material;
-                delete pass;
-                delete bounding_box_render_data;
+                    //Delete the generated bounding box mesh
+                    delete bounding_box_mesh;
+                    delete bbox_material;
+                    delete pass;
+                    delete bounding_box_render_data;
+                }
             }
 
             GLuint query_result = GL_FALSE;
@@ -583,6 +587,7 @@ namespace gvr
             shader = rstate.shader_manager->getShader(shader_id);
             renderWithShader(rstate, shader, render_data, curr_material, curr_pass);
         }
+        render_data->clearDirty();
     }
 
     void GLRenderer::renderMaterialShader(RenderState& rstate, RenderData* render_data,

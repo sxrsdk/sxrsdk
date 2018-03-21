@@ -35,25 +35,22 @@ import org.gearvrf.utility.ResourceCache;
 import org.gearvrf.utility.ResourceCacheBase;
 import org.gearvrf.utility.ResourceReader;
 import org.gearvrf.utility.Threads;
-import org.gearvrf.x3d.ShaderSettings;
-import org.gearvrf.x3d.X3Dobject;
-import org.gearvrf.x3d.X3DparseLights;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Future;
 
 /**
  * {@link GVRAssetLoader} provides methods for importing 3D models and textures.
@@ -199,13 +196,13 @@ public final class GVRAssetLoader {
                 {
                     resource = mVolume.openResource(request.TextureFile);
                     GVRAsynchronousResourceLoader.loadTexture(mContext, mCacheEnabled ? mTextureCache : null,
-                                                              request, resource, DEFAULT_PRIORITY, GVRCompressedTexture.BALANCED);
+                                                              request, resource, DEFAULT_PRIORITY, GVRCompressedImage.BALANCED);
                 }
                 catch (IOException ex)
                 {
                     GVRAndroidResource r = new GVRAndroidResource(mContext, R.drawable.white_texture);
                     GVRAsynchronousResourceLoader.loadTexture(mContext, mTextureCache,
-                                                              request, r, DEFAULT_PRIORITY, GVRCompressedTexture.BALANCED);
+                                                              request, r, DEFAULT_PRIORITY, GVRCompressedImage.BALANCED);
 
                     GVRImage whiteTex = getDefaultImage(mContext);
                     if (whiteTex != null)
@@ -269,7 +266,7 @@ public final class GVRAssetLoader {
                     bmap = Bitmap.createBitmap(aitex.getWidth(), aitex.getHeight(), Bitmap.Config.ARGB_8888);
                     bmap.setPixels(aitex.getIntData(), 0, aitex.getWidth(), 0, 0, aitex.getWidth(), aitex.getHeight());
                 }
-                GVRBitmapTexture bmaptex = new GVRBitmapTexture(mContext);
+                GVRBitmapImage bmaptex = new GVRBitmapImage(mContext);
                 bmaptex.setFileName(resource.getResourceFilename());
                 bmaptex.setBitmap(bmap);
                 image = bmaptex;
@@ -558,7 +555,7 @@ public final class GVRAssetLoader {
 
     protected static ResourceCache<GVRImage> mTextureCache = new ResourceCache<GVRImage>();
     protected static HashMap<String, GVRImage> mEmbeddedCache = new HashMap<String, GVRImage>();
-    protected static GVRBitmapTexture mDefaultImage = null;
+    protected static GVRBitmapImage mDefaultImage = null;
 
     protected GVRContext mContext;
     protected ResourceCache<GVRMesh> mMeshCache = new ResourceCache<>();
@@ -611,7 +608,7 @@ public final class GVRAssetLoader {
 
                 Canvas canvas = new Canvas(bmap);
                 canvas.drawRGB(0xff, 0xff, 0xff);
-                mDefaultImage = new GVRBitmapTexture(ctx, bmap);
+                mDefaultImage = new GVRBitmapImage(ctx, bmap);
             }
             catch (Exception ex)
             {
@@ -622,7 +619,7 @@ public final class GVRAssetLoader {
     }
 
     /**
-     * Loads file placed in the assets folder, as a {@link GVRBitmapTexture}
+     * Loads file placed in the assets folder, as a {@link GVRBitmapImage}
      * with the user provided texture parameters.
      * The bitmap is loaded asynchronously.
      * <p>
@@ -651,7 +648,7 @@ public final class GVRAssetLoader {
         GVRTexture texture = new GVRTexture(mContext, textureParameters);
         TextureRequest request = new TextureRequest(resource, texture);
         GVRAsynchronousResourceLoader.loadTexture(mContext, mTextureCache,
-                                                  request, resource, DEFAULT_PRIORITY, GVRCompressedTexture.BALANCED);
+                                                  request, resource, DEFAULT_PRIORITY, GVRCompressedImage.BALANCED);
         return texture;
     }
     /**
@@ -672,7 +669,7 @@ public final class GVRAssetLoader {
         GVRTexture texture = new GVRTexture(mContext, mDefaultTextureParameters);
         TextureRequest request = new TextureRequest(resource, texture);
         GVRAsynchronousResourceLoader.loadTexture(mContext, mTextureCache,
-                request, resource, DEFAULT_PRIORITY, GVRCompressedTexture.BALANCED);
+                                                  request, resource, DEFAULT_PRIORITY, GVRCompressedImage.BALANCED);
         return texture;
     }
 
@@ -727,11 +724,11 @@ public final class GVRAssetLoader {
      *            textures load so quickly that they are not run through the
      *            request scheduler.
      * @param quality
-     *            The compressed texture {@link GVRCompressedTexture#mQuality
+     *            The compressed texture {@link GVRCompressedImage#mQuality
      *            quality} parameter: should be one of
-     *            {@link GVRCompressedTexture#SPEED},
-     *            {@link GVRCompressedTexture#BALANCED}, or
-     *            {@link GVRCompressedTexture#QUALITY}, but other values are
+     *            {@link GVRCompressedImage#SPEED},
+     *            {@link GVRCompressedImage#BALANCED}, or
+     *            {@link GVRCompressedImage#QUALITY}, but other values are
      *            'clamped' to one of the recognized values. Please note that
      *            this (currently) only applies to compressed textures; normal
      *            {@linkplain GVRBitmapTexture bitmapped textures} don't take a
@@ -795,7 +792,7 @@ public final class GVRAssetLoader {
         GVRTexture texture = new GVRTexture(mContext, mDefaultTextureParameters);
         TextureRequest request = new TextureRequest(resource, texture, callback);
         GVRAsynchronousResourceLoader.loadTexture(mContext, mTextureCache,
-                request, resource, DEFAULT_PRIORITY, GVRCompressedTexture.BALANCED);
+                                                  request, resource, DEFAULT_PRIORITY, GVRCompressedImage.BALANCED);
         return texture;
     }
 
@@ -838,8 +835,8 @@ public final class GVRAssetLoader {
         GVRTexture texture = new GVRTexture(mContext, mDefaultTextureParameters);
         TextureRequest request = new TextureRequest(resource, texture, callback);
         GVRAsynchronousResourceLoader.loadCubemapTexture(mContext,
-                mTextureCache, request, resource, DEFAULT_PRIORITY,
-                GVRCubemapTexture.faceIndexMap);
+                                                         mTextureCache, request, resource, DEFAULT_PRIORITY,
+                                                         GVRCubemapImage.faceIndexMap);
         return texture;
     }
 
@@ -854,7 +851,7 @@ public final class GVRAssetLoader {
      *            the cube map texture respectively. The default names of the
      *            six images are "posx.png", "negx.png", "posy.png", "negx.png",
      *            "posz.png", and "negz.png", which can be changed by calling
-     *            {@link GVRCubemapTexture#setFaceNames(String[])}.
+     *            {@link GVRCubemapImage#setFaceNames(String[])}.
      * @return A {@link GVRTexture} that you can pass to methods like
      *         {@link GVRMaterial#setMainTexture(GVRTexture)}
      *
@@ -883,8 +880,8 @@ public final class GVRAssetLoader {
         GVRTexture texture = new GVRTexture(mContext, mDefaultTextureParameters);
         TextureRequest request = new TextureRequest(resource, texture);
         GVRAsynchronousResourceLoader.loadCubemapTexture(mContext,
-                mTextureCache, request, resource, DEFAULT_PRIORITY,
-                GVRCubemapTexture.faceIndexMap);
+                                                         mTextureCache, request, resource, DEFAULT_PRIORITY,
+                                                         GVRCubemapImage.faceIndexMap);
         return texture;
     }
 
@@ -905,8 +902,8 @@ public final class GVRAssetLoader {
         GVRTexture texture = new GVRTexture(mContext, mDefaultTextureParameters);
         TextureRequest request = new TextureRequest(resource, texture, callback);
         GVRAsynchronousResourceLoader.loadCompressedCubemapTexture(mContext,
-                mTextureCache, request, resource, DEFAULT_PRIORITY,
-                GVRCubemapTexture.faceIndexMap);
+                                                                   mTextureCache, request, resource, DEFAULT_PRIORITY,
+                                                                   GVRCubemapImage.faceIndexMap);
         return texture;
     }
 
@@ -916,7 +913,7 @@ public final class GVRAssetLoader {
         TextureRequest request = new TextureRequest(resource, texture);
         GVRAsynchronousResourceLoader.loadCompressedCubemapTexture(mContext,
                                                                    mTextureCache, request, resource, DEFAULT_PRIORITY,
-                                                                   GVRCubemapTexture.faceIndexMap);
+                                                                   GVRCubemapImage.faceIndexMap);
         return texture;
     }
 
@@ -945,67 +942,94 @@ public final class GVRAssetLoader {
     }
 
     // IO Handler for Jassimp
-    static class ResourceVolumeIO implements JassimpFileIO {
+    static class ResourceVolumeIO implements JassimpFileIO
+    {
         private GVRResourceVolume volume;
+        private Throwable lastError = null;
 
-        ResourceVolumeIO(GVRResourceVolume volume) {
+        ResourceVolumeIO(GVRResourceVolume volume)
+        {
             this.volume = volume;
         }
 
+        public Throwable getLastError() { return lastError; }
+
         @Override
-        public byte[] read(String path) {
+        public byte[] read(String path)
+        {
             GVRAndroidResource resource = null;
-            try {
+            try
+            {
                 resource = volume.openResource(path);
                 InputStream stream = resource.getStream();
-                if (stream == null) {
+                if (stream == null)
+                {
                     return null;
                 }
                 byte data[] = ResourceReader.readStream(stream);
                 return data;
-            } catch (Exception e) {
-                Log.e("GVRAssetLoader", path + " exception loading asset from " + e.getMessage());
+            }
+            catch (Exception e)
+            {
+                lastError = e;
                 return null;
-            } finally {
-                if (resource != null) {
+            }
+            finally
+            {
+                if (resource != null)
+                {
                     resource.closeStream();
                 }
             }
         }
 
-        protected GVRResourceVolume getResourceVolume() {
+        protected GVRResourceVolume getResourceVolume()
+        {
             return volume;
         }
     };
 
-    static class CachedVolumeIO implements JassimpFileIO {
+    static class CachedVolumeIO implements JassimpFileIO
+    {
         protected ResourceVolumeIO uncachedIO;
         protected ResourceCacheBase<GVRByteArray> cache;
+        protected Throwable lastError = null;
 
-        public CachedVolumeIO(ResourceVolumeIO uncachedIO) {
+        public CachedVolumeIO(ResourceVolumeIO uncachedIO)
+        {
             this.uncachedIO = uncachedIO;
             cache = new ResourceCacheBase<GVRByteArray>();
         }
 
+        public Throwable getLastError() { return lastError; }
+
         @Override
-        public byte[] read(String path) {
-            try {
+        public byte[] read(String path)
+        {
+            try
+            {
                 GVRAndroidResource resource = uncachedIO.getResourceVolume().openResource(path);
                 GVRByteArray byteArray = cache.get(resource);
-                if (byteArray == null) {
-                    if (resource.getResourceType() != GVRAndroidResource.ResourceType.INPUT_STREAM) {
+                if (byteArray == null)
+                {
+                    if (resource.getResourceType() != GVRAndroidResource.ResourceType.INPUT_STREAM)
+                    {
                         resource.closeStream(); // needed to avoid hanging
                     }
                     byte[] data = uncachedIO.read(path);
-                    if (data == null) {
+                    if (data == null)
+                    {
+                        lastError = uncachedIO.getLastError();
                         return null;
                     }
                     byteArray = GVRByteArray.wrap(data);
                     cache.put(resource, byteArray);
                 }
                 return byteArray.getByteArray();
-            } catch (IOException e) {
-                Log.e("GVRAssetLoader", path + " exception loading asset from " + e.getMessage());
+            }
+            catch (IOException e)
+            {
+                lastError = uncachedIO.getLastError();
                 return null;
             }
         }
@@ -1069,9 +1093,13 @@ public final class GVRAssetLoader {
         assetRequest.setImportSettings(GVRImportSettings.getRecommendedSettings());
         model.setName(assetRequest.getBaseName());
         if (ext.equals("x3d"))
+        {
             loadX3DModel(assetRequest, model);
+        }
         else
+        {
             loadJassimpModel(assetRequest, model);
+        }
         return model;
     }
 
@@ -1108,9 +1136,13 @@ public final class GVRAssetLoader {
         model.setName(assetRequest.getBaseName());
         assetRequest.setImportSettings(GVRImportSettings.getRecommendedSettings());
         if (ext.equals("x3d"))
+        {
             loadX3DModel(assetRequest, model);
+        }
         else
+        {
             loadJassimpModel(assetRequest, model);
+        }
         return model;
     }
 
@@ -1151,9 +1183,13 @@ public final class GVRAssetLoader {
                 try
                 {
                     if (ext.equals("x3d"))
+                    {
                         loadX3DModel(assetRequest, model);
+                    }
                     else
+                    {
                         loadJassimpModel(assetRequest, model);
+                    }
                 }
                 catch (IOException ex)
                 {
@@ -1202,9 +1238,13 @@ public final class GVRAssetLoader {
                 try
                 {
                     if (ext.equals("x3d"))
+                    {
                         loadX3DModel(assetRequest, model);
+                    }
                     else
+                    {
                         loadJassimpModel(assetRequest, model);
+                    }
                 }
                 catch (IOException ex)
                 {
@@ -1253,9 +1293,13 @@ public final class GVRAssetLoader {
                 try
                 {
                     if (ext.equals("x3d"))
+                    {
                         loadX3DModel(assetRequest, model);
+                    }
                     else
+                    {
                         loadJassimpModel(assetRequest, model);
+                    }
                 }
                 catch (IOException ex)
                 {
@@ -1306,9 +1350,13 @@ public final class GVRAssetLoader {
                 try
                 {
                     if (ext.equals("x3d"))
+                    {
                         loadX3DModel(assetRequest, model);
+                    }
                     else
+                    {
                         loadJassimpModel(assetRequest, model);
+                    }
                 }
                 catch (IOException ex)
                 {
@@ -1354,9 +1402,13 @@ public final class GVRAssetLoader {
         model.setName(assetRequest.getBaseName());
         assetRequest.setImportSettings(GVRImportSettings.getRecommendedSettings());
         if (ext.equals("x3d"))
+        {
             loadX3DModel(assetRequest, model);
+        }
         else
+        {
             loadJassimpModel(assetRequest, model);
+        }
         return model;
     }
 
@@ -1407,9 +1459,13 @@ public final class GVRAssetLoader {
         assetRequest.setImportSettings(settings);
         assetRequest.useCache(cacheEnabled);
         if (ext.equals("x3d"))
-		    loadX3DModel(assetRequest, model);
-		else
-		    loadJassimpModel(assetRequest, model);
+        {
+            loadX3DModel(assetRequest, model);
+        }
+        else
+        {
+            loadJassimpModel(assetRequest, model);
+        }
         return model;
     }
 
@@ -1468,9 +1524,13 @@ public final class GVRAssetLoader {
         assetRequest.setImportSettings(settings);
         assetRequest.useCache(cacheEnabled);
         if (ext.equals("x3d"))
+        {
             loadX3DModel(assetRequest, model);
+        }
         else
+        {
             loadJassimpModel(assetRequest, model);
+        }
         return model;
     }
 
@@ -1515,16 +1575,21 @@ public final class GVRAssetLoader {
             {
                 String filePath = fileVolume.getFileName();
                 String ext = filePath.substring(filePath.length() - 3).toLowerCase();
-                AssetRequest assetRequest = new AssetRequest(model, fileVolume, null, handler, false);
+                AssetRequest assetRequest =
+                        new AssetRequest(model, fileVolume, null, handler, false);
                 model.setName(assetRequest.getBaseName());
                 assetRequest.setImportSettings(settings);
                 assetRequest.useCache(cacheEnabled);
                 try
                 {
                     if (ext.equals("x3d"))
+                    {
                         loadX3DModel(assetRequest, model);
+                    }
                     else
+                    {
                         loadJassimpModel(assetRequest, model);
+                    }
                 }
                 catch (IOException ex)
                 {
@@ -1532,7 +1597,7 @@ public final class GVRAssetLoader {
                 }
             }
         });
-     }
+    }
 
     /**
      * Loads a file as a {@link GVRMesh}.
@@ -1747,72 +1812,61 @@ public final class GVRAssetLoader {
         GVRJassimpAdapter jassimpAdapter = new GVRJassimpAdapter(this, filePath);
 
         model.setName(filePath);
-        GVRResourceVolume volume = request.getVolume();
+        CachedVolumeIO volume = new CachedVolumeIO(new ResourceVolumeIO(request.getVolume()));
         try
         {
             assimpScene = Jassimp.importFileEx(FileNameUtils.getFilename(filePath),
                     jassimpAdapter.toJassimpSettings(request.getImportSettings()),
-                    new CachedVolumeIO(new ResourceVolumeIO(volume)));
+                    volume);
         }
         catch (IOException ex)
         {
-            request.onModelError(mContext, ex.getMessage(), filePath);
-            throw ex;
+            String errmsg = "Cannot load model: " + ex.getMessage() + " " + volume.getLastError();
+            request.onModelError(mContext, errmsg, filePath);
+            throw new IOException(errmsg);
         }
-
         if (assimpScene == null)
         {
-            String errmsg = "Cannot load model from path " + filePath;
+            String errmsg = "Cannot load model: " + filePath;
             request.onModelError(mContext, errmsg, filePath);
             throw new IOException(errmsg);
         }
         boolean startAnimations = request.getImportSettings().contains(GVRImportSettings.START_ANIMATIONS);
-        jassimpAdapter.processScene(request, model, assimpScene, volume, startAnimations);
+        jassimpAdapter.processScene(request, model, assimpScene, volume.uncachedIO.getResourceVolume(), startAnimations);
         request.onModelLoaded(mContext, model, filePath);
         return model;
     }
 
 
     GVRSceneObject loadX3DModel(GVRAssetLoader.AssetRequest assetRequest,
-            GVRSceneObject root) throws IOException
+                                GVRSceneObject root) throws IOException
     {
-        GVRResourceVolume volume = assetRequest.getVolume();
-        InputStream inputStream = null;
-        String fileName = assetRequest.getBaseName();
-        GVRAndroidResource resource = volume.openResource(fileName);
-
-        root.setName(fileName);
-        org.gearvrf.x3d.X3Dobject x3dObject = new org.gearvrf.x3d.X3Dobject(assetRequest, root);
+        Method loadMethod = null;
         try
         {
-            ShaderSettings shaderSettings = new ShaderSettings(new GVRMaterial(mContext));
-            if (!X3Dobject.UNIVERSAL_LIGHTS)
-            {
-                X3DparseLights x3dParseLights = new X3DparseLights(mContext, root);
-                inputStream = resource.getStream();
-                if (inputStream == null)
-                {
-                    throw new FileNotFoundException(fileName + " not found");
-                }
-                Log.d(TAG, "Parse: " + fileName);
-                x3dParseLights.Parse(inputStream, shaderSettings);
-                inputStream.close();
-            }
-            inputStream = resource.getStream();
-            if (inputStream == null)
-            {
-              	throw new FileNotFoundException(fileName + " not found");
-            }
-            x3dObject.Parse(inputStream, shaderSettings);
-            inputStream.close();
-            assetRequest.onModelLoaded(mContext, root, fileName);
+            final Class<?> loaderClass = Class.forName("org.gearvrf.x3d.X3DLoader");
+            loadMethod = loaderClass.getDeclaredMethod("load", GVRContext.class,
+                                                                    GVRAssetLoader.AssetRequest.class,
+                                                                    GVRSceneObject.class);
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            assetRequest.onModelError(mContext, ex.getMessage(), fileName);
-            throw ex;
+            throw new IOException("X3D extension not available; can't load X3D models! " + e);
         }
-        return root;
+        try
+        {
+            return (GVRSceneObject) loadMethod.invoke(null, mContext, assetRequest, root);
+        }
+        catch (InvocationTargetException te)
+        {
+            Throwable e = te.getCause();
+            Throwable cause = (e != null) ? e : te;
+            throw new IOException("Cannot load X3D model: " + cause);
+        }
+        catch (IllegalAccessException ae)
+        {
+            throw new IOException("Cannot load X3D model: " + ae);
+        }
     }
 
     public static File downloadFile(Context context, String urlString) {

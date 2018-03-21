@@ -18,9 +18,8 @@ package org.gearvrf.io.cursor3d;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
-import org.gearvrf.GVRBaseSensor;
 import org.gearvrf.GVRContext;
-import org.gearvrf.GVRCursorController;
+import org.gearvrf.io.GVRCursorController;
 import org.gearvrf.GVRSceneObject;
 import org.gearvrf.io.GVRControllerType;
 
@@ -59,7 +58,7 @@ public class IoDevice {
      * associated with the {@link IoDevice} is already connected. An {@link IoDevice} created
      * using this constructor will be ready to be attached to a {@link Cursor}. To create an
      * {@link IoDevice} whose hardware device is not connected at initialization use {@link
-     * IoDevice#IoDevice(String, int, int, String, String, boolean)}.
+     * IoDevice(String, int, int, String, String, boolean)}.
      *
      * @param deviceId   deviceId of the {@link IoDevice}. This differentiates
      *                   multiple devices from the same vendor with same productId and
@@ -299,32 +298,23 @@ public class IoDevice {
         }
     }
 
-    void setSceneObject(GVRSceneObject cursor) {
-        gvrCursorController.setCursor(cursor);
-    }
-
     void resetSceneObject() {
         gvrCursorController.stopDrag();
         gvrCursorController.setCursor(null);
     }
 
-    void addControllerEventListener(GVRCursorController.ControllerEventListener
+    void addControllerEventListener(GVRCursorController.IControllerEvent
                                             controllerEventListener) {
         if (controllerEventListener != null) {
-            gvrCursorController.addControllerEventListener(controllerEventListener);
+            gvrCursorController.getEventReceiver().addListener(controllerEventListener);
         }
     }
 
-    void removeControllerEventListener(GVRCursorController.ControllerEventListener
+    void removeControllerEventListener(GVRCursorController.IControllerEvent
                                                controllerEventListener) {
         if (controllerEventListener != null) {
-            gvrCursorController.removeControllerEventListener(controllerEventListener);
+            gvrCursorController.getEventReceiver().removeListener(controllerEventListener);
         }
-    }
-
-    // TODO this has to go only used by CursorInputManager
-    boolean contains(GVRCursorController gvrCursorController) {
-        return this.gvrCursorController == gvrCursorController;
     }
 
     void setNearDepth(float nearDepth) {
@@ -458,7 +448,7 @@ public class IoDevice {
         public boolean dispatchKeyEvent(KeyEvent ev) { return false; }
     }
 
-    GVRCursorController getGvrCursorController() {
+    public GVRCursorController getGvrCursorController() {
         return gvrCursorController;
     }
 }

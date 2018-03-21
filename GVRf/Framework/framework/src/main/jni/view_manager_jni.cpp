@@ -28,17 +28,21 @@ class Scene;
 extern "C" {
 
     void Java_org_gearvrf_GVRViewManager_makeShadowMaps(JNIEnv *jni, jclass clazz,
-                                                        jlong jscene, jlong jshader_manager,
+                                                        jlong jscene, jobject javaSceneObject,
+                                                        jlong jshader_manager,
                                                         jint width, jint height) {
         Scene *scene = reinterpret_cast<Scene *>(jscene);
 
         ShaderManager *shader_manager = reinterpret_cast<ShaderManager *>(jshader_manager);
         gRenderer = Renderer::getInstance();
-        gRenderer->makeShadowMaps(scene, shader_manager);
+        javaSceneObject = jni->NewLocalRef(javaSceneObject);
+        gRenderer->makeShadowMaps(scene, javaSceneObject, shader_manager);
+        jni->DeleteLocalRef(javaSceneObject);
     }
 
     void Java_org_gearvrf_GVRViewManager_cullAndRender(JNIEnv *jni, jclass clazz,
                                                       jlong jrenderTarget, jlong jscene,
+                                                      jobject javaSceneObject,
                                                       jlong jshader_manager,
                                                       jlong jpost_effect_shader_manager,
                                                       jlong jpost_effect_render_texture_a,
@@ -55,13 +59,30 @@ extern "C" {
         RenderTexture *post_effect_render_texture_b =
                 reinterpret_cast<RenderTexture *>(jpost_effect_render_texture_b);
 
-
-        renderTarget->cullFromCamera(scene, renderTarget->getCamera(),gRenderer,shader_manager);
+        javaSceneObject = jni->NewLocalRef(javaSceneObject);
+        renderTarget->cullFromCamera(scene, javaSceneObject, renderTarget->getCamera(),gRenderer,shader_manager);
         if(!gRenderer->isVulkanInstance())
             renderTarget->beginRendering(gRenderer);
-        gRenderer->renderRenderTarget(scene, renderTarget,shader_manager,post_effect_render_texture_a,post_effect_render_texture_b);
+        gRenderer->renderRenderTarget(scene, javaSceneObject, renderTarget,shader_manager,post_effect_render_texture_a,post_effect_render_texture_b);
         if(!gRenderer->isVulkanInstance())
             renderTarget->endRendering(gRenderer);
+
+        jni->DeleteLocalRef(javaSceneObject);
+    }
+
+    void
+    Java_org_gearvrf_GVRRenderBundle_addRenderTarget(JNIEnv *jni, jclass clazz, jlong jrenderTarget,
+                                                     jint eye, jint index) {
+        RenderTarget *renderTarget = reinterpret_cast<RenderTarget *>(jrenderTarget);
+        Renderer::getInstance()->addRenderTarget(renderTarget, EYE(eye), index);
+    }
+
+    long Java_org_gearvrf_GVRRenderBundle_getRenderTextureNative(JNIEnv *jni, jclass clazz, jlong jrenderTextureInfo)
+    {
+        RenderTextureInfo* renderTextureInfo = reinterpret_cast<RenderTextureInfo*>(jrenderTextureInfo);
+        RenderTexture* renderTexture = (Renderer::getInstance()->createRenderTexture(renderTextureInfo));
+        delete renderTextureInfo; // free up the resource as it is no longer needed
+        return reinterpret_cast<long>(renderTexture);
     }
 
     JNIEXPORT void JNICALL

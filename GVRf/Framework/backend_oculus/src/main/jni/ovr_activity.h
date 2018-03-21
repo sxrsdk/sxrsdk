@@ -23,11 +23,9 @@
 #include "objects/components/camera_rig.h"
 #include "util/ovr_configuration_helper.h"
 #include "VrApi_Types.h"
-
 namespace gvr {
-    struct RenderTextureInfo;
     class CameraRig;
-
+    struct RenderTextureInfo;
     class GVRActivity
     {
     public:
@@ -39,7 +37,7 @@ namespace gvr {
 
         CameraRig* cameraRig_ = nullptr;   // this needs a global ref on the java object; todo
         bool sensoredSceneUpdated_ = false;
-        RenderTextureInfo getRenderTextureInfo(int eye, int index);
+
     private:
         JNIEnv* envMainThread_ = nullptr;           // for use by the Java UI thread
 
@@ -66,8 +64,6 @@ namespace gvr {
         ovrTextureFormat mColorTextureFormatConfiguration = VRAPI_TEXTURE_FORMAT_NONE;
         ovrTextureFormat mDepthTextureFormatConfiguration = VRAPI_TEXTURE_FORMAT_NONE;
 
-        int32_t mVrapiInitResult = VRAPI_INITIALIZE_UNKNOWN_ERROR;
-
         int x, y, width, height;                // viewport
 
         void initializeOculusJava(JNIEnv& env, ovrJava& oculusJava);
@@ -83,11 +79,11 @@ namespace gvr {
         void onSurfaceCreated(JNIEnv& env);
         void copyVulkanTexture(int texSwapChainIndex, int eye);
         void onSurfaceChanged(JNIEnv& env);
-    void onDrawFrame(jobject jViewManager);
+        void onDrawFrame(jobject jViewManager);
         int initializeVrApi();
-        void uninitializeVrApi();
+        static void uninitializeVrApi();
         void leaveVrMode();
-
+        RenderTextureInfo* getRenderTextureInfo(int eye, int index);
         void showConfirmQuit();
 
         bool isHmtConnected() const;

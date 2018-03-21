@@ -112,15 +112,21 @@ abstract class GVRViewManager extends GVRContext {
         if (null == scene) {
             throw new IllegalArgumentException();
         }
+        GVRScene oldScene = null;
         mMainSceneLock.lock();
         try {
             if (mState == ViewManagerState.SHOWING_SPLASH) {
                 mPendingMainScene = scene;
             } else {
+                oldScene = mMainScene;
                 setMainSceneImpl(scene);
             }
         } finally {
             mMainSceneLock.unlock();
+            if (oldScene != null)
+            {
+                mEventManager.sendEvent(this, IContextEvents.class, "onSceneChange", oldScene, mMainScene);
+            }
         }
     }
 
@@ -197,11 +203,13 @@ abstract class GVRViewManager extends GVRContext {
         }
 
         mPreviousTimeNanos = GVRTime.getCurrentTime();
+
+
+        final GVRScene scene = null == mMainScene ? new GVRScene(GVRViewManager.this) : mMainScene;
+        setMainSceneImpl(scene);
         mRenderBundle = makeRenderBundle();
         final DepthFormat depthFormat = getActivity().getAppSettings().getEyeBufferParams().getDepthFormat();
         getActivity().getConfigurationManager().configureRendering(DepthFormat.DEPTH_24_STENCIL_8 == depthFormat);
-        final GVRScene scene = null == mMainScene ? new GVRScene(GVRViewManager.this) : mMainScene;
-        setMainSceneImpl(scene);
     }
 
     private void createMainScene() {
@@ -226,9 +234,8 @@ abstract class GVRViewManager extends GVRContext {
      * Called on surface creation to create a properly configured render bundle
      * @return
      */
-    protected IRenderBundle makeRenderBundle() {
-        final VrAppSettings.EyeBufferParams eyeBufferParams = getActivity().getAppSettings().getEyeBufferParams();
-        return new GVRRenderBundle(this, eyeBufferParams.getResolutionWidth(), eyeBufferParams.getResolutionHeight());
+    protected GVRRenderBundle makeRenderBundle() {
+        return new GVRRenderBundle(this);
     }
 
     /**
@@ -329,8 +336,8 @@ abstract class GVRViewManager extends GVRContext {
                 @Override
                 public void run() {
                     try {
-                        getEventManager().sendEvent(mMain, IScriptEvents.class, "onEarlyInit", GVRViewManager.this);
-                        getEventManager().sendEvent(mMain, IScriptEvents.class, "onInit", GVRViewManager.this);
+                        mEventManager.sendEvent(mMain, IScriptEvents.class, "onEarlyInit", GVRViewManager.this);
+                        mEventManager.sendEvent(mMain, IScriptEvents.class, "onInit", GVRViewManager.this);
 
                         if (null != mSplashScreen && GVRMain.SplashMode.AUTOMATIC == mMain
                                 .getSplashMode() && mMain.getSplashDisplayTime() < 0f) {
@@ -354,9 +361,9 @@ abstract class GVRViewManager extends GVRContext {
                     }
 
                     // Trigger event "onAfterInit" for post-processing of scene
-                    // graph after initialization.
-                    getEventManager().sendEvent(mMain, IScriptEvents.class,
-                            "onAfterInit");
+                    // graph after initialization. Also trigger "onInit" for the GVRContext.
+                    mEventManager.sendEvent(mMain, IScriptEvents.class, "onAfterInit");
+                    mEventManager.sendEvent(GVRViewManager.this, IContextEvents.class, "onInit", GVRViewManager.this);
                 }
             });
 
@@ -491,10 +498,8 @@ abstract class GVRViewManager extends GVRContext {
     protected void beforeDrawEyes() {
         GVRNotifications.notifyBeforeStep();
         mFrameHandler.beforeDrawEyes();
-
-        makeShadowMaps(mMainScene.getNative(), mRenderBundle.getMaterialShaderManager().getNative(),
-                mRenderBundle.getPostEffectRenderTextureA().getWidth(),
-                mRenderBundle.getPostEffectRenderTextureA().getHeight());
+        makeShadowMaps(mMainScene.getNative(), getMainScene(), mRenderBundle.getShaderManager().getNative(),
+                       mRenderBundle.getPostEffectRenderTextureA().getWidth(), mRenderBundle.getPostEffectRenderTextureA().getHeight());
     }
 
     protected void afterDrawEyes() {
@@ -520,8 +525,8 @@ abstract class GVRViewManager extends GVRContext {
 
     void cullAndRender(GVRRenderTarget renderTarget, GVRScene scene)
     {
-        cullAndRender(renderTarget.getNative(), scene.getNative(),
-                mRenderBundle.getMaterialShaderManager().getNative(),
+        cullAndRender(renderTarget.getNative(), scene.getNative(), scene,
+                mRenderBundle.getShaderManager().getNative(),
                 mRenderBundle.getPostEffectRenderTextureA().getNative(),
                 mRenderBundle.getPostEffectRenderTextureB().getNative());
     }
@@ -532,13 +537,8 @@ abstract class GVRViewManager extends GVRContext {
     }
 
     @Override
-    public GVRMaterialShaderManager getMaterialShaderManager() {
-        return mRenderBundle.getMaterialShaderManager();
-    }
-
-    @Override
-    public GVRPostEffectShaderManager getPostEffectShaderManager() {
-        return null;
+    public GVRShaderManager getShaderManager() {
+        return mRenderBundle.getShaderManager();
     }
 
     protected GVRScreenshotCallback mScreenshotCenterCallback;
@@ -696,7 +696,7 @@ abstract class GVRViewManager extends GVRContext {
             posteffectRenderTextureA = mRenderBundle.getEyeCapturePostEffectRenderTextureA();
             posteffectRenderTextureB = mRenderBundle.getEyeCapturePostEffectRenderTextureB();
             renderTarget = mRenderBundle.getEyeCaptureRenderTarget();
-            renderTarget.cullFromCamera(mMainScene, centerCamera ,mRenderBundle.getMaterialShaderManager());
+            renderTarget.cullFromCamera(mMainScene, centerCamera ,mRenderBundle.getShaderManager());
             renderTarget.beginRendering(centerCamera);
         }
         else {
@@ -704,7 +704,7 @@ abstract class GVRViewManager extends GVRContext {
             posteffectRenderTextureB = mRenderBundle.getPostEffectRenderTextureB();
         }
 
-        renderTarget.render(mMainScene,centerCamera, mRenderBundle.getMaterialShaderManager(), posteffectRenderTextureA, posteffectRenderTextureB);
+        renderTarget.render(mMainScene,centerCamera, mRenderBundle.getShaderManager(), posteffectRenderTextureA, posteffectRenderTextureB);
         centerCamera.removePostEffect(postEffect);
         readRenderResult(renderTarget, EYE.MULTIVIEW, false);
 
@@ -728,8 +728,8 @@ abstract class GVRViewManager extends GVRContext {
     private void renderOneCameraAndAddToList(final GVRPerspectiveCamera centerCamera, final Bitmap[] bitmaps, int index,
                                              GVRRenderTarget renderTarget, GVRRenderTexture postEffectRenderTextureA, GVRRenderTexture postEffectRenderTextureB ) {
 
-        renderTarget.cullFromCamera(mMainScene,centerCamera,mRenderBundle.getMaterialShaderManager());
-        renderTarget.render(mMainScene,centerCamera,mRenderBundle.getMaterialShaderManager(),postEffectRenderTextureA, postEffectRenderTextureB);
+        renderTarget.cullFromCamera(mMainScene,centerCamera,mRenderBundle.getShaderManager());
+        renderTarget.render(mMainScene,centerCamera,mRenderBundle.getShaderManager(),postEffectRenderTextureA, postEffectRenderTextureB);
         readRenderResult(renderTarget,EYE.CENTER, false);
 
         bitmaps[index] = Bitmap.createBitmap(mReadbackBufferWidth, mReadbackBufferHeight, Bitmap.Config.ARGB_8888);
@@ -816,7 +816,7 @@ abstract class GVRViewManager extends GVRContext {
 
     private final GVREventManager mEventManager;
     protected final GVRInputManager mInputManager;
-    protected IRenderBundle mRenderBundle;
+    protected GVRRenderBundle mRenderBundle;
 
     protected GVRMain mMain;
 
@@ -824,8 +824,8 @@ abstract class GVRViewManager extends GVRContext {
     protected int mReadbackBufferWidth;
     protected int mReadbackBufferHeight;
 
-    protected native void makeShadowMaps(long scene, long shader_manager, int width, int height);
-    protected native void cullAndRender(long render_target, long scene, long shader_manager, long postEffectRenderTextureA, long postEffectRenderTextureB);
+    protected native void makeShadowMaps(long scene, GVRScene javaSceneObject, long shader_manager, int width, int height);
+    protected native void cullAndRender(long render_target, long scene, GVRScene javaSceneObject, long shader_manager, long postEffectRenderTextureA, long postEffectRenderTextureB);
     private native static void readRenderResultNative(Object readbackBuffer, long renderTarget, int eye, boolean useMultiview);
 
     private static final String TAG = "GVRViewManager";

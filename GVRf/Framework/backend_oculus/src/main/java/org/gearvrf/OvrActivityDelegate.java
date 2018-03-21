@@ -16,15 +16,13 @@
 package org.gearvrf;
 
 import android.content.res.AssetManager;
-import android.content.res.Configuration;
-import android.view.KeyEvent;
 
 import org.gearvrf.utility.VrAppSettings;
 
 /**
  * {@inheritDoc}
  */
-final class OvrActivityDelegate implements GVRActivity.GVRActivityDelegate {
+final class OvrActivityDelegate extends GVRActivity.ActivityDelegateStubs {
     private GVRActivity mActivity;
     private OvrViewManager mActiveViewManager;
     private OvrActivityNative mActivityNative;
@@ -45,11 +43,6 @@ final class OvrActivityDelegate implements GVRActivity.GVRActivityDelegate {
     @Override
     public GVRViewManager makeViewManager() {
         return new OvrViewManager(mActivity, mActivity.getMain(), mXmlParser);
-    }
-
-    @Override
-    public OvrMonoscopicViewManager makeMonoscopicViewManager() {
-        return new OvrMonoscopicViewManager(mActivity, mActivity.getMain(), mXmlParser);
     }
 
     @Override
@@ -90,7 +83,10 @@ final class OvrActivityDelegate implements GVRActivity.GVRActivityDelegate {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onDestroy() {
+        if (null != mActivityHandler) {
+            mActivityHandler.onDestroy();
+        }
     }
 
     @Override
@@ -108,27 +104,13 @@ final class OvrActivityDelegate implements GVRActivity.GVRActivityDelegate {
     }
 
     @Override
-    public void onInitAppSettings(VrAppSettings appSettings) {
-    }
-
-    @Override
     public VrAppSettings makeVrAppSettings() {
-        return new OvrVrAppSettings();
-    }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        return false;
-    }
-
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        return false;
-    }
-
-    @Override
-    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
-        return false;
+        final VrAppSettings settings = new OvrVrAppSettings();
+        final VrAppSettings.EyeBufferParams params = settings.getEyeBufferParams();
+        params.setResolutionHeight(VrAppSettings.DEFAULT_FBO_RESOLUTION);
+        params.setResolutionWidth(VrAppSettings.DEFAULT_FBO_RESOLUTION);
+        return settings;
     }
 
     private OvrXMLParser mXmlParser;

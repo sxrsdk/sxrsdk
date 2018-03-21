@@ -95,7 +95,7 @@ public:
                         ShaderManager* shader_manager, PostEffectShaderManager* post_effect_shader_manager,
                         RenderTexture* post_effect_render_texture_a,
                         RenderTexture* post_effect_render_texture_b) {};
-    void makeShadowMaps(Scene* scene, ShaderManager* shader_manager){}
+    void makeShadowMaps(Scene* scene, jobject javaSceneObject, ShaderManager* shader_manager){}
     void set_face_culling(int cull_face){}
     virtual ShaderData* createMaterial(const char* uniform_desc, const char* texture_desc);
     virtual RenderData* createRenderData();
@@ -113,15 +113,15 @@ public:
     virtual RenderTexture* createRenderTexture(int width, int height, int sample_count,
                                                int jcolor_format, int jdepth_format, bool resolve_depth,
                                                const TextureParameters* texture_parameters, int number_views, bool monoscopic);
-    virtual RenderTexture* createRenderTexture(int width, int height, int sample_count, int layers) { }
-    virtual RenderTexture* createRenderTexture(const RenderTextureInfo&);
+    virtual RenderTexture* createRenderTexture(int width, int height, int sample_count, int layers, int depthformat) { }
+    virtual RenderTexture* createRenderTexture(const RenderTextureInfo*);
     virtual VertexBuffer* createVertexBuffer(const char* desc, int vcount);
     virtual IndexBuffer* createIndexBuffer(int bytesPerIndex, int icount);
     virtual Shader* createShader(int id, const char* signature,
                                  const char* uniformDescriptor, const char* textureDescriptor,
                                  const char* vertexDescriptor, const char* vertexShader,
                                  const char* fragmentShader);
-    virtual void renderRenderTarget(Scene*, RenderTarget* renderTarget, ShaderManager* shader_manager,
+    virtual void renderRenderTarget(Scene*, jobject javaSceneObject, RenderTarget* renderTarget, ShaderManager* shader_manager,
                                     RenderTexture* post_effect_render_texture_a, RenderTexture* post_effect_render_texture_b);
     virtual bool renderWithShader(RenderState& rstate, Shader* shader, RenderData* renderData, ShaderData* shaderData, int);
     virtual void updatePostEffectMesh(Mesh*);

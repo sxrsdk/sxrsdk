@@ -23,6 +23,29 @@
 namespace gvr {
 
 RenderData::~RenderData() {
+    if (nullptr == javaVm_) {
+        return;
+    }
+
+    JNIEnv* env;
+
+    const jint rc = javaVm_->GetEnv(reinterpret_cast<void**>(&env), SUPPORTED_JNI_VERSION);
+    if (JNI_EDETACHED != rc && JNI_OK != rc) {
+        FAIL("~RenderData: fatal GetEnv error");
+    }
+    if (rc == JNI_EDETACHED) {
+        if (javaVm_->AttachCurrentThread(&env, nullptr) != JNI_OK) {
+            FAIL("~RenderData: fatal AttachCurrentThread error");
+        }
+    }
+
+    env->DeleteGlobalRef(bindShaderObject_);
+
+    if (rc == JNI_EDETACHED) {
+        if (JNI_OK != javaVm_->DetachCurrentThread()) {
+            FAIL("~RenderData: fatal DetachCurrentThread error");
+        }
+    }
 }
 
 void RenderData::add_pass(RenderPass* render_pass) {
@@ -55,6 +78,11 @@ void RenderData::set_mesh(Mesh* mesh)
     {
         mesh_ = mesh;
         markDirty();
+        SceneObject* owner = owner_object();
+        if (owner)
+        {
+            owner->dirtyHierarchicalBoundingVolume();
+        }
     }
 }
 
@@ -89,20 +117,6 @@ void RenderData::setCameraDistanceLambda(std::function<float()> func)
     cameraDistanceLambda_ = func;
 }
 
-JNIEnv *RenderData::set_java(jobject javaObj, JavaVM *javaVM)
-{
-    JNIEnv *env = JavaComponent::set_java(javaObj, javaVM);
-
-    jclass renderDataClass = env->GetObjectClass(javaObj);
-    bindShaderMethod_ = env->GetMethodID(renderDataClass, "bindShaderNative", "(Lorg/gearvrf/GVRScene;Z)V");
-    if (bindShaderMethod_ == 0)
-    {
-        FAIL("RenderData::bindShader ERROR cannot find 'GVRRenderData.bindShaderNative()' Java method");
-    }
-
-    return env;
-}
-
 void RenderData::setStencilFunc(int func, int ref, int mask) {
     stencilFuncFunc_= func;
     stencilFuncRef_ = ref;
@@ -126,19 +140,10 @@ void RenderData::setStencilTest(bool flag) {
 
 /**
  * Called when the shader for a RenderData needs to be generated on the Java side.
- * This function spawns a Java task on the Framework thread which generates the shader.
  */
 void RenderData::bindShader(JNIEnv* env, jobject localSceneObject, bool isMultiview)
 {
-    jobject localJavaObject = get_java(env);
-    if ((bindShaderMethod_ == NULL) || (localJavaObject == NULL))
-    {
-        LOGE("SHADER: RenderData::bindShader could not call bindShaderNative");
-    }
-
-    if (nullptr != localJavaObject && nullptr != localSceneObject) {
-        env->CallVoidMethod(localJavaObject, bindShaderMethod_, localSceneObject, isMultiview);
-    }
+    env->CallVoidMethod(bindShaderObject_, bindShaderMethod_, localSceneObject, isMultiview);
 }
 
 bool compareRenderDataByShader(RenderData *i, RenderData *j)
@@ -274,7 +279,7 @@ int RenderData::isValid(Renderer* renderer, const RenderState& rstate)
         //@todo implementation details leaked; unify common JNI reqs of Scene and RenderData
         JNIEnv* env = nullptr;
         int rc = rstate.scene->get_java_env(&env);
-        bindShader(env, rstate.scene->getJavaObj(*env), rstate.is_multiview);
+        bindShader(env, rstate.javaSceneObject, rstate.is_multiview);
         if (rc > 0) {
             rstate.scene->detach_java_env();
         }
@@ -317,4 +322,18 @@ bool RenderData::updateGPU(Renderer* renderer, Shader* shader)
     vbuf->updateGPU(renderer, mesh_->getIndexBuffer(), shader);
     return true;
 }
+
+void RenderData::setBindShaderObject(JNIEnv* env, jobject bindShaderObject) {
+    static const jclass clazz = env->GetObjectClass(bindShaderObject);
+    static const jmethodID method = env->GetMethodID(clazz, "call", "(Lorg/gearvrf/GVRScene;Z)V");
+    if (method == 0)
+    {
+        FAIL("RenderData::setBindShaderObject: ERROR cannot find 'BindShaderObject.call' Java method");
+    }
+
+    bindShaderMethod_ = method;
+    bindShaderObject_ = env->NewGlobalRef(bindShaderObject);
+    env->GetJavaVM(&javaVm_);
+}
+
 }

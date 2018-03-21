@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.gearvrf.asynchronous.GVRAsynchronousResourceLoader;
 import org.gearvrf.utility.Exceptions;
@@ -63,7 +65,7 @@ public class GVRShaderData extends GVRHybridObject
      * samplers used by the shader.
      * @param gvrContext Current {@link GVRContext}
      * @param shaderId   Shader ID from {@link org.gearvrf.GVRMaterial.GVRShaderType} or
-     *                   {@link GVRContext#getMaterialShaderManager()}.
+     *                   {@link GVRContext#getShaderManager()}.
      * @see GVRShader
      * @see GVRShaderTemplate
      */
@@ -72,18 +74,48 @@ public class GVRShaderData extends GVRHybridObject
         super(gvrContext, NativeShaderData.ctor(shaderId.getUniformDescriptor(gvrContext),
                                                 shaderId.getTextureDescriptor(gvrContext)));
         GVRShader shader = shaderId.getTemplate(gvrContext);
-        GVRShaderManager shaderManager = gvrContext.getMaterialShaderManager();
+        GVRShaderManager shaderManager = gvrContext.getShaderManager();
         mShaderId = shaderManager.getShaderType(shaderId.ID);
         mUniformDescriptor = shader.getUniformDescriptor();
         mTextureDescriptor = shader.getTextureDescriptor();
         shader.setMaterialDefaults(this);
     }
 
+    /**
+     * Initialize shader data for a specific shader from an existing GVRShaderData.
+     * <p>
+     * This function copies all of the uniforms and textures from the source
+     * material to the new material.
+     * @param src        Input material to copy from
+     * @param shaderId   Shader ID
+     * @see GVRShader
+     * @see GVRShaderTemplate
+     */
+    public GVRShaderData(GVRShaderData src, GVRShaderId shaderId)
+    {
+        super(src.getGVRContext(), NativeShaderData.ctor(shaderId.getUniformDescriptor(src.getGVRContext()),
+                                                shaderId.getTextureDescriptor(src.getGVRContext())));
+        GVRShader shader = shaderId.getTemplate(src.getGVRContext());
+        GVRShaderManager shaderManager = src.getGVRContext().getShaderManager();
+        mShaderId = shaderManager.getShaderType(shaderId.ID);
+        mUniformDescriptor = shader.getUniformDescriptor();
+        mTextureDescriptor = shader.getTextureDescriptor();
+        shader.setMaterialDefaults(this);
+        NativeShaderData.copyUniforms(getNative(), src.getNative());
+        for (Map.Entry<String, GVRTexture> e : src.textures.entrySet())
+        {
+            if (hasTexture(e.getKey()))
+            {
+                textures.put(e.getKey(), e.getValue());
+            }
+        }
+    }
+
     protected GVRShaderData(GVRContext gvrContext, GVRShaderId shaderId, long constructor)
     {
         super(gvrContext, constructor);
         GVRShader shader = shaderId.getTemplate(gvrContext);
-        GVRShaderManager shaderManager = gvrContext.getMaterialShaderManager();
+        GVRShaderManager shaderManager = gvrContext.getShaderManager();
         mShaderId = shaderManager.getShaderType(shaderId.ID);
         mUniformDescriptor = shader.getUniformDescriptor();
         mTextureDescriptor = shader.getTextureDescriptor();
@@ -188,10 +220,7 @@ public class GVRShaderData extends GVRHybridObject
         synchronized (textures)
         {
             textures.put(key, texture);
-            if (texture != null)
-            {
-                NativeShaderData.setTexture(getNative(), key, texture.getNative());
-            }
+            NativeShaderData.setTexture(getNative(), key, texture != null ? texture.getNative() : 0);
         }
     }
 
@@ -519,4 +548,6 @@ class NativeShaderData {
             float y4, float z4, float w4);
 
     static native String makeShaderLayout(long shaderData);
+
+    static native boolean copyUniforms(long shaderDataDest, long shaderDataSrc);
 }

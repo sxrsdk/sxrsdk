@@ -31,7 +31,7 @@ Scene* Scene::main_scene_ = NULL;
 Scene::Scene() :
         HybridObject(),
         javaVM_(NULL),
-        javaObj_(0),
+        bindShadersMethod_(0),
         main_camera_rig_(),
         frustum_flag_(false),
         dirtyFlag_(0),
@@ -41,15 +41,6 @@ Scene::Scene() :
 { }
 
 Scene::~Scene() {
-    if (javaVM_ && javaObj_)
-    {
-        JNIEnv* env;
-        //@todo strictly speaking if you attach you must detach
-        jint rs = javaVM_->AttachCurrentThread(&env, NULL);
-        if (rs == JNI_OK) {
-            env->DeleteWeakGlobalRef(javaObj_);
-        }
-    }
 }
 
 void Scene::set_java(JavaVM* javaVM, jobject javaScene)
@@ -58,7 +49,12 @@ void Scene::set_java(JavaVM* javaVM, jobject javaScene)
     javaVM_ = javaVM;
     if (env)
     {
-        javaObj_ = env->NewWeakGlobalRef(javaScene);
+        jclass sceneClass = env->GetObjectClass(javaScene);
+        bindShadersMethod_ = env->GetMethodID(sceneClass, "bindShadersNative", "()V");
+        if (bindShadersMethod_ == 0)
+        {
+            LOGE("Scene::set_java ERROR cannot find 'GVRScene.bindShadersNative()' Java method");
+        }
     }
 }
 
@@ -72,16 +68,37 @@ int Scene::get_java_env(JNIEnv** envptr)
         {
             return 1;
         }
-        FAIL("SHADER: RenderData::bindShader Could not attach to Java VM");
+        FAIL("Scene::get_java_env Could not attach to Java VM");
     }
     else if (rc == JNI_EVERSION)
     {
-        FAIL("SHADER: RenderData::bindShader JNI version not supported");
+        FAIL("Scene::get_java_env JNI version not supported");
         return -1;
     }
     return 0;
 }
 
+/**
+ * Called when the shaders need to be generated on the Java side
+ * (usually because a light is added or removed).
+ */
+void Scene::bindShaders(jobject javaSceneObject)
+{
+    if ((bindShadersMethod_ == NULL))
+    {
+        LOGE("SHADER: Could not call GVRScene::bindShadersNative");
+    }
+    JNIEnv* env = NULL;
+    int rc = get_java_env(&env);
+    if (env && (rc >= 0))
+    {
+        env->CallVoidMethod(javaSceneObject, bindShadersMethod_);
+        if (rc > 0)
+        {
+            getJavaVM()->DetachCurrentThread();
+        }
+    }
+}
 
 void Scene::addSceneObject(SceneObject* scene_object) {
     scene_root_.addChildObject(&scene_root_, scene_object);

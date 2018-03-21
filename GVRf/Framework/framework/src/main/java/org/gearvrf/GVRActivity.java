@@ -207,6 +207,8 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
     @Override
     protected void onDestroy() {
         android.util.Log.i(TAG, "onDestroy " + Integer.toHexString(hashCode()));
+        mDelegate.onDestroy();
+
         if (mViewManager != null) {
             mViewManager.onDestroy();
             mViewManager.getEventManager().sendEventWithMask(
@@ -262,12 +264,7 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
                 return;
             }
 
-            boolean isMonoscopicMode = mAppSettings.getMonoscopicModeParams().isMonoscopicMode();
-            if (!isMonoscopicMode) {
-                mViewManager = mDelegate.makeViewManager();
-            } else {
-                mViewManager = mDelegate.makeMonoscopicViewManager();
-            }
+            mViewManager = mDelegate.makeViewManager();
             mDelegate.setViewManager(mViewManager);
 
             if (mConfigurationManager.isDockListenerRequired()) {
@@ -283,18 +280,16 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
                     "onSetMain", gvrMain);
 
             final GVRConfigurationManager localConfigurationManager = mConfigurationManager;
-            if (!isMonoscopicMode) {
-                if (null != mDockEventReceiver && localConfigurationManager.isDockListenerRequired()) {
-                    getGVRContext().registerDrawFrameListener(new GVRDrawFrameListener() {
-                        @Override
-                        public void onDrawFrame(float frameTime) {
-                            if (localConfigurationManager.isHmtConnected()) {
-                                handleOnDock();
-                                getGVRContext().unregisterDrawFrameListener(this);
-                            }
+            if (null != mDockEventReceiver && localConfigurationManager.isDockListenerRequired()) {
+                getGVRContext().registerDrawFrameListener(new GVRDrawFrameListener() {
+                    @Override
+                    public void onDrawFrame(float frameTime) {
+                        if (localConfigurationManager.isHmtConnected()) {
+                            handleOnDock();
+                            getGVRContext().unregisterDrawFrameListener(this);
                         }
-                    });
-                }
+                    }
+                });
             }
         } else {
             throw new IllegalArgumentException(
@@ -547,8 +542,7 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
 
     /**
      * It is a convenient function to add a {@link GVRView} to Android hierarchy
-     * view. UI thread will call {@link GVRView#draw(android.graphics.Canvas)}
-     * to refresh the view when necessary.
+     * view. UI thread will refresh the view when necessary.
      *
      * @param view Is a {@link GVRView} that draw itself into some
      *            {@link GVRViewSceneObject}.
@@ -682,6 +676,7 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
         void onCreate(GVRActivity activity);
         void onPause();
         void onResume();
+        void onDestroy();
         void onConfigurationChanged(final Configuration newConfig);
 
         boolean onKeyDown(int keyCode, KeyEvent event);
@@ -695,11 +690,103 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
         VrAppSettings makeVrAppSettings();
         IActivityNative getActivityNative();
         GVRViewManager makeViewManager();
-        GVRViewManager makeMonoscopicViewManager();
         GVRCameraRig makeCameraRig(GVRContext context);
         GVRConfigurationManager makeConfigurationManager(GVRActivity activity);
         void parseXmlSettings(AssetManager assetManager, String dataFilename);
 
         boolean onBackPress();
+    }
+
+    static class ActivityDelegateStubs implements GVRActivityDelegate {
+
+        @Override
+        public void onCreate(GVRActivity activity) {
+
+        }
+
+        @Override
+        public void onPause() {
+
+        }
+
+        @Override
+        public void onResume() {
+
+        }
+
+        @Override
+        public void onDestroy() {
+
+        }
+
+        @Override
+        public void onConfigurationChanged(Configuration newConfig) {
+
+        }
+
+        @Override
+        public boolean onKeyDown(int keyCode, KeyEvent event) {
+            return false;
+        }
+
+        @Override
+        public boolean onKeyUp(int keyCode, KeyEvent event) {
+            return false;
+        }
+
+        @Override
+        public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+            return false;
+        }
+
+        @Override
+        public boolean setMain(GVRMain gvrMain, String dataFileName) {
+            return false;
+        }
+
+        @Override
+        public void setViewManager(GVRViewManager viewManager) {
+
+        }
+
+        @Override
+        public void onInitAppSettings(VrAppSettings appSettings) {
+
+        }
+
+        @Override
+        public VrAppSettings makeVrAppSettings() {
+            return null;
+        }
+
+        @Override
+        public IActivityNative getActivityNative() {
+            return null;
+        }
+
+        @Override
+        public GVRViewManager makeViewManager() {
+            return null;
+        }
+
+        @Override
+        public GVRCameraRig makeCameraRig(GVRContext context) {
+            return null;
+        }
+
+        @Override
+        public GVRConfigurationManager makeConfigurationManager(GVRActivity activity) {
+            return null;
+        }
+
+        @Override
+        public void parseXmlSettings(AssetManager assetManager, String dataFilename) {
+
+        }
+
+        @Override
+        public boolean onBackPress() {
+            return false;
+        }
     }
 }

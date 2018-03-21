@@ -20,6 +20,7 @@
 #ifndef TEXTURE_H_
 #define TEXTURE_H_
 
+#include <atomic>
 #include "image.h"
 #include "util/gvr_jni.h"
 
@@ -83,6 +84,24 @@ public:
         setPadding();
     }
 
+    bool operator==(const TextureParameters& src)
+    {
+        return ((Params.MinFilter == src.Params.MinFilter) &&
+                (Params.MagFilter == src.Params.MagFilter) &&
+                (Params.WrapU == src.Params.WrapU) &&
+                (Params.WrapV == src.Params.WrapV) &&
+                (MaxAnisotropy == src.MaxAnisotropy));
+    }
+
+    bool operator!=(const TextureParameters& src)
+    {
+        return ((Params.MinFilter != src.Params.MinFilter) ||
+                (Params.MagFilter != src.Params.MagFilter) ||
+                (Params.WrapU != src.Params.WrapU) ||
+                (Params.WrapV != src.Params.WrapV) ||
+                (MaxAnisotropy != src.MaxAnisotropy));
+    }
+
     int getMinFilter() const { return Params.MinFilter; }
     int getMagFilter() const { return Params.MagFilter; }
     int getWrapU() const { return Params.WrapU; }
@@ -106,7 +125,7 @@ protected:
         unsigned short int WrapU : 2;
         unsigned short int WrapV : 2;
         unsigned short int Padding : 6;
-    }BitFields;
+    } BitFields;
 
     BitFields Params;
     float MaxAnisotropy;
@@ -130,14 +149,16 @@ public:
 
     explicit Texture(int type = TEXTURE_2D);
     virtual ~Texture();
-    void clearData(JNIEnv* env);
     void setImage(Image* image);
     void setImage(JNIEnv* env, jobject javaImage, Image* image);
     void updateTextureParameters(const int* texture_parameters, int n);
 
     int getType() const { return mType; }
-    Image*  getImage()  { return mImage; }
-    virtual int getId() { return mImage ? mImage->getId() : 0; }
+    Image* getImage() const { return mImage; }
+    int getId() {
+        Image* image = mImage;
+        return image ? image->getId() : 0;
+    }
     virtual bool isReady();
 
     const TextureParameters& getTexParams() const
@@ -153,12 +174,15 @@ public:
 protected:
     JavaVM* mJava;
     jobject mJavaImage;
-    Image*  mImage;
     int     mType;
     bool    mTexParamsDirty;
     TextureParameters   mTexParams;
 
 private:
+    //since it can be read/written from the gl and other threads concurrently
+    std::atomic<Image*> mImage;
+    void clearData(JNIEnv* env);
+
     Texture(const Texture& texture) = delete;
     Texture(Texture&& texture) = delete;
     Texture& operator=(const Texture& texture) = delete;
