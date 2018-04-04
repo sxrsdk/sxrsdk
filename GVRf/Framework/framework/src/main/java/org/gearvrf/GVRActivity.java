@@ -15,22 +15,6 @@
 
 package org.gearvrf;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.gearvrf.scene_objects.GVRViewSceneObject;
-import org.gearvrf.scene_objects.view.GVRView;
-import org.gearvrf.script.IScriptable;
-import org.gearvrf.utility.DockEventReceiver;
-import org.gearvrf.utility.GrowBeforeQueueThreadPoolExecutor;
-import org.gearvrf.utility.Log;
-import org.gearvrf.utility.Threads;
-import org.gearvrf.utility.VrAppSettings;
-
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
@@ -44,6 +28,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+
+import org.gearvrf.scene_objects.GVRViewSceneObject;
+import org.gearvrf.scene_objects.view.GVRView;
+import org.gearvrf.script.IScriptable;
+import org.gearvrf.utility.DockEventReceiver;
+import org.gearvrf.utility.GrowBeforeQueueThreadPoolExecutor;
+import org.gearvrf.utility.Log;
+import org.gearvrf.utility.Threads;
+import org.gearvrf.utility.VrAppSettings;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The typical GVRF application will have a single Android {@link Activity},
@@ -85,44 +85,20 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
         android.util.Log.i(TAG, "onCreate " + Integer.toHexString(hashCode()));
         super.onCreate(savedInstanceState);
 
-        InputStream inputStream = null;
-        BufferedReader reader = null;
-        try {
-            for (int i = 0; i < 10; ++i) {
-                try {
-                    inputStream = getAssets().open("backend_" + i + ".txt");
-                    reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                    final String line = reader.readLine();
-                    Log.i(TAG, "trying backend " + line);
-                    final Class<?> aClass = Class.forName(line);
-
-                    mDelegate = (GVRActivityDelegate) aClass.newInstance();
-                    mAppSettings = mDelegate.makeVrAppSettings();
-                    mDelegate.onCreate(this);
-
+        final int backendId = SystemPropertyUtil.getSystemProperty(DEBUG_GEARVRF_BACKEND);
+        if (-1 != backendId) {
+            mDelegate = tryBackend(backendId);
+        } else {
+            for (int i = 0; i <= MAX_BACKEND_ID; ++i) {
+                mDelegate = tryBackend(i);
+                if (null != mDelegate) {
                     break;
-                } catch (final Exception exc) {
-                    mDelegate = null;
                 }
             }
+        }
 
-            if (null == mDelegate) {
-                throw new IllegalStateException("Fatal error: no backend available");
-            }
-        } finally {
-            if (null != reader) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                }
-            }
-            if (null != inputStream) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                }
-            }
+        if (null == mDelegate) {
+            throw new IllegalStateException("Fatal error: no backend available");
         }
 
         if (null != Threads.getThreadPool()) {
@@ -141,6 +117,40 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
         mRenderableViewGroup = (ViewGroup) findViewById(android.R.id.content).getRootView();
 
         mActivityNative = mDelegate.getActivityNative();
+    }
+
+    private final GVRActivityDelegate tryBackend(final int backendId) {
+        InputStream inputStream = null;
+        BufferedReader reader = null;
+        try {
+            inputStream = getAssets().open("backend_" + backendId + ".txt");
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            final String line = reader.readLine();
+            Log.i(TAG, "trying backend " + line);
+            final Class<?> aClass = Class.forName(line);
+
+            GVRActivityDelegate delegate = (GVRActivityDelegate) aClass.newInstance();
+            mAppSettings = delegate.makeVrAppSettings();
+            delegate.onCreate(this);
+
+            return delegate;
+        } catch (final Exception exc) {
+            return null;
+        } finally {
+            if (null != reader) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                }
+            }
+            if (null != inputStream) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                }
+            }
+        }
     }
 
     protected void onInitAppSettings(VrAppSettings appSettings) {
@@ -336,35 +346,6 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
      */
     public final void setMain(GVRMain gvrMain) {
         setMain(gvrMain, "_gvr.xml");
-    }
-
-    /**
-     * Sets whether to force rendering to be single-eye, monoscopic view.
-     *
-     * @param force
-     *            If true, will create a OvrMonoscopicViewManager when
-     *            {@linkplain GVRActivity#setMain(GVRMain, String)} is called. If false, will
-     *            proceed to auto-detect whether the device supports VR
-     *            rendering and choose the appropriate ViewManager. This call
-     *            will only have an effect if it is called before
-     *            {@linkplain #setMain(GVRMain, String) setMain()}.
-     * @deprecated
-     */
-    @Deprecated
-    public void setForceMonoscopic(boolean force) {
-        mAppSettings.getMonoscopicModeParams().setMonoscopicMode(force);
-    }
-
-    /**
-     * Returns whether a monoscopic view was asked to be forced during
-     * {@linkplain #setMain(GVRMain, String) setMain()}.
-     *
-     * @see GVRActivity#setForceMonoscopic(boolean)
-     * @deprecated
-     */
-    @Deprecated
-    public final boolean getForceMonoscopic() {
-        return mAppSettings.getMonoscopicModeParams().isMonoscopicMode();
     }
 
     final long getNative() {
@@ -789,4 +770,7 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
             return false;
         }
     }
+
+    private final static String DEBUG_GEARVRF_BACKEND = "debug.gearvrf.backend";
+    private final static int MAX_BACKEND_ID = 9;
 }

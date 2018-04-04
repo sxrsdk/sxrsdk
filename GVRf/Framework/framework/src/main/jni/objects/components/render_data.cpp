@@ -19,6 +19,7 @@
 #include "util/jni_utils.h"
 #include "objects/scene.h"
 #include "shaders/shader.h"
+#include <glslang/Include/Common.h> //@todo remove; for to_string
 
 namespace gvr {
 
@@ -70,6 +71,7 @@ const RenderPass* RenderData::pass(int pass) const {
     if (pass >= 0 && pass < render_pass_list_.size()) {
         return render_pass_list_[pass];
     }
+    return nullptr;
 }
 
 void RenderData::set_mesh(Mesh* mesh)
@@ -212,20 +214,22 @@ const std::string& RenderData::getHashCode()
 {
     if (hash_code_dirty_)    {
         std::string render_data_string;
-        render_data_string.append(to_string(getRenderDataFlagsHashCode()));
-        render_data_string.append(to_string(getComponentType()));
-        render_data_string.append(to_string(render_mask_));
-        render_data_string.append(to_string(offset_factor_));
-        render_data_string.append(to_string(offset_units_));
-        render_data_string.append(to_string(sample_coverage_));
-        render_data_string.append(to_string(stencilMaskMask_));
-        render_data_string.append(to_string(stencilFuncFunc_));
-        render_data_string.append(to_string(stencilFuncRef_));
-        render_data_string.append(to_string(stencilFuncMask_));
-        render_data_string.append(to_string(stencilOpSfail_));
-        render_data_string.append(to_string(stencilOpDpfail_));
-        render_data_string.append(to_string(stencilOpDppass_));
-        render_data_string.append(to_string(mesh_->getVertexBuffer()->getDescriptor()));
+        render_data_string.append(std::to_string(getRenderDataFlagsHashCode()));
+        render_data_string.append(std::to_string(getComponentType()));
+        render_data_string.append(std::to_string(render_mask_));
+        render_data_string.append(std::to_string(offset_factor_));
+        render_data_string.append(std::to_string(offset_units_));
+        render_data_string.append(std::to_string(sample_coverage_));
+        render_data_string.append(std::to_string(stencilMaskMask_));
+        render_data_string.append(std::to_string(stencilFuncFunc_));
+        render_data_string.append(std::to_string(stencilFuncRef_));
+        render_data_string.append(std::to_string(stencilFuncMask_));
+        render_data_string.append(std::to_string(stencilOpSfail_));
+        render_data_string.append(std::to_string(stencilOpDpfail_));
+        render_data_string.append(std::to_string(stencilOpDppass_));
+        render_data_string.append(std::to_string(source_alpha_blend_func_));
+        render_data_string.append(std::to_string(dest_alpha_blend_func_));
+        render_data_string.append(std::to_string(mesh_->getVertexBuffer()->getDescriptor()));
         hash_code = render_data_string;
         hash_code_dirty_ = false;
     }
@@ -256,6 +260,7 @@ int RenderData::isValid(Renderer* renderer, const RenderState& rstate)
         return -1;
     }
     dirty |= m->isDirty();
+    dirty |= (rstate.lightsChanged && light_enabled());
     for (int p = 0; p < pass_count(); ++p)
     {
         RenderPass* rpass = pass(p);
@@ -279,11 +284,12 @@ int RenderData::isValid(Renderer* renderer, const RenderState& rstate)
         //@todo implementation details leaked; unify common JNI reqs of Scene and RenderData
         JNIEnv* env = nullptr;
         int rc = rstate.scene->get_java_env(&env);
+
         bindShader(env, rstate.javaSceneObject, rstate.is_multiview);
-        if (rc > 0) {
+        if (rc > 0)
+        {
             rstate.scene->detach_java_env();
         }
-
         for (int p = 0; p < pass_count(); ++p)
         {
             RenderPass *rpass = pass(p);

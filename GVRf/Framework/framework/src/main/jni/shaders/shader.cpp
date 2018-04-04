@@ -21,9 +21,7 @@
 #include "shader.h"
 
 namespace gvr {
-
-const bool Shader::LOG_SHADER = false;
-
+    
 Shader::Shader(int id,
                const char* signature,
                const char* uniformDescriptor,
@@ -70,7 +68,7 @@ void Shader::setJava(jclass shaderClass, JavaVM *javaVM)
     }
 }
 
-bool Shader::calcMatrix(float* inputMatrices, int inputSize, float* outputMatrices, int outputSize) const
+void Shader::calcMatrix(float* inputMatrices, int inputSize, float* outputMatrices, int outputSize) const
 {
     if (mJavaVM && mJavaShaderClass && mCalcMatrixMethod)
     {

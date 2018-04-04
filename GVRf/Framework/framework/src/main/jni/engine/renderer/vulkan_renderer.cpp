@@ -35,13 +35,16 @@
 #include "vulkan/vk_texture.h"
 #include "vulkan/vk_bitmap_image.h"
 
+#include <glslang/Include/Common.h>
+
 namespace gvr {
 ShaderData* VulkanRenderer::createMaterial(const char* uniform_desc, const char* texture_desc)
 {
     return new VulkanMaterial(uniform_desc, texture_desc);
 }
-RenderTexture* VulkanRenderer::createRenderTexture(const RenderTextureInfo* renderTextureInfo) {
-    return new VkRenderTextureOffScreen(renderTextureInfo->fdboWidth, renderTextureInfo->fboHeight, renderTextureInfo->multisamples);
+RenderTexture* VulkanRenderer::createRenderTexture(const RenderTextureInfo& renderTextureInfo)
+{
+    return new VkRenderTextureOffScreen(renderTextureInfo.fdboWidth, renderTextureInfo.fboHeight, renderTextureInfo.multisamples);
 }
 
 RenderData* VulkanRenderer::createRenderData()
@@ -57,10 +60,14 @@ RenderData* VulkanRenderer::createRenderData()
 RenderTarget* VulkanRenderer::createRenderTarget(Scene* scene) {
     return new VkRenderTarget(scene);
 }
-RenderTarget* VulkanRenderer::createRenderTarget(RenderTexture* renderTexture, bool isMultiview){
+
+RenderTarget* VulkanRenderer::createRenderTarget(RenderTexture* renderTexture, bool isMultiview)
+{
     return new VkRenderTarget(renderTexture, isMultiview);
 }
-RenderTarget* VulkanRenderer::createRenderTarget(RenderTexture* renderTexture, const RenderTarget* renderTarget){
+
+RenderTarget* VulkanRenderer::createRenderTarget(RenderTexture* renderTexture, const RenderTarget* renderTarget)
+{
     return new VkRenderTarget(renderTexture, renderTarget);
 }
 
@@ -146,7 +153,7 @@ bool VulkanRenderer::renderWithShader(RenderState& rstate, Shader* shader, Rende
     if(vkRdata->isDirty(pass)) {
         vulkanCore_->InitDescriptorSetForRenderData(this, pass, shader, vkRdata);
         VkRenderPass render_pass = vulkanCore_->createVkRenderPass(NORMAL_RENDERPASS, rstate.sampleCount);
-        std::string vkPipelineHashCode = vkRdata->getHashCode() + to_string(vkRdata->getRenderPass(pass)->getHashCode(rstate.is_multiview)) + to_string(rstate.sampleCount);
+        std::string vkPipelineHashCode = vkRdata->getHashCode() + std::to_string(vkRdata->getRenderPass(pass)->getHashCode(rstate.is_multiview)) + std::to_string(rstate.sampleCount);
 
         VkPipeline pipeline = vulkanCore_->getPipeline(vkPipelineHashCode);
         if(pipeline == 0) {
@@ -228,7 +235,7 @@ void VulkanRenderer::renderRenderTarget(Scene* scene, jobject javaSceneObject, R
     std::vector<RenderData*>* render_data_vector = renderTarget->getRenderDataVector();
     int postEffectCount = 0;
 
-    if (!rstate.shadow_map) {
+    if (!rstate.is_shadow) {
         rstate.render_mask = camera->render_mask();
         rstate.uniforms.u_right = rstate.render_mask & RenderData::RenderMaskBit::Right;
         rstate.material_override = NULL;

@@ -121,7 +121,7 @@ public:
     virtual bool readRenderResult(uint8_t* readback_buffer){
         glBindFramebuffer(GL_READ_FRAMEBUFFER, getReadBufferId());
         glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, getId(), 0, layer_index_ );
-        GLRenderTexture::readRenderResult(readback_buffer);
+        return GLRenderTexture::readRenderResult(readback_buffer);
     }
     virtual void beginRendering(Renderer* renderer){
         if (!isReady())
@@ -145,8 +145,7 @@ public:
     explicit GLNonMultiviewRenderTexture(int width, int height, int sample_count,
                              int jcolor_format, int jdepth_format, bool resolve_depth,
                              const TextureParameters* texture_parameters);
-    void generateRenderTextureLayer(GLenum depth_format, int width, int height);
-    void bindFrameBufferToLayer(int layerIndex);
+    void generateRenderTextureLayer(int width, int height);
     virtual ~GLNonMultiviewRenderTexture(){
 
     }

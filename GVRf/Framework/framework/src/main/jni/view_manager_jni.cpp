@@ -14,7 +14,6 @@
  */
 
 #include <jni.h>
-
 #include "engine/renderer/renderer.h"
 #include "objects/textures/render_texture.h"
 #include "objects/components/render_target.h"
@@ -80,7 +79,7 @@ extern "C" {
     long Java_org_gearvrf_GVRRenderBundle_getRenderTextureNative(JNIEnv *jni, jclass clazz, jlong jrenderTextureInfo)
     {
         RenderTextureInfo* renderTextureInfo = reinterpret_cast<RenderTextureInfo*>(jrenderTextureInfo);
-        RenderTexture* renderTexture = (Renderer::getInstance()->createRenderTexture(renderTextureInfo));
+        RenderTexture* renderTexture = (Renderer::getInstance()->createRenderTexture(*renderTextureInfo));
         delete renderTextureInfo; // free up the resource as it is no longer needed
         return reinterpret_cast<long>(renderTexture);
     }
@@ -95,8 +94,7 @@ JNIEXPORT void JNICALL Java_org_gearvrf_GVRViewManager_readRenderResultNative(JN
                                                                               jobject jreadback_buffer, jlong jrenderTarget, jint eye, jboolean useMultiview){
     uint8_t *readback_buffer = (uint8_t*) env->GetDirectBufferAddress(jreadback_buffer);
     RenderTarget* renderTarget = reinterpret_cast<RenderTarget*>(jrenderTarget);
-    RenderTexture* renderTexture =    renderTarget->getTexture();
-
+    RenderTexture* renderTexture = renderTarget->getTexture();
     if(useMultiview){
             renderTexture->setLayerIndex(eye);
     }

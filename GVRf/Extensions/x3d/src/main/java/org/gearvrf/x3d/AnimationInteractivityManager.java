@@ -51,12 +51,15 @@ import org.gearvrf.x3d.data_types.SFFloat;
 import org.gearvrf.x3d.data_types.SFInt32;
 import org.gearvrf.x3d.data_types.SFString;
 import org.gearvrf.x3d.data_types.SFTime;
+import org.gearvrf.x3d.data_types.SFVec2f;
 import org.gearvrf.x3d.data_types.SFVec3f;
 import org.gearvrf.x3d.data_types.SFRotation;
 import org.gearvrf.x3d.data_types.MFString;
 import org.joml.AxisAngle4f;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -1250,18 +1253,13 @@ public class AnimationInteractivityManager {
             // if the objects required for this function were constructed, then
             //   check if this <SCRIPT> has an initialize() method that is run just once.
             if (gvrJavascriptV8FileFinal.getScriptText().contains(INITIALIZE_FUNCTION)) {
+                // <SCRIPT> node initialize() functions set inputOnly values
+                // so we don't continue to run the main script method.
+                // http://www.web3d.org/documents/specifications/19775-1/V3.2/Part01/components/scripting.html#Script
                 complete = gvrJavascriptV8FileFinal.invokeFunction(INITIALIZE_FUNCTION, parametersFinal, "");
-
-                if (complete) {
-                    // The JavaScript initialize() function ran ok.
-                    // Now set any values (such as X3D data types such as SFColor)
-                    //  stored in 'localBindings'.
-                    //  Then call SetResultsFromScript() to set the GearVR values
-                    Bindings bindings = gvrJavascriptV8FileFinal.getLocalBindings();
-                    SetResultsFromScript(interactiveObjectFinal, bindings);
-                } else {
-                    Log.e(TAG, "Error in SCRIPT node '"+  interactiveObjectFinal.getScriptObject().getName() +
-                            "' JavaScript initialize() function.");
+                if ( !complete ) {
+                    Log.e(TAG, "Error with initialize() function in SCRIPT '" +
+                            interactiveObjectFinal.getScriptObject().getName() + "'");
                 }
             }
         } else {
@@ -1848,8 +1846,10 @@ public class AnimationInteractivityManager {
                 }  //  end OUTPUT-ONLY or INPUT_OUTPUT
             }  // end for-loop list of fields for a single script
         } catch (Exception e) {
-            Log.e(TAG, "Error setting values returned from JavaScript in SCRIPT node." +
-                    "  Check JavaScript or ROUTE's.  Exception: " + e);
+
+            Log.e(TAG, "Error setting values returned from JavaScript in SCRIPT node " +
+                    interactiveObjectFinal.getScriptObject().getName() +
+                    ".  Check JavaScript or ROUTE's.  Exception: " + e);
         }
     }  //  end  SetResultsFromScript
 
@@ -1894,8 +1894,36 @@ public class AnimationInteractivityManager {
         return q;
     } // end ConvertDirectionalVectorToQuaternion
 
+    public Matrix3f SetTextureTransformMatrix(SFVec2f translation, SFVec2f center, SFVec2f scale, SFFloat rotation) {
+        // Texture Transform Matrix equation:
+        // TC' = -C * S * R * C * T * TC
+        // matrix is:
+        //    moo m10 m20
+        //    m01 m11 m21
+        //    m02 m12 m22
 
-}  //  end AnimationInteractivityManager class
+        Matrix3f translationMatrix = new Matrix3f().identity();
+        translationMatrix.m02 = translation.x;
+        translationMatrix.m12 = translation.y;
+
+        Matrix3f centerMatrix = new Matrix3f().identity();
+        centerMatrix.m02 = center.x;
+        centerMatrix.m12 = center.y;
+        Matrix3f negCenterMatrix = new Matrix3f().identity();
+        negCenterMatrix.m02 = -center.x;
+        negCenterMatrix.m12 = -center.y;
+
+        Matrix3f scaleMatrix = new Matrix3f().scale(scale.x, scale.y, 1);
+
+        Matrix3f rotationMatrix = new Matrix3f().identity().rotateZ(rotation.getValue());
+
+        Matrix3f textureTransformMatrix = new Matrix3f().identity();
+        return textureTransformMatrix.mul(negCenterMatrix).mul(scaleMatrix).mul(rotationMatrix).mul(centerMatrix).mul(translationMatrix);
+    }
+
+
+
+    }  //  end AnimationInteractivityManager class
 
 
 

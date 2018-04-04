@@ -35,7 +35,7 @@ layout(location = 9)in vec2 normal_coord;
 
 
 #ifdef HAS_SHADOWS
-layout(set = 0, binding = 3) uniform lowp sampler2DArray u_shadow_maps;
+layout(set = 0, binding = 3) uniform highp sampler2DArray u_shadow_maps;
 
 float unpackFloatFromVec4i(const vec4 value)
 {
@@ -70,6 +70,5 @@ void main()
 	fragColor = color;
 #else
 	fragColor = s.diffuse;
-	//fragColor = vec4(1,0,0,1);
 #endif
 }

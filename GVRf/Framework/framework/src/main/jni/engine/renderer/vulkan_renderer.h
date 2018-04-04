@@ -34,6 +34,8 @@
 #include "batch_manager.h"
 #include "renderer.h"
 #include "vulkan/vulkan_headers.h"
+#include "vulkan/vulkan_flags.h"
+
 
 namespace gvr {
 
@@ -66,11 +68,13 @@ public:
     void renderToOculus(RenderTarget* renderTarget){
         vulkanCore_->renderToOculus(renderTarget);
     }
-    Texture* createSharedTexture( int id) {};
+    Texture* createSharedTexture( int id) { return nullptr; };
 
     VulkanRenderer() : vulkanCore_(nullptr) {
+        vkflags::initVkRenderFlags();
         vulkanCore_ = VulkanCore::getInstance();
     }
+
     VulkanCore* getCore() { return vulkanCore_; }
     VkDevice& getDevice(){
         return vulkanCore_->getDevice();
@@ -113,8 +117,8 @@ public:
     virtual RenderTexture* createRenderTexture(int width, int height, int sample_count,
                                                int jcolor_format, int jdepth_format, bool resolve_depth,
                                                const TextureParameters* texture_parameters, int number_views, bool monoscopic);
-    virtual RenderTexture* createRenderTexture(int width, int height, int sample_count, int layers, int depthformat) { }
-    virtual RenderTexture* createRenderTexture(const RenderTextureInfo*);
+    virtual RenderTexture* createRenderTexture(int width, int height, int sample_count, int layers, int depthformat) { return nullptr; }
+    virtual RenderTexture* createRenderTexture(const RenderTextureInfo&);
     virtual VertexBuffer* createVertexBuffer(const char* desc, int vcount);
     virtual IndexBuffer* createIndexBuffer(int bytesPerIndex, int icount);
     virtual Shader* createShader(int id, const char* signature,
@@ -123,6 +127,7 @@ public:
                                  const char* fragmentShader);
     virtual void renderRenderTarget(Scene*, jobject javaSceneObject, RenderTarget* renderTarget, ShaderManager* shader_manager,
                                     RenderTexture* post_effect_render_texture_a, RenderTexture* post_effect_render_texture_b);
+    virtual Light* createLight(const char* uniformDescriptor, const char* textureDescriptor) { return NULL; }
     virtual bool renderWithShader(RenderState& rstate, Shader* shader, RenderData* renderData, ShaderData* shaderData, int);
     virtual void updatePostEffectMesh(Mesh*);
 private:
