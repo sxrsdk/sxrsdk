@@ -92,6 +92,7 @@ int RenderData::cull_face(int pass) const {
     if (pass >= 0 && pass < render_pass_list_.size()) {
         return render_pass_list_[pass]->cull_face();
     }
+    return 0;
 }
 
 ShaderData* RenderData::material(int pass) const {
@@ -325,8 +326,7 @@ bool RenderData::updateGPU(Renderer* renderer, Shader* shader)
             bones_ubo_->updateGPU(renderer);
         }
     }
-    vbuf->updateGPU(renderer, mesh_->getIndexBuffer(), shader);
-    return true;
+    return vbuf->updateGPU(renderer, mesh_->getIndexBuffer(), shader);
 }
 
 void RenderData::setBindShaderObject(JNIEnv* env, jobject bindShaderObject) {
