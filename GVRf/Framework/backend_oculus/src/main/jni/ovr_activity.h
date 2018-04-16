@@ -23,9 +23,11 @@
 #include "objects/components/camera_rig.h"
 #include "util/ovr_configuration_helper.h"
 #include "VrApi_Types.h"
+
 namespace gvr {
     class CameraRig;
     struct RenderTextureInfo;
+
     class GVRActivity
     {
     public:
@@ -40,14 +42,14 @@ namespace gvr {
 
     private:
         JNIEnv* envMainThread_ = nullptr;           // for use by the Java UI thread
-
         jclass activityClass_ = nullptr;            // must be looked up from main thread or FindClass() will fail
 
         jmethodID onDrawEyeMethodId = nullptr;
         jmethodID onBeforeDrawEyesMethodId = nullptr;
         jmethodID updateSensoredSceneMethodId = nullptr;
 
-        jobject activity_;
+        jobject activity_ = nullptr;
+        jobject jsurface_ = nullptr;
 
         ConfigurationHelper configurationHelper_;
 
@@ -71,7 +73,6 @@ namespace gvr {
         void beginRenderingEye(const int eye);
         void endRenderingEye(const int eye);
 
-        bool docked_ = false;
         bool clampToBorderSupported_ = false;
         GearController *gearController;
         int mainThreadId_ = 0;
@@ -79,7 +80,7 @@ namespace gvr {
     public:
         void onSurfaceCreated(JNIEnv& env);
         void copyVulkanTexture(int texSwapChainIndex, int eye);
-        void onSurfaceChanged(JNIEnv& env);
+        void onSurfaceChanged(JNIEnv& env, jobject jsurface);
         void onDrawFrame(jobject jViewManager);
         int initializeVrApi();
         static void uninitializeVrApi();
@@ -89,9 +90,6 @@ namespace gvr {
 
         bool isHmtConnected() const;
         bool usingMultiview() const;
-
-        void onDock() { docked_ = true; }
-        void onUndock() { docked_ = false; }
 
         void setGearController(GearController *controller){
             gearController = controller;
