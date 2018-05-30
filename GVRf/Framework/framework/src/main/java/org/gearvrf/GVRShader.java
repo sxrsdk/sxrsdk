@@ -55,7 +55,7 @@ import org.joml.Matrix4f;
  */
 public class GVRShader
 {
-    protected boolean mWriteShadersToDisk = true;
+    protected boolean mWriteShadersToDisk = false;
     protected GLSLESVersion mGLSLVersion = GLSLESVersion.V100;
     protected boolean mHasVariants = false;
     protected boolean mUsesLights = false;
@@ -84,7 +84,7 @@ public class GVRShader
             + "uniform uint u_matrix_offset;\n"
             + "uniform float u_proj_offset;\n"
             + "layout (std140) uniform Transform_ubo\n{\n"
-            + "     mat4 u_matrices[45];\n"
+            + "     mat4 u_matrices[64];\n"
             + "};\n";
 
     protected static String sTransformCode =
@@ -114,7 +114,7 @@ public class GVRShader
             + "     float u_proj_offset;\n"
             + "};\n"
             + "layout (std140, set = 0, binding = 0) uniform Transform_ubo {\n "
-            + "     mat4 u_matrices[45];\n"
+            + "     mat4 u_matrices[64];\n"
             + "};\n";
 
 
