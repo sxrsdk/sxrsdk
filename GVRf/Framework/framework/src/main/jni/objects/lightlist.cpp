@@ -28,17 +28,6 @@
 
 namespace gvr {
 
-    LightList::~LightList()
-    {
-        if (mLightBlock)
-        {
-            delete mLightBlock;
-            mLightBlock = nullptr;
-        }
-#ifdef DEBUG_LIGHT
-        LOGD("LIGHT: deleting light block");
-#endif
-    }
 
     int LightList::getLights(std::vector<Light*>& lightList) const
     {
@@ -191,6 +180,7 @@ namespace gvr {
             (mDirty & (LIGHT_ADDED | LIGHT_REMOVED)) &&
             !createLightBlock(renderer))
         {
+            *mLightDesc = 0;
             return nullptr;
         }
         mTotalUniforms = 0;
@@ -338,6 +328,12 @@ namespace gvr {
         std::lock_guard < std::recursive_mutex > lock(mLock);
         mClassMap.clear();
         mDirty = LIGHT_REMOVED;
+        *mLightDesc = 0;
+        if (mLightBlock)
+        {
+            delete mLightBlock;
+            mLightBlock = nullptr;
+        }
 #ifdef DEBUG_LIGHT
         LOGD("LIGHT: clearing lights");
 #endif

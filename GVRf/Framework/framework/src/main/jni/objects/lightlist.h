@@ -52,7 +52,7 @@ namespace gvr {
                 mShadowMap(nullptr),
                 mUseUniformBlock(true) { }
 
-        virtual ~LightList();
+        ~LightList() { clear(); }
 
         /**
          * Enable or disable the use of uniform block.

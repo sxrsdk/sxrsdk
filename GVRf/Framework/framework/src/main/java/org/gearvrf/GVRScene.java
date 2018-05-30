@@ -657,10 +657,6 @@ class NativeScene {
 
     public static native void exportToFile(long scene, String file_path);
 
-    static native boolean addLight(long scene, long light);
-
-    static native void clearLights(long scene);
-
     static native GVRLight[] getLightList(long scene);
 
     static native void setMainScene(long scene);

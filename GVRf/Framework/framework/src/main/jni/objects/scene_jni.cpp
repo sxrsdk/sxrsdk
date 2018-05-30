@@ -70,14 +70,6 @@ extern "C" {
     Java_org_gearvrf_NativeScene_getNumberTriangles(JNIEnv * env,
             jobject obj, jlong jscene);
 
-    JNIEXPORT jboolean JNICALL
-    Java_org_gearvrf_NativeScene_addLight(
-            JNIEnv * env, jobject obj, jlong jscene, jlong light);
-
-    JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeScene_clearLights(
-            JNIEnv * env, jobject obj, jlong jscene);
-
     JNIEXPORT jobjectArray JNICALL
     Java_org_gearvrf_NativeScene_getLightList(JNIEnv* env, jobject obj, jlong scene);
 
@@ -186,25 +178,6 @@ Java_org_gearvrf_NativeScene_exportToFile(JNIEnv * env,
     scene->exportToFile(std::string(native_filepath));
 
     env->ReleaseStringUTFChars(filepath, native_filepath);
-}
-
-
-JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeScene_addLight(JNIEnv * env,
-        jobject obj, jlong jscene, jlong jlight) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    if (jlight != 0) {
-        Light* light = reinterpret_cast<Light*>(jlight);
-        return scene->addLight(light);
-    }
-    return false;
-}
-
-JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_clearLights(JNIEnv * env,
-        jobject obj, jlong jscene) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    scene->clearLights();
 }
 
 JNIEXPORT jobjectArray JNICALL
