@@ -55,7 +55,7 @@ import org.joml.Matrix4f;
  */
 public class GVRShader
 {
-    protected boolean mWriteShadersToDisk = false;
+    protected boolean mWriteShadersToDisk = true;
     protected GLSLESVersion mGLSLVersion = GLSLESVersion.V100;
     protected boolean mHasVariants = false;
     protected boolean mUsesLights = false;

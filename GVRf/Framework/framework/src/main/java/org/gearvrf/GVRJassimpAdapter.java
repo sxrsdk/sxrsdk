@@ -794,14 +794,13 @@ class   GVRJassimpAdapter {
         }
         if (texIndex > 1)
         {
-            assetRequest.onTextureError(mContext, "Layering only supported for two textures, ignoring " + texFileName, texFileName);
+            assetRequest.onModelError(mContext, "Layering only supported for two textures, ignoring " + texFileName, mFileName);
             return;
         }
         if (texIndex > 0)
         {
             if (usingPBR)
             {
-                assetRequest.onTextureError(mContext, textureKey + " duplicate ignored for PBR renderer" + mFileName, mFileName);
                 return;
             }
             textureKey += texIndex;

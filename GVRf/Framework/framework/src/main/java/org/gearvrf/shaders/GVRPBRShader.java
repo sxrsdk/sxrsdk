@@ -90,5 +90,11 @@ public class GVRPBRShader extends GVRShaderTemplate
         material.setFloat("normalScale", 1);
         material.setFloat("lightmapStrength", 1);
     }
+
+    @Override
+    public String getMatrixCalc(boolean usesLights)
+    {
+        return usesLights ? "left_mvp; right_mvp; model; (model~ * inverse_left_view)^; (model~ * inverse_right_view)^" : null;
+    }
 }
 
