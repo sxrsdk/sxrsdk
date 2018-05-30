@@ -6,6 +6,7 @@ layout ( set = 0, binding = 4 ) uniform sampler2D u_texture;
 @MATERIAL_UNIFORMS
 
 @MATRIX_UNIFORMS
+
 layout ( location = 0 ) in vec2 diffuse_coord;
 layout ( location = 0 ) out vec4 outColor;
 

@@ -62,6 +62,12 @@ public class X3DShader extends GVRShaderTemplate
         return defines;
     }
 
+    @Override
+    public String getMatrixCalc(boolean usesLights)
+    {
+        return usesLights ? "left_mvp; right_mvp; model; (model~ * inverse_left_view)^; (model~ * inverse_right_view)^" : null;
+    }
+
     protected void setMaterialDefaults(GVRShaderData material)
     {
         material.setVec4("ambient_color", 0.2f, 0.2f, 0.2f, 1.0f);

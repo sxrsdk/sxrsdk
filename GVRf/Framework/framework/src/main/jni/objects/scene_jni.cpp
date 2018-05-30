@@ -101,13 +101,6 @@ Java_org_gearvrf_NativeScene_ctor(JNIEnv* env, jobject obj) {
     return reinterpret_cast<jlong>(new Scene());
 }
 
-JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_setJava(JNIEnv *env, jclass, jlong nativeScene, jobject javaScene) {
-    JavaVM* jvm;
-    env->GetJavaVM(&jvm);
-    Scene* scene = reinterpret_cast<Scene*>(nativeScene);
-    scene->set_java(jvm, javaScene);
-}
 
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeScene_addSceneObject(JNIEnv * env,

@@ -24,6 +24,7 @@ import org.gearvrf.GVRShaderTemplate;
 import org.gearvrf.IRenderable;
 import org.gearvrf.R;
 import org.gearvrf.utility.TextFile;
+import org.joml.Matrix4f;
 
 import java.util.HashMap;
 
@@ -91,6 +92,13 @@ public class GVRPhongLayeredShader extends GVRShaderTemplate
         return defines;
     }
 
+    @Override
+    public String getMatrixCalc(boolean usesLights)
+    {
+        return usesLights ? "left_mvp; right_mvp; model; (model~ * inverse_left_view)^; (model~ * inverse_right_view)^" : null;
+    }
+
+
     protected void setMaterialDefaults(GVRShaderData material)
     {
         material.setVec4("ambient_color", 0.2f, 0.2f, 0.2f, 1.0f);
@@ -101,5 +109,6 @@ public class GVRPhongLayeredShader extends GVRShaderTemplate
         material.setFloat("line_width", 1.0f);
         material.setFloat("u_opacity", 0.0f);
     }
+
 }
 

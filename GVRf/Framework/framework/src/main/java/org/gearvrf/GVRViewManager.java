@@ -693,26 +693,26 @@ abstract class GVRViewManager extends GVRContext {
 
         GVRRenderTexture posteffectRenderTextureB = null;
         GVRRenderTexture posteffectRenderTextureA = null;
-
+        renderTarget.setStereo(false);
         if(isMultiview) {
             posteffectRenderTextureA = mRenderBundle.getEyeCapturePostEffectRenderTextureA();
             posteffectRenderTextureB = mRenderBundle.getEyeCapturePostEffectRenderTextureB();
             renderTarget = mRenderBundle.getEyeCaptureRenderTarget();
-            renderTarget.cullFromCamera(mMainScene, centerCamera ,mRenderBundle.getShaderManager());
+            renderTarget.cullFromCamera(mMainScene, centerCamera, mRenderBundle.getShaderManager());
             renderTarget.beginRendering(centerCamera);
         }
         else {
             posteffectRenderTextureA = mRenderBundle.getPostEffectRenderTextureA();
             posteffectRenderTextureB = mRenderBundle.getPostEffectRenderTextureB();
+            renderTarget.cullFromCamera(mMainScene, centerCamera, mRenderBundle.getShaderManager());
         }
-
-        renderTarget.render(mMainScene,centerCamera, mRenderBundle.getShaderManager(), posteffectRenderTextureA, posteffectRenderTextureB);
+        renderTarget.render(mMainScene, centerCamera, mRenderBundle.getShaderManager(), posteffectRenderTextureA, posteffectRenderTextureB);
         centerCamera.removePostEffect(postEffect);
         readRenderResult(renderTarget, EYE.MULTIVIEW, false);
 
         if(isMultiview)
             renderTarget.endRendering();
-
+        renderTarget.setStereo(true);
         final Bitmap bitmap = Bitmap.createBitmap(mReadbackBufferWidth, mReadbackBufferHeight, Bitmap.Config.ARGB_8888);
         mReadbackBuffer.rewind();
         bitmap.copyPixelsFromBuffer(mReadbackBuffer);

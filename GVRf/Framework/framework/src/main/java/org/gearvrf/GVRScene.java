@@ -70,8 +70,6 @@ public class GVRScene extends GVRHybridObject implements PrettyPrint, IScriptabl
      */
     public GVRScene(GVRContext gvrContext) {
         super(gvrContext, NativeScene.ctor());
-        NativeScene.setJava(getNative(), this);
-
         if(MAX_LIGHTS == 0) {
             MAX_LIGHTS = gvrContext.getActivity().getConfigurationManager().getMaxLights();
         }
@@ -105,7 +103,6 @@ public class GVRScene extends GVRHybridObject implements PrettyPrint, IScriptabl
 
     private GVRScene(GVRContext gvrContext, long ptr) {
         super(gvrContext, ptr);
-        NativeScene.setJava(getNative(), this);
         mSceneRoot = new GVRSceneObject(gvrContext);
         NativeScene.addSceneObject(getNative(), mSceneRoot.getNative());
         setFrustumCulling(true);
@@ -639,8 +636,6 @@ public class GVRScene extends GVRHybridObject implements PrettyPrint, IScriptabl
 class NativeScene {
 
     static native long ctor();
-
-    static native void setJava(long scene, GVRScene javaScene);
 
     static native void addSceneObject(long scene, long sceneObject);
    

@@ -27,19 +27,25 @@ namespace gvr {
 Renderer* Renderer::instance = nullptr;
 bool Renderer::isVulkan_ = false;
 
-/***
-    We are implementing Vulkan. Enable through system properties.
-***/
-Renderer* Renderer::getInstance(std::string type){
-    if( nullptr == instance ) {
-        if( useVulkanInstance() ) {
-            instance = new VulkanRenderer();
-            if(static_cast<VulkanRenderer*>(instance)->getCore() != NULL)
-                isVulkan_ = true;
-            else
-                LOGE("Vulkan is not supported on your device");
 
-        } else {
+Renderer* Renderer::getInstance(std::string type)
+{
+    if (instance == nullptr)
+    {
+        if (useVulkanInstance())
+        {
+            instance = new VulkanRenderer();
+            if (static_cast<VulkanRenderer*>(instance)->getCore() != NULL)
+            {
+                isVulkan_ = true;
+            }
+            else
+            {
+                LOGE("Vulkan is not supported on your device");
+            }
+        }
+        else
+        {
             instance = new GLRenderer();
         }
     }

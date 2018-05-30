@@ -348,7 +348,7 @@ class MonoscopicViewManager extends GVRViewManager implements MonoscopicRotation
                 mRenderBundle.addRenderTarget(mRenderTarget[2], GVRViewManager.EYE.LEFT, 2);
             }
             else{
-                mRenderTarget[0] = new GVRRenderTarget(getActivity().getGVRContext());
+                mRenderTarget[0] = new GVRRenderTarget(getActivity().getGVRContext(), false);
             }
         }
 

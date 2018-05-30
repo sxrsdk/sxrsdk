@@ -61,7 +61,7 @@ class GVRRenderBundle {
         else if(eye == GVRViewManager.EYE.LEFT)
             mLeftEyeRenderTarget[index] = new GVRRenderTarget(renderTexture, mGVRContext.getMainScene());
         else
-            mRightEyeRenderTarget[index] = new GVRRenderTarget(renderTexture, mGVRContext.getMainScene(),mLeftEyeRenderTarget[index]);
+            mRightEyeRenderTarget[index] = new GVRRenderTarget(renderTexture, mLeftEyeRenderTarget[index]);
     }
 
 

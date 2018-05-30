@@ -14,6 +14,8 @@
  */
 package org.gearvrf.shaders;
 
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.List;
 
@@ -28,6 +30,7 @@ import org.gearvrf.utility.TextFile;
 import android.content.Context;
 
 import org.gearvrf.R;
+import org.joml.Matrix4f;
 
 /**
  * Manages a set of variants on vertex and fragment shaders from the same source
@@ -61,9 +64,11 @@ public class GVRTextureShader extends GVRShaderTemplate
         setSegment("VertexShader", vtxShader);
         setSegment("VertexNormalShader", "");
         setSegment("VertexSkinShader", "");
+        setOutputMatrixCount(3);
         mHasVariants = true;
         mUsesLights = true;
     }
+
     public HashMap<String, Integer> getRenderDefines(IRenderable renderable, GVRScene scene)
     {
         boolean lightMapEnabled  = (renderable instanceof GVRRenderData) ? ((GVRRenderData) renderable).isLightMapEnabled() : false;
@@ -71,10 +76,6 @@ public class GVRTextureShader extends GVRShaderTemplate
         if (!lightMapEnabled)
         {
             defines.put("lightMapTexture", 0);
-        }
-        if (!defines.containsKey("LIGHTSOURCES") || (defines.get("LIGHTSOURCES") != 1))
-        {
-            defines.put("a_normal", 0);
         }
         return defines;
     }
@@ -90,6 +91,13 @@ public class GVRTextureShader extends GVRShaderTemplate
         material.setVec4("emissive_color", 0.0f, 0.0f, 0.0f, 1.0f);
         material.setFloat("specular_exponent", 0.0f);
     }
+
+    @Override
+    public String getMatrixCalc(boolean usesLights)
+    {
+        return usesLights ? "left_mvp; right_mvp; model; (model~ * inverse_left_view)^; (model~ * inverse_right_view)^" : null;
+    }
+
 }
 
 
