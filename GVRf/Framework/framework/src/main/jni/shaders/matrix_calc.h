@@ -78,7 +78,7 @@ namespace gvr
 
         bool eval (ExprNode* root, glm::mat4& result);
 
-        static const char*mInputMatrixNames[20];
+        static const char* mInputMatrixNames[20];
         std::vector<ExprNode*> mExprTrees;
         const glm::mat4* mInputMatrices;
         glm::mat4* mOutputMatrices;

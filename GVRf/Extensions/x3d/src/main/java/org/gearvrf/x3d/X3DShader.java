@@ -35,8 +35,7 @@ public class X3DShader extends GVRShaderTemplate
             vtxTemplate = TextFile.readTextFile(context, org.gearvrf.R.raw.vertex_template_multitex).
                             replaceFirst("@MATRIX_UNIFORMS", "@MATRIX_UNIFORMS\n@MATERIAL_UNIFORMS\n");
             surfaceShader = TextFile.readTextFile(context, org.gearvrf.x3d.R.raw.x3d_surface);
-            vtxShader = TextFile.readTextFile(context, org.gearvrf.R.raw.pos_norm_tex) +
-                        TextFile.readTextFile(context, org.gearvrf.x3d.R.raw.x3d_vertex);
+            vtxShader = TextFile.readTextFile(context, org.gearvrf.x3d.R.raw.x3d_vertex);
             addLight = TextFile.readTextFile(context, org.gearvrf.R.raw.addlight);
         }
         setSegment("FragmentTemplate", fragTemplate);
