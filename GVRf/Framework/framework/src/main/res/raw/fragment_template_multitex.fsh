@@ -7,14 +7,13 @@
 precision highp float;
 precision lowp int;
 
-layout(location = 0) out vec4 fragColor;
-
 @MATRIX_UNIFORMS
 
-layout(location = 1) in vec3 viewspace_position;
-layout(location = 2) in vec3 viewspace_normal;
-layout(location = 3) in vec4 local_position;
-layout(location = 0) in vec3 view_direction;
+layout(location = 0) out vec4 fragColor;
+
+layout(location = 1) in vec3 view_direction;
+layout(location = 2) in vec3 viewspace_position;
+layout(location = 3) in vec3 viewspace_normal;
 layout(location = 4) in vec2 diffuse_coord;
 
 #ifdef HAS_SHADOWS
@@ -35,7 +34,6 @@ float unpackFloatFromVec4i(const vec4 value)
     const vec4 unpackFactors = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
     return dot(value, unpackFactors);
 }
-
 
 @FragmentSurface
 

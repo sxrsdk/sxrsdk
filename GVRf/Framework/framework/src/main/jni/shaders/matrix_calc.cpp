@@ -36,6 +36,7 @@ namespace gvr
     MatrixCalc::MatrixCalc(const char* expressions)
     {
         int n;
+        int i = 0;
         const char* p = expressions;
         while (*p)
         {
@@ -45,6 +46,7 @@ namespace gvr
             {
                 mExprTrees.push_back(root);
                 p += n;
+                LOGE("MatrixCalc: OUTPUT %d\n%s", i++, asString(root).c_str());
             }
             else
             {
@@ -87,7 +89,6 @@ namespace gvr
         ExprNode* prevNode = nullptr;
         ExprNode* curNode = nullptr;
         NodeType curType = None;
-        int opIndex = 0;
 
         while (*p)
         {
@@ -96,19 +97,19 @@ namespace gvr
                 ++p;
                 continue;
             }
-            if (curType < Unary)
+            int consumed = 0;
+            if (*p == '(')
             {
-                int consumed = 0;
-                if (*p == '(')
-                {
-                    consumed = compile(&curNode, ++p);
-                }
-                else if (isalpha(*p))
-                {
-                    consumed = parseOperand(&curNode, p);
-                }
-                p += consumed;
+                ExprNode* temp;
+                curNode = new ExprNode(Group);
+                consumed = compile(&temp, ++p);
+                curNode->Operand[0] = temp;
             }
+            else if (isalpha(*p))
+            {
+                consumed = parseOperand(&curNode, p);
+            }
+            p += consumed;
             while (isspace(*p))
             {
                 ++p;
@@ -138,20 +139,23 @@ namespace gvr
                 {
                     if (prevNode->Type > curNode->Type)
                     {
-                        curNode->Operand[opIndex] = prevNode;
+                        curNode->Operand[0] = prevNode;
                         prevNode = curNode;
                     }
                     else
                     {
-                        curNode->Operand[opIndex] = prevNode->Operand[1];
-                        prevNode->Operand[1] = curNode;
+                        curNode->Operand[0] = prevNode->Operand[0];
+                        prevNode->Operand[0] = curNode;
                     }
-                    opIndex = 1;
-                    curType = prevNode->Type;
                 }
             }
         }
-        *root = prevNode ? prevNode : curNode;
+        *root = curNode;
+        if (prevNode && (prevNode->Type < Unary) && (prevNode->Operand[1] == nullptr))
+        {
+            prevNode->Operand[1] = curNode;
+            *root = prevNode;
+        }
         return p - expression;
     }
 
@@ -177,6 +181,10 @@ namespace gvr
         glm::mat4 firstOperand;
         glm::mat4 secondOperand;
 
+        if (node->Type == Group)
+        {
+            node = node->Operand[0];
+        }
         if (node->Type == InputOperand)
         {
             result = mInputMatrices[node->MatrixOffset];
@@ -219,5 +227,43 @@ namespace gvr
             default: return false;
         }
         return true;
+    }
+
+    std::string MatrixCalc::asString(ExprNode* node, int level)
+    {
+        std::string result = std::string(3 * level, ' ');
+
+        if (node->Type == InputOperand)
+        {
+            result += mInputMatrixNames[node->MatrixOffset];
+            result += '\n';
+            return result;
+        }
+        if (node->Type == OutputOperand)
+        {
+            result += mInputMatrixNames[node->MatrixOffset + OUTPUT_OFFSET];
+            result += '\n';
+            return result;
+        }
+        switch (node->Type)
+        {
+            case Invert: result += "INVERT\n"; break;
+            case Transpose: result += "TRANSPOSE\n"; break;
+            case Add: result += "ADD\n"; break;
+            case Subtract: result += "SUBTRACT\n"; break;
+            case Multiply: result += "MULTIPLY\n"; break;
+            case Group: result += "GROUP\n"; break;
+            default: result += "UNKNOWN"; break;
+        }
+        ++level;
+        if (node->Operand[0])
+        {
+            result += asString(node->Operand[0], level);
+        }
+        if (node->Operand[1])
+        {
+            result += asString(node->Operand[1], level);
+        }
+        return result;
     }
 }

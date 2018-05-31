@@ -2,7 +2,7 @@ Radiance @LightType(Surface s, in U@LightType data, int index)
 {
     vec4 L = u_view * vec4(data.world_direction.xyz, 0.0);
 	float attenuation = 1.0;
-vec3 lightdir = normalize(L.xyz);
+    vec3 lightdir = normalize(L.xyz);
 
  #ifdef HAS_SHADOWS
     vec4 ShadowCoord = @LightType_shadow_position[index];

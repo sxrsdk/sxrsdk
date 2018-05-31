@@ -5,9 +5,6 @@
 layout(location = 5) in vec2 ambient_coord;
 #endif
 
-#ifdef HAS_opacityTexture
-layout(location = 9) in vec2 opacity_coord;
-#endif
 
 #ifdef HAS_specularTexture
 layout(location = 6) in vec2 specular_coord;
@@ -17,17 +14,16 @@ layout(location = 6) in vec2 specular_coord;
 layout(location = 7) in vec2 emissive_coord;
 #endif
 
-#ifdef HAS_normalTexture
-layout(location = 10) in vec2 normal_coord;
-#endif
-
 #ifdef HAS_lightMapTexture
 layout(location = 8) in vec2 lightmap_coord;
 #endif
 
-#ifdef HAS_ambientTexture1
-layout(location = 12) in vec2 ambient_coord1;
-layout(set = 0, binding = 12) uniform sampler2D ambientTexture1;
+#ifdef HAS_opacityTexture
+layout(location = 9) in vec2 opacity_coord;
+#endif
+
+#ifdef HAS_normalTexture
+layout(location = 10) in vec2 normal_coord;
 #endif
 
 #ifdef HAS_diffuseTexture1
@@ -35,20 +31,25 @@ layout(location = 11) in vec2 diffuse_coord1;
 layout(set = 0, binding = 11) uniform sampler2D diffuseTexture1;
 #endif
 
+#ifdef HAS_ambientTexture1
+layout(location = 12) in vec2 ambient_coord1;
+layout(set = 0, binding = 12) uniform sampler2D ambientTexture1;
+#endif
+
 #ifdef HAS_specularTexture1
 layout(location = 13) in vec2 specular_coord1;
 layout(set = 0, binding = 13) uniform sampler2D specularTexture1;
 #endif
 
+#ifdef HAS_lightmapTexture1
+layout(location = 14) in vec2 lightmap_coord1;
+layout(set = 0, binding = 14) uniform sampler2D lightmapTexture1;
+#endif
+
 #ifdef HAS_emissiveTexture1
-layout(location = 14) in vec2 emissive_coord1;
-layout(set = 0, binding = 14) uniform sampler2D emissiveTexture1;
+layout(location = 15) in vec2 emissive_coord1;
+layout(set = 0, binding = 15) uniform sampler2D emissiveTexture1;
 #endif
-
-#ifdef HAS_lightMapTexture1
-in vec2 lightmap_coord1;
-#endif
-
 
 layout(set = 0, binding = 5) uniform sampler2D ambientTexture;
 layout(set = 0, binding = 4) uniform sampler2D diffuseTexture;

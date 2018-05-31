@@ -26,7 +26,7 @@
 namespace gvr {
 
 #define NUM_SCENE_MATRICES (MODEL - PROJECTION)
-#define MAX_MATRICES    45
+#define MAX_MATRICES    64
 
 RenderSorter::RenderSorter(Renderer& renderer, const char* name, int numMatrices, bool forceTransformBlock)
     :   mRenderer(renderer),

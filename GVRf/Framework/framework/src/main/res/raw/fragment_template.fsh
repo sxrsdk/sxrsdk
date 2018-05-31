@@ -9,34 +9,12 @@ precision lowp int;
 
 
 @MATRIX_UNIFORMS
-
-layout(location = 1) in vec3 viewspace_position;
-layout(location = 2) in vec3 viewspace_normal;
-layout(location = 3) in vec4 local_position;
-layout(location = 0) in vec3 view_direction;
-layout(location = 4) in vec2 diffuse_coord;
 layout(location = 0) out vec4 fragColor;
 
-#ifdef HAS_ambientTexture
-layout(location = 5) in vec2 ambient_coord;
-#endif
-
-#ifdef HAS_specularTexture
-layout(location = 6) in vec2 specular_coord;
-#endif
-
-#ifdef HAS_emissiveTexture
-layout(location = 7)in vec2 emissive_coord;
-#endif
-
-#ifdef HAS_lightMapTexture
-layout(location = 8)in vec2 lightmap_coord;
-#endif
-
-#ifdef HAS_normalTexture
-layout(location = 9)in vec2 normal_coord;
-#endif
-
+layout(location = 1) in vec3 view_direction;
+layout(location = 2) in vec3 viewspace_position;
+layout(location = 3) in vec3 viewspace_normal;
+layout(location = 4) in vec2 diffuse_coord;
 
 #ifdef HAS_SHADOWS
 layout(set = 0, binding = 4) uniform highp sampler2DArray u_shadow_maps;

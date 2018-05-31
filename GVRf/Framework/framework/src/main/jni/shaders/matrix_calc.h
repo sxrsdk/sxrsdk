@@ -33,8 +33,9 @@ namespace gvr
             Unary = 5,
             Invert = 5,
             Transpose = 6,
-            InputOperand = 7,
-            OutputOperand = 8
+            Group = 7,
+            InputOperand = 8,
+            OutputOperand = 9
         };
 
         struct ExprNode
@@ -70,6 +71,8 @@ namespace gvr
 
         int getNumOutputs () const
         { return mExprTrees.size(); }
+
+        std::string asString(ExprNode* node, int level = 0);
 
     protected:
         int compile (ExprNode** root, const char* expression);
