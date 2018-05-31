@@ -181,7 +181,7 @@ namespace gvr
         glm::mat4 firstOperand;
         glm::mat4 secondOperand;
 
-        if (node->Type == Group)
+        while (node->Type == Group)
         {
             node = node->Operand[0];
         }

@@ -499,7 +499,7 @@ namespace gvr
         {
             mMatrixUniforms->setFloatVec("u_matrices", glm::value_ptr(r.mvp),
                                          sizeof(glm::mat4) / sizeof(float));
-            mMatrixUniforms->updateGPU(this, 4, 2 * sizeof(int) + sizeof(float) + sizeof(glm::mat4) );
+            mMatrixUniforms->updateGPU(this, 0, 3 * sizeof(int) + sizeof(float) + sizeof(glm::mat4));
         }
         mMatrixUniforms->bindBuffer(r.shader, this);
         return true;
@@ -593,7 +593,6 @@ namespace gvr
             restoreRenderStates(mCurrentState.renderModes);
             mCurrentState.renderModes = rmodes;
             setRenderStates(rmodes);
-            render(rstate, r);
         }
     }
 
