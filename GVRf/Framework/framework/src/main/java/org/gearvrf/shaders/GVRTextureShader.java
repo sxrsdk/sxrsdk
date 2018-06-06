@@ -75,7 +75,7 @@ public class GVRTextureShader extends GVRShaderTemplate
         HashMap<String, Integer> defines = super.getRenderDefines(renderable, scene);
         if (!lightMapEnabled)
         {
-            defines.put("lightMapTexture", 0);
+            defines.put("lightmapTexture", 0);
         }
         return defines;
     }

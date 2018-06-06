@@ -84,7 +84,7 @@ public class GVRPhongLayeredShader extends GVRShaderTemplate
         boolean lightMapEnabled  = (renderable instanceof GVRRenderData) ? ((GVRRenderData) renderable).isLightMapEnabled() : false;
 
         if (!lightMapEnabled)
-            defines.put("lightMapTexture", 0);
+            defines.put("lightmapTexture", 0);
         if (!defines.containsKey("LIGHTSOURCES") || (defines.get("LIGHTSOURCES") != 1))
         {
             defines.put("a_normal", 0);

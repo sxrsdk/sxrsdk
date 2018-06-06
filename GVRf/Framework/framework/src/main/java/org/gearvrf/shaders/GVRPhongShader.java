@@ -84,7 +84,7 @@ import org.joml.Matrix4f;
 
         if (!lightMapEnabled)
         {
-            defines.put("lightMapTexture", 0);
+            defines.put("lightmapTexture", 0);
         }
         return defines;
     }

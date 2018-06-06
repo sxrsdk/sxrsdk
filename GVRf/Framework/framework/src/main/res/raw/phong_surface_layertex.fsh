@@ -18,7 +18,7 @@ layout(location = 13) in vec2 emissive_coord;
 layout(set = 0, binding = 13) uniform sampler2D emissiveTexture;
 #endif
 
-#ifdef HAS_lightMapTexture
+#ifdef HAS_lightmapTexture
 layout(location = 14) in vec2 lightmap_coord;
 layout(set = 0, binding = 14) uniform sampler2D lightmapTexture;
 #endif
@@ -168,12 +168,12 @@ diffuse.xyz *= diffuse.a;
 	viewspaceNormal = viewspace_normal;
 #endif
 
-#ifdef HAS_lightMapTexture
-	vec2 lcoord = (lightmap_coord * u_lightMap_scale) + u_lightMap_offset;
+#ifdef HAS_lightmapTexture
+	vec2 lcoord = (lightmap_coord * lightmap_scale) + lightmap_offset;
 	diffuse *= texture(lightMapTexture, vec2(lcoord.x, 1 - lcoord.y));
 	#ifdef HAS_lightMapTexture1
-		lcoord = (lightmap_coord1 * u_lightMap_scale) + u_lightMap_offset;
-    	diffuse = BlendColors(diffuse, texture(lightMapTexture1, vec2(lcoord.x, 1 - lcoord.y), lightMapTexture1_blendop);
+		lcoord = (lightmap_coord1 * lightmap_scale) + lightmap_offset;
+    	diffuse = BlendColors(diffuse, texture(lightmpTexture1, vec2(lcoord.x, 1 - lcoord.y), lightmapTexture1_blendop);
     #endif
 	return Surface(viewspaceNormal, ambient, vec4(0.0, 0.0, 0.0, 0.0), specular, emission);
 #else

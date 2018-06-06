@@ -15,7 +15,7 @@ layout(location = 12) in vec2 specular_coord;
 layout(location = 13) in vec2 emissive_coord;
 #endif
 
-#ifdef HAS_lightMapTexture
+#ifdef HAS_lightmapTexture
 layout(location = 14) in vec2 lightmap_coord;
 #endif
 
