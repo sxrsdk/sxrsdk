@@ -280,6 +280,12 @@ void VulkanRenderer::renderRenderTarget(Scene* scene, jobject javaSceneObject, R
 
     }
 
+    // Presenting image to swapchain
+    if(vulkanCore_->isSwapChainPresent()) {
+        vulkanCore_->waitForFence(static_cast<VkRenderTexture *>(renderTarget->getTexture())->getFenceObject());
+        vulkanCore_->PresentBackBuffer();
+    }
+
 }
 
     /**

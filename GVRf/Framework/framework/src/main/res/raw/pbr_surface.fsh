@@ -1,38 +1,40 @@
 @MATERIAL_UNIFORMS
+
 const float M_PI = 3.141592653589793;
 const float c_MinRoughness = 0.04;
 
-layout (set = 0, binding = 10 ) uniform sampler2D diffuseTexture;
-
-#ifdef HAS_metallicRoughnessTexture
-layout(location = 5) in vec2 metallicRoughness_coord;
-layout(set = 0, binding = 11) uniform sampler2D metallicRoughnessTexture;
+#ifdef HAS_ambientTexture
+layout(location = 11) in vec2 ambient_coord;
 #endif
 
 #ifdef HAS_specularTexture
-layout(location = 6) in vec2 specular_coord;
-layout(set = 0, binding = 12) uniform sampler2D specularTexture;
+layout(location = 12) in vec2 specular_coord;
 #endif
 
 #ifdef HAS_emissiveTexture
-layout(location = 7) in vec2 emissive_coord;
-layout (set = 0, binding = 16) uniform sampler2D emissiveTexture;
+layout(location = 13) in vec2 emissive_coord;
 #endif
 
-#ifdef HAS_lightmapTexture
-layout(location = 8) in vec2 lightmap_coord;
-layout(set = 0, binding = 14) uniform sampler2D lightmapTexture;
+#ifdef HAS_lightMapTexture
+layout(location = 14) in vec2 lightmap_coord;
+#endif
+
+#ifdef HAS_opacityTexture
+layout(location = 15) in vec2 opacity_coord;
 #endif
 
 #ifdef HAS_normalTexture
-layout(location = 9) in vec2 normal_coord;
-layout(set = 0, binding = 15) uniform sampler2D normalTexture;
+layout(location = 16) in vec2 normal_coord;
+layout(location = 4) in mat3 tangent_matrix;
 #endif
 
-#ifdef HAS_diffuseTexture1
-layout(location = 11) in vec2 diffuse_coord1;
-layout(set = 0, binding = 11) uniform sampler2D diffuseTexture1;
-#endif
+layout(set = 0, binding = 10) uniform sampler2D diffuseTexture;
+layout(set = 0, binding = 11) uniform sampler2D ambientTexture;
+layout(set = 0, binding = 12) uniform sampler2D specularTexture;
+layout(set = 0, binding = 13) uniform sampler2D emissiveTexture;
+layout(set = 0, binding = 14) uniform sampler2D lightmapTexture;
+layout(set = 0, binding = 15) uniform sampler2D opacityTexture;
+layout(set = 0, binding = 16) uniform sampler2D normalTexture;
 
 struct Surface
 {
