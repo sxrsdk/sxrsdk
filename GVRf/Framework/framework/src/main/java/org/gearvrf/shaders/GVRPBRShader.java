@@ -59,7 +59,7 @@ public class GVRPBRShader extends GVRShaderTemplate
             skinShader = TextFile.readTextFile(context, R.raw.vertexskinning);
             addLight = TextFile.readTextFile(context, R.raw.pbr_addlight);
         }
-        String defines = "#define ambient_coord metallicRoughness_coord\n";
+        String defines = "#define metallicRoughness_coord ambient_coord\n";
         setSegment("FragmentTemplate", defines + fragTemplate);
         setSegment("VertexTemplate", defines + vtxTemplate);
         setSegment("FragmentSurface", surfaceShader);

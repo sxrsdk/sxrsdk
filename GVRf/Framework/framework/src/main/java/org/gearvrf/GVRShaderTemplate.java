@@ -361,7 +361,7 @@ public class GVRShaderTemplate extends GVRShader
                 else if (!definedNames.containsKey(key) ||
                         (definedNames.get(key) != 0))
                 {
-                    shaderSource.append("#define HAS_" + key + " 1;\n");
+                    shaderSource.append("#define HAS_" + key + " 1\n");
                 }
                 combinedSource = combinedSource.replace("@" + key, segmentSource);
             }
