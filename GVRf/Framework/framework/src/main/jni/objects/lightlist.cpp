@@ -33,14 +33,7 @@ namespace gvr {
 
 LightList::~LightList()
 {
-    if (mLightBlock)
-    {
-        delete mLightBlock;
-        mLightBlock = nullptr;
-    }
-#ifdef DEBUG_LIGHT
-    LOGD("LIGHT: deleting light block");
-#endif
+    clear();
 }
 
 int LightList::getLights(std::vector<Light*>& lightList) const
@@ -226,6 +219,14 @@ ShadowMap* LightList::updateLightBlock(Renderer* renderer)
     mTotalUniforms = 0;
     if (mClassMap.size() == 0)
     {
+        if (mLightBlock != nullptr)
+        {
+            delete mLightBlock;
+            mLightBlock = nullptr;
+#ifdef DEBUG_LIGHT
+            LOGD("LIGHT: clearing light uniform block");
+#endif
+        }
         return NULL;
     }
     for (auto it1 = mClassMap.begin();
@@ -313,32 +314,43 @@ bool LightList::createLightBlock(Renderer* renderer)
             numFloats += light->getTotalSize() / sizeof(float);
         }
     }
-    if ((mLightBlock == NULL) ||
-        (numFloats > (mLightBlock->getTotalSize()/ sizeof(float))))
+    if (mLightBlock && (numFloats > (mLightBlock->getTotalSize() / sizeof(float))))
     {
-        std::string desc("float lightdata");
-        if (mLightBlock)
-        {
-            delete mLightBlock;
-        }
-        mLightBlock = renderer->createUniformBlock(desc.c_str(), LIGHT_UBO_INDEX, "Lights_ubo", numFloats);
-        mLightBlock->useGPUBuffer(true);
+        delete mLightBlock;
+        mLightBlock = nullptr;
 #ifdef DEBUG_LIGHT
-        LOGD("LIGHT: creating light uniform block");
+        LOGD("LIGHT: deleting light uniform block");
 #endif
-        return true;
     }
-    return false;
+    if (mLightBlock == nullptr)
+    {
+        mLightBlock = renderer->createUniformBlock("float lightdata", LIGHT_UBO_INDEX,
+                                                   "Lights_ubo", numFloats);
+#ifdef DEBUG_LIGHT
+        LOGD("LIGHT: creating light uniform block %d floats", numFloats);
+#endif
+        mLightBlock->useGPUBuffer(true);
+    }
+    return true;
 }
 
 /*
  * Removes all the lights from the scene.
+ * This function should only be called from the GL thread.
  */
 void LightList::clear()
 {
     std::lock_guard < std::recursive_mutex > lock(mLock);
     mClassMap.clear();
     mDirty = LIGHT_REMOVED | REBUILD_SHADERS;
+    if (mLightBlock)
+    {
+        delete mLightBlock;
+        mLightBlock = nullptr;
+#ifdef DEBUG_LIGHT
+        LOGD("LIGHT: clearing light uniform block");
+#endif
+    }
 #ifdef DEBUG_LIGHT
     LOGD("LIGHT: clearing lights");
 #endif
