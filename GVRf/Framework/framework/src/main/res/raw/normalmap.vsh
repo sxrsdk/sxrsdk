@@ -1,6 +1,8 @@
-#if defined(HAS_a_tangent) && defined(HAS_normalTexture) && defined(HAS_a_normal)
-   tangent_matrix = mat3(a_tangent, a_bitangent, vertex.local_normal.xyz);
-   mat3 wtts = tbnmtx * mat3(u_modelview_it);
-   vec3 d = wtts * -vertex.viewspace_position;
-   vertex.view_direction = normalize(d);
+
+#if defined(HAS_normalTexture) && defined(HAS_a_normal) && defined(HAS_a_tangent)
+   mat3 normalMatrix = mat3(u_modelview_it);
+   vec3 normal = normalize(normalMatrix * vertex.local_normal.xyz);
+   vec3 tangent = normalize(normalMatrix * a_tangent);
+   vec3 bitangent = normalize(normalMatrix * a_bitangent);
+   tangent_matrix = mat3(tangent, bitangent, normal);
 #endif

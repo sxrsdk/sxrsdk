@@ -213,6 +213,7 @@ int GLShader::getUniformLoc(int index, int bindingPoint) const
     {
         return locs[index];
     }
+    return -1;
 }
 
 /**

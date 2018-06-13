@@ -28,7 +28,6 @@
 
 namespace gvr {
 
-
     int LightList::getLights(std::vector<Light*>& lightList) const
     {
         std::lock_guard < std::recursive_mutex > lock(mLock);
@@ -176,16 +175,21 @@ namespace gvr {
         mTotalUniforms = 0;
         mNumLights = 0;
         *ptr = 0;
-        if (mUseUniformBlock &&
-            (mDirty & (LIGHT_ADDED | LIGHT_REMOVED)) &&
-            !createLightBlock(renderer))
+        if (mUseUniformBlock && (mDirty & LIGHT_ADDED))
         {
-            *mLightDesc = 0;
-            return nullptr;
+            createLightBlock(renderer);
         }
         mTotalUniforms = 0;
         if (mClassMap.size() == 0)
         {
+            if (mLightBlock != nullptr)
+            {
+                delete mLightBlock;
+                mLightBlock = nullptr;
+#ifdef DEBUG_LIGHT
+                LOGD("LIGHT: clearing light uniform block");
+#endif
+            }
             return NULL;
         }
         for (auto it1 = mClassMap.begin();
@@ -225,7 +229,6 @@ namespace gvr {
                              s.c_str());
 #endif
                     }
-
                 }
             }
         }
@@ -322,6 +325,7 @@ namespace gvr {
 
 /*
  * Removes all the lights from the scene.
+ * This function should only be called from the GL thread.
  */
     void LightList::clear()
     {
@@ -348,14 +352,12 @@ namespace gvr {
         if (mUseUniformBlock)
         {
             int uboLightBinding = LIGHT_UBO_INDEX;
-            stream <<
-                   "\n#ifdef VULKAN\n"
-                           "layout (std140, set = 0, binding = " << uboLightBinding << ")"
-                           "\n#else\n"
-                           "layout (std140)"
-                           "\n#endif\n"
-                           "uniform Lights_ubo\n{"
-                   << std::endl;
+            stream << "\n#ifdef VULKAN\n"
+                       "layout (std140, set = 0, binding = " << uboLightBinding << ")"
+                       "\n#else\n"
+                       "layout (std140)"
+                       "\n#endif\n"
+                       "uniform Lights_ubo\n{" << std::endl;
         }
         else
         {

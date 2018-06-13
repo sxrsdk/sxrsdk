@@ -143,10 +143,21 @@ class   GVRJassimpAdapter {
         {
             vertexDescriptor += " float4 a_bone_weights int4 a_bone_indices";
         }
+        if (doLighting && aiMesh.hasTangentsAndBitangents())
+        {
+            vertexDescriptor += " float3 a_tangent float3 a_bitangent";
+            FloatBuffer tangentBuffer = aiMesh.getTangentBuffer();
+            FloatBuffer bitangentBuffer = aiMesh.getBitangentBuffer();
+            tangentsArray = new float[tangentBuffer.capacity()];
+            tangentBuffer.get(tangentsArray, 0, tangentBuffer.capacity());
+            bitangentsArray = new float[bitangentBuffer.capacity()];
+            bitangentBuffer.get(bitangentsArray, 0, bitangentBuffer.capacity());
+        }
+
         GVRMesh mesh = new GVRMesh(ctx, vertexDescriptor);
 
         // Vertex Colors
-        for(int c = 0; c < MAX_VERTEX_COLORS; c++)
+        for (int c = 0; c < MAX_VERTEX_COLORS; c++)
         {
             FloatBuffer fbuf = aiMesh.getColorBuffer(c);
             if (fbuf != null)
@@ -818,6 +829,11 @@ class   GVRJassimpAdapter {
 
         gvrTex.setTexCoord(texCoordKey, shaderKey);
         gvrmtl.setTexture(textureKey, gvrTex);
+        if (!usingPBR && typeName.equals("lightmap"))
+        {
+            gvrmtl.setVec2("u_lightmap_scale", 1, 1);
+            gvrmtl.setVec2("u_lightmap_offset", 0, 0);
+        }
 
         if (texFileName.startsWith("*"))
         {

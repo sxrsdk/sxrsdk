@@ -34,9 +34,11 @@ layout(location = 7) in ivec4 a_bone_indices;
 #endif
 
 #ifdef HAS_VertexNormalShader
+#ifdef HAS_a_tangent
 layout(location = 8) in vec3 a_tangent;
 layout(location = 9) in vec3 a_bitangent;
 layout(location = 4) out mat3 tangent_matrix;
+#endif
 #endif
 
 layout(location = 1) out vec3 view_direction;
@@ -50,6 +52,7 @@ layout(location = 13) out vec2 emissive_coord;
 layout(location = 14) out vec2 lightmap_coord;
 layout(location = 15) out vec2 opacity_coord;
 layout(location = 16) out vec2 normal_coord;
+
 layout(location = 17) out vec2 diffuse_coord1;
 layout(location = 18) out vec2 ambient_coord1;
 layout(location = 19) out vec2 specular_coord1;
@@ -87,7 +90,7 @@ struct Vertex
 // This section contains code to compute
 // vertex contributions to lighting.
 //
-	@LIGHTSOURCES
+@LIGHTSOURCES
 #endif
 	
 void main()
@@ -96,10 +99,13 @@ void main()
 
 	vertex.local_position = vec4(a_position.xyz, 1.0);
 	vertex.local_normal = vec4(0.0, 0.0, 1.0, 0.0);
-	@VertexShader
+
+@VertexShader
+
 #ifdef HAS_VertexSkinShader
-	@VertexSkinShader
+@VertexSkinShader
 #endif
+
 #ifdef HAS_VertexNormalShader
 @VertexNormalShader
 #endif
@@ -109,15 +115,17 @@ void main()
 // This section contains code to compute
 // vertex contributions to lighting.
 //
-	LightVertex(vertex);
+    LightVertex(vertex);
 #endif
+
 #ifdef HAS_TEXCOORDS
 //
 // This section contains assignment statements from
 // input vertex attributes to output shader variables
 // generate by GVRShaderTemplate during shader construction.
 //
-	@TEXCOORDS
+@TEXCOORDS
+
 #endif
 	mat4 mvp = u_mvp;
 	viewspace_position = vertex.viewspace_position;

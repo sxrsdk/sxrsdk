@@ -11,14 +11,15 @@
     vertex.viewspace_normal = normalize((u_modelview_it * vertex.local_normal).xyz);
     vertex.view_direction = normalize(-vertex.viewspace_position);
 #endif
+
 #ifdef HAS_a_texcoord
-   diffuse_coord = a_texcoord.xy;
-   specular_coord = a_texcoord.xy;
-   ambient_coord = a_texcoord.xy;
+    diffuse_coord = a_texcoord.xy;
+    specular_coord = a_texcoord.xy;
+    ambient_coord = a_texcoord.xy;
 #ifdef HAS_normalTexture
-   normal_coord = a_texcoord.xy;
+    normal_coord = a_texcoord.xy;
 #endif
 #ifdef HAS_lightmapTexture
-   lightmap_coord = a_texcoord.xy;
+    lightmap_coord = a_texcoord.xy;
 #endif
 #endif

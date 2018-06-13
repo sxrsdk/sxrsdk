@@ -552,7 +552,7 @@ public class X3Dobject {
             {
                 descriptor += " float2 a_texcoord";
             }
-            if (mUseNormals && hasNormals)
+            if (mUseNormals)
             {
                 descriptor += " float3 a_normal";
             }
@@ -641,12 +641,12 @@ public class X3Dobject {
                 mVertexBufferDefine.setVertexBuffer(vbuffer);
             }
             vbuffer.setFloatArray("a_position", mOutputPositions.array(), 3, 0);
-            if (!hasNormals)
+            if (mUseNormals)
             {
-                generateNormals(newIndices, newIndices.length, mOutputPositions);
-            }
-            else if (mUseNormals)
-            {
+                if (!hasNormals)
+                {
+                    generateNormals(newIndices, newIndices.length, mOutputPositions);
+                }
                 vbuffer.setFloatArray("a_normal", mOutputNormals.array(), 3, 0);
             }
             if (hasTexCoords)
