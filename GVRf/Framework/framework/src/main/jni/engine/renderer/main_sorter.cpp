@@ -123,15 +123,22 @@ bool MainSceneSorter::isValid(RenderState& rstate, Renderable& r)
 {
     if (r.shader)
     {
-        const char* oldsig = r.shader->signature();
         const char* lightsig = rstate.scene->getLights().getDescriptor();
-        int nnew = strlen(lightsig);
-        int nold = strlen(oldsig);
 
-        oldsig += nold - nnew;
-        if ((nold > nnew) && (strcmp(oldsig, lightsig) != 0))
+        if (r.shader->useLights() != (*lightsig != 0))
         {
             r.renderPass->markDirty();
+        }
+        else
+        {
+            const char* oldsig = r.shader->signature();
+            int nnew = strlen(lightsig);
+            int nold = strlen(oldsig);
+            oldsig += nold - nnew;
+            if ((nold > nnew) && (strcmp(oldsig, lightsig) != 0))
+            {
+                r.renderPass->markDirty();
+            }
         }
         if (r.material->isTransparent())
         {

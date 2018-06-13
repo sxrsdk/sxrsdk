@@ -99,7 +99,7 @@ namespace gvr {
              * If all lights in the class are gone,
              * remove the class from the map.
              */
-            if (lights.size() == 0)
+            if (lights.size() == 1)
             {
                 mClassMap.erase(it3);
                 return true;
