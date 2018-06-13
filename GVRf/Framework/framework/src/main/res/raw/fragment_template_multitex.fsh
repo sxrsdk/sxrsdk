@@ -38,7 +38,9 @@ float unpackFloatFromVec4i(const vec4 value)
 
 @FragmentSurface
 
+#ifdef HAS_LIGHTSOURCES
 @FragmentAddLight
+#endif
 
 @LIGHTSOURCES
 

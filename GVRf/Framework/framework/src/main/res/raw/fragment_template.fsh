@@ -40,7 +40,9 @@ struct Radiance
 
 @FragmentSurface
 
+#ifdef HAS_LIGHTSOURCES
 @FragmentAddLight
+#endif
 
 @LIGHTSOURCES
 
