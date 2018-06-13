@@ -25,11 +25,6 @@ layout(location = 14) in vec2 lightmap_coord;
 layout(set = 0, binding = 14) uniform sampler2D lightmapTexture;
 #endif
 
-#ifdef HAS_opacityTexture
-layout(location = 15) in vec2 opacity_coord;
-layout(set = 0, binding = 15) uniform sampler2D opacityTexture;
-#endif
-
 #ifdef HAS_normalTexture
 layout(location = 16) in vec2 normal_coord;
 layout(set = 0, binding = 16) uniform sampler2D normalTexture;
@@ -38,6 +33,17 @@ layout(location = 4) in mat3 tangent_matrix;
 #endif
 #endif
 
+#ifdef HAS_brdfLUTTexture
+layout(set = 0, binding = 15) uniform sampler2D brdfLUTTexture;
+#endif
+
+#ifdef HAS_diffuseEnvTex
+layout(set = 0, binding = 17) uniform samplerCube diffuseEnvTex;
+#endif
+
+#ifdef HAS_specularEnvTexture
+layout(set = 0, binding = 18) uniform samplerCube specularEnvTexture;
+#endif
 
 struct Surface
 {
