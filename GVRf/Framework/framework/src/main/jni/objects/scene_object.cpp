@@ -280,7 +280,8 @@ void SceneObject::clear()
 {
     Scene* scene = Scene::main_scene();
     std::lock_guard < std::recursive_mutex > lock(children_mutex_);
-    for (auto it = children_.begin(); it != children_.end(); ++it) {
+    for (auto it = children_.begin(); it != children_.end(); ++it)
+    {
         SceneObject* child = *it;
         if (scene != NULL)
         {
