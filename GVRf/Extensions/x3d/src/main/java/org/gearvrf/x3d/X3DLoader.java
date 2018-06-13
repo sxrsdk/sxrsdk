@@ -18,9 +18,11 @@ package org.gearvrf.x3d;
 import org.gearvrf.GVRAndroidResource;
 import org.gearvrf.GVRAssetLoader;
 import org.gearvrf.GVRContext;
+import org.gearvrf.GVRImportSettings;
 import org.gearvrf.GVRMaterial;
 import org.gearvrf.GVRResourceVolume;
 import org.gearvrf.GVRSceneObject;
+import org.gearvrf.animation.GVRAnimator;
 import org.gearvrf.utility.Log;
 
 import java.io.FileNotFoundException;
@@ -57,8 +59,13 @@ final class X3DLoader {
                 throw new FileNotFoundException(fileName + " not found");
             }
 
-            try {
+            try
+            {
                 x3dObject.Parse(inputStream, shaderSettings);
+                if (assetRequest.getImportSettings().contains(GVRImportSettings.NO_ANIMATION))
+                {
+                    root.detachComponent(GVRAnimator.getComponentType());
+                }
                 assetRequest.onModelLoaded(context, root, fileName);
             } finally {
                 inputStream.close();
