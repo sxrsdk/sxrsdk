@@ -205,6 +205,7 @@ void VulkanRenderer::renderRenderTarget(Scene* scene, jobject javaSceneObject, R
     rstate.shader_manager = shader_manager;
     rstate.u_matrices[VIEW] = camera->getViewMatrix();
     rstate.u_matrices[PROJECTION] = camera->getProjectionMatrix();
+    rstate.javaSceneObject = javaSceneObject;
 
     if(vulkanCore_->isSwapChainPresent())
         rstate.u_matrices[PROJECTION] = glm::mat4(1,0,0,0,  0,-1,0,0, 0,0,0.5,0, 0,0,0.5,1) * rstate.u_matrices[PROJECTION];
