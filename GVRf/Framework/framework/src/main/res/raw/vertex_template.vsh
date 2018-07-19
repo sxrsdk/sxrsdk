@@ -46,7 +46,6 @@ layout(location = 0) out vec3 view_direction;
 layout(location = 1) out vec3 viewspace_position;
 layout(location = 2) out vec3 viewspace_normal;
 
-
 layout(location = 10) out vec2 diffuse_coord;
 layout(location = 11) out vec2 ambient_coord;
 layout(location = 12) out vec2 specular_coord;
@@ -59,7 +58,6 @@ layout(location = 16) out vec2 normal_coord;
 #ifdef HAS_blendshapeTexture
 layout (set = 0, binding = 17) uniform sampler2D blendshapeTexture;
 #endif
-
 
 struct Vertex
 {

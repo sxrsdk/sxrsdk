@@ -98,6 +98,17 @@ public class GVRAnimator extends GVRBehavior
     }
 
     /**
+     * Gets an animation from this animator.
+     *
+     * @param index index of animation to get
+     * @see GVRAnimator#addAnimation(GVRAnimation)
+     */
+    public GVRAnimation getAnimation(int index)
+    {
+        return mAnimations.get(index);
+    }
+
+    /**
      * Removes an animation from this animator.
      * <p>
      * This animation will not participate in any subsequent operations

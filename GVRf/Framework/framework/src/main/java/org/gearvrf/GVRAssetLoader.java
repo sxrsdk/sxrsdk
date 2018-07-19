@@ -28,7 +28,6 @@ import org.gearvrf.jassimp.AiIOStream;
 import org.gearvrf.jassimp.AiIOSystem;
 import org.gearvrf.jassimp.AiTexture;
 import org.gearvrf.jassimp.Jassimp;
-import org.gearvrf.scene_objects.GVRModelSceneObject;
 import org.gearvrf.utility.FileNameUtils;
 import org.gearvrf.utility.GVRByteArray;
 import org.gearvrf.utility.Log;
@@ -1011,12 +1010,12 @@ public final class GVRAssetLoader {
      *            If the filename starts with "http:" or "https:" it is assumed to be a URL.
      *            Otherwise the file is assumed to be relative to the "assets" directory.
      *
-     * @return A {@link GVRModelSceneObject} that contains the meshes with textures and bones
+     * @return A {@link GVRSceneObject} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException if model file cannot be opened
      *
      */
-    public GVRModelSceneObject loadModel(final String filePath) throws IOException
+    public GVRSceneObject loadModel(final String filePath) throws IOException
     {
         return loadModel(filePath, (GVRScene) null);
     }
@@ -1040,14 +1039,14 @@ public final class GVRAssetLoader {
      *            If present, this asset loader will wait until all of the textures have been
      *            loaded and then it will add the model to the scene.
      *
-     * @return A {@link GVRModelSceneObject} that contains the meshes with textures and bones
+     * @return A {@link GVRSceneObject} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException
      *
      */
-    public GVRModelSceneObject loadModel(final String filePath, final GVRScene scene) throws IOException
+    public GVRSceneObject loadModel(final String filePath, final GVRScene scene) throws IOException
     {
-        GVRModelSceneObject model = new GVRModelSceneObject(mContext);
+        GVRSceneObject model = new GVRSceneObject(mContext);
         AssetRequest assetRequest = new AssetRequest(model, new GVRResourceVolume(mContext, filePath), scene, null, false);
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
@@ -1083,14 +1082,14 @@ public final class GVRAssetLoader {
      * @param scene
      *            Scene to be replaced with the model.
      *
-     * @return A {@link GVRModelSceneObject} that contains the meshes with textures and bones
+     * @return A {@link GVRSceneObject} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException
      *
      */
-    public GVRModelSceneObject loadScene(final String filePath, final GVRScene scene) throws IOException
+    public GVRSceneObject loadScene(final String filePath, final GVRScene scene) throws IOException
     {
-        GVRModelSceneObject model = new GVRModelSceneObject(mContext);
+        GVRSceneObject model = new GVRSceneObject(mContext);
         AssetRequest assetRequest = new AssetRequest(model, new GVRResourceVolume(mContext, filePath), scene, null, true);
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
@@ -1347,15 +1346,15 @@ public final class GVRAssetLoader {
      * @param handler
      *            IAssetEvents handler to process asset loading events
      *
-     * @return A {@link GVRModelSceneObject} that contains the meshes with textures and bones
+     * @return A {@link GVRSceneObject} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException
      * @see #loadModel(GVRSceneObject, GVRResourceVolume, GVRScene)
      * @see #loadMesh(GVRAndroidResource.MeshCallback, GVRAndroidResource, int)
      */
-    public GVRModelSceneObject loadModel(String filePath, IAssetEvents handler) throws IOException
+    public GVRSceneObject loadModel(String filePath, IAssetEvents handler) throws IOException
     {
-        GVRModelSceneObject model = new GVRModelSceneObject(mContext);
+        GVRSceneObject model = new GVRSceneObject(mContext);
         GVRResourceVolume   volume = new GVRResourceVolume(mContext, filePath);
         AssetRequest assetRequest = new AssetRequest(model, volume, null, handler, false);
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
@@ -1402,19 +1401,19 @@ public final class GVRAssetLoader {
      *            If present, this asset loader will wait until all of the textures have been
      *            loaded and then adds the model to the scene.
      *
-     * @return A {@link GVRModelSceneObject} that contains the meshes with textures and bones
+     * @return A {@link GVRSceneObject} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException
      * @see #loadModel(GVRSceneObject, GVRResourceVolume, GVRScene)
      * @see #loadMesh(GVRAndroidResource.MeshCallback, GVRAndroidResource, int)
      */
-    public GVRModelSceneObject loadModel(String filePath,
+    public GVRSceneObject loadModel(String filePath,
                                          EnumSet<GVRImportSettings> settings,
                                          boolean cacheEnabled,
                                          GVRScene scene) throws IOException
     {
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
-        GVRModelSceneObject model = new GVRModelSceneObject(mContext);
+        GVRSceneObject model = new GVRSceneObject(mContext);
         AssetRequest assetRequest = new AssetRequest(model, new GVRResourceVolume(mContext, filePath), scene, null, false);
         model.setName(assetRequest.getBaseName());
         assetRequest.setImportSettings(settings);
@@ -1460,20 +1459,20 @@ public final class GVRAssetLoader {
      *            If present, this asset loader will wait until all of the textures have been
      *            loaded and then add the model to the scene.
      *
-     * @return A {@link GVRModelSceneObject} that contains the meshes with textures and bones
+     * @return A {@link GVRSceneObject} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException
      * @see #loadModel(GVRSceneObject, GVRResourceVolume, GVRScene)
      * @see #loadMesh(GVRAndroidResource.MeshCallback, GVRAndroidResource, int)
      */
-    public GVRModelSceneObject loadModel(GVRAndroidResource resource,
+    public GVRSceneObject loadModel(GVRAndroidResource resource,
                                          EnumSet<GVRImportSettings> settings,
                                          boolean cacheEnabled,
                                          GVRScene scene) throws IOException
     {
         String filePath = resource.getResourceFilename();
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
-        GVRModelSceneObject model = new GVRModelSceneObject(mContext);
+        GVRSceneObject model = new GVRSceneObject(mContext);
         GVRResourceVolume volume = new GVRResourceVolume(mContext, resource);
         AssetRequest assetRequest = new AssetRequest(model, volume, scene, null, false);
 
@@ -1511,7 +1510,7 @@ public final class GVRAssetLoader {
      *            The volume will be used to load models referenced by this model.
      *
      * @param model
-     *            {@link GVRModelSceneObject} that is the root of the hierarchy generated
+     *            {@link GVRSceneObject} that is the root of the hierarchy generated
      *            by loading the 3D model.
      *
      * @param settings
@@ -1759,13 +1758,13 @@ public final class GVRAssetLoader {
      * @param request
      *            AssetRequest with the filename, relative to the root of the volume.
      * @param model
-     *            GVRModelSceneObject that is the root of the loaded asset
-     * @return A {@link GVRModelSceneObject} that contains the meshes with textures and bones
+     *            GVRSceneObject that is the root of the loaded asset
+     * @return A {@link GVRSceneObject} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException
      *
      */
-    private GVRSceneObject loadJassimpModel(AssetRequest request, GVRSceneObject model) throws IOException
+    private GVRSceneObject loadJassimpModel(AssetRequest request, final GVRSceneObject model) throws IOException
     {
         Jassimp.setWrapperProvider(GVRJassimpAdapter.sWrapperProvider);
         org.gearvrf.jassimp.AiScene assimpScene = null;
@@ -1792,9 +1791,17 @@ public final class GVRAssetLoader {
             request.onModelError(mContext, errmsg, filePath);
             throw new IOException(errmsg);
         }
-        boolean startAnimations = request.getImportSettings().contains(GVRImportSettings.START_ANIMATIONS);
-        jassimpAdapter.processScene(request, model, assimpScene, request.getVolume(), startAnimations);
+        jassimpAdapter.processScene(request, model, assimpScene);
         request.onModelLoaded(mContext, model, filePath);
+        mContext.runOnTheFrameworkThread(new Runnable() {
+            public void run() {
+                // Inform the loaded object after it has been attached to the scene graph
+                mContext.getEventManager().sendEvent(
+                        model,
+                        ISceneObjectEvents.class,
+                        "onLoaded");
+            }
+        });
         return model;
     }
 

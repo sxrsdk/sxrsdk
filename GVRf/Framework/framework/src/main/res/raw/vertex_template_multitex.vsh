@@ -103,7 +103,6 @@ void main() {
 	Vertex vertex;
 
 	vertex.local_position = vec4(a_position.xyz, 1.0);
-
 #ifdef HAS_a_normal
     vertex.local_normal = vec4(normalize(a_normal), 0.0);
 #endif
@@ -143,19 +142,11 @@ void main() {
 	viewspace_normal = vertex.viewspace_normal;
 	view_direction = vertex.view_direction;
 #ifdef HAS_MULTIVIEW
-<<<<<<< HEAD
 	 bool render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? true : false;
      mat4 mvp = u_mvp_[gl_ViewID_OVR];
      if(!render_mask)
          mvp = mat4(0.0);  //  if render_mask is not set for particular eye, dont render that object
      gl_Position = mvp  * vertex.local_position;
-=======
-    bool render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? true : false;
-    mat4 mvp = u_mvp_[gl_ViewID_OVR];
-    if(!render_mask)
-        mvp = mat4(0.0);  //  if render_mask is not set for particular eye, dont render that object
-    gl_Position = mvp  * vertex.local_position;
->>>>>>> normalmap
 #else
 	gl_Position = u_mvp * vertex.local_position;	
 #endif
