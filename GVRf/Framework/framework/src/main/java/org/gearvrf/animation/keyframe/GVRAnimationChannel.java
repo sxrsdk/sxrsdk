@@ -21,6 +21,7 @@ import org.joml.Vector3f;
  */
 public final class GVRAnimationChannel implements PrettyPrint {
     private static final String TAG = GVRAnimationChannel.class.getSimpleName();
+    private static final float[] mTempVec = new float[3];
 
     /**
      * Constructor.
@@ -106,7 +107,10 @@ public final class GVRAnimationChannel implements PrettyPrint {
 
     public void setPosKeyVector(int keyIndex, float time, float x, float y, float z)
     {
-        mPosInterpolator.setKey(keyIndex, time, new float[] { x, y, z });
+        mTempVec[0] = x;
+        mTempVec[1] = y;
+        mTempVec[2] = z;
+        mPosInterpolator.setKey(keyIndex, time, mTempVec);
     }
 
     /**
@@ -209,6 +213,14 @@ public final class GVRAnimationChannel implements PrettyPrint {
     public void setScaleKeyVector(int keyIndex, float time, final float[] scale)
     {
         mSclInterpolator.setKey(keyIndex, time, scale);
+    }
+
+    public void setScaleKeyVector(int keyIndex, float time, float x, float y, float z)
+    {
+        mTempVec[0] = x;
+        mTempVec[1] = y;
+        mTempVec[2] = z;
+        mSclInterpolator.setKey(keyIndex, time, mTempVec);
     }
 
     /**
