@@ -20,6 +20,41 @@ import org.gearvrf.utility.Log;
 import static android.opengl.GLES20.GL_RGB;
 import static android.opengl.GLES30.GL_RGB32F;
 
+/**
+ * Component which morphs a mesh based on a set of blend shapes.
+ * <p>
+ * The mesh being morphed is not changed - it's vertices
+ * always contain the base shape being morphed.
+ * Each blend shape is represented as a {@link GVRVertexBuffer}
+ * with vertices in the same order as the base shape
+ * but in different positions. A blend shape vertex
+ * buffer may contain normals, tangents and bitangents
+ * as well. The only restriction is that, if the attribute
+ * is present in the base shape, the blend shapes must
+ * also have it (applies only to a_position, a_normal,
+ * a_tangent and a_bitangent vertex attributes).
+ * <p>
+ * The {@link GVRMeshMorph} component should be attached
+ * to the {@link GVRSceneObject} which owns the base mesh.
+ * The {@link GVRMaterial} used to render the mesh must
+ * have a shader that supports morphing.
+ * </p>
+ * In addition to blend shapes, the morph component
+ * has a set of blend weights which indicate what
+ * proportion of each blend shape is used to
+ * morph the mesh. After all the blend shapes
+ * have been added and the weights are set,
+ * the blend shape information is converted into
+ * a {@link GVRFloatImage} where each RGB ixel is
+ * actually three 32 bit floats representing a 3D
+ * vector or position. Each row of the texture represents
+ * a vertex, each column all the blend shape information
+ * for just that vertex.
+ * <p>
+ * The blend shape texture is put in the <b>blendShapeTexture</b> sampler
+ * in the vertex shader. The blend weights are in the <b>u_blendweights</b> uniform.
+ * </p>
+ */
 public class GVRMeshMorph extends GVRBehavior
 {
     static private long TYPE_MESHMORPH = newComponentType(GVRMeshMorph.class);
