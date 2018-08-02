@@ -29,6 +29,7 @@ public class GVRAnimator extends GVRBehavior
     static private long TYPE_ANIMATOR = newComponentType(GVRAnimator.class);
     protected List<GVRAnimation> mAnimations;
     protected boolean mAutoStart;
+    protected boolean mIsRunning;
 
     /**
      * Make an instance of the GVRAnimator component.
@@ -42,6 +43,7 @@ public class GVRAnimator extends GVRBehavior
         super(ctx);
         mType = getComponentType();
         mAutoStart = false;
+        mIsRunning = false;
         mAnimations = new ArrayList<GVRAnimation>();
     }
 
@@ -59,10 +61,16 @@ public class GVRAnimator extends GVRBehavior
         super(ctx);
         mType = getComponentType();
         mAutoStart = autoStart;
+        mIsRunning = false;
         mAnimations = new ArrayList<GVRAnimation>();
     }
 
     static public long getComponentType() { return TYPE_ANIMATOR; }
+
+    /**
+     * Determine if this animator is running (has been started).
+     */
+    public boolean isRunning() { return mIsRunning; }
 
     /**
      * Determine if this animator should start all the animations
@@ -183,6 +191,7 @@ public class GVRAnimator extends GVRBehavior
      */
     public void start()
     {
+        mIsRunning = true;
         for (GVRAnimation anim : mAnimations)
         {
             getGVRContext().getAnimationEngine().start(anim);
@@ -197,6 +206,7 @@ public class GVRAnimator extends GVRBehavior
      */
     public void stop()
     {
+        mIsRunning = false;
         for (GVRAnimation anim : mAnimations)
         {
             getGVRContext().getAnimationEngine().stop(anim);

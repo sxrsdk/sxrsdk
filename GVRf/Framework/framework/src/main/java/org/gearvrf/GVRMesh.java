@@ -64,7 +64,7 @@ import org.gearvrf.utility.Log;
  * @see org.gearvrf.animation.GVRSkeleton
  */
 public class GVRMesh extends GVRHybridObject implements PrettyPrint {
-    static public final int MAX_BONES = 60;
+    static public final int MAX_BONES = 64;
     static public final int BONES_PER_VERTEX = 4;
     private static final String TAG = GVRMesh.class.getSimpleName();
 

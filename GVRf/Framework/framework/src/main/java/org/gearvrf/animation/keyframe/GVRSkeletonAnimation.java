@@ -8,6 +8,7 @@ import org.gearvrf.animation.GVRPose;
 import org.gearvrf.animation.GVRSkeleton;
 import org.gearvrf.utility.Log;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,6 +56,25 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
     {
     	super(target, duration);
         mName = name;
+    }
+
+    /**
+     * Create a skeleton animation with bones from the given hierarchy.
+     *
+     * @param name The name of the animation.
+     * @param skel The skeleton being animated.
+     * @param duration Duration of the animation in seconds.
+     */
+    public GVRSkeletonAnimation(String name, GVRSkeleton skel, float duration)
+    {
+        super(skel.getOwnerObject(), duration);
+        mName = name;
+        mSkeleton = skel;
+        for (int boneId = 0; boneId < mSkeleton.getNumBones(); ++boneId)
+        {
+            mSkeleton.setBoneOptions(boneId, GVRSkeleton.BONE_ANIMATE);
+        }
+        mBoneChannels = new GVRAnimationChannel[mSkeleton.getNumBones()];
     }
 
     /**
@@ -123,47 +143,43 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
     public GVRSkeleton createSkeleton(List<String> boneNames)
     {
         int numBones = boneNames.size();
-        final int[] parentBones = new int[numBones];
         GVRSceneObject root = (GVRSceneObject) mTarget;
-
-        Arrays.fill(parentBones, -1);
+        mSkeleton = new GVRSkeleton(root, boneNames);
         for (int boneId = 0; boneId < numBones; ++boneId)
         {
-            String boneName = boneNames.get(boneId);
-            GVRSceneObject obj = root.getSceneObjectByName(boneName);
-
-            if (obj == null)
-            {
-                Log.e("BONE", "bone %s not found in scene", boneName);
-                continue;
-            }
-            GVRSceneObject parent = findParent(obj, boneNames);
-            int parBoneId = -1;
-
-            if (parent == null)
-            {
-                if (mSkeletonRoot == null)
-                {
-                    mSkeletonRoot = obj;
-                }
-                Log.d("BONE", "Skeleton root %d is %s", mNumRoots, boneNames.get(boneId));
-                ++mNumRoots;
-            }
-            else
-            {
-                parBoneId = boneNames.indexOf(parent.getName());
-            }
-            parentBones[boneId] = parBoneId;
-        }
-        mSkeleton = new GVRSkeleton(mTarget.getGVRContext(), parentBones);
-        for (int boneId = 0; boneId < numBones; ++boneId)
-        {
-            mSkeleton.setBoneName(boneId, boneNames.get(boneId));
             mSkeleton.setBoneOptions(boneId, GVRSkeleton.BONE_ANIMATE);
         }
         mBoneChannels = new GVRAnimationChannel[numBones];
-        mSkeletonRoot.attachComponent(mSkeleton);
         return mSkeleton;
+    }
+
+    public void setSkeleton(GVRSkeleton skel, List<String> boneNames)
+    {
+        int numBones = skel.getNumBones();
+
+        mSkeleton = skel;
+        if (boneNames != null)
+        {
+            for (int boneId = 0; boneId < numBones; ++boneId)
+            {
+                mSkeleton.setBoneName(boneId, boneNames.get(boneId));
+                mSkeleton.setBoneOptions(boneId, GVRSkeleton.BONE_ANIMATE);
+            }
+        }
+        if (mBoneChannels == null)
+        {
+            mBoneChannels = new GVRAnimationChannel[numBones];
+        }
+    }
+
+    public void setTarget(GVRSceneObject target)
+    {
+        mTarget = target;
+        if ((mSkeleton != null) &&
+            target.getComponent(GVRSkeleton.getComponentType()) == null)
+        {
+            target.attachComponent(mSkeleton);
+        }
     }
 
     @Override
@@ -181,18 +197,27 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
         Matrix4f temp = new Matrix4f();
         GVRSkeleton skel = getSkeleton();
         GVRPose pose = skel.getPose();
+        Vector3f rootOffset = skel.getRootOffset();
 
         for (int i = 0; i < skel.getNumBones(); ++i)
         {
             GVRAnimationChannel channel = mBoneChannels[i];
-            if (channel != null)
+            if ((channel != null) &&
+                (skel.getBoneOptions(i) == GVRSkeleton.BONE_ANIMATE))
             {
                 channel.animate(timeInSec, temp);
+                if (rootOffset != null)
+                {
+                    temp.m30(rootOffset.x + temp.m30());
+                    temp.m31(rootOffset.y + temp.m31());
+                    temp.m32(rootOffset.z + temp.m32());
+                    rootOffset = null;
+                }
                 pose.setLocalMatrix(i, temp);
             }
         }
         skel.poseToBones();
-        skel.computeSkinPose();
+        skel.updateSkinPose();
     }
 
     @Override

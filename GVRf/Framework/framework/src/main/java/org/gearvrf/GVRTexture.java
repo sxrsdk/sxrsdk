@@ -85,6 +85,20 @@ public class GVRTexture extends GVRHybridObject implements GVRAndroidResource.Te
         mTextureId = 0;
     }
 
+    /**
+     * Constructs a texture with an image.
+     * @param image image to use for the texture.
+     * @see #setImage(GVRImage)
+     */
+    public GVRTexture(GVRImage image)
+    {
+        super(image.getGVRContext(), NativeTexture.constructor());
+        mLock = new ReentrantLock();
+        mTextureParams = null;
+        mTextureId = 0;
+        setImage(image);
+    }
+
     protected GVRTexture(GVRContext gvrContext, long ptr)
     {
         super(gvrContext, ptr);

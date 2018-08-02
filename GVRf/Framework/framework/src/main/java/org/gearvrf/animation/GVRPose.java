@@ -8,6 +8,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import java.util.BitSet;
 import java.util.Formatter;
 import java.util.Locale;
 
@@ -40,7 +41,6 @@ public class GVRPose implements PrettyPrint
 {
     static final float EPSILON = Float.intBitsToFloat(1);
     protected GVRSkeleton mSkeleton;
-    protected PoseSpace	  mPoseSpace;
     private boolean	      mNeedSync;
     private Bone[]        mBones;
     private final Quaternionf mTempQuat = new Quaternionf();
@@ -55,14 +55,19 @@ public class GVRPose implements PrettyPrint
     public enum PoseSpace
     {
         /**
-         * world positions and orientations are relative to the root bone of the skeleton.
+         * world positions and orientations are relative to the bind pose of the skeleton.
          */
         BIND_POSE_RELATIVE,
 
         /**
-         * world positions and orientations are relative to the bind pose of the skeleton.
+         * world positions and orientations are relative to the root bone of the skeleton.
          */
         SKELETON,
+
+        /*
+         * pose only contains local rotations
+         */
+        ROTATION_ONLY,
     };
 
     /**
@@ -70,31 +75,18 @@ public class GVRPose implements PrettyPrint
      * Initially all of the bone matrices are identity.
      * @param skel	skeleton associated with the pose.
      * @see GVRSkeleton#setPose(GVRPose)
-     * @see GVRSkeleton#applyPose(GVRPose)
+     * @see GVRSkeleton#applyPose(GVRPose, int)
      */
     public GVRPose(GVRSkeleton skel)
     {
-        this(skel, PoseSpace.SKELETON);
-    }
-
-    /**
-     * Constructs a pose based on the specified skeleton.
-     * @param skel	skeleton associated with the pose.
-     * @param space	coordinate space for the pose.
-     *             {@link PoseSpace#SKELETON} or {@link PoseSpace#BIND_POSE_RELATIVE}
-     * Initially all of the bone matrices are identity.
-     */
-    public GVRPose(GVRSkeleton skel, PoseSpace space)
-    {
         mSkeleton = skel;
-        mPoseSpace = space;
         mBones = new Bone[skel.getNumBones()];
         for (int i = 0; i < mBones.length; ++i)
         {
             mBones[i] = new Bone();
         }
-        mSkeleton = skel;
     }
+
 
     /**
      * Makes a copy of the input pose.
@@ -107,7 +99,6 @@ public class GVRPose implements PrettyPrint
     public GVRPose(GVRPose src)
     {
         mSkeleton = src.getSkeleton();
-        mPoseSpace = src.getPoseSpace();
         mBones = new Bone[mSkeleton.getNumBones()];
         for (int i = 0; i < mBones.length; ++i)
         {
@@ -123,13 +114,6 @@ public class GVRPose implements PrettyPrint
     public int          getNumBones() { return mSkeleton.getNumBones(); }
 
     /**
-     * Gets the coordinate space of the pose.
-     * @return pose coordnate space
-     * @see PoseSpace
-     */
-    public PoseSpace	getPoseSpace() { return mPoseSpace; }
-
-    /**
      * Get the skeleton for this pose.
      * <p>
      * The skeleton is established when the pose is created
@@ -138,6 +122,7 @@ public class GVRPose implements PrettyPrint
      */
     public GVRSkeleton	getSkeleton() { return mSkeleton; }
 
+    public Bone		getBone(int boneindex) { return mBones[boneindex]; }
 
     /**
      * Get the world position of the given bone (relative to skeleton root).
@@ -193,9 +178,9 @@ public class GVRPose implements PrettyPrint
         for (int i = 0; i < mBones.length; ++i)
         {
             int t = i * 3;
-            dest[t++] = mBones[i].WorldMatrix.m30();
-            dest[t++] = mBones[i].WorldMatrix.m31();
-            dest[t] = mBones[i].WorldMatrix.m32();
+            dest[t] = mBones[i].WorldMatrix.m30();
+            dest[t + 1] = mBones[i].WorldMatrix.m31();
+            dest[t + 2] = mBones[i].WorldMatrix.m32();
         }
     }
 
@@ -250,18 +235,20 @@ public class GVRPose implements PrettyPrint
         {
             throw new IllegalArgumentException("Destination array is the wrong size");
         }
+        mNeedSync = true;
         for (int i = 0; i < mBones.length; ++i)
         {
             Bone bone = mBones[i];
             int t = i * 3;
 
             bone.setWorldPosition(positions[t], positions[t + 1], positions[t + 2]);
-            calcLocal(bone, mSkeleton.getParentBoneIndex(i));
+            bone.Changed = WORLD_POS;
             if (sDebug)
             {
                 Log.d("BONE", "setWorldPosition: %s %s", mSkeleton.getBoneName(i), bone.toString());
             }
         }
+        sync();
     }
 
     /**
@@ -291,15 +278,15 @@ public class GVRPose implements PrettyPrint
         {
             throw new IllegalArgumentException("Source array is the wrong size");
         }
+        mNeedSync = true;
         for (int i = 0; i < mBones.length; ++i)
         {
             Bone bone = mBones[i];
             int t = i * 4;
 
             bone.setWorldRotation(rotations[t], rotations[t + 1], rotations[t + 2], rotations[t + 3]);
-            calcLocal(bone, mSkeleton.getParentBoneIndex(i));
             bone.Changed |= WORLD_ROT;
-            mNeedSync = true;
+            calcLocal(bone, mSkeleton.getParentBoneIndex(i));
             if (sDebug)
             {
                 Log.d("BONE", "setWorldRotation: %s %s", mSkeleton.getBoneName(i), bone.toString());
@@ -349,13 +336,20 @@ public class GVRPose implements PrettyPrint
         Bone	  bone = mBones[boneindex];
 
         bone.WorldMatrix.set(mtx);
-        calcLocal(bone, mSkeleton.getParentBoneIndex(boneindex));
+        if (mSkeleton.getParentBoneIndex(boneindex) >= 0)
+        {
+            calcLocal(bone, mSkeleton.getParentBoneIndex(boneindex));
+        }
+        else
+        {
+            bone.LocalMatrix.set(mtx);
+        }
+        mNeedSync = true;
+        bone.Changed = Bone.WORLD_POS | Bone.WORLD_ROT;
         if (sDebug)
         {
             Log.d("BONE", "setWorldMatrix: %s %s", mSkeleton.getBoneName(boneindex), bone.toString());
         }
-        bone.Changed = Bone.WORLD_POS | Bone.WORLD_ROT;
-        mNeedSync = true;
     }
 
     /**
@@ -445,13 +439,13 @@ public class GVRPose implements PrettyPrint
 
         bone.setWorldRotation(x, y, z, w);
         bone.Changed |= WORLD_ROT;
-        /*
-         * Indicate world matrix has changed for this bone
-         */
-        mNeedSync = true;
         if (mSkeleton.getParentBoneIndex(boneindex) < 0)
         {
             bone.LocalMatrix.set3x3(bone.WorldMatrix);
+        }
+        else
+        {
+            mNeedSync = true;
         }
         if (sDebug)
         {
@@ -501,16 +495,23 @@ public class GVRPose implements PrettyPrint
         int		  parentid = mSkeleton.getParentBoneIndex(boneindex);
 
         bone.LocalMatrix.set(mtx);
+        bone.Changed = Bone.LOCAL_ROT;
         if (parentid < 0)
         {
             bone.WorldMatrix.set(bone.LocalMatrix);
         }
+        else
+        {
+            mNeedSync = true;
+        }
         if (sDebug)
         {
-            Log.d("BONE", "setLocalMatrix: %s %s", mSkeleton.getBoneName(boneindex), bone.toString());
+
+            Log.d("BONE",
+                  "setLocalMatrix: %s %s",
+                  mSkeleton.getBoneName(boneindex),
+                  bone.toString());
         }
-        bone.Changed = Bone.LOCAL_ROT;
-        mNeedSync = true;
     }
 
     /**
@@ -535,6 +536,7 @@ public class GVRPose implements PrettyPrint
      */
     public void setLocalRotations(float[] rotations)
     {
+        mNeedSync = true;
         for (int i = 0; i < mBones.length; ++i)
         {
             int t = i * 4;
@@ -543,7 +545,6 @@ public class GVRPose implements PrettyPrint
                 Bone bone = mBones[i];
 
                 bone.setLocalRotation(rotations[t], rotations[t + 1], rotations[t + 2], rotations[t + 3]);
-                mNeedSync = true;
                 bone.Changed = LOCAL_ROT;
                 if (sDebug)
                 {
@@ -563,7 +564,7 @@ public class GVRPose implements PrettyPrint
      * @see #setWorldMatrix
      * @see GVRSkeleton#setBoneAxis
      */
-    void getLocalRotation(int boneindex, Quaternionf q)
+    public void getLocalRotation(int boneindex, Quaternionf q)
     {
         Bone bone = mBones[boneindex];
 
@@ -598,15 +599,15 @@ public class GVRPose implements PrettyPrint
         Bone bone = mBones[boneindex];
 
         bone.setLocalRotation(x, y, z, w);
-        mNeedSync = true;
         if (mSkeleton.getParentBoneIndex(boneindex) < 0)
         {
             bone.WorldMatrix.set(bone.LocalMatrix);
         }
         else
         {
-            bone.Changed = LOCAL_ROT;
+            mNeedSync = true;
         }
+        bone.Changed = LOCAL_ROT;
         if (sDebug)
         {
             Log.d("BONE", "setLocalRotation: %s %s", mSkeleton.getBoneName(boneindex), bone.toString());
@@ -634,6 +635,31 @@ public class GVRPose implements PrettyPrint
         pos.x = mBones[boneindex].LocalMatrix.m30();
         pos.y = mBones[boneindex].LocalMatrix.m31();
         pos.z = mBones[boneindex].LocalMatrix.m32();
+    }
+
+    public void getLocalScale(int boneindex, Vector3f scale)
+    {
+        mBones[boneindex].getScale(scale);
+    }
+
+    public void setLocalPosition(int boneindex, float x, float y, float z)
+    {
+        Bone bone = mBones[boneindex];
+        bone.setLocalPosition(x, y, z);
+
+        if (mSkeleton.getParentBoneIndex(boneindex) < 0)
+        {
+            bone.WorldMatrix.set(bone.LocalMatrix);
+        }
+        else
+        {
+            mNeedSync = true;
+        }
+        bone.Changed = LOCAL_ROT;
+        if (sDebug)
+        {
+            Log.d("BONE", "setLocalPosition: %s %s", mSkeleton.getBoneName(boneindex), bone.toString());
+        }
     }
 
     /**
@@ -689,8 +715,6 @@ public class GVRPose implements PrettyPrint
 
         if (getSkeleton() != src.getSkeleton())
             throw new IllegalArgumentException("GVRPose.copy: input pose is incompatible with this pose");
-        mPoseSpace = src.getPoseSpace();
-        mNeedSync = src.mNeedSync;
         for (int i = 0; i < numbones; ++i)
         {
             mBones[i].copy(src.getBone(i));
@@ -710,7 +734,6 @@ public class GVRPose implements PrettyPrint
 
         if (getSkeleton() != src.getSkeleton())
             throw new IllegalArgumentException("GVRPose.copy: input pose is incompatible with this pose");
-        mPoseSpace = src.getPoseSpace();
         mNeedSync = false;
         src.sync();
         for (int i = 0; i < numbones; ++i)
@@ -729,6 +752,25 @@ public class GVRPose implements PrettyPrint
     }
 
     /**
+     * Clear the rotations in this pose.
+     * <p>
+     * Positions are not affected.
+     */
+    public void  clearRotations()
+    {
+        int numbones = getNumBones();
+
+        mNeedSync = true;
+        for (int i = 0; i < numbones; ++i)
+        {
+            Bone bone = mBones[i];
+
+            bone.clearRotation();
+            bone.Changed = 0;
+        }
+    }
+
+    /**
      * Makes this pose the inverse of the input pose.
      * @param src pose to invert.
      */
@@ -741,7 +783,6 @@ public class GVRPose implements PrettyPrint
         Bone srcBone = src.mBones[0];
         Bone dstBone = mBones[0];
 
-        mPoseSpace = src.getPoseSpace();
         mNeedSync = true;
         srcBone.WorldMatrix.invertAffine(dstBone.WorldMatrix);
         srcBone.LocalMatrix.set(dstBone.WorldMatrix);
@@ -777,25 +818,52 @@ public class GVRPose implements PrettyPrint
     public boolean	setPosition(float x, float y, float z)
     {
         Bone bone = mBones[0];
-
-        if (mSkeleton.getParentBoneIndex(0) >= 0)
-        {
-            return false;
-        }
         float dx = x - bone.WorldMatrix.m30();
-        float dy = y = bone.WorldMatrix.m31();
-        float dz = z = bone.WorldMatrix.m32();
+        float dy = y - bone.WorldMatrix.m31();
+        float dz = z - bone.WorldMatrix.m32();
 
         sync();
         bone.LocalMatrix.setTranslation(x, y, z);
         for (int i = 0; i < mBones.length; ++i)
         {
-            bone.WorldMatrix.translate(dx, dy, dz);
+            bone = mBones[i];
+            bone.WorldMatrix.m30(bone.WorldMatrix.m30() + dx);
+            bone.WorldMatrix.m31(bone.WorldMatrix.m31() + dy);
+            bone.WorldMatrix.m32(bone.WorldMatrix.m32() + dz);
+            bone.Changed = WORLD_ROT | WORLD_POS;
         }
+        mNeedSync = true;
         if (sDebug)
         {
             Log.d("BONE", "setWorldPosition: %s ", mSkeleton.getBoneName(0), bone.toString());
         }
+        return true;
+    }
+
+    public boolean	setScale(float sx, float sy, float sz)
+    {
+        Bone bone = mBones[0];
+        Vector3f v = new Vector3f();
+
+        bone.getScale(v);
+        v.x /= sx;
+        v.y /= sy;
+        v.z /= sz;
+        bone.WorldMatrix.scale(v.x, v.y, v.z);
+        bone.LocalMatrix.scale(1 / v.x, 1 / v.y, 1 / v.z);
+        bone.Changed = WORLD_ROT | WORLD_POS;
+        for (int i = 1; i < mBones.length; ++i)
+        {
+            bone = mBones[i];
+            bone.WorldMatrix.scale(v.x, v.y, v.z);
+            bone.Changed = WORLD_ROT | WORLD_POS;
+        }
+        if (sDebug)
+        {
+            Log.d("BONE", "setWorldScale: %s ", mSkeleton.getBoneName(0), bone.toString());
+        }
+        mNeedSync = true;
+        sync();
         return true;
     }
 
@@ -811,8 +879,6 @@ public class GVRPose implements PrettyPrint
         if (!mNeedSync)
             return false;
         mNeedSync = false;
-        if (mPoseSpace == PoseSpace.BIND_POSE_RELATIVE)
-            return false;
         for (int i = 0; i < mBones.length; ++i)
         {
             Bone 	bone = mBones[i];
@@ -882,10 +948,6 @@ public class GVRPose implements PrettyPrint
         mTempMtxA.mul(bone.WorldMatrix, bone.LocalMatrix);  // LocalMatrix = INVERSE[ WorldMatrix(parent) ] * WorldMatrix
     }
 
-    public void     setPoseSpace(PoseSpace s) { mPoseSpace = s; }
-    public Bone		getBone(int boneindex) { return mBones[boneindex]; }
-
-
     @Override
     public void prettyPrint(StringBuffer sb, int indent)
     {
@@ -947,6 +1009,11 @@ static class Bone
         Changed = src.Changed;
     }
 
+    public void clearRotation()
+    {
+        setLocalRotation(0, 0, 0, 1);
+    }
+
     public void getWorldMatrix(Matrix4f mtx)
     {
         mtx.set(WorldMatrix);
@@ -961,7 +1028,25 @@ static class Bone
     {
         WorldMatrix.setTranslation(x, y, z);
     }
-    
+
+    public void setLocalPosition(float x, float y, float z)
+    {
+        LocalMatrix.setTranslation(x, y, z);
+    }
+
+    public void getScale(Vector3f scale)
+    {
+        scale.x = (float) Math.sqrt( LocalMatrix.m00() *  LocalMatrix.m00() +
+                LocalMatrix.m01() *  LocalMatrix.m01() +
+                LocalMatrix.m02() *  LocalMatrix.m02());
+        scale.y = (float) Math.sqrt( LocalMatrix.m10() *  LocalMatrix.m10() +
+                LocalMatrix.m11() *  LocalMatrix.m11() +
+                LocalMatrix.m12() *  LocalMatrix.m12());
+        scale.z = (float) Math.sqrt( LocalMatrix.m20() *  LocalMatrix.m20() +
+                LocalMatrix.m21() *  LocalMatrix.m21() +
+                LocalMatrix.m22() *  LocalMatrix.m22());
+    }
+
     public void setLocalRotation(float x, float y, float z, float w)
     {
         float posx = LocalMatrix.m30();

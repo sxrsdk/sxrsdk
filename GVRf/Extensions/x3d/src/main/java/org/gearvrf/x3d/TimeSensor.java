@@ -87,8 +87,8 @@ public class TimeSensor {
     }
 
     /**
-     * SetLoop will either set the GVRKeyFrameAnimation's Repeat Mode to REPEATED if loop is true.
-     * or it will set the GVRKeyFrameAnimation's Repeat Mode to ONCE if loop is false
+     * SetLoop will either set the GVRNodeAnimation's Repeat Mode to REPEATED if loop is true.
+     * or it will set the GVRNodeAnimation's Repeat Mode to ONCE if loop is false
      * if loop is set to TRUE, when it was previously FALSE, then start the Animation.
      * @param doLoop
      * @param gvrContext

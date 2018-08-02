@@ -30,7 +30,7 @@ import org.gearvrf.animation.keyframe.GVRNodeAnimation;
 
 public class RouteAnimation extends Route {
 
-   // If a ROUTE is associated with GVRKeyFrameAnimation, then
+   // If a ROUTE is associated with GVRNodeAnimation, then
    // this value will point to it.
    // Assists with Touch Sensors
    private GVRNodeAnimation gvrAnimation = null;

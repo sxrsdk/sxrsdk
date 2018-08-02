@@ -619,7 +619,7 @@ public final class GVRAssetLoader {
         return texture;
     }
     /**
-     * Loads file placed in the assets folder, as a {@link GVRBitmapTexture}
+     * Loads file placed in the assets folder, as a {@link GVRBitmapImage}
      * with the default texture parameters.
      * The bitmap is loaded asynchronously.
      * @param resource

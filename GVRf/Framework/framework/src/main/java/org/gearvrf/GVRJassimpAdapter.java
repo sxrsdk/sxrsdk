@@ -105,7 +105,6 @@ class  GVRJassimpAdapter
         float[] normalsArray = null;
         boolean doTexturing = !settings.contains(GVRImportSettings.NO_TEXTURING);
         boolean doLighting = !settings.contains(GVRImportSettings.NO_LIGHTING);
-        boolean doAnimation = !settings.contains(GVRImportSettings.NO_ANIMATION);
 
         // Vertices
         FloatBuffer verticesBuffer = aiMesh.getPositionBuffer();
@@ -156,7 +155,7 @@ class  GVRJassimpAdapter
             }
         }
 
-        if (doAnimation && aiMesh.hasBones())
+        if (aiMesh.hasBones())
         {
             vertexDescriptor += " float4 a_bone_weights int4 a_bone_indices";
         }
@@ -343,11 +342,8 @@ class  GVRJassimpAdapter
         final List<String> mBoneNames = new ArrayList<>();
         private GVRSceneObject mRoot = null;
 
-        private final Map<String, GVRAnimationChannel> mAnimChannels;
-
-        public BoneCollector(Map<String, GVRAnimationChannel> animMap)
+        public BoneCollector()
         {
-           mAnimChannels = animMap;
         }
 
         public List<String> getBoneNames() { return mBoneNames; }
@@ -433,7 +429,7 @@ class  GVRJassimpAdapter
          */
         if (!mBoneMap.isEmpty())
         {
-            BoneCollector nodeProcessor = new BoneCollector(animMap);
+            BoneCollector nodeProcessor = new BoneCollector();
             GVRSkeletonAnimation anim = new GVRSkeletonAnimation(aiAnim.getName(), target, duration);
 
             target.forAllDescendants(nodeProcessor);
@@ -463,6 +459,52 @@ class  GVRJassimpAdapter
                 animator.addAnimation(nodeAnim);
                 Log.d("BONE", "Adding node animation for %s", nodeName);
             }
+        }
+    }
+
+    /*
+     * if there was a skinned mesh the bone map acts as a lookup
+     * table that maps bone names to their corresponding AiBone objects.
+     * The BoneCollector constructs the skeleton from the bone names in
+     * the map and the scene nodes, attempting to connect bones
+     * where there are gaps to produce a complete skeleton.
+     */
+    private void makeSkeleton(GVRSceneObject root)
+    {
+        if (!mBoneMap.isEmpty())
+        {
+            BoneCollector nodeProcessor = new BoneCollector();
+
+            root.forAllDescendants(nodeProcessor);
+            mSkeleton = new GVRSkeleton(root, nodeProcessor.getBoneNames());
+            GVRPose bindPose = new GVRPose(mSkeleton);
+            Matrix4f bindPoseMtx = new Matrix4f();
+
+            for (int boneId = 0; boneId < mSkeleton.getNumBones(); ++boneId)
+            {
+                String boneName = mSkeleton.getBoneName(boneId);
+                AiBone aiBone = mBoneMap.get(boneName);
+                GVRSceneObject bone = mSkeleton.getBone(boneId);
+
+                if (aiBone != null)
+                {
+                    float[] matrixdata = aiBone.getOffsetMatrix(sWrapperProvider);
+
+                    bindPoseMtx.set(matrixdata);
+                    bindPoseMtx.invert();
+                    bindPose.setWorldMatrix(boneId, bindPoseMtx);
+                }
+                else
+                {
+                    GVRTransform t = bone.getTransform();
+                    Matrix4f mtx = t.getModelMatrix4f();
+
+                    mtx.invert();
+                    bindPose.setWorldMatrix(boneId, mtx);
+                    Log.e("BONE", "no bind pose matrix for bone %s", boneName);
+                }
+            }
+            mSkeleton.setBindPose(bindPose);
         }
     }
 
@@ -744,10 +786,14 @@ class  GVRJassimpAdapter
         mMeshes = new GVRMesh[scene.getNumMeshes()];
         mMaterials = new GVRMaterial[scene.getNumMaterials()];
 
-        traverseGraph(model, scene.getSceneRoot(sWrapperProvider), lightList, doAnimation);
+        traverseGraph(model, scene.getSceneRoot(sWrapperProvider), lightList);
         if (doAnimation)
         {
             processAnimations(model, scene, settings.contains(GVRImportSettings.START_ANIMATIONS));
+        }
+        else
+        {
+            makeSkeleton(model);
         }
         for (Map.Entry<GVRSceneObject, Integer> entry : mNodeMap.entrySet())
         {
@@ -803,7 +849,7 @@ class  GVRJassimpAdapter
         return mainCamera;
     }
 
-    private void traverseGraph(GVRSceneObject parent, AiNode node, Hashtable<String, GVRLight> lightlist, boolean doAnimation)
+    private void traverseGraph(GVRSceneObject parent, AiNode node, Hashtable<String, GVRLight> lightlist)
     {
         GVRSceneObject sceneObject = new GVRSceneObject(mContext);
         final int[] nodeMeshes = node.getMeshes();
@@ -837,10 +883,7 @@ class  GVRJassimpAdapter
                 }
             }
             mNodeMap.put(sceneObject, meshId);
-            if (doAnimation)
-            {
-                findBones(mScene.getMeshes().get(meshId));
-            }
+            findBones(mScene.getMeshes().get(meshId));
         }
         else if (node.getNumMeshes() > 1)
         {
@@ -851,10 +894,7 @@ class  GVRJassimpAdapter
                 child.setName(nodeName + "-" + meshId);
                 sceneObject.addChildObject(child);
                 mNodeMap.put(child, meshId);
-                if (doAnimation)
-                {
-                    findBones(mScene.getMeshes().get(meshId));
-                }
+                findBones(mScene.getMeshes().get(meshId));
             }
         }
         else if ("".equals(nodeName) &&
@@ -864,7 +904,7 @@ class  GVRJassimpAdapter
         }
         for (AiNode child : node.getChildren())
         {
-            traverseGraph(sceneObject, child, lightlist, doAnimation);
+            traverseGraph(sceneObject, child, lightlist);
         }
     }
 
@@ -949,8 +989,7 @@ class  GVRJassimpAdapter
         {
             mesh = createMesh(mContext, aiMesh, settings);
             mMeshes[meshId] = mesh;
-            boolean doAnimation = !settings.contains(GVRImportSettings.NO_ANIMATION);
-            if (doAnimation && aiMesh.hasBones() && (mSkeleton != null))
+            if (aiMesh.hasBones() && (mSkeleton != null))
             {
                 GVRSkin skin = processBones(mesh, aiMesh.getBones());
                 if (skin != null)
