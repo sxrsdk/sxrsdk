@@ -1,4 +1,6 @@
-package org.gearvrf;
+package org.gearvrf.animation.keyframe;
+import org.gearvrf.GVRAndroidResource;
+import org.gearvrf.GVRContext;
 import org.gearvrf.animation.GVRAnimation;
 import org.gearvrf.animation.GVRPose;
 import org.gearvrf.animation.GVRSkeleton;

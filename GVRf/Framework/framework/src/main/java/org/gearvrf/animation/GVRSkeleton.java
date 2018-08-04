@@ -800,7 +800,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
      * Applies the matrices computed from the scene object's
      * linked to the skeleton bones to the current pose.
      *
-     * @see #applyPose(GVRPose)
+     * @see #applyPose(GVRPose, int)
      * @see #setPose(GVRPose)
      */
     public void poseFromBones()
@@ -835,7 +835,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
      * The {@link org.gearvrf.animation.keyframe.GVRSkeletonAnimation} class
      * does this as a part of skeletal animation. It does not occur
      * automatically when the current pose is updated.
-     * @see #applyPose(GVRPose)
+     * @see #applyPose(GVRPose, int)
      * @see #setPose(GVRPose)
      */
     public void poseToBones()

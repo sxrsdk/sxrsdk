@@ -921,6 +921,10 @@ class  GVRJassimpAdapter
         {
             return null;
         }
+        if (aichild.getNumMeshes() > 0)
+        {
+            return null;
+        }
         gvrnode.setName(childName);
         float[] matrix = aichild.getTransform(sWrapperProvider);
         Matrix4f childMtx = new Matrix4f();
@@ -1265,7 +1269,7 @@ class  GVRJassimpAdapter
         }
         else
         {
-            texRequest = new GVRAssetLoader.TextureRequest(assetRequest, gvrTex, texFileName);
+            texRequest = new GVRAssetLoader.TextureRequest(assetRequest, gvrTex, assetRequest.makeTextureName(texFileName));
             assetRequest.loadTexture(texRequest);
         }
     }

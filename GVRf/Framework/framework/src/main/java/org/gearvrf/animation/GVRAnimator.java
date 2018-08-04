@@ -30,6 +30,7 @@ public class GVRAnimator extends GVRBehavior
     protected List<GVRAnimation> mAnimations;
     protected boolean mAutoStart;
     protected boolean mIsRunning;
+    protected String mName;
 
     /**
      * Make an instance of the GVRAnimator component.
@@ -66,6 +67,22 @@ public class GVRAnimator extends GVRBehavior
     }
 
     static public long getComponentType() { return TYPE_ANIMATOR; }
+
+    /**
+     * Get the name of this animator.
+     * <p>
+     * The name is optional and may be set with {@link #setName(String) }
+     * @returns string with name of animator, may be null
+     * @see #setName(String)
+     */
+    public String getName() { return mName; }
+
+    /**
+     * Set the name of this animator.
+     * @param name string with name of animator, may be null
+     * @see #getName()
+     */
+    public void setName(String name) { mName = name; }
 
     /**
      * Determine if this animator is running (has been started).
@@ -123,7 +140,7 @@ public class GVRAnimator extends GVRBehavior
      * but it's state will not be changed when removed. For example,
      * if the animation is already running it will not be stopped.
      *
-     * @param anim animation to add
+     * @param anim animation to remove
      * @see GVRAnimator#addAnimation(GVRAnimation)
      * @see GVRAnimator#clear()
      */

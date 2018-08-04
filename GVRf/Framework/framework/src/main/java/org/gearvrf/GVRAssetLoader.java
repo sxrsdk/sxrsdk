@@ -141,6 +141,27 @@ public final class GVRAssetLoader {
             return fname;
         }
 
+        public String makeTextureName(String texFileName)
+        {
+            if (!Character.isAlphabetic(texFileName.charAt(0)))
+            {
+                return texFileName;
+            }
+            String fname = mVolume.getFullPath();
+            int i = fname.indexOf("/");
+            int j = fname.lastIndexOf("/");
+
+            if (i < 0)
+            {
+                return texFileName;
+            }
+            if (Character.isAlphabetic(fname.charAt(0)))
+            {
+                i = 0;
+            }
+            return fname.substring(i, j);
+        }
+
         /**
          * Disable texture caching
          */
