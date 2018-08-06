@@ -109,7 +109,7 @@ public final class GVRAssetLoader {
             mScene = scene;
             mContext = model.getGVRContext();
             mNumTextures = 0;
-            mFileName = fileVolume.getFileName();
+            mFileName = fileVolume.getFullPath();
             mUserHandler = userHandler;
             mModel = null;
             mErrors = "";
@@ -147,7 +147,7 @@ public final class GVRAssetLoader {
             {
                 return texFileName;
             }
-            String fname = mVolume.getFullPath();
+            String fname = mFileName;
             int i = fname.indexOf("/");
             int j = fname.lastIndexOf("/");
 
@@ -159,7 +159,7 @@ public final class GVRAssetLoader {
             {
                 i = 0;
             }
-            return fname.substring(i, j);
+            return fname.substring(i, j + 1) + texFileName;
         }
 
         /**
@@ -239,7 +239,7 @@ public final class GVRAssetLoader {
                 image = texCache.get(request.TextureFile);
                 if (image != null)
                 {
-                    Log.d(TAG, "ASSET: loadEmbeddedTexture found %s", resource.getResourceFilename());
+                    Log.d(TAG, "ASSET: loadEmbeddedTexture found %s", resource.getResourcePath());
                     bmapTex.setImage(image);
                     request.loaded(image, resource);
                     return bmapTex;
@@ -256,10 +256,10 @@ public final class GVRAssetLoader {
                     bmap.setPixels(aitex.getIntData(), 0, aitex.getWidth(), 0, 0, aitex.getWidth(), aitex.getHeight());
                 }
                 GVRBitmapImage bmaptex = new GVRBitmapImage(mContext);
-                bmaptex.setFileName(resource.getResourceFilename());
+                bmaptex.setFileName(resource.getResourcePath());
                 bmaptex.setBitmap(bmap);
                 image = bmaptex;
-                Log.d(TAG, "ASSET: loadEmbeddedTexture saved %s", resource.getResourceFilename());
+                Log.d(TAG, "ASSET: loadEmbeddedTexture saved %s", resource.getResourcePath());
                 texCache.put(request.TextureFile, image);
                 bmapTex.setImage(image);
             }
@@ -273,7 +273,8 @@ public final class GVRAssetLoader {
          * @param model     root node of model hierarchy that was loaded
          * @param modelFile filename of model loaded
          */
-        public void onModelLoaded(GVRContext context, GVRSceneObject model, String modelFile) {
+        public void onModelLoaded(GVRContext context, GVRSceneObject model, String modelFile)
+        {
             mModel = model;
             Log.d(TAG, "ASSET: successfully loaded model %s %d", modelFile, mNumTextures);
             if (mUserHandler != null)
@@ -719,8 +720,7 @@ public final class GVRAssetLoader {
      *            {@link GVRCompressedImage#QUALITY}, but other values are
      *            'clamped' to one of the recognized values. Please note that
      *            this (currently) only applies to compressed textures; normal
-     *            {@linkplain GVRBitmapTexture bitmapped textures} don't take a
-     *            quality parameter.
+     *            bitmapped textures don't take a quality parameter.
      */
     public GVRTexture loadTexture(GVRAndroidResource resource, TextureCallback callback, GVRTextureParameters texparams, int priority, int quality)
     {
@@ -1156,7 +1156,7 @@ public final class GVRAssetLoader {
             public void run()
             {
                 AssetRequest assetRequest = new AssetRequest(model, volume, scene, handler, true);
-                String filePath = volume.getFileName();
+                String filePath = volume.getFullPath();
                 String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
                 assetRequest.setImportSettings(GVRImportSettings.getRecommendedSettings());
@@ -1211,7 +1211,7 @@ public final class GVRAssetLoader {
             public void run()
             {
                 AssetRequest assetRequest = new AssetRequest(model, volume, scene, handler, true);
-                String filePath = volume.getFileName();
+                String filePath = volume.getFullPath();
                 String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
                 assetRequest.setImportSettings(settings);
@@ -1487,9 +1487,9 @@ public final class GVRAssetLoader {
      * @see #loadMesh(GVRAndroidResource.MeshCallback, GVRAndroidResource, int)
      */
     public GVRSceneObject loadModel(GVRAndroidResource resource,
-                                         EnumSet<GVRImportSettings> settings,
-                                         boolean cacheEnabled,
-                                         GVRScene scene) throws IOException
+                                    EnumSet<GVRImportSettings> settings,
+                                    boolean cacheEnabled,
+                                    GVRScene scene) throws IOException
     {
         String filePath = resource.getResourceFilename();
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
@@ -1652,14 +1652,14 @@ public final class GVRAssetLoader {
                 }
                 else
                 {
-                    throw new IOException("No mesh found in model " + androidResource.getResourceFilename());
+                    throw new IOException("No mesh found in model " + androidResource.getResourcePath());
                 }
             }
             catch (IOException ex)
             {
                 mContext.getEventManager().sendEvent(this, IAssetEvents.class,
                         "onModelError", new Object[] { mContext, ex.getMessage(),
-                                androidResource.getResourceFilename()});
+                                androidResource.getResourcePath()});
                 return null;
             }
         }

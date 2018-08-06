@@ -767,7 +767,12 @@ class  GVRJassimpAdapter
         Hashtable<String, GVRLight> lightList = new Hashtable<String, GVRLight>();
         EnumSet<GVRImportSettings> settings = request.getImportSettings();
         boolean doAnimation = !settings.contains(GVRImportSettings.NO_ANIMATION);
+        GVRSceneObject modelParent = model.getParent();
 
+        if (modelParent != null)
+        {
+            modelParent.removeChildObject(model);
+        }
         mScene = scene;
         mContext = model.getGVRContext();
         if (scene == null)
@@ -804,6 +809,10 @@ class  GVRJassimpAdapter
             {
                 processMesh(request, obj, meshId);
             }
+        }
+        if (modelParent != null)
+        {
+            modelParent.addChildObject(model);
         }
     }
 
@@ -1269,7 +1278,7 @@ class  GVRJassimpAdapter
         }
         else
         {
-            texRequest = new GVRAssetLoader.TextureRequest(assetRequest, gvrTex, assetRequest.makeTextureName(texFileName));
+            texRequest = new GVRAssetLoader.TextureRequest(assetRequest, gvrTex, texFileName);
             assetRequest.loadTexture(texRequest);
         }
     }

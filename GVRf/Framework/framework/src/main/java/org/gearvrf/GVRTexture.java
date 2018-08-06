@@ -138,7 +138,7 @@ public class GVRTexture extends GVRHybridObject implements GVRAndroidResource.Te
         String fname = image.getFileName();
         if ((fname == null) || fname.isEmpty() && (resource != null))
         {
-            image.setFileName(resource.getResourceFilename());
+            image.setFileName(resource.getResourcePath());
         }
         setImage(image);
     }

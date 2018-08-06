@@ -58,6 +58,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     public GVRAvatar(GVRContext ctx, String name)
     {
         super(ctx);
+        mReceiver = new GVREventReceiver(this);
         mType = getComponentType();
         mModelRoot = new GVRSceneObject(ctx);
         mModelRoot.setName(name);
@@ -118,7 +119,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
      */
     public void loadModel(GVRAndroidResource avatarResource)
     {
-        EnumSet<GVRImportSettings> settings = GVRImportSettings.getRecommendedSettings();
+        EnumSet<GVRImportSettings> settings = GVRImportSettings.getRecommendedSettingsWith(EnumSet.of(GVRImportSettings.NO_ANIMATION));
         GVRContext ctx = mModelRoot.getGVRContext();
         GVRResourceVolume volume = new GVRResourceVolume(ctx, avatarResource);
         GVRSceneObject previousAvatar = (mModelRoot.getChildrenCount() > 0) ? mModelRoot.getChildByIndex(0) : null;
@@ -127,13 +128,12 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         {
             mModelRoot.removeChildObject(previousAvatar);
         }
-        settings.add(GVRImportSettings.NO_ANIMATION);
         ctx.getAssetLoader().loadModel(volume, mModelRoot, settings, true, mLoadModelHandler);
     }
 
     public void loadAnimation(GVRAndroidResource animResource)
     {
-        String filePath = animResource.getResourceFilename();
+        String filePath = animResource.getResourcePath();
         GVRContext ctx = mModelRoot.getGVRContext();
         GVRResourceVolume volume = new GVRResourceVolume(ctx, animResource);
 
@@ -294,13 +294,13 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             {
                 Log.e(TAG, "Avatar skeleton not found in asset file " + filePath);
             }
+            centerModel(avatar);
             context.getEventManager().sendEvent(this, IAvatarEvents.class, "onAvatarLoaded", avatar, filePath, errors);
         }
 
         public void onModelLoaded(GVRContext context, GVRSceneObject model, String filePath)
         {
-            model.setEnable(false);
-            centerModel(model);
+            //centerModel(model);
         }
 
         public void onTextureLoaded(GVRContext context, GVRTexture texture, String filePath) { }
@@ -319,6 +319,14 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         public void onAssetLoaded(GVRContext context, GVRSceneObject animRoot, String filePath, String errors)
         {
             GVRAnimator animator = (GVRAnimator) animRoot.getComponent(GVRAnimator.getComponentType());
+            if (animator == null)
+            {
+                if (errors == null)
+                {
+                    errors = "No aniations found in " + filePath;
+                }
+                context.getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class, "onAnimationLoaded", null, filePath, errors);
+            }
             GVRSkeletonAnimation skelAnim = (GVRSkeletonAnimation) animator.getAnimation(0);
             GVRPoseMapper poseMapper = new GVRPoseMapper(mSkeleton, skelAnim.getSkeleton());
             GVRPose bindpose = skelAnim.getSkeleton().getBindPose();
@@ -329,12 +337,11 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             mSkeleton.getBindPose().setPosition(v.x, v.y, v.z);
             animator.addAnimation(poseMapper);
             addAnimation(animator);
-            context.getEventManager().sendEvent(this, IAvatarEvents.class, "onAnimationLoaded", animator, filePath, errors);
+            context.getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class, "onAnimationLoaded", animator, filePath, errors);
         }
 
         public void onModelLoaded(GVRContext context, GVRSceneObject model, String filePath)
         {
-            model.setEnable(false);
             centerModel(model);
         }
 
