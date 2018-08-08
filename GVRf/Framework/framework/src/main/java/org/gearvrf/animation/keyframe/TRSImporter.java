@@ -7,6 +7,7 @@ import org.gearvrf.animation.keyframe.GVRAnimationBehavior;
 import org.gearvrf.animation.keyframe.GVRAnimationChannel;
 import org.gearvrf.animation.keyframe.GVRSkeletonAnimation;
 import org.gearvrf.utility.Log;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -51,13 +52,11 @@ public class TRSImporter
         String      line;
         String 		bonename = "";
         float       secondsPerFrame = 1 / 30.0f;
-        float       curTime = -secondsPerFrame;
-        ArrayList<ArrayList<Float>> rotKeysPerBone = new ArrayList<>(numbones);
-        ArrayList<ArrayList<Float>> posKeysPerBone = new ArrayList<>(numbones);
-        ArrayList<ArrayList<Float>> sclKeysPerBone = new ArrayList<>(numbones);
-        ArrayList<Float> posKeys;
-        ArrayList<Float> rotKeys;
-        ArrayList<Float> sclKeys;
+        float       curTime = 0;
+        GVRPose     curpose = null;
+        Matrix4f mtx = new Matrix4f();
+        ArrayList<GVRPose> posePerFrame = new ArrayList<>();
+
         /*
          * Parse and accumulate all the motion keyframes.
          */
@@ -79,73 +78,73 @@ public class TRSImporter
             }
             if (boneIndex == 0)
             {
-                curTime += secondsPerFrame;
+                curpose = new GVRPose(skel);
+                posePerFrame.add(curpose);
+                curTime =+ secondsPerFrame;
             }
-            if (boneIndex < posKeysPerBone.size())
-            {
-                posKeys = posKeysPerBone.get(boneIndex);
-            }
-            else
-            {
-                posKeys = new ArrayList<Float>();
-                posKeysPerBone.add(boneIndex, posKeys);
-            }
-            posKeys.add(curTime);
-            posKeys.add(Float.parseFloat(words[1]));	// root bone position
-            posKeys.add(Float.parseFloat(words[2]));
-            posKeys.add(Float.parseFloat(words[3]));
-            if (boneIndex < rotKeysPerBone.size())
-            {
-                rotKeys = rotKeysPerBone.get(boneIndex);
-            }
-            else
-            {
-                rotKeys = new ArrayList();
-                rotKeysPerBone.add(boneIndex, rotKeys);
-            }
-            rotKeys.add(curTime);
-            rotKeys.add(Float.parseFloat(words[4]));
-            rotKeys.add(Float.parseFloat(words[5]));
-            rotKeys.add(Float.parseFloat(words[6]));
-            rotKeys.add(Float.parseFloat(words[7]));
-            if (boneIndex < sclKeysPerBone.size())
-            {
-                sclKeys = sclKeysPerBone.get(boneIndex);
-            }
-            else
-            {
-                sclKeys = new ArrayList();
-                sclKeysPerBone.add(boneIndex, sclKeys);
-            }
-            sclKeys.add(curTime);
-            sclKeys.add(Float.parseFloat(words[8]));	// root bone position
-            sclKeys.add(Float.parseFloat(words[9]));
-            sclKeys.add(Float.parseFloat(words[10]));
+            float tx = Float.parseFloat(words[1]);
+            float ty = Float.parseFloat(words[2]);
+            float tz = Float.parseFloat(words[3]);
+            float qx = Float.parseFloat(words[4]);
+            float qy = Float.parseFloat(words[5]);
+            float qz = Float.parseFloat(words[6]);
+            float qw = Float.parseFloat(words[7]);
+            float sx = Float.parseFloat(words[8]);
+            float sy = Float.parseFloat(words[9]);
+            float sz = Float.parseFloat(words[10]);
+            mtx.translationRotateScale(tx, ty, tz, qx, qy, qz, qw, sx, sy, sz);
+            curpose.setWorldMatrix(boneIndex, mtx);
         }
         /*
          * Create a skeleton animation with separate channels for each bone
          */
         GVRSkeletonAnimation skelanim = new GVRSkeletonAnimation(mFileName, skel, curTime);
         GVRAnimationChannel channel;
+        Vector3f v = new Vector3f();
+        Quaternionf q = new Quaternionf();
+        int numKeys = posePerFrame.size();
+
+        curTime = 0;
         for (int boneIndex = 0; boneIndex < numbones; ++boneIndex)
         {
-            bonename = skel.getBoneName(boneIndex);
-            rotKeys = rotKeysPerBone.get(boneIndex);
-            posKeys = posKeysPerBone.get(boneIndex);
-            sclKeys = posKeysPerBone.get(boneIndex);
-            if ((rotKeys != null) && (posKeys != null) && (sclKeys != null))
-            {
-                float[] rotations = listToArray(rotKeys, 5);
-                float[] positions = listToArray(posKeys, 4);
-                float[] scales = listToArray(sclKeys, 4);
-                channel = new GVRAnimationChannel(bonename, positions,
-                        rotations, scales,
-                        GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
+            int keyIndex = 0;
+            float[] rotations = new float[numKeys * 5];
+            float[] positions = new float[numKeys * 4];
+            float[] scales = new float[numKeys * 4];
 
-                skelanim.addChannel(bonename, channel);
-                Log.v("BONE", "%s positions\n%s", bonename, arrayToString(positions, 4));
-                Log.v("BONE", "%s rotations\n%s", bonename, arrayToString(rotations, 5));
+            bonename = skel.getBoneName(boneIndex);
+            for (GVRPose pose : posePerFrame)
+            {
+                int i = keyIndex * 4;
+
+                if (boneIndex == 0)
+                {
+                    pose.sync();
+                }
+                pose.getLocalMatrix(boneIndex, mtx);
+                mtx.getTranslation(v);
+                positions[i] = curTime;
+                positions[i + 1] = v.x;
+                positions[i + 2] = v.y;
+                positions[i + 3] = v.z;
+                mtx.getScale(v);
+                scales[i] = curTime;
+                scales[i + 1] = v.x;
+                scales[i + 2] = v.y;
+                scales[i + 3] = v.z;
+                i = keyIndex * 5;
+                mtx.getUnnormalizedRotation(q);
+                rotations[i] = curTime;
+                rotations[i + 1] = q.x;
+                rotations[i + 2] = q.y;
+                rotations[i + 3] = q.z;
+                rotations[i + 4] = q.z;
+                keyIndex++;
+                curTime += secondsPerFrame;
             }
+            channel = new GVRAnimationChannel(bonename, null, rotations, null,
+                    GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
+            skelanim.addChannel(bonename, channel);
         }
         return skelanim;
     }

@@ -792,11 +792,8 @@ class  GVRJassimpAdapter
         mMaterials = new GVRMaterial[scene.getNumMaterials()];
 
         traverseGraph(model, scene.getSceneRoot(sWrapperProvider), lightList);
-        if (doAnimation)
-        {
-            processAnimations(model, scene, settings.contains(GVRImportSettings.START_ANIMATIONS));
-        }
-        else
+        if (!doAnimation ||
+            ((processAnimations(model, scene, settings.contains(GVRImportSettings.START_ANIMATIONS)) == null)))
         {
             makeSkeleton(model);
         }

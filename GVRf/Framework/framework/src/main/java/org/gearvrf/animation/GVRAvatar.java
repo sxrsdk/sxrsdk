@@ -145,14 +145,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                 GVRSkeletonAnimation skelAnim = importer.importAnimation(animResource, mSkeleton);
                 GVRAnimator animator = new GVRAnimator(ctx);
                 animator.setName(filePath);
-                GVRPoseMapper poseMapper = new GVRPoseMapper(mSkeleton, skelAnim.getSkeleton());
-                GVRPose bindpose = skelAnim.getSkeleton().getBindPose();
-                Vector3f v = new Vector3f();
-
-                bindpose.setScale(1, 1, 1);
-                bindpose.getLocalPosition(1, v);
-                mSkeleton.getBindPose().setPosition(v.x, v.y, v.z);
-                animator.addAnimation(poseMapper);
+                animator.addAnimation(skelAnim);
                 addAnimation(animator);
                 ctx.getEventManager().sendEvent(this,
                                                 IAvatarEvents.class,
@@ -294,15 +287,10 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             {
                 Log.e(TAG, "Avatar skeleton not found in asset file " + filePath);
             }
-            centerModel(avatar);
-            context.getEventManager().sendEvent(this, IAvatarEvents.class, "onAvatarLoaded", avatar, filePath, errors);
+            context.getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class, "onAvatarLoaded", avatar, filePath, errors);
         }
 
-        public void onModelLoaded(GVRContext context, GVRSceneObject model, String filePath)
-        {
-            //centerModel(model);
-        }
-
+        public void onModelLoaded(GVRContext context, GVRSceneObject model, String filePath) { }
         public void onTextureLoaded(GVRContext context, GVRTexture texture, String filePath) { }
         public void onModelError(GVRContext context, String error, String filePath) { }
         public void onTextureError(GVRContext context, String error, String filePath) { }

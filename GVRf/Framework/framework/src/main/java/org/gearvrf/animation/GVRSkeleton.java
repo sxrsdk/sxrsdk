@@ -817,13 +817,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
                 continue;
             }
             GVRTransform trans = bone.getTransform();
-            mPose.setLocalRotation(i, trans.getRotationX(), trans.getRotationY(), trans.getRotationZ(), trans.getRotationW());
-            if (mParentBones[i] < 0)
-            {
-                mPose.setPosition(trans.getPositionX() + mRootOffset.x,
-                        trans.getPositionY() + mRootOffset.y,
-                        trans.getPositionZ() + mRootOffset.z);
-            }
+            mPose.setLocalMatrix(i, trans.getLocalModelMatrix4f());
         }
         mPose.sync();
     }
