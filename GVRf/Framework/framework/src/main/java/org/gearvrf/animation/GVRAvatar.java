@@ -316,14 +316,12 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                 context.getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class, "onAnimationLoaded", null, filePath, errors);
             }
             GVRSkeletonAnimation skelAnim = (GVRSkeletonAnimation) animator.getAnimation(0);
-            GVRPoseMapper poseMapper = new GVRPoseMapper(mSkeleton, skelAnim.getSkeleton());
-            GVRPose bindpose = skelAnim.getSkeleton().getBindPose();
-            Vector3f v = new Vector3f();
+            if (skelAnim.getSkeleton() != mSkeleton)
+            {
+                GVRPoseMapper poseMapper = new GVRPoseMapper(mSkeleton, skelAnim.getSkeleton());
 
-            bindpose.setScale(1, 1, 1);
-            bindpose.getLocalPosition(1, v);
-            mSkeleton.getBindPose().setPosition(v.x, v.y, v.z);
-            animator.addAnimation(poseMapper);
+                animator.addAnimation(poseMapper);
+            }
             addAnimation(animator);
             context.getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class, "onAnimationLoaded", animator, filePath, errors);
         }

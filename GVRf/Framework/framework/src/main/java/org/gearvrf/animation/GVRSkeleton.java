@@ -839,13 +839,12 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
         {
             GVRSceneObject bone = mBones[i];
             if ((bone != null) &&
-               ((mBoneOptions[i] & BONE_LOCK_ROTATION) != 0))
+               ((mBoneOptions[i] & BONE_LOCK_ROTATION) == 0))
             {
                 mPose.getLocalMatrix(i, mTempMtx);
                 bone.getTransform().setModelMatrix(mTempMtx);
             }
         }
-        mPose.sync();
     }
 
     /*
