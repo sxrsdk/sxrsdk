@@ -105,35 +105,52 @@ public class TRSImporter
         int numKeys = posePerFrame.size();
 
         curTime = 0;
-        for (int boneIndex = 0; boneIndex < numbones; ++boneIndex)
+        float[] positions = new float[numKeys * 4];
+        float[] scales = new float[numKeys * 4];
+        float[] rotations = new float[numKeys * 5];
+
+        bonename = skel.getBoneName(0);
+        for (GVRPose pose : posePerFrame)
         {
             int keyIndex = 0;
-            float[] rotations = new float[numKeys * 5];
-            float[] positions = new float[numKeys * 4];
-            float[] scales = new float[numKeys * 4];
+            int i = keyIndex * 4;
 
+            pose.sync();
+            pose.getLocalMatrix(0, mtx);
+            mtx.getTranslation(v);
+            positions[i] = curTime;
+            positions[i + 1] = v.x;
+            positions[i + 2] = v.y;
+            positions[i + 3] = v.z;
+            mtx.getScale(v);
+            scales[i] = curTime;
+            scales[i + 1] = v.x;
+            scales[i + 2] = v.y;
+            scales[i + 3] = v.z;
+            i = keyIndex * 5;
+            mtx.getUnnormalizedRotation(q);
+            rotations[i] = curTime;
+            rotations[i + 1] = q.x;
+            rotations[i + 2] = q.y;
+            rotations[i + 3] = q.z;
+            rotations[i + 4] = q.z;
+            keyIndex++;
+            curTime += secondsPerFrame;
+        }
+        channel = new GVRAnimationChannel(bonename, positions, rotations, scales,
+                                          GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
+        skelanim.addChannel(bonename, channel);
+        for (int boneIndex = 1; boneIndex < numbones; ++boneIndex)
+        {
+            rotations = new float[numKeys * 5];
             bonename = skel.getBoneName(boneIndex);
+            curTime = 0;
             for (GVRPose pose : posePerFrame)
             {
-                int i = keyIndex * 4;
+                int keyIndex = 0;
+                int i = keyIndex * 5;
 
-                if (boneIndex == 0)
-                {
-                    pose.sync();
-                }
-                pose.getLocalMatrix(boneIndex, mtx);
-                mtx.getTranslation(v);
-                positions[i] = curTime;
-                positions[i + 1] = v.x;
-                positions[i + 2] = v.y;
-                positions[i + 3] = v.z;
-                mtx.getScale(v);
-                scales[i] = curTime;
-                scales[i + 1] = v.x;
-                scales[i + 2] = v.y;
-                scales[i + 3] = v.z;
-                i = keyIndex * 5;
-                mtx.getUnnormalizedRotation(q);
+                pose.getLocalRotation(boneIndex, q);
                 rotations[i] = curTime;
                 rotations[i + 1] = q.x;
                 rotations[i + 2] = q.y;
@@ -143,7 +160,7 @@ public class TRSImporter
                 curTime += secondsPerFrame;
             }
             channel = new GVRAnimationChannel(bonename, null, rotations, null,
-                    GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
+                                              GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
             skelanim.addChannel(bonename, channel);
         }
         return skelanim;
