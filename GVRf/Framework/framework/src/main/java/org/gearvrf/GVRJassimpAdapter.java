@@ -479,7 +479,10 @@ class  GVRJassimpAdapter
             mSkeleton = new GVRSkeleton(root, nodeProcessor.getBoneNames());
             GVRPose bindPose = new GVRPose(mSkeleton);
             Matrix4f bindPoseMtx = new Matrix4f();
+            GVRSceneObject skelRoot = mSkeleton.getOwnerObject().getParent();
+            Matrix4f rootMtx = skelRoot.getTransform().getModelMatrix4f();
 
+            rootMtx.invert();
             for (int boneId = 0; boneId < mSkeleton.getNumBones(); ++boneId)
             {
                 String boneName = mSkeleton.getBoneName(boneId);
@@ -500,17 +503,19 @@ class  GVRJassimpAdapter
                     Matrix4f mtx = t.getModelMatrix4f();
 
                     mtx.invert();
+                    rootMtx.mul(mtx, mtx);
                     bindPose.setWorldMatrix(boneId, mtx);
                     Log.e("BONE", "no bind pose matrix for bone %s", boneName);
                 }
             }
             mSkeleton.setBindPose(bindPose);
+            mSkeleton.getPose().copy(bindPose);
         }
     }
 
     private void attachBoneAnimations(GVRSkeletonAnimation skelAnim, Map<String, GVRAnimationChannel> animMap)
     {
-        GVRPose bindPose = new GVRPose(mSkeleton);
+        GVRPose bindPose = mSkeleton.getBindPose();
         Matrix4f bindPoseMtx = new Matrix4f();
         Vector3f vec = new Vector3f();
         final float EPSILON = 0.00001f;
@@ -519,16 +524,11 @@ class  GVRJassimpAdapter
         {
             String boneName = mSkeleton.getBoneName(boneId);
             AiBone aiBone = mBoneMap.get(boneName);
-            GVRSceneObject bone = mSkeleton.getBone(boneId);
             GVRAnimationChannel channel = animMap.get(boneName);
 
             if (aiBone != null)
             {
-                float[] matrixdata = aiBone.getOffsetMatrix(sWrapperProvider);
-
-                bindPoseMtx.set(matrixdata);
-                bindPoseMtx.invert();
-                bindPose.setWorldMatrix(boneId, bindPoseMtx);
+                bindPose.getWorldMatrix(boneId, bindPoseMtx);
                 bindPoseMtx.getScale(vec);
                 if (channel != null)
                 {
@@ -552,11 +552,6 @@ class  GVRJassimpAdapter
             }
             else
             {
-                GVRTransform t = bone.getTransform();
-                Matrix4f mtx = t.getModelMatrix4f();
-
-                mtx.invert();
-                bindPose.setWorldMatrix(boneId, mtx);
                 Log.e("BONE", "no bind pose matrix for bone %s", boneName);
                 if (channel != null)
                 {
@@ -565,7 +560,6 @@ class  GVRJassimpAdapter
                 }
             }
         }
-        mSkeleton.setBindPose(bindPose);
     }
 
     /*
@@ -792,8 +786,11 @@ class  GVRJassimpAdapter
         mMaterials = new GVRMaterial[scene.getNumMaterials()];
 
         traverseGraph(model, scene.getSceneRoot(sWrapperProvider), lightList);
-        if (!doAnimation ||
-            ((processAnimations(model, scene, settings.contains(GVRImportSettings.START_ANIMATIONS)) == null)))
+        if (doAnimation)
+        {
+            processAnimations(model, scene, settings.contains(GVRImportSettings.START_ANIMATIONS));
+        }
+        else
         {
             makeSkeleton(model);
         }

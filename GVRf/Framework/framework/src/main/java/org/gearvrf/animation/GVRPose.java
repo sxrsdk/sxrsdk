@@ -46,7 +46,7 @@ public class GVRPose implements PrettyPrint
     private final Quaternionf mTempQuat = new Quaternionf();
     public static final Matrix4f mTempMtxA = new Matrix4f();
     public static final Matrix4f mTempMtxB = new Matrix4f();
-    private static boolean sDebug = false;
+    private static boolean sDebug = true;
 
     /**
      * The pose space designates how the world matrices
@@ -714,7 +714,8 @@ public class GVRPose implements PrettyPrint
         int numbones = getNumBones();
 
         if (getSkeleton() != src.getSkeleton())
-            throw new IllegalArgumentException("GVRPose.copy: input pose is incompatible with this pose");
+            throw new IllegalArgumentException("GVRPose.copy: input pose does not have same skeleton as this pose");
+        src.sync();
         for (int i = 0; i < numbones; ++i)
         {
             mBones[i].copy(src.getBone(i));
@@ -885,12 +886,13 @@ public class GVRPose implements PrettyPrint
             int		pid = mSkeleton.getParentBoneIndex(i);
             boolean	update;
 
-            if (pid < 0)							// root bone?
+            if (pid < 0)							        // root bone?
                 continue;
             update = (mBones[pid].Changed & (WORLD_ROT | LOCAL_ROT)) != 0;
-            if (!mSkeleton.isLocked(i))				// bone not locked?
+            if (!mSkeleton.isLocked(i))				        // bone not locked?
             {
-                if ((bone.Changed & Bone.WORLD_POS) != 0)	// world matrix changed?
+                if ((bone.Changed == WORLD_ROT) ||
+                    ((bone.Changed & Bone.WORLD_POS) != 0))	// world matrix changed?
                 {
                     calcLocal(bone, pid);					// calculate local rotation and position
                     if (sDebug)
@@ -900,11 +902,11 @@ public class GVRPose implements PrettyPrint
                     continue;
                 }
             }
-            if (update ||								// use local pos & rot?
+            if (update ||								    // use local pos & rot?
                 (bone.Changed & (LOCAL_ROT | WORLD_ROT)) != 0)
             {
                 bone.Changed = LOCAL_ROT;
-                calcWorld(bone, pid);				    // update world rotation & position
+                calcWorld(bone, pid);				        // update world rotation & position
                 if (sDebug)
                 {
                     Log.d("BONE", "sync: %s %s", mSkeleton.getBoneName(i), bone.toString());

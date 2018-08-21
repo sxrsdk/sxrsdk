@@ -119,7 +119,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
      */
     public void loadModel(GVRAndroidResource avatarResource)
     {
-        EnumSet<GVRImportSettings> settings = GVRImportSettings.getRecommendedSettingsWith(EnumSet.of(GVRImportSettings.NO_ANIMATION));
+        EnumSet<GVRImportSettings> settings = GVRImportSettings.getRecommendedSettingsWith(EnumSet.of(GVRImportSettings.OPTIMIZE_GRAPH, GVRImportSettings.NO_ANIMATION));
         GVRContext ctx = mModelRoot.getGVRContext();
         GVRResourceVolume volume = new GVRResourceVolume(ctx, avatarResource);
         GVRSceneObject previousAvatar = (mModelRoot.getChildrenCount() > 0) ? mModelRoot.getChildByIndex(0) : null;
@@ -166,7 +166,8 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         }
         else
         {
-            EnumSet<GVRImportSettings> settings = GVRImportSettings.getRecommendedSettings();
+            EnumSet<GVRImportSettings> settings = GVRImportSettings.getRecommendedSettingsWith(EnumSet.of(GVRImportSettings.OPTIMIZE_GRAPH, GVRImportSettings.NO_TEXTURING));
+
             GVRSceneObject animRoot = new GVRSceneObject(ctx);
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
         }
@@ -282,6 +283,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             if (components.size() > 0)
             {
                 mSkeleton = (GVRSkeleton) components.get(0);
+                mSkeleton.updateSkinPose();
             }
             else
             {
@@ -311,7 +313,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             {
                 if (errors == null)
                 {
-                    errors = "No aniations found in " + filePath;
+                    errors = "No animations found in " + filePath;
                 }
                 context.getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class, "onAnimationLoaded", null, filePath, errors);
             }
