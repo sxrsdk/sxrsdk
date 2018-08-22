@@ -28,6 +28,7 @@ import org.gearvrf.animation.keyframe.GVRAnimationChannel;
 import org.gearvrf.animation.keyframe.GVRNodeAnimation;
 import org.gearvrf.animation.keyframe.GVRSkeletonAnimation;
 import org.gearvrf.jassimp.AiAnimBehavior;
+import org.gearvrf.jassimp.AiAnimMesh;
 import org.gearvrf.jassimp.AiAnimation;
 import org.gearvrf.jassimp.AiBone;
 import org.gearvrf.jassimp.AiBoneWeight;
@@ -132,15 +133,19 @@ class  GVRJassimpAdapter
         // Normals
         if (doLighting)
         {
+
             FloatBuffer normalsBuffer = aiMesh.getNormalBuffer();
             if (normalsBuffer != null)
             {
                 vertexDescriptor += " float3 a_normal";
+
                 normalsArray = new float[normalsBuffer.capacity()];
                 normalsBuffer.get(normalsArray, 0, normalsBuffer.capacity());
             }
+
         }
-        for(int c = 0; c < MAX_VERTEX_COLORS; c++)
+
+        for (int c = 0; c < MAX_VERTEX_COLORS; c++)
         {
             FloatBuffer fbuf = aiMesh.getColorBuffer(c);
             if (fbuf != null)
@@ -161,13 +166,26 @@ class  GVRJassimpAdapter
         }
         if (doLighting && aiMesh.hasTangentsAndBitangents())
         {
+
             vertexDescriptor += " float3 a_tangent float3 a_bitangent";
+
             FloatBuffer tangentBuffer = aiMesh.getTangentBuffer();
-            FloatBuffer bitangentBuffer = aiMesh.getBitangentBuffer();
+
             tangentsArray = new float[tangentBuffer.capacity()];
             tangentBuffer.get(tangentsArray, 0, tangentBuffer.capacity());
-            bitangentsArray = new float[bitangentBuffer.capacity()];
-            bitangentBuffer.get(bitangentsArray, 0, bitangentBuffer.capacity());
+            bitangentsArray = new float[tangentsArray.length];
+
+            Vector3f tangent = new Vector3f();
+            Vector3f normal = new Vector3f();
+            Vector3f bitangent = new Vector3f();
+
+            for(int i = 0; i < tangentsArray.length; i += 3)
+            {
+                tangent.set(tangentsArray[i], tangentsArray[i + 1], tangentsArray[i + 2]);
+                normal.set(normalsArray[i], normalsArray[i + 1], normalsArray[i + 2]);
+                normal.cross(tangent, bitangent);
+                bitangentsArray[i] = bitangent.x; bitangentsArray[i+1] = bitangent.y; bitangentsArray[i + 2] = bitangent.z;
+            }
         }
 
         GVRMesh mesh = new GVRMesh(ctx, vertexDescriptor);
@@ -243,6 +261,81 @@ class  GVRJassimpAdapter
             }
         }
         return mesh;
+    }
+
+    public void setMeshMorphComponent(GVRMesh mesh, GVRSceneObject sceneObject, AiMesh aiMesh)
+    {
+        int nAnimationMeshes = aiMesh.getAnimationMeshes().size();
+        if (nAnimationMeshes == 0)
+            return;
+
+        try
+        {
+            GVRMeshMorph morph = new GVRMeshMorph(mContext, nAnimationMeshes);
+            sceneObject.attachComponent(morph);
+            int blendShapeNum = 0;
+
+            for (AiAnimMesh animMesh : aiMesh.getAnimationMeshes())
+            {
+                GVRVertexBuffer animBuff = new GVRVertexBuffer(mesh.getVertexBuffer(),
+                                                               "float3 a_position float3 a_normal float3 a_tangent float3 a_bitangent");
+
+                float[] vertexArray = null;
+                float[] normalArray = null;
+                float[] tangentArray = null;
+                float[] bitangentArray = null;
+
+                //copy target positions to anim vertex buffer
+                FloatBuffer animPositionBuffer = animMesh.getPositionBuffer();
+                if (animPositionBuffer != null)
+                {
+                    vertexArray = new float[animPositionBuffer.capacity()];
+                    animPositionBuffer.get(vertexArray, 0, animPositionBuffer.capacity());
+                    animBuff.setFloatArray("a_position", vertexArray);
+                }
+
+                //copy target normals to anim normal buffer
+                FloatBuffer animNormalBuffer = animMesh.getNormalBuffer();
+                if (animNormalBuffer != null)
+                {
+                    normalArray = new float[animNormalBuffer.capacity()];
+                    animNormalBuffer.get(normalArray, 0, animNormalBuffer.capacity());
+                    animBuff.setFloatArray("a_normal", normalArray);
+                }
+
+                //copy target tangents to anim tangent buffer
+                FloatBuffer animTangentBuffer = animMesh.getTangentBuffer();
+                if (animTangentBuffer != null)
+                {
+                    tangentArray = new float[animTangentBuffer.capacity()];
+                    animTangentBuffer.get(tangentArray, 0, animTangentBuffer.capacity());
+                    animBuff.setFloatArray("a_tangent", tangentArray);
+
+                    //calculate bitangents
+                    bitangentArray = new float[tangentArray.length];
+                    for (int i = 0; i < tangentArray.length; i += 3)
+                    {
+                        Vector3f tangent =
+                            new Vector3f(tangentArray[i], tangentArray[i + 1], tangentArray[i + 2]);
+                        Vector3f normal =
+                            new Vector3f(normalArray[i], normalArray[i + 1], normalArray[i + 2]);
+                        Vector3f bitangent = new Vector3f();
+                        normal.cross(tangent, bitangent);
+                        bitangentArray[i] = bitangent.x;
+                        bitangentArray[i + 1] = bitangent.y;
+                        bitangentArray[i + 2] = bitangent.z;
+                        animBuff.setFloatArray("a_bitangent", bitangentArray);
+                    }
+                }
+                morph.setBlendShape(blendShapeNum, animBuff);
+                blendShapeNum++;
+            }
+            morph.update();
+        }
+        catch (IllegalArgumentException ex)
+        {
+            sceneObject.detachComponent(GVRMeshMorph.getComponentType());
+        }
     }
 
     public GVRSkin processBones(GVRMesh mesh, List<AiBone> aiBones)
@@ -509,7 +602,6 @@ class  GVRJassimpAdapter
                 }
             }
             mSkeleton.setBindPose(bindPose);
-            mSkeleton.getPose().copy(bindPose);
         }
     }
 
@@ -1023,6 +1115,7 @@ class  GVRJassimpAdapter
             renderData.disableLight();
         }
         sceneObject.attachRenderData(renderData);
+        setMeshMorphComponent(mesh, sceneObject, aiMesh);
     }
 
     private static final Map<AiTextureType, String> textureMap;

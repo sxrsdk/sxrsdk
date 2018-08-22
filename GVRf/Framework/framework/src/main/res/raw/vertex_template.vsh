@@ -63,6 +63,8 @@ struct Vertex
 {
 	vec4 local_position;
 	vec4 local_normal;
+	vec3 local_tangent;
+	vec3 local_bitangent;
 	vec3 viewspace_position;
 	vec3 viewspace_normal;
 	vec3 view_direction;
@@ -79,6 +81,10 @@ void main() {
 #ifdef HAS_a_normal
     vertex.local_normal = vec4(normalize(a_normal), 0.0);
 #endif
+#ifdef HAS_a_tangent
+    vertex.local_tangent = a_tangent;
+    vertex.local_bitangent = a_bitangent;
+#endif
 #ifdef HAS_VertexMorphShader
 @VertexMorphShader
 #endif
@@ -94,14 +100,14 @@ void main() {
 @VertexShader
 
 #ifdef HAS_LIGHTSOURCES
-	LightVertex(vertex);
+    LightVertex(vertex);
 #endif
 #ifdef HAS_TEXCOORDS
-	@TEXCOORDS
+@TEXCOORDS
 #endif
-	viewspace_position = vertex.viewspace_position;
-	viewspace_normal = vertex.viewspace_normal;
-	view_direction = vertex.view_direction;
+    viewspace_position = vertex.viewspace_position;
+    viewspace_normal = vertex.viewspace_normal;
+    view_direction = vertex.view_direction;
 #ifdef HAS_MULTIVIEW
     bool render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? true : false;
     mat4 mvp = u_mvp_[gl_ViewID_OVR];
