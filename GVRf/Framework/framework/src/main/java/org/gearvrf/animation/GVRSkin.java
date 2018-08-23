@@ -34,7 +34,7 @@ public class GVRSkin extends GVRComponent implements PrettyPrint
 {
     private static final String TAG = Log.tag(GVRSkin.class);
     protected int[] mBoneMap = null;
-    final protected GVRSkeleton mSkeleton;
+    protected GVRSkeleton mSkeleton;
 
     static public long getComponentType()
     {
@@ -79,6 +79,39 @@ public class GVRSkin extends GVRComponent implements PrettyPrint
     {
         mBoneMap = boneMap;
         NativeSkin.setBoneMap(getNative(), boneMap);
+    }
+
+    /**
+     * Change the skeleton which contains the bones that
+     * control this mesh.
+     * <p>
+     * The new skeleton must have corresponding bones for
+     * the skin or an exception is thrown.
+     * @param newSkel   new skeleton to use
+     */
+    public void setSkeleton(GVRSkeleton newSkel)
+    {
+        if (mSkeleton == newSkel)
+        {
+            return;
+        }
+        int[] newMap = new int[newSkel.getNumBones()];
+        for (int i = 0; i < mBoneMap.length; ++i)
+        {
+            int oldIndex = mBoneMap[i];
+            String boneName = mSkeleton.getBoneName(oldIndex);
+            int newIndex = newSkel.getBoneIndex(boneName);
+            if (newIndex >= 0)
+            {
+                newMap[i] = newIndex;
+            }
+            else
+            {
+                throw new IllegalArgumentException("Destination skeleton does not have bone " + boneName);
+            }
+        }
+        mBoneMap = newMap;
+        mSkeleton = newSkel;
     }
 
     @Override

@@ -11,6 +11,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -90,9 +91,9 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
     public static final int BONE_PHYSICS = 2;
 
     private static final String TAG = Log.tag(GVRSkeleton.class);
-    final protected GVRSceneObject[] mBones;
-    final protected int[] mParentBones;
-    final protected int[] mBoneOptions;
+    protected GVRSceneObject[] mBones;
+    protected int[] mParentBones;
+    protected int[] mBoneOptions;
     final private Quaternionf mTempQuatA = new Quaternionf();
     final private Quaternionf mTempQuatB = new Quaternionf();
     final private Matrix4f mTempMtx = new Matrix4f();
@@ -104,7 +105,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
     protected GVRPose mInverseBindPose; // inverse bind pose for this skeleton
     protected GVRPose mPose;            // current pose for this skeleton
     protected GVRPose mSkinPose;        // current pose for the skin
-    protected final float[] mPoseMatrices;
+    protected float[] mPoseMatrices;
 
     static public long getComponentType()
     {
@@ -272,8 +273,11 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
      */
     public void setBindPose(GVRPose pose)
     {
-        mBindPose.copy(pose);
-        mBindPose.sync();
+        if (pose != mBindPose)
+        {
+            mBindPose.copy(pose);
+            mBindPose.sync();
+        }
         if (mInverseBindPose == null)
         {
             mInverseBindPose = new GVRPose(this);
@@ -898,6 +902,77 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
 
         skinPose.getWorldMatrices(mPoseMatrices);
         NativeSkeleton.setPose(getNative(), mPoseMatrices);
+    }
+
+    /**
+     * Merge the source skeleton with this one.
+     * The result will be that this skeleton has all of its
+     * original bones and all the bones in the new skeleton.
+     *
+     * @param newSkel skeleton to merge with this one
+     */
+    public void merge(GVRSkeleton newSkel)
+    {
+        int numBones = getNumBones();
+        List<Integer> parentBoneIds = new ArrayList<Integer>(numBones + newSkel.getNumBones());
+        List<String> newBoneNames = new ArrayList<String>(newSkel.getNumBones());
+        List<Matrix4f> newMatrices = new ArrayList<Matrix4f>(newSkel.getNumBones());
+        GVRPose oldBindPose = getBindPose();
+        GVRPose curPose = getPose();
+
+        for (int i = 0; i < numBones; ++i)
+        {
+            parentBoneIds.add(mParentBones[i]);
+        }
+        for (int j = 0; j < newSkel.getNumBones(); ++j)
+        {
+            String boneName = newSkel.getBoneName(j);
+            int boneId = getBoneIndex(boneName);
+            if (boneId < 0)
+            {
+                int parentId = newSkel.getParentBoneIndex(j);
+                Matrix4f m = new Matrix4f();
+
+                newSkel.getBindPose().getLocalMatrix(j, m);
+                newMatrices.add(m);
+                newBoneNames.add(boneName);
+                if (parentId >= 0)
+                {
+                    boneName = newSkel.getBoneName(parentId);
+                    parentId = getBoneIndex(boneName);
+                }
+                parentBoneIds.add(parentId);
+            }
+        }
+        int n = numBones +  parentBoneIds.size();
+        int[] parentIds = Arrays.copyOf(mParentBones, n);
+        int[] boneOptions = Arrays.copyOf(mBoneOptions, n);
+        String[] boneNames = Arrays.copyOf(mBoneNames, n);
+
+        mBones = Arrays.copyOf(mBones, n);
+        mPoseMatrices =  new float[n * 16];
+        for (int i = 0; i < parentBoneIds.size(); ++i)
+        {
+            n = numBones + i;
+            parentIds[n] = parentBoneIds.get(i);
+            boneNames[n] = newBoneNames.get(i);
+            boneOptions[n] = BONE_ANIMATE;
+        }
+        mBoneOptions = boneOptions;
+        mBoneNames = boneNames;
+        mParentBones = parentIds;
+        mPose = new GVRPose(this);
+        mBindPose = new GVRPose(this);
+        mBindPose.copy(oldBindPose);
+        mPose.copy(curPose);
+        mBindPose.sync();
+        for (int j = 0; j < newSkel.getNumBones(); ++j)
+        {
+            mBindPose.setLocalMatrix(numBones + j, newMatrices.get(j));
+            mPose.setLocalMatrix(numBones + j, newMatrices.get(j));
+        }
+        setBindPose(mBindPose);
+        mPose.sync();
     }
 
     @Override

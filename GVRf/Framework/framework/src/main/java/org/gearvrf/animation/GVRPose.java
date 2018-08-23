@@ -712,13 +712,26 @@ public class GVRPose implements PrettyPrint
     public void  copy(GVRPose src)
     {
         int numbones = getNumBones();
+        GVRSkeleton srcSkel = src.getSkeleton();
 
-        if (getSkeleton() != src.getSkeleton())
-            throw new IllegalArgumentException("GVRPose.copy: input pose does not have same skeleton as this pose");
         src.sync();
-        for (int i = 0; i < numbones; ++i)
+        if (getSkeleton() == srcSkel)
         {
-            mBones[i].copy(src.getBone(i));
+            for (int i = 0; i < numbones; ++i)
+            {
+                mBones[i].copy(src.getBone(i));
+            }
+            return;
+        }
+        for (int i = 0; i < srcSkel.getNumBones(); ++i)
+        {
+           String boneName = mSkeleton.getBoneName(i);
+           int j = mSkeleton.getBoneIndex(boneName);
+
+           if (j >= 0)
+           {
+               mBones[j] = src.getBone(j);
+           }
         }
     }
 
