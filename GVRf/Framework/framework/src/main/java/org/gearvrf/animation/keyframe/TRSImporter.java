@@ -55,6 +55,7 @@ public class TRSImporter
         float       curTime = 0;
         GVRPose     curpose = null;
         Matrix4f mtx = new Matrix4f();
+        Quaternionf q = new Quaternionf();
         ArrayList<GVRPose> posePerFrame = new ArrayList<>();
 
         /*
@@ -71,29 +72,40 @@ public class TRSImporter
             }
             boneName = words[0];
             int boneIndex = skel.getBoneIndex(boneName);
+
             if (boneIndex < 0)
             {
                 Log.w("BONE","Bone " + boneName + " not found in skeleton");
                 continue;
             }
+            float tx = Float.parseFloat(words[1]);
+            float ty = Float.parseFloat(words[2]);
+            float tz = Float.parseFloat(words[3]);
+            float sx = Float.parseFloat(words[8]);
+            float sy = Float.parseFloat(words[9]);
+            float sz = Float.parseFloat(words[10]);
+            q.x = Float.parseFloat(words[4]);
+            q.y = Float.parseFloat(words[5]);
+            q.z = Float.parseFloat(words[6]);
+            q.w = Float.parseFloat(words[7]);
+            q.normalize();
             if (boneIndex == 0)
             {
                 curpose = new GVRPose(skel);
                 posePerFrame.add(curpose);
                 curTime =+ secondsPerFrame;
+                mtx.translationRotateScale(tx, ty, tz, q.x, q.y, q.z, q.w, sx, sy, sz);
+                curpose.setWorldMatrix(boneIndex, mtx);
             }
-            float tx = Float.parseFloat(words[1]);
-            float ty = Float.parseFloat(words[2]);
-            float tz = Float.parseFloat(words[3]);
-            float qx = Float.parseFloat(words[4]);
-            float qy = Float.parseFloat(words[5]);
-            float qz = Float.parseFloat(words[6]);
-            float qw = Float.parseFloat(words[7]);
-            float sx = Float.parseFloat(words[8]);
-            float sy = Float.parseFloat(words[9]);
-            float sz = Float.parseFloat(words[10]);
-            mtx.translationRotateScale(tx, ty, tz, qx, qy, qz, qw, sx, sy, sz);
-            curpose.setWorldMatrix(boneIndex, mtx);
+            else
+            {
+                int parentIndex = skel.getParentBoneIndex(boneIndex);
+                curpose.getWorldMatrix(parentIndex, mtx);
+                mtx.setTranslation(tx, ty, tz);
+                mtx.rotate(q);
+                mtx.scale(sx, sy, sz);
+                curpose.setWorldMatrix(boneIndex, mtx);
+            }
         }
         /*
          * Create a skeleton animation with separate channels for each bone
@@ -101,7 +113,6 @@ public class TRSImporter
         GVRSkeletonAnimation skelanim = new GVRSkeletonAnimation(mFileName, skel, curTime);
         GVRAnimationChannel channel;
         Vector3f v = new Vector3f();
-        Quaternionf q = new Quaternionf();
         int numKeys = posePerFrame.size();
 
         curTime = 0;
@@ -133,7 +144,7 @@ public class TRSImporter
             rotations[i + 1] = q.x;
             rotations[i + 2] = q.y;
             rotations[i + 3] = q.z;
-            rotations[i + 4] = q.z;
+            rotations[i + 4] = q.w;
             keyIndex++;
             curTime += secondsPerFrame;
         }
@@ -155,7 +166,7 @@ public class TRSImporter
                 rotations[i + 1] = q.x;
                 rotations[i + 2] = q.y;
                 rotations[i + 3] = q.z;
-                rotations[i + 4] = q.z;
+                rotations[i + 4] = q.w;
                 keyIndex++;
                 curTime += secondsPerFrame;
             }

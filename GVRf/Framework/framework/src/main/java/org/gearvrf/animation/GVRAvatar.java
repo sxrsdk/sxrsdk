@@ -47,6 +47,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     protected final GVRSceneObject mModelRoot;
     protected boolean mIsRunning;
     protected GVREventReceiver mReceiver;
+    protected List<GVRAnimator> mAnimQueue = new ArrayList<GVRAnimator>();
 
     /**
      * Make an instance of the GVRAnimator component.
@@ -112,6 +113,31 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
      * @return number of animations added to this avatar
      */
     public int getAnimationCount() { return mAnimations.size(); }
+
+
+    protected GVROnFinish mOnFinish = new GVROnFinish()
+    {
+        public void finished(GVRAnimation animation)
+        {
+            if (mAnimQueue.size() > 0)
+            {
+                GVRAnimator animator = mAnimQueue.get(0);
+                if (animator.findAnimation(animation) >= 0)
+                {
+                    mAnimQueue.remove(0);
+                    mModelRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
+                                                                           "onAnimationFinished", animator, animation);
+                    if (mAnimQueue.size() > 0)
+                    {
+                        animator = mAnimQueue.get(0);
+                        mModelRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
+                                                                               "onAnimationStarted", animator);
+                        animator.start(mOnFinish);
+                    }
+                }
+            }
+        }
+    };
 
     /**
      * Load the
@@ -223,9 +249,8 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         mAnimations.clear();
     }
 
-
     /**
-     * Starts all of the animations.
+     * Starts the named animation.
      * @see GVRAvatar#stop(String)
      * @see GVRAnimationEngine#start(GVRAnimation)
      */
@@ -236,10 +261,37 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         {
             if (name.equals(anim.getName()))
             {
-                anim.start();
+                mAnimQueue.add(anim);
+                if (mAnimQueue.size() > 1)
+                {
+                    anim.start(mOnFinish);
+                }
             }
         }
     }
+
+    /**
+     * Starts the animation with the given index.
+     * @param animIndex 0-based index of {@link GVRAnimator} to start;
+     * @see GVRAvatar#stop()
+     * @see #start(String)
+     */
+    public GVRAnimator start(int animIndex)
+    {
+        if ((animIndex < 0) || (animIndex > mAnimations.size()))
+        {
+            throw new IndexOutOfBoundsException("Animation index out of bounds");
+        }
+        mIsRunning = true;
+        GVRAnimator anim = mAnimations.get(animIndex);
+        mAnimQueue.add(anim);
+        if (mAnimQueue.size() == 1)
+        {
+            anim.start(mOnFinish);
+        }
+        return anim;
+    }
+
 
     /**
      * Stops all of the animations associated with this animator.
@@ -255,6 +307,22 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             {
                 anim.stop();
             }
+        }
+    }
+
+    /**
+     * Stops the currently running animation, if any.
+     * @see GVRAvatar#start(String)
+     * @see GVRAnimationEngine#stop(GVRAnimation)
+     */
+    public void stop()
+    {
+        if (mIsRunning && (mAnimQueue.size() > 0))
+        {
+            mIsRunning = false;
+            GVRAnimator animator = mAnimQueue.get(0);
+            mAnimQueue.clear();
+            animator.stop();
         }
     }
 
@@ -283,6 +351,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             if (components.size() > 0)
             {
                 mSkeleton = (GVRSkeleton) components.get(0);
+                mSkeleton.getPose().clearRotations();
                 mSkeleton.updateSkinPose();
             }
             else
@@ -301,7 +370,9 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     public interface IAvatarEvents extends IEvents
     {
         public void onAvatarLoaded(GVRSceneObject avatarRoot, String filePath, String errors);
-        public void onAnimationLoaded(GVRAnimator animation, String filePath, String errors);
+        public void onAnimationLoaded(GVRAnimator animator, String filePath, String errors);
+        public void onAnimationStarted(GVRAnimator animator);
+        public void onAnimationFinished(GVRAnimator animator, GVRAnimation animation);
     }
 
     protected IAssetEvents mLoadAnimHandler = new IAssetEvents()

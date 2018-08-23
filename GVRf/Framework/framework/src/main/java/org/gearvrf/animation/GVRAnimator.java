@@ -150,6 +150,27 @@ public class GVRAnimator extends GVRBehavior
     }
 
     /**
+     * Find the index of this animation if it is in this animator.
+     *
+     * @param findme    {@link GVRAnimation} to find.
+     * @returns 0 based index of animation or -1 if not found
+     * @see GVRAnimator#addAnimation(GVRAnimation)
+     */
+    public int findAnimation(GVRAnimation findme)
+    {
+        int index = 0;
+        for (GVRAnimation anim : mAnimations)
+        {
+            if (anim == findme)
+            {
+                return index;
+            }
+            ++index;
+        }
+        return -1;
+    }
+
+    /**
      * Removes all the animations from this animator.
      * <p>
      * The state of the animations are not changed when removed. For example,
@@ -202,7 +223,7 @@ public class GVRAnimator extends GVRBehavior
     }
 
     /**
-     * Starts all of the animations.
+     * Starts all of the animations in this animator.
      * @see GVRAnimator#reset()
      * @see GVRAnimationEngine#start(GVRAnimation)
      */
@@ -215,6 +236,26 @@ public class GVRAnimator extends GVRBehavior
         }
     }
 
+    /**
+     * Starts all of the animations in this animator.
+     * @see GVRAnimator#reset()
+     * @see GVRAnimationEngine#start(GVRAnimation)
+     */
+    public void start(GVROnFinish finishCallback)
+    {
+        if (mAnimations.size() == 0)
+        {
+            return;
+        }
+        mIsRunning = true;
+        GVRAnimation anim = mAnimations.get(0);
+        anim.setOnFinish(finishCallback);
+        for (int i = 0; i < mAnimations.size(); ++i)
+        {
+            anim = mAnimations.get(i);
+            getGVRContext().getAnimationEngine().start(anim);
+        }
+    }
 
     /**
      * Stops all of the animations associated with this animator.
@@ -223,9 +264,16 @@ public class GVRAnimator extends GVRBehavior
      */
     public void stop()
     {
-        mIsRunning = false;
-        for (GVRAnimation anim : mAnimations)
+        if (!mIsRunning || (mAnimations.size() == 0))
         {
+            return;
+        }
+        GVRAnimation anim = mAnimations.get(0);
+        mIsRunning = false;
+        anim.setOnFinish(null);
+        for (int i = 0; i < mAnimations.size(); ++i)
+        {
+            anim = mAnimations.get(i);
             getGVRContext().getAnimationEngine().stop(anim);
         }
     }
