@@ -141,6 +141,8 @@ public final class GVRAssetLoader {
             return fname;
         }
 
+        public String getFileName() { return mFileName; }
+
         /**
          * Disable texture caching
          */
@@ -449,7 +451,7 @@ public final class GVRAssetLoader {
         public TextureRequest(AssetRequest assetRequest, GVRTexture texture, String texFile)
         {
             mAssetRequest = assetRequest;
-            TextureFile = texFile;
+            TextureFile = makeTexFileName(texFile);
             Texture = texture;
             mCallback = null;
             Log.v("ASSET", "loadTexture " + TextureFile);
@@ -458,7 +460,7 @@ public final class GVRAssetLoader {
         public TextureRequest(GVRAndroidResource resource, GVRTexture texture)
         {
             mAssetRequest = null;
-            TextureFile = resource.getResourceFilename();
+            TextureFile = makeTexFileName(resource.getResourceFilename());
             Texture = texture;
             mCallback = null;
             Log.v("ASSET", "loadTexture " + TextureFile);
@@ -467,13 +469,13 @@ public final class GVRAssetLoader {
         public TextureRequest(GVRAndroidResource resource, GVRTexture texture, TextureCallback callback)
         {
             mAssetRequest = null;
-            TextureFile = resource.getResourceFilename();
+            TextureFile = makeTexFileName(resource.getResourceFilename());
             Texture = texture;
             mCallback = callback;
             Log.v("ASSET", "loadTexture " + TextureFile);
         }
 
-         public void loaded(final GVRImage image, GVRAndroidResource resource)
+        public void loaded(final GVRImage image, GVRAndroidResource resource)
         {
             GVRContext ctx = Texture.getGVRContext();
             Texture.loaded(image, resource);
@@ -518,6 +520,42 @@ public final class GVRAssetLoader {
         public boolean stillWanted(GVRAndroidResource androidResource)
         {
             return true;
+        }
+
+        private String makeTexFileName(String texfile)
+        {
+            if (texfile.contains(":") || texfile.startsWith("/") || texfile.startsWith("\\"))
+            {
+                String assetFile = mAssetRequest.getFileName();
+                int i = 0;
+
+                while (assetFile.charAt(i) == texfile.charAt(i))
+                {
+                    ++i;
+                    if ((i >= assetFile.length()) || (i >= texfile.length()))
+                    {
+                        return texfile;
+                    }
+                }
+                if (i == 0)
+                {
+                    if (!texfile.startsWith("http"))
+                    {
+                        i = texfile.lastIndexOf("\\");
+                        if (i < 0)
+                        {
+                            i = texfile.lastIndexOf("/");
+                        }
+                        if (i < 0)
+                        {
+                            return texfile;
+                        }
+                        ++i;
+                    }
+                }
+                return texfile.substring(i);
+            }
+            return texfile;
         }
     }
 
