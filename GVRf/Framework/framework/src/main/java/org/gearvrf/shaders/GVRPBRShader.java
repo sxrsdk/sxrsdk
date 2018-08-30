@@ -73,6 +73,7 @@ public class GVRPBRShader extends GVRShaderTemplate
         setSegment("VertexNormalShader", normalShader);
 
 
+
         mHasVariants = true;
         mUsesLights = true;
     }

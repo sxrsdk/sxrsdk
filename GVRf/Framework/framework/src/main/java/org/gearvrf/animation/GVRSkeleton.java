@@ -125,6 +125,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
      */
     public GVRSkeleton(GVRContext ctx, int[] parentBones)
     {
+
         super(ctx, NativeSkeleton.ctor(parentBones.length));
         mType = getComponentType();
         mParentBones = parentBones;
@@ -150,6 +151,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
         mBoneNames = new String[numBones];
         mBones = new GVRSceneObject[numBones];
         mPoseMatrices =  new float[numBones * 16];
+
         int numRoots = 0;
         GVRSceneObject skelRoot = null;
 
@@ -588,8 +590,11 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
     public int getBoneIndex(String bonename)
     {
         for (int i = 0; i < getNumBones(); ++i)
+
             if (mBoneNames[i].equals(bonename))
+
                 return i;
+
         return -1;
     }
 
@@ -601,6 +606,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
      */
     public int getNumBones()
     {
+
         return mParentBones.length;
     }
 
@@ -861,6 +867,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
      */
     public GVRPose computeSkinPose()
     {
+
         if (mInverseBindPose == null)
         {
             return null;
@@ -895,7 +902,6 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
     public void updateSkinPose()
     {
         GVRPose skinPose = computeSkinPose();
-
         skinPose.getWorldMatrices(mPoseMatrices);
         NativeSkeleton.setPose(getNative(), mPoseMatrices);
     }

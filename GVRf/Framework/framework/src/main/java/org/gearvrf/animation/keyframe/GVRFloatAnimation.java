@@ -32,8 +32,8 @@ public class GVRFloatAnimation implements PrettyPrint
             float nextTime = getTime(index + 1);
 
             if ((index >= 0) &&
-                (curTime <= time) &&
-                (time < nextTime))
+                    (curTime <= time) &&
+                    (time < nextTime))
             {
                 // interpolate
                 float deltaTime = nextTime - curTime;
@@ -71,6 +71,7 @@ public class GVRFloatAnimation implements PrettyPrint
             {
                 return -1;
             }
+
             index = keyIndex * mFloatsPerKey;
             if (index + mFloatsPerKey > mKeyData.length)
             {
@@ -87,6 +88,7 @@ public class GVRFloatAnimation implements PrettyPrint
         public float getTime(int keyIndex)
         {
             int ofs = getKeyOffset(keyIndex);
+
             if (ofs >= 0)
             {
                 return mKeyData[ofs];
@@ -154,15 +156,15 @@ public class GVRFloatAnimation implements PrettyPrint
             if ((mLastKeyIndex != -1) && (lastOfs >= 0))
             {
                 if ((lastTime <= time) &&
-                    (time < nextTime))
+                        (time < nextTime))
                 {
                     return mLastKeyIndex;
                 }
                 float prevTime = getTime(mLastKeyIndex - 1);
 
                 if ((prevTime >= 0) &&
-                    (prevTime <= time) &&
-                    (time < lastTime))
+                        (prevTime <= time) &&
+                        (time < lastTime))
                 {
                     return --mLastKeyIndex;
                 }
@@ -171,8 +173,8 @@ public class GVRFloatAnimation implements PrettyPrint
 
                 // Try neighboring keys
                 if ((nextTime >= 0) &&
-                    (lastTime <= time) &&
-                    (time < nextTime))
+                        (lastTime <= time) &&
+                        (time < nextTime))
                 {
                     return ++mLastKeyIndex;
                 }
@@ -207,15 +209,15 @@ public class GVRFloatAnimation implements PrettyPrint
                 }
             }
             if ((getTime(low) <= time) &&
-                (time < getTime(low + 1)))
+                    (time < getTime(low + 1)))
             {
                 return mLastKeyIndex = low;
             }
             float lowTime = getTime(low + 2);
 
             if ((lowTime >= 0) &&
-               (getTime(low + 1) <= time) &&
-               (time < lowTime))
+                    (getTime(low + 1) <= time) &&
+                    (time < lowTime))
             {
                 return mLastKeyIndex = low + 1;
             }
@@ -378,4 +380,3 @@ public class GVRFloatAnimation implements PrettyPrint
 
 
 }
-

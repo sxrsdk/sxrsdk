@@ -286,7 +286,7 @@ public class GVRPose implements PrettyPrint
 
             bone.setWorldRotation(rotations[t], rotations[t + 1], rotations[t + 2], rotations[t + 3]);
             bone.Changed |= WORLD_ROT;
-            calcLocal(bone, mSkeleton.getParentBoneIndex(i));
+//            calcLocal(bone, mSkeleton.getParentBoneIndex(i));
             if (sDebug)
             {
                 Log.d("BONE", "setWorldRotation: %s %s", mSkeleton.getBoneName(i), bone.toString());
@@ -891,7 +891,9 @@ public class GVRPose implements PrettyPrint
             update = (mBones[pid].Changed & (WORLD_ROT | LOCAL_ROT)) != 0;
             if (!mSkeleton.isLocked(i))				        // bone not locked?
             {
-                if ((bone.Changed == WORLD_ROT) ||
+
+                if ((bone.Changed == Bone.WORLD_ROT) ||
+
                     ((bone.Changed & Bone.WORLD_POS) != 0))	// world matrix changed?
                 {
                     calcLocal(bone, pid);					// calculate local rotation and position
@@ -1081,8 +1083,11 @@ static class Bone
         float scalez = (float) Math.sqrt( WorldMatrix.m20() *  WorldMatrix.m20() +
                 WorldMatrix.m21() *  WorldMatrix.m21() +
                 WorldMatrix.m22() *  WorldMatrix.m22());
-
         WorldMatrix.translationRotateScale(posx, posy, posz, x, y, z, w, scalex, scaley, scalez);
+
+
+
+
     }
 
     public void setWorldRotation(Quaternionf q)

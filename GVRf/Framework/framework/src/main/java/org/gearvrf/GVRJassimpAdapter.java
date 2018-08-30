@@ -269,6 +269,7 @@ class  GVRJassimpAdapter
         if (nAnimationMeshes == 0)
             return;
 
+
         try
         {
             GVRMeshMorph morph = new GVRMeshMorph(mContext, nAnimationMeshes);
@@ -285,6 +286,7 @@ class  GVRJassimpAdapter
                 float[] tangentArray = null;
                 float[] bitangentArray = null;
 
+
                 //copy target positions to anim vertex buffer
                 FloatBuffer animPositionBuffer = animMesh.getPositionBuffer();
                 if (animPositionBuffer != null)
@@ -293,6 +295,7 @@ class  GVRJassimpAdapter
                     animPositionBuffer.get(vertexArray, 0, animPositionBuffer.capacity());
                     animBuff.setFloatArray("a_position", vertexArray);
                 }
+
 
                 //copy target normals to anim normal buffer
                 FloatBuffer animNormalBuffer = animMesh.getNormalBuffer();
@@ -335,6 +338,7 @@ class  GVRJassimpAdapter
         catch (IllegalArgumentException ex)
         {
             sceneObject.detachComponent(GVRMeshMorph.getComponentType());
+
         }
     }
 
@@ -783,18 +787,18 @@ class  GVRJassimpAdapter
     {
         switch (behavior)
         {
-        case DEFAULT:
-            return GVRAnimationBehavior.DEFAULT;
-        case CONSTANT:
-            return GVRAnimationBehavior.CONSTANT;
-        case LINEAR:
-            return GVRAnimationBehavior.LINEAR;
-        case REPEAT:
-            return GVRAnimationBehavior.REPEAT;
-        default:
-            // Unsupported setting
-            Log.e(TAG, "Cannot convert animation behavior: %s", behavior);
-            return GVRAnimationBehavior.DEFAULT;
+            case DEFAULT:
+                return GVRAnimationBehavior.DEFAULT;
+            case CONSTANT:
+                return GVRAnimationBehavior.CONSTANT;
+            case LINEAR:
+                return GVRAnimationBehavior.LINEAR;
+            case REPEAT:
+                return GVRAnimationBehavior.REPEAT;
+            default:
+                // Unsupported setting
+                Log.e(TAG, "Cannot convert animation behavior: %s", behavior);
+                return GVRAnimationBehavior.DEFAULT;
         }
     }
 
@@ -879,7 +883,9 @@ class  GVRJassimpAdapter
 
         traverseGraph(model, scene.getSceneRoot(sWrapperProvider), lightList);
         if (!doAnimation ||
+
             (processAnimations(model, scene, settings.contains(GVRImportSettings.START_ANIMATIONS)) == null))
+
         {
             makeSkeleton(model);
         }
@@ -964,7 +970,7 @@ class  GVRJassimpAdapter
             if ("".equals(nodeName))
             {
                 if ((mNodeMap.get(parent) == null) ||
-                    ((aiChild = handleNoName(node, sceneObject)) == null))
+                        ((aiChild = handleNoName(node, sceneObject)) == null))
                 {
                     nodeName = "mesh";
                     sceneObject.setName(nodeName + "-" + meshId);

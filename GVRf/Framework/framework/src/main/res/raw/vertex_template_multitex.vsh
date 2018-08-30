@@ -147,6 +147,7 @@ void main() {
 	viewspace_normal = vertex.viewspace_normal;
 	view_direction = vertex.view_direction;
 #ifdef HAS_MULTIVIEW
+
 	 bool render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? true : false;
      mat4 mvp = u_mvp_[gl_ViewID_OVR];
      if(!render_mask)

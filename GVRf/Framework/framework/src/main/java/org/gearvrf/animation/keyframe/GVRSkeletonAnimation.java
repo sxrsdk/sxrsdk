@@ -56,6 +56,7 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
     {
     	super(target, duration);
         mName = name;
+
     }
 
     /**
@@ -75,6 +76,7 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
             mSkeleton.setBoneOptions(boneId, GVRSkeleton.BONE_ANIMATE);
         }
         mBoneChannels = new GVRAnimationChannel[mSkeleton.getNumBones()];
+
     }
 
     /**
@@ -206,6 +208,7 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
                 (skel.getBoneOptions(i) == GVRSkeleton.BONE_ANIMATE))
             {
                 channel.animate(timeInSec, temp);
+
                 if (rootOffset != null)
                 {
                     temp.m30(rootOffset.x + temp.m30());
@@ -213,9 +216,14 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
                     temp.m32(rootOffset.z + temp.m32());
                     rootOffset = null;
                 }
+
+
                 pose.setLocalMatrix(i, temp);
             }
         }
+
+
+      //  pose.setWorldRotation(5,0.8f,1f,0.9f,1);
         skel.poseToBones();
         skel.updateSkinPose();
     }

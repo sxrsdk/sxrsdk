@@ -843,6 +843,8 @@ public class GVRMesh extends GVRHybridObject implements PrettyPrint {
         return mesh;
     }
 
+
+
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
