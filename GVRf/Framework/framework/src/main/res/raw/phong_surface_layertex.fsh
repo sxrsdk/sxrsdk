@@ -59,15 +59,6 @@ layout(location = 21) in vec2 lightmap_coord1;
 layout(set = 0, binding = 21) uniform sampler2D lightmapTexture1;
 #endif
 
-layout ( set = 0, binding = 10 ) uniform sampler2D diffuseTexture;
-layout ( set = 0, binding = 11 ) uniform sampler2D ambientTexture;
-layout ( set = 0, binding = 12 ) uniform sampler2D specularTexture;
-layout ( set = 0, binding = 13 ) uniform sampler2D opacityTexture;
-layout ( set = 0, binding = 14 ) uniform sampler2D lightmapTexture;
-layout ( set = 0, binding = 15 ) uniform sampler2D normalTexture;
-layout ( set = 0, binding = 16 ) uniform sampler2D emissiveTexture;
-layout ( set = 0, binding = 17 ) uniform sampler2D blendshapeTexture;
-
 struct Surface
 {
    vec3 viewspaceNormal;
