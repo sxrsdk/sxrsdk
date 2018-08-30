@@ -37,7 +37,7 @@ layout(set = 0, binding = 13) uniform sampler2D opacityTexture;
 layout(set = 0, binding = 14) uniform sampler2D lightmapTexture;
 layout(set = 0, binding = 15) uniform sampler2D emissiveTexture;
 layout(set = 0, binding = 16) uniform sampler2D normalTexture;
-layout ( set = 0, binding = 17 ) uniform sampler2D blendshapeTexture;
+layout(set = 0, binding = 17) uniform sampler2D blendshapeTexture;
 
 #ifdef HAS_diffuseTexture1
 layout(location = 19) in vec2 diffuse_coord1;
