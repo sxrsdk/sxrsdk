@@ -1,6 +1,19 @@
+/* Copyright 2018 Samsung Electronics Co., LTD
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gearvrf.animation;
 
-;
 import org.gearvrf.GVRComponent;
 import org.gearvrf.GVRContext;
 import org.gearvrf.GVRSceneObject;
@@ -803,7 +816,6 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
     /**
      * Applies the matrices computed from the scene object's
      * linked to the skeleton bones to the current pose.
-     *
      * @see #applyPose(GVRPose, int)
      * @see #setPose(GVRPose)
      */
@@ -822,6 +834,28 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
             }
             GVRTransform trans = bone.getTransform();
             mPose.setLocalMatrix(i, trans.getLocalModelMatrix4f());
+        }
+        mPose.sync();
+    }
+
+    /**
+     * Applies the matrices computed from the scene object's
+     * linked to the skeleton bones to the current pose.
+     * @param boneOptions   Only update bones with the given options
+     *                      (BONE_PHYSICS or BONE_ANIMATE)
+     * @see #applyPose(GVRPose, int)
+     * @see #setPose(GVRPose)
+     */
+    public void poseFromBones(int boneOptions)
+    {
+        for (int i = 0; i < getNumBones(); ++i)
+        {
+            GVRSceneObject bone = mBones[i];
+            if ((bone != null) && (mBoneOptions[i] & boneOptions) != 0)
+            {
+                GVRTransform trans = bone.getTransform();
+                mPose.setLocalMatrix(i, trans.getLocalModelMatrix4f());
+            }
         }
         mPose.sync();
     }
@@ -850,6 +884,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
             }
         }
     }
+
 
     /*
      * Compute the skinning matrices from the current pose.
