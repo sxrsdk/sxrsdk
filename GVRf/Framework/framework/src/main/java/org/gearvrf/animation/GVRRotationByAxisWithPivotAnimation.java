@@ -34,6 +34,8 @@ public class GVRRotationByAxisWithPivotAnimation extends GVRTransformAnimation {
     private final float mAngle, //
             mAxisX, mAxisY, mAxisZ, //
             mPivotX, mPivotY, mPivotZ;
+     private final Quaternionf mStartRotation = new Quaternionf();
+     private final Vector3f mStartPosition = new Vector3f();
 
     /**
      * Use
@@ -72,6 +74,8 @@ public class GVRRotationByAxisWithPivotAnimation extends GVRTransformAnimation {
         mPivotX = pivotX;
         mPivotY = pivotY;
         mPivotZ = pivotZ;
+        mStartRotation.set(mRotation);
+        mStartPosition.set(mPosition);
     }
 
     /**

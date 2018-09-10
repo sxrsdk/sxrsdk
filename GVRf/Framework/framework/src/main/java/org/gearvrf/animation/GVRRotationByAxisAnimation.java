@@ -18,6 +18,7 @@ package org.gearvrf.animation;
 import org.gearvrf.GVRHybridObject;
 import org.gearvrf.GVRSceneObject;
 import org.gearvrf.GVRTransform;
+import org.gearvrf.utility.Log;
 import org.joml.Quaternionf;
 
 /** Rotation animation. */
@@ -81,7 +82,8 @@ public class GVRRotationByAxisAnimation extends GVRTransformAnimation
     protected void animate(GVRHybridObject target, float ratio)
     {
         float angle = ratio * mAngle;
-        mRotation.fromAxisAngleDeg(mX, mY, mZ, angle);
+
+        mRotation.fromAxisAngleDeg(mAxisX, mAxisY, mAxisZ, angle);
         mRotation.mul(mStartRotation);
         super.animate(ratio);
     }

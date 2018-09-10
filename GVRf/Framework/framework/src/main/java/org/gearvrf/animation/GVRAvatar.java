@@ -1,17 +1,3 @@
-/* Copyright 2018 Samsung Electronics Co., LTD
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.gearvrf.animation;
 
 import org.gearvrf.GVRAndroidResource;
@@ -175,7 +161,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         {
             mModelRoot.removeChildObject(previousAvatar);
         }
-        ctx.getAssetLoader().loadModel(volume, mModelRoot, settings, true, mLoadModelHandler);
+        ctx.getAssetLoader().loadModel(volume, mModelRoot, settings, false, mLoadModelHandler);
     }
 
     public void loadAnimation(GVRAndroidResource animResource)
@@ -365,14 +351,14 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         {
             List<GVRComponent> components = avatar.getAllComponents(GVRSkeleton.getComponentType());
 
-            if (!"".equals(errors))
+            if ((errors != null) && !errors.isEmpty())
             {
                 Log.e(TAG, "Asset load errors: " + errors);
             }
             if (components.size() > 0)
             {
                 mSkeleton = (GVRSkeleton) components.get(0);
-                mSkeleton.getPose().clearRotations();
+                mSkeleton.poseFromBones();
                 mSkeleton.updateSkinPose();
             }
             else

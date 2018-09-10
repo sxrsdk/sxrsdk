@@ -1,17 +1,3 @@
-/* Copyright 2018 Samsung Electronics Co., LTD
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.gearvrf.animation;
 
 import org.gearvrf.PrettyPrint;
@@ -153,10 +139,11 @@ public class GVRPose implements PrettyPrint
     public void     getWorldPosition(int boneindex, Vector3f pos) 
     {
         Bone bone = mBones[boneindex];
+        int boneParent = mSkeleton.getParentBoneIndex(boneindex);
 
-        if ((bone.Changed & LOCAL_ROT) == LOCAL_ROT)
+        if ((boneParent >= 0) && ((bone.Changed & LOCAL_ROT) == LOCAL_ROT))
         {
-            calcWorld(bone, mSkeleton.getParentBoneIndex(boneindex));
+            calcWorld(bone, boneParent);
         }
         pos.x = bone.WorldMatrix.m30();
         pos.y = bone.WorldMatrix.m31();
@@ -726,26 +713,13 @@ public class GVRPose implements PrettyPrint
     public void  copy(GVRPose src)
     {
         int numbones = getNumBones();
-        GVRSkeleton srcSkel = src.getSkeleton();
 
+        if (getSkeleton() != src.getSkeleton())
+            throw new IllegalArgumentException("GVRPose.copy: input pose does not have same skeleton as this pose");
         src.sync();
-        if (getSkeleton() == srcSkel)
+        for (int i = 0; i < numbones; ++i)
         {
-            for (int i = 0; i < numbones; ++i)
-            {
-                mBones[i].copy(src.getBone(i));
-            }
-            return;
-        }
-        for (int i = 0; i < srcSkel.getNumBones(); ++i)
-        {
-           String boneName = mSkeleton.getBoneName(i);
-           int j = mSkeleton.getBoneIndex(boneName);
-
-           if (j >= 0)
-           {
-               mBones[j] = src.getBone(j);
-           }
+            mBones[i].copy(src.getBone(i));
         }
     }
 
@@ -858,9 +832,7 @@ public class GVRPose implements PrettyPrint
             bone.WorldMatrix.m30(bone.WorldMatrix.m30() + dx);
             bone.WorldMatrix.m31(bone.WorldMatrix.m31() + dy);
             bone.WorldMatrix.m32(bone.WorldMatrix.m32() + dz);
-            bone.Changed = WORLD_ROT | WORLD_POS;
         }
-        mNeedSync = true;
         if (sDebug)
         {
             Log.d("BONE", "setWorldPosition: %s ", mSkeleton.getBoneName(0), bone.toString());
