@@ -979,6 +979,10 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
                 parentBoneIds.add(parentId);
             }
         }
+        if (parentBoneIds.size() == numBones)
+        {
+            return;
+        }
         int n = numBones +  parentBoneIds.size();
         int[] parentIds = Arrays.copyOf(mParentBones, n);
         int[] boneOptions = Arrays.copyOf(mBoneOptions, n);

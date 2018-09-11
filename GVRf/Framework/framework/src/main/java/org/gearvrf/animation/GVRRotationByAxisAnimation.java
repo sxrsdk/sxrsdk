@@ -24,7 +24,7 @@ import org.joml.Quaternionf;
 /** Rotation animation. */
 public class GVRRotationByAxisAnimation extends GVRTransformAnimation
 {
-    private final float mAngle, mX, mY, mZ;
+    private final float mAngle, mAxisX, mAxisY, mAxisZ;
     private final Quaternionf mStartRotation = new Quaternionf();
 
     /**
@@ -49,9 +49,9 @@ public class GVRRotationByAxisAnimation extends GVRTransformAnimation
     {
         super(target, duration);
         mAngle = angle;
-        mX = x;
-        mY = y;
-        mZ = z;
+        mAxisX = x;
+        mAxisY = y;
+        mAxisZ = z;
         mStartRotation.set(mRotation);
     }
 

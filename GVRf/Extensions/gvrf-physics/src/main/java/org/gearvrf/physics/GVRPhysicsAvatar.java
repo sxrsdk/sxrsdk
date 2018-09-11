@@ -53,16 +53,14 @@ public class GVRPhysicsAvatar extends GVRAvatar
         super(ctx, name);
     }
 
-    public boolean loadPhysics(String filename, GVRScene scene)
+    /**
+     * Load physics information for the current avatar
+     * @param filename  name of physics file
+     * @param scene     scene the avatar is part of
+     * @throws IOException if physics file cannot be parsed
+     */
+    public void loadPhysics(String filename, GVRScene scene) throws IOException
     {
-        try
-        {
-            GVRPhysicsLoader.loadPhysicsFile(getGVRContext(), filename, true, scene);
-        }
-        catch (IOException ex)
-        {
-            return false;
-        }
-        return true;
+        GVRPhysicsLoader.loadPhysicsFile(getGVRContext(), filename, true, scene);
     }
 };
