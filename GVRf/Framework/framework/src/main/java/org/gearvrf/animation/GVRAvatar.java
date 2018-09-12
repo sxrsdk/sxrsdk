@@ -342,6 +342,23 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         return anim;
     }
 
+    /**
+     * Evaluates the animation with the given index at the specified time.
+     * @param animIndex 0-based index of {@link GVRAnimator} to start
+     * @param timeInSec time to evaluate the animation at
+     * @see GVRAvatar#stop()
+     * @see #start(String)
+     */
+    public GVRAnimator animate(int animIndex, float timeInSec)
+    {
+        if ((animIndex < 0) || (animIndex >= mAnimations.size()))
+        {
+            throw new IndexOutOfBoundsException("Animation index out of bounds");
+        }
+        GVRAnimator anim = mAnimations.get(animIndex);
+        anim.animate(timeInSec);
+        return anim;
+    }
 
     /**
      * Stops all of the animations associated with this animator.

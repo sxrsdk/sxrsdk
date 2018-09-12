@@ -277,6 +277,18 @@ public class GVRAnimator extends GVRBehavior
         }
     }
 
+    public void animate(float timeInSec)
+    {
+        if (mAnimations.size() > 0)
+        {
+            for (int i = 0; i < mAnimations.size(); ++i)
+            {
+                GVRAnimation anim = mAnimations.get(i);
+                anim.animate(timeInSec);
+            }
+        }
+    }
+
     /**
      * Stops all of the animations associated with this animator.
      * @see GVRAnimator#start()

@@ -89,7 +89,7 @@ public class GVRTransformAnimation extends GVRAnimation implements PrettyPrint
         mRotation.set(x, y, z, w);
     }
 
-    protected void animate(float timeInSec)
+    public void animate(float timeInSec)
     {
         mTempMtx.translationRotateScale(mPosition, mRotation, mScale);
         mTransform.setModelMatrix(mTempMtx);

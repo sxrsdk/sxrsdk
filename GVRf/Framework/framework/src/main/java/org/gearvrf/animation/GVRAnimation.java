@@ -393,6 +393,12 @@ public abstract class GVRAnimation {
         return stillRunning;
     }
 
+    public void animate(float timeInSec)
+    {
+        float ratio = timeInSec / mDuration;
+        animate(mTarget, ratio);
+    }
+
     private float interpolate(float cycleTime, float duration) {
         float ratio = cycleTime / duration;
         return mInterpolator == null ? ratio : mInterpolator.mapRatio(ratio);

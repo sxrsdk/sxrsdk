@@ -55,7 +55,7 @@ public class GVRNodeAnimation extends GVRTransformAnimation implements PrettyPri
     }
 
 
-    protected void animate(float timeInSec)
+    public void animate(float timeInSec)
     {
         if (mChannel != null)
         {

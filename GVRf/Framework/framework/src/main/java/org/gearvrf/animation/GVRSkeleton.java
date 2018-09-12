@@ -288,8 +288,8 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
     {
         if (pose != mBindPose)
         {
+            pose.sync();
             mBindPose.copy(pose);
-            mBindPose.sync();
         }
         if (mInverseBindPose == null)
         {
