@@ -203,7 +203,9 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
 
         for (int i = 0; i < skel.getNumBones(); ++i)
         {
+
             GVRAnimationChannel channel = mBoneChannels[i];
+
             if ((channel != null) &&
                 (skel.getBoneOptions(i) == GVRSkeleton.BONE_ANIMATE))
             {
@@ -223,7 +225,6 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
         }
 
 
-      //  pose.setWorldRotation(5,0.8f,1f,0.9f,1);
         skel.poseToBones();
         skel.updateSkinPose();
     }

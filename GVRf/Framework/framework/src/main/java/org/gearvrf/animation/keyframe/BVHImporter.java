@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
 public class BVHImporter
 {
@@ -24,13 +26,16 @@ public class BVHImporter
     private final ArrayList<String> mBoneNames = new ArrayList();
     private final ArrayList<Vector3f> mBonePositions = new ArrayList();
     private final ArrayList<Integer> mBoneParents = new ArrayList();
+    private final ArrayList<Integer> mBoneChannels = new ArrayList();
+    private final ArrayList<Integer> mBoneSkeleton = new ArrayList();
+
 
     public BVHImporter(GVRContext ctx)
     {
         mContext = ctx;
     }
 
-    public GVRSkeletonAnimation importAnimation(GVRAndroidResource res) throws IOException
+    public GVRSkeletonAnimation importAnimation(GVRAndroidResource res, GVRSkeleton skel) throws IOException
     {
         InputStream stream = res.getStream();
 
@@ -42,7 +47,6 @@ public class BVHImporter
         BufferedReader buffreader = new BufferedReader(inputreader);
 
         int numbones = readSkeleton(buffreader);
-        GVRSkeleton skel = createSkeleton();
         return readMotion(buffreader, skel);
     }
 
@@ -80,11 +84,14 @@ public class BVHImporter
     private int readSkeleton(BufferedReader buffreader) throws IOException
     {
         int         numbones = 0;
-        String 		bonename = "";
-        float		x, y, z;
+        String      bonename = "";
+        float       x, y, z;
         String      line;
         int         parentIndex = -1;
         int         boneIndex = 0;
+        Stack<Integer> balancedBraces = new Stack<>();
+        boolean     isJustClosed = false;
+        boolean     isMultiple   = false;
 
         while ((line = buffreader.readLine().trim()) != null)
         {
@@ -96,34 +103,78 @@ public class BVHImporter
             /*
              * Parsing skeleton definition with joint names and positions.
              */
-            if (words.length < 1)               // has an argument?
+            if (words.length < 1)           // has an argument?
                 continue;
             opcode = words[0];
-            if ((opcode == "ROOT") ||			// found root bone?
-                    (opcode == "JOINT"))			// found any bone?
+            if (opcode.equals("End"))       // bone position
             {
-                bonename = words[1];            // save the bone name
+                int i = 0;
+                while (i < 3)
+                {
+                    buffreader.readLine();
+                    i++;
+                }
+                continue;
+            }
+            if (opcode.equals("}"))
+            {
+
+                parentIndex = balancedBraces.peek();
+                balancedBraces.pop();
+                if(!isJustClosed&&!isMultiple)
+                {
+                    isJustClosed = true;
+
+                }
+                else
+                {
+                    isJustClosed = false;
+                    isMultiple = true;
+
+                }
+
+            }
+            if ((opcode.equals("ROOT")) ||       // found root bone?
+                    (opcode.equals("JOINT")))        // found any bone?
+            {
+                bonename = words[1];
                 mBoneParents.add(boneIndex, parentIndex);
                 mBoneNames.add(boneIndex, bonename);
                 ++numbones;
             }
-            else if (opcode == "OFFSET")       // bone position
+
+            else if (opcode.equals("OFFSET"))       // bone position
             {
                 float xpos = Float.parseFloat(words[1]);
                 float ypos = Float.parseFloat(words[2]);
                 float zpos = Float.parseFloat(words[3]);
 
-                if (bonename.length() > 0)		// save position for the bone
+                if (bonename.length() > 0)    // save position for the bone
                 {
                     mBonePositions.add(boneIndex, new Vector3f(xpos, ypos, zpos));
                     Log.d("BVH", "%s %f %f %f", bonename, xpos, ypos, zpos);
                 }
-                parentIndex = boneIndex;
-                ++boneIndex;
-                bonename = "";
-                continue;
+
             }
-            else if (opcode == "MOTION")
+            else if (opcode.equals("CHANNELS"))
+            {
+                mBoneChannels.add(boneIndex, Integer.parseInt(words[1]));
+                balancedBraces.push(parentIndex);
+                if(isJustClosed==true)
+                {
+                    parentIndex++;
+                }
+                else
+                {
+                    parentIndex = boneIndex;
+                }
+                ++boneIndex;
+                isJustClosed = false;
+                isMultiple = false;
+                bonename = "";
+
+            }
+            else if (opcode.equals("MOTION"))
             {
                 break;
             }
@@ -150,59 +201,86 @@ public class BVHImporter
 
     public GVRPose readPose(BufferedReader buffreader, GVRSkeleton skel) throws IOException
     {
-        float		x, y, z;
+        float     x, y, z;
         String      line;
-        String 		bonename = "";
+        String        bvhbonename = "";
         int         frameIndex = 0;
         Quaternionf q = new Quaternionf();
         Quaternionf b = new Quaternionf();
         GVRPose     pose = new GVRPose(skel);
-        GVRPose     bindpose = skel.getBindPose();
+
 
         /*
          * Parse and accumulate all the motion keyframes.
          * Keyframes for the root bone position are in rootPosKeys;
          * Keyframes for each bone's rotations are in rootKeysPerBone;
          */
-        while ((line = buffreader.readLine().trim()) != null)
+        while ((line = buffreader.readLine().trim()) != null&&frameIndex < 1)
         {
-            String[]    words = line.split(" ");
+            line = line.trim();
+            String[]    words;
+            if(line.contains("\t"))
+            {
+                words = line.split("\t");
+            }
+            else
+            {
+                words = line.split(" ");
+            }
 
-            if (line == "")
+            if (line == "") {
+
                 continue;
-            if (words[0].startsWith("Frame"))
+            }
+            if (words[0].startsWith("Frames"))
             {
                 continue;
             }
-            /*
-             * Parsing motion for each frame.
-             * Each line in the file contains the root joint position and rotations for all joints.
-             */
-            x = Float.parseFloat(words[0]);	// root bone position
-            y = Float.parseFloat(words[1]);
-            z = Float.parseFloat(words[2]);
-            pose.setPosition(x, y, z);
+            if (words[0].startsWith("Frame "))
+            {
+                continue;
+            }
             int boneIndex = 0;
-            for (int i = 3; i < words.length; i += 3)
-            {
-                bonename = skel.getBoneName(boneIndex);
-                if (bonename == null)
-                {
-                    throw new IOException("Cannot find bone " + bonename + " in skeleton");
+            int bvhboneIndex = 0;
+            int i=0;
+            while (i + 5 < words.length) {
+                String boneNameSkel = skel.getBoneName(boneIndex);
+                bvhbonename = mBoneNames.get(bvhboneIndex);
+
+                if (bvhbonename.equals(boneNameSkel)) {
+
+                    if (bvhbonename == null) {
+                        throw new IOException("Cannot find bone " + bvhbonename + " in skeleton");
+                    }
+
+                    x = Float.parseFloat(words[i++]);    // positions
+                    y = Float.parseFloat(words[i++]);
+                    z = Float.parseFloat(words[i++]);
+                    pose.setLocalPosition(boneIndex, x, y, z);
+
+                    z = Float.parseFloat(words[i++]);        // Z, Y, X rotation angles
+                    x = Float.parseFloat(words[i++]);
+                    y = Float.parseFloat(words[i++]);
+
+                    q.rotationZ(z * (float) Math.PI / 180);
+                    q.rotateX(x * (float) Math.PI / 180);
+                    q.rotateY(y * (float) Math.PI / 180);
+                    q.normalize();
+
+                    pose.setLocalRotation(boneIndex, q.x, q.y, q.z, q.w);
+                    boneIndex++;
+                    bvhboneIndex++;
+
+                    Log.d("BVH", "%s %f %f %f %f", bvhboneIndex, q.x, q.y, q.z, q.w);
+
                 }
-                z = Float.parseFloat(words[i]);	// Z, Y, X rotation angles
-                y = Float.parseFloat(words[i + 1]);
-                x = Float.parseFloat(words[i + 2]);
-                q.rotationZ(z * (float) Math.PI / 180);
-                q.rotateX(x * (float)Math.PI / 180);
-                q.rotateY(y * (float)Math.PI / 180);
-                q.normalize();
-                bindpose.getLocalRotation(boneIndex, b);
-                q.mul(b);
-                int f = (boneIndex * 5) * frameIndex;
-                pose.setLocalRotation(boneIndex, q.x, q.y, q.z, q.w);
+                else
+                {
+                    boneIndex++;
+                }
             }
-            break;
+            frameIndex++;
+
         }
         return pose;
     }
@@ -210,110 +288,134 @@ public class BVHImporter
     public GVRSkeletonAnimation readMotion(BufferedReader buffreader, GVRSkeleton skel) throws IOException
     {
         int         numbones = skel.getNumBones();
-        float		x, y, z;
+        float     x, y, z;
         String      line;
-        String 		bonename = "";
-        int         numFrames = 0;
+        String      bonename = "";
         float       secondsPerFrame = 0;
         float       curTime = 0;
         float[]     rotKeys;
+        float[]     posKeys;
         int         frameIndex = 0;
+
         ArrayList<float[]> rotKeysPerBone = new ArrayList<>(numbones);
-        float[]     rootPosKeys = null;
+        ArrayList<float[]> posKeysPerBone = new ArrayList<>(numbones);
         Quaternionf q = new Quaternionf();
         Quaternionf b = new Quaternionf();
-        GVRPose     bindpose = skel.getBindPose();
+        GVRPose bindpose = skel.getBindPose();
 
         /*
          * Parse and accumulate all the motion keyframes.
          * Keyframes for the root bone position are in rootPosKeys;
          * Keyframes for each bone's rotations are in rootKeysPerBone;
          */
-        while ((line = buffreader.readLine().trim()) != null)
-        {
-            String[]    words = line.split(" ");
 
-            if (line == "")
+        while ((line = buffreader.readLine()) != null)
+
+        {
+            line = line.trim();
+            String[]    words;
+            if(line.contains("\t"))
+            {
+                words = line.split("\t");
+            }
+            else
+            {
+                words = line.split(" ");
+            }
+
+            if (line == "") {
+
                 continue;
+            }
             if (words[0].startsWith("Frames"))
             {
-                numFrames = Integer.parseInt(words[1]);
-                rootPosKeys = new float[numFrames];
+                for (int i = 0; i < numbones; i++)
+                {
+                    float[] r = new float[5 * Integer.parseInt(words[1])];
+                    float[] p = new float[4 * Integer.parseInt(words[1])];
+                    rotKeysPerBone.add(r);
+                    posKeysPerBone.add(p);
+                }
                 continue;
             }
-            if (words[1].startsWith("Time"))
+            if (words[0].startsWith("Frame "))
             {
-                secondsPerFrame = Float.parseFloat(words[2]);
+                secondsPerFrame = Float.parseFloat(words[1]);
                 continue;
             }
-            /*
-             * Parsing motion for each frame.
-             * Each line in the file contains the root joint position and rotations for all joints.
-             */
-            rootPosKeys[frameIndex] = curTime;
-            rootPosKeys[frameIndex + 1] = Float.parseFloat(words[0]);	// root bone position
-            rootPosKeys[frameIndex + 2] = Float.parseFloat(words[1]);
-            rootPosKeys[frameIndex + 3] = Float.parseFloat(words[2]);
-            int boneIndex = 0;
-            for (int i = 3; i < words.length; i += 3)
-            {
-                bonename = skel.getBoneName(boneIndex);
-                if (bonename == null)
-                {
-                    throw new IOException("Cannot find bone " + bonename + " in skeleton");
-                }
-                rotKeys = rotKeysPerBone.get(boneIndex);
-                if (rotKeys == null)
-                {
-                    rotKeys = new float[5 * numbones];
-                    rotKeysPerBone.set(boneIndex, rotKeys);
-                }
-                z = Float.parseFloat(words[i]);	// Z, Y, X rotation angles
-                y = Float.parseFloat(words[i + 1]);
-                x = Float.parseFloat(words[i + 2]);
-                if (true)
-                {
+                /*
+                 * Parsing motion for each frame.
+                 * Each line in the file contains the root joint position and rotations for all joints.
+                 */
+                int boneIndex = 0;
+                int i = 0;
+                while (i + 3 < words.length) {
+
+                    bonename = mBoneNames.get(boneIndex);
+
+                    if (bonename == null) {
+                        throw new IOException("Cannot find bone " + bonename + " in skeleton");
+                    }
+
+                    if (mBoneChannels.get(boneIndex) > 3) {
+                        posKeys = posKeysPerBone.get(boneIndex);
+
+                        int f = frameIndex * 4;
+                        x = Float.parseFloat(words[i]);    // Z, Y, X rotation angles
+                        y = Float.parseFloat(words[i + 1]);
+                        z = Float.parseFloat(words[i + 2]);
+                        posKeys[f] = curTime;
+                        posKeys[f + 1] = x;    // bone position
+                        posKeys[f + 2] = y;
+                        posKeys[f + 3] = z;
+                        i += 3;
+                    }
+                    rotKeys = rotKeysPerBone.get(boneIndex);
+                    z = Float.parseFloat(words[i]);        // Z, Y, X rotation angles
+                    x = Float.parseFloat(words[i + 1]);
+                    y = Float.parseFloat(words[i + 2]);
+                    i += 3;
                     q.rotationZ(z * (float) Math.PI / 180);
-                    q.rotateX(x * (float)Math.PI / 180);
-                    q.rotateY(y * (float)Math.PI / 180);
-                }
-                else
-                {
-                    q.rotationY(y * (float) Math.PI / 180);
                     q.rotateX(x * (float) Math.PI / 180);
-                    q.rotateZ(z * (float) Math.PI / 180);
+                    q.rotateY(y * (float) Math.PI / 180);
+                    q.normalize();
+                    bindpose.getLocalRotation(boneIndex, b);
+                    q.mul(b);
+                    int f = 5 * frameIndex;
+                    rotKeys[f++] = curTime;
+                    rotKeys[f++] = q.x;
+                    rotKeys[f++] = q.y;
+                    rotKeys[f++] = q.z;
+                    rotKeys[f] = q.w;
+                    boneIndex++;
+
+                    Log.d("BVH", "%s %f %f %f %f", bonename, q.x, q.y, q.z, q.w);
                 }
-                q.normalize();
-                bindpose.getLocalRotation(boneIndex, b);
-                q.mul(b);
-                int f = (boneIndex * 5) * frameIndex;
-                rotKeys[f++] = curTime;
-                rotKeys[f++] = q.x;
-                rotKeys[f++] = q.y;
-                rotKeys[f++] = q.z;
-                rotKeys[f] = q.w;
-                frameIndex++;
                 curTime += secondsPerFrame;
-                Log.d("BVH", "%s %f %f %f %f", bonename, q.x, q.y, q.z, q.w);
+                frameIndex++;
             }
-        }
         /*
          * Create a skeleton animation with separate channels for each bone
          */
-        GVRSkeletonAnimation skelanim = new GVRSkeletonAnimation(mFileName, skel.getOwnerObject(), curTime);
-        rotKeys = rotKeysPerBone.get(0);
-        GVRAnimationChannel channel = new GVRAnimationChannel(skel.getBoneName(0), rootPosKeys, rotKeys, null,
-                GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
-        skelanim.addChannel(skel.getBoneName(0), channel);
-        for (int boneIndex = 1; boneIndex < numbones; ++boneIndex)
-        {
-            bonename = skel.getBoneName(boneIndex);
-            rotKeys = rotKeysPerBone.get(boneIndex);
-            channel = new GVRAnimationChannel(bonename, null, rotKeys, null,
-                    GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
 
+        GVRAnimationChannel channel;
+        GVRSkeletonAnimation skelanim = new GVRSkeletonAnimation(mFileName, skel, curTime);
+        for (int boneIndex = 0; boneIndex < mBoneNames.size(); ++boneIndex) {
+            bonename = mBoneNames.get(boneIndex);
+
+            rotKeys = rotKeysPerBone.get(boneIndex);
+            posKeys = posKeysPerBone.get(boneIndex);
+
+            if (mBoneChannels.get(boneIndex) > 3) {
+                channel = new GVRAnimationChannel(bonename, posKeys, rotKeys, null,
+                        GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
+            } else {
+               channel = new GVRAnimationChannel(bonename, null, rotKeys, null,
+                        GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
+            }
             skelanim.addChannel(bonename, channel);
         }
+
         return skelanim;
     }
 }

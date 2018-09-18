@@ -902,6 +902,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
     public void updateSkinPose()
     {
         GVRPose skinPose = computeSkinPose();
+
         skinPose.getWorldMatrices(mPoseMatrices);
         NativeSkeleton.setPose(getNative(), mPoseMatrices);
     }

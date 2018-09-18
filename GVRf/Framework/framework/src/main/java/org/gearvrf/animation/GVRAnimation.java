@@ -22,7 +22,7 @@ import org.gearvrf.GVRMaterial;
 import org.gearvrf.GVRSceneObject;
 import org.gearvrf.GVRShaderData;
 import org.gearvrf.GVRTransform;
-
+import org.gearvrf.utility.Log;
 
 import android.graphics.Color;
 
@@ -98,7 +98,7 @@ public abstract class GVRAnimation {
 
     // Immutable values, passed to constructor
     protected GVRHybridObject mTarget;
-    protected float mDuration;;
+    protected float mDuration;
 
     // Defaulted values, which should be set before start()
     protected GVRInterpolator mInterpolator = null;
@@ -136,8 +136,8 @@ public abstract class GVRAnimation {
      */
     protected GVRAnimation(GVRHybridObject target, float duration) {
         mTarget = target;
-
         mDuration = duration;
+
     }
 
     /**
@@ -369,7 +369,6 @@ public abstract class GVRAnimation {
      */
 
     final boolean onDrawFrame(float frameTime) {
-
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
         mElapsedTime += (frameTime*animationSpeed);

@@ -13,6 +13,7 @@ import org.gearvrf.GVRTransform;
 import org.gearvrf.IAssetEvents;
 import org.gearvrf.IEventReceiver;
 import org.gearvrf.IEvents;
+import org.gearvrf.animation.keyframe.BVHImporter;
 import org.gearvrf.animation.keyframe.GVRSkeletonAnimation;
 import org.gearvrf.animation.keyframe.TRSImporter;
 import org.gearvrf.utility.Log;
@@ -195,6 +196,35 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                                                 null,
                                                 filePath,
                                                 ex.getMessage());
+            }
+        }
+        else if (filePath.endsWith(".bvh"))
+        {
+            try
+            {
+                GVRSkeleton cc= mSkeleton;
+                BVHImporter importer = new BVHImporter(ctx);
+                GVRSkeletonAnimation skelAnim = importer.importAnimation(animResource, mSkeleton);
+
+                GVRAnimator animator = new GVRAnimator(ctx);
+                animator.setName(filePath);
+                animator.addAnimation(skelAnim);
+                addAnimation(animator);
+                ctx.getEventManager().sendEvent(this,
+                        IAvatarEvents.class,
+                        "onAnimationLoaded",
+                        animator,
+                        filePath,
+                        null);
+            }
+            catch (IOException ex)
+            {
+                ctx.getEventManager().sendEvent(this,
+                        IAvatarEvents.class,
+                        "onAnimationLoaded",
+                        null,
+                        filePath,
+                        ex.getMessage());
             }
         }
         else
@@ -396,7 +426,9 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                 context.getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class, "onAnimationLoaded", null, filePath, errors);
                 return;
             }
+
             GVRSkeletonAnimation skelAnim = (GVRSkeletonAnimation) animator.getAnimation(0);
+
             if (skelAnim.getSkeleton() != mSkeleton)
             {
                 GVRPoseMapper poseMapper = new GVRPoseMapper(mSkeleton, skelAnim.getSkeleton());
@@ -404,6 +436,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                 animator.addAnimation(poseMapper);
             }
             addAnimation(animator);
+
             context.getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class, "onAnimationLoaded", animator, filePath, errors);
         }
 
