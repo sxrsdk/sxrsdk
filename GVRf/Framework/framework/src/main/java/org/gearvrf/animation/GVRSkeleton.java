@@ -488,6 +488,10 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
 
                 if ((srcBone.Changed != 0) && !isLocked(i))
                 {
+                    if (i == 0)
+                    {
+                        newpose.setPosition(srcBone.LocalMatrix.m30(), srcBone.LocalMatrix.m31(), srcBone.LocalMatrix.m32());
+                    }
                     newpose.getLocalRotation(i, mTempQuatA);
                     mPose.setLocalRotation(i, mTempQuatA.x, mTempQuatA.y, mTempQuatA.z, mTempQuatA.w);
                     srcBone.Changed = 0;
@@ -509,8 +513,8 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
                     if (!isLocked(i))
                     {
                         GVRPose.Bone srcBone = newpose.getBone(i);
-                        srcBone.getWorldMatrix(mTempMtx);
-                        mPose.setWorldMatrix(i, mTempMtx);
+                        srcBone.getLocalMatrix(mTempMtx);
+                        mPose.setLocalMatrix(i, mTempMtx);
                     }
                 }
             }

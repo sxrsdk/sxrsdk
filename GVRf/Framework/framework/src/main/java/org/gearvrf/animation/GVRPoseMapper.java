@@ -11,10 +11,10 @@ import org.joml.Vector3f;
 
 public class GVRPoseMapper extends GVRAnimation
 {
-    private GVRSkeleton mSourceSkeleton;
-    private GVRSkeleton mDestSkeleton;
-    private int[]       mBoneMap;
-    private GVRPose     mDestPose;
+    protected GVRSkeleton mSourceSkeleton;
+    protected GVRSkeleton mDestSkeleton;
+    protected int[]       mBoneMap;
+    protected GVRPose     mDestPose;
 
     /**
      * Constructs an animation retargeting engine.
