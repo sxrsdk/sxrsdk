@@ -99,12 +99,15 @@ public abstract class GVRAnimation {
 
     // Immutable values, passed to constructor
     protected GVRHybridObject mTarget;
-    protected final float mDuration;
+    protected float mDuration;
+
 
     // Defaulted values, which should be set before start()
     protected GVRInterpolator mInterpolator = null;
     protected int mRepeatMode = GVRRepeatMode.ONCE;
     protected int mRepeatCount = DEFAULT_REPEAT_COUNT;
+    protected float animationOffset = 0;
+    protected float animationSpeed = 1;
     protected GVROnFinish mOnFinish = null;
 
     /**
@@ -136,6 +139,7 @@ public abstract class GVRAnimation {
     protected GVRAnimation(GVRHybridObject target, float duration) {
         mTarget = target;
         mDuration = duration;
+
     }
 
     /**
@@ -248,6 +252,38 @@ public abstract class GVRAnimation {
         return this;
     }
 
+
+    public GVRAnimation setOffset(float startOffset)
+    {
+        if(startOffset<0 || startOffset>mDuration){
+            throw new IllegalArgumentException("offset should not be either negative or greater than duration");
+        }
+
+        animationOffset = startOffset;
+        mDuration =  mDuration-animationOffset;
+        return this;
+    }
+
+
+    public GVRAnimation setSpeed(float speed)
+    {
+        if(speed<=0){
+            throw new IllegalArgumentException("speed should be greater than zero");
+        }
+        animationSpeed =  speed;
+        return this;
+    }
+
+    public GVRAnimation setDuration(float start, float end)
+    {
+        if(start>end || start<0 || end>mDuration){
+            throw new IllegalArgumentException("start and end values are wrong");
+        }
+
+        animationOffset =  start;
+        mDuration = end-start;
+        return this;
+    }
     /**
      * Set the on-finish callback.
      * 
@@ -322,6 +358,11 @@ public abstract class GVRAnimation {
         return this;
     }
 
+    public void setAnim(float x)
+    {
+        onDrawFrame(x);
+    }
+
     /**
      * Called by the animation engine. Uses the frame time, the interpolator,
      * and the repeat mode to generate a call to
@@ -332,13 +373,16 @@ public abstract class GVRAnimation {
      * @return {@code true} to keep running the animation; {@code false} to shut
      *         it down
      */
+
     final boolean onDrawFrame(float frameTime) {
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
-        mElapsedTime += frameTime;
+        mElapsedTime += (frameTime*animationSpeed);
+
 
         final int currentCycleCount = (int) (mElapsedTime / mDuration);
-        final float cycleTime = mElapsedTime % mDuration;
+        final float cycleTime = (mElapsedTime % mDuration)+animationOffset;
+
 
         final boolean cycled = previousCycleCount != currentCycleCount;
         boolean stillRunning = cycled != true;
@@ -367,9 +411,11 @@ public abstract class GVRAnimation {
         if (stillRunning) {
             final boolean countDown = mRepeatMode == GVRRepeatMode.PINGPONG
                     && (mIterations & 1) == 1;
+
             float elapsedRatio = //
             countDown != true ? interpolate(cycleTime, mDuration)
                     : interpolate(mDuration - cycleTime, mDuration);
+
 
             animate(mTarget, elapsedRatio);
         } else {
@@ -452,6 +498,16 @@ public abstract class GVRAnimation {
         return mRepeatCount;
     }
 
+    public float getAnimationOffset() {
+        return animationOffset;
+    }
+
+    public float getAnimationSpeed()
+    {
+        return animationSpeed;
+    }
+
+
     /**
      * The duration passed to {@linkplain #GVRAnimation(GVRHybridObject, float)
      * the constructor.}
@@ -476,6 +532,10 @@ public abstract class GVRAnimation {
     public float getElapsedTime() {
         return mElapsedTime;
     }
+
+
+
+
 
     /**
      * Override this to create a new animation. Generally, you do this by

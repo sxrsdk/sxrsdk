@@ -36,6 +36,7 @@ public class GVRTransformAnimation extends GVRAnimation implements PrettyPrint
     protected final Quaternionf mRotation = new Quaternionf();
     protected final GVRTransform mTransform;
 
+
     /**
      * Constructor.
      *

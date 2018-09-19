@@ -629,6 +629,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
     public int getBoneIndex(String bonename)
     {
         for (int i = 0; i < getNumBones(); ++i)
+
             if (mBoneNames[i].equals(bonename))
                 return i;
         return -1;
@@ -642,6 +643,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
      */
     public int getNumBones()
     {
+
         return mParentBones.length;
     }
 

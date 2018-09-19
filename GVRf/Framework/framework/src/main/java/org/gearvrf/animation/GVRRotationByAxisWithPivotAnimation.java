@@ -63,8 +63,7 @@ public class GVRRotationByAxisWithPivotAnimation extends GVRTransformAnimation {
             float duration, float angle, float axisX, float axisY, float axisZ,
             float pivotX, float pivotY, float pivotZ) {
         super(target, duration);
-        mStartRotation.set(mRotation);
-        mStartPosition.set(mPosition);
+
         mAngle = angle;
         mAxisX = axisX;
         mAxisY = axisY;

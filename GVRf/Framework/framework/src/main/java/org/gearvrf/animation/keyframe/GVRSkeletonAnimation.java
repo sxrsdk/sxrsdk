@@ -95,7 +95,6 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
         {
             mBoneChannels[boneId] = channel;
             Log.d("BONE", "Adding animation channel %d %s ", boneId, boneName);
-
         }
     }
 
@@ -216,6 +215,7 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
                 pose.setLocalMatrix(i, temp);
             }
         }
+
         skel.poseToBones();
         skel.updateSkinPose();
     }

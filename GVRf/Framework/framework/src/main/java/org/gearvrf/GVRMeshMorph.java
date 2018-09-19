@@ -78,7 +78,6 @@ public class GVRMeshMorph extends GVRBehavior
     protected float[] mBaseBlendShape;
     protected GVRVertexBuffer mbaseShape;
 
-
     /**
      * Construct a morph to a scene object with a base mesh.
      * @param ctx  The current GVRF context.
@@ -96,7 +95,6 @@ public class GVRMeshMorph extends GVRBehavior
         }
         mFloatsPerVertex = 0;
         mTexWidth = 0; // 3 floats for position
-
     }
 
 
@@ -111,7 +109,6 @@ public class GVRMeshMorph extends GVRBehavior
      */
     public void onAttach(GVRSceneObject sceneObj)
     {
-
         super.onAttach(sceneObj);
         GVRComponent comp = getComponent(GVRRenderData.getComponentType());
 
@@ -253,6 +250,7 @@ public class GVRMeshMorph extends GVRBehavior
     public void setBlendShape(int index, GVRVertexBuffer vbuf)
     {
         int shapeDescriptorFlags = 0;
+        float[] vec3dataBase;
         String shapeDescriptor = vbuf.getDescriptor();
 
         copyBlendShape(index * mFloatsPerVertex, 0, vbuf.getFloatArray("a_position"));
@@ -272,10 +270,21 @@ public class GVRMeshMorph extends GVRBehavior
         {
             copyBlendShape(index * mFloatsPerVertex + 3, 3, vbuf.getFloatArray("a_normal"));
         }
-        if ((shapeDescriptorFlags & HAS_TANGENT) != 0)
+        else
         {
+            vec3dataBase = mbaseShape.getFloatArray("a_normal");
+            copyBlendShape(index * mFloatsPerVertex + 3, 3, vec3dataBase);
+
+        }
+        if ((shapeDescriptorFlags & HAS_TANGENT) != 0) {
             copyBlendShape(index * mFloatsPerVertex + 6, 6, vbuf.getFloatArray("a_tangent"));
-            copyBlendShape(index * mFloatsPerVertex + 9, 9, vbuf.getFloatArray("a_bitangent"));
+        }
+        else
+        {
+            //copy base shape data
+            vec3dataBase = mbaseShape.getFloatArray("a_tangent");
+            copyBlendShape(index * mFloatsPerVertex + 6, 6, vec3dataBase);
+
         }
     }
 
@@ -320,6 +329,7 @@ public class GVRMeshMorph extends GVRBehavior
             blendshapeTex.setImage(blendshapeImage);
             mtl.setTexture("blendshapeTexture", blendshapeTex);
         }
+        Log.v("MORPH", "Blend Shape Diffs\n%s", dumpDiffs(20));
         blendshapeImage.update(mTexWidth / 3, mNumVerts, mBlendShapeDiffs);
         return true;
     }

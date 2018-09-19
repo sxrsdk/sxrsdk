@@ -268,7 +268,6 @@ class  GVRJassimpAdapter
         int nAnimationMeshes = aiMesh.getAnimationMeshes().size();
         if (nAnimationMeshes == 0)
             return;
-
         try
         {
             GVRMeshMorph morph = new GVRMeshMorph(mContext, nAnimationMeshes);
@@ -279,7 +278,6 @@ class  GVRJassimpAdapter
             {
                 GVRVertexBuffer animBuff = new GVRVertexBuffer(mesh.getVertexBuffer(),
                                                                "float3 a_position float3 a_normal float3 a_tangent float3 a_bitangent");
-
                 float[] vertexArray = null;
                 float[] normalArray = null;
                 float[] tangentArray = null;
@@ -310,7 +308,6 @@ class  GVRJassimpAdapter
                     tangentArray = new float[animTangentBuffer.capacity()];
                     animTangentBuffer.get(tangentArray, 0, animTangentBuffer.capacity());
                     animBuff.setFloatArray("a_tangent", tangentArray);
-
                     //calculate bitangents
                     bitangentArray = new float[tangentArray.length];
                     for (int i = 0; i < tangentArray.length; i += 3)
@@ -771,18 +768,18 @@ class  GVRJassimpAdapter
     {
         switch (behavior)
         {
-        case DEFAULT:
-            return GVRAnimationBehavior.DEFAULT;
-        case CONSTANT:
-            return GVRAnimationBehavior.CONSTANT;
-        case LINEAR:
-            return GVRAnimationBehavior.LINEAR;
-        case REPEAT:
-            return GVRAnimationBehavior.REPEAT;
-        default:
-            // Unsupported setting
-            Log.e(TAG, "Cannot convert animation behavior: %s", behavior);
-            return GVRAnimationBehavior.DEFAULT;
+            case DEFAULT:
+                return GVRAnimationBehavior.DEFAULT;
+            case CONSTANT:
+                return GVRAnimationBehavior.CONSTANT;
+            case LINEAR:
+                return GVRAnimationBehavior.LINEAR;
+            case REPEAT:
+                return GVRAnimationBehavior.REPEAT;
+            default:
+                // Unsupported setting
+                Log.e(TAG, "Cannot convert animation behavior: %s", behavior);
+                return GVRAnimationBehavior.DEFAULT;
         }
     }
 
