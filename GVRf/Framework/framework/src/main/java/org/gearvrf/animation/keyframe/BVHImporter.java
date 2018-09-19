@@ -195,7 +195,6 @@ public class BVHImporter
         float       x, y, z;
         String      line;
         String      bvhbonename = "";
-        int         frameIndex = 0;
         Quaternionf q = new Quaternionf();
         GVRPose     pose = new GVRPose(skel);
 
@@ -204,28 +203,17 @@ public class BVHImporter
          * Keyframes for the root bone position are in rootPosKeys;
          * Keyframes for each bone's rotations are in rootKeysPerBone;
          */
-        while ((line = mReader.readLine().trim()) != null&&frameIndex < 1)
+        while ((line = mReader.readLine().trim()) != null)
         {
-            line = line.trim();
             String[]    words;
 
-            if (line.contains("\t"))
-            {
-                words = line.split("\t");
-            }
-            else
-            {
-                words = line.split(" ");
-            }
+            line = line.trim();
+            words = line.split("[\t ]");
             if (line == "")
             {
                 continue;
             }
-            if (words[0].startsWith("Frames"))
-            {
-                continue;
-            }
-            if (words[0].startsWith("Frame "))
+            if (words[0].startsWith("Frame"))
             {
                 continue;
             }
@@ -266,7 +254,6 @@ public class BVHImporter
                     boneIndex++;
                 }
             }
-            frameIndex++;
         }
         return pose;
     }
@@ -295,16 +282,10 @@ public class BVHImporter
          */
         while ((line = mReader.readLine()) != null)
         {
-            line = line.trim();
             String[]    words;
-            if (line.contains("\t"))
-            {
-                words = line.split("\t");
-            }
-            else
-            {
-                words = line.split(" ");
-            }
+
+            line = line.trim();
+            words = line.split("[\t ]");
             if (line == "")
             {
                 continue;
@@ -320,9 +301,9 @@ public class BVHImporter
                 }
                 continue;
             }
-            if (words[0].startsWith("Frame "))
+            if (words[0].equals("Frame") && words[1].startsWith("Time"))
             {
-                secondsPerFrame = Float.parseFloat(words[1]);
+                secondsPerFrame = Float.parseFloat(words[2]);
                 continue;
             }
             /*
