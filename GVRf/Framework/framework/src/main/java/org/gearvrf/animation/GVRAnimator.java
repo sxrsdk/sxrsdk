@@ -297,11 +297,18 @@ public class GVRAnimator extends GVRBehavior
             return;
         }
         mIsRunning = true;
-        GVRAnimation anim = mAnimations.get(0);
-        anim.setOnFinish(finishCallback);
         for (int i = 0; i < mAnimations.size(); ++i)
         {
-            anim = mAnimations.get(i);
+            GVRAnimation anim = mAnimations.get(i);
+            anim.reset();
+            if (i == 0)
+            {
+                anim.setOnFinish(finishCallback);
+            }
+            else
+            {
+                anim.setOnFinish(null);
+            }
             getGVRContext().getAnimationEngine().start(anim);
         }
     }

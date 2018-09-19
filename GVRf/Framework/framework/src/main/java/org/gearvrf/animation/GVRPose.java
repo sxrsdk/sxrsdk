@@ -46,7 +46,7 @@ public class GVRPose implements PrettyPrint
     private final Quaternionf mTempQuat = new Quaternionf();
     public static final Matrix4f mTempMtxA = new Matrix4f();
     public static final Matrix4f mTempMtxB = new Matrix4f();
-    private static boolean sDebug = true;
+    private static boolean sDebug = false;
 
 
     /**
