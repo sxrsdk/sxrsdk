@@ -151,7 +151,6 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
         mBoneNames = new String[numBones];
         mBones = new GVRSceneObject[numBones];
         mPoseMatrices =  new float[numBones * 16];
-
         int numRoots = 0;
         GVRSceneObject skelRoot = null;
 
@@ -467,6 +466,10 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
          */
         else if (poseSpace == ROTATION_ONLY)
         {
+
+            Vector3f v = new Vector3f();
+            newpose.getWorldPosition(0, v);
+            mPose.setPosition(v.x, v.y, v.z);
             for (int i = 0; i < numbones; ++i)
             {
                 GVRPose.Bone srcBone = newpose.getBone(i);
@@ -592,9 +595,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
         for (int i = 0; i < getNumBones(); ++i)
 
             if (mBoneNames[i].equals(bonename))
-
                 return i;
-
         return -1;
     }
 
@@ -867,7 +868,6 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
      */
     public GVRPose computeSkinPose()
     {
-
         if (mInverseBindPose == null)
         {
             return null;

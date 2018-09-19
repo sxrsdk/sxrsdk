@@ -258,6 +258,12 @@ public class GVRAnimator extends GVRBehavior
      */
     public void start()
     {
+
+        if (mAnimations.size() == 0)
+        {
+            return;
+        }
+
         mIsRunning = true;
         for (GVRAnimation anim : mAnimations)
         {

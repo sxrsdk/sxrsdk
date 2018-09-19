@@ -269,7 +269,6 @@ class  GVRJassimpAdapter
         if (nAnimationMeshes == 0)
             return;
 
-
         try
         {
             GVRMeshMorph morph = new GVRMeshMorph(mContext, nAnimationMeshes);
@@ -286,7 +285,6 @@ class  GVRJassimpAdapter
                 float[] tangentArray = null;
                 float[] bitangentArray = null;
 
-
                 //copy target positions to anim vertex buffer
                 FloatBuffer animPositionBuffer = animMesh.getPositionBuffer();
                 if (animPositionBuffer != null)
@@ -295,7 +293,6 @@ class  GVRJassimpAdapter
                     animPositionBuffer.get(vertexArray, 0, animPositionBuffer.capacity());
                     animBuff.setFloatArray("a_position", vertexArray);
                 }
-
 
                 //copy target normals to anim normal buffer
                 FloatBuffer animNormalBuffer = animMesh.getNormalBuffer();
@@ -313,7 +310,6 @@ class  GVRJassimpAdapter
                     tangentArray = new float[animTangentBuffer.capacity()];
                     animTangentBuffer.get(tangentArray, 0, animTangentBuffer.capacity());
                     animBuff.setFloatArray("a_tangent", tangentArray);
-
                     //calculate bitangents
                     bitangentArray = new float[tangentArray.length];
                     for (int i = 0; i < tangentArray.length; i += 3)
@@ -334,12 +330,13 @@ class  GVRJassimpAdapter
                 blendShapeNum++;
             }
             morph.update();
+
         }
         catch (IllegalArgumentException ex)
         {
             sceneObject.detachComponent(GVRMeshMorph.getComponentType());
-
         }
+
     }
 
     public GVRSkin processBones(GVRMesh mesh, List<AiBone> aiBones)
@@ -515,23 +512,11 @@ class  GVRJassimpAdapter
 
             animMap.put(nodeName, channel);
         }
-        /*
-         * if there was a skinned mesh the bone map acts as a lookup
-         * table that maps bone names to their corresponding AiBone objects.
-         * The BoneCollector constructs the skeleton from the bone names in
-         * the map and the scene nodes, attempting to connect bones
-         * where there are gaps to produce a complete skeleton.
-         * Then it attaches the corresponding animation channels
-         * (based on bone name) to the skeleton animation.
-         */
-        if (!mBoneMap.isEmpty())
+        if (mSkeleton != null)
         {
-            BoneCollector nodeProcessor = new BoneCollector();
             GVRSkeletonAnimation anim = new GVRSkeletonAnimation(aiAnim.getName(), target, duration);
 
-            target.forAllDescendants(nodeProcessor);
-            List<String> boneNames = nodeProcessor.getBoneNames();
-            mSkeleton = anim.createSkeleton(boneNames);
+            anim.setSkeleton(mSkeleton, null);
             attachBoneAnimations(anim, animMap);
             animator.addAnimation(anim);
         }
@@ -615,44 +600,44 @@ class  GVRJassimpAdapter
         Matrix4f bindPoseMtx = new Matrix4f();
         Vector3f vec = new Vector3f();
         final float EPSILON = 0.00001f;
+        String boneName = mSkeleton.getBoneName(0);
+        GVRAnimationChannel channel = animMap.get(boneName);
+        AiBone aiBone;
 
-        for (int boneId = 0; boneId < mSkeleton.getNumBones(); ++boneId)
+        bindPose.getWorldMatrix(0, bindPoseMtx);
+        bindPoseMtx.getScale(vec);
+        if (channel != null)
         {
-            String boneName = mSkeleton.getBoneName(boneId);
-            AiBone aiBone = mBoneMap.get(boneName);
-            GVRAnimationChannel channel = animMap.get(boneName);
-
-            if (aiBone != null)
+            skelAnim.addChannel(boneName, channel);
+            animMap.remove(boneName);
+            /*
+             * This is required because of a bug in the FBX importer
+             * which does not scale the animations to match the bind pose
+             */
+            bindPoseMtx.getScale(vec);
+            float delta = vec.lengthSquared();
+            delta = 3.0f - delta;
+            if (Math.abs(delta) > EPSILON)
             {
-                bindPose.getWorldMatrix(boneId, bindPoseMtx);
-                bindPoseMtx.getScale(vec);
-                if (channel != null)
-                {
-                    skelAnim.addChannel(boneName, channel);
-                    animMap.remove(boneName);
-                    /*
-                     * This is required because of a bug in the FBX importer
-                     * which does not scale the animations to match the bind pose
-                     */
-                    if (boneId == 0)
-                    {
-                        bindPoseMtx.getScale(vec);
-                        float delta = vec.lengthSquared();
-                        delta = 3.0f - delta;
-                        if (Math.abs(delta) > EPSILON)
-                        {
-                            fixKeys(channel, vec);
-                        }
-                    }
-                }
+                fixKeys(channel, vec);
             }
-            else
+        }
+        for (int boneId = 1; boneId < mSkeleton.getNumBones(); ++boneId)
+        {
+            boneName = mSkeleton.getBoneName(boneId);
+            aiBone = mBoneMap.get(boneName);
+            channel = animMap.get(boneName);
+
+            if (channel != null)
             {
-                Log.e("BONE", "no bind pose matrix for bone %s", boneName);
-                if (channel != null)
+                if (aiBone != null)
                 {
                     skelAnim.addChannel(boneName, channel);
                     animMap.remove(boneName);
+                }
+                else
+                {
+                    Log.e("BONE", "no bind pose matrix for bone %s", boneName);
                 }
             }
         }
@@ -783,6 +768,7 @@ class  GVRJassimpAdapter
         return true;
     }
 
+
     private GVRAnimationBehavior convertAnimationBehavior(AiAnimBehavior behavior)
     {
         switch (behavior)
@@ -882,12 +868,10 @@ class  GVRJassimpAdapter
         mMaterials = new GVRMaterial[scene.getNumMaterials()];
 
         traverseGraph(model, scene.getSceneRoot(sWrapperProvider), lightList);
-        if (!doAnimation ||
-
-            (processAnimations(model, scene, settings.contains(GVRImportSettings.START_ANIMATIONS)) == null))
-
+        makeSkeleton(model);
+        if (doAnimation)
         {
-            makeSkeleton(model);
+            processAnimations(model, scene, settings.contains(GVRImportSettings.START_ANIMATIONS));
         }
         for (Map.Entry<GVRSceneObject, Integer> entry : mNodeMap.entrySet())
         {
@@ -970,7 +954,7 @@ class  GVRJassimpAdapter
             if ("".equals(nodeName))
             {
                 if ((mNodeMap.get(parent) == null) ||
-                        ((aiChild = handleNoName(node, sceneObject)) == null))
+                    ((aiChild = handleNoName(node, sceneObject)) == null))
                 {
                     nodeName = "mesh";
                     sceneObject.setName(nodeName + "-" + meshId);
@@ -1103,6 +1087,7 @@ class  GVRJassimpAdapter
         else
         {
             Log.v("BONE", "instancing mesh %s", sceneObject.getName());
+
         }
         if (gvrMaterial == null)
         {

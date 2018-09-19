@@ -161,7 +161,6 @@ public class GVRMeshMorph extends GVRBehavior
         }
         mbaseShape = baseShape;
         mNumVerts = baseShape.getVertexCount();
-
         if (mNumVerts <= 0)
         {
             throw new IllegalArgumentException("Base shape has no vertices");

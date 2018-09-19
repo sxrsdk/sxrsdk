@@ -464,6 +464,8 @@ abstract class GVRViewManager extends GVRContext {
                     }
                 }
             });
+
+            getInputManager().updateGearControllers();
         }
 
         @Override
@@ -510,10 +512,6 @@ abstract class GVRViewManager extends GVRContext {
     protected void beforeDrawEyes() {
         GVRNotifications.notifyBeforeStep();
         mFrameHandler.beforeDrawEyes();
-        if (null != mControllerReader) {
-            mControllerReader.updatePosData();
-        }
-        getInputManager().updateGearControllers();
         makeShadowMaps(mMainScene.getNative(), getMainScene(), mRenderBundle.getShaderManager().getNative(),
                        mRenderBundle.getPostEffectRenderTextureA().getWidth(), mRenderBundle.getPostEffectRenderTextureA().getHeight());
     }

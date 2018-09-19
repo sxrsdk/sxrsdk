@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+
 public class BVHImporter
 {
     private String mFileName;
@@ -36,6 +37,7 @@ public class BVHImporter
     }
 
     public GVRSkeletonAnimation importAnimation(GVRAndroidResource res, GVRSkeleton skel) throws IOException
+
     {
         InputStream stream = res.getStream();
 
@@ -47,6 +49,7 @@ public class BVHImporter
         BufferedReader buffreader = new BufferedReader(inputreader);
 
         int numbones = readSkeleton(buffreader);
+
         return readMotion(buffreader, skel);
     }
 
@@ -93,6 +96,7 @@ public class BVHImporter
         boolean     isJustClosed = false;
         boolean     isMultiple   = false;
 
+
         while ((line = buffreader.readLine().trim()) != null)
         {
             String[]    words = line.split(" ");
@@ -103,6 +107,7 @@ public class BVHImporter
             /*
              * Parsing skeleton definition with joint names and positions.
              */
+
             if (words.length < 1)           // has an argument?
                 continue;
             opcode = words[0];
@@ -144,12 +149,14 @@ public class BVHImporter
             }
 
             else if (opcode.equals("OFFSET"))       // bone position
+
             {
                 float xpos = Float.parseFloat(words[1]);
                 float ypos = Float.parseFloat(words[2]);
                 float zpos = Float.parseFloat(words[3]);
 
                 if (bonename.length() > 0)    // save position for the bone
+
                 {
                     mBonePositions.add(boneIndex, new Vector3f(xpos, ypos, zpos));
                     Log.d("BVH", "%s %f %f %f", bonename, xpos, ypos, zpos);
@@ -175,6 +182,7 @@ public class BVHImporter
 
             }
             else if (opcode.equals("MOTION"))
+
             {
                 break;
             }
@@ -201,6 +209,7 @@ public class BVHImporter
 
     public GVRPose readPose(BufferedReader buffreader, GVRSkeleton skel) throws IOException
     {
+
         float     x, y, z;
         String      line;
         String        bvhbonename = "";
@@ -208,13 +217,14 @@ public class BVHImporter
         Quaternionf q = new Quaternionf();
         Quaternionf b = new Quaternionf();
         GVRPose     pose = new GVRPose(skel);
-
+        GVRPose     bindpose = skel.getBindPose();
 
         /*
          * Parse and accumulate all the motion keyframes.
          * Keyframes for the root bone position are in rootPosKeys;
          * Keyframes for each bone's rotations are in rootKeysPerBone;
          */
+
         while ((line = buffreader.readLine().trim()) != null&&frameIndex < 1)
         {
             line = line.trim();
@@ -308,6 +318,7 @@ public class BVHImporter
          * Keyframes for the root bone position are in rootPosKeys;
          * Keyframes for each bone's rotations are in rootKeysPerBone;
          */
+
 
         while ((line = buffreader.readLine()) != null)
 
@@ -419,3 +430,4 @@ public class BVHImporter
         return skelanim;
     }
 }
+

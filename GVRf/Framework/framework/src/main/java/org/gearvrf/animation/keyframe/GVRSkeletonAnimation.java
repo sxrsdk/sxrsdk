@@ -160,13 +160,13 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
         int numBones = skel.getNumBones();
 
         mSkeleton = skel;
-        if (boneNames != null)
+        for (int boneId = 0; boneId < numBones; ++boneId)
         {
-            for (int boneId = 0; boneId < numBones; ++boneId)
+            if (boneNames != null)
             {
                 mSkeleton.setBoneName(boneId, boneNames.get(boneId));
-                mSkeleton.setBoneOptions(boneId, GVRSkeleton.BONE_ANIMATE);
             }
+            mSkeleton.setBoneOptions(boneId, GVRSkeleton.BONE_ANIMATE);
         }
         if (mBoneChannels == null)
         {
@@ -205,7 +205,6 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
         {
 
             GVRAnimationChannel channel = mBoneChannels[i];
-
             if ((channel != null) &&
                 (skel.getBoneOptions(i) == GVRSkeleton.BONE_ANIMATE))
             {
@@ -219,11 +218,9 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
                     rootOffset = null;
                 }
 
-
                 pose.setLocalMatrix(i, temp);
             }
         }
-
 
         skel.poseToBones();
         skel.updateSkinPose();
