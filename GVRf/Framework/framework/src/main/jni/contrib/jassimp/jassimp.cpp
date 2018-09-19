@@ -1454,7 +1454,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 		for (unsigned int p = 0; p < cMaterial->mNumProperties; p++)
 		{
-			//printf("%s - %u - %u\n", cScene->mMaterials[m]->mProperties[p]->mKey.C_Str(),
+			//printf("%s - %u - %u\n", cScene->mMaterials[m]->mProperties[p]->mKey.C_Str(), 
 			//	cScene->mMaterials[m]->mProperties[p]->mSemantic,
 			//	cScene->mMaterials[m]->mProperties[p]->mDataLength);
 
