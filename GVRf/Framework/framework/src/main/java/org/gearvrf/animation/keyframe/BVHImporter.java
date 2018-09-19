@@ -145,7 +145,7 @@ public class BVHImporter
                 if (bonename.length() > 0)    // save position for the bone
                 {
                     mBonePositions.add(boneIndex, new Vector3f(xpos, ypos, zpos));
-                    Log.d("BVH", "%s %f %f %f", bonename, xpos, ypos, zpos);
+//                    Log.d("BVH", "%s %f %f %f", bonename, xpos, ypos, zpos);
                 }
             }
             else if (opcode.equals("CHANNELS"))
@@ -260,7 +260,7 @@ public class BVHImporter
                     pose.setLocalRotation(boneIndex, q.x, q.y, q.z, q.w);
                     boneIndex++;
                     bvhboneIndex++;
-                    Log.d("BVH", "%s %f %f %f %f", bvhboneIndex, q.x, q.y, q.z, q.w);
+//                    Log.d("BVH", "%s %f %f %f %f", bvhboneIndex, q.x, q.y, q.z, q.w);
                 }
                 else
                 {
@@ -372,7 +372,7 @@ public class BVHImporter
                 rotKeys[f] = q.w;
                 boneIndex++;
 
-                Log.d("BVH", "%s %f %f %f %f", bonename, q.x, q.y, q.z, q.w);
+//                Log.d("BVH", "%s %f %f %f %f", bonename, q.x, q.y, q.z, q.w);
             }
             curTime += secondsPerFrame;
             frameIndex++;
