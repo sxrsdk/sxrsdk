@@ -60,7 +60,6 @@ public class BVHImporter
         }
         InputStreamReader inputreader = new InputStreamReader(stream);
         mReader = new BufferedReader(inputreader);
-
         readSkeleton();
         GVRSkeleton skel = createSkeleton();
         return readPose(skel);
@@ -75,8 +74,7 @@ public class BVHImporter
             throw new IOException("Cannot open " + res.getResourceFilename());
         }
         InputStreamReader inputreader = new InputStreamReader(stream);
-        BufferedReader buffreader = new BufferedReader(inputreader);
-
+        mReader = new BufferedReader(inputreader);
         readSkeleton();
         return createSkeleton();
     }
