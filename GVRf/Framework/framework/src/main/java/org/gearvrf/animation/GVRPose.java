@@ -48,7 +48,6 @@ public class GVRPose implements PrettyPrint
     public static final Matrix4f mTempMtxB = new Matrix4f();
     private static boolean sDebug = false;
 
-
     /**
      * The pose space designates how the world matrices
      * of the pose relate to one another.
