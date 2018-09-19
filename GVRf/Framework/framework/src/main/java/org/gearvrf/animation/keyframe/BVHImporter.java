@@ -28,8 +28,7 @@ public class BVHImporter
     private final ArrayList<Vector3f> mBonePositions = new ArrayList();
     private final ArrayList<Integer> mBoneParents = new ArrayList();
     private final ArrayList<Integer> mBoneChannels = new ArrayList();
-    private final ArrayList<Integer> mBoneSkeleton = new ArrayList();
-
+    private BufferedReader mReader;
 
     public BVHImporter(GVRContext ctx)
     {
@@ -46,9 +45,9 @@ public class BVHImporter
             throw new IOException("Cannot open " + mFileName);
         }
         InputStreamReader inputreader = new InputStreamReader(stream);
-        BufferedReader buffreader = new BufferedReader(inputreader);
-        readSkeleton(buffreader);
-        return readMotion(buffreader, skel);
+        mReader = new BufferedReader(inputreader);
+        readSkeleton();
+        return readMotion(skel);
     }
 
     public GVRPose importPose(GVRAndroidResource res)  throws IOException
@@ -60,11 +59,11 @@ public class BVHImporter
             throw new IOException("Cannot open " + res.getResourceFilename());
         }
         InputStreamReader inputreader = new InputStreamReader(stream);
-        BufferedReader buffreader = new BufferedReader(inputreader);
+        mReader = new BufferedReader(inputreader);
 
-        readSkeleton(buffreader);
+        readSkeleton();
         GVRSkeleton skel = createSkeleton();
-        return readPose(buffreader, skel);
+        return readPose(skel);
     }
 
     public GVRSkeleton importSkeleton(GVRAndroidResource res) throws IOException
@@ -78,11 +77,11 @@ public class BVHImporter
         InputStreamReader inputreader = new InputStreamReader(stream);
         BufferedReader buffreader = new BufferedReader(inputreader);
 
-        readSkeleton(buffreader);
+        readSkeleton();
         return createSkeleton();
     }
 
-    private int readSkeleton(BufferedReader buffreader) throws IOException
+    private int readSkeleton() throws IOException
     {
         int         numbones = 0;
         String      bonename = "";
@@ -93,8 +92,7 @@ public class BVHImporter
         boolean     isJustClosed = false;
         boolean     isMultiple   = false;
 
-
-        while ((line = buffreader.readLine().trim()) != null)
+        while ((line = mReader.readLine().trim()) != null)
         {
             String[]    words = line.split(" ");
             String      opcode;
@@ -112,7 +110,7 @@ public class BVHImporter
                 int i = 0;
                 while (i < 3)
                 {
-                    buffreader.readLine();
+                    mReader.readLine();
                     i++;
                 }
                 continue;
@@ -194,9 +192,8 @@ public class BVHImporter
         return skel;
     }
 
-    public GVRPose readPose(BufferedReader buffreader, GVRSkeleton skel) throws IOException
+    public GVRPose readPose(GVRSkeleton skel) throws IOException
     {
-
         float       x, y, z;
         String      line;
         String      bvhbonename = "";
@@ -210,7 +207,7 @@ public class BVHImporter
          * Keyframes for each bone's rotations are in rootKeysPerBone;
          */
 
-        while ((line = buffreader.readLine().trim()) != null&&frameIndex < 1)
+        while ((line = mReader.readLine().trim()) != null&&frameIndex < 1)
         {
             line = line.trim();
             String[]    words;
@@ -277,7 +274,7 @@ public class BVHImporter
         return pose;
     }
 
-    public GVRSkeletonAnimation readMotion(BufferedReader buffreader, GVRSkeleton skel) throws IOException
+    public GVRSkeletonAnimation readMotion(GVRSkeleton skel) throws IOException
     {
         int         numbones = skel.getNumBones();
         float       x, y, z;
@@ -300,7 +297,7 @@ public class BVHImporter
          * Keyframes for the root bone position are in rootPosKeys;
          * Keyframes for each bone's rotations are in rootKeysPerBone;
          */
-        while ((line = buffreader.readLine()) != null)
+        while ((line = mReader.readLine()) != null)
         {
             line = line.trim();
             String[]    words;
