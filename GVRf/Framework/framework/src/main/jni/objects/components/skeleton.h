@@ -16,7 +16,7 @@ class Shader;
 class Skeleton : public Component
 {
 public:
-    Skeleton(int numbones);
+    Skeleton(int* boneparents, int numbones);
 
     virtual ~Skeleton();
 
@@ -28,7 +28,18 @@ public:
     int getNumBones() const { return mNumBones; }
 
     void setPose(const float* input);
+    void setSkinPose(const float* input);
+    glm::mat4* getSkinMatrix(int boneId);
     glm::mat4* getBoneMatrix(int boneId);
+
+    int getParentBoneID(int boneId) const
+    {
+        if ((boneId < 0) || (boneId >= mNumBones))
+        {
+            return -1;
+        }
+        return mBoneParents[boneId];
+    }
 
 private:
     Skeleton(const Skeleton& skel) = delete;
@@ -37,8 +48,10 @@ private:
     Skeleton& operator=(Skeleton&& skel) = delete;
 
 private:
-    int mNumBones;
-    glm::mat4*  mMatrixData;
+    int         mNumBones;
+    int*        mBoneParents;
+    glm::mat4*  mSkinMatrices;
+    glm::mat4*  mBoneMatrices;
 };
 
 }

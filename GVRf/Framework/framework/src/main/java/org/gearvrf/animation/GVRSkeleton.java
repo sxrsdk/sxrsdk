@@ -110,6 +110,8 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
     final private Quaternionf mTempQuatA = new Quaternionf();
     final private Quaternionf mTempQuatB = new Quaternionf();
     final private Matrix4f mTempMtx = new Matrix4f();
+    private static int[] sTempBoneParents;
+    private static GVRSceneObject sTempRoot;
 
     protected String[] mBoneNames;
     protected Vector3f mRootOffset;     // offset for root bone animations
@@ -139,7 +141,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
      */
     public GVRSkeleton(GVRContext ctx, int[] parentBones)
     {
-        super(ctx, NativeSkeleton.ctor(parentBones.length));
+        super(ctx, NativeSkeleton.ctor(parentBones));
         mType = getComponentType();
         mParentBones = parentBones;
         mBoneAxis = new Vector3f(0, 0, 1);
@@ -154,20 +156,36 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
 
     public GVRSkeleton(GVRSceneObject root, List<String> boneNames)
     {
-        super(root.getGVRContext(), NativeSkeleton.ctor(boneNames.size()));
+        super(root.getGVRContext(), NativeSkeleton.ctor(makeParentBoneIds(root, boneNames)));
         int numBones = boneNames.size();
         mType = getComponentType();
-        mParentBones = new int[numBones];
+        mParentBones = sTempBoneParents;
         mBoneAxis = new Vector3f(0, 0, 1);
         mRootOffset = new Vector3f(0, 0, 0);
         mBoneOptions = new int[numBones];
         mBoneNames = new String[numBones];
         mBones = new GVRSceneObject[numBones];
         mPoseMatrices =  new float[numBones * 16];
-        int numRoots = 0;
-        GVRSceneObject skelRoot = null;
+        mPose = new GVRPose(this);
+        mBindPose = new GVRPose(this);
+        for (int boneId = 0; boneId < numBones; ++boneId)
+        {
+            String boneName = boneNames.get(boneId);
+            setBoneName(boneId, boneName);
+        }
+        if (sTempRoot != null)
+        {
+            sTempRoot.attachComponent(this);
+        }
+    }
 
-        Arrays.fill(mParentBones, -1);
+    protected static int[] makeParentBoneIds(GVRSceneObject root, List<String> boneNames)
+    {
+        int numBones = boneNames.size();
+        int[] parentBones = new int[numBones];
+        int numRoots = 0;
+        sTempRoot = null;
+        Arrays.fill(parentBones, -1);
         for (int boneId = 0; boneId < numBones; ++boneId)
         {
             String boneName = boneNames.get(boneId);
@@ -181,26 +199,21 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
             GVRSceneObject parent = obj.getParent();
             int parBoneId = -1;
 
-            setBoneName(boneId, boneName);
             if (parent != null)
             {
                 String nodeName = parent.getName();
                 parBoneId = boneNames.indexOf(nodeName);
             }
-            if ((parBoneId < 0) && (skelRoot == null))
+            if ((parBoneId < 0) && (sTempRoot == null))
             {
-                skelRoot = obj;
+                sTempRoot = obj;
                 Log.d("BONE", "Skeleton root %d is %s", numRoots, boneNames.get(boneId));
                 ++numRoots;
             }
-            mParentBones[boneId] = parBoneId;
+            parentBones[boneId] = parBoneId;
         }
-        mPose = new GVRPose(this);
-        mBindPose = new GVRPose(this);
-        if (skelRoot != null)
-        {
-            skelRoot.attachComponent(this);
-        }
+        sTempBoneParents = parentBones;
+        return parentBones;
     }
 
     /**
@@ -297,6 +310,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
         }
         mInverseBindPose.inverse(mBindPose);
         mPose.copy(mBindPose);
+        updateBonePose();
     }
 
     /**
@@ -332,7 +346,9 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
         }
         mInverseBindPose.inverse(mBindPose);
         mPose.copy(mBindPose);
+        updateBonePose();
     }
+
 
     /**
      * The bind pose is the pose the skeleton is in when no rotations are
@@ -423,6 +439,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
         if (skel != this)
             throw new IllegalArgumentException("setPose: input pose has incompatible skeleton");
         mPose.copy(pose);
+        updateBonePose();
     }
 
     /**
@@ -520,6 +537,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
             }
         }
         mPose.sync();
+        updateBonePose();
     }
 
     /**
@@ -554,6 +572,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
                 mPose.setWorldMatrix(i, mTempMtx);
             }
         }
+        updateBonePose();
     }
 
     /**
@@ -571,6 +590,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
     {
         mInverseBindPose.inverse(mBindPose);
         mPose.copy(mBindPose);
+        updateBonePose();
     }
 
     /**
@@ -760,6 +780,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
             mPose.copy(mBindPose);
             mInverseBindPose = new GVRPose(this);
             mInverseBindPose.inverse(mBindPose);
+            updateBonePose();
         }
         else
         {
@@ -840,6 +861,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
             mPose.setLocalMatrix(i, trans.getLocalModelMatrix4f());
         }
         mPose.sync();
+        updateBonePose();
     }
 
     /**
@@ -862,6 +884,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
             }
         }
         mPose.sync();
+        updateBonePose();
     }
 
     /**
@@ -940,6 +963,34 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
         GVRPose skinPose = computeSkinPose();
 
         skinPose.getWorldMatrices(mPoseMatrices);
+        NativeSkeleton.setSkinPose(getNative(), mPoseMatrices);
+    }
+
+    /*
+     * Compute the skinning matrices from the current pose.
+     * <p>
+     * The skin pose is relative to the untransformed mesh.
+     * It will be used to transform the vertices before
+     * overall translate, rotation and scale are performed.
+     * It is the current pose relative to the bind pose
+     * of the mesh.
+     * <p>
+     * Each skinned mesh has an associated @{link GVRSkin} component
+     * which manages the bones that affect that mesh.
+     * This function updates the GPU skinning matrices each frame.
+     * @see GVRSkin
+     */
+    public void updateBonePose()
+    {
+        GVRPose pose = getPose();
+        int t = 0;
+
+        for (int i = 0; i < mParentBones.length; ++i)
+        {
+            pose.getLocalMatrix(i, mTempMtx);
+            mTempMtx.get(mPoseMatrices, t);
+            t += 16;
+        }
         NativeSkeleton.setPose(getNative(), mPoseMatrices);
     }
 
@@ -1016,6 +1067,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
         }
         setBindPose(mBindPose);
         mPose.sync();
+        updateBonePose();
     }
 
     @Override
@@ -1039,7 +1091,8 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
 
 class NativeSkeleton
 {
-    static native long ctor(int numbones);
+    static native long ctor(int[] boneParents);
     static native long getComponentType();
     static native boolean setPose(long object, float[] matrices);
+    static native boolean setSkinPose(long object, float[] matrices);
 }
