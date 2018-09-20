@@ -183,10 +183,15 @@ public class BVHImporter
             boneparents[i] = mBoneParents.get(i);
         }
         skel = new GVRSkeleton(mContext, boneparents);
+        GVRPose bindpose = new GVRPose(skel);
+
         for (int i = 0; i < mBoneNames.size(); ++i)
         {
+            Vector3f p = mBonePositions.get(i);
+            bindpose.setLocalPosition(i, p.x, p.y, p.z);
             skel.setBoneName(i, mBoneNames.get(i));
         }
+        skel.setBindPose(bindpose);
         return skel;
     }
 
@@ -268,12 +273,13 @@ public class BVHImporter
         float       curTime = 0;
         float[]     rotKeys;
         float[]     posKeys;
-        int         frameIndex = 0;
         ArrayList<float[]> rotKeysPerBone = new ArrayList<>(numbones);
         ArrayList<float[]> posKeysPerBone = new ArrayList<>(numbones);
         Quaternionf q = new Quaternionf();
         Quaternionf b = new Quaternionf();
         GVRPose bindpose = skel.getBindPose();
+        int frameIndex = 0;
+        int numFrames = 0;
 
         /*
          * Parse and accumulate all the motion keyframes.
@@ -282,20 +288,21 @@ public class BVHImporter
          */
         while ((line = mReader.readLine()) != null)
         {
-            String[]    words;
+            String[] words;
 
             line = line.trim();
-            words = line.split("[\t ]");
             if (line == "")
             {
                 continue;
             }
+            words = line.split("[\t ]");
             if (words[0].startsWith("Frames"))
             {
                 for (int i = 0; i < numbones; i++)
                 {
-                    float[] r = new float[5 * Integer.parseInt(words[1])];
-                    float[] p = new float[4 * Integer.parseInt(words[1])];
+                    numFrames = Integer.parseInt(words[1]);
+                    float[] r = new float[5 * numFrames];
+                    float[] p = new float[4 * numFrames];
                     rotKeysPerBone.add(r);
                     posKeysPerBone.add(p);
                 }
@@ -312,6 +319,7 @@ public class BVHImporter
              */
             int boneIndex = 0;
             int i = 0;
+            int f;
             while (i + 3 < words.length)
             {
                 bonename = mBoneNames.get(boneIndex);
@@ -321,7 +329,7 @@ public class BVHImporter
                 }
                 if (mBoneChannels.get(boneIndex) > 3)
                 {
-                    int f = frameIndex * 4;
+                    f = frameIndex * 4;
                     posKeys = posKeysPerBone.get(boneIndex);
                     x = Float.parseFloat(words[i]);    // Z, Y, X rotation angles
                     y = Float.parseFloat(words[i + 1]);
@@ -343,18 +351,20 @@ public class BVHImporter
                 q.normalize();
                 bindpose.getLocalRotation(boneIndex, b);
                 q.mul(b);
-                int f = 5 * frameIndex;
+                f = 5 * frameIndex;
                 rotKeys[f++] = curTime;
                 rotKeys[f++] = q.x;
                 rotKeys[f++] = q.y;
                 rotKeys[f++] = q.z;
                 rotKeys[f] = q.w;
                 boneIndex++;
-
                 //Log.d("BVH", "%s %f %f %f %f", bonename, q.x, q.y, q.z, q.w);
             }
             curTime += secondsPerFrame;
-            frameIndex++;
+            if (++frameIndex >= numFrames)
+            {
+                break;
+            }
         }
         /*
          * Create a skeleton animation with separate channels for each bone

@@ -9,6 +9,8 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.Arrays;
+
 public class GVRPoseMapper extends GVRAnimation
 {
     protected GVRSkeleton mSourceSkeleton;
@@ -19,9 +21,9 @@ public class GVRPoseMapper extends GVRAnimation
     /**
      * Constructs an animation retargeting engine.
      */
-    public GVRPoseMapper(GVRSkeleton dstskel)
+    public GVRPoseMapper(GVRSkeleton dstskel, float duration)
     {
-        super(dstskel, 10);
+        super(dstskel, duration);
         mDestSkeleton = dstskel;
         mDestPose = new GVRPose(dstskel);
     }
@@ -29,9 +31,9 @@ public class GVRPoseMapper extends GVRAnimation
     /**
      * Constructs an animation retargeting engine.
      */
-    public GVRPoseMapper(GVRSkeleton dstskel, GVRSkeleton srcskel)
+    public GVRPoseMapper(GVRSkeleton dstskel, GVRSkeleton srcskel, float duration)
     {
-        super(dstskel, 10);
+        super(dstskel, duration);
         mDestSkeleton = dstskel;
         mSourceSkeleton = srcskel;
         mDestPose = new GVRPose(dstskel);
@@ -89,6 +91,34 @@ public class GVRPoseMapper extends GVRAnimation
         mBoneMap = bonemap;
     }
 
+    /**
+     * Set the bone map between source and target.
+     * @param bonemap	string with source to target bone mappings
+     *
+     * Each line in the bone map string contains the name of a source
+     * bone followed by the name of the corresponding target bone.
+     * The names can be separated by spaces or tabs.
+     *
+     * @see GVRSkeleton
+     */
+    public void setBoneMap(String bonemap)
+    {
+        String[] lines = bonemap.split("\n");
+
+        mBoneMap = new int[mSourceSkeleton.getNumBones()];
+        Arrays.fill(mBoneMap, -1);
+        for (String line : lines)
+        {
+            String[] words = line.split("[\t ]");
+            int sourceIndex = mSourceSkeleton.getBoneIndex(words[0]);
+            int destIndex = mDestSkeleton.getBoneIndex(words[1]);
+
+            if ((sourceIndex >= 0) && (destIndex >= 0))
+            {
+                mBoneMap[sourceIndex] = destIndex;
+            }
+        }
+    }
 
     /*!
      * @fn void PoseMapper::MakeBoneMap(IntArray& bonemap, const Skeleton* srcskel, const Skeleton* dstskel)

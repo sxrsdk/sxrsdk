@@ -207,52 +207,37 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     /**
      * Load an animation for the current avatar.
      * @param animResource resource with the animation
+     * @param boneMap optional bone map to map animation skeleton to avatar
      */
-    public void loadAnimation(GVRAndroidResource animResource)
+    public void loadAnimation(GVRAndroidResource animResource, String boneMap)
     {
         String filePath = animResource.getResourcePath();
         GVRContext ctx = mAvatarRoot.getGVRContext();
         GVRResourceVolume volume = new GVRResourceVolume(ctx, animResource);
 
-        if (filePath.endsWith(".txt"))
+        if (filePath.endsWith(".bvh"))
         {
+            GVRAnimator animator = new GVRAnimator(ctx);
+            animator.setName(filePath);
             try
             {
-                TRSImporter importer = new TRSImporter(ctx);
-                GVRSkeletonAnimation skelAnim = importer.importAnimation(animResource, mSkeleton);
-                GVRAnimator animator = new GVRAnimator(ctx);
-                animator.setName(filePath);
-                animator.addAnimation(skelAnim);
-                addAnimation(animator);
-                ctx.getEventManager().sendEvent(this,
-                                                IAvatarEvents.class,
-                                                "onAnimationLoaded",
-                                                animator,
-                                                filePath,
-                                                null);
-            }
-            catch (IOException ex)
-            {
-                ctx.getEventManager().sendEvent(this,
-                                                IAvatarEvents.class,
-                                                "onAnimationLoaded",
-                                                null,
-                                                filePath,
-                                                ex.getMessage());
-            }
-        }
-
-        else if (filePath.endsWith(".bvh"))
-        {
-            try
-            {
-                GVRSkeleton cc= mSkeleton;
                 BVHImporter importer = new BVHImporter(ctx);
-                GVRSkeletonAnimation skelAnim = importer.importAnimation(animResource, mSkeleton);
+                GVRSkeletonAnimation skelAnim;
 
-                GVRAnimator animator = new GVRAnimator(ctx);
-                animator.setName(filePath);
-                animator.addAnimation(skelAnim);
+                if (boneMap != null)
+                {
+                    GVRSkeleton skel = importer.importSkeleton(animResource);
+                    skelAnim = importer.readMotion(skel);
+                    animator.addAnimation(skelAnim);
+                    GVRPoseMapper retargeter = new GVRPoseMapper(mSkeleton, skel, skelAnim.getDuration());
+                    retargeter.setBoneMap(boneMap);
+                    animator.addAnimation(retargeter);
+                }
+                else
+                {
+                    skelAnim = importer.importAnimation(animResource, mSkeleton);
+                    animator.addAnimation(skelAnim);
+                }
                 addAnimation(animator);
                 ctx.getEventManager().sendEvent(this,
                         IAvatarEvents.class,
@@ -271,7 +256,6 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                         ex.getMessage());
             }
         }
-
         else
         {
             EnumSet<GVRImportSettings> settings = GVRImportSettings.getRecommendedSettingsWith(EnumSet.of(GVRImportSettings.OPTIMIZE_GRAPH, GVRImportSettings.NO_TEXTURING));
@@ -498,7 +482,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
 
             if (skelAnim.getSkeleton() != mSkeleton)
             {
-                GVRPoseMapper poseMapper = new GVRPoseMapper(mSkeleton, skelAnim.getSkeleton());
+                GVRPoseMapper poseMapper = new GVRPoseMapper(mSkeleton, skelAnim.getSkeleton(), skelAnim.getDuration());
 
                 animator.addAnimation(poseMapper);
             }

@@ -899,9 +899,7 @@ public class GVRPose implements PrettyPrint
             update = (mBones[pid].Changed & (WORLD_ROT | LOCAL_ROT)) != 0;
             if (!mSkeleton.isLocked(i))				        // bone not locked?
             {
-
                 if ((bone.Changed == WORLD_ROT) ||
-
                     ((bone.Changed & Bone.WORLD_POS) != 0))	// world matrix changed?
                 {
                     calcLocal(bone, pid);					// calculate local rotation and position
