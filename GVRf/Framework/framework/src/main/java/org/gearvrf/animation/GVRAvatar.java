@@ -326,12 +326,8 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         {
             if (name.equals(anim.getName()))
             {
-                mAnimQueue.add(anim);
-                if (mAnimQueue.size() > 1)
-                {
-                    mIsRunning = true;
-                    anim.start(mOnFinish);
-                }
+                start(anim);
+                return;
             }
         }
     }
@@ -349,13 +345,18 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             throw new IndexOutOfBoundsException("Animation index out of bounds");
         }
         GVRAnimator anim = mAnimations.get(animIndex);
-        mAnimQueue.add(anim);
+        start(anim);
+        return anim;
+    }
+
+    protected void start(GVRAnimator animator)
+    {
+        mAnimQueue.add(animator);
         if (mAnimQueue.size() == 1)
         {
             mIsRunning = true;
-            anim.start(mOnFinish);
+            animator.start(mOnFinish);
         }
-        return anim;
     }
 
     /**
