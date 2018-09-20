@@ -356,6 +356,8 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         {
             mIsRunning = true;
             animator.start(mOnFinish);
+            mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
+                                                                    "onAnimationStarted", animator);
         }
     }
 
