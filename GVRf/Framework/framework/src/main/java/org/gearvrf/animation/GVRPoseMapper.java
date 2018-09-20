@@ -103,13 +103,20 @@ public class GVRPoseMapper extends GVRAnimation
      */
     public void setBoneMap(String bonemap)
     {
-        String[] lines = bonemap.split("\n");
+        String[] lines = bonemap.split("\r\n");
 
         mBoneMap = new int[mSourceSkeleton.getNumBones()];
         Arrays.fill(mBoneMap, -1);
         for (String line : lines)
         {
-            String[] words = line.split("[\t ]");
+            String[] words;
+
+            line = line.trim();
+            if (line.isEmpty())
+            {
+                continue;
+            }
+            words = line.split("[\t ]");
             int sourceIndex = mSourceSkeleton.getBoneIndex(words[0]);
             int destIndex = mDestSkeleton.getBoneIndex(words[1]);
 
