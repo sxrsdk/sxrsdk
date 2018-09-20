@@ -341,9 +341,7 @@ public class GVRPose implements PrettyPrint
      */
     public void setWorldMatrix(int boneindex, Matrix4f mtx)
     {
-
         Bone	  bone = mBones[boneindex];
-
 
         bone.WorldMatrix.set(mtx);
         if (mSkeleton.getParentBoneIndex(boneindex) >= 0)
