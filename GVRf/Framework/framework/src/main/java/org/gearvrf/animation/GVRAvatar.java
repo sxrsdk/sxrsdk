@@ -16,7 +16,10 @@ import org.gearvrf.IEvents;
 import org.gearvrf.animation.keyframe.BVHImporter;
 import org.gearvrf.animation.keyframe.GVRSkeletonAnimation;
 import org.gearvrf.animation.keyframe.TRSImporter;
+import org.gearvrf.scene_objects.GVRCubeSceneObject;
+import org.gearvrf.scene_objects.GVRSphereSceneObject;
 import org.gearvrf.utility.Log;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.io.IOException;
@@ -49,6 +52,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     protected boolean mIsRunning;
     protected GVREventReceiver mReceiver;
     protected List<GVRAnimator> mAnimQueue = new ArrayList<GVRAnimator>();
+    GVRSkeleton skeletonMesh;
 
     /**
      * Make an instance of the GVRAnimator component.
@@ -205,9 +209,10 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         {
             try
             {
-                GVRSkeleton cc= mSkeleton;
                 BVHImporter importer = new BVHImporter(ctx);
                 GVRSkeletonAnimation skelAnim = importer.importAnimation(animResource, mSkeleton);
+                 skeletonMesh = importer.createSkeleton();
+
 
                 GVRAnimator animator = new GVRAnimator(ctx);
                 animator.setName(filePath);
@@ -238,6 +243,48 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             GVRSceneObject animRoot = new GVRSceneObject(ctx);
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
         }
+    }
+
+    public GVRSkeleton getmSkeleton() {
+        return skeletonMesh;
+    }
+
+    public void makeSkeletonGeometry(GVRSkeleton skele, GVRContext ctx) {
+
+        GVRSceneObject skeletonObj = null;
+        GVRSceneObject msphere;
+        //mCube = new GVRCubeSceneObject(ctx);
+        List<GVRSceneObject> objectList = new ArrayList<GVRSceneObject>();
+        GVRPose pos = skele.getBindPose();
+         Vector3f poseOnePos =new Vector3f(0,0,0);
+        int getnumBones = skeletonMesh.getNumBones();
+        Matrix4f temp = new Matrix4f();
+
+        for (int i = 0; i < 2; ++i)
+        {
+
+            pos.getLocalPosition(i,poseOnePos);
+            pos.getLocalMatrix(i,temp );
+            msphere = new GVRSphereSceneObject(ctx);
+            msphere.getTransform().setScale(0.25f,0.25f,0.25f);
+            msphere.getTransform().setPosition(0,0,0);
+            objectList.add(msphere);
+            //skeletonObj.addChildObject(msphere);
+
+           //
+        }
+        for (GVRSceneObject object : objectList) {
+
+            centerModel(object);
+            ctx.getMainScene().addSceneObject(object);
+
+        }
+
+
+
+
+
+
     }
 
 

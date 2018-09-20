@@ -159,7 +159,7 @@ public class BVHImporter
 
                 {
                     mBonePositions.add(boneIndex, new Vector3f(xpos, ypos, zpos));
-                    Log.d("BVH", "%s %f %f %f", bonename, xpos, ypos, zpos);
+                  //  Log.d("BVH", "%s %f %f %f", bonename, xpos, ypos, zpos);
                 }
 
             }
@@ -190,7 +190,7 @@ public class BVHImporter
         return numbones;
     }
 
-    private GVRSkeleton createSkeleton()
+    public GVRSkeleton createSkeleton()
     {
         int[] boneparents = new int[mBoneParents.size()];
         GVRSkeleton skel;
@@ -200,11 +200,20 @@ public class BVHImporter
             boneparents[i] = mBoneParents.get(i);
         }
         skel = new GVRSkeleton(mContext, boneparents);
+        GVRPose bindpose = new GVRPose(skel);
+
         for (int i = 0; i < mBoneNames.size(); ++i)
         {
+            Vector3f p = mBonePositions.get(i);
+            bindpose.setLocalPosition(i, p.x, p.y, p.z);
             skel.setBoneName(i, mBoneNames.get(i));
         }
+        skel.setBindPose(bindpose);
         return skel;
+    }
+    public  GVRContext getcont()
+    {
+        return mContext;
     }
 
     public GVRPose readPose(BufferedReader buffreader, GVRSkeleton skel) throws IOException
@@ -281,7 +290,7 @@ public class BVHImporter
                     boneIndex++;
                     bvhboneIndex++;
 
-                    Log.d("BVH", "%s %f %f %f %f", bvhboneIndex, q.x, q.y, q.z, q.w);
+                   // Log.d("BVH", "%s %f %f %f %f", bvhboneIndex, q.x, q.y, q.z, q.w);
 
                 }
                 else
@@ -400,7 +409,7 @@ public class BVHImporter
                     rotKeys[f] = q.w;
                     boneIndex++;
 
-                    Log.d("BVH", "%s %f %f %f %f", bonename, q.x, q.y, q.z, q.w);
+                   // Log.d("BVH", "%s %f %f %f %f", bonename, q.x, q.y, q.z, q.w);
                 }
                 curTime += secondsPerFrame;
                 frameIndex++;
