@@ -179,7 +179,7 @@ class  GVRJassimpAdapter
             Vector3f normal = new Vector3f();
             Vector3f bitangent = new Vector3f();
 
-            for(int i = 0; i < tangentsArray.length; i += 3)
+            for (int i = 0; i < tangentsArray.length; i += 3)
             {
                 tangent.set(tangentsArray[i], tangentsArray[i + 1], tangentsArray[i + 2]);
                 normal.set(normalsArray[i], normalsArray[i + 1], normalsArray[i + 2]);
@@ -321,8 +321,8 @@ class  GVRJassimpAdapter
                         bitangentArray[i] = bitangent.x;
                         bitangentArray[i + 1] = bitangent.y;
                         bitangentArray[i + 2] = bitangent.z;
-                        animBuff.setFloatArray("a_bitangent", bitangentArray);
                     }
+                    animBuff.setFloatArray("a_bitangent", bitangentArray);
                 }
                 morph.setBlendShape(blendShapeNum, animBuff);
                 blendShapeNum++;

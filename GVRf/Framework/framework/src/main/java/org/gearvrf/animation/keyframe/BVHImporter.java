@@ -95,60 +95,52 @@ public class BVHImporter
 
     private int readSkeleton() throws IOException
     {
-        int         numbones = 0;
-        String      bonename = "";
-        String      line;
-        int         parentIndex = -1;
-        int         boneIndex = 0;
-        Stack<Integer> balancedBraces = new Stack<>();
-        boolean     isJustClosed = false;
-        boolean     isMultiple   = false;
-
+        String line;
 
         while ((line = mReader.readLine().trim()) != null)
         {
-            String[]    words = line.split(" ");
+            String[] words;
+
+            if (line == "")
+                continue;
+            words = line.split("[ \t]");
+            if (words[0].equals("ROOT"))
+            {
+                parseJoint(words[1], -1);
+                return mBoneParents.size();
+            }
+        }
+        return 0;
+    }
+
+    private int parseJoint(String bonename, int parentIndex) throws IOException
+    {
+        String      line;
+        int         boneIndex = mBoneParents.size();
+        int         newIndex = boneIndex;
+
+        mBoneParents.add(boneIndex, parentIndex);
+        mBoneNames.add(boneIndex, bonename);
+        while ((line = mReader.readLine().trim()) != null)
+        {
+            String[]    words = line.split("[ \t]");
             String      opcode;
 
             if (line == "")
                 continue;
-            /*
-             * Parsing skeleton definition with joint names and positions.
-             */
             if (words.length < 1)           // has an argument?
                 continue;
             opcode = words[0];
-            if (opcode.equals("End"))       // bone position
+            if (opcode.equals("End"))       // end site
             {
-                int i = 0;
-                while (i < 3)
-                {
-                    mReader.readLine();
-                    i++;
-                }
-                continue;
+                bonename = "end_" + mBoneNames.get(boneIndex);
+                mBoneChannels.add(boneIndex, 0);
+                newIndex = parseJoint(bonename, boneIndex);
             }
-            if (opcode.equals("}"))
+            else if ((opcode.equals("ROOT")) ||   // found root bone?
+                    (opcode.equals("JOINT")))      // found any bone?
             {
-                parentIndex = balancedBraces.peek();
-                balancedBraces.pop();
-                if (!isJustClosed && !isMultiple)
-                {
-                    isJustClosed = true;
-                }
-                else
-                {
-                    isJustClosed = false;
-                    isMultiple = true;
-                }
-            }
-            if ((opcode.equals("ROOT")) ||       // found root bone?
-                (opcode.equals("JOINT")))        // found any bone?
-            {
-                bonename = words[1];
-                mBoneParents.add(boneIndex, parentIndex);
-                mBoneNames.add(boneIndex, bonename);
-                ++numbones;
+                newIndex = parseJoint(words[1], boneIndex);
             }
             else if (opcode.equals("OFFSET"))       // bone position
             {
@@ -156,35 +148,19 @@ public class BVHImporter
                 float ypos = Float.parseFloat(words[2]);
                 float zpos = Float.parseFloat(words[3]);
 
-                if (bonename.length() > 0)    // save position for the bone
-                {
-                    mBonePositions.add(boneIndex, new Vector3f(xpos, ypos, zpos));
-//                    Log.d("BVH", "%s %f %f %f", bonename, xpos, ypos, zpos);
-                }
+                mBonePositions.add(boneIndex, new Vector3f(xpos, ypos, zpos));
+//              Log.d("BVH", "%s %f %f %f", bonename, xpos, ypos, zpos);
             }
             else if (opcode.equals("CHANNELS"))
             {
                 mBoneChannels.add(boneIndex, Integer.parseInt(words[1]));
-                balancedBraces.push(parentIndex);
-                if (isJustClosed)
-                {
-                    parentIndex++;
-                }
-                else
-                {
-                    parentIndex = boneIndex;
-                }
-                ++boneIndex;
-                isJustClosed = false;
-                isMultiple = false;
-                bonename = "";
             }
-            else if (opcode.equals("MOTION"))
+            else if (opcode.equals("MOTION") || opcode.equals("}"))
             {
                 break;
             }
         }
-        return numbones;
+        return newIndex;
     }
 
     private GVRSkeleton createSkeleton()
@@ -310,6 +286,10 @@ public class BVHImporter
                 continue;
             }
             words = line.split("[\t ]");
+            if (words[0].equals("MOTION"))
+            {
+                continue;
+            }
             if (words[0].startsWith("Frames"))
             {
                 for (int i = 0; i < numbones; i++)
@@ -340,6 +320,11 @@ public class BVHImporter
                 if (bonename == null)
                 {
                     throw new IOException("Cannot find bone " + bonename + " in skeleton");
+                }
+                if (mBoneChannels.get(boneIndex) == 0)
+                {
+                    ++boneIndex;
+                    continue;
                 }
                 if (mBoneChannels.get(boneIndex) > 3)
                 {
@@ -387,6 +372,10 @@ public class BVHImporter
         GVRSkeletonAnimation skelanim = new GVRSkeletonAnimation(mFileName, skel, curTime);
         for (int boneIndex = 0; boneIndex < mBoneNames.size(); ++boneIndex)
         {
+            if (mBoneChannels.get(boneIndex) == 0)
+            {
+                continue;
+            }
             bonename = mBoneNames.get(boneIndex);
             rotKeys = rotKeysPerBone.get(boneIndex);
             posKeys = posKeysPerBone.get(boneIndex);
