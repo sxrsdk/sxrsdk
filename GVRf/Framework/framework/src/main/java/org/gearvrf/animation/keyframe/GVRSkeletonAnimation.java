@@ -230,8 +230,8 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
                 pose.setLocalMatrix(i, temp);
             }
         }
-
         skel.poseToBones();
+        skel.updateBonePose();
         skel.updateSkinPose();
     }
 
