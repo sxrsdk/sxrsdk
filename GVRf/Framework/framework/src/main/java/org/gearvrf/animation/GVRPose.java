@@ -1,3 +1,17 @@
+/* Copyright 2015 Samsung Electronics Co., LTD
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gearvrf.animation;
 
 import org.gearvrf.PrettyPrint;
@@ -46,8 +60,7 @@ public class GVRPose implements PrettyPrint
     private final Quaternionf mTempQuat = new Quaternionf();
     public static final Matrix4f mTempMtxA = new Matrix4f();
     public static final Matrix4f mTempMtxB = new Matrix4f();
-    private static boolean sDebug = true;
-
+    private static boolean sDebug = false;
 
     /**
      * The pose space designates how the world matrices
@@ -150,7 +163,6 @@ public class GVRPose implements PrettyPrint
         if ((boneParent >= 0) && ((bone.Changed & LOCAL_ROT) == LOCAL_ROT))
         {
             calcWorld(bone, boneParent);
-
         }
         pos.x = bone.WorldMatrix.m30();
         pos.y = bone.WorldMatrix.m31();
@@ -343,9 +355,7 @@ public class GVRPose implements PrettyPrint
      */
     public void setWorldMatrix(int boneindex, Matrix4f mtx)
     {
-
         Bone	  bone = mBones[boneindex];
-
 
         bone.WorldMatrix.set(mtx);
         if (mSkeleton.getParentBoneIndex(boneindex) >= 0)
@@ -844,7 +854,6 @@ public class GVRPose implements PrettyPrint
             bone.WorldMatrix.m31(bone.WorldMatrix.m31() + dy);
             bone.WorldMatrix.m32(bone.WorldMatrix.m32() + dz);
         }
-
         if (sDebug)
         {
             Log.d("BONE", "setWorldPosition: %s ", mSkeleton.getBoneName(0), bone.toString());
@@ -902,9 +911,7 @@ public class GVRPose implements PrettyPrint
             update = (mBones[pid].Changed & (WORLD_ROT | LOCAL_ROT)) != 0;
             if (!mSkeleton.isLocked(i))				        // bone not locked?
             {
-
                 if ((bone.Changed == WORLD_ROT) ||
-
                     ((bone.Changed & Bone.WORLD_POS) != 0))	// world matrix changed?
                 {
                     calcLocal(bone, pid);					// calculate local rotation and position

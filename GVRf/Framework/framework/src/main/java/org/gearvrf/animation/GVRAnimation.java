@@ -528,7 +528,20 @@ public abstract class GVRAnimation {
     }
 
 
-
+    /*
+     * Evaluates the animation at the specific time.
+     * This allows the user to step the animation under program control
+     * as opposed to having it run at the current frame rate.
+     * Subclasses can override this function when creating new
+     * types of animation. The default behavior is to call
+     * {@link #animate(GVRHybridObject, float)}.
+     * @param timeInSec elapsed time from animation start (seconds)
+     */
+    public void animate(float timeInSec)
+    {
+        float ratio = timeInSec / mDuration;
+        animate(mTarget, ratio);
+    }
 
 
     /**

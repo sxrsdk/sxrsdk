@@ -24,15 +24,13 @@ import org.joml.Quaternionf;
 /** Rotation animation. */
 public class GVRRotationByAxisAnimation extends GVRTransformAnimation
 {
-
     private final float mAngle, mAxisX, mAxisY, mAxisZ;
-
     private final Quaternionf mStartRotation = new Quaternionf();
 
     /**
      * Use {@link GVRTransform#rotateByAxis(float, float, float, float)} to do
      * an animated rotation about a specific axis.
-     * 
+     *
      * @param target
      *            {@link GVRTransform} to animate.
      * @param duration
@@ -47,22 +45,20 @@ public class GVRRotationByAxisAnimation extends GVRTransformAnimation
      *            the normalized axis z component
      */
     public GVRRotationByAxisAnimation(GVRTransform target, float duration,
-            float angle, float x, float y, float z)
+                                      float angle, float x, float y, float z)
     {
         super(target, duration);
         mAngle = angle;
-
         mAxisX = x;
         mAxisY = y;
         mAxisZ = z;
-
         mStartRotation.set(mRotation);
     }
 
     /**
      * Use {@link GVRTransform#rotateByAxis(float, float, float, float)} to do
      * an animated rotation about a specific axis.
-     * 
+     *
      * @param target
      *            {@link GVRSceneObject} containing a {@link GVRTransform}
      * @param duration
@@ -77,7 +73,7 @@ public class GVRRotationByAxisAnimation extends GVRTransformAnimation
      *            the normalized axis z component
      */
     public GVRRotationByAxisAnimation(GVRSceneObject target, float duration,
-            float angle, float x, float y, float z)
+                                      float angle, float x, float y, float z)
     {
         this(target.getTransform(), duration, angle, x, y, z);
     }
@@ -89,12 +85,10 @@ public class GVRRotationByAxisAnimation extends GVRTransformAnimation
 
         mRotation.fromAxisAngleDeg(mAxisX, mAxisY, mAxisZ, angle);
         mRotation.mul(mStartRotation);
-
         mTransform.setRotation(mRotation.w, mRotation.x, mRotation.y, mRotation.z);
         if (sDebug)
         {
             Log.d("ANIMATION", "%s angle = %f", getClass().getSimpleName(), angle);
         }
-
     }
 }

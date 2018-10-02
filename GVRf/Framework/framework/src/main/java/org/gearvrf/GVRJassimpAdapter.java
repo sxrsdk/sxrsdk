@@ -179,7 +179,7 @@ class  GVRJassimpAdapter
             Vector3f normal = new Vector3f();
             Vector3f bitangent = new Vector3f();
 
-            for(int i = 0; i < tangentsArray.length; i += 3)
+            for (int i = 0; i < tangentsArray.length; i += 3)
             {
                 tangent.set(tangentsArray[i], tangentsArray[i + 1], tangentsArray[i + 2]);
                 normal.set(normalsArray[i], normalsArray[i + 1], normalsArray[i + 2]);
@@ -268,7 +268,6 @@ class  GVRJassimpAdapter
         int nAnimationMeshes = aiMesh.getAnimationMeshes().size();
         if (nAnimationMeshes == 0)
             return;
-
         try
         {
             GVRMeshMorph morph = new GVRMeshMorph(mContext, nAnimationMeshes);
@@ -279,7 +278,6 @@ class  GVRJassimpAdapter
             {
                 GVRVertexBuffer animBuff = new GVRVertexBuffer(mesh.getVertexBuffer(),
                                                                "float3 a_position float3 a_normal float3 a_tangent float3 a_bitangent");
-
                 float[] vertexArray = null;
                 float[] normalArray = null;
                 float[] tangentArray = null;
@@ -323,20 +321,18 @@ class  GVRJassimpAdapter
                         bitangentArray[i] = bitangent.x;
                         bitangentArray[i + 1] = bitangent.y;
                         bitangentArray[i + 2] = bitangent.z;
-                        animBuff.setFloatArray("a_bitangent", bitangentArray);
                     }
+                    animBuff.setFloatArray("a_bitangent", bitangentArray);
                 }
                 morph.setBlendShape(blendShapeNum, animBuff);
                 blendShapeNum++;
             }
             morph.update();
-
         }
         catch (IllegalArgumentException ex)
         {
             sceneObject.detachComponent(GVRMeshMorph.getComponentType());
         }
-
     }
 
     public GVRSkin processBones(GVRMesh mesh, List<AiBone> aiBones)
@@ -768,7 +764,6 @@ class  GVRJassimpAdapter
         return true;
     }
 
-
     private GVRAnimationBehavior convertAnimationBehavior(AiAnimBehavior behavior)
     {
         switch (behavior)
@@ -1087,7 +1082,6 @@ class  GVRJassimpAdapter
         else
         {
             Log.v("BONE", "instancing mesh %s", sceneObject.getName());
-
         }
         if (gvrMaterial == null)
         {

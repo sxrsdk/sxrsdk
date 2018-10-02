@@ -6,21 +6,40 @@
 #define MAX_BONES 60
 
 namespace gvr {
-    Skeleton::Skeleton(int numbones)
+    Skeleton::Skeleton(int* boneparents, int numbones)
        :  Component(COMPONENT_TYPE_SKELETON),
           mNumBones(numbones)
     {
-        mMatrixData = new glm::mat4[numbones];
+        mSkinMatrices = new glm::mat4[numbones];
+        mBoneMatrices = new glm::mat4[numbones];
+        mBoneParents = new int[numbones];
+        memcpy(mBoneParents, boneparents, numbones * sizeof(int));
     }
 
     Skeleton::~Skeleton()
     {
-        delete[] mMatrixData;
+        delete[] mSkinMatrices;
+        delete[] mBoneMatrices;
+        delete[] mBoneParents;
     };
 
     void Skeleton::setPose(const float* input)
     {
-        memcpy(mMatrixData, input, mNumBones * sizeof(glm::mat4));
+        memcpy(mBoneMatrices, input, mNumBones * sizeof(glm::mat4));
+    }
+
+    void Skeleton::setSkinPose(const float* input)
+    {
+        memcpy(mSkinMatrices, input, mNumBones * sizeof(glm::mat4));
+    }
+
+    glm::mat4* Skeleton::getSkinMatrix(int boneId)
+    {
+        if ((boneId < 0) || (boneId > getNumBones()))
+        {
+            return nullptr;
+        }
+        return &mSkinMatrices[boneId];
     }
 
     glm::mat4* Skeleton::getBoneMatrix(int boneId)
@@ -29,7 +48,6 @@ namespace gvr {
         {
             return nullptr;
         }
-        return &mMatrixData[boneId];
+        return &mBoneMatrices[boneId];
     }
-
 }

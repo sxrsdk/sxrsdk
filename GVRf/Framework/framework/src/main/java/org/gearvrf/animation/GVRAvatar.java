@@ -48,7 +48,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     static private long TYPE_AVATAR = newComponentType(GVRAvatar.class);
     protected List<GVRAnimator> mAnimations;
     protected GVRSkeleton mSkeleton;
-    protected final GVRSceneObject mModelRoot;
+    protected final GVRSceneObject mAvatarRoot;
     protected boolean mIsRunning;
     protected GVREventReceiver mReceiver;
     protected List<GVRAnimator> mAnimQueue = new ArrayList<GVRAnimator>();
@@ -74,8 +74,8 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         super(ctx);
         mReceiver = new GVREventReceiver(this);
         mType = getComponentType();
-        mModelRoot = new GVRSceneObject(ctx);
-        mModelRoot.setName(name);
+        mAvatarRoot = new GVRSceneObject(ctx);
+        mAvatarRoot.setName(name);
         mAnimations = new ArrayList<GVRAnimator>();
     }
 
@@ -95,7 +95,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
      * Get the name of this avatar (supplied at construction time).
      * @returns string with avatar name
      */
-    public String getName() { return mModelRoot.getName(); }
+    public String getName() { return mAvatarRoot.getName(); }
 
     /**
      * Get the skeleton for the avatar.
@@ -114,7 +114,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
      * bones and the meshes for the avatar.
      * @return root of the avatar model hierarchy
      */
-    public GVRSceneObject getModel() { return mModelRoot; }
+    public GVRSceneObject getModel() { return mAvatarRoot; }
 
     /**
      * Determine if this avatar is currently animating.
@@ -135,24 +135,25 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             if (mAnimQueue.size() > 0)
             {
                 GVRAnimator animator = mAnimQueue.get(0);
+                Log.d("ANIMATION", "%s finished", animator.getName());
                 if (animator.findAnimation(animation) >= 0)
                 {
-                    animator.reset();
                     mAnimQueue.remove(0);
                     mIsRunning = false;
                     if (mAnimQueue.size() > 0)
                     {
                         animator = mAnimQueue.get(0);
                         animator.start(mOnFinish);
-                        mModelRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
-                                "onAnimationFinished", animator, animation);
-                        mModelRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
-                                "onAnimationStarted", animator);
+                        mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
+                                                                                "onAnimationFinished", animator, animation);
+                        mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
+                                                                                "onAnimationStarted", animator);
                     }
                     else
                     {
-                        mModelRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
-                                "onAnimationFinished", animator, animation);
+                        mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
+                                                                                "onAnimationFinished", animator, animation);
+
                     }
                 }
             }
@@ -160,71 +161,101 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     };
 
     /**
-     * Load the
-     * @param avatarResource
+     * Load the avatar base model
+     * @param avatarResource    resource with avatar model
      */
     public void loadModel(GVRAndroidResource avatarResource)
     {
         EnumSet<GVRImportSettings> settings = GVRImportSettings.getRecommendedSettingsWith(EnumSet.of(GVRImportSettings.OPTIMIZE_GRAPH, GVRImportSettings.NO_ANIMATION));
-        GVRContext ctx = mModelRoot.getGVRContext();
+        GVRContext ctx = mAvatarRoot.getGVRContext();
         GVRResourceVolume volume = new GVRResourceVolume(ctx, avatarResource);
-        GVRSceneObject previousAvatar = (mModelRoot.getChildrenCount() > 0) ? mModelRoot.getChildByIndex(0) : null;
+        GVRSceneObject modelRoot = new GVRSceneObject(ctx);
+
+        mAvatarRoot.addChildObject(modelRoot);
+        ctx.getAssetLoader().loadModel(volume, modelRoot, settings, false, mLoadModelHandler);
+    }
+
+    /**
+     * Load a model to attach to the avatar
+     * @param avatarResource    resource with avatar model
+     * @param attachBone        name of bone to attach model to
+     */
+    public void loadModel(GVRAndroidResource avatarResource, String attachBone)
+    {
+        EnumSet<GVRImportSettings> settings = GVRImportSettings.getRecommendedSettingsWith(EnumSet.of(GVRImportSettings.OPTIMIZE_GRAPH, GVRImportSettings.NO_ANIMATION));
+        GVRContext ctx = mAvatarRoot.getGVRContext();
+        GVRResourceVolume volume = new GVRResourceVolume(ctx, avatarResource);
+        GVRSceneObject modelRoot = new GVRSceneObject(ctx);
+        GVRSceneObject boneObject;
+        int boneIndex;
+
+        if (mSkeleton == null)
+        {
+            throw new IllegalArgumentException("Cannot attach model to avatar - there is no skeleton");
+        }
+        boneIndex = mSkeleton.getBoneIndex(attachBone);
+        if (boneIndex < 0)
+        {
+            throw new IllegalArgumentException(attachBone + " is not a bone in the avatar skeleton");
+        }
+        boneObject = mSkeleton.getBone(boneIndex);
+        if (boneObject == null)
+        {
+            throw new IllegalArgumentException(attachBone +
+                                                   " does not have a bone object in the avatar skeleton");
+        }
+        boneObject.addChildObject(modelRoot);
+        ctx.getAssetLoader().loadModel(volume, modelRoot, settings, false, mLoadModelHandler);
+    }
+
+    public void clearAvatar()
+    {
+        GVRSceneObject previousAvatar = (mAvatarRoot.getChildrenCount() > 0) ?
+            mAvatarRoot.getChildByIndex(0) : null;
 
         if (previousAvatar != null)
         {
-            mModelRoot.removeChildObject(previousAvatar);
+            mAvatarRoot.removeChildObject(previousAvatar);
         }
-
-        ctx.getAssetLoader().loadModel(volume, mModelRoot, settings, false, mLoadModelHandler);
-
     }
 
-    public void loadAnimation(GVRAndroidResource animResource)
+    /**
+     * Load an animation for the current avatar.
+     * @param animResource resource with the animation
+     * @param boneMap optional bone map to map animation skeleton to avatar
+     */
+    public void loadAnimation(GVRAndroidResource animResource, String boneMap)
     {
         String filePath = animResource.getResourcePath();
-        GVRContext ctx = mModelRoot.getGVRContext();
+        GVRContext ctx = mAvatarRoot.getGVRContext();
         GVRResourceVolume volume = new GVRResourceVolume(ctx, animResource);
 
-        if (filePath.endsWith(".txt"))
+        if (filePath.endsWith(".bvh"))
         {
-            try
-            {
-                TRSImporter importer = new TRSImporter(ctx);
-                GVRSkeletonAnimation skelAnim = importer.importAnimation(animResource, mSkeleton);
-                GVRAnimator animator = new GVRAnimator(ctx);
-                animator.setName(filePath);
-                animator.addAnimation(skelAnim);
-                addAnimation(animator);
-                ctx.getEventManager().sendEvent(this,
-                        IAvatarEvents.class,
-                        "onAnimationLoaded",
-                        animator,
-                        filePath,
-                        null);
-            }
-            catch (IOException ex)
-            {
-                ctx.getEventManager().sendEvent(this,
-                        IAvatarEvents.class,
-                        "onAnimationLoaded",
-                        null,
-                        filePath,
-                        ex.getMessage());
-            }
-        }
-
-        else if (filePath.endsWith(".bvh"))
-        {
+            GVRAnimator animator = new GVRAnimator(ctx);
+            animator.setName(filePath);
             try
             {
                 BVHImporter importer = new BVHImporter(ctx);
-                GVRSkeletonAnimation skelAnim = importer.importAnimation(animResource, mSkeleton);
-                bvhSkeleton = importer.createSkeleton();
+
+                GVRSkeletonAnimation skelAnim;
 
 
-                GVRAnimator animator = new GVRAnimator(ctx);
-                animator.setName(filePath);
-                animator.addAnimation(skelAnim);
+                if (boneMap != null)
+                {
+                    GVRSkeleton skel = importer.importSkeleton(animResource);
+                    bvhSkeleton = skel;
+                    skelAnim = importer.readMotion(skel);
+                    animator.addAnimation(skelAnim);
+                    GVRPoseMapper retargeter = new GVRPoseMapper(mSkeleton, skel, skelAnim.getDuration());
+                    retargeter.setBoneMap(boneMap);
+                    animator.addAnimation(retargeter);
+                }
+                else
+                {
+                    skelAnim = importer.importAnimation(animResource, mSkeleton);
+                    animator.addAnimation(skelAnim);
+                }
                 addAnimation(animator);
                 ctx.getEventManager().sendEvent(this,
                         IAvatarEvents.class,
@@ -243,7 +274,6 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                         ex.getMessage());
             }
         }
-
         else
         {
             EnumSet<GVRImportSettings> settings = GVRImportSettings.getRecommendedSettingsWith(EnumSet.of(GVRImportSettings.OPTIMIZE_GRAPH, GVRImportSettings.NO_TEXTURING));
@@ -496,12 +526,8 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         {
             if (name.equals(anim.getName()))
             {
-                mAnimQueue.add(anim);
-                if (mAnimQueue.size() > 1)
-                {
-                    mIsRunning = true;
-                    anim.start(mOnFinish);
-                }
+                start(anim);
+                return;
             }
         }
     }
@@ -519,15 +545,41 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             throw new IndexOutOfBoundsException("Animation index out of bounds");
         }
         GVRAnimator anim = mAnimations.get(animIndex);
-        mAnimQueue.add(anim);
-        if (mAnimQueue.size() == 1)
-        {
-            mIsRunning = true;
-            anim.start(mOnFinish);
-        }
+        start(anim);
         return anim;
     }
 
+    protected void start(GVRAnimator animator)
+    {
+        mAnimQueue.add(animator);
+        if (mAnimQueue.size() == 1)
+        {
+            mIsRunning = true;
+            mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
+                    "onAnimationStarted", animator);
+            animator.start(mOnFinish);
+            mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
+                                                                    "onAnimationStarted", animator);
+        }
+    }
+
+    /**
+     * Evaluates the animation with the given index at the specified time.
+     * @param animIndex 0-based index of {@link GVRAnimator} to start
+     * @param timeInSec time to evaluate the animation at
+     * @see GVRAvatar#stop()
+     * @see #start(String)
+     */
+    public GVRAnimator animate(int animIndex, float timeInSec)
+    {
+        if ((animIndex < 0) || (animIndex >= mAnimations.size()))
+        {
+            throw new IndexOutOfBoundsException("Animation index out of bounds");
+        }
+        GVRAnimator anim = mAnimations.get(animIndex);
+        anim.animate(timeInSec);
+        return anim;
+    }
 
     /**
      * Stops all of the animations associated with this animator.
@@ -565,38 +617,41 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     public void centerModel(GVRSceneObject model)
     {
         GVRSceneObject.BoundingVolume bv = model.getBoundingVolume();
-        float x = 0;
-        float y = 0;
-        float z = 0;
-        float sf = 1 / bv.radius;
-        bv = model.getBoundingVolume();
-        model.getTransform().setPosition(x - bv.center.x, y - bv.center.y, z - bv.center.z - 1.5f * bv.radius);
+        model.getTransform().setPosition(-bv.center.x, -bv.center.y, -bv.center.z - 1.5f * bv.radius);
+
     }
 
     protected IAssetEvents mLoadModelHandler = new IAssetEvents()
     {
-        public void onAssetLoaded(GVRContext context, GVRSceneObject avatar, String filePath, String errors)
+        public void onAssetLoaded(GVRContext context, GVRSceneObject modelRoot, String filePath, String errors)
         {
-            List<GVRComponent> components = avatar.getAllComponents(GVRSkeleton.getComponentType());
-
+            List<GVRComponent> components = modelRoot.getAllComponents(GVRSkeleton.getComponentType());
+            String eventName = "onModelLoaded";
             if ((errors != null) && !errors.isEmpty())
-
             {
                 Log.e(TAG, "Asset load errors: " + errors);
             }
             if (components.size() > 0)
             {
-                mSkeleton = (GVRSkeleton) components.get(0);
-
+                GVRSkeleton skel = (GVRSkeleton) components.get(0);
+                if (mSkeleton != null)
+                {
+                    mSkeleton.merge(skel);
+                }
+                else
+                {
+                    mSkeleton = skel;
+                    modelRoot = mAvatarRoot;
+                    eventName = "onAvatarLoaded";
+                }
                 mSkeleton.poseFromBones();
-
                 mSkeleton.updateSkinPose();
             }
             else
             {
                 Log.e(TAG, "Avatar skeleton not found in asset file " + filePath);
             }
-            context.getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class, "onAvatarLoaded", avatar, filePath, errors);
+            context.getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class, eventName, modelRoot, filePath, errors);
         }
 
         public void onModelLoaded(GVRContext context, GVRSceneObject model, String filePath) { }
@@ -608,6 +663,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     public interface IAvatarEvents extends IEvents
     {
         public void onAvatarLoaded(GVRSceneObject avatarRoot, String filePath, String errors);
+        public void onModelLoaded(GVRSceneObject avatarRoot, String filePath, String errors);
         public void onAnimationLoaded(GVRAnimator animator, String filePath, String errors);
         public void onAnimationStarted(GVRAnimator animator);
         public void onAnimationFinished(GVRAnimator animator, GVRAnimation animation);
@@ -632,7 +688,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
 
             if (skelAnim.getSkeleton() != mSkeleton)
             {
-                GVRPoseMapper poseMapper = new GVRPoseMapper(mSkeleton, skelAnim.getSkeleton());
+                GVRPoseMapper poseMapper = new GVRPoseMapper(mSkeleton, skelAnim.getSkeleton(), skelAnim.getDuration());
 
                 animator.addAnimation(poseMapper);
             }

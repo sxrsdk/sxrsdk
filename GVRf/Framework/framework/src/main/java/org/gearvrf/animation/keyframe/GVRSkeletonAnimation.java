@@ -1,3 +1,18 @@
+/* Copyright 2015 Samsung Electronics Co., LTD
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.gearvrf.animation.keyframe;
 
 import org.gearvrf.GVRHybridObject;
@@ -56,7 +71,6 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
     {
     	super(target, duration);
         mName = name;
-
     }
 
     /**
@@ -76,7 +90,6 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
             mSkeleton.setBoneOptions(boneId, GVRSkeleton.BONE_ANIMATE);
         }
         mBoneChannels = new GVRAnimationChannel[mSkeleton.getNumBones()];
-
     }
 
     /**
@@ -97,7 +110,6 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
         {
             mBoneChannels[boneId] = channel;
             Log.d("BONE", "Adding animation channel %d %s ", boneId, boneName);
-
         }
     }
 
@@ -203,13 +215,11 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
 
         for (int i = 0; i < skel.getNumBones(); ++i)
         {
-
             GVRAnimationChannel channel = mBoneChannels[i];
             if ((channel != null) &&
                 (skel.getBoneOptions(i) == GVRSkeleton.BONE_ANIMATE))
             {
                 channel.animate(timeInSec, temp);
-
                 if (rootOffset != null)
                 {
                     temp.m30(rootOffset.x + temp.m30());
@@ -217,12 +227,11 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
                     temp.m32(rootOffset.z + temp.m32());
                     rootOffset = null;
                 }
-
                 pose.setLocalMatrix(i, temp);
             }
         }
-
         skel.poseToBones();
+        skel.updateBonePose();
         skel.updateSkinPose();
     }
 

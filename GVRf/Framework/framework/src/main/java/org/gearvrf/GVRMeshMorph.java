@@ -78,7 +78,6 @@ public class GVRMeshMorph extends GVRBehavior
     protected float[] mBaseBlendShape;
     protected GVRVertexBuffer mbaseShape;
 
-
     /**
      * Construct a morph to a scene object with a base mesh.
      * @param ctx  The current GVRF context.
@@ -96,7 +95,6 @@ public class GVRMeshMorph extends GVRBehavior
         }
         mFloatsPerVertex = 0;
         mTexWidth = 0; // 3 floats for position
-
     }
 
 
@@ -111,7 +109,6 @@ public class GVRMeshMorph extends GVRBehavior
      */
     public void onAttach(GVRSceneObject sceneObj)
     {
-
         super.onAttach(sceneObj);
         GVRComponent comp = getComponent(GVRRenderData.getComponentType());
 
@@ -265,21 +262,16 @@ public class GVRMeshMorph extends GVRBehavior
         {
             shapeDescriptorFlags |= HAS_TANGENT;
         }
-
         if (shapeDescriptorFlags != mDescriptorFlags)
         {
             throw new IllegalArgumentException("Blend shapes descriptors are inconsistent");
         }
-
         if ((shapeDescriptorFlags & HAS_NORMAL) != 0)
         {
             copyBlendShape(index * mFloatsPerVertex + 3, 3, vbuf.getFloatArray("a_normal"));
         }
         else
         {
-            //mbaseShape
-           // copyBaseAttribute(mbaseShape, "a_tangent", 6);
-            //copy base shape data
             vec3dataBase = mbaseShape.getFloatArray("a_normal");
             copyBlendShape(index * mFloatsPerVertex + 3, 3, vec3dataBase);
 
