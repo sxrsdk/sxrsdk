@@ -163,7 +163,7 @@ public class BVHImporter
         return newIndex;
     }
 
-    private GVRSkeleton createSkeleton()
+    public GVRSkeleton createSkeleton()
     {
         int[] boneparents = new int[mBoneParents.size()];
         GVRSkeleton skel;
@@ -183,6 +183,10 @@ public class BVHImporter
         }
         skel.setBindPose(bindpose);
         return skel;
+    }
+    public  GVRContext getcont()
+    {
+        return mContext;
     }
 
     public GVRPose readPose(GVRSkeleton skel) throws IOException
@@ -242,7 +246,7 @@ public class BVHImporter
                     pose.setLocalRotation(boneIndex, q.x, q.y, q.z, q.w);
                     boneIndex++;
                     bvhboneIndex++;
-                    //Log.d("BVH", "%s %f %f %f %f", bvhboneIndex, q.x, q.y, q.z, q.w);
+
                 }
                 else
                 {
@@ -338,6 +342,7 @@ public class BVHImporter
                     posKeys[f + 2] = y;
                     posKeys[f + 3] = z;
                     i += 3;
+
                 }
                 rotKeys = rotKeysPerBone.get(boneIndex);
                 z = Float.parseFloat(words[i]);         // Z, X, Y rotation angles

@@ -770,6 +770,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
 
     public void onAttach(GVRSceneObject root)
     {
+       //int i =0;
         super.onAttach(root);
         if (mInverseBindPose == null)
         {
