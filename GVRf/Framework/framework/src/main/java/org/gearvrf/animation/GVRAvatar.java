@@ -52,7 +52,6 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     protected boolean mIsRunning;
     protected GVREventReceiver mReceiver;
     protected List<GVRAnimator> mAnimQueue = new ArrayList<GVRAnimator>();
-    GVRSkeleton bvhSkeleton;
     GVRSphereSceneObject msphere;
     GVRCylinderSceneObject mCyl;
     GVRMaterial flatMaterialSphr;
@@ -244,7 +243,6 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                 if (boneMap != null)
                 {
                     GVRSkeleton skel = importer.importSkeleton(animResource);
-                    bvhSkeleton = skel;
                     skelAnim = importer.readMotion(skel);
                     animator.addAnimation(skelAnim);
                     GVRPoseMapper retargeter = new GVRPoseMapper(mSkeleton, skel, skelAnim.getDuration());
@@ -282,7 +280,18 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
         }
     }
-    public GVRSceneObject createSkeletonGeometry(GVRSceneObject root, GVRContext ctx) {
+    public GVRSceneObject createSkeletonGeometry(GVRSceneObject root, GVRContext ctx, GVRAndroidResource data) {
+
+        BVHImporter imp = new BVHImporter(ctx);
+        GVRSkeleton bvhSkeleton = null;
+
+        try {
+            bvhSkeleton = imp.importSkeleton(data);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+                 }
+
 
         GVRSceneObject jointSphr = makeSphrSkeletonGeometry(bvhSkeleton, ctx);
         GVRSceneObject boneCyl = makeCylSkeletonGeometry(bvhSkeleton, ctx);
@@ -419,6 +428,11 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         }
         int parent = 0;
         int child = 0;
+        Vector3f downNormal = new Vector3f(0,-1,0);
+        Vector3f childDir = new Vector3f(0,0,0);
+        Vector3f worldposP = new Vector3f(0,0,0);
+        Vector3f worldposC = new Vector3f(0,0,0);
+
 
         for (int i =0; i<root.getChildrenCount(); i++)
         {
@@ -432,10 +446,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                 }
             }
 
-            Vector3f downNormal = new Vector3f(0,-1,0);
-            Vector3f childDir = new Vector3f(0,0,0);
-            Vector3f worldposP = new Vector3f(0,0,0);
-            Vector3f worldposC = new Vector3f(0,0,0);
+
 
             bind.getWorldPosition(parent,worldposP);
             bind.getWorldPosition(child,worldposC);
@@ -445,7 +456,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             childDir.z = worldposP.z -worldposC.z;
 
             Quaternionf q = new Quaternionf(0,0,0,1);
-            Quaternionf x= q.rotateTo(downNormal, childDir);
+            Quaternionf quatRot= q.rotateTo(downNormal, childDir);
 
             GVRMesh meshCyl = root.getChildByIndex(i).getRenderData().getMesh();
 
@@ -454,7 +465,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
 
             for(int t=0; t<meshCyl.getVertices().length; t=t+3){
                 Vector3f dest = new Vector3f(0,0,0);
-                x.transform(vertexmesh[t], vertexmesh[t+1]-(cylHeight[child]/2), vertexmesh[t+2], dest);
+                quatRot.transform(vertexmesh[t], vertexmesh[t+1]-(cylHeight[child]/2), vertexmesh[t+2], dest);
                 vertexmesh[t] = dest.x();
                 vertexmesh[t + 1] = dest.y();
                 vertexmesh[t + 2] = dest.z();
