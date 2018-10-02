@@ -121,6 +121,7 @@ public class BVHImporter
 
         mBoneParents.add(boneIndex, parentIndex);
         mBoneNames.add(boneIndex, bonename);
+        mBoneChannels.add(boneIndex, 0);
         while ((line = mReader.readLine().trim()) != null)
         {
             String[]    words = line.split("[ \t]");
@@ -134,7 +135,6 @@ public class BVHImporter
             if (opcode.equals("End"))       // end site
             {
                 bonename = "end_" + mBoneNames.get(boneIndex);
-                mBoneChannels.add(boneIndex, 0);
                 newIndex = parseJoint(bonename, boneIndex);
             }
             else if ((opcode.equals("ROOT")) ||   // found root bone?
@@ -330,17 +330,17 @@ public class BVHImporter
                 {
                     f = frameIndex * 4;
                     posKeys = posKeysPerBone.get(boneIndex);
-                    x = Float.parseFloat(words[i]);    // Z, Y, X rotation angles
+                    x = Float.parseFloat(words[i]);     // X, Y, Z position
                     y = Float.parseFloat(words[i + 1]);
                     z = Float.parseFloat(words[i + 2]);
                     posKeys[f] = curTime;
-                    posKeys[f + 1] = x;    // bone position
+                    posKeys[f + 1] = x;                 // bone position
                     posKeys[f + 2] = y;
                     posKeys[f + 3] = z;
                     i += 3;
                 }
                 rotKeys = rotKeysPerBone.get(boneIndex);
-                z = Float.parseFloat(words[i]);        // Z, Y, X rotation angles
+                z = Float.parseFloat(words[i]);         // Z, X, Y rotation angles
                 x = Float.parseFloat(words[i + 1]);
                 y = Float.parseFloat(words[i + 2]);
                 i += 3;
