@@ -113,11 +113,10 @@ public class BVHImporter
         return 0;
     }
 
-    private int parseJoint(String bonename, int parentIndex) throws IOException
+    private void parseJoint(String bonename, final int parentIndex) throws IOException
     {
         String      line;
-        int         boneIndex = mBoneParents.size();
-        int         newIndex = boneIndex;
+        final int   boneIndex = mBoneParents.size();
 
         mBoneParents.add(boneIndex, parentIndex);
         mBoneNames.add(boneIndex, bonename);
@@ -135,12 +134,12 @@ public class BVHImporter
             if (opcode.equals("End"))       // end site
             {
                 bonename = "end_" + mBoneNames.get(boneIndex);
-                newIndex = parseJoint(bonename, boneIndex);
+                parseJoint(bonename, boneIndex);
             }
             else if ((opcode.equals("ROOT")) ||   // found root bone?
                     (opcode.equals("JOINT")))      // found any bone?
             {
-                newIndex = parseJoint(words[1], boneIndex);
+                parseJoint(words[1], boneIndex);
             }
             else if (opcode.equals("OFFSET"))       // bone position
             {
@@ -149,7 +148,6 @@ public class BVHImporter
                 float zpos = Float.parseFloat(words[3]);
 
                 mBonePositions.add(boneIndex, new Vector3f(xpos, ypos, zpos));
-//              Log.d("BVH", "%s %f %f %f", bonename, xpos, ypos, zpos);
             }
             else if (opcode.equals("CHANNELS"))
             {
@@ -160,7 +158,6 @@ public class BVHImporter
                 break;
             }
         }
-        return newIndex;
     }
 
     public GVRSkeleton createSkeleton()
