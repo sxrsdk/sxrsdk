@@ -1124,7 +1124,10 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
             mCylProto.getRenderData().setMaterial(flatMaterialCyl);
             GVRSceneObject rootGeo = makeSpheres();
 
-            root.addChildObject(rootGeo);
+            if (rootGeo.getParent() == null)
+            {
+                root.addChildObject(rootGeo);
+            }
             mSkeleton.poseToBones();
             return root;
         }
@@ -1206,6 +1209,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
                 verts[t + 2] = dest.z();
             }
             newMesh.setIndexBuffer(oldMesh.getIndexBuffer());
+            newMesh.setNormals(oldMesh.getNormals());
             newMesh.setVertices(verts);
             return new GVRSceneObject(mCylProto.getGVRContext(), newMesh, mCylProto.getRenderData().getMaterial());
         }

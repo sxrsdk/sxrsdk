@@ -335,7 +335,6 @@ public class BVHImporter
                     posKeys[f + 2] = y;
                     posKeys[f + 3] = z;
                     i += 3;
-
                 }
                 rotKeys = rotKeysPerBone.get(boneIndex);
                 z = Float.parseFloat(words[i]);         // Z, X, Y rotation angles
@@ -368,6 +367,7 @@ public class BVHImporter
          */
         GVRAnimationChannel channel;
         GVRSkeletonAnimation skelanim = new GVRSkeletonAnimation(mFileName, skel, curTime);
+        Vector3f pos = new Vector3f();
         for (int boneIndex = 0; boneIndex < mBoneNames.size(); ++boneIndex)
         {
             if (mBoneChannels.get(boneIndex) == 0)
@@ -377,16 +377,13 @@ public class BVHImporter
             bonename = mBoneNames.get(boneIndex);
             rotKeys = rotKeysPerBone.get(boneIndex);
             posKeys = posKeysPerBone.get(boneIndex);
-            if (mBoneChannels.get(boneIndex) > 3)
+            if (mBoneChannels.get(boneIndex) == 3)
             {
-                channel = new GVRAnimationChannel(bonename, posKeys, rotKeys, null,
-                        GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
+                skel.getBindPose().getLocalPosition(boneIndex, pos);
+                posKeys = new float[] { 0, pos.x, pos.y, pos.z };
             }
-            else
-            {
-               channel = new GVRAnimationChannel(bonename, null, rotKeys, null,
-                        GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
-            }
+            channel = new GVRAnimationChannel(bonename, posKeys, rotKeys, null,
+                    GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
             skelanim.addChannel(bonename, channel);
         }
         return skelanim;

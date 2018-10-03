@@ -270,21 +270,9 @@ public class GVRMeshMorph extends GVRBehavior
         {
             copyBlendShape(index * mFloatsPerVertex + 3, 3, vbuf.getFloatArray("a_normal"));
         }
-        else
+        if ((shapeDescriptorFlags & HAS_TANGENT) != 0)
         {
-            vec3dataBase = mbaseShape.getFloatArray("a_normal");
-            copyBlendShape(index * mFloatsPerVertex + 3, 3, vec3dataBase);
-
-        }
-        if ((shapeDescriptorFlags & HAS_TANGENT) != 0) {
             copyBlendShape(index * mFloatsPerVertex + 6, 6, vbuf.getFloatArray("a_tangent"));
-        }
-        else
-        {
-            //copy base shape data
-            vec3dataBase = mbaseShape.getFloatArray("a_tangent");
-            copyBlendShape(index * mFloatsPerVertex + 6, 6, vec3dataBase);
-
         }
     }
 
