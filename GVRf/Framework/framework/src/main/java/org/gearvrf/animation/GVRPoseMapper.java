@@ -39,6 +39,13 @@ public class GVRPoseMapper extends GVRAnimation
         mDestPose = new GVRPose(dstskel);
     }
 
+    public GVRAnimation setDuration(float start, float end)
+    {
+        animationOffset =  start;
+        mDuration = end - start;
+        return this;
+    }
+
     /**
      * Set the source skeleton
      * @param source	source skeleton
@@ -103,6 +110,14 @@ public class GVRPoseMapper extends GVRAnimation
      */
     public void setBoneMap(String bonemap)
     {
+        if ((bonemap == null) || bonemap.isEmpty())
+        {
+            throw new IllegalArgumentException("BoneMap cannot be empty");
+        }
+        if (mSourceSkeleton == null)
+        {
+            throw new IllegalArgumentException("Source skeleton cannot be null");
+        }
         String[] lines = bonemap.split("[\r\n]");
 
         mBoneMap = new int[mSourceSkeleton.getNumBones()];
@@ -123,12 +138,17 @@ public class GVRPoseMapper extends GVRAnimation
             if ((sourceIndex >= 0) && (destIndex >= 0))
             {
                 mBoneMap[sourceIndex] = destIndex;
+                Log.w("BONE", "%s %d -> %s %d",
+                      words[0], sourceIndex, words[1], destIndex);
+            }
+            else
+            {
+                Log.w("GVRPoseMapper", "makeBoneMap: cannot find bone " + words[0]);
             }
         }
     }
 
     /*!
-     * @fn void PoseMapper::MakeBoneMap(IntArray& bonemap, const Skeleton* srcskel, const Skeleton* dstskel)
      * @param	srcskel	source Skeleton
      * @pararm	dstskel	destination Skeleton
      *

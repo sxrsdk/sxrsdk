@@ -52,15 +52,6 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     protected boolean mIsRunning;
     protected GVREventReceiver mReceiver;
     protected List<GVRAnimator> mAnimQueue = new ArrayList<GVRAnimator>();
-    GVRSphereSceneObject msphere;
-    GVRCylinderSceneObject mCyl;
-    GVRMaterial flatMaterialSphr;
-    GVRMaterial flatMaterialCyl;
-    GVRPose bind;
-    float[] cylHeight;
-    BVHImporter imp;
-
-
 
     /**
      * Make an instance of the GVRAnimator component.
@@ -236,10 +227,9 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             animator.setName(filePath);
             try
             {
-                BVHImporter importer = imp;
 
+                BVHImporter importer = new BVHImporter(ctx);
                 GVRSkeletonAnimation skelAnim;
-
 
                 if (boneMap != null)
                 {
@@ -279,203 +269,6 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
 
             GVRSceneObject animRoot = new GVRSceneObject(ctx);
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
-        }
-    }
-    public GVRSceneObject createSkeletonGeometry(GVRSceneObject root, GVRContext ctx, GVRAndroidResource data) {
-
-         imp = new BVHImporter(ctx);
-        GVRSkeleton bvhSkeleton = null;
-
-        try {
-            bvhSkeleton = imp.importSkeleton(data);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-                 }
-
-
-        GVRSceneObject jointSphr = makeSphrSkeletonGeometry(bvhSkeleton, ctx);
-        GVRSceneObject boneCyl = makeCylSkeletonGeometry(bvhSkeleton, ctx);
-
-        boneDirection(bvhSkeleton, boneCyl);
-        root.addChildObject(boneCyl);
-        root.addChildObject(jointSphr);
-        mSkeleton = bvhSkeleton;
-
-
-        return root;
-    }
-
-    public GVRSceneObject makeSphrSkeletonGeometry(GVRSkeleton skele, GVRContext ctx) {
-
-        cylHeight =  new float[skele.getNumBones()];
-        flatMaterialSphr = new GVRMaterial(ctx);
-        flatMaterialSphr.setColor(1f, 1f, 0f);
-        int[] boneArr = new int[skele.getNumBones()];
-
-        msphere =  new GVRSphereSceneObject(ctx,true,flatMaterialSphr,2f);
-
-        msphere.setName(skele.getBoneName(0));
-
-        if(boneArr[0]!=0)
-            boneArr[0]++;
-
-        findChildren(skele, msphere, 0, boneArr, ctx);
-
-        msphere.attachComponent(skele);
-        bind = skele.getBindPose();
-
-        skele.poseToBones();
-
-        return msphere;
-
-    }
-
-    public void findChildren(GVRSkeleton skeleton, GVRSphereSceneObject parent, int currentIndex, int[] boneArray, GVRContext ctx){
-
-        for(int j= currentIndex+1; j<skeleton.getNumBones();j++) {
-
-            if (boneArray[j] == 0) {
-                if (currentIndex == skeleton.getParentBoneIndex(j)) {
-                    GVRSphereSceneObject child = new GVRSphereSceneObject(ctx,true,flatMaterialSphr,2f);
-
-                    child.setName(skeleton.getBoneName(j));
-
-                    parent.addChildObject(child);
-                    boneArray[j]++;
-                    findChildren(skeleton, child, j, boneArray, ctx);
-                }
-
-            }
-        }
-
-    }
-
-
-
-    public GVRSceneObject makeCylSkeletonGeometry(GVRSkeleton skele, GVRContext ctx) {
-
-        int[] boneArr = new int[skele.getNumBones()];
-        flatMaterialCyl = new GVRMaterial(ctx);
-        flatMaterialCyl.setColor(1f, 0f, 0f);
-        calcCylHeight(skele);
-        mCyl =  new GVRCylinderSceneObject(ctx, 1f, 1f, 1, 10, 36, true);
-
-        mCyl.setName(skele.getBoneName(0));
-
-        if(boneArr[0]!=0)
-            boneArr[0]++;
-
-        findChildrenCyl(skele, mCyl, 0, boneArr, ctx);
-
-        mCyl.attachComponent(skele);
-
-        skele.poseToBones();
-
-
-        return mCyl;
-
-    }
-
-    public void findChildrenCyl(GVRSkeleton skeleton, GVRCylinderSceneObject parent, int currentIndex, int[] boneArray, GVRContext ctx){
-
-        for(int j= currentIndex+1; j<skeleton.getNumBones();j++) {
-
-            if (boneArray[j] == 0) {
-                if (currentIndex == skeleton.getParentBoneIndex(j)) {
-
-                    GVRCylinderSceneObject child = new GVRCylinderSceneObject(ctx, 1f, 1f, cylHeight[j], 10, 36, true);
-                    child.setName(skeleton.getBoneName(j));
-                    child.getRenderData().setMaterial(flatMaterialCyl);
-
-                    parent.addChildObject(child);
-                    boneArray[j]++;
-                    findChildrenCyl(skeleton, child, j, boneArray, ctx);
-                }
-
-            }
-        }
-
-    }
-    public void calcCylHeight(GVRSkeleton skel)
-    {
-
-        for(int l = 0; l<skel.getNumBones();l++)
-        {
-            int index = skel.getParentBoneIndex(l);
-            Vector3f p = new Vector3f(0,0,0);
-            Vector3f c = new Vector3f(0,0,0);
-
-            cylHeight[0] = 5;
-            if(l>=1)
-            {
-                bind.getWorldPosition(index, p);
-                bind.getWorldPosition(l, c);
-                double xComp = (p.x - c.x) * (p.x - c.x);
-                double yComp = (p.y - c.y) * (p.y - c.y);
-                double zComp = (p.z - c.z) * (p.z - c.z);
-                double dist = Math.sqrt(xComp + yComp + zComp);
-                cylHeight[l] = (float) dist;
-            }
-
-        }
-
-    }
-
-    public void boneDirection(GVRSkeleton skel, GVRSceneObject root)
-    {
-
-        if(root.getChildrenCount()<=0)
-        {
-            return;
-        }
-        int parent = 0;
-        int child = 0;
-        Vector3f downNormal = new Vector3f(0,-1,0);
-        Vector3f childDir = new Vector3f(0,0,0);
-        Vector3f worldposP = new Vector3f(0,0,0);
-        Vector3f worldposC = new Vector3f(0,0,0);
-
-
-        for (int i =0; i<root.getChildrenCount(); i++)
-        {
-
-            for(int h=0; h<skel.getNumBones();h++){
-                if(root.getName().equals(skel.getBoneName(h))){
-                    parent  = skel.getBoneIndex(root.getName());
-                }
-                if(root.getChildByIndex(i).getName().equals(skel.getBoneName(h))){
-                    child = skel.getBoneIndex(root.getChildByIndex(i).getName());
-                }
-            }
-
-
-
-            bind.getWorldPosition(parent,worldposP);
-            bind.getWorldPosition(child,worldposC);
-
-            childDir.x = worldposP.x -worldposC.x;
-            childDir.y = worldposP.y -worldposC.y;
-            childDir.z = worldposP.z -worldposC.z;
-
-            Quaternionf q = new Quaternionf(0,0,0,1);
-            Quaternionf quatRot= q.rotateTo(downNormal, childDir);
-
-            GVRMesh meshCyl = root.getChildByIndex(i).getRenderData().getMesh();
-
-            float[] vertexmesh = new float[meshCyl.getVertices().length];
-            vertexmesh = meshCyl.getVertices();
-
-            for(int t=0; t<meshCyl.getVertices().length; t=t+3){
-                Vector3f dest = new Vector3f(0,0,0);
-                quatRot.transform(vertexmesh[t], vertexmesh[t+1]-(cylHeight[child]/2), vertexmesh[t+2], dest);
-                vertexmesh[t] = dest.x();
-                vertexmesh[t + 1] = dest.y();
-                vertexmesh[t + 2] = dest.z();
-            }
-            meshCyl.setVertices(vertexmesh);
-
-            boneDirection(skel,root.getChildByIndex(i));
         }
     }
 
@@ -569,8 +362,6 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         if (mAnimQueue.size() == 1)
         {
             mIsRunning = true;
-            mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
-                    "onAnimationStarted", animator);
             animator.start(mOnFinish);
             mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
                                                                     "onAnimationStarted", animator);
@@ -632,7 +423,6 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     {
         GVRSceneObject.BoundingVolume bv = model.getBoundingVolume();
         model.getTransform().setPosition(-bv.center.x, -bv.center.y, -bv.center.z - 1.5f * bv.radius);
-
     }
 
     protected IAssetEvents mLoadModelHandler = new IAssetEvents()
@@ -699,15 +489,14 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             }
 
             GVRSkeletonAnimation skelAnim = (GVRSkeletonAnimation) animator.getAnimation(0);
-
-            if (skelAnim.getSkeleton() != mSkeleton)
+            GVRSkeleton skel = skelAnim.getSkeleton();
+            if (skel != mSkeleton)
             {
-                GVRPoseMapper poseMapper = new GVRPoseMapper(mSkeleton, skelAnim.getSkeleton(), skelAnim.getDuration());
+                GVRPoseMapper poseMapper = new GVRPoseMapper(mSkeleton, skel, skelAnim.getDuration());
 
                 animator.addAnimation(poseMapper);
             }
             addAnimation(animator);
-
             context.getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class, "onAnimationLoaded", animator, filePath, errors);
         }
 

@@ -281,7 +281,7 @@ public class GVRAnimator extends GVRBehavior
         mIsRunning = true;
         for (GVRAnimation anim : mAnimations)
         {
-            getGVRContext().getAnimationEngine().start(anim);
+            anim.start(getGVRContext().getAnimationEngine());
         }
     }
 
@@ -309,7 +309,7 @@ public class GVRAnimator extends GVRBehavior
             {
                 anim.setOnFinish(null);
             }
-            getGVRContext().getAnimationEngine().start(anim);
+            anim.start(getGVRContext().getAnimationEngine());
         }
     }
 

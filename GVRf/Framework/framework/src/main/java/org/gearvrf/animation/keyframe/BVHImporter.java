@@ -114,14 +114,14 @@ public class BVHImporter
         return 0;
     }
 
-    private int parseJoint(String bonename, int parentIndex) throws IOException
+    private void parseJoint(String bonename, final int parentIndex) throws IOException
     {
         String      line;
-        int         boneIndex = mBoneParents.size();
-        int         newIndex = boneIndex;
+        final int   boneIndex = mBoneParents.size();
 
         mBoneParents.add(boneIndex, parentIndex);
         mBoneNames.add(boneIndex, bonename);
+        mBoneChannels.add(boneIndex, 0);
         while ((line = mReader.readLine().trim()) != null)
         {
             String[]    words = line.split("[ \t]");
@@ -135,13 +135,12 @@ public class BVHImporter
             if (opcode.equals("End"))       // end site
             {
                 bonename = "end_" + mBoneNames.get(boneIndex);
-                mBoneChannels.add(boneIndex, 0);
-                newIndex = parseJoint(bonename, boneIndex);
+                parseJoint(bonename, boneIndex);
             }
             else if ((opcode.equals("ROOT")) ||   // found root bone?
                     (opcode.equals("JOINT")))      // found any bone?
             {
-                newIndex = parseJoint(words[1], boneIndex);
+                parseJoint(words[1], boneIndex);
             }
             else if (opcode.equals("OFFSET"))       // bone position
             {
@@ -150,7 +149,6 @@ public class BVHImporter
                 float zpos = Float.parseFloat(words[3]);
 
                 mBonePositions.add(boneIndex, new Vector3f(xpos, ypos, zpos));
-//              Log.d("BVH", "%s %f %f %f", bonename, xpos, ypos, zpos);
             }
             else if (opcode.equals("CHANNELS"))
             {
@@ -161,7 +159,6 @@ public class BVHImporter
                 break;
             }
         }
-        return newIndex;
     }
 
     public GVRSkeleton createSkeleton()
@@ -185,12 +182,8 @@ public class BVHImporter
         skel.setBindPose(bindpose);
         return skel;
     }
-    public  GVRContext getcont()
-    {
-        return mContext;
-    }
 
-    public GVRPose readPose(GVRSkeleton skel) throws IOException
+    private GVRPose readPose(GVRSkeleton skel) throws IOException
     {
         float       x, y, z;
         String      line;
@@ -319,7 +312,7 @@ public class BVHImporter
             int boneIndex = 0;
             int i = 0;
             int f;
-            while (i + 3 < words.length)
+            while (i + 3 <= words.length)
             {
                 bonename = mBoneNames.get(boneIndex);
                 if (bonename == null)
@@ -335,18 +328,17 @@ public class BVHImporter
                 {
                     f = frameIndex * 4;
                     posKeys = posKeysPerBone.get(boneIndex);
-                    x = Float.parseFloat(words[i]);    // Z, Y, X rotation angles
+                    x = Float.parseFloat(words[i]);     // X, Y, Z position
                     y = Float.parseFloat(words[i + 1]);
                     z = Float.parseFloat(words[i + 2]);
                     posKeys[f] = curTime;
-                    posKeys[f + 1] = x;    // bone position
+                    posKeys[f + 1] = x;                 // bone position
                     posKeys[f + 2] = y;
                     posKeys[f + 3] = z;
                     i += 3;
-
                 }
                 rotKeys = rotKeysPerBone.get(boneIndex);
-                z = Float.parseFloat(words[i]);        // Z, Y, X rotation angles
+                z = Float.parseFloat(words[i]);         // Z, X, Y rotation angles
                 x = Float.parseFloat(words[i + 1]);
                 y = Float.parseFloat(words[i + 2]);
                 i += 3;
@@ -376,6 +368,7 @@ public class BVHImporter
          */
         GVRAnimationChannel channel;
         GVRSkeletonAnimation skelanim = new GVRSkeletonAnimation(mFileName, skel, curTime);
+        Vector3f pos = new Vector3f();
         for (int boneIndex = 0; boneIndex < mBoneNames.size(); ++boneIndex)
         {
             if (mBoneChannels.get(boneIndex) == 0)
@@ -385,16 +378,13 @@ public class BVHImporter
             bonename = mBoneNames.get(boneIndex);
             rotKeys = rotKeysPerBone.get(boneIndex);
             posKeys = posKeysPerBone.get(boneIndex);
-            if (mBoneChannels.get(boneIndex) > 3)
+            if (mBoneChannels.get(boneIndex) == 3)
             {
-                channel = new GVRAnimationChannel(bonename, posKeys, rotKeys, null,
-                        GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
+                skel.getBindPose().getLocalPosition(boneIndex, pos);
+                posKeys = new float[] { 0, pos.x, pos.y, pos.z };
             }
-            else
-            {
-               channel = new GVRAnimationChannel(bonename, null, rotKeys, null,
-                        GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
-            }
+            channel = new GVRAnimationChannel(bonename, posKeys, rotKeys, null,
+                    GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
             skelanim.addChannel(bonename, channel);
         }
         return skelanim;
