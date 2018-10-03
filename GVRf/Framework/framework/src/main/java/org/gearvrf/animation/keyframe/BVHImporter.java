@@ -184,12 +184,8 @@ public class BVHImporter
         skel.setBindPose(bindpose);
         return skel;
     }
-    public  GVRContext getcont()
-    {
-        return mContext;
-    }
 
-    public GVRPose readPose(GVRSkeleton skel) throws IOException
+    private GVRPose readPose(GVRSkeleton skel) throws IOException
     {
         float       x, y, z;
         String      line;
@@ -318,7 +314,7 @@ public class BVHImporter
             int boneIndex = 0;
             int i = 0;
             int f;
-            while (i + 3 < words.length)
+            while (i + 3 <= words.length)
             {
                 bonename = mBoneNames.get(boneIndex);
                 if (bonename == null)
