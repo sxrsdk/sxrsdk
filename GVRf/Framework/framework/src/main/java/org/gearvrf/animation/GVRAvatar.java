@@ -58,6 +58,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     GVRMaterial flatMaterialCyl;
     GVRPose bind;
     float[] cylHeight;
+    BVHImporter imp;
 
 
 
@@ -235,7 +236,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             animator.setName(filePath);
             try
             {
-                BVHImporter importer = new BVHImporter(ctx);
+                BVHImporter importer = imp;
 
                 GVRSkeletonAnimation skelAnim;
 
@@ -282,7 +283,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     }
     public GVRSceneObject createSkeletonGeometry(GVRSceneObject root, GVRContext ctx, GVRAndroidResource data) {
 
-        BVHImporter imp = new BVHImporter(ctx);
+         imp = new BVHImporter(ctx);
         GVRSkeleton bvhSkeleton = null;
 
         try {
@@ -299,6 +300,8 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         boneDirection(bvhSkeleton, boneCyl);
         root.addChildObject(boneCyl);
         root.addChildObject(jointSphr);
+        mSkeleton = bvhSkeleton;
+
 
         return root;
     }

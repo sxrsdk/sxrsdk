@@ -97,8 +97,9 @@ public class BVHImporter
     {
         String line;
 
-        while ((line = mReader.readLine().trim()) != null)
+        while ((line = mReader.readLine()) != null)
         {
+            line.trim();
             String[] words;
 
             if (line == "")
