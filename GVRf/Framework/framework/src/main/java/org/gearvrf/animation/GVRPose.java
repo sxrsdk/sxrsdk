@@ -1102,9 +1102,7 @@ static class Bone
                 WorldMatrix.m21() *  WorldMatrix.m21() +
                 WorldMatrix.m22() *  WorldMatrix.m22());
 
-
         WorldMatrix.translationRotateScale(posx, posy, posz, x, y, z, w, scalex, scaley, scalez);
-
     }
 
     public void setWorldRotation(Quaternionf q)
