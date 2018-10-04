@@ -351,16 +351,31 @@ public abstract class GVRAnimation {
      */
     public GVRAnimation start(GVRAnimationEngine engine) {
         engine.start(this);
+        return this;
+    }
+
+    public void onStart()
+    {
         if (sDebug)
         {
             Log.d("ANIMATION", "%s started", getClass().getSimpleName());
         }
-        return this;
     }
 
-    public void setAnim(float x)
+    protected void onFinish(float frameTime)
     {
-        onDrawFrame(x);
+        if (sDebug)
+        {
+            Log.d("ANIMATION", "%s finished", getClass().getSimpleName());
+        }
+    }
+
+    protected void onRepeat(float frameTime, int count)
+    {
+        if (sDebug)
+        {
+            Log.d("ANIMATION", "%s repeated %d", getClass().getSimpleName(), count);
+        }
     }
 
     /**
@@ -394,16 +409,13 @@ public abstract class GVRAnimation {
             } else if (mRepeatCount > 0) {
                 stillRunning = --mRepeatCount > 0;
             } else {
+                onRepeat(frameTime, currentCycleCount);
                 // Negative repeat count - call mOnRepeat, if we can
                 if (mOnRepeat != null) {
                     stillRunning = mOnRepeat.iteration(this, mIterations);
                 } else {
                     stillRunning = true; // repeat indefinitely
                 }
-            }
-            if (sDebug)
-            {
-                Log.d("ANIMATION", "%s cycle %d", getClass().getSimpleName(), mIterations);
             }
         }
 
@@ -424,10 +436,7 @@ public abstract class GVRAnimation {
 
             animate(mTarget, endRatio);
 
-            if (sDebug)
-            {
-                Log.d("ANIMATION", "%s finished", getClass().getSimpleName());
-            }
+            onFinish(frameTime);
             if (mOnFinish != null) {
                 mOnFinish.finished(this);
             }

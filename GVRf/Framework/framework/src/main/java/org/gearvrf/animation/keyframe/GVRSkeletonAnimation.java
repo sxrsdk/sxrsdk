@@ -109,6 +109,7 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
         if (boneId >= 0)
         {
             mBoneChannels[boneId] = channel;
+            mSkeleton.setBoneOptions(boneId, GVRSkeleton.BONE_ANIMATE);
             Log.d("BONE", "Adding animation channel %d %s ", boneId, boneName);
         }
     }
@@ -182,6 +183,16 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
         if (mBoneChannels == null)
         {
             mBoneChannels = new GVRAnimationChannel[numBones];
+        }
+        else
+        {
+            for (int i = 0; i < mBoneChannels.length; ++i)
+            {
+                if (mBoneChannels[i] != null)
+                {
+                    skel.setBoneOptions(i, GVRSkeleton.BONE_ANIMATE);
+                }
+            }
         }
     }
 

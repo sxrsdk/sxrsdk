@@ -239,14 +239,6 @@ public class GVRAnimator extends GVRBehavior
             anim.setDuration(start,end);
         }
     }
-    public void setAnim(float ftime)
-    {
-        for (GVRAnimation anim : mAnimations)
-        {
-            anim.setAnim(ftime);
-        }
-    }
-
 
     /**
      * Sets the repeat count for all the animations in this animator.

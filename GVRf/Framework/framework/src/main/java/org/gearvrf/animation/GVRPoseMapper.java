@@ -60,9 +60,32 @@ public class GVRPoseMapper extends GVRAnimation
         mSourceSkeleton = source;
     }
 
-    public void	setDestSkeleton(GVRSkeleton dstskel)
+    /**
+     * Get the source skeleton
+     * @returns source skeleton (may be null if not set)
+     *
+     * The source skeleton provides the input animation
+     * which will be remapped to the target skeleton.
+     *
+     * @see GVRSkeleton
+     */
+    public GVRSkeleton	getSourceSkeleton()
     {
-        mDestSkeleton = dstskel;
+        return mSourceSkeleton;
+    }
+
+    /**
+     * Get the target skeleton
+     * @returns target skeleton (will not be null)
+     *
+     * The target skeleton is modified by the pose
+     * from the source skeleton.
+     *
+     * @see GVRSkeleton
+     */
+    public GVRSkeleton	getTargetSkeleton()
+    {
+        return mDestSkeleton;
     }
 
     /**
