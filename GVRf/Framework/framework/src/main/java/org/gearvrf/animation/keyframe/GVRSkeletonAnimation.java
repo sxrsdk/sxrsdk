@@ -23,6 +23,7 @@ import org.gearvrf.animation.GVRPose;
 import org.gearvrf.animation.GVRSkeleton;
 import org.gearvrf.utility.Log;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.Arrays;
@@ -50,8 +51,6 @@ import java.util.List;
  */
 public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
     protected String mName;
-    private int mNumRoots = 0;
-    private GVRSceneObject mSkeletonRoot = null;
     private GVRSkeleton mSkeleton = null;
 
     /**
@@ -173,9 +172,9 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
         int numBones = skel.getNumBones();
 
         mSkeleton = skel;
-        for (int boneId = 0; boneId < numBones; ++boneId)
+        if (boneNames != null)
         {
-            if (boneNames != null)
+            for (int boneId = 0; boneId < numBones; ++boneId)
             {
                 mSkeleton.setBoneName(boneId, boneNames.get(boneId));
             }
