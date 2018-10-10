@@ -23,6 +23,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import static org.gearvrf.animation.GVRPose.Bone;
+import org.gearvrf.utility.Log;
 
 public class GVRPoseInterpolator extends GVRAnimation
 {
@@ -229,7 +230,9 @@ public class GVRPoseInterpolator extends GVRAnimation
 
     public void animate(float timer)
     {
+
         initialPose = pSkeleton.getPose();
+
         for(int  i= 0;i < pSkeleton.getNumBones();i++)
         {
             offset = i*poseDataSize;
@@ -249,7 +252,9 @@ public class GVRPoseInterpolator extends GVRAnimation
             setPoseScale(i);
         }
         pSkeleton.poseToBones();
+        pSkeleton.updateBonePose();
         pSkeleton.updateSkinPose();
+
     }
 
 

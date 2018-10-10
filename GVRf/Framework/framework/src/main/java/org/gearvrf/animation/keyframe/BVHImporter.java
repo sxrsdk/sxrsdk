@@ -43,6 +43,13 @@ public class BVHImporter
     private final ArrayList<Integer> mBoneParents = new ArrayList();
     private final ArrayList<Integer> mBoneChannels = new ArrayList();
     private BufferedReader mReader;
+    private boolean channelOrder=false;
+    private int xPosOffset;
+    private int yPosOffset;
+    private int zPosOffset;
+    private int xRotOffset;
+    private int yRotOffset;
+    private int zRotOffset;
 
     public BVHImporter(GVRContext ctx)
     {
@@ -152,7 +159,45 @@ public class BVHImporter
             }
             else if (opcode.equals("CHANNELS"))
             {
-                mBoneChannels.add(boneIndex, Integer.parseInt(words[1]));
+                if(!channelOrder)
+                {
+                       for(int j=2; j<5; j++)
+                       {
+                           if(words[j].equals("Xposition"))  //positions order
+                           {
+                               xPosOffset = j-2;
+                           }
+                           else if (words[j].equals("Yposition"))
+                           {
+                               yPosOffset = j-2;
+                           }
+                           else if (words[j].equals("Zposition"))
+                           {
+                               zPosOffset = j-2;
+                           }
+
+                       }
+
+                        for(int j=5; j<words.length; j++)
+                        {
+                            if(words[j].equals("Xrotation"))  //rotations order
+                            {
+                                xRotOffset = j-5;
+                            }
+                            else if (words[j].equals("Yrotation"))
+                            {
+                                yRotOffset = j-5;
+                            }
+                            else if (words[j].equals("Zrotation"))
+                            {
+                                zRotOffset = j-5;
+                            }
+
+                        }
+
+                    channelOrder = true;
+                }
+               mBoneChannels.add(boneIndex, Integer.parseInt(words[1]));
             }
             else if (opcode.equals("MOTION") || opcode.equals("}"))
             {
@@ -223,18 +268,57 @@ public class BVHImporter
                     {
                         throw new IOException("Cannot find bone " + bvhbonename + " in skeleton");
                     }
-                    x = Float.parseFloat(words[i++]);    // positions
-                    y = Float.parseFloat(words[i++]);
-                    z = Float.parseFloat(words[i++]);
+                    x = Float.parseFloat(words[i+xPosOffset]);    // positions
+                    y = Float.parseFloat(words[i+yPosOffset]);
+                    z = Float.parseFloat(words[i+zPosOffset]);
                     pose.setLocalPosition(boneIndex, x, y, z);
 
-                    z = Float.parseFloat(words[i++]);        // Z, Y, X rotation angles
-                    x = Float.parseFloat(words[i++]);
-                    y = Float.parseFloat(words[i++]);
+                    x = Float.parseFloat(words[i+xRotOffset]);
+                    y = Float.parseFloat(words[i+yRotOffset]);
+                    z = Float.parseFloat(words[i+zRotOffset]);
 
-                    q.rotationZ(z * (float) Math.PI / 180);
-                    q.rotateX(x * (float) Math.PI / 180);
-                    q.rotateY(y * (float) Math.PI / 180);
+                    //rotation order
+
+                    for(int order = 0; order < 3; order++)
+                    {
+                        if(xRotOffset == order)
+                        {
+                            if(order == 0)
+                            {
+                                q.rotationX(x * (float) Math.PI / 180);
+                            }
+                            else
+                            {
+                                q.rotateX(x * (float) Math.PI / 180);
+                            }
+
+                        }
+                        else if(yRotOffset == order)
+                        {
+                            if(order == 0)
+                            {
+                                q.rotationY(y * (float) Math.PI / 180);
+                            }
+                            else
+                            {
+                                q.rotateY(y * (float) Math.PI / 180);
+                            }
+
+                        }
+                        else if(zRotOffset == order)
+                        {
+                            if(order == 0)
+                            {
+                                q.rotationZ(z * (float) Math.PI / 180);
+                            }
+                            else
+                            {
+                                q.rotateZ(z * (float) Math.PI / 180);
+                            }
+
+                        }
+
+                    }
                     q.normalize();
 
                     pose.setLocalRotation(boneIndex, q.x, q.y, q.z, q.w);
@@ -326,25 +410,70 @@ public class BVHImporter
                 }
                 if (mBoneChannels.get(boneIndex) > 3)
                 {
+
                     f = frameIndex * 4;
                     posKeys = posKeysPerBone.get(boneIndex);
-                    x = Float.parseFloat(words[i]);     // X, Y, Z position
-                    y = Float.parseFloat(words[i + 1]);
-                    z = Float.parseFloat(words[i + 2]);
+                    x = Float.parseFloat(words[i + xPosOffset]);     // X, Y, Z position
+                    y = Float.parseFloat(words[i + yPosOffset]);
+                    z = Float.parseFloat(words[i + zPosOffset]);
+
                     posKeys[f] = curTime;
                     posKeys[f + 1] = x;                 // bone position
                     posKeys[f + 2] = y;
                     posKeys[f + 3] = z;
                     i += 3;
                 }
+
                 rotKeys = rotKeysPerBone.get(boneIndex);
-                z = Float.parseFloat(words[i]);         // Z, X, Y rotation angles
-                x = Float.parseFloat(words[i + 1]);
-                y = Float.parseFloat(words[i + 2]);
+
+                x = Float.parseFloat(words[i + xRotOffset]);
+                y = Float.parseFloat(words[i + yRotOffset]);
+                z = Float.parseFloat(words[i + zRotOffset]);
                 i += 3;
-                q.rotationZ(z * (float) Math.PI / 180);
-                q.rotateX(x * (float) Math.PI / 180);
-                q.rotateY(y * (float) Math.PI / 180);
+
+                //rotation order
+
+                for(int order = 0; order < 3; order++)
+                {
+                    if(xRotOffset == order)
+                    {
+                        if(order == 0)
+                        {
+                            q.rotationX(x * (float) Math.PI / 180);
+                        }
+                        else
+                        {
+                            q.rotateX(x * (float) Math.PI / 180);
+                        }
+
+                    }
+                    else if(yRotOffset == order)
+                    {
+                        if(order == 0)
+                        {
+                            q.rotationY(y * (float) Math.PI / 180);
+                        }
+                        else
+                        {
+                            q.rotateY(y * (float) Math.PI / 180);
+                        }
+
+                    }
+                    else if(zRotOffset == order)
+                    {
+                        if(order == 0)
+                        {
+                            q.rotationZ(z * (float) Math.PI / 180);
+                        }
+                        else
+                        {
+                            q.rotateZ(z * (float) Math.PI / 180);
+                        }
+
+                    }
+
+                }
+
                 q.normalize();
                 bindpose.getLocalRotation(boneIndex, b);
                 q.mul(b);
