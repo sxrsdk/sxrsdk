@@ -136,14 +136,14 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                         animator = mAnimQueue.get(0);
                         animator.start(mOnFinish);
                         mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
-                                                                                "onAnimationFinished", animator, animation);
+                                "onAnimationFinished", animator, animation);
                         mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
-                                                                                "onAnimationStarted", animator);
+                                "onAnimationStarted", animator);
                     }
                     else
                     {
                         mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
-                                                                                "onAnimationFinished", animator, animation);
+                                "onAnimationFinished", animator, animation);
 
                     }
                 }
@@ -193,7 +193,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         if (boneObject == null)
         {
             throw new IllegalArgumentException(attachBone +
-                                                   " does not have a bone object in the avatar skeleton");
+                    " does not have a bone object in the avatar skeleton");
         }
         boneObject.addChildObject(modelRoot);
         ctx.getAssetLoader().loadModel(volume, modelRoot, settings, false, mLoadModelHandler);
@@ -202,7 +202,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     public void clearAvatar()
     {
         GVRSceneObject previousAvatar = (mAvatarRoot.getChildrenCount() > 0) ?
-            mAvatarRoot.getChildByIndex(0) : null;
+                mAvatarRoot.getChildByIndex(0) : null;
 
         if (previousAvatar != null)
         {
@@ -227,6 +227,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             animator.setName(filePath);
             try
             {
+
                 BVHImporter importer = new BVHImporter(ctx);
                 GVRSkeletonAnimation skelAnim;
 
@@ -270,6 +271,8 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
         }
     }
+
+
     /**
      * Adds an animation to this avatar.
      *
@@ -361,7 +364,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             mIsRunning = true;
             animator.start(mOnFinish);
             mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
-                                                                    "onAnimationStarted", animator);
+                    "onAnimationStarted", animator);
         }
     }
 

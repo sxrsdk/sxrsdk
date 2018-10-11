@@ -394,7 +394,6 @@ public abstract class GVRAnimation {
 
         mElapsedTime += (frameTime*animationSpeed);
 
-
         final int currentCycleCount = (int) (mElapsedTime / mDuration);
         final float cycleTime = (mElapsedTime % mDuration)+animationOffset;
 

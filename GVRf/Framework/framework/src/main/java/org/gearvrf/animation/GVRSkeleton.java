@@ -297,7 +297,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
      * You can restore the skeleton to it's bind pose with {@link #restoreBindPose()}
      * <p>
       * The bind pose is maintained as a {link GVRPose} object internal to the skeleton
-     * and connot be shared across skeletons. Setting the bind pose copies the
+     * and cannot be shared across skeletons. Setting the bind pose copies the
      * value of the input pose into the skeleton's bind pose. Subsequent
      * updates to the input pose are not reflected in the skeleton's bind pose.
      * @param pose {@link GVRPose} containing rotations and positions for the bind pose.
@@ -332,7 +332,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
      * You can restore the skeleton to it's bind pose with {@link #restoreBindPose()}
      * <p>
      * The bind pose is maintained as a {link GVRPose} object internal to the skeleton
-     * and connot be shared across skeletons. Setting the bind pose copies the
+     * and cannot be shared across skeletons. Setting the bind pose copies the
      * value of the input pose into the skeleton's bind pose. Subsequent
      * updates to the input pose are not reflected in the skeleton's bind pose.
      * @param rotations new bind pose rotations
