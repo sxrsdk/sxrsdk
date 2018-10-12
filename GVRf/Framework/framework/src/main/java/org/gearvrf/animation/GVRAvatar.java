@@ -236,6 +236,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                     GVRSkeleton skel = importer.importSkeleton(animResource);
                     skelAnim = importer.readMotion(skel);
                     animator.addAnimation(skelAnim);
+
                     GVRPoseMapper retargeter = new GVRPoseMapper(mSkeleton, skel, skelAnim.getDuration());
                     retargeter.setBoneMap(boneMap);
                     animator.addAnimation(retargeter);
@@ -243,6 +244,8 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                 else
                 {
                     skelAnim = importer.importAnimation(animResource, mSkeleton);
+                    GVRSkeleton skl = skelAnim.getSkeleton();
+
                     animator.addAnimation(skelAnim);
                 }
                 addAnimation(animator);

@@ -316,7 +316,6 @@ public abstract class GVRAnimation {
         if (mOnRepeat != null) {
             mRepeatCount = -1; // loop until iterate() returns false
         }
-
         return this;
     }
 
@@ -356,6 +355,7 @@ public abstract class GVRAnimation {
 
     public void onStart()
     {
+       // mCurrentTime = 0;
         if (sDebug)
         {
             Log.d("ANIMATION", "%s started", getClass().getSimpleName());
@@ -390,6 +390,12 @@ public abstract class GVRAnimation {
      */
 
     final boolean onDrawFrame(float frameTime) {
+        /*
+        if (mCurrentTime < mStartTime)
+        {
+            mCurrentTime =+ frameTime;
+            return true;
+        }*/
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
         mElapsedTime += (frameTime*animationSpeed);
