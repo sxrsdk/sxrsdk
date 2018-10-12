@@ -25,11 +25,13 @@ namespace gvr {
 
     void Skeleton::setPose(const float* input)
     {
+        std::lock_guard<std::mutex> lock(mLock);
         memcpy(mBoneMatrices, input, mNumBones * sizeof(glm::mat4));
     }
 
     void Skeleton::setSkinPose(const float* input)
     {
+        std::lock_guard<std::mutex> lock(mLock);
         memcpy(mSkinMatrices, input, mNumBones * sizeof(glm::mat4));
     }
 
@@ -42,12 +44,9 @@ namespace gvr {
         return &mSkinMatrices[boneId];
     }
 
-    glm::mat4* Skeleton::getBoneMatrix(int boneId)
+    void Skeleton::getBoneMatrices(glm::mat4* matrixData)
     {
-        if ((boneId < 0) || (boneId > getNumBones()))
-        {
-            return nullptr;
-        }
-        return &mBoneMatrices[boneId];
+        std::lock_guard<std::mutex> lock(mLock);
+        memcpy(matrixData, mBoneMatrices, sizeof(glm::mat4) * getNumBones());
     }
 }

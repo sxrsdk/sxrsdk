@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Group of animations that can be collectively manipulated.
@@ -46,12 +47,13 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
 {
     private static final String TAG = Log.tag(GVRAvatar.class);
     static private long TYPE_AVATAR = newComponentType(GVRAvatar.class);
-    protected List<GVRAnimator> mAnimations;
+    protected final List<GVRAnimator> mAnimations;
     protected GVRSkeleton mSkeleton;
     protected final GVRSceneObject mAvatarRoot;
     protected boolean mIsRunning;
     protected GVREventReceiver mReceiver;
-    protected List<GVRAnimator> mAnimQueue = new ArrayList<GVRAnimator>();
+    protected final List<GVRAnimator> mAnimQueue = new ArrayList<GVRAnimator>();
+    protected int mRepeatMode = GVRRepeatMode.ONCE;
 
     /**
      * Make an instance of the GVRAnimator component.
@@ -67,7 +69,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         mType = getComponentType();
         mAvatarRoot = new GVRSceneObject(ctx);
         mAvatarRoot.setName(name);
-        mAnimations = new ArrayList<GVRAnimator>();
+        mAnimations = new CopyOnWriteArrayList<>();
     }
 
     static public long getComponentType() { return TYPE_AVATAR; }
@@ -116,37 +118,59 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
      * Query the number of animations owned by this avatar.
      * @return number of animations added to this avatar
      */
-    public int getAnimationCount() { return mAnimations.size(); }
+    public int getAnimationCount()
+    {
+        return mAnimations.size();
+    }
 
 
     protected GVROnFinish mOnFinish = new GVROnFinish()
     {
         public void finished(GVRAnimation animation)
         {
-            if (mAnimQueue.size() > 0)
+            int numEvents = 0;
+            GVRAnimator animator = null;
+            synchronized (mAnimQueue)
             {
-                GVRAnimator animator = mAnimQueue.get(0);
-                Log.d("ANIMATION", "%s finished", animator.getName());
-                if (animator.findAnimation(animation) >= 0)
+                if (mAnimQueue.size() > 0)
                 {
-                    mAnimQueue.remove(0);
-                    mIsRunning = false;
-                    if (mAnimQueue.size() > 0)
+                    animator = mAnimQueue.get(0);
+                    Log.d("ANIMATION", "%s finished", animator.getName());
+                    if (animator.findAnimation(animation) >= 0)
                     {
-                        animator = mAnimQueue.get(0);
-                        animator.start(mOnFinish);
-                        mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
-                                "onAnimationFinished", animator, animation);
-                        mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
-                                "onAnimationStarted", animator);
-                    }
-                    else
-                    {
-                        mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
-                                "onAnimationFinished", animator, animation);
-
+                        mAnimQueue.remove(0);
+                        mIsRunning = false;
+                        if (mAnimQueue.size() > 0)
+                        {
+                            animator = mAnimQueue.get(0);
+                            animator.start(mOnFinish);
+                            numEvents = 2;
+                        }
+                        else
+                        {
+                            numEvents = 1;
+                        }
                     }
                 }
+            }
+            switch (numEvents)
+            {
+                case 2:
+                mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this,
+                        IAvatarEvents.class, "onAnimationFinished", animator, animation);
+                mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this,
+                        IAvatarEvents.class, "onAnimationStarted", animator);
+                break;
+
+                case 1:
+                mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this,
+                        IAvatarEvents.class, "onAnimationStarted", animator);
+                if (mRepeatMode == GVRRepeatMode.REPEATED)
+                {
+                    startAll(mRepeatMode);
+                }
+
+                default: break;
             }
         }
     };
@@ -193,7 +217,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         if (boneObject == null)
         {
             throw new IllegalArgumentException(attachBone +
-                    " does not have a bone object in the avatar skeleton");
+                                                   " does not have a bone object in the avatar skeleton");
         }
         boneObject.addChildObject(modelRoot);
         ctx.getAssetLoader().loadModel(volume, modelRoot, settings, false, mLoadModelHandler);
@@ -202,7 +226,7 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
     public void clearAvatar()
     {
         GVRSceneObject previousAvatar = (mAvatarRoot.getChildrenCount() > 0) ?
-                mAvatarRoot.getChildByIndex(0) : null;
+            mAvatarRoot.getChildByIndex(0) : null;
 
         if (previousAvatar != null)
         {
@@ -227,7 +251,6 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             animator.setName(filePath);
             try
             {
-
                 BVHImporter importer = new BVHImporter(ctx);
                 GVRSkeletonAnimation skelAnim;
 
@@ -250,20 +273,20 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                 }
                 addAnimation(animator);
                 ctx.getEventManager().sendEvent(this,
-                        IAvatarEvents.class,
-                        "onAnimationLoaded",
-                        animator,
-                        filePath,
-                        null);
+                                                IAvatarEvents.class,
+                                                "onAnimationLoaded",
+                                                animator,
+                                                filePath,
+                                                null);
             }
             catch (IOException ex)
             {
                 ctx.getEventManager().sendEvent(this,
-                        IAvatarEvents.class,
-                        "onAnimationLoaded",
-                        null,
-                        filePath,
-                        ex.getMessage());
+                                                IAvatarEvents.class,
+                                                "onAnimationLoaded",
+                                                null,
+                                                filePath,
+                                                ex.getMessage());
             }
         }
         else
@@ -274,8 +297,6 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
         }
     }
-
-
     /**
      * Adds an animation to this avatar.
      *
@@ -332,14 +353,30 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
      */
     public void start(String name)
     {
+        GVRAnimator anim = findAnimation(name);
+
+        if (name.equals(anim.getName()))
+        {
+            start(anim);
+            return;
+        }
+    }
+
+    /**
+     * Find the animation associated with this avatar with the given name.
+     * @param name  name of animation to look for
+     * @return {@link GVRAnimator} animation found or null if none with that name
+     */
+    public GVRAnimator findAnimation(String name)
+    {
         for (GVRAnimator anim : mAnimations)
         {
             if (name.equals(anim.getName()))
             {
-                start(anim);
-                return;
+                return anim;
             }
         }
+        return null;
     }
 
     /**
@@ -359,16 +396,35 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
         return anim;
     }
 
+    /**
+     * Start all of the avatar animations, causing them
+     * to play one at a time in succession.
+     * @param repeatMode GVRRepeatMode.REPEATED to repeatedly play,
+     *                   GVRRepeatMode.ONCE to play only once
+     */
+    public void startAll(int repeatMode)
+    {
+        mRepeatMode = repeatMode;
+        for (GVRAnimator anim : mAnimations)
+        {
+            start(anim);
+        }
+    }
+
     protected void start(GVRAnimator animator)
     {
-        mAnimQueue.add(animator);
-        if (mAnimQueue.size() == 1)
+        synchronized (mAnimQueue)
         {
-            mIsRunning = true;
-            animator.start(mOnFinish);
-            mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
-                    "onAnimationStarted", animator);
+            mAnimQueue.add(animator);
+            if (mAnimQueue.size() > 1)
+            {
+                return;
+            }
         }
+        mIsRunning = true;
+        animator.start(mOnFinish);
+        mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this, IAvatarEvents.class,
+                "onAnimationStarted", animator);
     }
 
     /**
@@ -396,13 +452,12 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
      */
     public void stop(String name)
     {
-        for (GVRAnimator anim : mAnimations)
+        GVRAnimator anim = findAnimation(name);
+
+        if (anim != null)
         {
-            if (name.equals(anim.getName()))
-            {
-                mIsRunning = false;
-                anim.stop();
-            }
+            mIsRunning = false;
+            anim.stop();
         }
     }
 
@@ -413,12 +468,15 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
      */
     public void stop()
     {
-        if (mIsRunning && (mAnimQueue.size() > 0))
+        synchronized (mAnimQueue)
         {
-            mIsRunning = false;
-            GVRAnimator animator = mAnimQueue.get(0);
-            mAnimQueue.clear();
-            animator.stop();
+            if (mIsRunning && (mAnimQueue.size() > 0))
+            {
+                mIsRunning = false;
+                GVRAnimator animator = mAnimQueue.get(0);
+                mAnimQueue.clear();
+                animator.stop();
+            }
         }
     }
 

@@ -362,7 +362,7 @@ public abstract class GVRAnimation {
         }
     }
 
-    protected void onFinish(float frameTime)
+    protected void onFinish()
     {
         if (sDebug)
         {
@@ -398,7 +398,8 @@ public abstract class GVRAnimation {
         }*/
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
-        mElapsedTime += (frameTime*animationSpeed);
+//        mElapsedTime += (frameTime*animationSpeed);
+        mElapsedTime += 1 / 30.0f;
 
         final int currentCycleCount = (int) (mElapsedTime / mDuration);
         final float cycleTime = (mElapsedTime % mDuration)+animationOffset;
@@ -442,7 +443,7 @@ public abstract class GVRAnimation {
 
             animate(mTarget, endRatio);
 
-            onFinish(frameTime);
+            onFinish();
             if (mOnFinish != null) {
                 mOnFinish.finished(this);
             }
