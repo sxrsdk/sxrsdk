@@ -392,7 +392,8 @@ public abstract class GVRAnimation {
     final boolean onDrawFrame(float frameTime) {
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
-        mElapsedTime += (frameTime*animationSpeed);
+//        mElapsedTime += (frameTime*animationSpeed);
+        mElapsedTime += 1 / 30.0f;
 
         final int currentCycleCount = (int) (mElapsedTime / mDuration);
         final float cycleTime = (mElapsedTime % mDuration)+animationOffset;
