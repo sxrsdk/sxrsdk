@@ -158,6 +158,9 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                 case 2:
                 mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this,
                         IAvatarEvents.class, "onAnimationFinished", animator, animation);
+                mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this,
+                        IAvatarEvents.class, "onAnimationStarted", animator);
+                break;
 
                 case 1:
                 mAvatarRoot.getGVRContext().getEventManager().sendEvent(GVRAvatar.this,
