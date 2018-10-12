@@ -362,7 +362,7 @@ public abstract class GVRAnimation {
         }
     }
 
-    protected void onFinish(float frameTime)
+    protected void onFinish()
     {
         if (sDebug)
         {
@@ -436,7 +436,7 @@ public abstract class GVRAnimation {
 
             animate(mTarget, endRatio);
 
-            onFinish(frameTime);
+            onFinish();
             if (mOnFinish != null) {
                 mOnFinish.finished(this);
             }

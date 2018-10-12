@@ -5,6 +5,7 @@
 #ifndef SKELETON_H_
 #define SKELETON_H_
 
+#include <mutex>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "objects/components/component.h"
@@ -30,7 +31,7 @@ public:
     void setPose(const float* input);
     void setSkinPose(const float* input);
     glm::mat4* getSkinMatrix(int boneId);
-    glm::mat4* getBoneMatrix(int boneId);
+    void getBoneMatrices(glm::mat4* matrixData);
 
     int getParentBoneID(int boneId) const
     {
@@ -48,6 +49,7 @@ private:
     Skeleton& operator=(Skeleton&& skel) = delete;
 
 private:
+    std::mutex  mLock;
     int         mNumBones;
     int*        mBoneParents;
     glm::mat4*  mSkinMatrices;
