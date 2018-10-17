@@ -398,12 +398,10 @@ public abstract class GVRAnimation {
         }*/
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
-//        mElapsedTime += (frameTime*animationSpeed);
-        mElapsedTime += 1 / 30.0f;
+        mElapsedTime += (frameTime*animationSpeed);
 
         final int currentCycleCount = (int) (mElapsedTime / mDuration);
         final float cycleTime = (mElapsedTime % mDuration)+animationOffset;
-
 
         final boolean cycled = previousCycleCount != currentCycleCount;
         boolean stillRunning = cycled != true;
