@@ -25,7 +25,7 @@ import org.gearvrf.animation.GVROpacityAnimation;
 import org.gearvrf.asynchronous.GVRAsynchronousResourceLoader;
 import org.gearvrf.io.GVRGearCursorController;
 import org.gearvrf.io.GVRInputManager;
-import org.gearvrf.script.GVRScriptManager;
+import org.gearvrf.script.IScriptManager;
 import org.gearvrf.utility.ImageUtils;
 import org.gearvrf.utility.Log;
 import org.gearvrf.utility.Threads;
@@ -48,10 +48,10 @@ abstract class GVRViewManager extends GVRContext {
     enum EYE {
         LEFT, RIGHT, MULTIVIEW, CENTER;
     }
-    GVRViewManager(GVRActivity activity, GVRMain main) {
+    GVRViewManager(GVRApplication activity, GVRMain main) {
         super(activity);
 
-        mActivity = activity;
+        mApplication = activity;
         mMain = main;
 
         VrAppSettings vrAppSettings = activity.getAppSettings();
@@ -62,7 +62,7 @@ abstract class GVRViewManager extends GVRContext {
 
         GVRAsynchronousResourceLoader.setup(this);
         VrAppSettings appSettings = activity.getAppSettings();
-        mScriptManager = new GVRScriptManager(this);
+        initScriptManager();
         mEventManager = new GVREventManager(this);
         mInputManager = new GVRInputManager(this, appSettings.getCursorControllerTypes(),appSettings.getNumControllers());
         mInputManager.scanDevices();
@@ -82,7 +82,9 @@ abstract class GVRViewManager extends GVRContext {
 
     void onDestroy() {
         mInputManager.close();
-        mScriptManager.destroy();
+        if (mScriptManager != null) {
+            mScriptManager.destroy();
+        }
 
         mFrameListeners.clear();
         mRunnables.clear();
@@ -140,10 +142,10 @@ abstract class GVRViewManager extends GVRContext {
     }
 
     private void setMainSceneImpl(GVRScene scene) {
-        mMainScene = scene;
         NativeScene.setMainScene(scene.getNative());
-        getActivity().setCameraRig(scene.getMainCameraRig());
+        mApplication.setCameraRig(scene.getMainCameraRig());
         mInputManager.setScene(scene);
+        this.mMainScene = scene;
     }
 
     protected boolean updateSensoredScene() {
@@ -218,12 +220,12 @@ abstract class GVRViewManager extends GVRContext {
         setMainSceneImpl(scene);
         mRenderBundle = makeRenderBundle();
 
-        final DepthFormat depthFormat = getActivity().getAppSettings().getEyeBufferParams().getDepthFormat();
-        getActivity().getConfigurationManager().configureRendering(DepthFormat.DEPTH_24_STENCIL_8 == depthFormat);
+        final DepthFormat depthFormat = mApplication.getAppSettings().getEyeBufferParams().getDepthFormat();
+        mApplication.getConfigurationManager().configureRendering(DepthFormat.DEPTH_24_STENCIL_8 == depthFormat);
     }
 
     private void createMainScene() {
-        if (getActivity().getAppSettings().showLoadingIcon) {
+        if (mApplication.getAppSettings().showLoadingIcon) {
             mSplashScreen = mMain.createSplashScreen();
             if (mSplashScreen != null) {
                 mMainSceneLock.lock();
@@ -462,6 +464,8 @@ abstract class GVRViewManager extends GVRContext {
                     }
                 }
             });
+
+            getInputManager().updateGearControllers();
         }
 
         @Override
@@ -508,7 +512,6 @@ abstract class GVRViewManager extends GVRContext {
     protected void beforeDrawEyes() {
         GVRNotifications.notifyBeforeStep();
         mFrameHandler.beforeDrawEyes();
-        getInputManager().updateGearControllers();
         makeShadowMaps(mMainScene.getNative(), getMainScene(), mRenderBundle.getShaderManager().getNative(),
                        mRenderBundle.getPostEffectRenderTextureA().getWidth(), mRenderBundle.getPostEffectRenderTextureA().getHeight());
     }
@@ -543,7 +546,7 @@ abstract class GVRViewManager extends GVRContext {
     }
 
     @Override
-    public GVRScriptManager getScriptManager() {
+    public IScriptManager getScriptManager() {
         return mScriptManager;
     }
 
@@ -591,7 +594,7 @@ abstract class GVRViewManager extends GVRContext {
 
     protected void readRenderResult(GVRRenderTarget renderTarget, GVRViewManager.EYE eye, boolean useMultiview) {
         if (mReadbackBuffer == null) {
-            final VrAppSettings settings = mActivity.getAppSettings();
+            final VrAppSettings settings = mApplication.getAppSettings();
             final VrAppSettings.EyeBufferParams eyeBufferParams = settings.getEyeBufferParams();
             mReadbackBufferWidth = eyeBufferParams.getResolutionWidth();
             mReadbackBufferHeight = eyeBufferParams.getResolutionHeight();
@@ -807,9 +810,20 @@ abstract class GVRViewManager extends GVRContext {
             mReadbackBuffer = null;
         }
     }
+
+    private void initScriptManager() {
+        try
+        {
+            final Class<?> cls = Class.forName("org.gearvrf.script.GVRScriptManager");
+            mScriptManager = (IScriptManager)cls.getConstructor(GVRContext.class).newInstance(this);
+        }
+        catch (Exception e) {
+        }
+    }
+
     GVRGearCursorController.ControllerReader mControllerReader;
-    private final GVRScriptManager mScriptManager;
-    protected final GVRActivity mActivity;
+    private IScriptManager mScriptManager = null;
+    protected final GVRApplication mApplication;
     protected float mFrameTime;
     protected long mPreviousTimeNanos;
 

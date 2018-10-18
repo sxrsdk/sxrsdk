@@ -29,16 +29,15 @@
 #include "glm/glm.hpp"
 
 #include "util/gvr_gl.h"
-#include "objects/components/bone.h"
 #include "objects/hybrid_object.h"
 #include "objects/shader_data.h"
 #include "objects/bounding_volume.h"
-#include "objects/vertex_bone_data.h"
 #include "objects/vertex_buffer.h"
 #include "objects/index_buffer.h"
 #include "bounding_volume.h"
 
 namespace gvr {
+
 /**
  * A mesh describes a geometric object that can be rendered.
  *
@@ -54,6 +53,8 @@ namespace gvr {
  * @see VertexBuffer
  * @see IndexBuffer
  */
+class Skeleton;
+
 class Mesh: public HybridObject {
 public:
     explicit Mesh(const char* descriptor);
@@ -269,37 +270,6 @@ public:
         return mVertices->getVertexCount();
     }
 
-    /**
-     * Determine if mesh has bones or not
-     * @return true if mesh is skinned, false if not
-     */
-    bool hasBones() const
-    {
-        return vertexBoneData_.getNumBones();
-    }
-
-    /**
-     * Set the bone positions and orientations for the mesh
-     * @param bones array of bone matrices
-     */
-    void setBones(std::vector<Bone*>&& bones)
-    {
-        vertexBoneData_.setBones(std::move(bones));
-    }
-
-    /**
-     * Get the vertex bone data
-     * @return vertex bone data information
-     */
-    VertexBoneData& getVertexBoneData()
-    {
-        return vertexBoneData_;
-    }
-
-    /**
-     * Determine if mesh vertices or indices have changed
-     * @return true if dirty, else false
-     */
     bool isDirty() const { return mVertices->isDirty(); }
 
 private:
@@ -312,10 +282,6 @@ protected:
     VertexBuffer* mVertices;
     bool have_bounding_volume_;
     BoundingVolume bounding_volume;
-
-    // Bone data for the shader
-    VertexBoneData vertexBoneData_;
-    std::unordered_set<std::shared_ptr<u_short>> dirty_flags_;
 };
 }
 #endif

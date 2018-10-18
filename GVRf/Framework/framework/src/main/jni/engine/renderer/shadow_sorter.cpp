@@ -41,7 +41,7 @@ bool ShadowRenderSorter::isValid(RenderState& rstate, Renderable& r)
 
 Shader* ShadowRenderSorter::selectShader(const RenderState& rstate, Renderable& r)
 {
-    int index = r.mesh->hasBones() ? 1 : 0;
+    int index = r.hasBones;
     Shader* shader = mDepthShader[index];
     if (shader != nullptr)
     {

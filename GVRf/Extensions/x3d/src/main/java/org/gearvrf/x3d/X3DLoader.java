@@ -67,6 +67,12 @@ final class X3DLoader {
                     root.detachComponent(GVRAnimator.getComponentType());
                 }
                 assetRequest.onModelLoaded(context, root, fileName);
+                GVRAnimator animator = (GVRAnimator) root.getComponent(GVRAnimator.getComponentType());
+
+                if ((animator != null) && assetRequest.getImportSettings().contains(GVRImportSettings.NO_ANIMATION))
+                {
+                    root.detachComponent(GVRAnimator.getComponentType());
+                }
             } finally {
                 inputStream.close();
             }

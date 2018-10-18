@@ -59,7 +59,7 @@ import org.joml.Vector3f;
  * </pre>
  */
 public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScriptable, IEventReceiver {
-    private Map<Long, GVRComponent> mComponents = new HashMap<Long, GVRComponent>();
+    private final Map<Long, GVRComponent> mComponents = new HashMap<Long, GVRComponent>();
     private GVRSceneObject mParent;
     private Object mTag;
     private final List<GVRSceneObject> mChildren = new CopyOnWriteArrayList<GVRSceneObject>();
@@ -694,23 +694,29 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      *            object.
      */
     public void removeChildObject(GVRSceneObject child) {
-        mChildren.remove(child);
-        child.mParent = null;
-        NativeSceneObject.removeChildObject(getNative(), child.getNative());
-        child.onRemoveParentObject(this);
+        synchronized (mChildren) {
+            NativeSceneObject.removeChildObject(getNative(), child.getNative());
+
+            child.mParent = null;
+            child.onRemoveParentObject(this);
+
+            mChildren.remove(child);
+        }
     }
 
     protected int removeChildObjectsByNameImpl(final String name) {
-        int count = 0;
-        for (GVRSceneObject child : mChildren) {
-            if (child.getName().equals(name)) {
-                removeChildObject(child);
-                count++;
-            } else {
-                count = count + child.removeChildObjectsByNameImpl(name);
+        synchronized (mChildren) {
+            int count = 0;
+            for (GVRSceneObject child : mChildren) {
+                if (child.getName().equals(name)) {
+                    removeChildObject(child);
+                    count++;
+                } else {
+                    count = count + child.removeChildObjectsByNameImpl(name);
+                }
             }
+            return count;
         }
-        return count;
     }
 
     /**

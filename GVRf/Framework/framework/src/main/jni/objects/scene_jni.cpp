@@ -30,10 +30,6 @@ extern "C" {
     Java_org_gearvrf_NativeScene_setJava(JNIEnv *env, jclass, jlong nativeScene, jobject javaScene);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeScene_addSceneObject(JNIEnv * env,
-            jobject obj, jlong jscene, jlong jscene_object);
-
-    JNIEXPORT void JNICALL
     Java_org_gearvrf_NativeScene_removeSceneObject(JNIEnv * env,
             jobject obj, jlong jscene, jlong jscene_object);
 
@@ -86,6 +82,14 @@ extern "C" {
         Scene* scene = reinterpret_cast<Scene*>(jscene);
         scene->clearLights();
     }
+
+    JNIEXPORT void JNICALL
+    Java_org_gearvrf_NativeScene_setSceneRoot(JNIEnv *env, jclass type, jlong scene, jlong sceneRoot) {
+        Scene* aScene = reinterpret_cast<Scene*>(scene);
+        SceneObject* aSceneRoot = reinterpret_cast<SceneObject*>(sceneRoot);
+        aScene->setSceneRoot(aSceneRoot);
+    }
+
 };
 
 JNIEXPORT jlong JNICALL
@@ -93,14 +97,6 @@ Java_org_gearvrf_NativeScene_ctor(JNIEnv* env, jobject obj) {
     return reinterpret_cast<jlong>(new Scene());
 }
 
-
-JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_addSceneObject(JNIEnv * env,
-        jobject obj, jlong jscene, jlong jscene_object) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    scene->addSceneObject(scene_object);
-}
 
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeScene_removeSceneObject(JNIEnv * env,

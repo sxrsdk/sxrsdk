@@ -11,6 +11,8 @@ precision lowp int;
 
 @MATRIX_UNIFORMS
 
+@MATERIAL_UNIFORMS
+
 layout(location = 0) in vec3 a_position;
 
 #ifdef HAS_a_texcoord
@@ -35,7 +37,9 @@ layout(location = 7) in ivec4 a_bone_indices;
 #ifdef HAS_a_tangent
 layout(location = 8) in vec3 a_tangent;
 layout(location = 9) in vec3 a_bitangent;
+
 layout(location = 4) out mat3 tangent_matrix;
+#endif
 #endif
 #endif
 
@@ -51,15 +55,16 @@ layout(location = 14) out vec2 lightmap_coord;
 layout(location = 15) out vec2 opacity_coord;
 layout(location = 16) out vec2 normal_coord;
 
-layout(location = 17) out vec2 diffuse_coord1;
-layout(location = 18) out vec2 ambient_coord1;
-layout(location = 19) out vec2 specular_coord1;
-layout(location = 20) out vec2 emissive_coord1;
+#ifdef HAS_blendshapeTexture
+layout (set = 0, binding = 17) uniform sampler2D blendshapeTexture;
+#endif
 
 struct Vertex
 {
 	vec4 local_position;
 	vec4 local_normal;
+	vec3 local_tangent;
+	vec3 local_bitangent;
 	vec3 viewspace_position;
 	vec3 viewspace_normal;
 	vec3 view_direction;
@@ -73,19 +78,32 @@ void main() {
 	Vertex vertex;
 
 	vertex.local_position = vec4(a_position.xyz, 1.0);
-	vertex.local_normal = vec4(0.0, 0.0, 1.0, 0.0);
-	@VertexShader
+#ifdef HAS_a_normal
+    vertex.local_normal = vec4(normalize(a_normal), 0.0);
+#endif
+#ifdef HAS_a_tangent
+    vertex.local_tangent = a_tangent;
+    vertex.local_bitangent = a_bitangent;
+#endif
+#ifdef HAS_VertexMorphShader
+@VertexMorphShader
+#endif
+
 #ifdef HAS_VertexSkinShader
-	@VertexSkinShader
+@VertexSkinShader
 #endif
+
 #ifdef HAS_VertexNormalShader
-	@VertexNormalShader
+@VertexNormalShader
 #endif
+
+@VertexShader
+
 #ifdef HAS_LIGHTSOURCES
-	LightVertex(vertex);
+    LightVertex(vertex);
 #endif
 #ifdef HAS_TEXCOORDS
-	@TEXCOORDS
+@TEXCOORDS
 #endif
     mat4 mvp = u_mvp;
 	viewspace_position = vertex.viewspace_position;

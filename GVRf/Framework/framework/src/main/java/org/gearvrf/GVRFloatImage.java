@@ -12,24 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* Copyright 2015 Samsung Electronics Co., LTD
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 package org.gearvrf;
 
+import static android.opengl.GLES20.GL_RGB;
 import static android.opengl.GLES30.GL_RG;
+import static android.opengl.GLES30.GL_RGB32F;
 
 /**
  * A specialized image, for doing computation on the GPU.
@@ -41,6 +29,7 @@ import static android.opengl.GLES30.GL_RG;
  */
 public class GVRFloatImage extends GVRImage
 {
+    protected int mFloatsPerPixel = 2;
     /**
      * Create a floating-point image.
      *
@@ -63,12 +52,16 @@ public class GVRFloatImage extends GVRImage
             throws IllegalArgumentException
     {
         super(gvrContext, NativeBitmapImage.constructor(ImageType.FLOAT_BITMAP.Value, GL_RG));
-        NativeFloatTexture.update(getNative(), width, height, data);
+        NativeFloatImage.update(getNative(), width, height, GL_RG, data);
     }
 
-    public GVRFloatImage(GVRContext gvrContext)
+    public GVRFloatImage(GVRContext gvrContext, int pixelFormat)
     {
-        super(gvrContext, NativeBitmapImage.constructor(ImageType.FLOAT_BITMAP.Value, GL_RG));
+        super(gvrContext, NativeBitmapImage.constructor(ImageType.FLOAT_BITMAP.Value, pixelFormat));
+        if (pixelFormat == GL_RGB)
+        {
+            mFloatsPerPixel = 3;
+        }
     }
 
     /**
@@ -79,8 +72,7 @@ public class GVRFloatImage extends GVRImage
      * and some GL hardware handshaking. Reusing the texture reduces this
      * overhead (primarily by delaying garbage collection). Do be aware that
      * updating a texture will affect any and all {@linkplain GVRMaterial
-     * materials} (and/or post effects that use the
-     * texture!
+     * materials} (and/or post effects that use the texture!
      *
      * @param width
      *            Texture width, in pixels
@@ -97,18 +89,18 @@ public class GVRFloatImage extends GVRImage
      *             {@code data} is {@code null}, or if
      *             {@code data.length < height * width * 2}
      */
-    public boolean update(int width, int height, float[] data)
+    public void update(int width, int height, float[] data)
             throws IllegalArgumentException
     {
         if ((width <= 0) || (height <= 0) ||
-            (data == null) || (data.length < height * width * 2))
+            (data == null) || (data.length < height * width * mFloatsPerPixel))
         {
             throw new IllegalArgumentException();
         }
-        return NativeFloatTexture.update(getNative(), width, height, data);
+        NativeFloatImage.update(getNative(), width, height, 0, data);
     }
 }
 
-class NativeFloatTexture {
-    static native boolean update(long pointer, int width, int height, float[] data);
+class NativeFloatImage {
+    static native void update(long pointer, int width, int height, int pixelFormat, float[] data);
 }

@@ -11,6 +11,7 @@ precision lowp int;
 
 @MATRIX_UNIFORMS
 
+@MATERIAL_UNIFORMS
 
 layout(location = 0) in vec3 a_position;
 
@@ -53,10 +54,15 @@ layout(location = 14) out vec2 lightmap_coord;
 layout(location = 15) out vec2 opacity_coord;
 layout(location = 16) out vec2 normal_coord;
 
-layout(location = 17) out vec2 diffuse_coord1;
 layout(location = 18) out vec2 ambient_coord1;
-layout(location = 19) out vec2 specular_coord1;
-layout(location = 20) out vec2 emissive_coord1;
+layout(location = 19) out vec2 diffuse_coord1;
+layout(location = 20) out vec2 specular_coord1;
+layout(location = 21) out vec2 emissive_coord1;
+layout(location = 22) out vec2 lightmap_coord1;
+
+#ifdef HAS_blendshapeTexture
+layout (set = 0, binding = 17) uniform sampler2D blendshapeTexture;
+#endif
 
 //
 // The Phong vertex shader supports up to 4 sets of texture coordinates.
@@ -82,6 +88,8 @@ struct Vertex
 	vec4 local_normal;
 	vec3 viewspace_position;
 	vec3 viewspace_normal;
+	vec3 local_tangent;
+	vec3 local_bitangent;
 	vec3 view_direction;
 };
 
@@ -98,9 +106,17 @@ void main()
 	Vertex vertex;
 
 	vertex.local_position = vec4(a_position.xyz, 1.0);
-	vertex.local_normal = vec4(0.0, 0.0, 1.0, 0.0);
 
-@VertexShader
+#ifdef HAS_a_normal
+    vertex.local_normal = vec4(normalize(a_normal), 0.0);
+#endif
+#ifdef HAS_a_tangent
+    vertex.local_tangent = a_tangent;
+    vertex.local_bitangent = a_bitangent;
+#endif
+#ifdef HAS_VertexMorphShader
+@VertexMorphShader
+#endif
 
 #ifdef HAS_VertexSkinShader
 @VertexSkinShader
@@ -109,6 +125,8 @@ void main()
 #ifdef HAS_VertexNormalShader
 @VertexNormalShader
 #endif
+
+@VertexShader
 
 #ifdef HAS_LIGHTSOURCES
 //
@@ -132,10 +150,12 @@ void main()
 	viewspace_normal = vertex.viewspace_normal;
 	view_direction = vertex.view_direction;
 #ifdef HAS_MULTIVIEW
-	bool render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? true : false;
+    bool render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? true : false;
     mvp[3][0] = mvp[3][0] - (u_proj_offset * float(gl_ViewID_OVR));
     mvp = mvp * float(render_mask);
 #else
-	gl_Position = u_mvp * vertex.local_position;	
+	//generate right eye mvp from left
+    mvp[3][0] = mvp[3][0] - (u_proj_offset * float(u_right));
 #endif
+	gl_Position = u_mvp * vertex.local_position;
 }
