@@ -18,7 +18,9 @@
 
 #include "util/jni_utils.h"
 #include "objects/scene.h"
+#include "objects/scene_object.h"
 #include "shaders/shader.h"
+#include "objects/components/skin.h"
 #include <glslang/Include/Common.h> //@todo remove; for to_string
 
 namespace gvr {
@@ -128,30 +130,20 @@ const std::string& RenderData::getHashCode()
 
 bool RenderData::updateGPU(Renderer* renderer, Shader* shader)
 {
-    VertexBuffer* vbuf = mesh_->getVertexBuffer();
-
-    if (mesh_->hasBones() && shader->hasBones())
+    if (shader->hasBones())
     {
-        VertexBoneData& vbd = mesh_->getVertexBoneData();
-        std::vector<glm::mat4>& bone_matrices = vbd.getBoneMatrices();
-        int numBones = bone_matrices.size();
+        Skin* skin = (Skin*) owner_object()->getComponent(Skin::getComponentType());
 
-        if (numBones > 0)
+        if (skin)
         {
-            if (bones_ubo_ == NULL)
-            {
-                bones_ubo_ = renderer->createUniformBlock("mat4 u_bone_matrix", BONES_UBO_INDEX,
-                                                          "Bones_ubo", MAX_BONES);
-                bones_ubo_->setNumElems(numBones);
-            }
-            bones_ubo_->setRange(0, bone_matrices.data(), numBones);
-            bones_ubo_->updateGPU(renderer, 0, numBones * sizeof(glm::mat4));
+            skin->updateGPU(renderer, shader);
         }
     }
-    return vbuf->updateGPU(renderer, mesh_->getIndexBuffer(), shader);
+    return mesh_->getVertexBuffer()->updateGPU(renderer, mesh_->getIndexBuffer(), shader);
 }
 
-void RenderData::setBindShaderObject(JNIEnv* env, jobject bindShaderObject) {
+void RenderData::setBindShaderObject(JNIEnv* env, jobject bindShaderObject)
+{
     static const jclass clazz = env->GetObjectClass(bindShaderObject);
     static const jmethodID method = env->GetMethodID(clazz, "call", "(Lorg/gearvrf/GVRScene;Z)V");
     if (method == 0)

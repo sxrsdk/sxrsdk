@@ -58,14 +58,7 @@ public:
      * This node cannot be removed.
      * @return root of scene graph.
      */
-    SceneObject* getRoot() { return &scene_root_; }
-
-    /**
-     * Add a scene object underneath the root.
-     * @param scene_object SceneObject to add.
-     * @see #removeSceneObject
-     */
-    void addSceneObject(SceneObject* scene_object);
+    SceneObject* getRoot() { return scene_root_; }
 
     /**
      * Remove a scene object from the root.
@@ -333,6 +326,8 @@ public:
      */
     static void set_main_scene(Scene* scene);
 
+    void setSceneRoot(SceneObject *sceneRoot);
+
 private:
     Scene(const Scene& scene) = delete;
     Scene(Scene&& scene) = delete;
@@ -349,12 +344,12 @@ private:
 
 private:
     static Scene* main_scene_;
-    SceneObject scene_root_;
+    jmethodID makeDepthShadersMethod_;
+    SceneObject* scene_root_ = nullptr;
     CameraRig* main_camera_rig_;
     bool frustum_flag_;
     bool occlusion_flag_;
     bool pick_visible_;
-    jmethodID makeDepthShadersMethod_;
     std::mutex collider_mutex_;
     LightList lights_;
     std::vector<Component*> allColliders;

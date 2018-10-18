@@ -28,6 +28,7 @@
 #include "glm/gtc/matrix_inverse.hpp"
 
 #include "objects/scene.h"
+#include "objects/components/skin.h"
 #include "vulkan/vulkan_shader.h"
 #include "vulkan_renderer.h"
 #include "vulkan/vulkan_material.h"

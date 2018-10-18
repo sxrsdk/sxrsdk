@@ -18,7 +18,9 @@ package org.gearvrf.x3d;
 import org.gearvrf.GVRSensor;
 import org.gearvrf.GVRSceneObject;
 import org.gearvrf.ISensorEvents;
-import org.gearvrf.animation.keyframe.GVRKeyFrameAnimation;
+import org.gearvrf.animation.keyframe.GVRNodeAnimation;
+import org.gearvrf.x3d.data_types.SFFloat;
+import org.gearvrf.x3d.data_types.SFRotation;
 import org.gearvrf.x3d.data_types.SFVec2f;
 import org.joml.Vector3f;
 
@@ -45,11 +47,17 @@ public class Sensor extends GVRSensor
   private String name = null;
   private boolean mEnabled = true;
   private Type sensorType;
-  private GVRKeyFrameAnimation gvrKeyFrameAnimation = null;
+  private GVRNodeAnimation gvrKeyFrameAnimation = null;
   private String anchorURL = null;
   private Vector3f hitPoint = new Vector3f();
+  // PlaneSensor values
   private SFVec2f mMinValue = new SFVec2f(0, 0);
   private SFVec2f mMaxValue = new SFVec2f(-1, -1);
+  // CylinderSensor values
+  private SFFloat mMinAngle = new SFFloat(0);
+  private SFFloat mMaxAngle = new SFFloat(-1);
+  SFRotation mAxisRotation = new SFRotation(0, 1, 0, 0);
+
 
 
   public Sensor(String name, Type sensorType, GVRSceneObject sensorSceneObject, boolean enabled)
@@ -75,11 +83,11 @@ public class Sensor extends GVRSensor
     return this.mEnabled;
   }
 
-  public void setGVRKeyFrameAnimation(GVRKeyFrameAnimation gvrKeyFrameAnimation)
+  public void setGVRKeyFrameAnimation(GVRNodeAnimation gvrKeyFrameAnimation)
   {
     this.gvrKeyFrameAnimation = gvrKeyFrameAnimation;
   }
-  public GVRKeyFrameAnimation getGVRKeyFrameAnimation()
+  public GVRNodeAnimation getGVRKeyFrameAnimation()
   {
     return this.gvrKeyFrameAnimation;
   }
@@ -128,6 +136,33 @@ public class Sensor extends GVRSensor
   public SFVec2f getMinValues()
   {
     return this.mMinValue;
+  }
+
+  public void setMinMaxAngle(SFFloat minAngle, SFFloat maxAngle)
+  {
+    this.mMinAngle.setValue( minAngle.getValue() );
+    this.mMaxAngle.setValue( maxAngle.getValue() );
+  }
+
+  public SFFloat getMaxAngle()
+  {
+    return this.mMaxAngle;
+  }
+
+  public SFFloat getMinAngle()
+  {
+    return this.mMinAngle;
+  }
+
+  public SFRotation getAxisRotation()
+  {
+    return this.mAxisRotation;
+  }
+
+  public void setAxisRotation(SFRotation axisRotation)
+  {
+    this.mAxisRotation.setValue( axisRotation.getAngle(),
+            axisRotation.getX(), axisRotation.getY(), axisRotation.getZ() );
   }
 
 
