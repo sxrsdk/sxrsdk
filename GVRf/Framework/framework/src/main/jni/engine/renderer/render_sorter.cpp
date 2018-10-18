@@ -19,7 +19,6 @@
 
 #include <contrib/glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include <objects/components/skin.h>
 #include "renderer.h"
 #include "objects/scene.h"
 #include "shaders/shader.h"
@@ -189,9 +188,7 @@ void RenderSorter::add(RenderState& rstate, SceneObject* object)
     }
 
     Renderable* r = alloc();
-    Skin* skin = (Skin*) object->getComponent(Skin::getComponentType());
 
-    r->hasBones = skin ? 1 : 0;
     r->mesh = geometry;
     r->mvp = object->transform()->getModelMatrix();
     r->renderData = rdata;

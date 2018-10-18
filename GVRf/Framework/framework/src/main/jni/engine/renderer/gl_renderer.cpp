@@ -31,7 +31,6 @@
 #include "shadow_sorter.h"
 #include "objects/scene.h"
 #include "objects/components/render_target.h"
-#include "objects/components/skin.h"
 
 namespace gvr
 {
@@ -157,13 +156,13 @@ namespace gvr
         return block;
     }
 
-    Image* GLRenderer::createImage(int type, int format)
+    Image *GLRenderer::createImage(int type, int format)
     {
         switch (type)
         {
             case Image::ImageType::BITMAP: return new GLBitmapImage(format);
             case Image::ImageType::CUBEMAP: return new GLCubemapImage(format);
-            case Image::ImageType::FLOAT_BITMAP: return new GLFloatImage(format);
+            case Image::ImageType::FLOAT_BITMAP: return new GLFloatImage();
         }
         return NULL;
     }

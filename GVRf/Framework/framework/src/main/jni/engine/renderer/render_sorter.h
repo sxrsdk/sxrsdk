@@ -74,8 +74,7 @@ public:
     class Renderable
     {
     public:
-        short           matrixOffset;           // offset of matrices in transform block
-        short           hasBones;               // nonzero if a skin component is attached
+        int             matrixOffset;           // offset of matrices in transform block
         float           distanceFromCamera;     // distance of object from camera
         RenderModes     renderModes;            // render modes to use
         RenderData*     renderData;             // original RenderData
@@ -98,7 +97,6 @@ public:
           material(nullptr),
           distanceFromCamera(0),
           matrixOffset(-1),
-          hasBones(0),
           transformBlock(nullptr)
         {
         }
@@ -109,7 +107,6 @@ public:
             renderPass = nullptr;
             shader = nullptr;
             mesh = nullptr;
-            hasBones = 0;
             material = nullptr;
             nextLevel = nullptr;
             nextSibling = nullptr;

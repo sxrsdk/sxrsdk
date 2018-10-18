@@ -17,7 +17,6 @@
  * Renders a scene, a screen.
  ***************************************************************************/
 
-#include <objects/components/skin.h>
 #include "objects/scene.h"
 #include "objects/components/render_data.h"
 #include "shaders/shader.h"
@@ -91,9 +90,7 @@ void MainSceneSorter::add(RenderState& rstate, SceneObject* object)
     {
         RenderPass* rpass = rdata->pass(i);
         Renderable* r = alloc();
-        Skin* skin = (Skin*) object->getComponent(Skin::getComponentType());
 
-        r->hasBones = skin ? 1 : 0;
         r->mesh = geometry;
         r->mvp = object->transform()->getModelMatrix();
         r->renderData = rdata;

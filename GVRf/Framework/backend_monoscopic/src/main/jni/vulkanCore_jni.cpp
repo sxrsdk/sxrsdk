@@ -23,12 +23,8 @@
 
 namespace gvr {
 extern "C" {
-
-    JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeVulkanCore_setJavaVM(JNIEnv* env, jobject obj);
-
     JNIEXPORT jlong JNICALL
-        Java_org_gearvrf_NativeVulkanCore_getInstance(JNIEnv* env, jobject obj, jobject surface, jint vulkanPropValue);
+        Java_org_gearvrf_NativeVulkanCore_getInstance(JNIEnv* env, jobject obj, jobject surface);
 
     JNIEXPORT jint JNICALL
         Java_org_gearvrf_NativeVulkanCore_getSwapChainIndexToRender(JNIEnv* env, jobject obj);
@@ -39,17 +35,17 @@ extern "C" {
     JNIEXPORT void JNICALL
         Java_org_gearvrf_NativeVulkanCore_recreateSwapchain(JNIEnv* env, jobject obj, jobject surface);
 
-    JNIEXPORT int JNICALL
-        Java_org_gearvrf_NativeVulkanCore_getVulkanPropValue(JNIEnv* env, jobject obj);
+    JNIEXPORT bool JNICALL
+        Java_org_gearvrf_NativeVulkanCore_useVulkanInstance(JNIEnv* env, jobject obj);
 
     JNIEXPORT bool JNICALL
         Java_org_gearvrf_NativeVulkanCore_isInstancePresent(JNIEnv* env, jobject obj);
     };
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeVulkanCore_getInstance(JNIEnv * env, jobject obj, jobject surface, jint vulkanPropValue){
+    Java_org_gearvrf_NativeVulkanCore_getInstance(JNIEnv * env, jobject obj, jobject surface){
         ANativeWindow * newNativeWindow = ANativeWindow_fromSurface(env, surface);
-        VulkanCore * vulkanCore = VulkanCore::getInstance(newNativeWindow, vulkanPropValue);
+        VulkanCore * vulkanCore = VulkanCore::getInstance(newNativeWindow);
         return (reinterpret_cast<jlong>(vulkanCore));
     }
 
@@ -72,23 +68,13 @@ extern "C" {
         return vulkanCore->recreateSwapChain(newNativeWindow);
     }
 
-    JNIEXPORT int JNICALL
-    Java_org_gearvrf_NativeVulkanCore_getVulkanPropValue(JNIEnv * env, jobject obj){
-        return Renderer::getVulkanPropValue();
+    JNIEXPORT bool JNICALL
+    Java_org_gearvrf_NativeVulkanCore_useVulkanInstance(JNIEnv * env, jobject obj){
+        return Renderer::useVulkanInstance();
     }
 
     JNIEXPORT bool JNICALL
     Java_org_gearvrf_NativeVulkanCore_isInstancePresent(JNIEnv* env, jobject obj){
         return VulkanCore::isInstancePresent();
     }
-
-    JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeVulkanCore_setJavaVM(JNIEnv* env, jobject obj)
-    {
-        JavaVM* javavm;
-
-        env->GetJavaVM(&javavm);
-        Renderer::getInstance()->setJavaVM(javavm);
-    }
-
 }

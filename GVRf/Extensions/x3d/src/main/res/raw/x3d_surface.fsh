@@ -1,11 +1,12 @@
 
 @MATERIAL_UNIFORMS
 
-layout(set = 1, binding = 10) uniform sampler2D diffuseTexture;
+layout(set = 0, binding = 10) uniform sampler2D diffuseTexture;
+
 
 #ifdef HAS_diffuseTexture1
-layout(location = 18) in vec2 diffuse_coord1;
-layout(set = 1, binding = 18) uniform sampler2D diffuseTexture1;
+layout(location = 17) in vec2 diffuse_coord1;
+layout(set = 0, binding = 17) uniform sampler2D diffuseTexture1;
 #endif
 
 struct Surface

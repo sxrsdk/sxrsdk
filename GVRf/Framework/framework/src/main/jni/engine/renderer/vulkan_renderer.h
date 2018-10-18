@@ -74,9 +74,10 @@ public:
 
     Texture* createSharedTexture( int id) { return nullptr; };
 
-    VulkanRenderer(int vulkanPropValue = 0) : vulkanCore_(nullptr) {
+
+    VulkanRenderer() : Renderer(), vulkanCore_(nullptr) {
         vkflags::initVkRenderFlags();
-        vulkanCore_ = VulkanCore::getInstance(nullptr, vulkanPropValue);
+        vulkanCore_ = VulkanCore::getInstance();
     }
 
     VulkanCore* getCore() { return vulkanCore_; }

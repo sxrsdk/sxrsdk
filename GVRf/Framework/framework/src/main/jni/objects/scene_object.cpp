@@ -54,9 +54,9 @@ bool SceneObject::attachComponent(Component* component) {
     if (par)
     {
         Scene* scene = Scene::main_scene();
+        SceneObject* root = scene->getRoot();
         if (scene != NULL)
         {
-            SceneObject* root = scene->getRoot();
             while (par)
             {
                 if (par == root)

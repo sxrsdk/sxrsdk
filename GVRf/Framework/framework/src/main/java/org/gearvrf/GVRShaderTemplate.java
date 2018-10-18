@@ -14,15 +14,15 @@
  */
 package org.gearvrf;
 
-import org.gearvrf.shaders.GVRPhongShader;
-import org.gearvrf.utility.Log;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.gearvrf.shaders.GVRPhongShader;
+import org.gearvrf.utility.Log;
 
 /**
  * Generates a set of native vertex and fragment shaders from source code segments.
@@ -65,8 +65,8 @@ import java.util.regex.Pattern;
 public class GVRShaderTemplate extends GVRShader
 {
     private final static String TAG = "GVRShaderTemplate";
-    // Keeping the start of shadow attribute from 25 since locations less than it are used up by vertex descriptor and texture coords.
-    private final int shadowmapStartLocation = 25;
+    // Keeping the start of shadow attribute from 20 since locations less than it are used up by vertex descriptor and texture coords.
+    private final int shadowmapStartLocation = 20;
 
     protected class LightClass
     {
@@ -472,7 +472,7 @@ public class GVRShaderTemplate extends GVRShader
                     writeShader("V-" + signature + ".glsl", vertexShaderSource);
                     writeShader("F-" + signature + ".glsl", fragmentShaderSource);
                 }
-                Log.i(TAG, "SHADER: generated shader #%d %s", nativeShader, signature);
+                //Log.i(TAG, "SHADER: generated shader #%d %s", nativeShader, signature);
             }
             else
             {
@@ -557,7 +557,7 @@ public class GVRShaderTemplate extends GVRShader
         int castShadow = 0;
         GVRLight[] lights = (scene != null) ? scene.getLightList() : null;
 
-        if (renderable.getGVRContext().getApplication().getAppSettings().isMultiviewSet())
+        if (renderable.getGVRContext().getActivity().getAppSettings().isMultiviewSet())
         {
             defines.put("MULTIVIEW", 1);
         }

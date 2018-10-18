@@ -15,6 +15,8 @@
 
 package org.gearvrf;
 
+import org.gearvrf.utility.Log;
+
 /**
  * A render target is a component which allows the scene to be rendered
  * into a texture from the viewpoint of a particular scene object.
@@ -178,7 +180,7 @@ public class GVRRenderTarget extends GVRBehavior
 
     public void onDrawFrame(float frameTime)
     {
-        getGVRContext().getApplication().getViewManager().cullAndRender(this, mScene);
+        getGVRContext().getActivity().getViewManager().cullAndRender(this, mScene);
     }
 }
 
