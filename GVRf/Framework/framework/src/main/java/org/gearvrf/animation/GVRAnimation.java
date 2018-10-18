@@ -95,7 +95,7 @@ public abstract class GVRAnimation {
      * {@linkplain GVRAnimation#setRepeatCount(int) setRepeatCount(2).}
      */
     public static final int DEFAULT_REPEAT_COUNT = 2;
-    public static boolean sDebug = true;
+    public static final boolean sDebug = true;
 
     // Immutable values, passed to constructor
     protected GVRHybridObject mTarget;
@@ -251,8 +251,16 @@ public abstract class GVRAnimation {
         mRepeatCount = repeatCount;
         return this;
     }
-
-
+    /**
+     * Sets the offset for the animation.
+     *
+     * @param startOffset animation will start at the specified offset value
+     *
+     * @return {@code this}, so you can chain setProperty() calls.
+     * @throws IllegalArgumentException
+     *             If {@code startOffset} is either negative or greater than
+     *             the animation duration
+     */
     public GVRAnimation setOffset(float startOffset)
     {
         if(startOffset<0 || startOffset>mDuration){
@@ -263,8 +271,16 @@ public abstract class GVRAnimation {
         mDuration =  mDuration-animationOffset;
         return this;
     }
-
-
+    /**
+     * Sets the speed for the animation.
+     *
+     * @param speed values from between 0 to 1 displays animation in slow mode
+     *              values from 1 displays the animation in fast mode
+     *
+     * @return {@code this}, so you can chain setProperty() calls.
+     * @throws IllegalArgumentException
+     *             If {@code speed} is either zero or negative value
+     */
     public GVRAnimation setSpeed(float speed)
     {
         if(speed<=0){
@@ -273,7 +289,17 @@ public abstract class GVRAnimation {
         animationSpeed =  speed;
         return this;
     }
-
+    /**
+     * Sets the duration for the animation to be played.
+     *
+     * @param start the animation will start playing from the specified time
+     * @param end the animation will stop playing at the specified time
+     *
+     * @return {@code this}, so you can chain setProperty() calls.
+     * @throws IllegalArgumentException
+     *             If {@code start} is either negative value, greater than
+     *             {@code end} value or {@code end} is greater than duration
+     */
     public GVRAnimation setDuration(float start, float end)
     {
         if(start>end || start<0 || end>mDuration){
@@ -393,7 +419,7 @@ public abstract class GVRAnimation {
         /*
         if (mCurrentTime < mStartTime)
         {
-            mCurrentTime =+ frameTime;
+            mCurrentTime += frameTime;
             return true;
         }*/
         final int previousCycleCount = (int) (mElapsedTime / mDuration);

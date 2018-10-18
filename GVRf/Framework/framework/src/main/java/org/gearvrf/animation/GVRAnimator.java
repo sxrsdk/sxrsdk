@@ -218,6 +218,13 @@ public class GVRAnimator extends GVRBehavior
             anim.setRepeatMode(repeatMode);
         }
     }
+    /**
+     * Sets the offset for the all animations in this animator.
+     *
+     * @param startOffset animation will start at the specified offset value
+     *
+     * @see GVRAnimation#setOffset(float)
+     */
     public void setOffset(float startOffset)
     {
         for (GVRAnimation anim : mAnimations)
@@ -225,6 +232,14 @@ public class GVRAnimator extends GVRBehavior
             anim.setOffset(startOffset);
         }
     }
+    /**
+     * Sets the speed for the all animations in this animator.
+     *
+     * @param speed values from between 0 to 1 displays animation in slow mode
+     *              values from 1 displays in fast mode
+     *
+     * @see GVRAnimation#setSpeed(float)
+     */
     public void setSpeed(float speed)
     {
         for (GVRAnimation anim : mAnimations)
@@ -232,6 +247,14 @@ public class GVRAnimator extends GVRBehavior
             anim.setSpeed(speed);
         }
     }
+    /**
+     * Sets the duration for the animations in this animator.
+     *
+     * @param start the animation will start playing from the specified time
+     * @param end the animation will stop playing at the specified time
+     *
+     * @see GVRAnimation#setDuration(float, float)
+     */
     public void setDuration(float start, float end)
     {
         for (GVRAnimation anim : mAnimations)

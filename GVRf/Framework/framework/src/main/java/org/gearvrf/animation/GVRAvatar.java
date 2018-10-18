@@ -135,7 +135,6 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                 if (mAnimQueue.size() > 0)
                 {
                     animator = mAnimQueue.get(0);
-                    Log.d("ANIMATION", "%s finished", animator.getName());
                     if (animator.findAnimation(animation) >= 0)
                     {
                         mAnimQueue.remove(0);

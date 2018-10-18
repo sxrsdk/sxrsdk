@@ -317,7 +317,7 @@ public class GVRMeshMorph extends GVRBehavior
             blendshapeTex.setImage(blendshapeImage);
             mtl.setTexture("blendshapeTexture", blendshapeTex);
         }
-        Log.v("MORPH", "Blend Shape Diffs\n%s", dumpDiffs(20));
+       //Log.v("MORPH", "Blend Shape Diffs\n%s", dumpDiffs(20));
         blendshapeImage.update(mTexWidth / 3, mNumVerts, mBlendShapeDiffs);
         return true;
     }
