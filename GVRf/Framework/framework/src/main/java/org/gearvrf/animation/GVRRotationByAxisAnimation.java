@@ -86,9 +86,5 @@ public class GVRRotationByAxisAnimation extends GVRTransformAnimation
         mRotation.fromAxisAngleDeg(mAxisX, mAxisY, mAxisZ, angle);
         mRotation.mul(mStartRotation);
         mTransform.setRotation(mRotation.w, mRotation.x, mRotation.y, mRotation.z);
-        if (sDebug)
-        {
-            Log.d("ANIMATION", "%s angle = %f", getClass().getSimpleName(), angle);
-        }
     }
 }
