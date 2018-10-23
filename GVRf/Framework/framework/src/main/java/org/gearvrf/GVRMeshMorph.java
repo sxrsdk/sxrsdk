@@ -250,7 +250,6 @@ public class GVRMeshMorph extends GVRBehavior
     public void setBlendShape(int index, GVRVertexBuffer vbuf)
     {
         int shapeDescriptorFlags = 0;
-        float[] vec3dataBase;
         String shapeDescriptor = vbuf.getDescriptor();
 
         copyBlendShape(index * mFloatsPerVertex, 0, vbuf.getFloatArray("a_position"));
