@@ -30,7 +30,7 @@ public class GVRRotationByAxisAnimation extends GVRTransformAnimation
     /**
      * Use {@link GVRTransform#rotateByAxis(float, float, float, float)} to do
      * an animated rotation about a specific axis.
-     * 
+     *
      * @param target
      *            {@link GVRTransform} to animate.
      * @param duration
@@ -58,7 +58,7 @@ public class GVRRotationByAxisAnimation extends GVRTransformAnimation
     /**
      * Use {@link GVRTransform#rotateByAxis(float, float, float, float)} to do
      * an animated rotation about a specific axis.
-     * 
+     *
      * @param target
      *            {@link GVRSceneObject} containing a {@link GVRTransform}
      * @param duration

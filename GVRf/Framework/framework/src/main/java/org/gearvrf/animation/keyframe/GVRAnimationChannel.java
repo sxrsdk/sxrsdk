@@ -294,6 +294,7 @@ public final class GVRAnimationChannel implements PrettyPrint {
         mPosInterpolator.animate(animationTime, mPosKey);
         mSclInterpolator.animate(animationTime, mScaleKey);
         mat.translationRotateScale(mPosKey[0], mPosKey[1], mPosKey[2], mRotKey[0], mRotKey[1], mRotKey[2], mRotKey[3], mScaleKey[0], mScaleKey[1], mScaleKey[2]);
+
     }
 
     @Override

@@ -29,17 +29,17 @@ import org.joml.Vector3f;
  */
 public class GVRRotationByAxisWithPivotAnimation extends GVRTransformAnimation {
 
-     private final float mAngle, //
-            mAxisX, mAxisY, mAxisZ, //
-            mPivotX, mPivotY, mPivotZ;
-     private final Quaternionf mStartRotation = new Quaternionf();
-     private final Vector3f mStartPosition = new Vector3f();
+    private final float mAngle, //
+        mAxisX, mAxisY, mAxisZ, //
+        mPivotX, mPivotY, mPivotZ;
+    private final Quaternionf mStartRotation = new Quaternionf();
+    private final Vector3f mStartPosition = new Vector3f();
 
     /**
      * Use
      * {@link GVRTransform#rotateByAxisWithPivot(float, float, float, float, float, float, float)}
      * to do an animated rotation about a specific axis with a specific pivot.
-     * 
+     *
      * @param target
      *            {@link GVRTransform} to animate.
      * @param duration
@@ -78,7 +78,7 @@ public class GVRRotationByAxisWithPivotAnimation extends GVRTransformAnimation {
      * Use
      * {@link GVRTransform#rotateByAxisWithPivot(float, float, float, float, float, float, float)}
      * to do an animated rotation about a specific axis with a specific pivot.
-     * 
+     *
      * @param target
      *            {@link GVRSceneObject} containing a {@link GVRTransform}
      * @param duration
@@ -102,7 +102,7 @@ public class GVRRotationByAxisWithPivotAnimation extends GVRTransformAnimation {
                                                float duration, float angle, float axisX, float axisY, float axisZ,
                                                float pivotX, float pivotY, float pivotZ) {
         this(target.getTransform(), duration, angle, axisX, axisY, axisZ,
-                pivotX, pivotY, pivotZ);
+             pivotX, pivotY, pivotZ);
     }
 
     @Override

@@ -234,7 +234,7 @@ public class GVRSkeletonAnimation extends GVRAnimation implements PrettyPrint {
         {
             GVRAnimationChannel channel = mBoneChannels[i];
             if ((channel != null) &&
-                (skel.getBoneOptions(i) == GVRSkeleton.BONE_ANIMATE))
+                    (skel.getBoneOptions(i) == GVRSkeleton.BONE_ANIMATE))
             {
                 channel.animate(timeInSec, temp);
                 if (rootOffset != null)

@@ -765,19 +765,15 @@ public class GVRMesh extends GVRHybridObject implements PrettyPrint {
     {
         GVRMesh mesh = new GVRMesh(gvrContext);
         final float MAX_DEGREES_PER_SUBDIVISION = 10f;
-
         float ratio = (float)width/(float)height;
         int subdivisions = (int) Math.ceil(centralAngle / MAX_DEGREES_PER_SUBDIVISION);
         float degreesPerSubdivision = centralAngle/subdivisions;
         // Scale the number of subdivisions with the central angle size
         // Let each subdivision represent a constant number of degrees on the arc
         double startDegree = -centralAngle/2.0;
-
         float h = (float) (radius * Math.toRadians(centralAngle))/ratio;
-
         float yTop = h/2;
         float yBottom = -yTop;
-
         float[] vertices = new float[(subdivisions+1)*6];
         float[] normals = new float[(subdivisions+1)*6];
         float[] texCoords= new float[(subdivisions+1)*4];
@@ -839,7 +835,6 @@ public class GVRMesh extends GVRHybridObject implements PrettyPrint {
             triangles[6*i+4] = (char) (2*(i+1));
             triangles[6*i+5] = (char) (2*(i));
         }
-
         mesh.setVertices(vertices);
         mesh.setNormals(normals);
         mesh.setTexCoords(texCoords);
@@ -858,7 +853,6 @@ public class GVRMesh extends GVRHybridObject implements PrettyPrint {
     final static String KEY_TEXCOORD = "a_texcoord";
     final static String KEY_NORMAL = "a_normal";
     final static String KEY_POSITION = "a_position";
-
 }
 
 class NativeMesh
