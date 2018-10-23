@@ -324,7 +324,6 @@ public class BVHImporter
                     pose.setLocalRotation(boneIndex, q.x, q.y, q.z, q.w);
                     boneIndex++;
                     bvhboneIndex++;
-
                 }
                 else
                 {

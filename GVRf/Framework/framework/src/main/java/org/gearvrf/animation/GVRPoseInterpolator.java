@@ -169,7 +169,6 @@ public class GVRPoseInterpolator extends GVRAnimation
         setPoseScale(offset+finalSclIndex,poseTwoScl);
     }
 
-
     public void setPoseScale(int sclOffset, Vector3f poseScl)
     {
         poseData[sclOffset]=poseScl.x();

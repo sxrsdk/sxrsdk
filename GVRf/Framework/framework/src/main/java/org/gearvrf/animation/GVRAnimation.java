@@ -101,7 +101,6 @@ public abstract class GVRAnimation {
     protected GVRHybridObject mTarget;
     protected float mDuration;
 
-
     // Defaulted values, which should be set before start()
     protected GVRInterpolator mInterpolator = null;
     protected int mRepeatMode = GVRRepeatMode.ONCE;
@@ -139,7 +138,6 @@ public abstract class GVRAnimation {
     protected GVRAnimation(GVRHybridObject target, float duration) {
         mTarget = target;
         mDuration = duration;
-
     }
 
     /**
@@ -342,6 +340,7 @@ public abstract class GVRAnimation {
         if (mOnRepeat != null) {
             mRepeatCount = -1; // loop until iterate() returns false
         }
+
         return this;
     }
 
@@ -414,7 +413,6 @@ public abstract class GVRAnimation {
      * @return {@code true} to keep running the animation; {@code false} to shut
      *         it down
      */
-
     final boolean onDrawFrame(float frameTime) {
         /*
         if (mCurrentTime < mStartTime)
@@ -453,11 +451,9 @@ public abstract class GVRAnimation {
         if (stillRunning) {
             final boolean countDown = mRepeatMode == GVRRepeatMode.PINGPONG
                     && (mIterations & 1) == 1;
-
             float elapsedRatio = //
             countDown != true ? interpolate(cycleTime, mDuration)
                     : interpolate(mDuration - cycleTime, mDuration);
-
 
             animate(mTarget, elapsedRatio);
         } else {
@@ -581,7 +577,6 @@ public abstract class GVRAnimation {
         float ratio = timeInSec / mDuration;
         animate(mTarget, ratio);
     }
-
 
     /**
      * Override this to create a new animation. Generally, you do this by

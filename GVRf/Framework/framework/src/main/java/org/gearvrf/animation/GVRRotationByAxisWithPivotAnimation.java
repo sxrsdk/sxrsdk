@@ -60,8 +60,8 @@ public class GVRRotationByAxisWithPivotAnimation extends GVRTransformAnimation {
      *            The z-coordinate of the pivot point
      */
     public GVRRotationByAxisWithPivotAnimation(GVRTransform target,
-            float duration, float angle, float axisX, float axisY, float axisZ,
-            float pivotX, float pivotY, float pivotZ) {
+                                               float duration, float angle, float axisX, float axisY, float axisZ,
+                                               float pivotX, float pivotY, float pivotZ) {
         super(target, duration);
         mAngle = angle;
         mAxisX = axisX;
@@ -99,8 +99,8 @@ public class GVRRotationByAxisWithPivotAnimation extends GVRTransformAnimation {
      *            The z-coordinate of the pivot point
      */
     public GVRRotationByAxisWithPivotAnimation(GVRSceneObject target,
-            float duration, float angle, float axisX, float axisY, float axisZ,
-            float pivotX, float pivotY, float pivotZ) {
+                                               float duration, float angle, float axisX, float axisY, float axisZ,
+                                               float pivotX, float pivotY, float pivotZ) {
         this(target.getTransform(), duration, angle, axisX, axisY, axisZ,
                 pivotX, pivotY, pivotZ);
     }
@@ -116,6 +116,6 @@ public class GVRRotationByAxisWithPivotAnimation extends GVRTransformAnimation {
         // Rotate with pivot, from start orientation & position
         float angle = ratio * mAngle;
         mTransform.rotateByAxisWithPivot(angle, mAxisX, mAxisY, mAxisZ,
-                mPivotX, mPivotY, mPivotZ);
+                                         mPivotX, mPivotY, mPivotZ);
     }
 }

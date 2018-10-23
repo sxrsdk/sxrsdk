@@ -45,7 +45,7 @@ public class GVRRotationByAxisAnimation extends GVRTransformAnimation
      *            the normalized axis z component
      */
     public GVRRotationByAxisAnimation(GVRTransform target, float duration,
-            float angle, float x, float y, float z)
+                                      float angle, float x, float y, float z)
     {
         super(target, duration);
         mAngle = angle;
@@ -73,7 +73,7 @@ public class GVRRotationByAxisAnimation extends GVRTransformAnimation
      *            the normalized axis z component
      */
     public GVRRotationByAxisAnimation(GVRSceneObject target, float duration,
-            float angle, float x, float y, float z)
+                                      float angle, float x, float y, float z)
     {
         this(target.getTransform(), duration, angle, x, y, z);
     }
