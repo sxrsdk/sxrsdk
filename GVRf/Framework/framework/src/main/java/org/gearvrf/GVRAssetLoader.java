@@ -433,6 +433,9 @@ public final class GVRAssetLoader {
             }
             synchronized (mNumTextures)
             {
+                 /*
+                 * This prevents it from trying to load textures after the asset has been loaded.
+                 */
                 mNumTextures = -1;
             }
             onAssetLoaded(mContext, mModel, mFileName, errors);

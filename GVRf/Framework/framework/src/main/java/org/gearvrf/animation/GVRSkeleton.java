@@ -120,7 +120,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
     final private Quaternionf mTempQuatB = new Quaternionf();
     final private Matrix4f mTempMtx = new Matrix4f();
     private static int[] sTempBoneParents;
-    private static GVRSceneObject sTempRoot;
+    private GVRSceneObject sTempRoot;
 
     protected String[] mBoneNames;
     protected Vector3f mRootOffset;     // offset for root bone animations
@@ -165,7 +165,8 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
 
     public GVRSkeleton(GVRSceneObject root, List<String> boneNames)
     {
-        super(root.getGVRContext(), NativeSkeleton.ctor(makeParentBoneIds(root, boneNames)));
+        super(root.getGVRContext(), 0);
+        setNative(NativeSkeleton.ctor(makeParentBoneIds(root, boneNames)));
         int numBones = boneNames.size();
         mType = getComponentType();
         mParentBones = sTempBoneParents;
@@ -188,7 +189,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
         }
     }
 
-    protected static int[] makeParentBoneIds(GVRSceneObject root, List<String> boneNames)
+    protected int[] makeParentBoneIds(GVRSceneObject root, List<String> boneNames)
     {
         int numBones = boneNames.size();
         int[] parentBones = new int[numBones];
