@@ -165,7 +165,13 @@ public class GVRScene extends GVRHybridObject implements PrettyPrint, IScriptabl
         for (final GVRSceneObject child : mSceneRoot.getChildren()) {
             child.getParent().removeChildObject(child);
         }
-
+        mSceneRoot = new GVRSceneObject(getGVRContext());
+        NativeScene.setSceneRoot(getNative(), mSceneRoot.getNative());
+        GVRSceneObject parent = head.getParent();
+        if (parent != null)
+        {
+            parent.removeChildObject(head);
+        }
         if (null != head) {
             mSceneRoot.addChildObject(head);
         }
