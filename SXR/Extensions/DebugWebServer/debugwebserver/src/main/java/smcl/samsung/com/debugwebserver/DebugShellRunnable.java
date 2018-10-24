@@ -1,10 +1,10 @@
 package smcl.samsung.com.debugwebserver;
 
-import org.gearvrf.GVRContext;
-import org.gearvrf.debug.GVRConsoleFactory;
-import org.gearvrf.debug.ShellCommandHandler;
-import org.gearvrf.debug.cli.Shell;
-import org.gearvrf.utility.Log;
+import com.samsungxr.GVRContext;
+import com.samsungxr.debug.GVRConsoleFactory;
+import com.samsungxr.debug.ShellCommandHandler;
+import com.samsungxr.debug.cli.Shell;
+import com.samsungxr.utility.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;

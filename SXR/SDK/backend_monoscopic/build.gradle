@@ -124,7 +124,7 @@ project.ext.jomlVersion = "1.9.1-SNAPSHOT"
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation fileTree(include: ['*.jar'], dir: 'src/main/libs')
-    implementation project(':sdk')
+    implementation project(':sxrsdk')
     implementation "org.joml:joml-android:${jomlVersion}"
 }
 
@@ -144,10 +144,10 @@ task copyJarToBin(type: Copy) {
 
 tasks.whenTaskAdded { task ->
     if (task.name == 'externalNativeBuildDebug') {
-        task.dependsOn ":sdk:externalNativeBuildDebug"
+        task.dependsOn ":sxrsdk:externalNativeBuildDebug"
         task.dependsOn 'buildInfo'
     } else if (task.name == 'externalNativeBuildRelease') {
-        task.dependsOn ":sdk:externalNativeBuildRelease"
+        task.dependsOn ":sxrsdk:externalNativeBuildRelease"
         task.dependsOn 'buildInfo'
     } else if (task.name == 'bundleDebug') {
         task.finalizedBy(copyJarToBin)

@@ -18,10 +18,10 @@ package com.sample.template;
 import android.os.Handler;
 import android.view.KeyEvent;
 
-import org.gearvrf.GVRContext;
-import org.gearvrf.GVRScene;
-import org.gearvrf.io.cursor3d.IoDevice;
-import org.gearvrf.utility.Log;
+import com.samsungxr.GVRContext;
+import com.samsungxr.GVRScene;
+import com.samsungxr.io.cursor3d.IoDevice;
+import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 

@@ -25,7 +25,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := sxr-platformsdk
 
 LOCAL_C_INCLUDES += $(OVR_PLATFORM_SDK)/Include
-LOCAL_C_INCLUDES += ../../../../SDK/sdk/src/main/jni
+LOCAL_C_INCLUDES += ../../../../SDK/sxrsdk/src/main/jni
 
 FILE_LIST := $(wildcard $(LOCAL_PATH)/*.cpp)
 $(info $(FILE_LIST))

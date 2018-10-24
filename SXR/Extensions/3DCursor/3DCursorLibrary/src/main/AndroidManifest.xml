@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<manifest package="org.gearvrf.io.cursor3d"
+<manifest package="com.samsungxr.io.cursor3d"
           xmlns:android="http://schemas.android.com/apk/res/android"
           android:versionCode="1"
           android:versionName="1.0">

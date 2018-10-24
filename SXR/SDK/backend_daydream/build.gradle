@@ -63,7 +63,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'src/main/libs')
     implementation "com.google.vr:sdk-base:${daydreamVersion}"
     implementation "com.google.vr:sdk-controller:${daydreamVersion}"
-    implementation project(':sdk')
+    implementation project(':sxrsdk')
     implementation "org.joml:joml-android:${jomlVersion}"
 }
 
@@ -87,8 +87,8 @@ tasks.whenTaskAdded { task ->
     } else if (task.name == 'bundleRelease') {
         task.finalizedBy(copyJarToBin)
     } else if (task.name == 'externalNativeBuildRelease') {
-        task.dependsOn ":sdk:externalNativeBuildRelease"
+        task.dependsOn ":sxrsdk:externalNativeBuildRelease"
     } else if (task.name == 'externalNativeBuildDebug') {
-        task.dependsOn ":sdk:externalNativeBuildDebug"
+        task.dependsOn ":sxrsdk:externalNativeBuildDebug"
     }
 }

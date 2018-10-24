@@ -38,17 +38,17 @@ android {
     }
 }
 
-ext.gearvrfVersion='4.0.0-SNAPSHOT'
+ext.sxrVersion='4.0.0-SNAPSHOT'
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     if(project.hasProperty("useLocalDependencies") && project.useLocalDependencies) {
-        if (findProject(':framework')) {
-            compile project(':framework')
+        if (findProject(':sxrsdk')) {
+            compile project(':sxrsdk')
         } else {
-            compile(name: 'framework-debug', ext: 'aar')
+            compile(name: 'sxrsdk-debug', ext: 'aar')
         }
     } else {
-        compile "org.gearvrf:framework:$gearvrfVersion"
+        compile "com.samsungxr:sxrsdk:$sxrVersion"
     }
     compile (project(':3DCursorLibrary')) {
         transitive = true

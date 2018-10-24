@@ -16,16 +16,16 @@ package com.sample.hand.template;
 
 import android.view.KeyEvent;
 
-import org.gearvrf.GVRAndroidResource;
-import org.gearvrf.GVRCameraRig;
-import org.gearvrf.GVRContext;
-import org.gearvrf.GVRMaterial;
-import org.gearvrf.GVRScene;
-import org.gearvrf.GVRSceneObject;
-import org.gearvrf.GVRTexture;
-import org.gearvrf.io.cursor3d.*;
-import org.gearvrf.scene_objects.GVRCubeSceneObject;
-import org.gearvrf.utility.Log;
+import com.samsungxr.GVRAndroidResource;
+import com.samsungxr.GVRCameraRig;
+import com.samsungxr.GVRContext;
+import com.samsungxr.GVRMaterial;
+import com.samsungxr.GVRScene;
+import com.samsungxr.GVRSceneObject;
+import com.samsungxr.GVRTexture;
+import com.samsungxr.io.cursor3d.*;
+import com.samsungxr.scene_objects.GVRCubeSceneObject;
+import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;

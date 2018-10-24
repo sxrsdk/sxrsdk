@@ -9,8 +9,8 @@ import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 
-import org.gearvrf.GVRContext;
-import org.gearvrf.utility.Log;
+import com.samsungxr.GVRContext;
+import com.samsungxr.utility.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 
 /**
  * This class creates a web server that serves webpage with a debug console for GVRf. It uses
- * {@link org.gearvrf.debug.cli.ConsoleIO} internally to forward commands from the web-console to
+ * {@link com.samsungxr.debug.cli.ConsoleIO} internally to forward commands from the web-console to
  * GVRf. After creating the instance, call {@link DebugWebServer#listen(int)} to start the webserver.
  * You can enter http://\<hostname for device running the GVRf app\>:\<port\> in your browser to
  * access the console.

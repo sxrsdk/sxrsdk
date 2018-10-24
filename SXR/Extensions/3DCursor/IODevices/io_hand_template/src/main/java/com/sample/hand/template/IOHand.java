@@ -14,8 +14,8 @@
  */
 package com.sample.hand.template;
 
-import org.gearvrf.GVRContext;
-import org.gearvrf.GVRSceneObject;
+import com.samsungxr.GVRContext;
+import com.samsungxr.GVRSceneObject;
 
 import java.util.HashMap;
 import java.util.Map;

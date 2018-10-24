@@ -15,7 +15,7 @@
 #
 LOCAL_PATH := $(call my-dir)
 
-ifneq (,$(strip $(wildcard $(LOCAL_PATH)/../../../../sdk/build/intermediates/ndkBuild/$(APP_OPTIM)/obj/local/$(TARGET_ARCH_ABI)/libsxr.so)))
+ifneq (,$(strip $(wildcard $(LOCAL_PATH)/../../../../sxrsdk/build/intermediates/ndkBuild/$(APP_OPTIM)/obj/local/$(TARGET_ARCH_ABI)/libsxr.so)))
     LIBGVRF_EXISTS := 1
 endif
 
@@ -23,7 +23,7 @@ endif
 ifeq ($(LIBGVRF_EXISTS),1)
     include $(CLEAR_VARS)
     LOCAL_MODULE    := sxr
-    LOCAL_SRC_FILES := ../../../../sdk/build/intermediates/ndkBuild/$(APP_OPTIM)/obj/local/$(TARGET_ARCH_ABI)/libsxr.so
+    LOCAL_SRC_FILES := ../../../../sxrsdk/build/intermediates/ndkBuild/$(APP_OPTIM)/obj/local/$(TARGET_ARCH_ABI)/libsxr.so
     include $(PREBUILT_SHARED_LIBRARY)
 endif
 
@@ -31,9 +31,9 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := sxr-monoscopic
 
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../../sdk/src/main/jni/
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../../sdk/src/main/jni/util
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../../sdk/src/main/jni/contrib
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../../sxrsdk/src/main/jni/
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../../sxrsdk/src/main/jni/util
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../../sxrsdk/src/main/jni/contrib
 
 # Uncomment for logs
 # LOCAL_CFLAGS += -DANDROID -DJNI_LOG

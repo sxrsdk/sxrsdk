@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.gearvrf.widgetlib"
+    package="com.samsungxr.widgetlib"
     android:versionCode="1"
     android:versionName="0.1" xmlns:tools="http://schemas.android.com/tools">
 

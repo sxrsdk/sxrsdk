@@ -14,7 +14,7 @@ android {
         targetSdkVersion 21
 
         ndk {
-            moduleName "gvrf-extensions"
+            moduleName "sxr-extensions"
         }
     }
 
@@ -35,10 +35,10 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile fileTree(dir: 'src/main/libs', include: ['*.jar'])
-    if (findProject(':framework')) {
-        compile project (':framework')
+    if (findProject(':sxrsdk')) {
+        compile project (':sxrsdk')
     } else {
-        compile(name: 'framework-debug', ext: 'aar')
+        compile(name: 'sxrsdk-debug', ext: 'aar')
     }
 }
 

@@ -6,7 +6,7 @@ add_library(sxr-platformsdk SHARED
     platform_entitlement_check_jni.cpp)
 
 include_directories(${OVR_PLATFORM_SDK}/Include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../../SDK/sdk/src/main/jni)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../../SDK/sxrsdk/src/main/jni)
 
 string(TOLOWER ${CMAKE_BUILD_TYPE} buildType)
 

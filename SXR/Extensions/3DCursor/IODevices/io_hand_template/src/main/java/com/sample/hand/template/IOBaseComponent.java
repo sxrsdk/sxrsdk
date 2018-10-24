@@ -14,7 +14,7 @@
  */
 package com.sample.hand.template;
 
-import org.gearvrf.GVRSceneObject;
+import com.samsungxr.GVRSceneObject;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 

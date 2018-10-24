@@ -26,7 +26,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'src/main/libs')
-    compile(name: 'framework-debug', ext: 'aar')
+    compile(name: 'sxrsdk-debug', ext: 'aar')
 }
 
 clean {}.doLast {

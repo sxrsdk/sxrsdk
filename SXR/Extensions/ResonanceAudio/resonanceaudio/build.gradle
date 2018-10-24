@@ -42,10 +42,10 @@ project.ext.daydreamVersion = "1.130.0"
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    if (findProject(':framework')) {
-        compile project (':framework')
+    if (findProject(':sxrsdk')) {
+        compile project (':sxrsdk')
     } else {
-        compile(name: 'framework-debug', ext: 'aar')
+        compile(name: 'sxrsdk-debug', ext: 'aar')
     }
     compile "org.joml:joml-android:${jomlVersion}"
     compile "com.google.vr:sdk-audio:${daydreamVersion}"

@@ -25,14 +25,14 @@ add_library(sxr-physics SHARED
     engine/physics_genericconstraint_jni.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/bullet3/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../../SDK/sdk/src/main/jni)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../../SDK/sdk/src/main/jni/contrib)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../../SDK/sxrsdk/src/main/jni)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../../SDK/sxrsdk/src/main/jni/contrib)
 
 string(TOLOWER ${CMAKE_BUILD_TYPE} buildType)
 
 add_library(sxr SHARED IMPORTED)
 set_property(TARGET sxr PROPERTY IMPORTED_LOCATION
-             ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../SDK/sdk/build/intermediates/ndkBuild/${buildType}/obj/local/${ANDROID_ABI}/libsxr.so)
+             ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../SDK/sxrsdk/build/intermediates/ndkBuild/${buildType}/obj/local/${ANDROID_ABI}/libsxr.so)
 
 add_library(Bullet SHARED IMPORTED)
 set_property(TARGET Bullet PROPERTY IMPORTED_LOCATION

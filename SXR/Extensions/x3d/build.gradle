@@ -42,10 +42,10 @@ dependencies {
     compile "org.joml:joml-android:${jomlVersion}"
     compile "com.google.code.gson:gson:$gsonVersion"
     compile 'com.google.android.exoplayer:exoplayer:2.6.0'
-    if (findProject(':framework')) {
-        compile project (':framework')
+    if (findProject(':sxrsdk')) {
+        compile project (':sxrsdk')
     } else {
-        compile(name: 'framework-debug', ext: 'aar')
+        compile(name: 'sxrsdk-debug', ext: 'aar')
     }
     if (findProject(':script')) {
         compile project (':script')

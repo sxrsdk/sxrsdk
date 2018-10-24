@@ -14,7 +14,7 @@
   ~  limitations under the License.
   -->
 
-<manifest package="org.gearvrf.weartouchpad"
+<manifest package="com.samsungxr.weartouchpad"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
@@ -24,7 +24,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="org.gearvrf.weartouchpad.WearStatusActivity">
+        <activity android:name="com.samsungxr.weartouchpad.WearStatusActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -32,7 +32,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name="org.gearvrf.weartouchpad.MessageListenerService">
+        <service android:name="com.samsungxr.weartouchpad.MessageListenerService">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED"/>
                 <action android:name="com.google.android.gms.wearable.CAPABILITY_CHANGED"/>
@@ -44,7 +44,7 @@
         </service>
 
         <service
-            android:name="org.gearvrf.weartouchpad.WearInputService"
+            android:name="com.samsungxr.weartouchpad.WearInputService"
             android:enabled="true"
             android:exported="true">
         </service>

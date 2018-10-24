@@ -1,4 +1,4 @@
-include ':sdk'
+include ':sxrsdk'
 if (hasProperty('only_daydream') && (only_daydream == "true")) {
     include ':backend_daydream'
 } else if (hasProperty('only_monoscopic') && (only_monoscopic == "true")) {

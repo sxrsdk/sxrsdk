@@ -37,10 +37,10 @@ project.ext.arcoreVersion = "1.2.0"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    if (findProject(':framework')) {
-        implementation project (':framework')
+    if (findProject(':sxrsdk')) {
+        implementation project (':sxrsdk')
     } else {
-        implementation(name: 'framework-debug', ext: 'aar')
+        implementation(name: 'sxrsdk-debug', ext: 'aar')
     }
 
     implementation "org.joml:joml-android:${jomlVersion}"

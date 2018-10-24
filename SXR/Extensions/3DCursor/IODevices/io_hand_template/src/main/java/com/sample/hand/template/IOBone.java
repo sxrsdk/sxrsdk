@@ -14,7 +14,7 @@
  */
 package com.sample.hand.template;
 
-import org.gearvrf.GVRSceneObject;
+import com.samsungxr.GVRSceneObject;
 
 /**
  * This class represents a bone. Use the class methods to set its properties.

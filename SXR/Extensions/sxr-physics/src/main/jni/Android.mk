@@ -25,8 +25,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := sxr-physics
 
 LOCAL_C_INCLUDES +=	$(LOCAL_PATH)/bullet3/include
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../../../SDK/sdk/src/main/jni/
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../../../SDK/sdk/src/main/jni/contrib
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../../../SDK/sxrsdk/src/main/jni/
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../../../SDK/sxrsdk/src/main/jni/contrib
 
 FILE_LIST := $(wildcard $(LOCAL_PATH)/engine/physics/*.cpp)
 LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)
@@ -51,6 +51,6 @@ LOCAL_CFLAGS := -Wattributes
 #softFP
 #LOCAL_LDLIBS += -ljnigraphics -llog -lGLESv3 -lEGL -lz -landroid
 LOCAL_LDLIBS += -llog
-LOCAL_LDLIBS += $(LOCAL_PATH)/../../../build/intermediates/exploded-aar/framework-debug/jni/$(TARGET_ARCH_ABI)/libsxr.so
+LOCAL_LDLIBS += $(LOCAL_PATH)/../../../build/intermediates/exploded-aar/sxrsdk-debug/jni/$(TARGET_ARCH_ABI)/libsxr.so
 
 include $(BUILD_SHARED_LIBRARY)
