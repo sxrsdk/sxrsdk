@@ -83,7 +83,7 @@ android {
         source.text += '    return JNI_VERSION_1_6;\n'
         source.text += '}'
 
-        javaSource.text = 'package org.gearvrf;\n'
+        javaSource.text = 'package com.samsungxr;\n'
         javaSource.text += 'public class OvrBuildInfo {\n'
         javaSource.text += '    public final static String HEAD="' + commitId + '";\n'
         javaSource.text += '    static { android.util.Log.i("sxr", "BACKEND_OCULUS-JAVA HEAD: " + HEAD); }\n'
