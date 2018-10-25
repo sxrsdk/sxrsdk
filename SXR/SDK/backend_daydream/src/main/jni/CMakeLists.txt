@@ -12,7 +12,7 @@ string(TOLOWER ${CMAKE_BUILD_TYPE} buildType)
 
 add_library(sxr SHARED IMPORTED)
 set_property(TARGET sxr PROPERTY IMPORTED_LOCATION
-             ${CMAKE_CURRENT_SOURCE_DIR}/../../../../sxrsdk/build/intermediates/ndkBuild/${buildType}/obj/local/${ANDROID_ABI}/libsxr.so)
+             ${CMAKE_CURRENT_SOURCE_DIR}/../../../../sxrsdk/build/intermediates/ndkBuild/${buildType}/obj/local/${ANDROID_ABI}/libsxrsdk.so)
 
 
 add_library(gvr SHARED IMPORTED)

@@ -60,7 +60,7 @@ android {
         }
         def javaSource = new File(projectDir.absolutePath + '/src/main/java/com/samsungxr/', 'MonoscopicBuildInfo.java')
 
-        source.text = '#include "util/gvr_log.h"\n'
+        source.text = '#include "util/sxr_log.h"\n'
         source.text += '#include <jni.h>\n\n'
         source.text += 'jint JNI_OnLoad(JavaVM *vm, void *reserved) {\n'
         source.text += '    LOGI("BACKEND_MONOSCOPIC-CPP  HEAD: ' + commitId + '");\n'

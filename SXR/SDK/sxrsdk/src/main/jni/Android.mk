@@ -26,7 +26,7 @@ LOCAL_SRC_FILES := ../prebuilt/$(TARGET_ARCH_ABI)/libshaderc.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := sxr
+LOCAL_MODULE := sxrsdk
 
 FILE_LIST := $(wildcard $(LOCAL_PATH)/*.cpp)
 LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)

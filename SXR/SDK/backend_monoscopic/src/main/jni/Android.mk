@@ -15,7 +15,7 @@
 #
 LOCAL_PATH := $(call my-dir)
 
-ifneq (,$(strip $(wildcard $(LOCAL_PATH)/../../../../sxrsdk/build/intermediates/ndkBuild/$(APP_OPTIM)/obj/local/$(TARGET_ARCH_ABI)/libsxr.so)))
+ifneq (,$(strip $(wildcard $(LOCAL_PATH)/../../../../sxrsdk/build/intermediates/ndkBuild/$(APP_OPTIM)/obj/local/$(TARGET_ARCH_ABI)/libsxrsdk.so)))
     LIBGVRF_EXISTS := 1
 endif
 
@@ -23,7 +23,7 @@ endif
 ifeq ($(LIBGVRF_EXISTS),1)
     include $(CLEAR_VARS)
     LOCAL_MODULE    := sxr
-    LOCAL_SRC_FILES := ../../../../sxrsdk/build/intermediates/ndkBuild/$(APP_OPTIM)/obj/local/$(TARGET_ARCH_ABI)/libsxr.so
+    LOCAL_SRC_FILES := ../../../../sxrsdk/build/intermediates/ndkBuild/$(APP_OPTIM)/obj/local/$(TARGET_ARCH_ABI)/libsxrsdk.so
     include $(PREBUILT_SHARED_LIBRARY)
 endif
 
