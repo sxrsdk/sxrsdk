@@ -15,7 +15,7 @@
 #ifndef COMPONENT_TYPES_H
 #define COMPONENT_TYPES_H
 
-namespace gvr {
+namespace sxr {
     static const long long COMPONENT_TYPE_TRANSFORM          = 10001;
     static const long long COMPONENT_TYPE_LIGHT              = 10002;
     static const long long COMPONENT_TYPE_BONE               = 10003;

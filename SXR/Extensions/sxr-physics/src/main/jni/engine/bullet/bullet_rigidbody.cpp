@@ -14,10 +14,10 @@
  */
 #include "bullet_world.h"
 #include "bullet_rigidbody.h"
-#include "bullet_gvr_utils.h"
+#include "bullet_sxr_utils.h"
 #include "objects/scene_object.h"
 #include "objects/components/sphere_collider.h"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionShapes/btEmptyShape.h>
@@ -25,7 +25,7 @@
 #include <LinearMath/btTransform.h>
 #include <math.h>
 
-namespace gvr {
+namespace sxr {
 
 BulletRigidBody::BulletRigidBody()
         : mConstructionInfo(btScalar(0.0f), nullptr, new btEmptyShape()),

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.4.1)
 project (sxr-physics C CXX)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fexceptions")
 add_library(sxr-physics SHARED
-    engine/bullet/bullet_gvr_utils.cpp
+    engine/bullet/bullet_sxr_utils.cpp
     engine/bullet/bullet_rigidbody.cpp
     engine/bullet/bullet_world.cpp
     engine/bullet/bullet_fileloader.cpp

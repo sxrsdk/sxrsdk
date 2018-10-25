@@ -24,7 +24,7 @@
 
 static const char tag[] = "BulletSliderConstrN";
 
-namespace gvr {
+namespace sxr {
 
     BulletSliderConstraint::BulletSliderConstraint(PhysicsRigidBody *rigidBodyB) {
         mRigidBodyB = reinterpret_cast<BulletRigidBody*>(rigidBodyB);

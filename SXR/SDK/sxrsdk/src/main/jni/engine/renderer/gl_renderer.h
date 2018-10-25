@@ -43,7 +43,7 @@
 #include "gl/gl_uniform_block.h"
 
 typedef unsigned long Long;
-namespace gvr {
+namespace sxr {
 class Camera;
 class Scene;
 class SceneObject;

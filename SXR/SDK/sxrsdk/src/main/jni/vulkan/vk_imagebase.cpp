@@ -16,7 +16,7 @@
 #include "vulkan/vk_imagebase.h"
 #include "engine/renderer/vulkan_renderer.h"
 
-namespace gvr {
+namespace sxr {
     VkImageAspectFlagBits getAspectFlagForFormat(VkFormat format){
         switch (format){
             case VK_FORMAT_R8G8B8A8_UNORM:
@@ -76,14 +76,14 @@ void vkImageBase::createImage() {
 
     ret = vkCreateImage(
             device,
-            gvr::ImageCreateInfo(VK_IMAGE_TYPE_2D, format_, width_,
+            sxr::ImageCreateInfo(VK_IMAGE_TYPE_2D, format_, width_,
                                  height_, depth_, 1, mLayers,
                                  tiling_,
                                  usage_flags_, 0, getVKSampleBit(mSampleCount),
                                  imageLayout),
             nullptr, &imageHandle
     );
-    GVR_VK_CHECK(!ret);
+    SXR_VK_CHECK(!ret);
 
     // discover what memory requirements are for this image.
     vkGetImageMemoryRequirements(device, imageHandle, &mem_reqs);
@@ -91,27 +91,27 @@ void vkImageBase::createImage() {
     pass = vk_renderer->GetMemoryTypeFromProperties(mem_reqs.memoryTypeBits,
                                                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                                                     &memoryTypeIndex);
-    GVR_VK_CHECK(pass);
+    SXR_VK_CHECK(pass);
     size = mem_reqs.size;
 
     ret = vkAllocateMemory(device,
-                           gvr::MemoryAllocateInfo(mem_reqs.size, memoryTypeIndex), nullptr,
+                           sxr::MemoryAllocateInfo(mem_reqs.size, memoryTypeIndex), nullptr,
                            &device_memory);
-    GVR_VK_CHECK(!ret);
+    SXR_VK_CHECK(!ret);
 
     // Bind memory to the image
     ret = vkBindImageMemory(device, imageHandle, device_memory, 0);
-    GVR_VK_CHECK(!ret);
+    SXR_VK_CHECK(!ret);
 
     // View of the image created
     ret = vkCreateImageView(
               device,
-              gvr::ImageViewCreateInfo(imageHandle, imageType,
+              sxr::ImageViewCreateInfo(imageHandle, imageType,
                                        format_, 1, 0, mLayers,
                                        getAspectFlagForFormat(format_)),
               nullptr, &imageView
     );
-    GVR_VK_CHECK(!ret);
+    SXR_VK_CHECK(!ret);
 
     if(mLayers > 1){
         //View per layers are created here
@@ -119,12 +119,12 @@ void vkImageBase::createImage() {
         for (int i = 0; i < mLayers; i++) {
             ret = vkCreateImageView(
                     device,
-                    gvr::ImageViewCreateInfo(imageHandle, imageType,
+                    sxr::ImageViewCreateInfo(imageHandle, imageType,
                                              format_, 1, i, 1,
                                              getAspectFlagForFormat(format_)),
                     nullptr, &layerView
             );
-            GVR_VK_CHECK(!ret);
+            SXR_VK_CHECK(!ret);
             cascadeImageView.push_back(layerView);
         }
     }
@@ -156,12 +156,12 @@ void vkImageBase::updateMipVkImage(uint64_t texSize, std::vector<void *> &pixels
     memoryAllocateInfo.memoryTypeIndex = 0;
 
     err = vkCreateBuffer(device,
-                         gvr::BufferCreateInfo(texSize,
+                         sxr::BufferCreateInfo(texSize,
                                                VK_BUFFER_USAGE_TRANSFER_SRC_BIT),
                          nullptr, &texBuffer);
 
 
-    GVR_VK_CHECK(!err);
+    SXR_VK_CHECK(!err);
 
     // Obtain the requirements on memory for this buffer
     VkMemoryRequirements mem_reqs;
@@ -175,7 +175,7 @@ void vkImageBase::updateMipVkImage(uint64_t texSize, std::vector<void *> &pixels
                                                     &memoryAllocateInfo.memoryTypeIndex);
     assert(pass);
     size = mem_reqs.size;
-    err = vkAllocateMemory(device, gvr::MemoryAllocateInfo(mem_reqs.size,
+    err = vkAllocateMemory(device, sxr::MemoryAllocateInfo(mem_reqs.size,
                                                            memoryAllocateInfo.memoryTypeIndex),
                            NULL, &texMemory);
     unsigned char *texData;
@@ -194,7 +194,7 @@ void vkImageBase::updateMipVkImage(uint64_t texSize, std::vector<void *> &pixels
     err = vkBindBufferMemory(device, texBuffer, texMemory, 0);
     assert(!err);
 
-    err = vkCreateImage(device, gvr::ImageCreateInfo(VK_IMAGE_TYPE_2D,
+    err = vkCreateImage(device, sxr::ImageCreateInfo(VK_IMAGE_TYPE_2D,
                                                      internalFormat,
                                                      bitmapInfos[0].width,
                                                      bitmapInfos[0].height, 1, mipLevels, pixels.size(),
@@ -314,7 +314,7 @@ void vkImageBase::updateMipVkImage(uint64_t texSize, std::vector<void *> &pixels
                         bufferCopyRegions, mipLevels, bitmapInfos, imageMemoryBarrier,
                         submit_info, buffers, queue);
 
-    err = vkCreateImageView(device, gvr::ImageViewCreateInfo(imageHandle,
+    err = vkCreateImageView(device, sxr::ImageViewCreateInfo(imageHandle,
                                                              target,
                                                              internalFormat, mipLevels,0,
                                                              pixels.size(),

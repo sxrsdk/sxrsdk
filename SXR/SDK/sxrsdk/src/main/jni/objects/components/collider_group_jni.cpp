@@ -20,16 +20,16 @@
 
 #include "collider.h"
 #include "collider_group.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeColliderGroup_ctor(JNIEnv * env, jobject obj);
+    Java_com_samsungxr_NativeColliderGroup_ctor(JNIEnv * env, jobject obj);
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeColliderGroup_ctor(JNIEnv * env, jobject obj)
+Java_com_samsungxr_NativeColliderGroup_ctor(JNIEnv * env, jobject obj)
 {
     return reinterpret_cast<jlong>(new ColliderGroup());
 }

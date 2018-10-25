@@ -20,91 +20,91 @@
 
 #include "perspective_camera.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_ctor(JNIEnv * env,
+Java_com_samsungxr_NativePerspectiveCamera_ctor(JNIEnv * env,
         jobject obj);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_getDefaultAspectRatio(
+Java_com_samsungxr_NativePerspectiveCamera_getDefaultAspectRatio(
         JNIEnv * env, jobject obj);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_setDefaultAspectRatio(
+Java_com_samsungxr_NativePerspectiveCamera_setDefaultAspectRatio(
         JNIEnv * env, jobject obj, jfloat aspect_ratio);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_getDefaultFovY(
+Java_com_samsungxr_NativePerspectiveCamera_getDefaultFovY(
         JNIEnv * env, jobject obj);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_setDefaultFovY(
+Java_com_samsungxr_NativePerspectiveCamera_setDefaultFovY(
         JNIEnv * env, jobject obj, jfloat fov_y);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_getNearClippingDistance(
+Java_com_samsungxr_NativePerspectiveCamera_getNearClippingDistance(
         JNIEnv * env, jobject obj, jlong jperspective_camera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_setNearClippingDistance(
+Java_com_samsungxr_NativePerspectiveCamera_setNearClippingDistance(
         JNIEnv * env, jobject obj, jlong jperspective_camera, jfloat near);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_getFarClippingDistance(
+Java_com_samsungxr_NativePerspectiveCamera_getFarClippingDistance(
         JNIEnv * env, jobject obj, jlong jperspective_camera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_setFarClippingDistance(
+Java_com_samsungxr_NativePerspectiveCamera_setFarClippingDistance(
         JNIEnv * env, jobject obj, jlong jperspective_camera, jfloat far);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_getFovY(JNIEnv * env,
+Java_com_samsungxr_NativePerspectiveCamera_getFovY(JNIEnv * env,
         jobject obj, jlong jperspective_camera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_setFovY(JNIEnv * env,
+Java_com_samsungxr_NativePerspectiveCamera_setFovY(JNIEnv * env,
         jobject obj, jlong jperspective_camera, jfloat fov_y);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_getAspectRatio(
+Java_com_samsungxr_NativePerspectiveCamera_getAspectRatio(
         JNIEnv * env, jobject obj, jlong jperspective_camera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_setAspectRatio(
+Java_com_samsungxr_NativePerspectiveCamera_setAspectRatio(
         JNIEnv * env, jobject obj, jlong jperspective_camera,
         jfloat aspect_ratio);
 }
 ;
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_ctor(JNIEnv * env,
+Java_com_samsungxr_NativePerspectiveCamera_ctor(JNIEnv * env,
         jobject obj) {
     return reinterpret_cast<jlong>(new PerspectiveCamera());
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_getDefaultFovY(
+Java_com_samsungxr_NativePerspectiveCamera_getDefaultFovY(
         JNIEnv * env, jobject obj) {
     return PerspectiveCamera::default_fov_y();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_setDefaultFovY(
+Java_com_samsungxr_NativePerspectiveCamera_setDefaultFovY(
         JNIEnv * env, jobject obj, jfloat fov_y) {
     PerspectiveCamera::set_default_fov_y(fov_y);
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_getDefaultAspectRatio(
+Java_com_samsungxr_NativePerspectiveCamera_getDefaultAspectRatio(
         JNIEnv * env, jobject obj) {
     return PerspectiveCamera::default_aspect_ratio();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_setDefaultAspectRatio(
+Java_com_samsungxr_NativePerspectiveCamera_setDefaultAspectRatio(
         JNIEnv * env, jobject obj, jfloat aspect_ratio) {
     PerspectiveCamera::set_default_aspect_ratio(aspect_ratio);
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_getNearClippingDistance(
+Java_com_samsungxr_NativePerspectiveCamera_getNearClippingDistance(
         JNIEnv * env, jobject obj, jlong jperspective_camera) {
     PerspectiveCamera* perspective_camera =
             reinterpret_cast<PerspectiveCamera*>(jperspective_camera);
@@ -112,7 +112,7 @@ Java_org_gearvrf_NativePerspectiveCamera_getNearClippingDistance(
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_setNearClippingDistance(
+Java_com_samsungxr_NativePerspectiveCamera_setNearClippingDistance(
         JNIEnv * env, jobject obj, jlong jperspective_camera, jfloat near) {
     PerspectiveCamera* perspective_camera =
             reinterpret_cast<PerspectiveCamera*>(jperspective_camera);
@@ -120,7 +120,7 @@ Java_org_gearvrf_NativePerspectiveCamera_setNearClippingDistance(
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_getFarClippingDistance(
+Java_com_samsungxr_NativePerspectiveCamera_getFarClippingDistance(
         JNIEnv * env, jobject obj, jlong jperspective_camera) {
     PerspectiveCamera* perspective_camera =
             reinterpret_cast<PerspectiveCamera*>(jperspective_camera);
@@ -128,7 +128,7 @@ Java_org_gearvrf_NativePerspectiveCamera_getFarClippingDistance(
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_setFarClippingDistance(
+Java_com_samsungxr_NativePerspectiveCamera_setFarClippingDistance(
         JNIEnv * env, jobject obj, jlong jperspective_camera, jfloat far) {
     PerspectiveCamera* perspective_camera =
             reinterpret_cast<PerspectiveCamera*>(jperspective_camera);
@@ -136,7 +136,7 @@ Java_org_gearvrf_NativePerspectiveCamera_setFarClippingDistance(
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_getFovY(JNIEnv * env,
+Java_com_samsungxr_NativePerspectiveCamera_getFovY(JNIEnv * env,
         jobject obj, jlong jperspective_camera) {
     PerspectiveCamera* perspective_camera =
             reinterpret_cast<PerspectiveCamera*>(jperspective_camera);
@@ -144,7 +144,7 @@ Java_org_gearvrf_NativePerspectiveCamera_getFovY(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_setFovY(JNIEnv * env,
+Java_com_samsungxr_NativePerspectiveCamera_setFovY(JNIEnv * env,
         jobject obj, jlong jperspective_camera, jfloat fov_y) {
     PerspectiveCamera* perspective_camera =
             reinterpret_cast<PerspectiveCamera*>(jperspective_camera);
@@ -152,7 +152,7 @@ Java_org_gearvrf_NativePerspectiveCamera_setFovY(JNIEnv * env,
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_getAspectRatio(
+Java_com_samsungxr_NativePerspectiveCamera_getAspectRatio(
         JNIEnv * env, jobject obj, jlong jperspective_camera) {
     PerspectiveCamera* perspective_camera =
             reinterpret_cast<PerspectiveCamera*>(jperspective_camera);
@@ -160,7 +160,7 @@ Java_org_gearvrf_NativePerspectiveCamera_getAspectRatio(
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativePerspectiveCamera_setAspectRatio(
+Java_com_samsungxr_NativePerspectiveCamera_setAspectRatio(
         JNIEnv * env, jobject obj, jlong jperspective_camera,
         jfloat aspect_ratio) {
     PerspectiveCamera* perspective_camera =

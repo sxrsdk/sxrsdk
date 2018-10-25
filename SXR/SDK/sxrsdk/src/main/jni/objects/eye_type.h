@@ -21,7 +21,7 @@
 #ifndef EYE_TYPE_H_
 #define EYE_TYPE_H_
 
-namespace gvr {
+namespace sxr {
 enum EyeType {
     LEFT_EYE = 0, RIGHT_EYE = 1
 };

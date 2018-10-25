@@ -37,7 +37,7 @@
 #include "vulkan/vulkan_flags.h"
 
 
-namespace gvr {
+namespace sxr {
 
 class Camera;
 class Scene;

@@ -16,7 +16,7 @@
 
 #include "vk_device_component.h"
 #include "vulkanCore.h"
-namespace  gvr {
+namespace  sxr {
     VKDeviceComponent::VKDeviceComponent() {
         VulkanCore *instance = VulkanCore::getInstance();
         instance->addDeviceComponent(this);

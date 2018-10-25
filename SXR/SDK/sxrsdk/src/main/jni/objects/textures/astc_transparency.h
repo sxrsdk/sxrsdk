@@ -17,11 +17,11 @@
  * JNI
  ***************************************************************************/
 
-#include "util/gvr_jni.h"
-#include "util/gvr_log.h"
+#include "util/sxr_jni.h"
+#include "util/sxr_log.h"
 
 
-namespace gvr {
+namespace sxr {
 
 bool astc_has_transparency(void *data, int datasize);
 

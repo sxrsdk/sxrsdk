@@ -18,7 +18,7 @@
 
 #include "objects/uniform_block.h"
 
-namespace gvr {
+namespace sxr {
     class VulkanUniformBlock;
     class VulkanCore;
 
@@ -63,9 +63,9 @@ namespace gvr {
         virtual std::string makeShaderLayout();
         VulkanDescriptor* getVulkanDescriptor();
         void createDescriptorWriteInfo(int binding_index,int stageFlags, bool sampler=false);
-        GVR_Uniform& getBuffer() { return m_bufferInfo; }
+        SXR_Uniform& getBuffer() { return m_bufferInfo; }
 
-        GVR_Uniform m_bufferInfo;
+        SXR_Uniform m_bufferInfo;
         const VkWriteDescriptorSet& getDescriptorSet();
         void setDescriptorSet(VkDescriptorSet descriptorSet){
             writeDescriptorSet.dstSet = descriptorSet;

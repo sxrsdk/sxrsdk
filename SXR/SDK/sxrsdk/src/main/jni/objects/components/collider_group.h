@@ -29,7 +29,7 @@
 
 #include "collider.h"
 
-namespace gvr {
+namespace sxr {
 
     class ColliderGroup: public Collider {
     public:

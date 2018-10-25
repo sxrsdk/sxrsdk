@@ -34,7 +34,7 @@
 
 typedef unsigned long Long;
 
-namespace gvr {
+namespace sxr {
 extern bool use_multiview;
 struct RenderTextureInfo;
 class Camera;

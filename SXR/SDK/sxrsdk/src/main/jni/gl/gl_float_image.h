@@ -23,7 +23,7 @@
 #include "objects/textures/float_image.h"
 #include "gl_image.h"
 
-namespace gvr {
+namespace sxr {
     class GLFloatImage : public GLImage, public FloatImage
     {
     public:

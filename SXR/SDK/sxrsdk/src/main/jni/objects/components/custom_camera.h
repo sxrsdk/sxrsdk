@@ -23,7 +23,7 @@
 
 #include "objects/components/camera.h"
 
-namespace gvr {
+namespace sxr {
 
 class CustomCamera: public Camera {
 public:

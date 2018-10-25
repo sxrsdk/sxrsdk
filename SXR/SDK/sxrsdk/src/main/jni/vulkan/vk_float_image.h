@@ -23,7 +23,7 @@
 #include "objects/textures/float_image.h"
 #include "../util/jni_utils.h"
 
-namespace gvr {
+namespace sxr {
     class VkFloatImage : public vkImageBase, public FloatImage
     {
     public:

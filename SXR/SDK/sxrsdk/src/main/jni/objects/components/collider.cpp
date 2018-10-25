@@ -23,7 +23,7 @@
 #include "objects/scene.h"
 #include "objects/scene_object.h"
 
-namespace gvr
+namespace sxr
 {
 
 /*

@@ -23,9 +23,9 @@
 #include "glm/gtc/matrix_inverse.hpp"
 
 #include "objects/scene_object.h"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
-namespace gvr {
+namespace sxr {
 
 Camera::Camera() :
         Component(Camera::getComponentType()),

@@ -45,7 +45,7 @@ public:
 
     void SetCameraRig(jlong camera);
 
-    void SetCameraProjectionMatrix(gvr::CustomCamera *camera, const gvr::Rectf &fov, float z_near,
+    void SetCameraProjectionMatrix(sxr::CustomCamera *camera, const gvr::Rectf &fov, float z_near,
                          float z_far);
     void updateHandedness(){
         // Needs to be called when user changes its preferences, right now we don't any api to change preferences so we are calling it only once
@@ -73,7 +73,7 @@ private:
     jmethodID onDrawEyeMethodId_ = nullptr;
     jobject rendererObject_ = nullptr;
 
-    gvr::CameraRig *cameraRig_;
+    sxr::CameraRig *cameraRig_;
 };
 
 #endif  // DAYDREAM_RENDERER_H_

@@ -24,7 +24,7 @@
 #include "gl/gl_material.h"
 #include "objects/components/shadow_map.h"
 
-namespace gvr {
+namespace sxr {
 
 Scene* Scene::main_scene_ = NULL;
 
@@ -53,7 +53,7 @@ void Scene::set_java(JavaVM* javaVM, jobject javaScene)
         makeDepthShadersMethod_ = env->GetMethodID(sceneClass, "makeDepthShaders", "()V");
         if (makeDepthShadersMethod_ == 0)
         {
-            LOGE("Scene::set_java ERROR cannot find 'GVRScene.makeDepthShaders()' Java method");
+            LOGE("Scene::set_java ERROR cannot find 'SXRScene.makeDepthShaders()' Java method");
         }
     }
 }
@@ -87,7 +87,7 @@ void Scene::makeDepthShaders(jobject jscene)
 {
     if (makeDepthShadersMethod_ == NULL)
     {
-        LOGE("SHADER: Could not call GVRScene::makeDepthShadersMethod_");
+        LOGE("SHADER: Could not call SXRScene::makeDepthShadersMethod_");
     }
     JNIEnv* env = NULL;
     int rc = get_java_env(&env);

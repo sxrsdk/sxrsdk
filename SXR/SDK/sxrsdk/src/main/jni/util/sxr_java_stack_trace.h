@@ -13,16 +13,30 @@
  * limitations under the License.
  */
 
-
 /***************************************************************************
- * Header file for jni files.
+ * Printing Java stacktrace when native crash happens. Using tag sxrf
  ***************************************************************************/
 
-#ifndef GVR_JNI_H_
-#define GVR_JNI_H_
+#ifndef SXR_JAVA_STACK_TRACE_H_
+#define SXR_JAVA_STACK_TRACE_H_
 
-#include <memory>
 #include "jni.h"
-#include "gvr_log.h"
+#include <string>
+
+namespace sxr {
+static void printJavaCallStack(JNIEnv *env, const char *msg) {
+    jclass exception = env->FindClass(
+            "com/samsungxr/utility/SXRJniException");
+    jclass global_ex = (jclass) env->NewGlobalRef(exception);
+    jmethodID throw_ex = env->GetStaticMethodID(global_ex, "printCallStack",
+            "(Ljava/lang/String;)V");
+    env->CallStaticVoidMethod(global_ex, throw_ex, env->NewStringUTF(msg));
+}
+
+static void printJavaCallStack(JNIEnv *env, const std::string &msg) {
+    printJavaCallStack(env, msg.c_str());
+}
+
+}
 
 #endif

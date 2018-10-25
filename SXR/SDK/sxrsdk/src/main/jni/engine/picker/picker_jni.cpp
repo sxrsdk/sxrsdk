@@ -22,45 +22,45 @@
 #include "picker.h"
 #include "objects/scene.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 #include "glm/gtc/type_ptr.hpp"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlongArray JNICALL
-    Java_org_gearvrf_NativePicker_pickScene(JNIEnv * env,
+    Java_com_samsungxr_NativePicker_pickScene(JNIEnv * env,
                                             jobject obj, jlong jscene, jfloat ox, jfloat oy, jfloat z, jfloat dx,
                                             jfloat dy, jfloat dz);
     JNIEXPORT jobject JNICALL
-    Java_org_gearvrf_NativePicker_pickClosest(JNIEnv * env,
+    Java_com_samsungxr_NativePicker_pickClosest(JNIEnv * env,
                                             jobject obj, jlong jscene,
                                             jlong jtransform,
                                             jfloat ox, jfloat oy, jfloat oz,
                                             jfloat dx, jfloat dy, jfloat dz);
     JNIEXPORT jobjectArray JNICALL
-    Java_org_gearvrf_NativePicker_pickBounds(JNIEnv * env,
+    Java_com_samsungxr_NativePicker_pickBounds(JNIEnv * env,
                                           jobject obj, jlong jscene,
                                           jobject collidables);
 
     JNIEXPORT jobjectArray JNICALL
-    Java_org_gearvrf_NativePicker_pickObjects(JNIEnv * env,
+    Java_com_samsungxr_NativePicker_pickObjects(JNIEnv * env,
             jobject obj, jlong jscene, jlong jtransform, jfloat ox, jfloat oy, jfloat oz, jfloat dx,
             jfloat dy, jfloat dz);
     JNIEXPORT jobject JNICALL
-    Java_org_gearvrf_NativePicker_pickSceneObject(JNIEnv * env,
+    Java_com_samsungxr_NativePicker_pickSceneObject(JNIEnv * env,
             jobject obj, jlong jscene_object, jfloat ox, jfloat oy, jfloat oz,
             jfloat dx, jfloat dy, jfloat dz);
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativePicker_pickSceneObjectAgainstBoundingBox(JNIEnv * env,
+    Java_com_samsungxr_NativePicker_pickSceneObjectAgainstBoundingBox(JNIEnv * env,
             jobject obj, jlong jscene_object, jfloat ox, jfloat oy, jfloat oz, jfloat dx,
             jfloat dy, jfloat dz, jobject jreadback_buffer);
     JNIEXPORT jobjectArray JNICALL
-    Java_org_gearvrf_NativePicker_pickVisible(JNIEnv * env,
+    Java_com_samsungxr_NativePicker_pickVisible(JNIEnv * env,
             jobject obj, jlong jscene);
 }
 
 JNIEXPORT jlongArray JNICALL
-Java_org_gearvrf_NativePicker_pickScene(JNIEnv * env,
+Java_com_samsungxr_NativePicker_pickScene(JNIEnv * env,
         jobject obj, jlong jscene, jfloat ox, jfloat oy, jfloat oz, jfloat dx,
         jfloat dy, jfloat dz) {
     Scene* scene = reinterpret_cast<Scene*>(jscene);
@@ -85,14 +85,14 @@ Java_org_gearvrf_NativePicker_pickScene(JNIEnv * env,
 
 
 JNIEXPORT jobjectArray JNICALL
-Java_org_gearvrf_NativePicker_pickObjects(JNIEnv * env,
+Java_com_samsungxr_NativePicker_pickObjects(JNIEnv * env,
         jobject obj, jlong jscene, jlong jtransform, jfloat ox, jfloat oy, jfloat oz, jfloat dx,
         jfloat dy, jfloat dz)
 {
-    jclass pickerClass = env->FindClass("org/gearvrf/GVRPicker");
-    jclass hitClass = env->FindClass("org/gearvrf/GVRPicker$GVRPickedObject");
-    jmethodID makeHitMesh = env->GetStaticMethodID(pickerClass, "makeHitMesh", "(JFFFFIFFFFFFFF)Lorg/gearvrf/GVRPicker$GVRPickedObject;");
-    jmethodID makeHit = env->GetStaticMethodID(pickerClass, "makeHit", "(JFFFF)Lorg/gearvrf/GVRPicker$GVRPickedObject;");
+    jclass pickerClass = env->FindClass("com/samsungxr/SXRPicker");
+    jclass hitClass = env->FindClass("com/samsungxr/SXRPicker$SXRPickedObject");
+    jmethodID makeHitMesh = env->GetStaticMethodID(pickerClass, "makeHitMesh", "(JFFFFIFFFFFFFF)Lcom/samsungxr/SXRPicker$SXRPickedObject;");
+    jmethodID makeHit = env->GetStaticMethodID(pickerClass, "makeHit", "(JFFFF)Lcom/samsungxr/SXRPicker$SXRPickedObject;");
 
     Scene* scene = reinterpret_cast<Scene*>(jscene);
     std::vector<ColliderData> colliders;
@@ -142,7 +142,7 @@ Java_org_gearvrf_NativePicker_pickObjects(JNIEnv * env,
 }
 
 JNIEXPORT jobject JNICALL
-Java_org_gearvrf_NativePicker_pickClosest(JNIEnv * env,
+Java_com_samsungxr_NativePicker_pickClosest(JNIEnv * env,
                                           jobject obj, jlong jscene, jlong jtransform,
                                           jfloat ox, jfloat oy, jfloat oz,
                                           jfloat dx,  jfloat dy, jfloat dz)
@@ -166,13 +166,13 @@ Java_org_gearvrf_NativePicker_pickClosest(JNIEnv * env,
     jlong pointerCollider = reinterpret_cast<jlong>(data.ColliderHit);
     jobject hitObject;
     MeshCollider* meshCollider = (MeshCollider *) data.ColliderHit;
-    jclass pickerClass = env->FindClass("org/gearvrf/GVRPicker");
+    jclass pickerClass = env->FindClass("com/samsungxr/SXRPicker");
 
     if (meshCollider &&
         (meshCollider->shape_type() == COLLIDER_SHAPE_MESH) &&
         meshCollider->pickCoordinatesEnabled())
     {
-        jmethodID makeHitMesh = env->GetStaticMethodID(pickerClass, "makeHitMesh", "(JFFFFIFFFFFFFF)Lorg/gearvrf/GVRPicker$GVRPickedObject;");
+        jmethodID makeHitMesh = env->GetStaticMethodID(pickerClass, "makeHitMesh", "(JFFFFIFFFFFFFF)Lcom/samsungxr/SXRPicker$SXRPickedObject;");
 
         hitObject = env->CallStaticObjectMethod(pickerClass, makeHitMesh, pointerCollider,
                                                 data.Distance,
@@ -184,7 +184,7 @@ Java_org_gearvrf_NativePicker_pickClosest(JNIEnv * env,
     }
     else
     {
-        jmethodID makeHit = env->GetStaticMethodID(pickerClass, "makeHit", "(JFFFF)Lorg/gearvrf/GVRPicker$GVRPickedObject;");
+        jmethodID makeHit = env->GetStaticMethodID(pickerClass, "makeHit", "(JFFFF)Lcom/samsungxr/SXRPicker$SXRPickedObject;");
         hitObject = env->CallStaticObjectMethod(pickerClass, makeHit, pointerCollider,
                                                 data.Distance,
                                                 data.HitPosition.x, data.HitPosition.y, data.HitPosition.z);
@@ -194,7 +194,7 @@ Java_org_gearvrf_NativePicker_pickClosest(JNIEnv * env,
 }
 
 JNIEXPORT jobjectArray JNICALL
-Java_org_gearvrf_NativePicker_pickBounds(JNIEnv * env, jobject obj,
+Java_com_samsungxr_NativePicker_pickBounds(JNIEnv * env, jobject obj,
                                          jlong jscene,
                                          jobject jcollidables)
 {
@@ -207,7 +207,7 @@ Java_org_gearvrf_NativePicker_pickBounds(JNIEnv * env, jobject obj,
     {
         return NULL;
     }
-    jclass hybridClass = env->FindClass("org/gearvrf/GVRHybridObject");
+    jclass hybridClass = env->FindClass("com/samsungxr/SXRHybridObject");
     jmethodID getMethod = env->GetMethodID(listClass, "get", "(I)Ljava/lang/Object;");
     jmethodID nativeMethod = env->GetMethodID(hybridClass, "getNative", "()J");
     Scene *scene = reinterpret_cast<Scene *>(jscene);
@@ -237,9 +237,9 @@ Java_org_gearvrf_NativePicker_pickBounds(JNIEnv * env, jobject obj,
     {
         return NULL;
     }
-    jclass hitClass = env->FindClass("org/gearvrf/GVRPicker$GVRPickedObject");
-    jclass pickerClass = env->FindClass("org/gearvrf/GVRBoundsPicker");
-    jmethodID makeHit = env->GetStaticMethodID(pickerClass, "makeObjectHit", "(JIFFFF)Lorg/gearvrf/GVRPicker$GVRPickedObject;");
+    jclass hitClass = env->FindClass("com/samsungxr/SXRPicker$SXRPickedObject");
+    jclass pickerClass = env->FindClass("com/samsungxr/SXRBoundsPicker");
+    jmethodID makeHit = env->GetStaticMethodID(pickerClass, "makeObjectHit", "(JIFFFF)Lcom/samsungxr/SXRPicker$SXRPickedObject;");
     jobjectArray pickList = env->NewObjectArray(colliders.size(), hitClass, NULL);
 
     i = 0;
@@ -259,7 +259,7 @@ Java_org_gearvrf_NativePicker_pickBounds(JNIEnv * env, jobject obj,
                 env->DeleteLocalRef(hitObject);
             } else
             {
-                LOGE("PICKER: ERROR: failed to make GVRPickedObject for collidable #%d",
+                LOGE("PICKER: ERROR: failed to make SXRPickedObject for collidable #%d",
                      data.CollidableIndex);
             }
         }
@@ -271,13 +271,13 @@ Java_org_gearvrf_NativePicker_pickBounds(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT jobject JNICALL
-Java_org_gearvrf_NativePicker_pickSceneObject(JNIEnv * env,
+Java_com_samsungxr_NativePicker_pickSceneObject(JNIEnv * env,
                                               jobject obj, jlong jscene_object,
                                               jfloat ox, jfloat oy, jfloat oz,
                                               jfloat dx, jfloat dy, jfloat dz) {
-    jclass pickerClass = env->FindClass("org/gearvrf/GVRPicker");
-    jmethodID makeHitMesh = env->GetStaticMethodID(pickerClass, "makeHitMesh", "(JFFFFIFFFFFFFF)Lorg/gearvrf/GVRPicker$GVRPickedObject;");
-    jmethodID makeHit = env->GetStaticMethodID(pickerClass, "makeHit", "(JFFFF)Lorg/gearvrf/GVRPicker$GVRPickedObject;");
+    jclass pickerClass = env->FindClass("com/samsungxr/SXRPicker");
+    jmethodID makeHitMesh = env->GetStaticMethodID(pickerClass, "makeHitMesh", "(JFFFFIFFFFFFFF)Lcom/samsungxr/SXRPicker$SXRPickedObject;");
+    jmethodID makeHit = env->GetStaticMethodID(pickerClass, "makeHit", "(JFFFF)Lcom/samsungxr/SXRPicker$SXRPickedObject;");
 
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
 
@@ -306,7 +306,7 @@ Java_org_gearvrf_NativePicker_pickSceneObject(JNIEnv * env,
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativePicker_pickSceneObjectAgainstBoundingBox(JNIEnv * env,
+Java_com_samsungxr_NativePicker_pickSceneObjectAgainstBoundingBox(JNIEnv * env,
         jobject obj, jlong jscene_object,  jfloat ox, jfloat oy, jfloat oz, jfloat dx,
         jfloat dy, jfloat dz, jobject jreadback_buffer) {
     SceneObject* scene_object =
@@ -331,13 +331,13 @@ Java_org_gearvrf_NativePicker_pickSceneObjectAgainstBoundingBox(JNIEnv * env,
 }
 
 JNIEXPORT jobjectArray JNICALL
-Java_org_gearvrf_NativePicker_pickVisible(JNIEnv * env,
+Java_com_samsungxr_NativePicker_pickVisible(JNIEnv * env,
         jobject obj, jlong jscene)
 {
-    jclass pickerClass = env->FindClass("org/gearvrf/GVRPicker");
-    jclass hitClass = env->FindClass("org/gearvrf/GVRPicker$GVRPickedObject");
-    jmethodID makeHitMesh = env->GetStaticMethodID(pickerClass, "makeHitMesh", "(JFFFFIFFFFFFFF)Lorg/gearvrf/GVRPicker$GVRPickedObject;");
-    jmethodID makeHit = env->GetStaticMethodID(pickerClass, "makeHit", "(JFFFF)Lorg/gearvrf/GVRPicker$GVRPickedObject;");
+    jclass pickerClass = env->FindClass("com/samsungxr/SXRPicker");
+    jclass hitClass = env->FindClass("com/samsungxr/SXRPicker$SXRPickedObject");
+    jmethodID makeHitMesh = env->GetStaticMethodID(pickerClass, "makeHitMesh", "(JFFFFIFFFFFFFF)Lcom/samsungxr/SXRPicker$SXRPickedObject;");
+    jmethodID makeHit = env->GetStaticMethodID(pickerClass, "makeHit", "(JFFFF)Lcom/samsungxr/SXRPicker$SXRPickedObject;");
 
     Scene* scene = reinterpret_cast<Scene*>(jscene);
     std::vector<ColliderData> colliders;

@@ -15,7 +15,7 @@
 
 #include "float_image.h"
 
-namespace gvr {
+namespace sxr {
     FloatImage::FloatImage(int pixelFormat) : Image(ImageType::FLOAT_BITMAP, pixelFormat),
                                mJava(NULL), mData(NULL)
     {

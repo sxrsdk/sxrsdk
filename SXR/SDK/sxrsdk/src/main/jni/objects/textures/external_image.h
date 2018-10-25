@@ -5,10 +5,10 @@
 #include "image.h"
 
 // this is the texture to be used with an external renderer
-// the data field can be used to pass data between the gvrf application
+// the data field can be used to pass data between the sxrf application
 // and the external renderer
 
-namespace gvr {
+namespace sxr {
 
 class ExternalImage : public Image
 {

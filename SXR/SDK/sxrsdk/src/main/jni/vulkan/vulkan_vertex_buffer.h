@@ -20,7 +20,7 @@
 #include <vector>
 #include <map>
 
-namespace gvr {
+namespace sxr {
     class Shader;
     class Renderer;
 
@@ -37,14 +37,14 @@ namespace gvr {
 
         virtual bool    updateGPU(Renderer*, IndexBuffer*, Shader*);
         virtual void    bindToShader(Shader*r, IndexBuffer*) { }
-        const GVR_VK_Vertices* getVKVertices(Shader* shader);
+        const SXR_VK_Vertices* getVKVertices(Shader* shader);
         void    generateVKBuffers(VulkanCore* vulkanCore, Shader* shader);
 
     protected:
         void    freeGPUResources();
         VkFormat getDataType(const std::string& type);
-        std::unordered_map<Shader*,std::shared_ptr<GVR_VK_Vertices>> mVerticesMap;
+        std::unordered_map<Shader*,std::shared_ptr<SXR_VK_Vertices>> mVerticesMap;
     };
 
-} // end gvrf
+} // end sxrf
 

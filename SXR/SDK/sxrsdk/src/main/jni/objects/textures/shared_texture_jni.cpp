@@ -19,16 +19,16 @@
 #include <engine/renderer/renderer.h>
 #include <jni.h>
 
-namespace gvr {
+namespace sxr {
 extern "C" {
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeSharedTexture_ctor(JNIEnv * env,
+Java_com_samsungxr_NativeSharedTexture_ctor(JNIEnv * env,
         jobject obj, jint id);
 }
 ;
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeSharedTexture_ctor(JNIEnv * env,
+Java_com_samsungxr_NativeSharedTexture_ctor(JNIEnv * env,
     jobject obj, jint id) {
 return reinterpret_cast<jlong>(Renderer::getInstance()->createSharedTexture(id));
 }

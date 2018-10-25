@@ -14,12 +14,12 @@
  */
 
 /***************************************************************************
- * Printing C++ stacktrace when native crash happens. Using tag gvrf
+ * Printing C++ stacktrace when native crash happens. Using tag sxrf
  ***************************************************************************/
 
-#ifndef GVR_CPP_STACK_TRACE_H_
-#define GVR_CPP_STACK_TRACE_H_
+#ifndef SXR_CPP_STACK_TRACE_H_
+#define SXR_CPP_STACK_TRACE_H_
 
 void printStackTrace(unsigned int max_frames = 10);
 
-#endif // GVR_CPP_STACK_TRACE_H_
+#endif // SXR_CPP_STACK_TRACE_H_

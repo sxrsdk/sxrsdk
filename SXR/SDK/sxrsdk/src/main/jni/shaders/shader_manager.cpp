@@ -1,10 +1,10 @@
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
 #include "shader_manager.h"
 #include "shader.h"
 #include "engine/renderer/renderer.h"
 
-namespace gvr {
+namespace sxr {
     ShaderManager::~ShaderManager()
     {
 #ifdef DEBUG_SHADER

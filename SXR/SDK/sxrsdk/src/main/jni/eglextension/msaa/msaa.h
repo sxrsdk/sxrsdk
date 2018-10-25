@@ -23,7 +23,7 @@
 
 #include "gl/gl_headers.h"
 
-namespace gvr {
+namespace sxr {
 
     using PFNGLRENDERBUFFERSTORAGEMULTISAMPLEIMG = void (*) (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
     using PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMG = void (*) (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLsizei samples);

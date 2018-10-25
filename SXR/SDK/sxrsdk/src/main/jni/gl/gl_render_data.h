@@ -28,7 +28,7 @@
  * OpenGL implementation of RenderData.
  * Specializes handling of bone matrices.
  */
-namespace gvr
+namespace sxr
 {
     class GLRenderData : public RenderData
     {

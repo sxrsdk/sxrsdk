@@ -19,52 +19,52 @@
 
 #include <engine/renderer/renderer.h>
 #include "configuration_manager.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
     extern "C" {
-    JNIEXPORT bool JNICALL Java_org_gearvrf_GVRShader_isVulkanInstance(JNIEnv *env, jobject obj);
-    JNIEXPORT jlong JNICALL Java_org_gearvrf_NativeConfigurationManager_ctor(JNIEnv *env,
+    JNIEXPORT bool JNICALL Java_com_samsungxr_SXRShader_isVulkanInstance(JNIEnv *env, jobject obj);
+    JNIEXPORT jlong JNICALL Java_com_samsungxr_NativeConfigurationManager_ctor(JNIEnv *env,
                                                                              jobject obj);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeConfigurationManager_configureRendering(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeConfigurationManager_configureRendering(JNIEnv *env, jobject obj,
                                                                            jlong jConfigurationManager, jboolean useStencil);
 
     JNIEXPORT int JNICALL
-    Java_org_gearvrf_NativeConfigurationManager_getMaxLights(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeConfigurationManager_getMaxLights(JNIEnv *env, jobject obj,
                                                                      jlong jConfigurationManager);
 
-    JNIEXPORT void JNICALL Java_org_gearvrf_NativeConfigurationManager_delete(JNIEnv *env,
+    JNIEXPORT void JNICALL Java_com_samsungxr_NativeConfigurationManager_delete(JNIEnv *env,
                                                                               jobject obj,
                                                                               jlong jConfigurationManager);
 
-    JNIEXPORT jlong JNICALL Java_org_gearvrf_NativeConfigurationManager_ctor(JNIEnv *env,
+    JNIEXPORT jlong JNICALL Java_com_samsungxr_NativeConfigurationManager_ctor(JNIEnv *env,
                                                                              jobject obj) {
         return reinterpret_cast<jlong>(new ConfigurationManager());
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeConfigurationManager_configureRendering(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeConfigurationManager_configureRendering(JNIEnv *env, jobject obj,
                                                                    jlong jConfigurationManager, jboolean useStencil) {
         ConfigurationManager *configuration_manager = reinterpret_cast<ConfigurationManager *>(jConfigurationManager);
         configuration_manager->configureRendering(useStencil);
     }
 
     JNIEXPORT int JNICALL
-    Java_org_gearvrf_NativeConfigurationManager_getMaxLights(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeConfigurationManager_getMaxLights(JNIEnv *env, jobject obj,
                                                              jlong jConfigurationManager) {
         ConfigurationManager *configuration_manager = reinterpret_cast<ConfigurationManager *>(jConfigurationManager);
         return configuration_manager->getMaxLights();
     }
 
 
-    JNIEXPORT void JNICALL Java_org_gearvrf_NativeConfigurationManager_delete(JNIEnv *env,
+    JNIEXPORT void JNICALL Java_com_samsungxr_NativeConfigurationManager_delete(JNIEnv *env,
                                                                               jobject obj,
                                                                               jlong jConfigurationManager) {
         delete reinterpret_cast<ConfigurationManager *>(jConfigurationManager);
     }
-    JNIEXPORT bool JNICALL Java_org_gearvrf_GVRShader_isVulkanInstance(JNIEnv *env, jobject obj){
+    JNIEXPORT bool JNICALL Java_com_samsungxr_SXRShader_isVulkanInstance(JNIEnv *env, jobject obj){
         Renderer* renderer = Renderer::getInstance();
         return renderer->isVulkanInstance();
     }

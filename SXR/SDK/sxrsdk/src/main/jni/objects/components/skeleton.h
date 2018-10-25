@@ -10,7 +10,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "objects/components/component.h"
 
-namespace gvr {
+namespace sxr {
 class Renderer;
 class Shader;
 

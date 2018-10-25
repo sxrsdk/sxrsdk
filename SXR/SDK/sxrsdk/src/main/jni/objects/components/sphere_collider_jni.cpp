@@ -19,31 +19,31 @@
  ***************************************************************************/
 
 #include "sphere_collider.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C"
 {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeSphereCollider_ctor(JNIEnv * env, jobject obj);
+    Java_com_samsungxr_NativeSphereCollider_ctor(JNIEnv * env, jobject obj);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeSphereCollider_setRadius(JNIEnv * env,
+    Java_com_samsungxr_NativeSphereCollider_setRadius(JNIEnv * env,
             jobject obj, jlong jcollider, jfloat radius);
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_NativeSphereCollider_getRadius(JNIEnv * env,
+    Java_com_samsungxr_NativeSphereCollider_getRadius(JNIEnv * env,
             jobject obj, jlong jcollider);
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeSphereCollider_ctor(JNIEnv * env, jobject obj)
+Java_com_samsungxr_NativeSphereCollider_ctor(JNIEnv * env, jobject obj)
 {
     return reinterpret_cast<jlong>(new SphereCollider());
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeSphereCollider_setRadius(JNIEnv * env,
+Java_com_samsungxr_NativeSphereCollider_setRadius(JNIEnv * env,
         jobject obj, jlong jcollider, jfloat radius)
 {
     SphereCollider* collider = reinterpret_cast<SphereCollider*>(jcollider);
@@ -51,7 +51,7 @@ Java_org_gearvrf_NativeSphereCollider_setRadius(JNIEnv * env,
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeSphereCollider_getRadius(JNIEnv * env,
+Java_com_samsungxr_NativeSphereCollider_getRadius(JNIEnv * env,
         jobject obj, jlong jcollider)
 {
     SphereCollider* collider = reinterpret_cast<SphereCollider*>(jcollider);

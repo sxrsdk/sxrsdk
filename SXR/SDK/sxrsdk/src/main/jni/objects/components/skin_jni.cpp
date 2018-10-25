@@ -6,38 +6,38 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "skin.h"
 #include "skeleton.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_animation_NativeSkin_ctor(JNIEnv* env, jobject obj, jobject jskeleton);
+    Java_com_samsungxr_animation_NativeSkin_ctor(JNIEnv* env, jobject obj, jobject jskeleton);
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_animation_NativeSkin_getComponentType(JNIEnv* env, jobject clz);
+    Java_com_samsungxr_animation_NativeSkin_getComponentType(JNIEnv* env, jobject clz);
 
     JNIEXPORT jboolean JNICALL
-    Java_org_gearvrf_animation_NativeSkin_setBoneMap(JNIEnv* env, jobject clz,
+    Java_com_samsungxr_animation_NativeSkin_setBoneMap(JNIEnv* env, jobject clz,
                                             jlong jskin, jintArray jboneMap);
 
 } // extern "C"
 
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_animation_NativeSkin_ctor(JNIEnv * env, jobject clz, jobject jskeleton)
+Java_com_samsungxr_animation_NativeSkin_ctor(JNIEnv * env, jobject clz, jobject jskeleton)
 {
     Skeleton* skel = reinterpret_cast<Skeleton*>(jskeleton);
     return reinterpret_cast<jlong>(new Skin(*skel));
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_animation_NativeSkin_getComponentType(JNIEnv * env, jobject clz)
+Java_com_samsungxr_animation_NativeSkin_getComponentType(JNIEnv * env, jobject clz)
 {
     return Skin::getComponentType();
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_animation_NativeSkin_setBoneMap(JNIEnv* env, jobject clz,
+Java_com_samsungxr_animation_NativeSkin_setBoneMap(JNIEnv* env, jobject clz,
                                         jlong jskin, jintArray jboneMap)
 {
     Skin* skin = reinterpret_cast<Skin*>(jskin);
@@ -49,4 +49,4 @@ Java_org_gearvrf_animation_NativeSkin_setBoneMap(JNIEnv* env, jobject clz,
     return true;
 }
 
-} // namespace gvr
+} // namespace sxr

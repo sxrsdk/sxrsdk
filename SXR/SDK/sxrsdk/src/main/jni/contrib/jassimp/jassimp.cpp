@@ -566,12 +566,12 @@ class JavaIOSystem : public Assimp::IOSystem {
     {
     	jvalue params[1];
 		params[0].l = mJniEnv->NewStringUTF(pFile);
-	    return call(mJniEnv, mJavaIOSystem, "org/gearvrf/jassimp/AiIOSystem", "exists", "(Ljava/lang/String;)Z", params);
+	    return call(mJniEnv, mJavaIOSystem, "com/samsungxr/jassimp/AiIOSystem", "exists", "(Ljava/lang/String;)Z", params);
 
     };
     char getOsSeparator() const
     {
-	    return (char) callc(mJniEnv, mJavaIOSystem, "org/gearvrf/jassimp/AiIOSystem", "getOsSeparator", "()C");
+	    return (char) callc(mJniEnv, mJavaIOSystem, "com/samsungxr/jassimp/AiIOSystem", "getOsSeparator", "()C");
     };
     
     Assimp::IOStream* Open(const char* pFile,const char* pMode = "rb")
@@ -581,14 +581,14 @@ class JavaIOSystem : public Assimp::IOSystem {
 		params[1].l = mJniEnv->NewStringUTF(pMode);
 		
 		
-	    jobject jStream = callo(mJniEnv, mJavaIOSystem, "org/gearvrf/jassimp/AiIOSystem", "open", "(Ljava/lang/String;Ljava/lang/String;)Lorg/gearvrf/jassimp/AiIOStream;", params);
+	    jobject jStream = callo(mJniEnv, mJavaIOSystem, "com/samsungxr/jassimp/AiIOSystem", "open", "(Ljava/lang/String;Ljava/lang/String;)Lcom/samsungxr/jassimp/AiIOStream;", params);
 	    if(NULL == jStream)
 	    {
 	    	lprintf("NULL object from AiIOSystem.open\n");
 	    	return NULL;
 	    }
 	    
-	    size_t size = calli(mJniEnv, jStream, "org/gearvrf/jassimp/AiIOStream", "getFileSize", "()I");
+	    size_t size = calli(mJniEnv, jStream, "com/samsungxr/jassimp/AiIOStream", "getFileSize", "()I");
 	    lprintf("Model file size is %d\n", size);
 	    
 	    char* buffer = (char*)malloc(size);
@@ -596,7 +596,7 @@ class JavaIOSystem : public Assimp::IOSystem {
 	    
 	    jvalue readParams[1];
 	    readParams[0].l = javaBuffer;
-	    if(call(mJniEnv, jStream, "org/gearvrf/jassimp/AiIOStream", "read", "(Ljava/nio/ByteBuffer;)Z", readParams))
+	    if(call(mJniEnv, jStream, "com/samsungxr/jassimp/AiIOStream", "read", "(Ljava/nio/ByteBuffer;)Z", readParams))
 	    {
 	    	return new JavaIOStream(size, buffer, jStream);
 		}
@@ -613,7 +613,7 @@ class JavaIOSystem : public Assimp::IOSystem {
     	
 		jvalue params[1];
 		params[0].l = ((JavaIOStream*) pFile)->javaObject();
-		callv(mJniEnv, mJavaIOSystem, "org/gearvrf/jassimp/AiIOSystem", "close", "(Lorg/gearvrf/jassimp/AiIOStream;)V", params);
+		callv(mJniEnv, mJavaIOSystem, "com/samsungxr/jassimp/AiIOSystem", "close", "(Lcom/samsungxr/jassimp/AiIOStream;)V", params);
     	delete pFile;
     };
     
@@ -634,7 +634,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		jobject jMesh = NULL;
 		SmartLocalRef refMesh(env, jMesh);
 
-		if (!createInstance(env, "org/gearvrf/jassimp/AiMesh", jMesh)) 
+		if (!createInstance(env, "com/samsungxr/jassimp/AiMesh", jMesh)) 
 		{
 			return false;
 		}
@@ -660,7 +660,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		/* set general mesh data in java */
 		jvalue setTypesParams[1];
 		setTypesParams[0].i = cMesh->mPrimitiveTypes;
-		if (!callv(env, jMesh, "org/gearvrf/jassimp/AiMesh", "setPrimitiveTypes", "(I)V", setTypesParams))
+		if (!callv(env, jMesh, "com/samsungxr/jassimp/AiMesh", "setPrimitiveTypes", "(I)V", setTypesParams))
 		{
 			return false;
 		}
@@ -704,7 +704,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		allocateBuffersParams[1].i = cMesh->mNumFaces;
 		allocateBuffersParams[2].z = isPureTriangle;
 		allocateBuffersParams[3].i = (jint) faceBufferSize;
-		if (!callv(env, jMesh, "org/gearvrf/jassimp/AiMesh", "allocateBuffers", "(IIZI)V", allocateBuffersParams))
+		if (!callv(env, jMesh, "com/samsungxr/jassimp/AiMesh", "allocateBuffers", "(IIZI)V", allocateBuffersParams))
 		{
 			return false;
 		}
@@ -794,7 +794,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			jvalue allocateDataChannelParams[2];
 			allocateDataChannelParams[0].i = 0;
 			allocateDataChannelParams[1].i = 0;
-			if (!callv(env, jMesh, "org/gearvrf/jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
+			if (!callv(env, jMesh, "com/samsungxr/jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
 			{
 				lprintf("could not allocate normal data channel\n");
 				return false;
@@ -815,7 +815,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			jvalue allocateDataChannelParams[2];
 			allocateDataChannelParams[0].i = 1;
 			allocateDataChannelParams[1].i = 0;
-			if (!callv(env, jMesh, "org/gearvrf/jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
+			if (!callv(env, jMesh, "com/samsungxr/jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
 			{
 				lprintf("could not allocate tangents data channel\n");
 				return false;
@@ -836,7 +836,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			jvalue allocateDataChannelParams[2];
 			allocateDataChannelParams[0].i = 2;
 			allocateDataChannelParams[1].i = 0;
-			if (!callv(env, jMesh, "org/gearvrf/jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
+			if (!callv(env, jMesh, "com/samsungxr/jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
 			{
 				lprintf("could not allocate bitangents data channel\n");
 				return false;
@@ -859,7 +859,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				jvalue allocateDataChannelParams[2];
 				allocateDataChannelParams[0].i = 3;
 				allocateDataChannelParams[1].i = c;
-				if (!callv(env, jMesh, "org/gearvrf/jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
+				if (!callv(env, jMesh, "com/samsungxr/jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
 				{
 					lprintf("could not allocate colorset data channel\n");
 					return false;
@@ -898,7 +898,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				}
 
 				allocateDataChannelParams[1].i = c;
-				if (!callv(env, jMesh, "org/gearvrf/jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
+				if (!callv(env, jMesh, "com/samsungxr/jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
 				{
 					lprintf("could not allocate texture coordinates data channel\n");
 					return false;
@@ -944,7 +944,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 			jobject jBone;
 			SmartLocalRef refBone(env, jBone);
-			if (!createInstance(env, "org/gearvrf/jassimp/AiBone", jBone)) 
+			if (!createInstance(env, "com/samsungxr/jassimp/AiBone", jBone)) 
 			{
 				return false;
 			}
@@ -977,7 +977,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			{
 				jobject jBoneWeight;
 				SmartLocalRef refBoneWeight(env, jBoneWeight);
-				if (!createInstance(env, "org/gearvrf/jassimp/AiBoneWeight", jBoneWeight))
+				if (!createInstance(env, "com/samsungxr/jassimp/AiBoneWeight", jBoneWeight))
 				{
 					return false;
 				}
@@ -1000,7 +1000,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				jobject jMatrix;
 				SmartLocalRef refMatrix(env, jMatrix);
 				
-				if (!callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapMatrix", "([F)Ljava/lang/Object;", wrapParams, jMatrix))
+				if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapMatrix", "([F)Ljava/lang/Object;", wrapParams, jMatrix))
 				{
 					return false;
 				}
@@ -1044,7 +1044,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
             jobject jAnimMesh;
             SmartLocalRef refAnimMesh(env, jAnimMesh);
-            if (!createInstance(env, "org/gearvrf/jassimp/AiAnimMesh", jAnimMesh))
+            if (!createInstance(env, "com/samsungxr/jassimp/AiAnimMesh", jAnimMesh))
             {
                 return false;
             }
@@ -1069,7 +1069,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
             jvalue allocateBuffersParams[1];
             allocateBuffersParams[0].i = aMesh->mNumVertices;
-            if (!callv(env, jAnimMesh, "org/gearvrf/jassimp/AiAnimMesh", "allocateBuffers", "(I)V", allocateBuffersParams))
+            if (!callv(env, jAnimMesh, "com/samsungxr/jassimp/AiAnimMesh", "allocateBuffers", "(I)V", allocateBuffersParams))
             {
                 return false;
             }
@@ -1091,7 +1091,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
             {
                 jvalue allocateDataChannelParams[1];
                 allocateDataChannelParams[0].i = 0;
-                if (!callv(env, jAnimMesh, "org/gearvrf/jassimp/AiAnimMesh", "allocateDataChannel", "(I)V", allocateDataChannelParams))
+                if (!callv(env, jAnimMesh, "com/samsungxr/jassimp/AiAnimMesh", "allocateDataChannel", "(I)V", allocateDataChannelParams))
                 {
                     lprintf("could not allocate animation normal data channel\n");
                     return false;
@@ -1111,7 +1111,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
             {
                 jvalue allocateDataChannelParams[1];
                 allocateDataChannelParams[0].i = 1;
-                if (!callv(env, jAnimMesh, "org/gearvrf/jassimp/AiAnimMesh", "allocateDataChannel", "(I)V", allocateDataChannelParams))
+                if (!callv(env, jAnimMesh, "com/samsungxr/jassimp/AiAnimMesh", "allocateDataChannel", "(I)V", allocateDataChannelParams))
                 {
                     lprintf("could not allocate tangents data channel\n");
                     return false;
@@ -1150,7 +1150,7 @@ static bool loadMetadata(JNIEnv *env, const aiNode* cNode, jobject& jNode)
 		jobject jAiMetadataEntry = NULL;
 		SmartLocalRef refMetadataEntry(env, jAiMetadataEntry);
 
-		if(!createInstance(env, "org/gearvrf/jassimp/AiMetadataEntry", jAiMetadataEntry)) {
+		if(!createInstance(env, "com/samsungxr/jassimp/AiMetadataEntry", jAiMetadataEntry)) {
 			return false;
 		}
 
@@ -1170,51 +1170,51 @@ static bool loadMetadata(JNIEnv *env, const aiNode* cNode, jobject& jNode)
 		switch (cMetadataType) {
 
 			case AI_BOOL: {
-                getMetadataTypeSuccess = getStaticField(env, "org/gearvrf/jassimp/AiMetadataEntry$AiMetadataType", "AI_BOOL", "Lorg/gearvrf/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
+                getMetadataTypeSuccess = getStaticField(env, "com/samsungxr/jassimp/AiMetadataEntry$AiMetadataType", "AI_BOOL", "Lcom/samsungxr/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
                 boxingMethodArgument[0].z = (jboolean) *static_cast<bool*>(cData);
                 getMetadataDataSuccess = callStaticObject(env, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", boxingMethodArgument, jMetadataData);
                 break;
             }
             case AI_INT32: {
-                getMetadataTypeSuccess = getStaticField(env, "org/gearvrf/jassimp/AiMetadataEntry$AiMetadataType", "AI_INT32", "Lorg/gearvrf/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
+                getMetadataTypeSuccess = getStaticField(env, "com/samsungxr/jassimp/AiMetadataEntry$AiMetadataType", "AI_INT32", "Lcom/samsungxr/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
                 boxingMethodArgument[0].i = (jint) *static_cast<int32_t*>(cData);
                 getMetadataDataSuccess = callStaticObject(env, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", boxingMethodArgument, jMetadataData);
                 break;
             }
             case AI_UINT64: {
-                getMetadataTypeSuccess = getStaticField(env, "org/gearvrf/jassimp/AiMetadataEntry$AiMetadataType", "AI_UINT64", "Lorg/gearvrf/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
+                getMetadataTypeSuccess = getStaticField(env, "com/samsungxr/jassimp/AiMetadataEntry$AiMetadataType", "AI_UINT64", "Lcom/samsungxr/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
                 boxingMethodArgument[0].j = (jlong) *static_cast<uint64_t*>(cData);
                 getMetadataDataSuccess = callStaticObject(env, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", boxingMethodArgument, jMetadataData);
                 break;
             }
             case AI_FLOAT: {
-                getMetadataTypeSuccess = getStaticField(env, "org/gearvrf/jassimp/AiMetadataEntry$AiMetadataType", "AI_FLOAT", "Lorg/gearvrf/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
+                getMetadataTypeSuccess = getStaticField(env, "com/samsungxr/jassimp/AiMetadataEntry$AiMetadataType", "AI_FLOAT", "Lcom/samsungxr/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
                 boxingMethodArgument[0].f = (jfloat) *static_cast<float*>(cData);
                 getMetadataDataSuccess = callStaticObject(env, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", boxingMethodArgument, jMetadataData);
                 break;
             }
             case AI_DOUBLE: {
-                getMetadataTypeSuccess = getStaticField(env, "org/gearvrf/jassimp/AiMetadataEntry$AiMetadataType", "AI_DOUBLE", "Lorg/gearvrf/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
+                getMetadataTypeSuccess = getStaticField(env, "com/samsungxr/jassimp/AiMetadataEntry$AiMetadataType", "AI_DOUBLE", "Lcom/samsungxr/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
                 boxingMethodArgument[0].d = (jdouble) *static_cast<double*>(cData);
                 getMetadataDataSuccess = callStaticObject(env, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", boxingMethodArgument, jMetadataData);
                 break;
             }
             case AI_AISTRING: {
-                getMetadataTypeSuccess = getStaticField(env, "org/gearvrf/jassimp/AiMetadataEntry$AiMetadataType", "AI_AISTRING", "Lorg/gearvrf/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
+                getMetadataTypeSuccess = getStaticField(env, "com/samsungxr/jassimp/AiMetadataEntry$AiMetadataType", "AI_AISTRING", "Lcom/samsungxr/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
                 jMetadataData = env->NewStringUTF(static_cast<aiString*>(cData)->C_Str());
                 getMetadataDataSuccess = (jMetadataData != NULL);
                 break;
             }
             case AI_AIVECTOR3D: {
-                getMetadataTypeSuccess = getStaticField(env, "org/gearvrf/jassimp/AiMetadataEntry$AiMetadataType", "AI_AIVECTOR3D",
-                                                        "Lorg/gearvrf/jassimp/AiMetadataEntry$AiMetadataType;",
+                getMetadataTypeSuccess = getStaticField(env, "com/samsungxr/jassimp/AiMetadataEntry$AiMetadataType", "AI_AIVECTOR3D",
+                                                        "Lcom/samsungxr/jassimp/AiMetadataEntry$AiMetadataType;",
                                                         jAiMetadataTypeEnumValue);
                 jvalue wrapVec3Args[3];
                 aiVector3D *vector3D = static_cast<aiVector3D *>(cData);
                 wrapVec3Args[0].f = vector3D->x;
                 wrapVec3Args[1].f = vector3D->y;
                 wrapVec3Args[2].f = vector3D->z;
-                getMetadataDataSuccess = callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;",
+                getMetadataDataSuccess = callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;",
                                                           wrapVec3Args, jMetadataData);
                 break;
             }
@@ -1236,7 +1236,7 @@ static bool loadMetadata(JNIEnv *env, const aiNode* cNode, jobject& jNode)
             return false;
         }
 
-        if(!setObjectField(env, jAiMetadataEntry, "mType", "Lorg/gearvrf/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue)) {
+        if(!setObjectField(env, jAiMetadataEntry, "mType", "Lcom/samsungxr/jassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue)) {
             exceptionThrown = env->ExceptionCheck();
 
             if(exceptionThrown)
@@ -1308,7 +1308,7 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 	jobject jMatrix;
 	SmartLocalRef refMatrix(env, jMatrix);
 
-	if (!callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapMatrix", "([F)Ljava/lang/Object;", wrapMatParams, jMatrix))
+	if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapMatrix", "([F)Ljava/lang/Object;", wrapMatParams, jMatrix))
 	{
 		return false;
 	}
@@ -1340,7 +1340,7 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 	wrapNodeParams[2].l = jMeshrefArr;
 	wrapNodeParams[3].l = jNodeName;
 	jobject jNode;
-	if (!callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapSceneNode",
+	if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapSceneNode",
 		"(Ljava/lang/Object;Ljava/lang/Object;[ILjava/lang/String;)Ljava/lang/Object;", wrapNodeParams, jNode)) 
 	{
 		return false;
@@ -1411,7 +1411,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		jobject jMaterial = NULL;
 		SmartLocalRef refMaterial(env, jMaterial);
 
-		if (!createInstance(env, "org/gearvrf/jassimp/AiMaterial", jMaterial))
+		if (!createInstance(env, "com/samsungxr/jassimp/AiMaterial", jMaterial))
 		{
 			return false;
 		}
@@ -1445,7 +1445,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			setNumberParams[0].i = ttInd;
 			setNumberParams[1].i = num;
 
-			if (!callv(env, jMaterial, "org/gearvrf/jassimp/AiMaterial", "setTextureNumber", "(II)V", setNumberParams))
+			if (!callv(env, jMaterial, "com/samsungxr/jassimp/AiMaterial", "setTextureNumber", "(II)V", setNumberParams))
 			{
 				return false;
 			}
@@ -1483,13 +1483,13 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				wrapColorParams[0].f = ((float*) cProperty->mData)[0];
 				wrapColorParams[1].f = ((float*) cProperty->mData)[1];
 				wrapColorParams[2].f = ((float*) cProperty->mData)[2];
-				if (!callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jData))
+				if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jData))
 				{
 					return false;
 				}
 
 				constructorParams[4].l = jData;
-				if (!createInstance(env, "org/gearvrf/jassimp/AiMaterial$Property", "(Ljava/lang/String;IIILjava/lang/Object;)V", 
+				if (!createInstance(env, "com/samsungxr/jassimp/AiMaterial$Property", "(Ljava/lang/String;IIILjava/lang/Object;)V", 
 					constructorParams, jProperty))
 				{
 					return false;
@@ -1509,13 +1509,13 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				wrapColorParams[1].f = ((float*) cProperty->mData)[1];
 				wrapColorParams[2].f = ((float*) cProperty->mData)[2];
 				wrapColorParams[3].f = ((float*) cProperty->mData)[3];
-				if (!callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapColor4", "(FFFF)Ljava/lang/Object;", wrapColorParams, jData))
+				if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapColor4", "(FFFF)Ljava/lang/Object;", wrapColorParams, jData))
 				{
 					return false;
 				}
 
 				constructorParams[4].l = jData;
-				if (!createInstance(env, "org/gearvrf/jassimp/AiMaterial$Property", "(Ljava/lang/String;IIILjava/lang/Object;)V", 
+				if (!createInstance(env, "com/samsungxr/jassimp/AiMaterial$Property", "(Ljava/lang/String;IIILjava/lang/Object;)V", 
 					constructorParams, jProperty))
 				{
 					return false;
@@ -1534,7 +1534,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				}
 
 				constructorParams[4].l = jData;
-				if (!createInstance(env, "org/gearvrf/jassimp/AiMaterial$Property", "(Ljava/lang/String;IIILjava/lang/Object;)V", 
+				if (!createInstance(env, "com/samsungxr/jassimp/AiMaterial$Property", "(Ljava/lang/String;IIILjava/lang/Object;)V", 
 					constructorParams, jProperty))
 				{
 					return false;
@@ -1553,7 +1553,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				}
 
 				constructorParams[4].l = jData;
-				if (!createInstance(env, "org/gearvrf/jassimp/AiMaterial$Property", "(Ljava/lang/String;IIILjava/lang/Object;)V", 
+				if (!createInstance(env, "com/samsungxr/jassimp/AiMaterial$Property", "(Ljava/lang/String;IIILjava/lang/Object;)V", 
 					constructorParams, jProperty))
 				{
 					return false;
@@ -1566,7 +1566,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				SmartLocalRef refData(env, jData);
 
 				constructorParams[4].l = jData;
-				if (!createInstance(env, "org/gearvrf/jassimp/AiMaterial$Property", "(Ljava/lang/String;IIILjava/lang/Object;)V", 
+				if (!createInstance(env, "com/samsungxr/jassimp/AiMaterial$Property", "(Ljava/lang/String;IIILjava/lang/Object;)V", 
 					constructorParams, jProperty))
 				{
 					return false;
@@ -1577,7 +1577,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				constructorParams[4].i = cProperty->mDataLength;
 
 				/* generic copy code, uses dump ByteBuffer on java side */
-				if (!createInstance(env, "org/gearvrf/jassimp/AiMaterial$Property", "(Ljava/lang/String;IIII)V", constructorParams, jProperty))
+				if (!createInstance(env, "com/samsungxr/jassimp/AiMaterial$Property", "(Ljava/lang/String;IIII)V", constructorParams, jProperty))
 				{
 					return false;
 				}
@@ -1650,7 +1650,7 @@ static bool loadAnimations(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		newAnimParams[1].d = cAnimation->mDuration;
 		newAnimParams[2].d = cAnimation->mTicksPerSecond;
 
-		if (!createInstance(env, "org/gearvrf/jassimp/AiAnimation", "(Ljava/lang/String;DD)V", newAnimParams, jAnimation))
+		if (!createInstance(env, "com/samsungxr/jassimp/AiAnimation", "(Ljava/lang/String;DD)V", newAnimParams, jAnimation))
 		{
 			return false;
 		}
@@ -1689,7 +1689,7 @@ static bool loadAnimations(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			newNodeAnimParams[4].i = cNodeAnim->mPreState;
 			newNodeAnimParams[5].i = cNodeAnim->mPostState;
 
-			if (!createInstance(env, "org/gearvrf/jassimp/AiNodeAnim", "(Ljava/lang/String;IIIII)V", newNodeAnimParams, jNodeAnim))
+			if (!createInstance(env, "com/samsungxr/jassimp/AiNodeAnim", "(Ljava/lang/String;IIIII)V", newNodeAnimParams, jNodeAnim))
 			{
 				return false;
 			}
@@ -1755,7 +1755,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapColorParams[2].f = cLight->mColorDiffuse.b;
 		jobject jDiffuse;
 		SmartLocalRef refDiffuse(env, jDiffuse);
-		if (!callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jDiffuse))
+		if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jDiffuse))
 		{
 			return false;
 		}
@@ -1765,7 +1765,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapColorParams[2].f = cLight->mColorSpecular.b;
 		jobject jSpecular;
 		SmartLocalRef refSpecular(env, jSpecular);
-		if (!callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jSpecular))
+		if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jSpecular))
 		{
 			return false;
 		}
@@ -1775,7 +1775,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapColorParams[2].f = cLight->mColorAmbient.b;
 		jobject jAmbient;
 		SmartLocalRef refAmbient(env, jAmbient);
-		if (!callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jAmbient))
+		if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jAmbient))
 		{
 			return false;
 		}
@@ -1788,7 +1788,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapVec3Params[2].f = cLight->mPosition.z;
 		jobject jPosition;
 		SmartLocalRef refPosition(env, jPosition);
-		if (!callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jPosition))
+		if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jPosition))
 		{
 			return false;
 		}
@@ -1798,7 +1798,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapVec3Params[2].f = cLight->mPosition.z;
 		jobject jDirection;
 		SmartLocalRef refDirection(env, jDirection);
-		if (!callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jDirection))
+		if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jDirection))
 		{
 			return false;
 		}
@@ -1822,7 +1822,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		params[10].f = cLight->mAngleInnerCone;
 		params[11].f = cLight->mAngleOuterCone;
 		
-		if (!createInstance(env, "org/gearvrf/jassimp/AiLight", "(Ljava/lang/String;ILjava/lang/Object;Ljava/lang/Object;FFFLjava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;FF)V",
+		if (!createInstance(env, "com/samsungxr/jassimp/AiLight", "(Ljava/lang/String;ILjava/lang/Object;Ljava/lang/Object;FFFLjava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;FF)V",
 			params, jLight))
 		{
 			return false;
@@ -1868,7 +1868,7 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapPositionParams[2].f = cCamera->mPosition.z;
 		jobject jPosition;
 		SmartLocalRef refPosition(env, jPosition);
-		if (!callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jPosition))
+		if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jPosition))
 		{
 			return false;
 		}
@@ -1878,7 +1878,7 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapPositionParams[2].f = cCamera->mUp.z;
 		jobject jUp;
 		SmartLocalRef refUp(env, jUp);
-		if (!callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jUp))
+		if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jUp))
 		{
 			return false;
 		}
@@ -1888,7 +1888,7 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapPositionParams[2].f = cCamera->mLookAt.z;
 		jobject jLookAt;
 		SmartLocalRef refLookAt(env, jLookAt);
-		if (!callStaticObject(env, "org/gearvrf/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jLookAt))
+		if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jLookAt))
 		{
 			return false;
 		}
@@ -1909,7 +1909,7 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		params[6].f = cCamera->mClipPlaneFar;
 		params[7].f = cCamera->mAspect;
 		
-		if (!createInstance(env, "org/gearvrf/jassimp/AiCamera", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;FFFF)V",
+		if (!createInstance(env, "com/samsungxr/jassimp/AiCamera", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;FFFF)V",
 			params, jCamera))
 		{
 			return false;
@@ -1960,14 +1960,14 @@ static bool loadEmbeddedTextures(JNIEnv *env, const aiScene* cScene, jobject& jS
         texparams[0].i = cTex->mWidth;
         texparams[1].i = cTex->mHeight;
         texparams[2].l = jType;
-        if (!createInstance(env, "org/gearvrf/jassimp/AiTexture",
+        if (!createInstance(env, "com/samsungxr/jassimp/AiTexture",
                             "(IILjava/lang/String;)V", texparams, jTex))
         {
-            throwException(env, "Cannot find constructor org/gearvrf/jassimp/AiTexture(int, int, String");
+            throwException(env, "Cannot find constructor com/samsungxr/jassimp/AiTexture(int, int, String");
         }
 
         /* copy pixels into memory array */
-        jbyteArray jPixels = (jbyteArray) callj(env, jTex, "org/gearvrf/jassimp/AiTexture", "getByteData", "()[B");
+        jbyteArray jPixels = (jbyteArray) callj(env, jTex, "com/samsungxr/jassimp/AiTexture", "getByteData", "()[B");
         if (jPixels == NULL)
         {
             throwException(env, "cannot allocate buffer for pixel data");
@@ -1995,63 +1995,63 @@ static bool loadEmbeddedTextures(JNIEnv *env, const aiScene* cScene, jobject& jS
     return true;
 }
 
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getVKeysize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getVKeysize
   (JNIEnv *env, jclass jClazz)
 {
 	const int res = sizeof(aiVectorKey);
 	return res;
 }
 
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getQKeysize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getQKeysize
   (JNIEnv *env, jclass jClazz)
 {
 	const int res = sizeof(aiQuatKey);
 	return res;
 }
 
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getV3Dsize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getV3Dsize
   (JNIEnv *env, jclass jClazz)
 {
 	const int res = sizeof(aiVector3D);
 	return res;
 }
 
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getfloatsize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getfloatsize
   (JNIEnv *env, jclass jClazz)
 {
 	const int res = sizeof(float);
 	return res;
 }
 
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getintsize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getintsize
   (JNIEnv *env, jclass jClazz)
 {
 	const int res = sizeof(int);
 	return res;
 }
 
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getuintsize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getuintsize
   (JNIEnv *env, jclass jClazz)
 {
 	const int res = sizeof(unsigned int);
 	return res;
 }
 
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getdoublesize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getdoublesize
   (JNIEnv *env, jclass jClazz)
 {
 	const int res = sizeof(double);
 	return res;
 }
 
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getlongsize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getlongsize
   (JNIEnv *env, jclass jClazz)
 {
 	const int res = sizeof(long);
 	return res;
 }
 
-JNIEXPORT jstring JNICALL Java_org_gearvrf_jassimp_Jassimp_getErrorString
+JNIEXPORT jstring JNICALL Java_com_samsungxr_jassimp_Jassimp_getErrorString
   (JNIEnv *env, jclass jClazz)
 {
 	const char *err = gLastErrorString.c_str();
@@ -2065,7 +2065,7 @@ JNIEXPORT jstring JNICALL Java_org_gearvrf_jassimp_Jassimp_getErrorString
 }
 
 
-JNIEXPORT jobject JNICALL Java_org_gearvrf_jassimp_Jassimp_aiImportFile
+JNIEXPORT jobject JNICALL Java_com_samsungxr_jassimp_Jassimp_aiImportFile
   (JNIEnv *env, jclass jClazz, jstring jFilename, jlong postProcess, jobject ioSystem)
 {
 	jobject jScene = NULL; 
@@ -2093,7 +2093,7 @@ JNIEXPORT jobject JNICALL Java_org_gearvrf_jassimp_Jassimp_aiImportFile
 		goto error;
 	}
 
-	if (!createInstance(env, "org/gearvrf/jassimp/AiScene", jScene)) 
+	if (!createInstance(env, "com/samsungxr/jassimp/AiScene", jScene)) 
 	{
 		goto error;
 	}

@@ -13,30 +13,14 @@
  * limitations under the License.
  */
 
+
 /***************************************************************************
- * Printing Java stacktrace when native crash happens. Using tag gvrf
+ * Logging macros.
  ***************************************************************************/
 
-#ifndef GVR_JAVA_STACK_TRACE_H_
-#define GVR_JAVA_STACK_TRACE_H_
+#ifndef SXR_THREAD_H_
+#define SXR_THREAD_H_
 
-#include "jni.h"
-#include <string>
-
-namespace gvr {
-static void printJavaCallStack(JNIEnv *env, const char *msg) {
-    jclass exception = env->FindClass(
-            "org/gearvrf/utility/GVRJniException");
-    jclass global_ex = (jclass) env->NewGlobalRef(exception);
-    jmethodID throw_ex = env->GetStaticMethodID(global_ex, "printCallStack",
-            "(Ljava/lang/String;)V");
-    env->CallStaticVoidMethod(global_ex, throw_ex, env->NewStringUTF(msg));
-}
-
-static void printJavaCallStack(JNIEnv *env, const std::string &msg) {
-    printJavaCallStack(env, msg.c_str());
-}
-
-}
+void setCurrentThreadAffinityMask(int cpu1, int cpu2, int cpu3);
 
 #endif

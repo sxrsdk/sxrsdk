@@ -21,10 +21,10 @@
 #include <mutex>
 #include <vector>
 #include "objects/hybrid_object.h"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 #include "gl/gl_headers.h"  // for GL_TEXTURE_xxx
 
-namespace gvr {
+namespace sxr {
 class Texture;
 class TextureParameters;
 

@@ -16,10 +16,10 @@
 #ifndef JNI_UTILS_H
 #define JNI_UTILS_H
 
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 #include <jni.h>
 
-namespace gvr {
+namespace sxr {
 
 static jmethodID GetStaticMethodID(JNIEnv& env, jclass clazz, const char * name,
         const char * signature) {

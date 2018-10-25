@@ -19,27 +19,27 @@
  ***************************************************************************/
 
 #include "box_collider.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C"
 {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeBoxCollider_ctor(JNIEnv *env, jobject obj);
+    Java_com_samsungxr_NativeBoxCollider_ctor(JNIEnv *env, jobject obj);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBoxCollider_setHalfExtents(JNIEnv * env,
+    Java_com_samsungxr_NativeBoxCollider_setHalfExtents(JNIEnv * env,
             jobject obj, jlong jcollider, jfloat x, jfloat y, jfloat z);
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeBoxCollider_ctor(JNIEnv *env, jobject obj)
+Java_com_samsungxr_NativeBoxCollider_ctor(JNIEnv *env, jobject obj)
 {
     return reinterpret_cast<jlong>(new BoxCollider());
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeBoxCollider_setHalfExtents(JNIEnv *env,
+Java_com_samsungxr_NativeBoxCollider_setHalfExtents(JNIEnv *env,
         jobject obj, jlong jcollider, jfloat x, jfloat y, jfloat z)
 {
     BoxCollider *collider = reinterpret_cast<BoxCollider *>(jcollider);

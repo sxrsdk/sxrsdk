@@ -29,7 +29,7 @@
 #define SHADOW_CHANGED 4
 #define REBUILD_SHADERS 8
 
-namespace gvr {
+namespace sxr {
 
 LightList::~LightList()
 {

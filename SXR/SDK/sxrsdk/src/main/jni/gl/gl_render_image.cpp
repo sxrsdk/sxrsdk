@@ -22,7 +22,7 @@
 #include "gl_imagetex.h"
 #include "gl_headers.h"
 
-namespace gvr {
+namespace sxr {
 
 GLRenderImage::GLRenderImage(int width, int height, int layers, GLuint texId, bool marktexParamsDirty)
         : GLRenderImage(width, height, layers)

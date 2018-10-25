@@ -24,7 +24,7 @@
 #include <map>
 #include "objects/hybrid_object.h"
 
-namespace gvr {
+namespace sxr {
 class Shader;
 
 /**

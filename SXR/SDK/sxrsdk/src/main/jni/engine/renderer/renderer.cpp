@@ -29,7 +29,7 @@
 #define BATCH_SIZE 60
 bool do_batching = false;
 
-namespace gvr {
+namespace sxr {
 
 Renderer* gRenderer = nullptr;
 bool use_multiview= false;

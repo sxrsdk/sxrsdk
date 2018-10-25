@@ -17,7 +17,7 @@
 #include "bitmap_transparency.h"
 #include "astc_transparency.h"
 
-namespace gvr {
+namespace sxr {
 BitmapImage::BitmapImage(int format) :
             Image(Image::BITMAP, format),mData(NULL),
             mBitmap(NULL), mJava(NULL), mHasTransparency(false)

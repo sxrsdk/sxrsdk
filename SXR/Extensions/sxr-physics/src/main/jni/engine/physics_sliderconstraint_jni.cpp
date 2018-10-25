@@ -21,67 +21,67 @@
 #include "physics_rigidbody.h"
 #include "bullet/bullet_sliderconstraint.h"
 
-namespace gvr {
+namespace sxr {
 
     extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_ctor(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_ctor(JNIEnv * env, jobject obj,
                                                            jlong rigidBodyB);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_setAngularLowerLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_setAngularLowerLimit(JNIEnv * env,
                                                                            jobject obj,
                                                                            jlong jsliderconstraint,
                                                                            jfloat limit);
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_getAngularLowerLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_getAngularLowerLimit(JNIEnv * env,
                                                                            jobject obj,
                                                                            jlong jsliderconstraint);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_setAngularUpperLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_setAngularUpperLimit(JNIEnv * env,
                                                                            jobject obj,
                                                                            jlong jsliderconstraint,
                                                                            jfloat limit);
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_getAngularUpperLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_getAngularUpperLimit(JNIEnv * env,
                                                                            jobject obj,
                                                                            jlong jsliderconstraint);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_setLinearLowerLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_setLinearLowerLimit(JNIEnv * env,
                                                                           jobject obj,
                                                                           jlong jsliderconstraint,
                                                                           jfloat limit);
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_getLinearLowerLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_getLinearLowerLimit(JNIEnv * env,
                                                                           jobject obj,
                                                                           jlong jsliderconstraint);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_setLinearUpperLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_setLinearUpperLimit(JNIEnv * env,
                                                                           jobject obj,
                                                                           jlong jsliderconstraint,
                                                                           jfloat limit);
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_getLinearUpperLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_getLinearUpperLimit(JNIEnv * env,
                                                                           jobject obj,
                                                                           jlong jsliderconstraint);
     }
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_ctor(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_ctor(JNIEnv * env, jobject obj,
                                                            jlong rigidBodyB) {
         return reinterpret_cast<jlong>(new
                 BulletSliderConstraint(reinterpret_cast<PhysicsRigidBody*>(rigidBodyB)));
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_setAngularLowerLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_setAngularLowerLimit(JNIEnv * env,
                                                                            jobject obj,
                                                                            jlong jsliderconstraint,
                                                                            jfloat limit) {
@@ -89,14 +89,14 @@ namespace gvr {
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_getAngularLowerLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_getAngularLowerLimit(JNIEnv * env,
                                                                            jobject obj,
                                                                            jlong jsliderconstraint) {
         return reinterpret_cast<PhysicsSliderConstraint*>(jsliderconstraint)->getAngularLowerLimit();
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_setAngularUpperLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_setAngularUpperLimit(JNIEnv * env,
                                                                            jobject obj,
                                                                            jlong jsliderconstraint,
                                                                            jfloat limit) {
@@ -104,14 +104,14 @@ namespace gvr {
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_getAngularUpperLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_getAngularUpperLimit(JNIEnv * env,
                                                                            jobject obj,
                                                                            jlong jsliderconstraint) {
         return reinterpret_cast<PhysicsSliderConstraint*>(jsliderconstraint)->getAngularUpperLimit();
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_setLinearLowerLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_setLinearLowerLimit(JNIEnv * env,
                                                                           jobject obj,
                                                                           jlong jsliderconstraint,
                                                                           jfloat limit) {
@@ -119,14 +119,14 @@ namespace gvr {
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_getLinearLowerLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_getLinearLowerLimit(JNIEnv * env,
                                                                           jobject obj,
                                                                           jlong jsliderconstraint) {
         return reinterpret_cast<PhysicsSliderConstraint*>(jsliderconstraint)->getLinearLowerLimit();
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_setLinearUpperLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_setLinearUpperLimit(JNIEnv * env,
                                                                           jobject obj,
                                                                           jlong jsliderconstraint,
                                                                           jfloat limit) {
@@ -134,7 +134,7 @@ namespace gvr {
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DSliderConstraint_getLinearUpperLimit(JNIEnv * env,
+    Java_com_samsungxr_physics_Native3DSliderConstraint_getLinearUpperLimit(JNIEnv * env,
                                                                           jobject obj,
                                                                           jlong jsliderconstraint) {
         return reinterpret_cast<PhysicsSliderConstraint*>(jsliderconstraint)->getLinearUpperLimit();

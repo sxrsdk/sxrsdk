@@ -27,7 +27,7 @@
 #include "collider_shape_types.h"
 #include "objects/scene_object.h"
 
-namespace gvr {
+namespace sxr {
 class Collider;
 
 /*

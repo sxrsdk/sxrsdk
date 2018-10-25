@@ -28,7 +28,7 @@
 #include "objects/components/skin.h"
 #include "objects/scene_object.h"
 
-namespace gvr {
+namespace sxr {
 
 VulkanShader::VulkanShader(int id,
                const char* signature,
@@ -234,4 +234,4 @@ VulkanShader::~VulkanShader() { }
         return stream.str();
     }
 
-} /* namespace gvr */
+} /* namespace sxr */

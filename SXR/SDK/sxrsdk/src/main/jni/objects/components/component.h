@@ -24,7 +24,7 @@
 #include "objects/hybrid_object.h"
 #include "component_types.h"
 
-namespace gvr {
+namespace sxr {
 class SceneObject;
 class Scene;
 

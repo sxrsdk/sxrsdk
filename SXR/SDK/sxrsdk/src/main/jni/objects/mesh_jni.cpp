@@ -20,25 +20,25 @@
 
 #include "mesh.h"
 
-#include "util/gvr_log.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_log.h"
+#include "util/sxr_jni.h"
 #include "android/asset_manager_jni.h"
 
-namespace gvr {
+namespace sxr {
     extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeMesh_ctorBuffers(JNIEnv* env, jobject obj, jlong vbuf, jlong ibuf);
+    Java_com_samsungxr_NativeMesh_ctorBuffers(JNIEnv* env, jobject obj, jlong vbuf, jlong ibuf);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeMesh_setVertexBuffer(JNIEnv* env,
+    Java_com_samsungxr_NativeMesh_setVertexBuffer(JNIEnv* env,
                                                 jobject obj, jlong jmesh, jlong vertices);
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeMesh_setIndexBuffer(JNIEnv* env,
+    Java_com_samsungxr_NativeMesh_setIndexBuffer(JNIEnv* env,
                                                jobject obj, jlong jmesh, jlong indices);
 };
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeMesh_ctorBuffers(JNIEnv* env, jobject obj, jlong jvertices, jlong jindices)
+    Java_com_samsungxr_NativeMesh_ctorBuffers(JNIEnv* env, jobject obj, jlong jvertices, jlong jindices)
     {
         VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvertices);
         IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jindices);
@@ -52,7 +52,7 @@ namespace gvr {
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeMesh_setVertexBuffer(JNIEnv * env,
+    Java_com_samsungxr_NativeMesh_setVertexBuffer(JNIEnv * env,
                                             jobject obj, jlong jmesh, jlong jverts)
     {
         Mesh* mesh = reinterpret_cast<Mesh*>(jmesh);
@@ -61,7 +61,7 @@ namespace gvr {
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeMesh_setIndexBuffer(JNIEnv * env,
+    Java_com_samsungxr_NativeMesh_setIndexBuffer(JNIEnv * env,
                                                 jobject obj, jlong jmesh, jlong jindices)
     {
         Mesh* mesh = reinterpret_cast<Mesh*>(jmesh);
@@ -70,7 +70,7 @@ namespace gvr {
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeMesh_getSphereBound(JNIEnv * env,
+    Java_com_samsungxr_NativeMesh_getSphereBound(JNIEnv * env,
                                                jobject obj, jlong jmesh, jfloatArray jsphere) {
         Mesh* mesh = reinterpret_cast<Mesh*>(jmesh);
         const BoundingVolume& bvol = mesh->getBoundingVolume();

@@ -6,12 +6,12 @@
 #include "GLES3/gl3.h"
 #endif
 #include "gl/gl_program.h"
-#include "util/gvr_gl.h"
+#include "util/sxr_gl.h"
 
 #include "../objects/index_buffer.h"
 
 
-namespace gvr {
+namespace sxr {
     class GlDelete;
     class Shader;
     class Renderer;
@@ -34,5 +34,5 @@ namespace gvr {
         GLuint      mIBufferID;
     };
 
-} // end gvrf
+} // end sxrf
 

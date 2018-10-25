@@ -19,7 +19,7 @@
 
 #include "VrApi_Types.h"
 
-namespace gvr {
+namespace sxr {
 
 class ConfigurationHelper
 {

@@ -24,7 +24,7 @@
 #include "objects/components/component.h"
 #include "objects/components/transform.h"
 
-namespace gvr {
+namespace sxr {
 
 class PhysicsRigidBody : public Component {
  public:

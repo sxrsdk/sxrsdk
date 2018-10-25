@@ -21,7 +21,7 @@
 #include "render_target.h"
 #include "objects/textures/render_texture.h"
 
-namespace gvr {
+namespace sxr {
 class Renderer;
 class GLFrameBuffer;
 

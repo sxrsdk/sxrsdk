@@ -35,7 +35,7 @@
 
 //#define DEBUG_SHADER 1
 
-namespace gvr {
+namespace sxr {
 class Mesh;
 
 /**

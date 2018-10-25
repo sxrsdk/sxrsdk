@@ -20,78 +20,78 @@
 
 #include "shader_data.h"
 #include "engine/renderer/renderer.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr
+namespace sxr
 {
 extern "C" {
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeShaderData_ctor(JNIEnv* env, jobject obj, jstring udesc, jstring tdesc);
+Java_com_samsungxr_NativeShaderData_ctor(JNIEnv* env, jobject obj, jstring udesc, jstring tdesc);
 
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeShaderData_useGpuBuffer(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_useGpuBuffer(JNIEnv* env,
                                                jobject obj, jlong jshader_data, jboolean  flag);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeShaderData_setTexture(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_setTexture(JNIEnv* env,
                                              jobject obj, jlong jshader_data, jstring key,
                                              jlong jtexture);
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeShaderData_getFloat(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_getFloat(JNIEnv* env,
                                            jobject obj, jlong jshader_data, jstring key);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeShaderData_setFloat(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_setFloat(JNIEnv* env,
                                            jobject obj, jlong jshader_data, jstring key,
                                            jfloat value);
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeShaderData_getInt(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_getInt(JNIEnv* env,
                                          jobject obj, jlong jshader_data, jstring key);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setInt(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_setInt(JNIEnv* env,
                                          jobject obj, jlong jshader_data, jstring key,
                                          jint value);
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeShaderData_getFloatVec(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_getFloatVec(JNIEnv* env,
                                               jobject obj, jlong jshader_data, jstring key);
 
 JNIEXPORT jintArray JNICALL
-Java_org_gearvrf_NativeShaderData_getIntVec(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_getIntVec(JNIEnv* env,
                                             jobject obj, jlong jshader_data, jstring key);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setFloatVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_setFloatVec(JNIEnv* env, jobject obj,
                                               jlong jshader_data, jstring key, jfloatArray jvec,
                                               jint size);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setIntVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_setIntVec(JNIEnv* env, jobject obj,
                                             jlong jshader_data, jstring key, jintArray jvec,
                                             jint size);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setVec2(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_setVec2(JNIEnv* env,
                                           jobject obj, jlong jshader_data, jstring key,
                                           jfloat x, jfloat y);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setVec3(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_setVec3(JNIEnv* env,
                                           jobject obj, jlong jshader_data, jstring key,
                                           jfloat x, jfloat y, jfloat z);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setVec4(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_setVec4(JNIEnv* env,
                                           jobject obj, jlong jshader_data, jstring key,
                                           jfloat x, jfloat y,
                                           jfloat z, jfloat w);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setMat4(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_setMat4(JNIEnv* env,
                                           jobject obj, jlong jshader_data, jstring key,
                                           jfloat x1, jfloat y1, jfloat z1, jfloat w1,
                                           jfloat x2, jfloat y2, jfloat z2, jfloat w2,
@@ -99,36 +99,36 @@ Java_org_gearvrf_NativeShaderData_setMat4(JNIEnv* env,
                                           jfloat x4, jfloat y4, jfloat z4, jfloat w4);
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeShaderData_getMat4(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_getMat4(JNIEnv* env,
                                           jobject obj, jlong jshader_data, jstring key);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_hasUniform(JNIEnv*, jobject, jlong, jstring);
+Java_com_samsungxr_NativeShaderData_hasUniform(JNIEnv*, jobject, jlong, jstring);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_hasTexture(JNIEnv*, jobject, jlong, jstring);
+Java_com_samsungxr_NativeShaderData_hasTexture(JNIEnv*, jobject, jlong, jstring);
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeShaderData_getShaderType(JNIEnv*, jobject, jlong shader_data, jstring name);
+Java_com_samsungxr_NativeShaderData_getShaderType(JNIEnv*, jobject, jlong shader_data, jstring name);
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeShaderData_makeShaderLayout(JNIEnv*, jobject, jlong shader_data);
+Java_com_samsungxr_NativeShaderData_makeShaderLayout(JNIEnv*, jobject, jlong shader_data);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_copyUniforms(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_copyUniforms(JNIEnv* env,
                                              jobject obj, jlong jdest, jlong jsrc);
 
 };
 
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeShaderData_useGpuBuffer(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_useGpuBuffer(JNIEnv* env,
                                                jobject obj, jlong jshader_data, jboolean  flag){
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
     shader_data->useGPUBuffer(flag);
 }
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeShaderData_ctor(JNIEnv* env, jobject obj, jstring junidesc, jstring jtexdesc)
+Java_com_samsungxr_NativeShaderData_ctor(JNIEnv* env, jobject obj, jstring junidesc, jstring jtexdesc)
 {
     const char* uni_desc = env->GetStringUTFChars(junidesc, 0);
     const char* tex_desc = env->GetStringUTFChars(jtexdesc, 0);
@@ -140,7 +140,7 @@ Java_org_gearvrf_NativeShaderData_ctor(JNIEnv* env, jobject obj, jstring junides
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeShaderData_setTexture(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_setTexture(JNIEnv* env, jobject obj,
                                              jlong jshader_data, jstring key, jlong jtexture)
 {
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
@@ -151,7 +151,7 @@ Java_org_gearvrf_NativeShaderData_setTexture(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setIntVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_setIntVec(JNIEnv* env, jobject obj,
                                             jlong jshader_data, jstring key, jintArray jvec,
                                             jint size)
 {
@@ -165,7 +165,7 @@ Java_org_gearvrf_NativeShaderData_setIntVec(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setFloatVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_setFloatVec(JNIEnv* env, jobject obj,
                                               jlong jshader_data, jstring key, jfloatArray jvec,
                                               jint size)
 {
@@ -179,7 +179,7 @@ Java_org_gearvrf_NativeShaderData_setFloatVec(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeShaderData_getFloatVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_getFloatVec(JNIEnv* env, jobject obj,
                                               jlong jshader_data, jstring key)
 {
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
@@ -199,7 +199,7 @@ Java_org_gearvrf_NativeShaderData_getFloatVec(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jintArray JNICALL
-Java_org_gearvrf_NativeShaderData_getIntVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_getIntVec(JNIEnv* env, jobject obj,
                                             jlong jshader_data, jstring key)
 {
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
@@ -219,7 +219,7 @@ Java_org_gearvrf_NativeShaderData_getIntVec(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeShaderData_getFloat(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_getFloat(JNIEnv* env, jobject obj,
                                            jlong jshader_data, jstring key)
 {
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
@@ -231,7 +231,7 @@ Java_org_gearvrf_NativeShaderData_getFloat(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeShaderData_setFloat(JNIEnv* env, jobject obj, jlong jshader_data,
+Java_com_samsungxr_NativeShaderData_setFloat(JNIEnv* env, jobject obj, jlong jshader_data,
                                            jstring key, jfloat value)
 {
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
@@ -241,7 +241,7 @@ Java_org_gearvrf_NativeShaderData_setFloat(JNIEnv* env, jobject obj, jlong jshad
 }
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeShaderData_getInt(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_getInt(JNIEnv* env, jobject obj,
                                          jlong jshader_data, jstring key)
 {
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
@@ -253,7 +253,7 @@ Java_org_gearvrf_NativeShaderData_getInt(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setInt(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_setInt(JNIEnv* env, jobject obj,
                                          jlong jshader_data, jstring key, jint value)
 {
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
@@ -265,7 +265,7 @@ Java_org_gearvrf_NativeShaderData_setInt(JNIEnv* env, jobject obj,
 
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setVec2(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_setVec2(JNIEnv* env, jobject obj,
                                           jlong jshader_data, jstring key, jfloat x, jfloat y)
 {
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
@@ -277,7 +277,7 @@ Java_org_gearvrf_NativeShaderData_setVec2(JNIEnv* env, jobject obj,
 
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setVec3(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_setVec3(JNIEnv* env, jobject obj,
                                           jlong jshader_data, jstring key, jfloat x, jfloat y,
                                           jfloat z)
 {
@@ -290,7 +290,7 @@ Java_org_gearvrf_NativeShaderData_setVec3(JNIEnv* env, jobject obj,
 
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setVec4(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_setVec4(JNIEnv* env, jobject obj,
                                           jlong jshader_data, jstring key, jfloat x, jfloat y,
                                           jfloat z, jfloat w)
 {
@@ -302,7 +302,7 @@ Java_org_gearvrf_NativeShaderData_setVec4(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_setMat4(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_setMat4(JNIEnv* env,
                                           jobject obj, jlong jshader_data, jstring key,
                                           jfloat x1, jfloat y1, jfloat z1, jfloat w1,
                                           jfloat x2, jfloat y2, jfloat z2, jfloat w2,
@@ -318,14 +318,14 @@ Java_org_gearvrf_NativeShaderData_setMat4(JNIEnv* env,
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeShaderData_getMat4(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_getMat4(JNIEnv* env,
                                           jobject obj, jlong jshader_data, jstring key)
 {
-    return Java_org_gearvrf_NativeShaderData_getFloatVec(env, obj, jshader_data, key);
+    return Java_com_samsungxr_NativeShaderData_getFloatVec(env, obj, jshader_data, key);
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_hasTexture(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderData_hasTexture(JNIEnv* env, jobject obj,
                                              jlong jshader_data, jstring key)
 {
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
@@ -336,7 +336,7 @@ Java_org_gearvrf_NativeShaderData_hasTexture(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_hasUniform(JNIEnv* env, jobject obj, jlong jshader_data,
+Java_com_samsungxr_NativeShaderData_hasUniform(JNIEnv* env, jobject obj, jlong jshader_data,
                                              jstring key)
 {
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
@@ -348,7 +348,7 @@ Java_org_gearvrf_NativeShaderData_hasUniform(JNIEnv* env, jobject obj, jlong jsh
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeShaderData_getShaderType(JNIEnv* env, jobject, jlong jshader_data, jstring jname)
+Java_com_samsungxr_NativeShaderData_getShaderType(JNIEnv* env, jobject, jlong jshader_data, jstring jname)
 {
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
     const char* char_key = env->GetStringUTFChars(jname, 0);
@@ -358,7 +358,7 @@ Java_org_gearvrf_NativeShaderData_getShaderType(JNIEnv* env, jobject, jlong jsha
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeShaderData_makeShaderLayout(JNIEnv* env, jobject, jlong jshader_data)
+Java_com_samsungxr_NativeShaderData_makeShaderLayout(JNIEnv* env, jobject, jlong jshader_data)
 {
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
     const std::string& layout = shader_data->makeShaderLayout();
@@ -366,7 +366,7 @@ Java_org_gearvrf_NativeShaderData_makeShaderLayout(JNIEnv* env, jobject, jlong j
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeShaderData_copyUniforms(JNIEnv* env,
+Java_com_samsungxr_NativeShaderData_copyUniforms(JNIEnv* env,
                                                jobject obj, jlong jdest, jlong jsrc)
 {
     const ShaderData* src = reinterpret_cast<ShaderData*>(jsrc);

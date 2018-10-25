@@ -21,37 +21,37 @@
 #include "physics_rigidbody.h"
 #include "bullet/bullet_conetwistconstraint.h"
 
-namespace gvr {
+namespace sxr {
 
     extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_Native3DConeTwistConstraint_ctor(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConeTwistConstraint_ctor(JNIEnv *env, jobject obj,
                                                               jlong rigidBodyB, jfloatArray pivot,
                                                               const jfloatArray bodyRotation,
                                                               const jfloatArray coneRotation);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DConeTwistConstraint_setSwingLimit(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConeTwistConstraint_setSwingLimit(JNIEnv *env, jobject obj,
                                                                        jlong jconstraint,
                                                                        jfloat limit);
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DConeTwistConstraint_getSwingLimit(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConeTwistConstraint_getSwingLimit(JNIEnv *env, jobject obj,
                                                                        jlong jconstraint);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DConeTwistConstraint_setTwistLimit(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConeTwistConstraint_setTwistLimit(JNIEnv *env, jobject obj,
                                                                        jlong jconstraint,
                                                                        jfloat limit);
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DConeTwistConstraint_getTwistLimit(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConeTwistConstraint_getTwistLimit(JNIEnv *env, jobject obj,
                                                                        jlong jconstraint);
 
     }
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_Native3DConeTwistConstraint_ctor(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConeTwistConstraint_ctor(JNIEnv *env, jobject obj,
                                                               jlong rigidBodyB,
                                                               const jfloatArray pivot,
                                                               const jfloatArray bodyRotation,
@@ -66,27 +66,27 @@ namespace gvr {
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DConeTwistConstraint_setSwingLimit(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConeTwistConstraint_setSwingLimit(JNIEnv *env, jobject obj,
                                                                        jlong jconstraint,
                                                                        jfloat limit) {
         reinterpret_cast<PhysicsConeTwistConstraint*>(jconstraint)->setSwingLimit(limit);
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DConeTwistConstraint_getSwingLimit(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConeTwistConstraint_getSwingLimit(JNIEnv *env, jobject obj,
                                                                        jlong jconstraint) {
         return reinterpret_cast<PhysicsConeTwistConstraint*>(jconstraint)->getSwingLimit();
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DConeTwistConstraint_setTwistLimit(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConeTwistConstraint_setTwistLimit(JNIEnv *env, jobject obj,
                                                                        jlong jconstraint,
                                                                        jfloat limit) {
         reinterpret_cast<PhysicsConeTwistConstraint*>(jconstraint)->setTwistLimit(limit);
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DConeTwistConstraint_getTwistLimit(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConeTwistConstraint_getTwistLimit(JNIEnv *env, jobject obj,
                                                                        jlong jconstraint) {
         return reinterpret_cast<PhysicsConeTwistConstraint*>(jconstraint)->getTwistLimit();
     }

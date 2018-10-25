@@ -18,7 +18,7 @@
 #include "vk_render_to_texture.h"
 #include "../engine/renderer/vulkan_renderer.h"
 #include "vk_texture.h"
-namespace gvr{
+namespace sxr{
 VkRenderTexture::VkRenderTexture(int width, int height, int fboType, int layers, int sample_count):RenderTexture(sample_count), fbo(nullptr),mWidth(width), mHeight(height), mFboType(fboType), mLayers(layers), mSamples(sample_count){
     initVkData();
 }
@@ -107,27 +107,27 @@ void VkRenderTexture::createBufferForRenderedResult(){
 
     // Components currently hard coded to 4 since our Color buffer is VK_FORMAT_R8G8B8A8_UNORM
     ret = vkCreateBuffer(device,
-                         gvr::BufferCreateInfo(mWidth * mHeight *  4 * sizeof(uint8_t),
+                         sxr::BufferCreateInfo(mWidth * mHeight *  4 * sizeof(uint8_t),
                                                VK_BUFFER_USAGE_TRANSFER_DST_BIT), nullptr,
                          &readbackMemoryHandle);
-    GVR_VK_CHECK(!ret);
+    SXR_VK_CHECK(!ret);
 
     // Obtain the memory requirements for this buffer.
     vkGetBufferMemoryRequirements(device, readbackMemoryHandle, &mem_reqs);
-    GVR_VK_CHECK(!ret);
+    SXR_VK_CHECK(!ret);
 
     bool pass = vk_renderer->GetMemoryTypeFromProperties(mem_reqs.memoryTypeBits,
                                                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
                                                          &memoryTypeIndex);
-    GVR_VK_CHECK(pass);
+    SXR_VK_CHECK(pass);
 
     ret = vkAllocateMemory(device,
-                           gvr::MemoryAllocateInfo(mem_reqs.size, memoryTypeIndex), nullptr,
+                           sxr::MemoryAllocateInfo(mem_reqs.size, memoryTypeIndex), nullptr,
                            &readbackMemory);
-    GVR_VK_CHECK(!ret);
+    SXR_VK_CHECK(!ret);
 
     ret = vkBindBufferMemory(device, readbackMemoryHandle, readbackMemory, 0);
-    GVR_VK_CHECK(!ret);
+    SXR_VK_CHECK(!ret);
 }
 
 void VkRenderTexture::beginRendering(Renderer* renderer){
@@ -254,12 +254,12 @@ bool VkRenderTexture::readRenderResult(uint8_t *readback_buffer){
 
         uint8_t *data;
         err = vkWaitForFences(device, 1, &mWaitFence, VK_TRUE, 4294967295U);
-        GVR_VK_CHECK(!err);
+        SXR_VK_CHECK(!err);
         err = vkMapMemory(device, readbackMemory, 0,
                           fbo->getImageSize(COLOR_IMAGE), 0, (void **) &data);
 
         *readback_buffer = data;
-        GVR_VK_CHECK(!err);
+        SXR_VK_CHECK(!err);
 
         return true;
 

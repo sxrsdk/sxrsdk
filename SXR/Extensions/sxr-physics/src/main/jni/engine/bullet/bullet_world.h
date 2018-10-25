@@ -33,7 +33,7 @@ class btCollisionDispatcher;
 class btSequentialImpulseConstraintSolver;
 class btBroadphaseInterface;
 
-namespace gvr {
+namespace sxr {
 
 class PhysicsConstraint;
 class PhysicsRigidBody;

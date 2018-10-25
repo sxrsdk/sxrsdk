@@ -13,9 +13,9 @@
 
 #include "objects/components/component.h"
 
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
-namespace gvr {
+namespace sxr {
 class Bone: public Component {
 public:
     Bone();

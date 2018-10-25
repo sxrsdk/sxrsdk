@@ -16,7 +16,7 @@
 #include <unordered_map>
 #include "vulkan_flags.h"
 
-namespace  gvr {
+namespace  sxr {
 
     namespace vkflags {
 

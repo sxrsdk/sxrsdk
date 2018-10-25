@@ -42,7 +42,7 @@
 static btMatrix3x3 matrixInvIdty(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f);
 static btTransform transformInvIdty(matrixInvIdty);
 
-namespace gvr {
+namespace sxr {
 
 static void createBulletRigidBodies(btBulletWorldImporter *importer)
 {
@@ -68,7 +68,7 @@ static void createBulletP2pConstraint(btPoint2PointConstraint *p2p, bool needRot
 
     if (needRotate)
     {
-        // Adapting pivot to GVRf coordinates system
+        // Adapting pivot to SXRf coordinates system
         btVector3 pivot = p2p->getPivotInA();
         float t = pivot.getZ();
         pivot.setZ(-pivot.getY());

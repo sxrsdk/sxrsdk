@@ -22,7 +22,7 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
-namespace gvr {
+namespace sxr {
 
 glm::mat4 OrthogonalCamera::getProjectionMatrix() const {
     return glm::ortho(left_clipping_distance_, right_clipping_distance_,

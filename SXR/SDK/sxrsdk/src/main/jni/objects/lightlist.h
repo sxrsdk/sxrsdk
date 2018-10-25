@@ -23,7 +23,7 @@
 
 #include <functional>
 #include "engine/renderer/renderer.h"
-namespace gvr {
+namespace sxr {
 
 class Light;
 

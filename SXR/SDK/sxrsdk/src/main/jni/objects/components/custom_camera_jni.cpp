@@ -20,16 +20,16 @@
 
 #include "custom_camera.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeCustomCamera_ctor(JNIEnv * env,
+Java_com_samsungxr_NativeCustomCamera_ctor(JNIEnv * env,
         jobject obj);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCustomCamera_setProjectionMatrix(
+Java_com_samsungxr_NativeCustomCamera_setProjectionMatrix(
         JNIEnv * env, jobject obj, jlong jcustom_camera, jfloat x1, jfloat y1,
         jfloat z1, jfloat w1, jfloat x2, jfloat y2, jfloat z2, jfloat w2,
         jfloat x3, jfloat y3, jfloat z3, jfloat w3, jfloat x4, jfloat y4,
@@ -38,13 +38,13 @@ Java_org_gearvrf_NativeCustomCamera_setProjectionMatrix(
 ;
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeCustomCamera_ctor(JNIEnv * env,
+Java_com_samsungxr_NativeCustomCamera_ctor(JNIEnv * env,
         jobject obj) {
     return reinterpret_cast<jlong>(new CustomCamera());
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCustomCamera_setProjectionMatrix(
+Java_com_samsungxr_NativeCustomCamera_setProjectionMatrix(
         JNIEnv * env, jobject obj, jlong jcustom_camera, jfloat x1, jfloat y1,
         jfloat z1, jfloat w1, jfloat x2, jfloat y2, jfloat z2, jfloat w2,
         jfloat x3, jfloat y3, jfloat z3, jfloat w3, jfloat x4, jfloat y4,

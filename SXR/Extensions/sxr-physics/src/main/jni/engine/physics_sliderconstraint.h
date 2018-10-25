@@ -22,7 +22,7 @@
 
 #include "physics_constraint.h"
 
-namespace gvr {
+namespace sxr {
 
     class PhysicsSliderConstraint : public PhysicsConstraint {
     public:

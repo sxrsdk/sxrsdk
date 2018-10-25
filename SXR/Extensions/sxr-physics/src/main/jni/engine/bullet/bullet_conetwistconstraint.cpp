@@ -25,7 +25,7 @@
 
 const char tag[] = "BulletConeTwistConstrN";
 
-namespace gvr {
+namespace sxr {
     BulletConeTwistConstraint::BulletConeTwistConstraint(PhysicsRigidBody *rigidBodyB,
                                                          PhysicsVec3 pivot,
                                                          PhysicsMat3x3 const &bodyRotation,

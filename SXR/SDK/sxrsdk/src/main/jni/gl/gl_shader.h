@@ -19,7 +19,7 @@
 #include "shaders/shader.h"
 #include "gl/gl_program.h"
 
-namespace gvr {
+namespace sxr {
     class Mesh;
     class GLMaterial;
     class LightList;

@@ -15,11 +15,11 @@
 
 #include "ovr_configuration_helper.h"
 #include "jni_utils.h"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
-static const char* app_settings_name = "org/gearvrf/OvrVrAppSettings";
+static const char* app_settings_name = "com/samsungxr/OvrVrAppSettings";
 
-namespace gvr {
+namespace sxr {
 
 ConfigurationHelper::ConfigurationHelper(JNIEnv& env, jobject vrAppSettings)
     : env_(env), vrAppSettings_(vrAppSettings)
@@ -39,7 +39,7 @@ void ConfigurationHelper::getFramebufferConfiguration(JNIEnv& env, int& fbWidthO
 {
     LOGV("ConfigurationHelper: --- framebuffer configuration ---");
 
-    jfieldID fid = env.GetFieldID(vrAppSettingsClass_, "eyeBufferParams", "Lorg/gearvrf/utility/VrAppSettings$EyeBufferParams;");
+    jfieldID fid = env.GetFieldID(vrAppSettingsClass_, "eyeBufferParams", "Lcom/samsungxr/utility/VrAppSettings$EyeBufferParams;");
     const jobject parms = env.GetObjectField(vrAppSettings_, fid);
     const jclass parmsClass = env.GetObjectClass(parms);
 
@@ -63,7 +63,7 @@ void ConfigurationHelper::getFramebufferConfiguration(JNIEnv& env, int& fbWidthO
     multiSamplesOut = env.GetIntField(parms, fid);
     LOGV("ConfigurationHelper: --- multisamples: %d", multiSamplesOut);
 
-    fid = env.GetFieldID(parmsClass, "colorFormat", "Lorg/gearvrf/utility/VrAppSettings$EyeBufferParams$ColorFormat;");
+    fid = env.GetFieldID(parmsClass, "colorFormat", "Lcom/samsungxr/utility/VrAppSettings$EyeBufferParams$ColorFormat;");
     jobject textureFormat = env.GetObjectField(parms, fid);
     jmethodID mid = env.GetMethodID(env.GetObjectClass(textureFormat),"getValue","()I");
     int textureFormatValue = env.CallIntMethod(textureFormat, mid);
@@ -97,7 +97,7 @@ void ConfigurationHelper::getFramebufferConfiguration(JNIEnv& env, int& fbWidthO
     LOGV("ConfigurationHelper: --- resolve depth: %d", resolveDepthOut);
 
     fid = env.GetFieldID(parmsClass, "depthFormat",
-            "Lorg/gearvrf/utility/VrAppSettings$EyeBufferParams$DepthFormat;");
+            "Lcom/samsungxr/utility/VrAppSettings$EyeBufferParams$DepthFormat;");
     jobject depthFormat = env.GetObjectField(parms, fid);
     mid = env.GetMethodID(env.GetObjectClass(depthFormat), "getValue", "()I");
     int depthFormatValue = env.CallIntMethod(depthFormat, mid);
@@ -130,7 +130,7 @@ void ConfigurationHelper::getMultiviewConfiguration(JNIEnv& env, bool& useMultiv
 void ConfigurationHelper::getModeConfiguration(JNIEnv& env, bool& allowPowerSaveOut, bool& resetWindowFullscreenOut) {
     LOGV("ConfigurationHelper: --- mode configuration ---");
 
-    jfieldID fid = env.GetFieldID(vrAppSettingsClass_, "modeParams", "Lorg/gearvrf/utility/VrAppSettings$ModeParams;");
+    jfieldID fid = env.GetFieldID(vrAppSettingsClass_, "modeParams", "Lcom/samsungxr/utility/VrAppSettings$ModeParams;");
     jobject modeParms = env.GetObjectField(vrAppSettings_, fid);
     jclass modeParmsClass = env.GetObjectClass(modeParms);
 
@@ -145,7 +145,7 @@ void ConfigurationHelper::getModeConfiguration(JNIEnv& env, bool& allowPowerSave
 void ConfigurationHelper::getPerformanceConfiguration(JNIEnv& env, ovrPerformanceParms& parmsOut) {
     LOGV("ConfigurationHelper: --- performance configuration ---");
 
-    jfieldID fid = env.GetFieldID(vrAppSettingsClass_, "performanceParams", "Lorg/gearvrf/utility/VrAppSettings$PerformanceParams;");
+    jfieldID fid = env.GetFieldID(vrAppSettingsClass_, "performanceParams", "Lcom/samsungxr/utility/VrAppSettings$PerformanceParams;");
     jobject parms = env.GetObjectField(vrAppSettings_, fid);
     jclass parmsClass = env.GetObjectClass(parms);
 
@@ -162,7 +162,7 @@ void ConfigurationHelper::getSceneViewport(JNIEnv& env, int& viewport_x, int& vi
     LOGV("ConfigurationHelper: --- viewport configuration ---");
     int x, y, width, height;
 
-    jfieldID fid = env.GetFieldID(vrAppSettingsClass_, "sceneParams", "Lorg/gearvrf/OvrVrAppSettings$SceneParams;");
+    jfieldID fid = env.GetFieldID(vrAppSettingsClass_, "sceneParams", "Lcom/samsungxr/OvrVrAppSettings$SceneParams;");
     jobject parms = env.GetObjectField(vrAppSettings_, fid);
     jclass parmsClass = env.GetObjectClass(parms);
 

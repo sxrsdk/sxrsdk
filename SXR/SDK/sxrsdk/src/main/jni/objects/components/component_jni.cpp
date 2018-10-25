@@ -16,35 +16,35 @@
 
 #include "component.h"
 #include "component.inl"
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeComponent_getType(JNIEnv * env,
+    Java_com_samsungxr_NativeComponent_getType(JNIEnv * env,
             jobject obj, jlong jcomponent);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeComponent_setOwnerObject(JNIEnv * env,
+    Java_com_samsungxr_NativeComponent_setOwnerObject(JNIEnv * env,
             jobject obj, jlong jcomponent, jlong jowner);
 
     JNIEXPORT jboolean JNICALL
-    Java_org_gearvrf_NativeComponent_isEnabled(JNIEnv * env, jobject obj, jlong jcomponent);
+    Java_com_samsungxr_NativeComponent_isEnabled(JNIEnv * env, jobject obj, jlong jcomponent);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeComponent_setEnable(JNIEnv * env, jobject obj, jlong jlight, jboolean flag);
+    Java_com_samsungxr_NativeComponent_setEnable(JNIEnv * env, jobject obj, jlong jlight, jboolean flag);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeComponent_addChildComponent(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_NativeComponent_addChildComponent(JNIEnv * env, jobject obj,
                                                        jlong jgroup, jlong jcomponent);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeComponent_removeChildComponent(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_NativeComponent_removeChildComponent(JNIEnv * env, jobject obj,
                                                           jlong jgroup, jlong jcomponent);
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeComponent_getType(JNIEnv * env,
+Java_com_samsungxr_NativeComponent_getType(JNIEnv * env,
         jobject obj, jlong jcomponent)
 {
     Component* component = reinterpret_cast<Component*>(jcomponent);
@@ -53,7 +53,7 @@ Java_org_gearvrf_NativeComponent_getType(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeComponent_setOwnerObject(JNIEnv * env,
+Java_com_samsungxr_NativeComponent_setOwnerObject(JNIEnv * env,
         jobject obj, jlong jcomponent, jlong jowner)
 {
     Component* component = reinterpret_cast<Component*>(jcomponent);
@@ -62,21 +62,21 @@ Java_org_gearvrf_NativeComponent_setOwnerObject(JNIEnv * env,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeComponent_isEnabled(JNIEnv * env, jobject obj, jlong jcomponent)
+Java_com_samsungxr_NativeComponent_isEnabled(JNIEnv * env, jobject obj, jlong jcomponent)
 {
     Component* component = reinterpret_cast<Component*>(jcomponent);
     return component->enabled();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeComponent_setEnable(JNIEnv * env, jobject obj, jlong jcomponent, jboolean flag)
+Java_com_samsungxr_NativeComponent_setEnable(JNIEnv * env, jobject obj, jlong jcomponent, jboolean flag)
 {
     Component* component = reinterpret_cast<Component*>(jcomponent);
     component->set_enable((bool) flag);
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeComponent_addChildComponent(JNIEnv * env, jobject obj,
+Java_com_samsungxr_NativeComponent_addChildComponent(JNIEnv * env, jobject obj,
                                                    jlong jgroup, jlong jcomponent)
 {
     Component* group = reinterpret_cast<Component*>(jgroup);
@@ -85,7 +85,7 @@ Java_org_gearvrf_NativeComponent_addChildComponent(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeComponent_removeChildComponent(JNIEnv * env, jobject obj,
+Java_com_samsungxr_NativeComponent_removeChildComponent(JNIEnv * env, jobject obj,
                                                       jlong jgroup, jlong jcomponent)
 {
     Component* group = reinterpret_cast<Component*>(jgroup);

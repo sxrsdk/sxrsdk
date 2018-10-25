@@ -28,7 +28,7 @@
 #include "vulkan_index_buffer.h"
 
 typedef unsigned long Long;
-namespace gvr
+namespace sxr
 {
 struct VulkanRenderPass : public RenderPass
 {

@@ -18,43 +18,43 @@
  ***************************************************************************/
 
 #include <engine/renderer/renderer.h>
-#include "util/gvr_jni.h"
-#include "util/gvr_log.h"
+#include "util/sxr_jni.h"
+#include "util/sxr_log.h"
 #include "render_pass.h"
 #include "objects/shader_data.h"
 
-namespace gvr {
+namespace sxr {
 
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeRenderPass_ctor(JNIEnv * env, jobject obj);
+    Java_com_samsungxr_NativeRenderPass_ctor(JNIEnv * env, jobject obj);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeRenderPass_setMaterial(JNIEnv* env,
+    Java_com_samsungxr_NativeRenderPass_setMaterial(JNIEnv* env,
             jobject obj, jlong jrender_pass, jlong jmaterial);
 
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeRenderPass_setCullFace(JNIEnv* env,
+    Java_com_samsungxr_NativeRenderPass_setCullFace(JNIEnv* env,
             jobject obj, jlong jrender_pass, jint jcull_face);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeRenderPass_setShader(JNIEnv* env,
+    Java_com_samsungxr_NativeRenderPass_setShader(JNIEnv* env,
             jobject obj, jlong jrender_pass, jint jshaderid, jboolean jUse_multiview);
 
     JNIEXPORT jint JNICALL
-    Java_org_gearvrf_NativeRenderPass_getShader(JNIEnv* env,
+    Java_com_samsungxr_NativeRenderPass_getShader(JNIEnv* env,
             jobject obj, jlong jrender_pass, jboolean useMultiview);
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeRenderPass_ctor(JNIEnv * env, jobject obj)
+Java_com_samsungxr_NativeRenderPass_ctor(JNIEnv * env, jobject obj)
 {
     return reinterpret_cast<jlong>(Renderer::getInstance()->createRenderPass());
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeRenderPass_setMaterial(JNIEnv* env,
+Java_com_samsungxr_NativeRenderPass_setMaterial(JNIEnv* env,
         jobject obj, jlong jrender_pass, jlong jmaterial)
 {
     RenderPass* pass = reinterpret_cast<RenderPass*>(jrender_pass);
@@ -63,7 +63,7 @@ Java_org_gearvrf_NativeRenderPass_setMaterial(JNIEnv* env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeRenderPass_setCullFace(JNIEnv* env,
+Java_com_samsungxr_NativeRenderPass_setCullFace(JNIEnv* env,
         jobject obj, jlong jrender_pass, jint jcull_face)
 {
     RenderPass* pass = reinterpret_cast<RenderPass*>(jrender_pass);
@@ -71,7 +71,7 @@ Java_org_gearvrf_NativeRenderPass_setCullFace(JNIEnv* env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeRenderPass_setShader(JNIEnv* env,
+Java_com_samsungxr_NativeRenderPass_setShader(JNIEnv* env,
         jobject obj, jlong jrender_pass, jint jshaderid, jboolean jUse_multiview)
 {
     RenderPass* pass = reinterpret_cast<RenderPass*>(jrender_pass);
@@ -79,7 +79,7 @@ Java_org_gearvrf_NativeRenderPass_setShader(JNIEnv* env,
 }
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeRenderPass_getShader(JNIEnv* env,
+Java_com_samsungxr_NativeRenderPass_getShader(JNIEnv* env,
      jobject obj, jlong jrender_pass, jboolean useMultiview)
 {
     RenderPass* pass = reinterpret_cast<RenderPass*>(jrender_pass);

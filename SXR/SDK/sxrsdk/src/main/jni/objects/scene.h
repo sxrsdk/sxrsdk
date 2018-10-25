@@ -33,7 +33,7 @@
 #include "objects/scene_object.h"
 
 
-namespace gvr {
+namespace sxr {
 
 class Light;
 class Collider;

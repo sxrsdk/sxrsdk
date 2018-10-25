@@ -23,7 +23,7 @@
 
 #include "gl/gl_headers.h"
 
-namespace gvr {
+namespace sxr {
 
 class GLFrameBuffer {
 public:

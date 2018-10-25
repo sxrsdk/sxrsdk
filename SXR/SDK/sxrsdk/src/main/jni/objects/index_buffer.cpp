@@ -8,9 +8,9 @@
 #include <sstream>
 #include <cstring>
 #include "index_buffer.h"
-#include "../util/gvr_log.h"
+#include "../util/sxr_log.h"
 
-namespace gvr {
+namespace sxr {
 
     IndexBuffer::IndexBuffer(int bytesPerIndex, int count)
     : mIndexCount(0),
@@ -226,5 +226,5 @@ namespace gvr {
         LOGV("%s", os.str().c_str());
     }
 
-} // end gvrf
+} // end sxrsdk
 

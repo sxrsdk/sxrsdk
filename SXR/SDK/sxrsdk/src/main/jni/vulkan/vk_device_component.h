@@ -24,7 +24,7 @@
  *
  */
 
-namespace gvr {
+namespace sxr {
     class VKDeviceComponent {
 
     public:

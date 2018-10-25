@@ -20,7 +20,7 @@
 #include "objects/components/shadow_map.h"
 #include "objects/textures/render_texture.h"
 
-namespace gvr
+namespace sxr
 {
     Light::~Light()
     { }

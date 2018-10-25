@@ -19,7 +19,7 @@
 #include "objects/components/skeleton.h"
 #include "objects/components/skin.h"
 
-namespace gvr
+namespace sxr
 {
     void GLRenderData::render(Shader* shader, Renderer* renderer)
     {

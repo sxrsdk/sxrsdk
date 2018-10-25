@@ -17,7 +17,7 @@
 #include "../objects/components/render_target.h"
 #include "vulkan_headers.h"
 
-namespace gvr{
+namespace sxr{
 
 class Scene;
 class Renderer;

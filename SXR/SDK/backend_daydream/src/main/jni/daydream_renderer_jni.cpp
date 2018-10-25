@@ -19,7 +19,7 @@
 
 #define JNI_METHOD(return_type, method_name) \
   JNIEXPORT return_type JNICALL              \
-      Java_org_gearvrf_DaydreamRenderer_##method_name
+      Java_com_samsungxr_DaydreamRenderer_##method_name
 
 
 namespace {
@@ -34,13 +34,13 @@ inline DaydreamRenderer *native(jlong ptr) {
 }  // anonymous namespace
 
 extern "C" {
-JNIEXPORT void JNICALL Java_org_gearvrf_DayDreamControllerReader_setNativeBuffer(JNIEnv * env, jclass clazz, jlong nativeRenderer,
+JNIEXPORT void JNICALL Java_com_samsungxr_DayDreamControllerReader_setNativeBuffer(JNIEnv * env, jclass clazz, jlong nativeRenderer,
                                                                                 jobject jreadback_buffer) {
   float *data = (float *) env->GetDirectBufferAddress(jreadback_buffer);
  DaydreamRenderer* daydreamRenderer = reinterpret_cast<DaydreamRenderer*>(nativeRenderer);
  daydreamRenderer->setFloatBuffer(data);
 }
-JNIEXPORT void JNICALL Java_org_gearvrf_DayDreamControllerReader_updateHandedness(JNIEnv * env, jclass clazz, jlong nativeRenderer) {
+JNIEXPORT void JNICALL Java_com_samsungxr_DayDreamControllerReader_updateHandedness(JNIEnv * env, jclass clazz, jlong nativeRenderer) {
       DaydreamRenderer* daydreamRenderer = reinterpret_cast<DaydreamRenderer*>(nativeRenderer);
       daydreamRenderer->updateHandedness();
 }

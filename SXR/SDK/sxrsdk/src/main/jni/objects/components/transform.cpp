@@ -25,7 +25,7 @@
 #include <math.h>
 #include <glm/gtx/matrix_decompose.hpp>
 
-namespace gvr {
+namespace sxr {
 
 Transform::Transform() :
         Component(Transform::getComponentType()), position_(glm::vec3(0.0f, 0.0f, 0.0f)),

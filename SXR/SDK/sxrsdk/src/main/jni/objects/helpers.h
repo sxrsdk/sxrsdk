@@ -25,7 +25,7 @@ enum DIRTY_BITS {
     MAT_DATA = 8,
 };
 
-namespace gvr {
+namespace sxr {
 
 static void dirtyImpl(std::unordered_set<std::shared_ptr<u_short>>& dirty_flags,DIRTY_BITS bit) {
     for (std::unordered_set<std::shared_ptr<u_short>>::iterator it = dirty_flags.begin();

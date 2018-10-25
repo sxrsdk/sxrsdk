@@ -21,71 +21,71 @@
 #include <engine/renderer/renderer.h>
 #include "objects/vertex_buffer.h"
 
-#include "util/gvr_log.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_log.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
     extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_ctor(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_ctor(JNIEnv* env, jobject obj,
                                              jstring descriptor, int vertexCount);
     JNIEXPORT jintArray JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_getIntArray(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_getIntArray(JNIEnv* env, jobject obj,
                                                     jlong jvbuf, jstring attribName);
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_setIntArray(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_setIntArray(JNIEnv* env, jobject obj,
                                                     jlong jvbuf, jstring attribName,
                                                     jintArray data, jint stride, jint ofs);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_setIntVec(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_setIntVec(JNIEnv* env, jobject obj,
                                                   jlong jvbuf, jstring attribName,
                                                   jintArray data, jint stride, jint ofs);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_getIntVec(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_getIntVec(JNIEnv* env, jobject obj,
                                                   jlong jvbuf, jstring attribName,
                                                   jobject jintbuf, jint stride, jint ofs);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_getFloatVec(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_getFloatVec(JNIEnv* env, jobject obj,
                                                     jlong jvbuf, jstring attribName,
                                                     jobject jfloatbuf, jint stride, jint ofs);
 
     JNIEXPORT jfloatArray JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_getFloatArray(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_getFloatArray(JNIEnv * env, jobject obj,
                                                       jlong jvbuf, jstring attribName);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_setFloatArray(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_setFloatArray(JNIEnv* env, jobject obj,
                                                     jlong jvbuf, jstring attribName,
                                                     jfloatArray data, jint stride, jint ofs);
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_setFloatVec(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_setFloatVec(JNIEnv* env, jobject obj,
                                                     jlong jvbuf, jstring attribName,
                                                     jobject jfloatbuf, jint stride, jint ofs);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_isSet(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_isSet(JNIEnv* env, jobject obj,
                                               jlong jvbuf, jstring attribName);
     JNIEXPORT int JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_getVertexCount(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_getVertexCount(JNIEnv* env, jobject obj,
                                                       jlong jvbuf);
 
     JNIEXPORT int JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_getAttributeSize(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_getAttributeSize(JNIEnv* env, jobject obj,
                                                         jlong jvbuf, jstring attribName);
 
     JNIEXPORT int JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_getBoundingVolume(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_getBoundingVolume(JNIEnv* env, jobject obj,
                                                          jlong jvbuf, jfloatArray outputArray);
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeVertexBuffer_dump(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeVertexBuffer_dump(JNIEnv* env, jobject obj,
                                                           jlong jvbuf, jstring attrName);
     };
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeVertexBuffer_ctor(JNIEnv* env, jobject obj, jstring descriptor, int vertexCount)
+Java_com_samsungxr_NativeVertexBuffer_ctor(JNIEnv* env, jobject obj, jstring descriptor, int vertexCount)
 {
     const char* char_desc = env->GetStringUTFChars(descriptor, 0);
     VertexBuffer* vbuf = Renderer::getInstance()->createVertexBuffer(char_desc, vertexCount);
@@ -94,7 +94,7 @@ Java_org_gearvrf_NativeVertexBuffer_ctor(JNIEnv* env, jobject obj, jstring descr
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeVertexBuffer_getFloatVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeVertexBuffer_getFloatVec(JNIEnv* env, jobject obj,
                                                 jlong jvbuf, jstring attribName,
                                                 jobject jfloatbuf, jint stride, jint ofs)
 {
@@ -112,7 +112,7 @@ Java_org_gearvrf_NativeVertexBuffer_getFloatVec(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeVertexBuffer_getFloatArray(JNIEnv * env, jobject obj,
+Java_com_samsungxr_NativeVertexBuffer_getFloatArray(JNIEnv * env, jobject obj,
                                                 jlong jvbuf, jstring attribName)
 {
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
@@ -133,7 +133,7 @@ Java_org_gearvrf_NativeVertexBuffer_getFloatArray(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT jintArray JNICALL
-Java_org_gearvrf_NativeVertexBuffer_getIntArray(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeVertexBuffer_getIntArray(JNIEnv* env, jobject obj,
                                                 jlong jvbuf, jstring attribName)
 {
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
@@ -154,7 +154,7 @@ Java_org_gearvrf_NativeVertexBuffer_getIntArray(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeVertexBuffer_setIntArray(JNIEnv * env, jobject obj,
+Java_com_samsungxr_NativeVertexBuffer_setIntArray(JNIEnv * env, jobject obj,
                                                 jlong jvbuf, jstring attribName,
                                                 jintArray jdata, jint stride, jint ofs)
 {
@@ -170,7 +170,7 @@ Java_org_gearvrf_NativeVertexBuffer_setIntArray(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeVertexBuffer_getIntVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeVertexBuffer_getIntVec(JNIEnv* env, jobject obj,
                                               jlong jvbuf, jstring attribName, jobject jintbuf,
                                               jint stride, jint ofs)
 {
@@ -188,7 +188,7 @@ Java_org_gearvrf_NativeVertexBuffer_getIntVec(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeVertexBuffer_setFloatArray(JNIEnv * env, jobject obj,
+Java_com_samsungxr_NativeVertexBuffer_setFloatArray(JNIEnv * env, jobject obj,
                                                 jlong jvbuf, jstring attribName,
                                                 jfloatArray jdata, jint stride, jint ofs)
 {
@@ -203,7 +203,7 @@ Java_org_gearvrf_NativeVertexBuffer_setFloatArray(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeVertexBuffer_setFloatVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeVertexBuffer_setFloatVec(JNIEnv* env, jobject obj,
                                                 jlong jvbuf, jstring attribName,
                                                 jobject jfloatbuf, jint stride, jint ofs)
 {
@@ -221,7 +221,7 @@ Java_org_gearvrf_NativeVertexBuffer_setFloatVec(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeVertexBuffer_setIntVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeVertexBuffer_setIntVec(JNIEnv* env, jobject obj,
                                               jlong jvbuf, jstring attribName,
                                               jintArray jdata, jint stride, jint ofs)
 {
@@ -237,7 +237,7 @@ Java_org_gearvrf_NativeVertexBuffer_setIntVec(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeVertexBuffer_isSet(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeVertexBuffer_isSet(JNIEnv* env, jobject obj,
                                           jlong jvbuf, jstring attribName)
 {
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
@@ -248,14 +248,14 @@ Java_org_gearvrf_NativeVertexBuffer_isSet(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT int JNICALL
-Java_org_gearvrf_NativeVertexBuffer_getVertexCount(JNIEnv* env, jobject obj, jlong jvbuf)
+Java_com_samsungxr_NativeVertexBuffer_getVertexCount(JNIEnv* env, jobject obj, jlong jvbuf)
 {
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
     return vbuf->getVertexCount();
 }
 
 JNIEXPORT int JNICALL
-Java_org_gearvrf_NativeVertexBuffer_getAttributeSize(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeVertexBuffer_getAttributeSize(JNIEnv* env, jobject obj,
                                                      jlong jvbuf, jstring attribName)
 {
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
@@ -266,7 +266,7 @@ Java_org_gearvrf_NativeVertexBuffer_getAttributeSize(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT int JNICALL
-Java_org_gearvrf_NativeVertexBuffer_getBoundingVolume(JNIEnv* env, jobject,
+Java_com_samsungxr_NativeVertexBuffer_getBoundingVolume(JNIEnv* env, jobject,
                                                       jlong jvbuf, jfloatArray outputArray)
 {
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
@@ -318,7 +318,7 @@ Java_org_gearvrf_NativeVertexBuffer_getBoundingVolume(JNIEnv* env, jobject,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeVertexBuffer_dump(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeVertexBuffer_dump(JNIEnv* env, jobject obj,
                                          jlong jvbuf, jstring attrName)
 {
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "util/gvr_log.h"
-#include "gvr_cpp_stack_trace.h"
+#include "util/sxr_log.h"
+#include "sxr_cpp_stack_trace.h"
 
 #include <iostream>
 #include <sstream>

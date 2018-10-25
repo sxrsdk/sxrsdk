@@ -16,7 +16,7 @@
 #ifndef COMPONENT_INL_
 #define COMPONENT_INL_
 
-namespace gvr {
+namespace sxr {
 inline Component::Component() :
         HybridObject(), type_(0), owner_object_(0), enabled_(true) {
 }

@@ -19,23 +19,23 @@
 
 #include <engine/renderer/renderer.h>
 #include "cubemap_image.h"
-#include "util/gvr_jni.h"
-#include "util/gvr_java_stack_trace.h"
+#include "util/sxr_jni.h"
+#include "util/sxr_java_stack_trace.h"
 #include "android/asset_manager_jni.h"
 
 
-namespace gvr {
+namespace sxr {
     extern "C" {
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCubemapImage_update(JNIEnv * env, jobject obj, jlong jcubemap, jobjectArray bitmapArray);
+    Java_com_samsungxr_NativeCubemapImage_update(JNIEnv * env, jobject obj, jlong jcubemap, jobjectArray bitmapArray);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCubemapImage_updateCompressed(JNIEnv * env, jobject obj, jlong jcubemap,
+    Java_com_samsungxr_NativeCubemapImage_updateCompressed(JNIEnv * env, jobject obj, jlong jcubemap,
                                                jint width, jint height, jint imageSize, jobjectArray textureArray, jintArray joffsetArray);
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCubemapImage_update(JNIEnv * env,
+Java_com_samsungxr_NativeCubemapImage_update(JNIEnv * env,
                                            jobject obj, jlong jcubemap, jobjectArray bitmapArray)
 {
     jobject keep = env->NewLocalRef(bitmapArray);
@@ -45,7 +45,7 @@ Java_org_gearvrf_NativeCubemapImage_update(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCubemapImage_updateCompressed(JNIEnv* env,
+Java_com_samsungxr_NativeCubemapImage_updateCompressed(JNIEnv* env,
                                            jobject obj, jlong jcubemap,
                                            jint width, jint height, jint imageSize,
                                            jobjectArray textureArray, jintArray joffsetArray)

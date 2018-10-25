@@ -21,7 +21,7 @@
 #include <VrApi.h>
 #include "VrApi_Types.h"
 
-namespace gvr {
+namespace sxr {
 
 class FrameBufferObject {
 public:
@@ -63,6 +63,6 @@ private:
     GLenum translateVrapiFormatToInternal(const ovrTextureFormat format) const;
 };
 
-} //namespace gvr
+} //namespace sxr
 
 #endif /* _FRAMEBUFFEROBJECT_H_ */

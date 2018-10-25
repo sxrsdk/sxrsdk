@@ -22,7 +22,7 @@
 
 class btFixedConstraint;
 
-namespace gvr {
+namespace sxr {
 
     class PhysicsRigidBody;
     class BulletRigidBody;

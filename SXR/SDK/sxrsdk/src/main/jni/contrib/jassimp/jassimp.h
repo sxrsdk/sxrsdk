@@ -8,21 +8,21 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getVKeysize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getVKeysize
   (JNIEnv *, jclass);
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getQKeysize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getQKeysize
   (JNIEnv *, jclass);
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getV3Dsize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getV3Dsize
   (JNIEnv *, jclass);
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getfloatsize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getfloatsize
   (JNIEnv *, jclass);
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getintsize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getintsize
   (JNIEnv *, jclass);
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getuintsize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getuintsize
   (JNIEnv *, jclass);
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getdoublesize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getdoublesize
   (JNIEnv *, jclass);
-JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getlongsize
+JNIEXPORT jint JNICALL Java_com_samsungxr_jassimp_Jassimp_getlongsize
   (JNIEnv *, jclass);
 
 /*
@@ -30,7 +30,7 @@ JNIEXPORT jint JNICALL Java_org_gearvrf_jassimp_Jassimp_getlongsize
  * Method:    getErrorString
  * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_gearvrf_jassimp_Jassimp_getErrorString
+JNIEXPORT jstring JNICALL Java_com_samsungxr_jassimp_Jassimp_getErrorString
   (JNIEnv *, jclass);
 
 /*
@@ -38,7 +38,7 @@ JNIEXPORT jstring JNICALL Java_org_gearvrf_jassimp_Jassimp_getErrorString
  * Method:    aiImportFile
  * Signature: (Ljava/lang/String;J)Ljassimp/AiScene;
  */
-JNIEXPORT jobject JNICALL Java_org_gearvrf_jassimp_Jassimp_aiImportFile
+JNIEXPORT jobject JNICALL Java_com_samsungxr_jassimp_Jassimp_aiImportFile
   (JNIEnv *, jclass, jstring, jlong, jobject);
 
 #ifdef __cplusplus

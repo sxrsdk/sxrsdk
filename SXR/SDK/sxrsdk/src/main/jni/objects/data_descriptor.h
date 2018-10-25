@@ -22,7 +22,7 @@
 #include <functional>
 #include <string>
 
-namespace gvr {
+namespace sxr {
 
 /**
  * Data descriptor which defines the layout for uniform blocks

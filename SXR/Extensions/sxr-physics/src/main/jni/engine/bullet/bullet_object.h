@@ -18,7 +18,7 @@
 #define BULLET_OBJECT_H
 
 class SceneObject;
-namespace gvr {
+namespace sxr {
 
     class BulletObject {
     public:

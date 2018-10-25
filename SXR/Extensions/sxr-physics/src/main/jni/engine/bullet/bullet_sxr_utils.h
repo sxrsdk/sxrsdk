@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORK_BULLET_GVR_UTILS_H
-#define FRAMEWORK_BULLET_GVR_UTILS_H
+#ifndef FRAMEWORK_BULLET_SXR_UTILS_H
+#define FRAMEWORK_BULLET_SXR_UTILS_H
 
 #include "../physics_common.h"
 
@@ -27,7 +27,7 @@
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 
-namespace gvr {
+namespace sxr {
     btCollisionShape *convertCollider2CollisionShape(Collider *collider);
 
     btCollisionShape *convertSphereCollider2CollisionShape(SphereCollider *collider);
@@ -51,4 +51,4 @@ namespace gvr {
     }
 }
 
-#endif //FRAMEWORK_BULLET_GVR_UTILS_H
+#endif //FRAMEWORK_BULLET_SXR_UTILS_H

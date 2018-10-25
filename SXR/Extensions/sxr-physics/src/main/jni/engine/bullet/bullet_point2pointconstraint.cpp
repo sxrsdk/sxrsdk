@@ -9,7 +9,7 @@
 
 static const char tag[] = "BulletP2pConstrN";
 
-namespace gvr {
+namespace sxr {
 
     BulletPoint2PointConstraint::BulletPoint2PointConstraint(PhysicsRigidBody* rigidBodyB,
             float pivotInA[], float pivotInB[]) {

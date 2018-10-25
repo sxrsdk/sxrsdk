@@ -22,7 +22,7 @@
 #include "vk_bitmap_image.h"
 #include "vk_cubemap_image.h"
 
-namespace gvr {
+namespace sxr {
 
 VkSamplerAddressMode VkTexture::MapWrap[3] = { VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_REPEAT, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT };
 VkFilter VkTexture::MapFilter[] = { VK_FILTER_NEAREST, VK_FILTER_LINEAR};
@@ -87,7 +87,7 @@ void VkTexture::createSampler(TextureParameters& textureParameters, int maxLod) 
 
     VkResult err;
 
-    err = vkCreateSampler(vk_renderer->getDevice(), gvr::SamplerCreateInfo(min_filter_type_,
+    err = vkCreateSampler(vk_renderer->getDevice(), sxr::SamplerCreateInfo(min_filter_type_,
                                                                            mag_filter_type_,
                                                                            VK_SAMPLER_MIPMAP_MODE_NEAREST,
                                                                            wrap_s_type_,

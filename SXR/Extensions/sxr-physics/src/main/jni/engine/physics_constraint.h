@@ -18,7 +18,7 @@
 
 #include "../objects/scene_object.h"
 
-namespace gvr {
+namespace sxr {
 
     struct JointFeedback {
         float torqueA[3] = {0.0f, 0.0f, 0.0f};

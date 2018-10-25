@@ -19,7 +19,7 @@
 
 #include "gl/gl_image.h"
 
-namespace gvr {
+namespace sxr {
 GLenum GLImage::MapWrap[3] = { GL_CLAMP_TO_EDGE, GL_REPEAT, GL_MIRRORED_REPEAT };
 GLenum GLImage::MapFilter[6] = { GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST,
                         GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_LINEAR };

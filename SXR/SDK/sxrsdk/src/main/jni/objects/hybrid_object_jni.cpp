@@ -16,17 +16,17 @@
 
 #include "hybrid_object.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeHybridObject_delete(JNIEnv * env,
+Java_com_samsungxr_NativeHybridObject_delete(JNIEnv * env,
         jobject obj, jlong jhybrid_object);
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeHybridObject_delete(JNIEnv * env,
+Java_com_samsungxr_NativeHybridObject_delete(JNIEnv * env,
         jobject obj, jlong jhybrid_object) {
     delete reinterpret_cast<HybridObject*>(jhybrid_object);
 }

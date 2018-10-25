@@ -16,12 +16,12 @@
 
 #include "OVR_Platform.h"
 
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
 
 extern "C" {
 
-JNIEXPORT jint JNICALL Java_org_gearvrf_PlatformEntitlementCheck_create(JNIEnv* jni, jclass, jobject activity, jstring appId) {
+JNIEXPORT jint JNICALL Java_com_samsungxr_PlatformEntitlementCheck_create(JNIEnv* jni, jclass, jobject activity, jstring appId) {
     const ovrPlatformInitializeResult result = ovr_PlatformInitializeAndroid(
             jni->GetStringUTFChars(appId, 0), activity, jni);
 
@@ -38,7 +38,7 @@ JNIEXPORT jint JNICALL Java_org_gearvrf_PlatformEntitlementCheck_create(JNIEnv* 
 /**
  * @return 0 if indeterminate (keep on checking), -1 on failure, 1 on success
  */
-JNIEXPORT jint JNICALL Java_org_gearvrf_PlatformEntitlementCheck_processEntitlementCheckResponse(JNIEnv* jni, jclass) {
+JNIEXPORT jint JNICALL Java_com_samsungxr_PlatformEntitlementCheck_processEntitlementCheckResponse(JNIEnv* jni, jclass) {
 
     ovrMessage *response = ovr_PopMessage();
     if (response) {

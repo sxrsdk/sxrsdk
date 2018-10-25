@@ -14,7 +14,7 @@
  */
 #include "vulkanInfoWrapper.h"
 
-namespace gvr {
+namespace sxr {
     PipelineShaderStageCreateInfo::PipelineShaderStageCreateInfo(VkStructureType sType, VkShaderStageFlagBits stage,VkShaderModule&  module,const char* name):mInfo(){
         mInfo.sType = sType;
         mInfo.stage = stage;

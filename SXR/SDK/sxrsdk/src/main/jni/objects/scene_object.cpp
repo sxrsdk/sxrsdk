@@ -22,11 +22,11 @@
 #include "objects/components/camera.h"
 #include "objects/components/camera_rig.h"
 #include "objects/components/render_data.h"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 #include "mesh.h"
 #include "scene.h"
 
-namespace gvr {
+namespace sxr {
 
 SceneObject::SceneObject() :
         HybridObject(), name_(""), children_(), visible_(true), transform_dirty_(false), in_frustum_(

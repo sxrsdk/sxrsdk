@@ -25,7 +25,7 @@
 
 #include <android/log.h>
 
-namespace gvr {
+namespace sxr {
 
 BulletWorld::BulletWorld() {
     initialize();

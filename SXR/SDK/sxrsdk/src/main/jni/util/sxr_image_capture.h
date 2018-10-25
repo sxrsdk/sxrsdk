@@ -17,8 +17,8 @@
  * Save front bufer image
  ***************************************************************************/
 
-#ifndef GVR_CPP_IMAGE_CAPTURE_H_
-#define GVR_CPP_IMAGE_CAPTURE_H_
+#ifndef SXR_CPP_IMAGE_CAPTURE_H_
+#define SXR_CPP_IMAGE_CAPTURE_H_
 #include "gl/gl_headers.h"
 #include <vector>
 #include <string>
@@ -31,10 +31,10 @@ int write_truecolor_tga( int width, int height, GLubyte* valRGBA, char* fileName
 // Reads back in RGBA format.
 // Images are saved to /sdcard/image-xx.tga
 
-class GVRImageCapture final {
+class SXRImageCapture final {
 public:
-    explicit GVRImageCapture(uint width = 0, uint height = 0); // Default width and height for PBOs.
-    ~GVRImageCapture();
+    explicit SXRImageCapture(uint width = 0, uint height = 0); // Default width and height for PBOs.
+    ~SXRImageCapture();
     void captureImage(int startX, int startY, uint width, uint height, char* msg = NULL);
     void captureImage(int startX, int startY, char* msg = NULL);
     void saveAllImages();
@@ -58,4 +58,4 @@ private:
 
 };
 
-#endif // GVR_CPP_STACK_TRACE_H_
+#endif // SXR_CPP_STACK_TRACE_H_

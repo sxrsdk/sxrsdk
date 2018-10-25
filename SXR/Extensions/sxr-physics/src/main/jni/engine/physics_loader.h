@@ -18,7 +18,7 @@
 
 #include <cstddef>
 
-namespace gvr {
+namespace sxr {
 
 class PhysicsWorld;
 class PhysicsRigidBody;

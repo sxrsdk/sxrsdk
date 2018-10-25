@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "bullet_gvr_utils.h"
+#include "bullet_sxr_utils.h"
 
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 
-namespace gvr {
+namespace sxr {
 
 btCollisionShape *convertCollider2CollisionShape(Collider *collider) {
     btCollisionShape *shape = NULL;

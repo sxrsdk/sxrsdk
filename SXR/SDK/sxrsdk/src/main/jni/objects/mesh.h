@@ -28,7 +28,7 @@
 #include <unordered_set>
 #include "glm/glm.hpp"
 
-#include "util/gvr_gl.h"
+#include "util/sxr_gl.h"
 #include "objects/hybrid_object.h"
 #include "objects/shader_data.h"
 #include "objects/bounding_volume.h"
@@ -36,7 +36,7 @@
 #include "objects/index_buffer.h"
 #include "bounding_volume.h"
 
-namespace gvr {
+namespace sxr {
 class Skeleton;
 
 class Mesh: public HybridObject {

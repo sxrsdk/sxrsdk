@@ -21,7 +21,7 @@
 
 #define BATCH_SIZE 60
 
-namespace gvr {
+namespace sxr {
 Batch::Batch(int no_vertices, int no_indices) :
         draw_count_(0), vertex_count_(0), index_count_(0), vertex_limit_(no_vertices),
         indices_limit_(no_indices), renderdata_(nullptr),mesh_init_(false),

@@ -18,9 +18,9 @@
  ***************************************************************************/
 
 #include "bounding_volume.h"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
-namespace gvr {
+namespace sxr {
 
 BoundingVolume::BoundingVolume() {
     reset();

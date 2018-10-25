@@ -7,7 +7,7 @@
 #include "hybrid_object.h"
 #include "bounding_volume.h"
 
-namespace gvr {
+namespace sxr {
     class Shader;
     class Renderer;
     class IndexBuffer;
@@ -148,5 +148,5 @@ namespace gvr {
         int             mBoneFlags = 0;     // indicates which vertex attributes are bones
     };
 
-} // end gvrf
+} // end sxrf
 

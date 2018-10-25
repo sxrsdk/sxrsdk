@@ -17,29 +17,29 @@
 #include <engine/renderer/renderer.h>
 #include <objects/textures/render_texture.h>
 #include "ovr_activity.h"
-namespace gvr {
+namespace sxr {
     extern "C" {
 
-    JNIEXPORT long JNICALL Java_org_gearvrf_OvrActivityNative_onCreate(JNIEnv *jni, jclass,
+    JNIEXPORT long JNICALL Java_com_samsungxr_OvrActivityNative_onCreate(JNIEnv *jni, jclass,
                                                                        jobject activity,
                                                                        jobject vrAppSettings) {
-        GVRActivity *gvrActivity = new GVRActivity(*jni, activity, vrAppSettings);
-        return reinterpret_cast<long>(gvrActivity);
+        SXRActivity *sxrActivity = new SXRActivity(*jni, activity, vrAppSettings);
+        return reinterpret_cast<long>(sxrActivity);
     }
 
-    JNIEXPORT long JNICALL Java_org_gearvrf_OvrViewManager_getRenderTextureInfo(JNIEnv* jni, jclass clazz, jlong jactivity ,  jint index, jint eye){
-        GVRActivity* gvrActivity = reinterpret_cast<GVRActivity*>(jactivity);
-        return reinterpret_cast<long>(gvrActivity->getRenderTextureInfo(eye, index));
+    JNIEXPORT long JNICALL Java_com_samsungxr_OvrViewManager_getRenderTextureInfo(JNIEnv* jni, jclass clazz, jlong jactivity ,  jint index, jint eye){
+        SXRActivity* sxrActivity = reinterpret_cast<SXRActivity*>(jactivity);
+        return reinterpret_cast<long>(sxrActivity->getRenderTextureInfo(eye, index));
     }
 
-    JNIEXPORT void JNICALL Java_org_gearvrf_OvrActivityNative_onDestroy(JNIEnv * jni, jclass clazz, jlong appPtr) {
-        GVRActivity *activity = reinterpret_cast<GVRActivity*>(appPtr);
+    JNIEXPORT void JNICALL Java_com_samsungxr_OvrActivityNative_onDestroy(JNIEnv * jni, jclass clazz, jlong appPtr) {
+        SXRActivity *activity = reinterpret_cast<SXRActivity*>(appPtr);
         delete activity;
     }
 
-    JNIEXPORT void JNICALL Java_org_gearvrf_OvrActivityNative_setCameraRig(JNIEnv * jni, jclass clazz, jlong appPtr,
+    JNIEXPORT void JNICALL Java_com_samsungxr_OvrActivityNative_setCameraRig(JNIEnv * jni, jclass clazz, jlong appPtr,
                                                                            jlong cameraRig) {
-        GVRActivity *activity = reinterpret_cast<GVRActivity*>(appPtr);
+        SXRActivity *activity = reinterpret_cast<SXRActivity*>(appPtr);
         activity->setCameraRig(cameraRig);
     }
 
@@ -47,54 +47,54 @@ namespace gvr {
 // VrapiActivityHandler //
 // -------------------- //
 
-    JNIEXPORT void JNICALL Java_org_gearvrf_OvrVrapiActivityHandler_nativeLeaveVrMode(JNIEnv * jni, jclass clazz,
+    JNIEXPORT void JNICALL Java_com_samsungxr_OvrVrapiActivityHandler_nativeLeaveVrMode(JNIEnv * jni, jclass clazz,
                                                                                       jlong appPtr) {
-        GVRActivity *activity = reinterpret_cast<GVRActivity*>(appPtr);
+        SXRActivity *activity = reinterpret_cast<SXRActivity*>(appPtr);
         activity->leaveVrMode();
     }
 
-    JNIEXPORT void JNICALL Java_org_gearvrf_OvrVrapiActivityHandler_nativeOnSurfaceCreated(JNIEnv * jni, jclass clazz,
+    JNIEXPORT void JNICALL Java_com_samsungxr_OvrVrapiActivityHandler_nativeOnSurfaceCreated(JNIEnv * jni, jclass clazz,
                                                                                            jlong appPtr) {
-        GVRActivity *activity = reinterpret_cast<GVRActivity*>(appPtr);
+        SXRActivity *activity = reinterpret_cast<SXRActivity*>(appPtr);
         activity->onSurfaceCreated(*jni);
     }
 
-    JNIEXPORT void JNICALL Java_org_gearvrf_OvrVrapiActivityHandler_nativeOnSurfaceChanged(JNIEnv * jni, jclass,
+    JNIEXPORT void JNICALL Java_com_samsungxr_OvrVrapiActivityHandler_nativeOnSurfaceChanged(JNIEnv * jni, jclass,
                                                                                            jlong appPtr, jobject jsurface) {
-        GVRActivity *activity = reinterpret_cast<GVRActivity*>(appPtr);
+        SXRActivity *activity = reinterpret_cast<SXRActivity*>(appPtr);
         activity->onSurfaceChanged(*jni, jsurface);
     }
 
-    JNIEXPORT void JNICALL Java_org_gearvrf_OvrViewManager_drawEyes(JNIEnv * jni, jobject jViewManager,
+    JNIEXPORT void JNICALL Java_com_samsungxr_OvrViewManager_drawEyes(JNIEnv * jni, jobject jViewManager,
                                                                     jlong appPtr) {
-        GVRActivity *activity = reinterpret_cast<GVRActivity*>(appPtr);
+        SXRActivity *activity = reinterpret_cast<SXRActivity*>(appPtr);
         activity->onDrawFrame(jViewManager);
     }
     
-    JNIEXPORT void JNICALL Java_org_gearvrf_OvrVrapiActivityHandler_nativeShowConfirmQuit(JNIEnv * jni, jclass clazz, jlong appPtr) {
-        GVRActivity *activity = reinterpret_cast<GVRActivity*>(appPtr);
+    JNIEXPORT void JNICALL Java_com_samsungxr_OvrVrapiActivityHandler_nativeShowConfirmQuit(JNIEnv * jni, jclass clazz, jlong appPtr) {
+        SXRActivity *activity = reinterpret_cast<SXRActivity*>(appPtr);
         activity->showConfirmQuit();
     }
     
-    JNIEXPORT jint JNICALL Java_org_gearvrf_OvrVrapiActivityHandler_nativeInitializeVrApi(JNIEnv * jni, jclass clazz, jlong appPtr) {
-        GVRActivity *activity = reinterpret_cast<GVRActivity*>(appPtr);
+    JNIEXPORT jint JNICALL Java_com_samsungxr_OvrVrapiActivityHandler_nativeInitializeVrApi(JNIEnv * jni, jclass clazz, jlong appPtr) {
+        SXRActivity *activity = reinterpret_cast<SXRActivity*>(appPtr);
         return activity->initializeVrApi();
     }
     
-    JNIEXPORT void JNICALL Java_org_gearvrf_OvrVrapiActivityHandler_nativeUninitializeVrApi(JNIEnv *, jclass) {
-        GVRActivity::uninitializeVrApi();
+    JNIEXPORT void JNICALL Java_com_samsungxr_OvrVrapiActivityHandler_nativeUninitializeVrApi(JNIEnv *, jclass) {
+        SXRActivity::uninitializeVrApi();
     }
     
-    JNIEXPORT jboolean JNICALL Java_org_gearvrf_OvrConfigurationManager_nativeIsHmtConnected(JNIEnv* jni, jclass clazz, jlong appPtr) {
-        const GVRActivity *activity = reinterpret_cast<GVRActivity*>(appPtr);
+    JNIEXPORT jboolean JNICALL Java_com_samsungxr_OvrConfigurationManager_nativeIsHmtConnected(JNIEnv* jni, jclass clazz, jlong appPtr) {
+        const SXRActivity *activity = reinterpret_cast<SXRActivity*>(appPtr);
         return activity->isHmtConnected();
     }
     
-    JNIEXPORT jboolean JNICALL Java_org_gearvrf_GVRConfigurationManager_nativeUsingMultiview(JNIEnv* jni, jclass clazz, jlong appPtr) {
-        const GVRActivity *activity = reinterpret_cast<GVRActivity*>(appPtr);
+    JNIEXPORT jboolean JNICALL Java_com_samsungxr_SXRConfigurationManager_nativeUsingMultiview(JNIEnv* jni, jclass clazz, jlong appPtr) {
+        const SXRActivity *activity = reinterpret_cast<SXRActivity*>(appPtr);
         return activity->usingMultiview();
     }
     
     } //extern "C" {
     
-} //namespace gvr
+} //namespace sxr

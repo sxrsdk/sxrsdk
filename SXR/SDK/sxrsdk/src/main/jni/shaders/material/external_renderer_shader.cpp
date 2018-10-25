@@ -12,13 +12,13 @@
 #include "objects/components/texture_capturer.h"
 #include "objects/textures/external_image.h"
 
-static GVRF_ExternalRenderer externalRenderer = NULL;
+static SXRF_ExternalRenderer externalRenderer = NULL;
 
-void GVRF_installExternalRenderer(GVRF_ExternalRenderer fct) {
+void SXRF_installExternalRenderer(SXRF_ExternalRenderer fct) {
     externalRenderer = fct;
 }
 
-namespace gvr {
+namespace sxr {
 
 void ExternalRendererShader::render(RenderState* rstate, RenderData* render_data, ShaderData* mtl_unused) {
     if (externalRenderer == NULL) {

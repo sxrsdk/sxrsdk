@@ -22,15 +22,15 @@
 #include <gl/gl_shader.h>
 #include "shader_manager.h"
 #include "shader.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeShaderManager_ctor(JNIEnv* env, jobject obj);
+    Java_com_samsungxr_NativeShaderManager_ctor(JNIEnv* env, jobject obj);
 
     JNIEXPORT jint JNICALL
-    Java_org_gearvrf_NativeShaderManager_addShader(JNIEnv* env, jobject obj, jlong jshader_manager,
+    Java_com_samsungxr_NativeShaderManager_addShader(JNIEnv* env, jobject obj, jlong jshader_manager,
                                                     jstring signature,
                                                     jstring uniformDesc,
                                                     jstring textureDesc,
@@ -39,26 +39,26 @@ extern "C" {
                                                     jstring fragment_shader);
 
     JNIEXPORT jint JNICALL
-    Java_org_gearvrf_NativeShaderManager_getShader(JNIEnv* env, jobject obj, jlong jshader_manager, jstring signature);
+    Java_com_samsungxr_NativeShaderManager_getShader(JNIEnv* env, jobject obj, jlong jshader_manager, jstring signature);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeShaderManager_bindCalcMatrix(JNIEnv* env, jobject obj, jlong jshader_manager,
+    Java_com_samsungxr_NativeShaderManager_bindCalcMatrix(JNIEnv* env, jobject obj, jlong jshader_manager,
                                                         jint nativeShader, jclass javeShaderClass);
 
     JNIEXPORT jstring JNICALL
-    Java_org_gearvrf_NativeShaderManager_makeLayout(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeShaderManager_makeLayout(JNIEnv* env, jobject obj,
                                                    jstring descriptor, jstring blockName, jboolean useGPUBuffer);
 
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeShaderManager_ctor(JNIEnv* env, jobject obj)
+Java_com_samsungxr_NativeShaderManager_ctor(JNIEnv* env, jobject obj)
 {
     return reinterpret_cast<jlong>(new ShaderManager());
 }
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeShaderManager_addShader(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderManager_addShader(JNIEnv* env, jobject obj,
                                                 jlong jshader_manager,
                                                 jstring signature,
                                                 jstring uniformDesc,
@@ -85,7 +85,7 @@ Java_org_gearvrf_NativeShaderManager_addShader(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeShaderManager_getShader(JNIEnv * env, jobject obj, jlong jshader_manager, jstring signature)
+Java_com_samsungxr_NativeShaderManager_getShader(JNIEnv * env, jobject obj, jlong jshader_manager, jstring signature)
 {
     ShaderManager* shader_manager = reinterpret_cast<ShaderManager*>(jshader_manager);
     const char* sig_str = env->GetStringUTFChars(signature, 0);
@@ -101,7 +101,7 @@ Java_org_gearvrf_NativeShaderManager_getShader(JNIEnv * env, jobject obj, jlong 
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeShaderManager_bindCalcMatrix(JNIEnv* env, jobject obj, jlong jshader_manager,
+Java_com_samsungxr_NativeShaderManager_bindCalcMatrix(JNIEnv* env, jobject obj, jlong jshader_manager,
                                                     jint nativeShader, jclass javeShaderClass)
 {
     ShaderManager* shader_manager = reinterpret_cast<ShaderManager*>(jshader_manager);
@@ -115,7 +115,7 @@ Java_org_gearvrf_NativeShaderManager_bindCalcMatrix(JNIEnv* env, jobject obj, jl
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeShaderManager_makeLayout(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeShaderManager_makeLayout(JNIEnv* env, jobject obj,
                                                 jstring jdescriptor, jstring jblockName, jboolean useGPUBuffer)
 {
     const char* sdesc = env->GetStringUTFChars(jdescriptor, 0);

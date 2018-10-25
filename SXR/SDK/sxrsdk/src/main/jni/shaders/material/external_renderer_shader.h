@@ -5,14 +5,14 @@
 #ifndef EXTERNAL_RENDERER_SHADER_H_
 #define EXTERNAL_RENDERER_SHADER_H_
 
-typedef void (*GVRF_ExternalRenderer)(long data,
+typedef void (*SXRF_ExternalRenderer)(long data,
                                       const float* bounding_volume, int vcount,
                                       const float* projection, int pcount,
                                       const float* texCoords, int tcount,
                                       float opacity);
-extern "C" void GVRF_installExternalRenderer(GVRF_ExternalRenderer renderer);
+extern "C" void SXRF_installExternalRenderer(SXRF_ExternalRenderer renderer);
 
-namespace gvr {
+namespace sxr {
 class RenderState;
 class RenderData;
 class ShaderData;

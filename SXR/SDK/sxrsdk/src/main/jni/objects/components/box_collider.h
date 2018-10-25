@@ -23,7 +23,7 @@
 
 #include "collider.h"
 
-namespace gvr {
+namespace sxr {
 
 class BoxCollider : public Collider {
 public:

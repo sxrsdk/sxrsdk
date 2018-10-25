@@ -25,7 +25,7 @@
 
 #include "astc_transparency.h"
 
-namespace gvr {
+namespace sxr {
 
 /*
  * This file will extensively reference the documentation in the following URL:

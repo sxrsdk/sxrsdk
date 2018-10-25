@@ -2,10 +2,10 @@
  * Parameters related enumeration
  ***************************************************************************/
 
-#ifndef GVR_PARAMETERS_H_
-#define GVR_PARAMETERS_H_
+#ifndef SXR_PARAMETERS_H_
+#define SXR_PARAMETERS_H_
 
-namespace gvr {
+namespace sxr {
 enum ColorFormat {
     COLOR_565 = 0,
     COLOR_5551 = 1,

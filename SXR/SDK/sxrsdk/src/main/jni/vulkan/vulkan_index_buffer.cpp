@@ -23,7 +23,7 @@
 #include "vulkan_index_buffer.h"
 #include "vulkan_shader.h"
 
-namespace gvr {
+namespace sxr {
     VulkanIndexBuffer::VulkanIndexBuffer(int bytesPerIndex, int vertexCount)
     : IndexBuffer(bytesPerIndex, vertexCount)
     { }
@@ -64,40 +64,40 @@ namespace gvr {
         vulkanCore->createTransientCmdBuffer(trnCmdBuf);
 
         // Copy index data to a buffer visible to the host
-        VkResult   err = vkCreateBuffer(device, gvr::BufferCreateInfo(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT), nullptr, &m_indices.buffer);
-        GVR_VK_CHECK(!err);
+        VkResult   err = vkCreateBuffer(device, sxr::BufferCreateInfo(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT), nullptr, &m_indices.buffer);
+        SXR_VK_CHECK(!err);
 
         VkDeviceMemory mem_staging_indi;
         VkBuffer buf_staging_indi;
-        err = vkCreateBuffer(device, gvr::BufferCreateInfo(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT), nullptr, &buf_staging_indi);
-        GVR_VK_CHECK(!err);
+        err = vkCreateBuffer(device, sxr::BufferCreateInfo(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT), nullptr, &buf_staging_indi);
+        SXR_VK_CHECK(!err);
 
 
         vkGetBufferMemoryRequirements(device, m_indices.buffer, &mem_reqs);
         memoryAllocateInfo.allocationSize = mem_reqs.size;
         pass = vulkanCore->GetMemoryTypeFromProperties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &memoryAllocateInfo.memoryTypeIndex);
-        GVR_VK_CHECK(pass);
+        SXR_VK_CHECK(pass);
 
         err = vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &mem_staging_indi);
-        GVR_VK_CHECK(!err);
+        SXR_VK_CHECK(!err);
         err = vkMapMemory(device, mem_staging_indi, 0, indexBufferSize, 0, &data);
-        GVR_VK_CHECK(!err);
+        SXR_VK_CHECK(!err);
         memcpy(data, mIndexData, indexBufferSize);
         vkUnmapMemory(device, mem_staging_indi);
 
         //err = vkBindBufferMemory(m_device, m_indices.buffer, m_indices.memory, 0);
         err = vkBindBufferMemory(device, buf_staging_indi, mem_staging_indi, 0);
-        GVR_VK_CHECK(!err);
+        SXR_VK_CHECK(!err);
 
         // Create Device memory optimal
         pass = vulkanCore->GetMemoryTypeFromProperties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &memoryAllocateInfo.memoryTypeIndex);
-        GVR_VK_CHECK(pass);
+        SXR_VK_CHECK(pass);
         err = vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &m_indices.memory);
-        GVR_VK_CHECK(!err);
+        SXR_VK_CHECK(!err);
 
         // Bind our buffer to the memory.
         err = vkBindBufferMemory(device, m_indices.buffer, m_indices.memory, 0);
-        GVR_VK_CHECK(!err);
+        SXR_VK_CHECK(!err);
 
         VkCommandBufferBeginInfo beginInfo = {};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -142,5 +142,5 @@ namespace gvr {
 
         throw std::runtime_error("VulkanIndexBuffer::getDataType: unknown type");
     }
-} // end gvrf
+} // end sxrsdk
 

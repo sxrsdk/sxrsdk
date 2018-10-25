@@ -19,7 +19,7 @@
 #include "physics_common.h"
 #include "physics_constraint.h"
 
-namespace gvr {
+namespace sxr {
 
 class PhysicsRigidBody;
 

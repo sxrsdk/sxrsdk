@@ -41,8 +41,8 @@ class DaydreamViewManager extends SXRViewManager {
                 }
             };
 
-    DaydreamViewManager(final SXRApplication application, SXRMain gvrMain) {
-        super(application, gvrMain);
+    DaydreamViewManager(final SXRApplication application, SXRMain sxrMain) {
+        super(application, sxrMain);
 
         // Initialize GvrLayout and the native renderer.
         gvrLayout = new GvrLayout(application.getActivity());

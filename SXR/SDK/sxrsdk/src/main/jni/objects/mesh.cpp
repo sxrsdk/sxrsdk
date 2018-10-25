@@ -18,7 +18,7 @@
 #include "objects/components/skeleton.h"
 #include "glm/gtc/matrix_inverse.hpp"
 
-namespace gvr
+namespace sxr
 {
 
     Mesh::Mesh(const char* descriptor)

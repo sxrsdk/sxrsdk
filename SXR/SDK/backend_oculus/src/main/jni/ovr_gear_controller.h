@@ -20,9 +20,9 @@
 #include "VrApi_Input.h"
 #include "glm/glm.hpp"
 #include "glm/gtx/quaternion.hpp"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
-namespace gvr {
+namespace sxr {
     class GearController {
 
     private:

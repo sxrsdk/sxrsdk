@@ -21,60 +21,60 @@
 #include <engine/renderer/renderer.h>
 #include "vulkan/vulkan_headers.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-        Java_org_gearvrf_NativeVulkanCore_getInstance(JNIEnv* env, jobject obj, jobject surface, jint vulkanPropValue);
+        Java_com_samsungxr_NativeVulkanCore_getInstance(JNIEnv* env, jobject obj, jobject surface, jint vulkanPropValue);
 
     JNIEXPORT jint JNICALL
-        Java_org_gearvrf_NativeVulkanCore_getSwapChainIndexToRender(JNIEnv* env, jobject obj);
+        Java_com_samsungxr_NativeVulkanCore_getSwapChainIndexToRender(JNIEnv* env, jobject obj);
 
     JNIEXPORT void JNICALL
-        Java_org_gearvrf_NativeVulkanCore_resetTheInstance(JNIEnv* env, jobject obj);
+        Java_com_samsungxr_NativeVulkanCore_resetTheInstance(JNIEnv* env, jobject obj);
 
     JNIEXPORT void JNICALL
-        Java_org_gearvrf_NativeVulkanCore_recreateSwapchain(JNIEnv* env, jobject obj, jobject surface);
+        Java_com_samsungxr_NativeVulkanCore_recreateSwapchain(JNIEnv* env, jobject obj, jobject surface);
 
     JNIEXPORT int JNICALL
-        Java_org_gearvrf_NativeVulkanCore_getVulkanPropValue(JNIEnv* env, jobject obj);
+        Java_com_samsungxr_NativeVulkanCore_getVulkanPropValue(JNIEnv* env, jobject obj);
 
     JNIEXPORT bool JNICALL
-        Java_org_gearvrf_NativeVulkanCore_isInstancePresent(JNIEnv* env, jobject obj);
+        Java_com_samsungxr_NativeVulkanCore_isInstancePresent(JNIEnv* env, jobject obj);
     };
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeVulkanCore_getInstance(JNIEnv * env, jobject obj, jobject surface, jint vulkanPropValue){
+    Java_com_samsungxr_NativeVulkanCore_getInstance(JNIEnv * env, jobject obj, jobject surface, jint vulkanPropValue){
         ANativeWindow * newNativeWindow = ANativeWindow_fromSurface(env, surface);
         VulkanCore * vulkanCore = VulkanCore::getInstance(newNativeWindow, vulkanPropValue);
         return (reinterpret_cast<jlong>(vulkanCore));
     }
 
     JNIEXPORT jint JNICALL
-    Java_org_gearvrf_NativeVulkanCore_getSwapChainIndexToRender(JNIEnv * env, jobject obj){
+    Java_com_samsungxr_NativeVulkanCore_getSwapChainIndexToRender(JNIEnv * env, jobject obj){
         VulkanCore * vulkanCore = VulkanCore::getInstance();
         return vulkanCore->getSwapChainIndexToRender();
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeVulkanCore_resetTheInstance(JNIEnv * env, jobject obj){
+    Java_com_samsungxr_NativeVulkanCore_resetTheInstance(JNIEnv * env, jobject obj){
         VulkanCore * vulkanCore = VulkanCore::getInstance();
         return vulkanCore->releaseInstance();
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeVulkanCore_recreateSwapchain(JNIEnv * env, jobject obj, jobject surface){
+    Java_com_samsungxr_NativeVulkanCore_recreateSwapchain(JNIEnv * env, jobject obj, jobject surface){
         ANativeWindow * newNativeWindow = ANativeWindow_fromSurface(env, surface);
         VulkanCore * vulkanCore = VulkanCore::getInstance();
         return vulkanCore->recreateSwapChain(newNativeWindow);
     }
 
     JNIEXPORT int JNICALL
-    Java_org_gearvrf_NativeVulkanCore_getVulkanPropValue(JNIEnv * env, jobject obj){
+    Java_com_samsungxr_NativeVulkanCore_getVulkanPropValue(JNIEnv * env, jobject obj){
         return Renderer::getVulkanPropValue();
     }
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeVulkanCore_isInstancePresent(JNIEnv* env, jobject obj){
+    Java_com_samsungxr_NativeVulkanCore_isInstancePresent(JNIEnv* env, jobject obj){
         return VulkanCore::isInstancePresent();
     }
 }

@@ -21,136 +21,136 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "camera.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeCamera_getComponentType(JNIEnv* env, jobject obj);
+Java_com_samsungxr_NativeCamera_getComponentType(JNIEnv* env, jobject obj);
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeCamera_getBackgroundColorR(JNIEnv* env,
+Java_com_samsungxr_NativeCamera_getBackgroundColorR(JNIEnv* env,
                                                   jobject obj, jlong jcamera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setBackgroundColorR(JNIEnv* env,
+Java_com_samsungxr_NativeCamera_setBackgroundColorR(JNIEnv* env,
                                                   jobject obj, jlong jcamera, jfloat r);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeCamera_getBackgroundColorG(JNIEnv* env,
+Java_com_samsungxr_NativeCamera_getBackgroundColorG(JNIEnv* env,
                                                   jobject obj, jlong jcamera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setBackgroundColorG(JNIEnv* env,
+Java_com_samsungxr_NativeCamera_setBackgroundColorG(JNIEnv* env,
                                                   jobject obj, jlong jcamera, jfloat g);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeCamera_getBackgroundColorB(JNIEnv* env,
+Java_com_samsungxr_NativeCamera_getBackgroundColorB(JNIEnv* env,
                                                   jobject obj, jlong jcamera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setBackgroundColorB(JNIEnv* env,
+Java_com_samsungxr_NativeCamera_setBackgroundColorB(JNIEnv* env,
                                                   jobject obj, jlong jcamera, jfloat b);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeCamera_getBackgroundColorA(JNIEnv* env,
+Java_com_samsungxr_NativeCamera_getBackgroundColorA(JNIEnv* env,
                                                   jobject obj, jlong jcamera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setBackgroundColorA(JNIEnv* env,
+Java_com_samsungxr_NativeCamera_setBackgroundColorA(JNIEnv* env,
                                                   jobject obj, jlong jcamera, jfloat a);
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeCamera_getRenderMask(JNIEnv* env,
+Java_com_samsungxr_NativeCamera_getRenderMask(JNIEnv* env,
                                             jobject obj, jlong jcamera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setRenderMask(JNIEnv* env,
+Java_com_samsungxr_NativeCamera_setRenderMask(JNIEnv* env,
                                             jobject obj, jlong jcamera, jint render_mask);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setPostEffect(JNIEnv* env,
+Java_com_samsungxr_NativeCamera_setPostEffect(JNIEnv* env,
                                             jobject obj, jlong jcamera,
                                             jlong jpost_effect_data);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setViewMatrix(JNIEnv* env, jobject obj, jlong jcamera, jfloatArray mat);
+Java_com_samsungxr_NativeCamera_setViewMatrix(JNIEnv* env, jobject obj, jlong jcamera, jfloatArray mat);
 };
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeCamera_getComponentType(JNIEnv * env, jobject obj) {
+Java_com_samsungxr_NativeCamera_getComponentType(JNIEnv * env, jobject obj) {
     return Camera::getComponentType();
 }
 
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeCamera_getBackgroundColorR(JNIEnv * env,
+Java_com_samsungxr_NativeCamera_getBackgroundColorR(JNIEnv * env,
                                                   jobject obj, jlong jcamera) {
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     return camera->background_color_r();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setBackgroundColorR(JNIEnv * env,
+Java_com_samsungxr_NativeCamera_setBackgroundColorR(JNIEnv * env,
                                                   jobject obj, jlong jcamera, jfloat r) {
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     camera->set_background_color_r(r);
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeCamera_getBackgroundColorG(JNIEnv * env,
+Java_com_samsungxr_NativeCamera_getBackgroundColorG(JNIEnv * env,
                                                   jobject obj, jlong jcamera) {
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     return camera->background_color_g();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setBackgroundColorG(JNIEnv * env,
+Java_com_samsungxr_NativeCamera_setBackgroundColorG(JNIEnv * env,
                                                   jobject obj, jlong jcamera, jfloat g) {
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     camera->set_background_color_g(g);
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeCamera_getBackgroundColorB(JNIEnv * env,
+Java_com_samsungxr_NativeCamera_getBackgroundColorB(JNIEnv * env,
                                                   jobject obj, jlong jcamera) {
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     return camera->background_color_b();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setBackgroundColorB(JNIEnv * env,
+Java_com_samsungxr_NativeCamera_setBackgroundColorB(JNIEnv * env,
                                                   jobject obj, jlong jcamera, jfloat b) {
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     camera->set_background_color_b(b);
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeCamera_getBackgroundColorA(JNIEnv * env,
+Java_com_samsungxr_NativeCamera_getBackgroundColorA(JNIEnv * env,
                                                   jobject obj, jlong jcamera) {
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     return camera->background_color_a();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setBackgroundColorA(JNIEnv * env,
+Java_com_samsungxr_NativeCamera_setBackgroundColorA(JNIEnv * env,
                                                   jobject obj, jlong jcamera, jfloat a) {
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     camera->set_background_color_a(a);
 }
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeCamera_getRenderMask(JNIEnv * env,
+Java_com_samsungxr_NativeCamera_getRenderMask(JNIEnv * env,
                                             jobject obj, jlong jcamera) {
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     return camera->render_mask();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setRenderMask(JNIEnv * env,
+Java_com_samsungxr_NativeCamera_setRenderMask(JNIEnv * env,
                                             jobject obj, jlong jcamera, jint render_mask) {
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     camera->set_render_mask(render_mask);
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setPostEffect(JNIEnv * env,
+Java_com_samsungxr_NativeCamera_setPostEffect(JNIEnv * env,
                                             jobject obj, jlong jcamera, jlong jpost_effect_data) {
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     RenderData* post_effect_data = reinterpret_cast<RenderData*>(jpost_effect_data);
@@ -158,7 +158,7 @@ Java_org_gearvrf_NativeCamera_setPostEffect(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCamera_setViewMatrix(JNIEnv* env,
+Java_com_samsungxr_NativeCamera_setViewMatrix(JNIEnv* env,
                                             jobject obj, jlong jcamera, jfloatArray mat)
 {
     Camera* camera = reinterpret_cast<Camera*>(jcamera);

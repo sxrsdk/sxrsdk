@@ -31,7 +31,7 @@
 #include "objects/uniform_block.h"
 
 
-namespace gvr {
+namespace sxr {
 
 class Texture;
 class RenderData;

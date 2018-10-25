@@ -24,13 +24,13 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtc/matrix_inverse.hpp"
 
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
 #include "sphere_collider.h"
 #include "objects/mesh.h"
 #include "mesh_collider.h"
 
-namespace gvr {
+namespace sxr {
 /*
  * Determine if the ray hits the collider.
  * @param owner       SceneObject which owns this collider.

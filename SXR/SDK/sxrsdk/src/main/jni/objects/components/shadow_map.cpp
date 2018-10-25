@@ -15,7 +15,7 @@
 #include "shadow_map.h"
 #include "gl/gl_render_texture.h"
 
-namespace gvr {
+namespace sxr {
 class Renderer;
     ShadowMap::ShadowMap(ShaderData* mtl)
             : RenderTarget((RenderTexture*)nullptr, false),

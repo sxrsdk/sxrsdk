@@ -16,7 +16,7 @@
 #ifndef COLLIDER_SHAPE_TYPES_H
 #define COLLIDER_SHAPE_TYPES_H
 
-namespace gvr {
+namespace sxr {
     const long COLLIDER_SHAPE_UNKNOWN   = 10000;
     const long COLLIDER_SHAPE_BOX       = 10001;
     const long COLLIDER_SHAPE_SPHERE    = 10002;

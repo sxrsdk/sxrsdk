@@ -20,7 +20,7 @@
 #include "objects/textures/cubemap_image.h"
 #include "vulkan_headers.h"
 #include "vulkan/vulkan_image.h"
-namespace gvr {
+namespace sxr {
     class VkCubemapImage : public vkImageBase, public CubemapImage
     {
     public:

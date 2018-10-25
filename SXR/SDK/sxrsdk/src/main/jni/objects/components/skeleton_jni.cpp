@@ -5,27 +5,27 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "objects/components/skeleton.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_animation_NativeSkeleton_ctor(JNIEnv* env, jobject obj, jintArray boneparents);
+    Java_com_samsungxr_animation_NativeSkeleton_ctor(JNIEnv* env, jobject obj, jintArray boneparents);
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_animation_NativeSkeleton_getComponentType(JNIEnv* env, jobject clz);
+    Java_com_samsungxr_animation_NativeSkeleton_getComponentType(JNIEnv* env, jobject clz);
 
     JNIEXPORT jboolean JNICALL
-    Java_org_gearvrf_animation_NativeSkeleton_setPose(JNIEnv* env, jobject clz,
+    Java_com_samsungxr_animation_NativeSkeleton_setPose(JNIEnv* env, jobject clz,
                                             jlong jskel, jfloatArray jmatrices);
     JNIEXPORT jboolean JNICALL
-    Java_org_gearvrf_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz,
+    Java_com_samsungxr_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz,
                                             jlong jskel, jfloatArray jmatrices);
 } // extern "C"
 
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_animation_NativeSkeleton_ctor(JNIEnv * env, jobject clz, jintArray jboneparents)
+Java_com_samsungxr_animation_NativeSkeleton_ctor(JNIEnv * env, jobject clz, jintArray jboneparents)
 {
     jint numbones = env->GetArrayLength(jboneparents);
     jint* boneParents = env->GetIntArrayElements(jboneparents, JNI_FALSE);
@@ -35,13 +35,13 @@ Java_org_gearvrf_animation_NativeSkeleton_ctor(JNIEnv * env, jobject clz, jintAr
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_animation_NativeSkeleton_getComponentType(JNIEnv * env, jobject clz)
+Java_com_samsungxr_animation_NativeSkeleton_getComponentType(JNIEnv * env, jobject clz)
 {
     return Skeleton::getComponentType();
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_animation_NativeSkeleton_setPose(JNIEnv* env, jobject clz,
+Java_com_samsungxr_animation_NativeSkeleton_setPose(JNIEnv* env, jobject clz,
                                         jlong jskel, jfloatArray jmatrices)
 {
     Skeleton* skel = reinterpret_cast<Skeleton*>(jskel);
@@ -59,7 +59,7 @@ Java_org_gearvrf_animation_NativeSkeleton_setPose(JNIEnv* env, jobject clz,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz,
+Java_com_samsungxr_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz,
                                                   jlong jskel, jfloatArray jmatrices)
 {
     Skeleton* skel = reinterpret_cast<Skeleton*>(jskel);
@@ -76,4 +76,4 @@ Java_org_gearvrf_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz,
     return true;
 }
 
-} // namespace gvr
+} // namespace sxr

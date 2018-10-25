@@ -58,7 +58,7 @@
 
 #include "gl/gl_headers.h"
 
-#define  LOG_TAG    "gvrf"
+#define  LOG_TAG    "sxrf"
 
 //#define STOP_ON_ERROR
 //#define GL( func )      func; checkGLError(#func);

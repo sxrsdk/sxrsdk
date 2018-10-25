@@ -19,7 +19,7 @@
 
 #include "bitmap_transparency.h"
 
-namespace gvr {
+namespace sxr {
 
 bool bitmap_has_transparency(JNIEnv *env, jobject jbitmap) {
     int result = -4;
@@ -29,13 +29,13 @@ bool bitmap_has_transparency(JNIEnv *env, jobject jbitmap) {
 
     result = AndroidBitmap_getInfo(env, jbitmap, &info);
     if(result != ANDROID_BITMAP_RESUT_SUCCESS) {
-        LOGE("GVRBitmapTexture: unable to determine bitmap format in bitmap_transparency.cpp");
+        LOGE("SXRBitmapTexture: unable to determine bitmap format in bitmap_transparency.cpp");
         return false;
     }
 
     result = AndroidBitmap_lockPixels(env, jbitmap, &addrPtr);
     if(result != ANDROID_BITMAP_RESUT_SUCCESS) {
-        LOGE("GVRBitmapTexture: unable to lock bitmap in bitmap_transparency.cpp");
+        LOGE("SXRBitmapTexture: unable to lock bitmap in bitmap_transparency.cpp");
         return false;
     }
 
@@ -85,7 +85,7 @@ bool bitmap_has_transparency(JNIEnv *env, jobject jbitmap) {
 
     result = AndroidBitmap_unlockPixels(env, jbitmap);
     if(result != ANDROID_BITMAP_RESUT_SUCCESS) {
-        LOGE("GVRBitmapTexture: unable to unlock bitmap in bitmap_transparency.cpp");
+        LOGE("SXRBitmapTexture: unable to unlock bitmap in bitmap_transparency.cpp");
         return transparency;
     }
 

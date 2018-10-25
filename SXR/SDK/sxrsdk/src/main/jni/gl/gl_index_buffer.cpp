@@ -9,7 +9,7 @@
 #include "gl_index_buffer.h"
 #include "gl_shader.h"
 
-namespace gvr {
+namespace sxr {
     GLIndexBuffer::GLIndexBuffer(int bytesPerIndex, int vertexCount)
     : IndexBuffer(bytesPerIndex, vertexCount),
       mIBufferID(-1)
@@ -64,5 +64,5 @@ namespace gvr {
     }
 
 
-} // end gvrf
+} // end sxrsdk
 

@@ -15,7 +15,7 @@
 
 #include "vulkan/vulkan_material.h"
 
-namespace gvr
+namespace sxr
 {
     VulkanMaterial::VulkanMaterial(const char* uniform_desc, const char* texture_desc)
      : ShaderData(texture_desc),

@@ -20,7 +20,7 @@
 #include<unordered_map>
 #include "data_descriptor.h"
 #include "glm/glm.hpp"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 #include <map>
 #include <vector>
 
@@ -31,7 +31,7 @@
 #define LAST_UBO_INDEX      3
 #define SHADOW_UBO_INDEX    4
 
-namespace gvr
+namespace sxr
 {
     class SceneObject;
 

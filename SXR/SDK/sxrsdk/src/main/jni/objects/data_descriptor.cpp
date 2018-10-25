@@ -18,9 +18,9 @@
 #include <sstream>
 #include <istream>
 #include "objects/data_descriptor.h"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
-namespace gvr
+namespace sxr
 {
 
     DataDescriptor::DataDescriptor(const char* descriptor) :

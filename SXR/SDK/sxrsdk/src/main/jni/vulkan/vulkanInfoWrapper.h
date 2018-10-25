@@ -19,8 +19,8 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-namespace gvr {
-struct GVR_VK_SwapchainBuffer
+namespace sxr {
+struct SXR_VK_SwapchainBuffer
 {
     VkImage image;
     VkCommandBuffer cmdBuffer;
@@ -30,14 +30,14 @@ struct GVR_VK_SwapchainBuffer
     VkBuffer buf;
 };
 
-struct GVR_VK_DepthBuffer {
+struct SXR_VK_DepthBuffer {
     VkFormat format;
     VkImage image;
     VkDeviceMemory mem;
     VkImageView view;
 };
 
-struct GVR_VK_Vertices {
+struct SXR_VK_Vertices {
     VkBuffer buf;
     VkDeviceMemory mem;
     VkPipelineVertexInputStateCreateInfo vi;
@@ -48,7 +48,7 @@ struct GVR_VK_Vertices {
     std::vector<VkVertexInputAttributeDescription>    vi_attrs;
 };
 
-struct GVR_Uniform {
+struct SXR_Uniform {
     VkBuffer buf;
     VkDeviceMemory mem;
     VkDescriptorBufferInfo bufferInfo;
@@ -63,7 +63,7 @@ struct OutputBuffer
 };
 
 // Index buffer
-struct GVR_VK_Indices {
+struct SXR_VK_Indices {
     VkDeviceMemory memory;
     VkBuffer buffer;
     uint32_t count;

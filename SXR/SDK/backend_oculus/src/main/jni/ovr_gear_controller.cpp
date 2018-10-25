@@ -16,7 +16,7 @@
 
 #include "ovr_gear_controller.h"
 
-namespace gvr {
+namespace sxr {
 
     bool GearController::findConnectedGearController() {
         bool foundRemote = false;

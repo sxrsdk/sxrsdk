@@ -25,7 +25,7 @@
 
 #include "collider.h"
 
-namespace gvr {
+namespace sxr {
 
 class SphereCollider: public Collider {
 public:

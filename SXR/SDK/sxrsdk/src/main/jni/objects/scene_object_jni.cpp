@@ -19,84 +19,84 @@
 
 #include "scene_object.h"
 
-#include "util/gvr_log.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_log.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeSceneObject_ctor(JNIEnv * env,
+    Java_com_samsungxr_NativeSceneObject_ctor(JNIEnv * env,
             jobject obj);
     JNIEXPORT jstring JNICALL
-    Java_org_gearvrf_NativeSceneObject_getName(JNIEnv * env,
+    Java_com_samsungxr_NativeSceneObject_getName(JNIEnv * env,
             jobject obj, jlong jscene_object);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeSceneObject_setName(JNIEnv * env,
+    Java_com_samsungxr_NativeSceneObject_setName(JNIEnv * env,
             jobject obj, jlong jscene_object, jstring name);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeSceneObject_attachComponent(JNIEnv * env,
+    Java_com_samsungxr_NativeSceneObject_attachComponent(JNIEnv * env,
             jobject obj, jlong jscene_object, jlong jcomponent);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeSceneObject_detachComponent(JNIEnv * env,
+    Java_com_samsungxr_NativeSceneObject_detachComponent(JNIEnv * env,
             jobject obj, jlong jscene_object, jlong type);
 
     JNIEXPORT long JNICALL
-    Java_org_gearvrf_NativeSceneObject_findComponent(JNIEnv * env,
+    Java_com_samsungxr_NativeSceneObject_findComponent(JNIEnv * env,
             jobject obj, jlong jscene_object, jlong type);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeSceneObject_addChildObject(JNIEnv * env,
+    Java_com_samsungxr_NativeSceneObject_addChildObject(JNIEnv * env,
             jobject obj, jlong jscene_object, jlong jchild);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeSceneObject_removeChildObject(
+    Java_com_samsungxr_NativeSceneObject_removeChildObject(
             JNIEnv * env, jobject obj, jlong jscene_object, jlong jchild);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeSceneObject_isColliding(
+    Java_com_samsungxr_NativeSceneObject_isColliding(
             JNIEnv * env, jobject obj, jlong jscene_object, jlong jother_object);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeSceneObject_isEnabled(
+    Java_com_samsungxr_NativeSceneObject_isEnabled(
             JNIEnv * env, jobject obj, jlong jscene_object);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeSceneObject_setEnable(
+    Java_com_samsungxr_NativeSceneObject_setEnable(
             JNIEnv * env, jobject obj, jlong jscene_object, bool flag);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeSceneObject_rayIntersectsBoundingVolume(JNIEnv * env,
+    Java_com_samsungxr_NativeSceneObject_rayIntersectsBoundingVolume(JNIEnv * env,
             jobject obj, jlong jscene_object, jfloat rox, jfloat roy, jfloat roz,
             jfloat rdx, jfloat rdy, jfloat rdz);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeSceneObject_objectIntersectsBoundingVolume(
+    Java_com_samsungxr_NativeSceneObject_objectIntersectsBoundingVolume(
             JNIEnv * env, jobject obj, jlong jscene_object, jlong jother_object);
 
     JNIEXPORT jfloatArray JNICALL
-    Java_org_gearvrf_NativeSceneObject_getBoundingVolume(JNIEnv * env,
+    Java_com_samsungxr_NativeSceneObject_getBoundingVolume(JNIEnv * env,
             jobject obj, jlong jSceneObject);
 
     JNIEXPORT jfloatArray JNICALL
-    Java_org_gearvrf_NativeSceneObject_expandBoundingVolumeByPoint(JNIEnv * env,
+    Java_com_samsungxr_NativeSceneObject_expandBoundingVolumeByPoint(JNIEnv * env,
             jobject obj, jlong jSceneObject, jfloat pointX, jfloat pointY, jfloat pointZ);
 
     JNIEXPORT jfloatArray JNICALL
-    Java_org_gearvrf_NativeSceneObject_expandBoundingVolumeByCenterAndRadius(JNIEnv * env,
+    Java_com_samsungxr_NativeSceneObject_expandBoundingVolumeByCenterAndRadius(JNIEnv * env,
             jobject obj, jlong jSceneObject, jfloat centerX, jfloat centerY, jfloat centerZ, jfloat radius);
 } // extern "C"
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeSceneObject_ctor(JNIEnv * env,
+Java_com_samsungxr_NativeSceneObject_ctor(JNIEnv * env,
         jobject obj) {
     return reinterpret_cast<jlong>(new SceneObject());
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeSceneObject_getName(JNIEnv * env,
+Java_com_samsungxr_NativeSceneObject_getName(JNIEnv * env,
         jobject obj, jlong jscene_object) {
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
     std::string name = scene_object->name();
@@ -105,7 +105,7 @@ Java_org_gearvrf_NativeSceneObject_getName(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeSceneObject_setName(JNIEnv * env,
+Java_com_samsungxr_NativeSceneObject_setName(JNIEnv * env,
         jobject obj, jlong jscene_object, jstring name) {
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
     const char* native_name = env->GetStringUTFChars(name, 0);
@@ -115,7 +115,7 @@ Java_org_gearvrf_NativeSceneObject_setName(JNIEnv * env,
 
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeSceneObject_attachComponent(JNIEnv * env,
+Java_com_samsungxr_NativeSceneObject_attachComponent(JNIEnv * env,
         jobject obj, jlong jscene_object, jlong jcomponent) {
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
     Component* component = reinterpret_cast<Component*>(jcomponent);
@@ -123,7 +123,7 @@ Java_org_gearvrf_NativeSceneObject_attachComponent(JNIEnv * env,
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeSceneObject_detachComponent(JNIEnv * env,
+Java_com_samsungxr_NativeSceneObject_detachComponent(JNIEnv * env,
         jobject obj, jlong jscene_object, jlong type) {
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
     return scene_object->detachComponent(type) != NULL;
@@ -131,7 +131,7 @@ Java_org_gearvrf_NativeSceneObject_detachComponent(JNIEnv * env,
 
 
 JNIEXPORT long JNICALL
-Java_org_gearvrf_NativeSceneObject_findComponent(JNIEnv * env,
+Java_com_samsungxr_NativeSceneObject_findComponent(JNIEnv * env,
         jobject obj, jlong jscene_object, jlong type) {
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
     Component* component = scene_object->getComponent(type);
@@ -140,7 +140,7 @@ Java_org_gearvrf_NativeSceneObject_findComponent(JNIEnv * env,
 
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeSceneObject_addChildObject(JNIEnv * env,
+Java_com_samsungxr_NativeSceneObject_addChildObject(JNIEnv * env,
         jobject obj, jlong jscene_object, jlong jchild) {
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
     SceneObject* child = reinterpret_cast<SceneObject*>(jchild);
@@ -148,7 +148,7 @@ Java_org_gearvrf_NativeSceneObject_addChildObject(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeSceneObject_removeChildObject(
+Java_com_samsungxr_NativeSceneObject_removeChildObject(
         JNIEnv * env, jobject obj, jlong jscene_object, jlong jchild) {
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
     SceneObject* child = reinterpret_cast<SceneObject*>(jchild);
@@ -156,7 +156,7 @@ Java_org_gearvrf_NativeSceneObject_removeChildObject(
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeSceneObject_isColliding(
+Java_com_samsungxr_NativeSceneObject_isColliding(
         JNIEnv * env, jobject obj, jlong jscene_object, jlong jother_object) {
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
     SceneObject* other_object = reinterpret_cast<SceneObject*>(jother_object);
@@ -165,21 +165,21 @@ Java_org_gearvrf_NativeSceneObject_isColliding(
 
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeSceneObject_isEnabled(
+Java_com_samsungxr_NativeSceneObject_isEnabled(
         JNIEnv * env, jobject obj, jlong jscene_object) {
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
     return scene_object->enabled();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeSceneObject_setEnable(
+Java_com_samsungxr_NativeSceneObject_setEnable(
         JNIEnv * env, jobject obj, jlong jscene_object, bool flag) {
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
     scene_object->set_enable(flag);
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeSceneObject_rayIntersectsBoundingVolume(JNIEnv * env,
+Java_com_samsungxr_NativeSceneObject_rayIntersectsBoundingVolume(JNIEnv * env,
         jobject obj, jlong jscene_object, jfloat rox, jfloat roy, jfloat roz,
         jfloat rdx, jfloat rdy, jfloat rdz) {
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
@@ -187,7 +187,7 @@ Java_org_gearvrf_NativeSceneObject_rayIntersectsBoundingVolume(JNIEnv * env,
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeSceneObject_objectIntersectsBoundingVolume(
+Java_com_samsungxr_NativeSceneObject_objectIntersectsBoundingVolume(
         JNIEnv * env, jobject obj, jlong jscene_object, jlong jother_object) {
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
     SceneObject* other_object = reinterpret_cast<SceneObject*>(jother_object);
@@ -213,7 +213,7 @@ jfloatArray boundingVolumeToArray(JNIEnv* env, const BoundingVolume& bvol) {
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeSceneObject_getBoundingVolume(JNIEnv * env,
+Java_com_samsungxr_NativeSceneObject_getBoundingVolume(JNIEnv * env,
         jobject obj, jlong jSceneObject) {
     SceneObject* sceneObject = reinterpret_cast<SceneObject*>(jSceneObject);
     const BoundingVolume& bvol = sceneObject->getBoundingVolume();
@@ -221,7 +221,7 @@ Java_org_gearvrf_NativeSceneObject_getBoundingVolume(JNIEnv * env,
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeSceneObject_expandBoundingVolumeByPoint(JNIEnv * env,
+Java_com_samsungxr_NativeSceneObject_expandBoundingVolumeByPoint(JNIEnv * env,
         jobject obj, jlong jSceneObject, jfloat pointX, jfloat pointY, jfloat pointZ) {
 
     SceneObject* sceneObject = reinterpret_cast<SceneObject*>(jSceneObject);
@@ -232,7 +232,7 @@ Java_org_gearvrf_NativeSceneObject_expandBoundingVolumeByPoint(JNIEnv * env,
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeSceneObject_expandBoundingVolumeByCenterAndRadius(JNIEnv * env,
+Java_com_samsungxr_NativeSceneObject_expandBoundingVolumeByCenterAndRadius(JNIEnv * env,
         jobject obj, jlong jSceneObject, jfloat centerX, jfloat centerY, jfloat centerZ, jfloat radius) {
 
     SceneObject* sceneObject = reinterpret_cast<SceneObject*>(jSceneObject);
@@ -242,4 +242,4 @@ Java_org_gearvrf_NativeSceneObject_expandBoundingVolumeByCenterAndRadius(JNIEnv 
     return boundingVolumeToArray(env, bvol);
 }
 
-} // namespace gvr
+} // namespace sxr

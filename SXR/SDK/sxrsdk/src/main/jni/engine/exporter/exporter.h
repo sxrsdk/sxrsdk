@@ -22,7 +22,7 @@
 
 #include "objects/scene.h"
 
-namespace gvr {
+namespace sxr {
     namespace Exporter {
         int writeToFile(Scene *scene, const std::string filename);
     };

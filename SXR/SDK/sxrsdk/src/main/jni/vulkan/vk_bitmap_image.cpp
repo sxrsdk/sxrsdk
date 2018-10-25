@@ -21,7 +21,7 @@
 #include "engine/renderer/renderer.h"
 #include "engine/renderer/vulkan_renderer.h"
 #include "vk_bitmap_image.h"
-namespace gvr {
+namespace sxr {
 std::map<int, VkFormat> compressed_formats = {
         {0x93B0,                        VK_FORMAT_ASTC_4x4_UNORM_BLOCK},
         {0x93B1,                        VK_FORMAT_ASTC_5x4_UNORM_BLOCK},

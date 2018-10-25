@@ -5,10 +5,10 @@
  *
  ****/
 #include "vertex_buffer.h"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 #include <sstream>
 
-namespace gvr {
+namespace sxr {
 
     VertexBuffer::VertexBuffer(const char* layout_desc, int vertexCount)
     : DataDescriptor(layout_desc),
@@ -458,5 +458,5 @@ namespace gvr {
         });
     }
 
-} // end gvrf
+} // end sxrsdk
 

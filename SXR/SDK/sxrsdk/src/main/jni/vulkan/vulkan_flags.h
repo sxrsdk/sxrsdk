@@ -21,7 +21,7 @@
 #include "vulkan.h"
 #include "GLES3/gl3.h"
 
-namespace  gvr {
+namespace  sxr {
 
     namespace vkflags {
 

@@ -21,10 +21,10 @@
 #ifndef RENDER_TEXTURE_H_
 #define RENDER_TEXTURE_H_
 
-#include "util/gvr_parameters.h"
+#include "util/sxr_parameters.h"
 #include "objects/textures/texture.h"
 
-namespace gvr {
+namespace sxr {
 class Renderer;
 struct RenderTextureInfo{
     int fboWidth;

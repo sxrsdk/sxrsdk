@@ -18,7 +18,7 @@
 #include "../objects/index_buffer.h"
 #include "vulkan_headers.h"
 
-namespace gvr {
+namespace sxr {
     class Shader;
     class Renderer;
 
@@ -35,15 +35,15 @@ namespace gvr {
 
         virtual bool    updateGPU(Renderer*);
         virtual bool    bindBuffer(Shader*)  { return true; }
-        const GVR_VK_Indices& getVKIndices() const { return m_indices; }
+        const SXR_VK_Indices& getVKIndices() const { return m_indices; }
         void    generateVKBuffers(VulkanCore* vulkanCore);
     protected:
         void    freeGPUResources();
 
         VkFormat getDataType(const std::string& type);
 
-        GVR_VK_Indices m_indices;
+        SXR_VK_Indices m_indices;
     };
 
-} // end gvrf
+} // end sxrf
 

@@ -20,17 +20,17 @@
 
 #include "msaa.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeMSAA_getMaxSampleCount(JNIEnv * env,
+Java_com_samsungxr_NativeMSAA_getMaxSampleCount(JNIEnv * env,
         jobject obj);
 }
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeMSAA_getMaxSampleCount(JNIEnv * env,
+Java_com_samsungxr_NativeMSAA_getMaxSampleCount(JNIEnv * env,
         jobject obj) {
     return MSAA::getMaxSampleCount();
 }

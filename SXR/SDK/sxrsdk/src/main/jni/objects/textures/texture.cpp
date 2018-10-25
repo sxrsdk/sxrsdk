@@ -23,7 +23,7 @@
 #include "gl/gl_cubemap_image.h"
 #include "gl/gl_bitmap_image.h"
 
-namespace gvr {
+namespace sxr {
 class VkBitmapImage;
     class VkCubemapImage;
 

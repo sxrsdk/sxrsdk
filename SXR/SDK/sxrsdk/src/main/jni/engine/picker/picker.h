@@ -26,7 +26,7 @@
 #include "objects/components/collider.h"
 #include "glm/glm.hpp"
 
-namespace gvr {
+namespace sxr {
 class Scene;
 class Collider;
 class SceneObject;

@@ -27,7 +27,7 @@
 #include <set>
 #include<unordered_set>
 #define BATCH_POOL_SIZE 150
-namespace gvr{
+namespace sxr{
 class RenderData;
 class ShaderData;
 class Mesh;

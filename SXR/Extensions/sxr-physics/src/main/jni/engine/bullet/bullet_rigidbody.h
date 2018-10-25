@@ -22,7 +22,7 @@
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <LinearMath/btMotionState.h>
 
-namespace gvr {
+namespace sxr {
 class SceneObject;
 
 class BulletRigidBody : public PhysicsRigidBody,

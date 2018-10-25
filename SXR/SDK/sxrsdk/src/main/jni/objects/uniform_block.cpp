@@ -15,9 +15,9 @@
 #include "objects/uniform_block.h"
 #include "glm/gtc/type_ptr.hpp"
 #include <sstream>
-#include "util/gvr_gl.h"
+#include "util/sxr_gl.h"
 
-namespace gvr
+namespace sxr
 {
 
     UniformBlock::UniformBlock(const char* descriptor, int bindingPoint, const char* blockName) :

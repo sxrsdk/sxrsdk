@@ -24,7 +24,7 @@
 #include <unordered_set>
 #include "objects/hybrid_object.h"
 
-namespace gvr {
+namespace sxr {
 
 class ShaderData;
 struct RenderState;

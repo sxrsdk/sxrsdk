@@ -21,7 +21,7 @@
 #ifndef HYBRID_OBJECT_H_
 #define HYBRID_OBJECT_H_
 
-namespace gvr {
+namespace sxr {
 
 class HybridObject {
 public:

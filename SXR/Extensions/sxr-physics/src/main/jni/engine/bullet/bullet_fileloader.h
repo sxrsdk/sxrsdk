@@ -21,7 +21,7 @@
 
 class btBulletWorldImporter;
 
-namespace gvr{
+namespace sxr{
 class BulletFileLoader : public PhysicsLoader
 {
 public:

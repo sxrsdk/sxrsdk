@@ -25,17 +25,17 @@
 
 #include "gl/gl_headers.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeTextureParameters_getMaxAnisotropicValue(JNIEnv * env, jobject obj);
+Java_com_samsungxr_NativeTextureParameters_getMaxAnisotropicValue(JNIEnv * env, jobject obj);
 }
 ;
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeTextureParameters_getMaxAnisotropicValue(JNIEnv * env, jobject obj) {
+Java_com_samsungxr_NativeTextureParameters_getMaxAnisotropicValue(JNIEnv * env, jobject obj) {
     float aniso_max_value = 0.0f;
     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso_max_value);
     return (int)aniso_max_value;

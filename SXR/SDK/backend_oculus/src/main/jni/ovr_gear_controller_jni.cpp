@@ -18,38 +18,38 @@
  ***************************************************************************/
 
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 #include "ovr_gear_controller.h"
 #include "ovr_activity.h"
 
-namespace gvr {
+namespace sxr {
 
 extern "C" {
 
-    JNIEXPORT jlong JNICALL Java_org_gearvrf_OvrNativeGearController_ctor(JNIEnv *env,
+    JNIEXPORT jlong JNICALL Java_com_samsungxr_OvrNativeGearController_ctor(JNIEnv *env,
                                                                           jclass clazz, jobject
                                                                           jreadback_buffer);
 
-    JNIEXPORT void JNICALL Java_org_gearvrf_OvrNativeGearController_delete(JNIEnv *env,
+    JNIEXPORT void JNICALL Java_com_samsungxr_OvrNativeGearController_delete(JNIEnv *env,
                                                                            jclass clazz,
                                                                            jlong jController);
 
-    JNIEXPORT jlong JNICALL Java_org_gearvrf_OvrNativeGearController_ctor(JNIEnv *env,
+    JNIEXPORT jlong JNICALL Java_com_samsungxr_OvrNativeGearController_ctor(JNIEnv *env,
                                                                           jclass clazz, jobject
                                                                           jreadback_buffer) {
         float *data = (float *) env->GetDirectBufferAddress(jreadback_buffer);
         return reinterpret_cast<jlong>(new GearController(data));
     }
 
-    JNIEXPORT void JNICALL Java_org_gearvrf_OvrNativeGearController_delete(JNIEnv *env,
+    JNIEXPORT void JNICALL Java_com_samsungxr_OvrNativeGearController_delete(JNIEnv *env,
                                                                            jclass clazz,
                                                                            jlong jController) {
         delete reinterpret_cast<GearController *>(jController);
     }
 
-    JNIEXPORT void JNICALL Java_org_gearvrf_OvrNativeGearController_nativeInitializeGearController
+    JNIEXPORT void JNICALL Java_com_samsungxr_OvrNativeGearController_nativeInitializeGearController
             (JNIEnv* jni, jclass clazz, jlong appPtr, jlong controllerPtr) {
-        GVRActivity *activity = reinterpret_cast<GVRActivity*>(appPtr);
+        SXRActivity *activity = reinterpret_cast<SXRActivity*>(appPtr);
         GearController *gearController = reinterpret_cast<GearController*>(controllerPtr);
         activity->setGearController(gearController);
     }

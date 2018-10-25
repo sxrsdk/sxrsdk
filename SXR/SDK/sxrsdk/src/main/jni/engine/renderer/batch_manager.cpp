@@ -18,7 +18,7 @@
 #include "shaders/shader.h"
 
 #define BATCH_SIZE 60
-namespace gvr {
+namespace sxr {
 
 BatchManager::BatchManager(int batch_size, int max_indices){
     batch_size_ = batch_size;

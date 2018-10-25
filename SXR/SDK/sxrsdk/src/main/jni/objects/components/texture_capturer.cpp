@@ -15,14 +15,14 @@
 #include "gl/gl_render_texture.h"
 #include "component.inl"
 
-#include "util/gvr_time.h"
+#include "util/sxr_time.h"
 
 #define TOL 1e-8
 
-namespace gvr {
+namespace sxr {
 
 extern "C" {
-void Java_org_gearvrf_NativeTextureCapturer_callbackFromNative(
+void Java_com_samsungxr_NativeTextureCapturer_callbackFromNative(
         JNIEnv *env, jobject obj, jint index, char *info);
 }
 
@@ -187,7 +187,7 @@ glm::mat4 TextureCapturer::getMvpMatrix(float half_width, float half_height) {
 }
 
 void TextureCapturer::callback(int msg, char *info) {
-    Java_org_gearvrf_NativeTextureCapturer_callbackFromNative(
+    Java_com_samsungxr_NativeTextureCapturer_callbackFromNative(
             mJNIEnv, mCapturerObject, msg, info);
 }
 

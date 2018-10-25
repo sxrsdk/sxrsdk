@@ -12,15 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef SXR_UTIL_H
+#define SXR_UTIL_H
 
+namespace sxr {
 
-/***************************************************************************
- * Logging macros.
- ***************************************************************************/
+bool isSystemPropertySet(const char *prop);
+int getSystemProperty(const char *prop);
+char* getSystemPropertyString(const char *prop, char* out);
 
-#ifndef GVR_THREAD_H_
-#define GVR_THREAD_H_
-
-void setCurrentThreadAffinityMask(int cpu1, int cpu2, int cpu3);
-
+}
 #endif

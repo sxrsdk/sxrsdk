@@ -21,45 +21,45 @@
 #include <engine/renderer/renderer.h>
 #include "texture.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeTexture_constructor(JNIEnv * env, jobject obj);
+    Java_com_samsungxr_NativeTexture_constructor(JNIEnv * env, jobject obj);
 
     JNIEXPORT jboolean JNICALL
-    Java_org_gearvrf_NativeTexture_isReady(JNIEnv * env, jobject obj, jlong jtexture);
+    Java_com_samsungxr_NativeTexture_isReady(JNIEnv * env, jobject obj, jlong jtexture);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeTexture_updateTextureParameters(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_NativeTexture_updateTextureParameters(JNIEnv * env, jobject obj,
                 jlong jtexture, jintArray jtexture_parameters);
 
     JNIEXPORT jint JNICALL
-    Java_org_gearvrf_NativeTexture_getId(JNIEnv * env, jobject obj, jlong jtexture);
+    Java_com_samsungxr_NativeTexture_getId(JNIEnv * env, jobject obj, jlong jtexture);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeTexture_setImage(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_NativeTexture_setImage(JNIEnv * env, jobject obj,
                 jlong jtexture, jobject javaImage, jlong nativeImage);
 }
 ;
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeTexture_constructor(JNIEnv * env, jobject obj)
+Java_com_samsungxr_NativeTexture_constructor(JNIEnv * env, jobject obj)
 {
     Texture* tex = Renderer::getInstance()->createTexture(0);
     return reinterpret_cast<jlong>(tex);
 }
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeTexture_getId(JNIEnv * env, jobject obj, jlong jtexture)
+Java_com_samsungxr_NativeTexture_getId(JNIEnv * env, jobject obj, jlong jtexture)
 {
     Texture* texture = reinterpret_cast<Texture*>(jtexture);
     return texture->getId();
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeTexture_isReady(JNIEnv * env, jobject obj, jlong jtexture)
+Java_com_samsungxr_NativeTexture_isReady(JNIEnv * env, jobject obj, jlong jtexture)
 {
     Texture* texture = reinterpret_cast<Texture*>(jtexture);
     return texture->isReady();
@@ -67,7 +67,7 @@ Java_org_gearvrf_NativeTexture_isReady(JNIEnv * env, jobject obj, jlong jtexture
 
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeTexture_updateTextureParameters(JNIEnv * env, jobject obj,
+Java_com_samsungxr_NativeTexture_updateTextureParameters(JNIEnv * env, jobject obj,
         jlong jtexture, jintArray jtexture_parameters) {
     Texture* texture = reinterpret_cast<Texture*>(jtexture);
 
@@ -78,7 +78,7 @@ Java_org_gearvrf_NativeTexture_updateTextureParameters(JNIEnv * env, jobject obj
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeTexture_setImage(JNIEnv* env, jobject obj, jlong jtexture,
+Java_com_samsungxr_NativeTexture_setImage(JNIEnv* env, jobject obj, jlong jtexture,
                                         jobject javaImage, jlong nativeImage)
 {
     Texture* texture = reinterpret_cast<Texture*>(jtexture);

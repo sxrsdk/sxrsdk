@@ -29,10 +29,10 @@
 #include "engine/renderer/renderer.h"
 #include "objects/scene_object.h"
 #include "objects/components/shadow_map.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 #include "engine/renderer/renderer.h"
 
-namespace gvr {
+namespace sxr {
 class SceneObject;
 class Scene;
 class Shader;
@@ -221,7 +221,7 @@ public:
    /**
     * Set the light class that determines what
     * type of light this is.
-    * {@link GVRScene.addLight }
+    * {@link SXRScene.addLight }
     */
     void setLightClass(const char* lightClass)
     {

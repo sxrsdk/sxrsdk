@@ -23,7 +23,7 @@
 #include "vulkan/vulkan_material.h"
 #include "shaders/shader.h"
 
-namespace gvr
+namespace sxr
 {
 
 /**

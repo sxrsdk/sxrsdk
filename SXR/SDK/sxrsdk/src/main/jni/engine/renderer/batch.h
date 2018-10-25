@@ -28,7 +28,7 @@
 #include <set>
 #include<unordered_set>
 
-namespace gvr{
+namespace sxr{
 class RenderData;
 class ShaderData;
 class Mesh;

@@ -17,7 +17,7 @@
 #include "vulkan/vk_imagebase.h"
 #include <unordered_map>
 
-namespace gvr {
+namespace sxr {
 
 class VKFramebuffer final : public VKDeviceComponent{
     vkImageBase *mAttachments[3];

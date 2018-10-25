@@ -20,7 +20,7 @@
 #ifndef PHYSICS_COMMON_H_
 #define PHYSICS_COMMON_H_
 
-namespace gvr {
+namespace sxr {
 
     union PhysicsVec3 {
         float vec[3];

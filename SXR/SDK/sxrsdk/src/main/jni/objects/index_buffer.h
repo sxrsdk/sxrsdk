@@ -5,7 +5,7 @@
 #include <vector>
 #include "hybrid_object.h"
 
-namespace gvr {
+namespace sxr {
     class Shader;
     class Renderer;
 
@@ -103,5 +103,5 @@ namespace gvr {
     };
 
 
-} // end gvrf
+} // end sxrf
 

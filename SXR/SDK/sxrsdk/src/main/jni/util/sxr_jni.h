@@ -12,14 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef GVR_UTIL_H
-#define GVR_UTIL_H
 
-namespace gvr {
 
-bool isSystemPropertySet(const char *prop);
-int getSystemProperty(const char *prop);
-char* getSystemPropertyString(const char *prop, char* out);
+/***************************************************************************
+ * Header file for jni files.
+ ***************************************************************************/
 
-}
+#ifndef SXR_JNI_H_
+#define SXR_JNI_H_
+
+#include <memory>
+#include "jni.h"
+#include "sxr_log.h"
+
 #endif

@@ -25,38 +25,38 @@
 
 static char tag[] = "PhysLoaderJNI";
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DLoader_ctor(JNIEnv* env, jclass clazz,
+    Java_com_samsungxr_physics_NativePhysics3DLoader_ctor(JNIEnv* env, jclass clazz,
             jbyteArray byteArr, jint arrLen, jboolean ignoreUpAxis);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DLoader_delete(JNIEnv* env, jclass clazz, jlong jloader);
+    Java_com_samsungxr_physics_NativePhysics3DLoader_delete(JNIEnv* env, jclass clazz, jlong jloader);
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DLoader_getNextRigidBody(JNIEnv* env, jclass clazz,
+    Java_com_samsungxr_physics_NativePhysics3DLoader_getNextRigidBody(JNIEnv* env, jclass clazz,
             jlong jloader);
 
     JNIEXPORT jstring JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DLoader_getRigidBodyName(JNIEnv* env, jclass clazz,
+    Java_com_samsungxr_physics_NativePhysics3DLoader_getRigidBodyName(JNIEnv* env, jclass clazz,
             jlong jloader, jlong rigid_body);
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DLoader_getNextConstraint(JNIEnv* env, jclass clazz,
+    Java_com_samsungxr_physics_NativePhysics3DLoader_getNextConstraint(JNIEnv* env, jclass clazz,
             jlong jloader);
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DLoader_getConstraintBodyA(JNIEnv* env, jclass clazz,
+    Java_com_samsungxr_physics_NativePhysics3DLoader_getConstraintBodyA(JNIEnv* env, jclass clazz,
             jlong jloader, jlong jconstraint);
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DLoader_getConstraintBodyB(JNIEnv* env, jclass clazz,
+    Java_com_samsungxr_physics_NativePhysics3DLoader_getConstraintBodyB(JNIEnv* env, jclass clazz,
             jlong jloader, jlong jconstraint);
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_physics_NativePhysics3DLoader_ctor(JNIEnv* env, jclass clazz,
+Java_com_samsungxr_physics_NativePhysics3DLoader_ctor(JNIEnv* env, jclass clazz,
     jbyteArray byteArr, jint len, jboolean ignoreUpAxis)
 {
     jbyte* data = env->GetByteArrayElements(byteArr, NULL);
@@ -78,7 +78,7 @@ Java_org_gearvrf_physics_NativePhysics3DLoader_ctor(JNIEnv* env, jclass clazz,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_NativePhysics3DLoader_delete(JNIEnv* env, jclass clazz, jlong jloader)
+Java_com_samsungxr_physics_NativePhysics3DLoader_delete(JNIEnv* env, jclass clazz, jlong jloader)
 {
     PhysicsLoader *loader = reinterpret_cast<PhysicsLoader*>(jloader);
 
@@ -86,7 +86,7 @@ Java_org_gearvrf_physics_NativePhysics3DLoader_delete(JNIEnv* env, jclass clazz,
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_physics_NativePhysics3DLoader_getNextRigidBody(JNIEnv* env, jclass clazz,
+Java_com_samsungxr_physics_NativePhysics3DLoader_getNextRigidBody(JNIEnv* env, jclass clazz,
         jlong jloader)
 {
     PhysicsLoader *loader = reinterpret_cast<PhysicsLoader*>(jloader);
@@ -95,7 +95,7 @@ Java_org_gearvrf_physics_NativePhysics3DLoader_getNextRigidBody(JNIEnv* env, jcl
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_physics_NativePhysics3DLoader_getRigidBodyName(JNIEnv* env, jclass clazz,
+Java_com_samsungxr_physics_NativePhysics3DLoader_getRigidBodyName(JNIEnv* env, jclass clazz,
         jlong jloader, jlong jrigid_body)
 {
     PhysicsLoader *loader = reinterpret_cast<PhysicsLoader*>(jloader);
@@ -107,7 +107,7 @@ Java_org_gearvrf_physics_NativePhysics3DLoader_getRigidBodyName(JNIEnv* env, jcl
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_physics_NativePhysics3DLoader_getNextConstraint(JNIEnv* env, jclass clazz,
+Java_com_samsungxr_physics_NativePhysics3DLoader_getNextConstraint(JNIEnv* env, jclass clazz,
         jlong jloader)
 {
     PhysicsLoader *loader = reinterpret_cast<PhysicsLoader*>(jloader);
@@ -116,7 +116,7 @@ Java_org_gearvrf_physics_NativePhysics3DLoader_getNextConstraint(JNIEnv* env, jc
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_physics_NativePhysics3DLoader_getConstraintBodyA(JNIEnv* env, jclass clazz,
+Java_com_samsungxr_physics_NativePhysics3DLoader_getConstraintBodyA(JNIEnv* env, jclass clazz,
         jlong jloader, jlong jconstraint)
 {
     PhysicsLoader *loader = reinterpret_cast<PhysicsLoader*>(jloader);
@@ -126,7 +126,7 @@ Java_org_gearvrf_physics_NativePhysics3DLoader_getConstraintBodyA(JNIEnv* env, j
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_physics_NativePhysics3DLoader_getConstraintBodyB(JNIEnv* env, jclass clazz,
+Java_com_samsungxr_physics_NativePhysics3DLoader_getConstraintBodyB(JNIEnv* env, jclass clazz,
                                                                   jlong jloader, jlong jconstraint)
 {
     PhysicsLoader *loader = reinterpret_cast<PhysicsLoader*>(jloader);

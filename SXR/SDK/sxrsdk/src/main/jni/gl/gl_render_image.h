@@ -26,9 +26,9 @@
 #include "gl/gl_frame_buffer.h"
 #include "gl/gl_imagetex.h"
 #include "eglextension/msaa/msaa.h"
-#include "util/gvr_gl.h"
+#include "util/sxr_gl.h"
 
-namespace gvr {
+namespace sxr {
 
 class GLRenderImage : public GLImage, public Image
 {

@@ -31,7 +31,7 @@
 #include "objects/textures/texture.h"
 #include "gl/gl_headers.h"
 
-namespace gvr {
+namespace sxr {
 class GLImage
 {
 public:

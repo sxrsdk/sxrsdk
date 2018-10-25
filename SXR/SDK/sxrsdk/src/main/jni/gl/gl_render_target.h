@@ -7,7 +7,7 @@
 
 #include "../objects/components/render_target.h"
 
-namespace gvr{
+namespace sxr{
 class ShaderManager;
 class Scene;
 class RenderTexture;

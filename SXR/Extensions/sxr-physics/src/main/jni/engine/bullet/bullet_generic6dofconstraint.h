@@ -25,7 +25,7 @@
 #include "bullet_object.h"
 
 class btGeneric6DofConstraint;
-namespace gvr {
+namespace sxr {
 
     class PhysicsRigidBody;
     class BulletRigidBody;

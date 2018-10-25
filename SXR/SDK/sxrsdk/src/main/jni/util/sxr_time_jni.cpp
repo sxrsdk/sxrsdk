@@ -18,23 +18,42 @@
  * JNI
  ***************************************************************************/
 
-#include "gvr_thread.h"
+#include "sxr_time.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 
 extern "C" {
+JNIEXPORT jlong JNICALL
+Java_com_samsungxr_NativeTime_getCurrentTime(JNIEnv * env,
+        jobject obj);
+
+JNIEXPORT jlong JNICALL
+Java_com_samsungxr_NativeTime_getNanoTime(JNIEnv * env,
+        jobject obj);
+
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeThread_setCurrentThreadAffinityMask(JNIEnv * env,
-        jobject obj, jlong cpu1, jlong cpu2, jlong cpu3);
+Java_com_samsungxr_NativeTime_sleepNanos(JNIEnv * env,
+        jobject obj, jlong nanoSeconds);
 }
 ;
 
-JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeThread_setCurrentThreadAffinityMask(JNIEnv * env,
-        jobject obj, jint cpu1, jint cpu2, jint cpu3) {
-    return setCurrentThreadAffinityMask(cpu1, cpu2, cpu3);
+JNIEXPORT jlong JNICALL
+Java_com_samsungxr_NativeTime_getCurrentTime(JNIEnv * env,
+        jobject obj) {
+    return getCurrentTime();
 }
 
+JNIEXPORT jlong JNICALL
+Java_com_samsungxr_NativeTime_getNanoTime(JNIEnv * env,
+        jobject obj) {
+    return getNanoTime();
+}
+
+JNIEXPORT void JNICALL
+Java_com_samsungxr_NativeTime_sleepNanos(JNIEnv * env,
+        jobject obj, jlong nanoSeconds) {
+    sleepNanos(nanoSeconds);
+}
 }

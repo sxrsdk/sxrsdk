@@ -27,7 +27,7 @@
 #include "util/scope_exit.h"
 #include "util/jni_utils.h"
 
-namespace gvr {
+namespace sxr {
 /*
  * Represents an cubemap described by six separate 2D pixel arrays.
  * The image data for each cube face be either raw pixel data or

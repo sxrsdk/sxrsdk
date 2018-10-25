@@ -16,7 +16,7 @@
 #include "vulkan/vk_framebuffer.h"
 #include "vulkanCore.h"
 
-namespace gvr {
+namespace sxr {
 
     VKFramebuffer::~VKFramebuffer() {
 

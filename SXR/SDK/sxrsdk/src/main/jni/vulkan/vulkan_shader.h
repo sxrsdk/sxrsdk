@@ -21,7 +21,7 @@
 #include "vulkan_headers.h"
 
 
-namespace gvr {
+namespace sxr {
 class Mesh;
 
 /**

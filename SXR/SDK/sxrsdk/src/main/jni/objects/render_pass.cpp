@@ -18,7 +18,7 @@
 #include "engine/renderer/renderer.h"
 #include "render_pass.h"
 
-namespace gvr {
+namespace sxr {
 
 RenderPass::RenderPass() :
         material_(0), cull_face_(DEFAULT_CULL_FACE), dirty_(true), hash_code_dirty_(true)

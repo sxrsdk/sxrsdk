@@ -14,12 +14,12 @@
  */
 
 #include "ovr_framebufferobject.h"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 #include "VrApi.h"
 #include <EGL/egl.h>
 #include "engine/renderer/renderer.h"
 
-namespace gvr {
+namespace sxr {
 
 typedef void (GL_APIENTRY*PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC)(GLenum target, GLsizei samples,
         GLenum internalformat, GLsizei width, GLsizei height);
@@ -362,4 +362,4 @@ GLenum FrameBufferObject::translateVrapiFormatToInternal(const ovrTextureFormat 
     return internalFormat;
 }
 
-} //namespace gvr
+} //namespace sxr

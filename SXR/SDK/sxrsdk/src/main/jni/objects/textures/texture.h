@@ -22,11 +22,11 @@
 
 #include <atomic>
 #include "image.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
 #define MAX_TEXTURE_PARAM_NUM 10
 
-namespace gvr {
+namespace sxr {
 class Image;
 
 /*

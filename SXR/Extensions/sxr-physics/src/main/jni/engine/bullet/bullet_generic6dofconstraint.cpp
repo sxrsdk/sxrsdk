@@ -19,14 +19,14 @@
 
 #include "bullet_generic6dofconstraint.h"
 #include "bullet_rigidbody.h"
-#include "bullet_gvr_utils.h"
+#include "bullet_sxr_utils.h"
 
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h>
 
 static const char tag[] = "BulletGenericConstrN";
 
-namespace gvr {
+namespace sxr {
 
     BulletGeneric6dofConstraint::BulletGeneric6dofConstraint(
             PhysicsRigidBody *rigidBodyB, float const joint[], float const rotationA[],

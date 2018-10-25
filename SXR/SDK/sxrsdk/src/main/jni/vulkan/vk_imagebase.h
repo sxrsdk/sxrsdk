@@ -20,7 +20,7 @@
 #include <memory>
 #include "vulkan_headers.h"
 
-namespace gvr {
+namespace sxr {
     struct ImageInfo
     {
         int width;

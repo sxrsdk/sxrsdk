@@ -18,9 +18,9 @@
  ***************************************************************************/
 
 #include <android/bitmap.h>
-#include <gvr_gl.h>
+#include <sxr_gl.h>
 #include "gl/gl_bitmap_image.h"
-namespace gvr {
+namespace sxr {
 
 int GLBitmapImage::updateFromBitmap(JNIEnv *env, int target, jobject bitmap, bool mipmap, int internalFormat)
 {

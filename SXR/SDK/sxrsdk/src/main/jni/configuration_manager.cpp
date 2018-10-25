@@ -17,7 +17,7 @@
 #include <engine/renderer/renderer.h>
 #include "configuration_manager.h"
 
-namespace gvr {
+namespace sxr {
 
     ConfigurationManager::ConfigurationManager() {
     }

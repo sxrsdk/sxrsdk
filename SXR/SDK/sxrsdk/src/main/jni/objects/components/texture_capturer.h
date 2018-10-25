@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "glm/glm.hpp"
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 #include "util/jni_utils.h"
 #include "objects/lazy.h"
 #include "objects/components/component.h"
@@ -19,7 +19,7 @@
 
 #define TCCB_NEW_CAPTURE   1
 
-namespace gvr {
+namespace sxr {
 class RenderData;
 struct RenderState;
 

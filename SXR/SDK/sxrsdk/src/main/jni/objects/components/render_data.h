@@ -32,7 +32,7 @@
 #include "objects/render_pass.h"
 
 typedef unsigned long Long;
-namespace gvr {
+namespace sxr {
 
 class Mesh;
 class ShaderData;

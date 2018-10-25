@@ -25,7 +25,7 @@
 
 class btSliderConstraint;
 
-namespace gvr {
+namespace sxr {
 
     class PhysicsRigidBody;
     class BulletRigidBody;

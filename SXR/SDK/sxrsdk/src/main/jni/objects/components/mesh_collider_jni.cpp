@@ -20,43 +20,43 @@
 
 #include "mesh_collider.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeMeshCollider_ctorMesh(JNIEnv * env,
+    Java_com_samsungxr_NativeMeshCollider_ctorMesh(JNIEnv * env,
             jobject obj, jlong jmesh);
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeMeshCollider_ctorMeshPicking(JNIEnv * env,
+    Java_com_samsungxr_NativeMeshCollider_ctorMeshPicking(JNIEnv * env,
              jobject obj, jlong jmesh, jboolean pickCoordinates);
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeMeshCollider_ctor(JNIEnv * env,
+    Java_com_samsungxr_NativeMeshCollider_ctor(JNIEnv * env,
             jobject obj, jboolean useBounds);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeMeshCollider_setMesh(JNIEnv * env,
+    Java_com_samsungxr_NativeMeshCollider_setMesh(JNIEnv * env,
             jobject obj, jlong jmesh_collider, jlong jmesh);
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeMeshCollider_ctorMesh(JNIEnv * env,
+Java_com_samsungxr_NativeMeshCollider_ctorMesh(JNIEnv * env,
         jobject obj, jlong jmesh) {
     Mesh* mesh = reinterpret_cast<Mesh*>(jmesh);
     return reinterpret_cast<jlong>(new MeshCollider(mesh));
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeMeshCollider_ctorMeshPicking(JNIEnv * env,
+Java_com_samsungxr_NativeMeshCollider_ctorMeshPicking(JNIEnv * env,
                                              jobject obj, jlong jmesh, jboolean pickCoordinates) {
     Mesh* mesh = reinterpret_cast<Mesh*>(jmesh);
     return reinterpret_cast<jlong>(new MeshCollider(mesh, pickCoordinates));
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeMeshCollider_setMesh(JNIEnv * env,
+Java_com_samsungxr_NativeMeshCollider_setMesh(JNIEnv * env,
         jobject obj, jlong jmesh_collider, jlong jmesh) {
     MeshCollider* meshcollider = reinterpret_cast<MeshCollider*>(jmesh_collider);
     Mesh* mesh = reinterpret_cast<Mesh*>(jmesh);
@@ -64,7 +64,7 @@ Java_org_gearvrf_NativeMeshCollider_setMesh(JNIEnv * env,
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeMeshCollider_ctor(JNIEnv * env,
+Java_com_samsungxr_NativeMeshCollider_ctor(JNIEnv * env,
         jobject obj, jboolean useBounds) {
     return reinterpret_cast<jlong>(new MeshCollider(useBounds));
 }

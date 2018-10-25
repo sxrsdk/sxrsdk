@@ -9,9 +9,9 @@
 #include "gl_shader.h"
 
 #define VERBOSE_LOGGING 0
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
-namespace gvr {
+namespace sxr {
     GLVertexBuffer::GLVertexBuffer(const char* layout_desc, int vertexCount)
     : VertexBuffer(layout_desc, vertexCount),
       mVBufferID(-1), mVArrayID(-1), mProgramID(-1)
@@ -133,5 +133,5 @@ namespace gvr {
     }
 
 
-} // end gvrf
+} // end sxrsdk
 

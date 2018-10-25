@@ -22,7 +22,7 @@
 #include "vulkan_vertex_buffer.h"
 #include "vulkan_shader.h"
 
-namespace gvr {
+namespace sxr {
     VulkanVertexBuffer::VulkanVertexBuffer(const char* layout_desc, int vertexCount)
             : VertexBuffer(layout_desc, vertexCount)
     {
@@ -55,8 +55,8 @@ namespace gvr {
         }
         return true;
     }
-    const GVR_VK_Vertices* VulkanVertexBuffer::getVKVertices(Shader* shader)  {
-        std::unordered_map<Shader*,std::shared_ptr<GVR_VK_Vertices>>::iterator it;
+    const SXR_VK_Vertices* VulkanVertexBuffer::getVKVertices(Shader* shader)  {
+        std::unordered_map<Shader*,std::shared_ptr<SXR_VK_Vertices>>::iterator it;
         if((it = mVerticesMap.find(shader)) == mVerticesMap.end()) {
             LOGE("vertex buffer not created");
             return NULL;
@@ -72,7 +72,7 @@ namespace gvr {
 
         VkResult   err;
         bool   pass;
-        std::shared_ptr<GVR_VK_Vertices> vertices(new GVR_VK_Vertices);
+        std::shared_ptr<SXR_VK_Vertices> vertices(new SXR_VK_Vertices);
         // Our m_vertices member contains the types required for storing
         // and defining our vertex buffer within the graphics pipeline
 
@@ -88,7 +88,7 @@ namespace gvr {
                                                            if ((entry != nullptr) && entry->IsSet) // mesh uses this vertex attribute?
                                                            {
                                                                VkVertexInputAttributeDescription binding;
-                                                               binding.binding = GVR_VK_VERTEX_BUFFER_BIND_ID;
+                                                               binding.binding = SXR_VK_VERTEX_BUFFER_BIND_ID;
                                                                binding.location = e.Index;
                                                                LOGV("location %d attrMapping[i].offset %d , name %s", entry->Index, entry->Offset, entry->Name);
                                                                binding.format = getDataType(entry->Type); //float3
@@ -120,13 +120,13 @@ namespace gvr {
         bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
         bufferCreateInfo.flags = 0;
         //err = vkCreateBuffer(m_device, &bufferCreateInfo, nullptr, &m_vertices.buf);
-        err = vkCreateBuffer(device, gvr::BufferCreateInfo(bufferByteSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT), nullptr, &(vertices->buf));
-        GVR_VK_CHECK(!err);
+        err = vkCreateBuffer(device, sxr::BufferCreateInfo(bufferByteSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT), nullptr, &(vertices->buf));
+        SXR_VK_CHECK(!err);
 
         // Obtain the memory requirements for this buffer.
         VkMemoryRequirements mem_reqs;
         vkGetBufferMemoryRequirements(device, vertices->buf, &mem_reqs);
-        GVR_VK_CHECK(!err);
+        SXR_VK_CHECK(!err);
 
         // And allocate memory according to those requirements.
         VkMemoryAllocateInfo memoryAllocateInfo = {};
@@ -136,21 +136,21 @@ namespace gvr {
         memoryAllocateInfo.memoryTypeIndex = 0;
         memoryAllocateInfo.allocationSize  = mem_reqs.size;
         pass = vulkanCore->GetMemoryTypeFromProperties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &memoryAllocateInfo.memoryTypeIndex);
-        GVR_VK_CHECK(pass);
+        SXR_VK_CHECK(pass);
 
         VkDeviceMemory mem_staging_vert;
         VkBuffer buf_staging_vert;
-        err = vkCreateBuffer(device, gvr::BufferCreateInfo(bufferByteSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT), nullptr, &buf_staging_vert);
-        GVR_VK_CHECK(!err);
+        err = vkCreateBuffer(device, sxr::BufferCreateInfo(bufferByteSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT), nullptr, &buf_staging_vert);
+        SXR_VK_CHECK(!err);
 
         err = vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &mem_staging_vert);
-        GVR_VK_CHECK(!err);
+        SXR_VK_CHECK(!err);
 
         // Now we need to map the memory of this new allocation so the CPU can edit it.
         void *data;
 
         err = vkMapMemory(device, mem_staging_vert, 0, memoryAllocateInfo.allocationSize, 0, &data);
-        GVR_VK_CHECK(!err);
+        SXR_VK_CHECK(!err);
 
         // Copy our triangle verticies and colors into the mapped memory area.
         memcpy(data, mVertexData, bufferByteSize);
@@ -158,16 +158,16 @@ namespace gvr {
         // Unmap the memory back from the CPU.
         vkUnmapMemory(device, mem_staging_vert);
         err = vkBindBufferMemory(device, buf_staging_vert, mem_staging_vert, 0);
-        GVR_VK_CHECK(!err);
+        SXR_VK_CHECK(!err);
 
         // Create Device memory optimal
         pass = vulkanCore->GetMemoryTypeFromProperties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &memoryAllocateInfo.memoryTypeIndex);
-        GVR_VK_CHECK(pass);
+        SXR_VK_CHECK(pass);
         err = vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &vertices->mem);
-        GVR_VK_CHECK(!err);
+        SXR_VK_CHECK(!err);
         // Bind our buffer to the memory.
         err = vkBindBufferMemory(device, vertices->buf, vertices->mem, 0);
-        GVR_VK_CHECK(!err);
+        SXR_VK_CHECK(!err);
 
         VkCommandBufferBeginInfo beginInfo = {};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -231,4 +231,4 @@ namespace gvr {
         return VK_FORMAT_UNDEFINED;
 
     }
-} // end gvrf
+} // end sxrsdk

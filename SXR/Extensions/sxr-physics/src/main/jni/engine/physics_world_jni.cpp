@@ -25,77 +25,77 @@
 #include "physics_rigidbody.h"
 #include "physics_constraint.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
 static char tag[] = "PhysWorldJNI";
 
-namespace gvr {
+namespace sxr {
 extern "C" {
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DWorld_ctor(JNIEnv * env, jobject obj);
+    Java_com_samsungxr_physics_NativePhysics3DWorld_ctor(JNIEnv * env, jobject obj);
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DWorld_getComponentType(JNIEnv * env, jobject obj);
+    Java_com_samsungxr_physics_NativePhysics3DWorld_getComponentType(JNIEnv * env, jobject obj);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DWorld_addConstraint(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_NativePhysics3DWorld_addConstraint(JNIEnv * env, jobject obj,
                                                            jlong jworld, jlong jconstraint);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DWorld_removeConstraint(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_NativePhysics3DWorld_removeConstraint(JNIEnv * env, jobject obj,
                                                             jlong jworld, jlong jconstraint);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DWorld_startDrag(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_NativePhysics3DWorld_startDrag(JNIEnv * env, jobject obj,
             jlong jworld, jlong jpivot_obj, jlong jtarget,
             jfloat relx, jfloat rely, jfloat relz);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DWorld_stopDrag(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_NativePhysics3DWorld_stopDrag(JNIEnv * env, jobject obj,
             jlong jworld);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DWorld_addRigidBody(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_NativePhysics3DWorld_addRigidBody(JNIEnv * env, jobject obj,
             jlong jworld, jlong jrigid_body);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DWorld_addRigidBodyWithMask(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_NativePhysics3DWorld_addRigidBodyWithMask(JNIEnv * env, jobject obj,
             jlong jworld, jlong jrigid_body, jlong collisionType, jlong collidesWith);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DWorld_removeRigidBody(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_NativePhysics3DWorld_removeRigidBody(JNIEnv * env, jobject obj,
             jlong jworld, jlong jrigid_body);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DWorld_step(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_NativePhysics3DWorld_step(JNIEnv * env, jobject obj,
             jlong jworld, jfloat jtime_step, int maxSubSteps);
 
     JNIEXPORT jobjectArray JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DWorld_listCollisions(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_NativePhysics3DWorld_listCollisions(JNIEnv * env, jobject obj,
                                                                     jlong jworld);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DWorld_setGravity(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_physics_NativePhysics3DWorld_setGravity(JNIEnv* env, jobject obj,
             jlong jworld, float gx, float gy, float gz);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_NativePhysics3DWorld_getGravity(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_physics_NativePhysics3DWorld_getGravity(JNIEnv* env, jobject obj,
             jlong jworld, jfloatArray jgravity);
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_physics_NativePhysics3DWorld_ctor(JNIEnv * env, jobject obj) {
+Java_com_samsungxr_physics_NativePhysics3DWorld_ctor(JNIEnv * env, jobject obj) {
     return reinterpret_cast<jlong>(new BulletWorld());
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_physics_NativePhysics3DWorld_getComponentType(JNIEnv * env, jobject obj) {
+Java_com_samsungxr_physics_NativePhysics3DWorld_getComponentType(JNIEnv * env, jobject obj) {
     return PhysicsWorld::getComponentType();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_NativePhysics3DWorld_addConstraint(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_NativePhysics3DWorld_addConstraint(JNIEnv * env, jobject obj,
                                                             jlong jworld, jlong jconstraint) {
     PhysicsWorld *world = reinterpret_cast<PhysicsWorld*>(jworld);
     PhysicsConstraint* constraint = reinterpret_cast<PhysicsConstraint*>(jconstraint);
@@ -104,7 +104,7 @@ Java_org_gearvrf_physics_NativePhysics3DWorld_addConstraint(JNIEnv * env, jobjec
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_NativePhysics3DWorld_removeConstraint(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_NativePhysics3DWorld_removeConstraint(JNIEnv * env, jobject obj,
                                                             jlong jworld, jlong jconstraint) {
     PhysicsWorld *world = reinterpret_cast<PhysicsWorld*>(jworld);
     PhysicsConstraint* constraint = reinterpret_cast<PhysicsConstraint*>(jconstraint);
@@ -113,7 +113,7 @@ Java_org_gearvrf_physics_NativePhysics3DWorld_removeConstraint(JNIEnv * env, job
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_NativePhysics3DWorld_startDrag(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_NativePhysics3DWorld_startDrag(JNIEnv * env, jobject obj,
         jlong jworld, jlong jpivot_obj, jlong jtarget,
         jfloat relx, jfloat rely, jfloat relz) {
     PhysicsWorld *world = reinterpret_cast<PhysicsWorld*>(jworld);
@@ -124,7 +124,7 @@ Java_org_gearvrf_physics_NativePhysics3DWorld_startDrag(JNIEnv * env, jobject ob
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_NativePhysics3DWorld_stopDrag(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_NativePhysics3DWorld_stopDrag(JNIEnv * env, jobject obj,
         jlong jworld) {
     PhysicsWorld *world = reinterpret_cast<PhysicsWorld*>(jworld);
 
@@ -132,7 +132,7 @@ Java_org_gearvrf_physics_NativePhysics3DWorld_stopDrag(JNIEnv * env, jobject obj
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_NativePhysics3DWorld_addRigidBody(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_NativePhysics3DWorld_addRigidBody(JNIEnv * env, jobject obj,
         jlong jworld, jlong jrigid_body) {
     PhysicsWorld *world = reinterpret_cast<PhysicsWorld*>(jworld);
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
@@ -141,7 +141,7 @@ Java_org_gearvrf_physics_NativePhysics3DWorld_addRigidBody(JNIEnv * env, jobject
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_NativePhysics3DWorld_addRigidBodyWithMask(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_NativePhysics3DWorld_addRigidBodyWithMask(JNIEnv * env, jobject obj,
         jlong jworld, jlong jrigid_body, jlong collisionType, jlong collidesWith) {
     PhysicsWorld *world = reinterpret_cast<PhysicsWorld*>(jworld);
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
@@ -150,7 +150,7 @@ Java_org_gearvrf_physics_NativePhysics3DWorld_addRigidBodyWithMask(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_NativePhysics3DWorld_removeRigidBody(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_NativePhysics3DWorld_removeRigidBody(JNIEnv * env, jobject obj,
         jlong jworld, jlong jrigid_body) {
     PhysicsWorld *world = reinterpret_cast<PhysicsWorld*>(jworld);
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
@@ -159,7 +159,7 @@ Java_org_gearvrf_physics_NativePhysics3DWorld_removeRigidBody(JNIEnv * env, jobj
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_NativePhysics3DWorld_step(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_NativePhysics3DWorld_step(JNIEnv * env, jobject obj,
         jlong jworld, jfloat jtime_step, int maxSubSteps) {
     PhysicsWorld *world = reinterpret_cast<PhysicsWorld*>(jworld);
 
@@ -167,9 +167,9 @@ Java_org_gearvrf_physics_NativePhysics3DWorld_step(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT jobjectArray JNICALL
-Java_org_gearvrf_physics_NativePhysics3DWorld_listCollisions(JNIEnv * env, jobject obj, jlong jworld) {
+Java_com_samsungxr_physics_NativePhysics3DWorld_listCollisions(JNIEnv * env, jobject obj, jlong jworld) {
 
-    jclass collisionInfoClass = env->FindClass("org/gearvrf/physics/GVRCollisionInfo");
+    jclass collisionInfoClass = env->FindClass("com/samsungxr/physics/SXRCollisionInfo");
     jmethodID collisionInfoConstructor = env->GetMethodID(collisionInfoClass, "<init>", "(JJ[FFZ)V");
 
     PhysicsWorld *world = reinterpret_cast <PhysicsWorld*> (jworld);
@@ -202,7 +202,7 @@ Java_org_gearvrf_physics_NativePhysics3DWorld_listCollisions(JNIEnv * env, jobje
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_NativePhysics3DWorld_setGravity(JNIEnv* env, jobject obj,
+Java_com_samsungxr_physics_NativePhysics3DWorld_setGravity(JNIEnv* env, jobject obj,
         jlong jworld, float gx, float gy, float gz)
 {
     PhysicsWorld* world = reinterpret_cast <PhysicsWorld*> (jworld);
@@ -210,7 +210,7 @@ Java_org_gearvrf_physics_NativePhysics3DWorld_setGravity(JNIEnv* env, jobject ob
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_NativePhysics3DWorld_getGravity(JNIEnv* env, jobject obj,
+Java_com_samsungxr_physics_NativePhysics3DWorld_getGravity(JNIEnv* env, jobject obj,
         jlong jworld, jfloatArray jgravity)
 {
     PhysicsWorld* world = reinterpret_cast <PhysicsWorld*> (jworld);

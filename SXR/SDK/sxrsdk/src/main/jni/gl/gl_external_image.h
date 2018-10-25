@@ -20,7 +20,7 @@
 #include "gl_image.h"
 #include "gl_headers.h"
 
-namespace gvr {
+namespace sxr {
 
 class GLExternalImage: public GLImage, public ExternalImage
 {

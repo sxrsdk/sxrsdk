@@ -9,7 +9,7 @@
 #include "render_data.h"
 #include "objects/scene_object.h"
 
-namespace gvr {
+namespace sxr {
 /*
  * Determine if the ray hits the collider.
  * @param owner         SceneObject that owns this collider or

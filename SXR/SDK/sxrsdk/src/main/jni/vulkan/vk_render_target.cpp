@@ -19,7 +19,7 @@
 
 
 
-namespace gvr{
+namespace sxr{
 VkCommandBuffer& VkRenderTarget::getCommandBuffer(){
     return static_cast<VkRenderTexture*>(mRenderTexture)->getCommandBuffer();
 }

@@ -4,7 +4,7 @@
 #include "component.inl"
 #include "engine/renderer/renderer.h"
 
-namespace gvr
+namespace sxr
 {
     Skin::Skin(Skeleton& skel)
     : Component(COMPONENT_TYPE_SKIN),

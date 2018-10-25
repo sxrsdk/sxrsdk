@@ -27,16 +27,16 @@
 #include <objects/textures/render_texture.h>
 
 static const char* activityClassName = "android/app/Activity";
-static const char* applicationClassName = "org/gearvrf/GVRApplication";
-static const char* viewManagerClassName = "org/gearvrf/OvrViewManager";
+static const char* applicationClassName = "com/samsungxr/SXRApplication";
+static const char* viewManagerClassName = "com/samsungxr/OvrViewManager";
 
-namespace gvr {
+namespace sxr {
 
 //=============================================================================
-//                             GVRActivity
+//                             SXRActivity
 //=============================================================================
 
-GVRActivity::GVRActivity(JNIEnv &env, jobject activity, jobject vrAppSettings) : envMainThread_(
+SXRActivity::SXRActivity(JNIEnv &env, jobject activity, jobject vrAppSettings) : envMainThread_(
         &env), configurationHelper_(env, vrAppSettings)
     {
         activity_ = env.NewGlobalRef(activity);
@@ -51,14 +51,14 @@ GVRActivity::GVRActivity(JNIEnv &env, jobject activity, jobject vrAppSettings) :
         mainThreadId_ = gettid();
     }
 
-    GVRActivity::~GVRActivity() {
-        LOGV("GVRActivity::~GVRActivity");
+    SXRActivity::~SXRActivity() {
+        LOGV("SXRActivity::~SXRActivity");
         envMainThread_->DeleteGlobalRef(activityClass_);
         envMainThread_->DeleteGlobalRef(activity_);
         envMainThread_->DeleteGlobalRef(jsurface_);
     }
 
-    int GVRActivity::initializeVrApi() {
+    int SXRActivity::initializeVrApi() {
         initializeOculusJava(*envMainThread_, oculusJavaMainThread_);
 
         const ovrInitParms initParms = vrapi_DefaultInitParms(&oculusJavaMainThread_);
@@ -79,12 +79,12 @@ GVRActivity::GVRActivity(JNIEnv &env, jobject activity, jobject vrAppSettings) :
     /**
      * Do not call unless vrapi has been successfully initialized prior to that.
      */
-    void GVRActivity::uninitializeVrApi() {
+    void SXRActivity::uninitializeVrApi() {
         vrapi_Shutdown();
     }
 
-    void GVRActivity::showConfirmQuit() {
-        LOGV("GVRActivity::showConfirmuit");
+    void SXRActivity::showConfirmQuit() {
+        LOGV("SXRActivity::showConfirmuit");
 
         ovrFrameParms parms = vrapi_DefaultFrameParms(&oculusJavaGlThread_, VRAPI_FRAME_INIT_BLACK_FINAL, vrapi_GetTimeInSeconds(), nullptr);
         parms.FrameIndex = ++frameIndex;
@@ -95,17 +95,17 @@ GVRActivity::GVRActivity(JNIEnv &env, jobject activity, jobject vrAppSettings) :
         vrapi_ShowSystemUI(&oculusJavaGlThread_, VRAPI_SYS_UI_CONFIRM_QUIT_MENU);
     }
 
-    bool GVRActivity::updateSensoredScene(jobject jViewManager) {
+    bool SXRActivity::updateSensoredScene(jobject jViewManager) {
         return oculusJavaGlThread_.Env->CallBooleanMethod(jViewManager, updateSensoredSceneMethodId);
     }
 
-    void GVRActivity::setCameraRig(jlong cameraRig) {
+    void SXRActivity::setCameraRig(jlong cameraRig) {
         cameraRig_ = reinterpret_cast<CameraRig*>(cameraRig);
         sensoredSceneUpdated_ = false;
     }
 
-    void GVRActivity::onSurfaceCreated(JNIEnv& env) {
-        LOGV("GVRActivity::onSurfaceCreated");
+    void SXRActivity::onSurfaceCreated(JNIEnv& env) {
+        LOGV("SXRActivity::onSurfaceCreated");
         initializeOculusJava(env, oculusJavaGlThread_);
 
         //must happen as soon as possible as it updates the java side wherever it has default values; e.g.
@@ -117,7 +117,7 @@ GVRActivity::GVRActivity(JNIEnv &env, jobject activity, jobject vrAppSettings) :
                                                          mResolveDepthConfiguration, mDepthTextureFormatConfiguration);
     }
 
-RenderTextureInfo *GVRActivity::getRenderTextureInfo(int eye, int index) {
+RenderTextureInfo *SXRActivity::getRenderTextureInfo(int eye, int index) {
     // for multiview, eye index would be 2
     eye = eye % 2;
     FrameBufferObject fbo = frameBuffer_[eye];
@@ -138,9 +138,9 @@ RenderTextureInfo *GVRActivity::getRenderTextureInfo(int eye, int index) {
     return renderTextureInfo;
 }
 
-void GVRActivity::onSurfaceChanged(JNIEnv &env, jobject jsurface) {
+void SXRActivity::onSurfaceChanged(JNIEnv &env, jobject jsurface) {
     int maxSamples = MSAA::getMaxSampleCount();
-    LOGV("GVRActivity::onSurfaceChanged");
+    LOGV("SXRActivity::onSurfaceChanged");
     initializeOculusJava(env, oculusJavaGlThread_);
     jsurface_ = env.NewGlobalRef(jsurface);
 
@@ -237,7 +237,7 @@ void GVRActivity::onSurfaceChanged(JNIEnv &env, jobject jsurface) {
     }
 }
 
-void GVRActivity::copyVulkanTexture(int texSwapChainIndex, int eye){
+void SXRActivity::copyVulkanTexture(int texSwapChainIndex, int eye){
     RenderTarget* renderTarget = gRenderer->getRenderTarget(texSwapChainIndex, use_multiview ? 2 : eye);
     reinterpret_cast<VulkanRenderer*>(gRenderer)->renderToOculus(renderTarget);
 
@@ -256,7 +256,7 @@ void GVRActivity::copyVulkanTexture(int texSwapChainIndex, int eye){
     reinterpret_cast<VulkanRenderer*>(gRenderer)->unmapRenderToOculus(renderTarget);
 }
 
-void GVRActivity::onDrawFrame(jobject jViewManager) {
+void SXRActivity::onDrawFrame(jobject jViewManager) {
     ovrFrameParms parms = vrapi_DefaultFrameParms(&oculusJavaGlThread_, VRAPI_FRAME_INIT_DEFAULT,
                                                   vrapi_GetTimeInSeconds(),
                                                   NULL);
@@ -327,7 +327,7 @@ void GVRActivity::onDrawFrame(jobject jViewManager) {
     vrapi_SubmitFrame(oculusMobile_, &parms);
 }
 
-    void GVRActivity::endRenderingEye(const int eye) {
+    void SXRActivity::endRenderingEye(const int eye) {
         if (!clampToBorderSupported_) {
             // quote off VrApi_Types.h:
             // <quote>
@@ -357,14 +357,14 @@ void GVRActivity::onDrawFrame(jobject jViewManager) {
         frameBuffer_[eye].advance();
     }
 
-    void GVRActivity::initializeOculusJava(JNIEnv& env, ovrJava& oculusJava) {
+    void SXRActivity::initializeOculusJava(JNIEnv& env, ovrJava& oculusJava) {
         oculusJava.Env = &env;
         env.GetJavaVM(&oculusJava.Vm);
         oculusJava.ActivityObject = activity_;
     }
 
-    void GVRActivity::leaveVrMode() {
-        LOGV("GVRActivity::leaveVrMode");
+    void SXRActivity::leaveVrMode() {
+        LOGV("SXRActivity::leaveVrMode");
         Renderer::resetInstance();
         if (nullptr != oculusMobile_) {
             for (int eye = 0; eye < (use_multiview ? 1 : VRAPI_FRAME_LAYER_EYE_MAX); eye++) {
@@ -374,18 +374,18 @@ void GVRActivity::onDrawFrame(jobject jViewManager) {
             vrapi_LeaveVrMode(oculusMobile_);
             oculusMobile_ = nullptr;
         } else {
-            LOGW("GVRActivity::leaveVrMode: ignored, have not entered vrMode");
+            LOGW("SXRActivity::leaveVrMode: ignored, have not entered vrMode");
         }
     }
 
 /**
  * Must be called on the GL thread
  */
-    bool GVRActivity::isHmtConnected() const {
+    bool SXRActivity::isHmtConnected() const {
         return vrapi_GetSystemStatusInt(&oculusJavaMainThread_, VRAPI_SYS_STATUS_DOCKED);
     }
 
-    bool GVRActivity::usingMultiview() const {
+    bool SXRActivity::usingMultiview() const {
         LOGD("Activity: usingMultview = %d", use_multiview);
         return use_multiview;
     }

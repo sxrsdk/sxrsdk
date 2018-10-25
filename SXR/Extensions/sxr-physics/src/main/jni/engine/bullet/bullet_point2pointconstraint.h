@@ -22,7 +22,7 @@
 
 class btPoint2PointConstraint;
 
-namespace gvr {
+namespace sxr {
 
     class PhysicsRigidBody;
     class BulletRigidBody;

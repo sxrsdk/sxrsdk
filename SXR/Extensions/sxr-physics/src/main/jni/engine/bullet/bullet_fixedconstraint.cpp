@@ -10,7 +10,7 @@
 
 static const char tag[] = "BulletFixedConstrN";
 
-namespace gvr {
+namespace sxr {
 
 BulletFixedConstraint::BulletFixedConstraint(PhysicsRigidBody* rigidBodyB) {
     mFixedConstraint = 0;

@@ -20,7 +20,7 @@
 #include "exporter.h"
 
 #include "objects/scene_object.h"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 #include "objects/components/render_data.h"
 
 #include <assimp/Exporter.hpp>
@@ -28,7 +28,7 @@
 
 #include <vector>
 
-namespace gvr {
+namespace sxr {
 
 /* Returns the extension of filename */
 const std::string getFileExtension(const std::string &filename) {
@@ -67,19 +67,19 @@ void glm2aiMatrix4x4(aiMatrix4x4 &p, glm::mat4 m) {
     p.d1 = m[0][3]; p.d2 = m[1][3]; p.d3 = m[2][3]; p.d4 = m[3][3];
 }
 
-/* Sets the transformations of GVRSceneObject to aiNode of i Mesh */
-void gvr2aiNode(SceneObject &gvrobj, aiNode &ainode, int i) {
+/* Sets the transformations of SXRSceneObject to aiNode of i Mesh */
+void sxr2aiNode(SceneObject &sxrobj, aiNode &ainode, int i) {
     ainode.mNumMeshes = 1;
     ainode.mMeshes = new unsigned int[ainode.mNumMeshes];
     ainode.mMeshes[0] = i;
     ainode.mNumChildren = 0;
 
-    glm2aiMatrix4x4(ainode.mTransformation, gvrobj.transform()->getModelMatrix());
+    glm2aiMatrix4x4(ainode.mTransformation, sxrobj.transform()->getModelMatrix());
 }
 
-/* Converts the GVRMesh to aiMesh */
-void gvr2aiMesh(Mesh &gvrmesh, aiMesh &aimesh) {
-    int nverts = gvrmesh.getVertexCount();
+/* Converts the SXRMesh to aiMesh */
+void sxr2aiMesh(Mesh &sxrmesh, aiMesh &aimesh) {
+    int nverts = sxrmesh.getVertexCount();
     float* verts = static_cast<float*>(&(aimesh.mVertices[0].x));
     float* norms = static_cast<float*>(&(aimesh.mNormals[0].x));
 
@@ -89,16 +89,16 @@ void gvr2aiMesh(Mesh &gvrmesh, aiMesh &aimesh) {
     aimesh.mNumVertices = nverts;
     aimesh.mTextureCoords[0] = new aiVector3D[nverts];
     aimesh.mNumUVComponents[0] = nverts;
-    gvrmesh.getVertices(verts, nverts * 3);
-    gvrmesh.getNormals(norms, nverts * 3);
-    gvrmesh.forAllVertices("a_texcoord", [aimesh](int iter, const float* uvs)
+    sxrmesh.getVertices(verts, nverts * 3);
+    sxrmesh.getNormals(norms, nverts * 3);
+    sxrmesh.forAllVertices("a_texcoord", [aimesh](int iter, const float* uvs)
     {
         aimesh.mTextureCoords[0][iter] = aiVector3D(uvs[0], uvs[1], 0);
     });
-    int nIndices = gvrmesh.getIndexCount();
+    int nIndices = sxrmesh.getIndexCount();
     aimesh.mNumFaces = (unsigned int)(nIndices / 3);
     aimesh.mFaces = new aiFace[aimesh.mNumFaces];
-        gvrmesh.forAllIndices([aimesh](int iter, int index)
+        sxrmesh.forAllIndices([aimesh](int iter, int index)
                               {
                                   int faceIndex = iter / 3;
                                   aiFace &face = aimesh.mFaces[faceIndex];
@@ -112,9 +112,9 @@ void gvr2aiMesh(Mesh &gvrmesh, aiMesh &aimesh) {
         );
 }
 
-/* Converts the given GVRScene to aiScene */
-void gvr2aiScene(Scene &gvrscene, aiScene &aiscene) {
-    std::vector<SceneObject*> scene_objects(gvrscene.getWholeSceneObjects());
+/* Converts the given SXRScene to aiScene */
+void sxr2aiScene(Scene &sxrscene, aiScene &aiscene) {
+    std::vector<SceneObject*> scene_objects(sxrscene.getWholeSceneObjects());
 
     aiscene.mRootNode = new aiNode();
 
@@ -141,9 +141,9 @@ void gvr2aiScene(Scene &gvrscene, aiScene &aiscene) {
         aiMesh *aimesh = new aiMesh();
         aiNode *ainode = new aiNode();
 
-        gvr2aiMesh(*(*itr)->render_data()->mesh(), *aimesh);
+        sxr2aiMesh(*(*itr)->render_data()->mesh(), *aimesh);
 
-        gvr2aiNode(**itr, *ainode, i);
+        sxr2aiNode(**itr, *ainode, i);
 
         if ((*itr)->name().empty())
             aimesh->mName.length = sprintf(aimesh->mName.data, "Mesh%03d", i);
@@ -177,7 +177,7 @@ int Exporter::writeToFile(Scene *scene, const std::string filename) {
 
     aiScene aiscene;
 
-    gvr2aiScene(*scene, aiscene);
+    sxr2aiScene(*scene, aiscene);
 
     if (aiscene.mNumMeshes > 0) {
         LOGD("Exporting scene to %s\n", filename.c_str());

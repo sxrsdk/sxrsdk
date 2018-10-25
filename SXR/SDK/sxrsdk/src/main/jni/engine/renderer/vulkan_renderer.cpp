@@ -37,7 +37,7 @@
 
 #include <glslang/Include/Common.h>
 
-namespace gvr {
+namespace sxr {
 ShaderData* VulkanRenderer::createMaterial(const char* uniform_desc, const char* texture_desc)
 {
     return new VulkanMaterial(uniform_desc, texture_desc);
@@ -150,8 +150,8 @@ bool VulkanRenderer::renderWithShader(RenderState& rstate, Shader* shader, Rende
     bool shadowFlag = false;
     if (rstate.is_shadow && curr_material) {
         const char *depthShaderName = (rdata->owner_object()->getComponent(Skin::getComponentType()) != nullptr)
-                                      ? "GVRDepthShader$a_bone_weights$a_bone_indices"
-                                      : "GVRDepthShader";
+                                      ? "SXRDepthShader$a_bone_weights$a_bone_indices"
+                                      : "SXRDepthShader";
         shader = rstate.shader_manager->findShader(depthShaderName);
         if (shader == nullptr) {
             rstate.scene->makeDepthShaders(rstate.javaSceneObject);
@@ -371,7 +371,7 @@ void VulkanRenderer::renderRenderTarget(Scene* scene, jobject javaSceneObject, R
     /**
      * Generate shadow maps for all the lights that cast shadows.
      * The scene is rendered from the viewpoint of the light using a
-     * special depth shader (GVRDepthShader) to create the shadow map.
+     * special depth shader (SXRDepthShader) to create the shadow map.
      * @see Renderer::renderShadowMap Light::makeShadowMap
      */
     void VulkanRenderer::makeShadowMaps(Scene* scene, jobject javaSceneObject, ShaderManager* shader_manager)

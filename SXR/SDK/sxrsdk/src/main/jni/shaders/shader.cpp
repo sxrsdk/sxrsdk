@@ -20,7 +20,7 @@
 #include <jni_utils.h>
 #include "shader.h"
 
-namespace gvr {
+namespace sxr {
     
 Shader::Shader(int id,
                const char* signature,
@@ -86,4 +86,4 @@ int Shader::calcSize(const char* type)
 
 
 
-} /* namespace gvr */
+} /* namespace sxr */

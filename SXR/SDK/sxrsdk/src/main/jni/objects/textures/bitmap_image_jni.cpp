@@ -19,43 +19,43 @@
 
 #include <engine/renderer/renderer.h>
 #include "bitmap_image.h"
-#include "util/gvr_jni.h"
-#include "util/gvr_java_stack_trace.h"
+#include "util/sxr_jni.h"
+#include "util/sxr_java_stack_trace.h"
 #include "android/asset_manager_jni.h"
 
 
-namespace gvr
+namespace sxr
 {
     extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeBitmapImage_constructor(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeBitmapImage_constructor(JNIEnv *env, jobject obj,
                                                    int imageType, int pixelFormat);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBitmapImage_setFileName(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeBitmapImage_setFileName(JNIEnv *env, jobject obj,
                                                    jlong jtexture, jstring jfile);
 
     JNIEXPORT jstring JNICALL
-    Java_org_gearvrf_NativeBitmapImage_getFileName(JNIEnv *env, jobject obj, jlong jtexture);
+    Java_com_samsungxr_NativeBitmapImage_getFileName(JNIEnv *env, jobject obj, jlong jtexture);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBitmapImage_updateFromMemory(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeBitmapImage_updateFromMemory(JNIEnv *env, jobject obj,
                                                         jlong jtexture, jint width,
                                                         jint height, jbyteArray jdata);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBitmapImage_updateCompressed(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeBitmapImage_updateCompressed(JNIEnv *env, jobject obj,
                                                         jlong jtexture, jint width, int height, jint imageSize,
                                                         jbyteArray jdata, jint levels, jintArray offset);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBitmapImage_updateFromBitmap(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeBitmapImage_updateFromBitmap(JNIEnv *env, jobject obj,
                                                         jlong jtexture, jobject jbitmap,
                                                         jboolean hasAlpha, jstring format);
     }
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeBitmapImage_constructor(JNIEnv *env, jobject obj, jint type, jint format)
+    Java_com_samsungxr_NativeBitmapImage_constructor(JNIEnv *env, jobject obj, jint type, jint format)
     {
         Image *image = Renderer::getInstance()->createImage(type, format);
         jlong result = reinterpret_cast<jlong>(image);
@@ -63,7 +63,7 @@ namespace gvr
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBitmapImage_updateFromMemory(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeBitmapImage_updateFromMemory(JNIEnv *env, jobject obj,
                                                         jlong jtexture, jint width, jint height,
                                                         jbyteArray jdata)
     {
@@ -75,7 +75,7 @@ namespace gvr
 
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBitmapImage_updateFromBitmap(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeBitmapImage_updateFromBitmap(JNIEnv *env, jobject obj,
                                                         jlong jtexture, jobject jbitmap,
                                                         jboolean hasAlpha, jstring format)
     {
@@ -101,7 +101,7 @@ namespace gvr
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBitmapImage_updateFromBuffer(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeBitmapImage_updateFromBuffer(JNIEnv *env, jobject obj,
                                                         jlong jtexture, jint xoffset, jint yoffset,
                                                         jint width, jint height,
                                                         jint format, jint type, jobject jbuffer)
@@ -111,7 +111,7 @@ namespace gvr
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBitmapImage_updateCompressed(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeBitmapImage_updateCompressed(JNIEnv *env, jobject obj,
                                                         jlong jtexture, jint width, jint height, jint imageSize,
                                                         jbyteArray jdata, jint levels, jintArray joffsets)
     {
@@ -128,7 +128,7 @@ namespace gvr
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBitmapImage_setFileName(JNIEnv *env, jobject obj,
+    Java_com_samsungxr_NativeBitmapImage_setFileName(JNIEnv *env, jobject obj,
                                                    jlong jtexture, jstring jfile)
     {
         BitmapImage* bmap = reinterpret_cast<BitmapImage *>(jtexture);
@@ -138,7 +138,7 @@ namespace gvr
     }
 
     JNIEXPORT jstring JNICALL
-    Java_org_gearvrf_NativeBitmapImage_getFileName(JNIEnv *env, jobject obj, jlong jtexture)
+    Java_com_samsungxr_NativeBitmapImage_getFileName(JNIEnv *env, jobject obj, jlong jtexture)
     {
         BitmapImage* bmap = reinterpret_cast<BitmapImage *>(jtexture);
         const char* fname = bmap->getFileName();

@@ -23,7 +23,7 @@
 #include "objects/components/skin.h"
 #include <glslang/Include/Common.h> //@todo remove; for to_string
 
-namespace gvr {
+namespace sxr {
 
 RenderData::~RenderData() {
     if (nullptr == javaVm_) {
@@ -325,7 +325,7 @@ bool RenderData::updateGPU(Renderer* renderer, Shader* shader)
 void RenderData::setBindShaderObject(JNIEnv* env, jobject bindShaderObject)
 {
     static const jclass clazz = env->GetObjectClass(bindShaderObject);
-    static const jmethodID method = env->GetMethodID(clazz, "call", "(Lorg/gearvrf/GVRScene;Z)V");
+    static const jmethodID method = env->GetMethodID(clazz, "call", "(Lcom/samsungxr/SXRScene;Z)V");
     if (method == 0)
     {
         FAIL("RenderData::setBindShaderObject: ERROR cannot find 'BindShaderObject.call' Java method");

@@ -23,7 +23,7 @@
 #include "gl/gl_material.h"
 #include "gl/gl_shader.h"
 
-namespace gvr
+namespace sxr
 {
 
 /**

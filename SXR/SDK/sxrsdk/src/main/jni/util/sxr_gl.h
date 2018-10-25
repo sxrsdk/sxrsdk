@@ -26,12 +26,12 @@
 #include <math.h>
 
 #include <android/bitmap.h>
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 #include "gl/gl_headers.h"
 
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
-namespace gvr {
+namespace sxr {
 
 static void dumpActiveAttribues(GLuint program)
 {

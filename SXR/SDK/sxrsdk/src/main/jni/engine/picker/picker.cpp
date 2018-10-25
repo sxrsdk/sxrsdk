@@ -30,7 +30,7 @@
 #include "objects/components/render_data.h"
 #include "objects/components/mesh_collider.h"
 
-namespace gvr {
+namespace sxr {
 
 /*
  * Intersects all the colliders in the scene with the input ray

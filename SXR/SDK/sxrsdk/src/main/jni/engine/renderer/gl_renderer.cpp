@@ -31,7 +31,7 @@
 #include "objects/scene.h"
 #include "objects/components/skin.h"
 
-namespace gvr
+namespace sxr
 {
     ShaderData *GLRenderer::createMaterial(const char* uniform_desc, const char* texture_desc)
     {
@@ -432,7 +432,7 @@ namespace gvr
     /**
      * Generate shadow maps for all the lights that cast shadows.
      * The scene is rendered from the viewpoint of the light using a
-     * special depth shader (GVRDepthShader) to create the shadow map.
+     * special depth shader (SXRDepthShader) to create the shadow map.
      * @see Renderer::renderShadowMap Light::makeShadowMap
      */
     void GLRenderer::makeShadowMaps(Scene* scene, jobject javaSceneObject, ShaderManager* shader_manager)
@@ -500,7 +500,7 @@ namespace gvr
                 ShaderData *bbox_material = new GLMaterial("", "");
                 RenderPass *pass = Renderer::getInstance()->createRenderPass();
                 GLShader *bboxShader = static_cast<GLShader *>(rstate.shader_manager
-                        ->findShader("GVRBoundingBoxShader"));
+                        ->findShader("SXRBoundingBoxShader"));
                 pass->set_shader(bboxShader->getProgramId(), false);
                 pass->set_material(bbox_material);
                 bounding_box_render_data->set_mesh(bounding_box_mesh);
@@ -569,7 +569,7 @@ namespace gvr
         if (rstate.is_shadow && curr_material)
         {
             const char* depthShaderName = render_data->owner_object()->getComponent(Skin::getComponentType()) ?
-                                          "GVRDepthShader$a_bone_weights$a_bone_indices" : "GVRDepthShader";
+                                          "SXRDepthShader$a_bone_weights$a_bone_indices" : "SXRDepthShader";
             shader = rstate.shader_manager->findShader(depthShaderName);
 
             if (shader == nullptr)
@@ -624,7 +624,7 @@ namespace gvr
         {
             LOGE("Error detected in Renderer::renderRenderData; name : %s, error : %s",
                  render_data->owner_object()->name().c_str(), error.c_str());
-            shader = rstate.shader_manager->findShader("GVRErrorShader");
+            shader = rstate.shader_manager->findShader("SXRErrorShader");
             shader->useShader(rstate.is_multiview);
         }
         if ((drawMode == GL_LINE_STRIP) ||

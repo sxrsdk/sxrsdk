@@ -16,11 +16,11 @@
 /***************************************************************************
  * Save front bufer image
  ***************************************************************************/
-#include "gvr_image_capture.h"
+#include "sxr_image_capture.h"
 
 #include <stdio.h>
 #include <cstring>
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
 int write_truecolor_tga( uint width, uint height, GLubyte* val, char* fileName ) {
      FILE *fp = fopen(fileName, "wb");
@@ -66,13 +66,13 @@ int write_truecolor_tga( uint width, uint height, GLubyte* val, char* fileName )
     return 1;
  }
 
-GVRImageCapture::GVRImageCapture(uint width, uint height) :
+SXRImageCapture::SXRImageCapture(uint width, uint height) :
         mDefaultWidth(width), mDefaultHeight(height),
         mMaxWidth(0), mMaxHeight(0)
 {
 }
 
-GVRImageCapture::~GVRImageCapture()
+SXRImageCapture::~SXRImageCapture()
 {
     for (std::vector<PBOINFO>::iterator it = mPBOData.begin(); it != mPBOData.end(); ++it)
     {
@@ -82,7 +82,7 @@ GVRImageCapture::~GVRImageCapture()
     }
 }
 
-void GVRImageCapture::captureImage(int startX, int startY, uint width, uint height, char* msg)
+void SXRImageCapture::captureImage(int startX, int startY, uint width, uint height, char* msg)
 {
     mMaxWidth = std::max(width, mMaxWidth);
     mMaxHeight = std::max(height, mMaxHeight);
@@ -105,12 +105,12 @@ void GVRImageCapture::captureImage(int startX, int startY, uint width, uint heig
     glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }
 
-void GVRImageCapture::captureImage(int startX, int startY, char* msg)
+void SXRImageCapture::captureImage(int startX, int startY, char* msg)
 {
     captureImage(startX, startY, mDefaultWidth, mDefaultHeight, msg);
 }
 
-void GVRImageCapture::saveAllImages()
+void SXRImageCapture::saveAllImages()
 {
     GLubyte* data = new GLubyte[mMaxWidth * mMaxHeight * 4];
     int fileIndex = 0;

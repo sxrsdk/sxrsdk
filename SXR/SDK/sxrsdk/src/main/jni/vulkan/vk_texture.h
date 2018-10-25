@@ -21,7 +21,7 @@
 #include "../objects/textures/texture.h"
 
 
-namespace gvr {
+namespace sxr {
 class VkTexture : public  Texture
 {
 public:

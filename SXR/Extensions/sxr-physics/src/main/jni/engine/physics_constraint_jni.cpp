@@ -19,46 +19,46 @@
 
 #include "physics_constraint.h"
 
-namespace gvr {
+namespace sxr {
 
     extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_Native3DConstraint_getComponentType(JNIEnv * env, jobject obj);
+    Java_com_samsungxr_physics_Native3DConstraint_getComponentType(JNIEnv * env, jobject obj);
 
     JNIEXPORT jint JNICALL
-    Java_org_gearvrf_physics_Native3DConstraint_getConstraintType(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConstraint_getConstraintType(JNIEnv * env, jobject obj,
                                                                   jlong jconstraint);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DConstraint_setBreakingImpulse(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConstraint_setBreakingImpulse(JNIEnv * env, jobject obj,
                                                                    jlong jconstraint,
                                                                    jfloat impulse);
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DConstraint_getBreakingImpulse(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConstraint_getBreakingImpulse(JNIEnv * env, jobject obj,
                                                                    jlong jconstraint);
     }
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_Native3DConstraint_getComponentType(JNIEnv * env, jobject obj) {
+    Java_com_samsungxr_physics_Native3DConstraint_getComponentType(JNIEnv * env, jobject obj) {
         return PhysicsConstraint::getComponentType();
     }
 
     JNIEXPORT jint JNICALL
-    Java_org_gearvrf_physics_Native3DConstraint_getConstraintType(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConstraint_getConstraintType(JNIEnv * env, jobject obj,
                                                                   jlong jconstraint) {
         return reinterpret_cast<PhysicsConstraint*>(jconstraint)->getConstraintType();
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DConstraint_setBreakingImpulse(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConstraint_setBreakingImpulse(JNIEnv * env, jobject obj,
                                                                    jlong jconstraint,
                                                                    jfloat impulse) {
         reinterpret_cast<PhysicsConstraint*>(jconstraint)->setBreakingImpulse(impulse);
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DConstraint_getBreakingImpulse(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConstraint_getBreakingImpulse(JNIEnv * env, jobject obj,
                                                                    jlong jconstraint) {
         return reinterpret_cast<PhysicsConstraint*>(jconstraint)->getBreakingImpulse();
     }

@@ -27,7 +27,7 @@
 
 #include "objects/components/component.h"
 
-namespace gvr {
+namespace sxr {
 class ShaderData;
 class RenderData;
 

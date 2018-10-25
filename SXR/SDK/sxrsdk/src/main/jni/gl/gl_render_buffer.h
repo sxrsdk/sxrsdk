@@ -22,9 +22,9 @@
 #define GL_RENDER_BUFFER_H_
 
 #include "gl/gl_headers.h"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
-namespace gvr {
+namespace sxr {
 
 class GLRenderBuffer final {
 public:

@@ -21,7 +21,7 @@
 #include "util/scope_exit.h"
 #include "util/jni_utils.h"
 
-namespace gvr {
+namespace sxr {
     CubemapImage::CubemapImage(int format) :
             Image(Image::CUBEMAP, format), mJava(NULL), mBitmaps(NULL), mTextures(NULL)
     {

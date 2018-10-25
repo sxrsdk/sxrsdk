@@ -17,7 +17,7 @@
 #include "gl/gl_shader.h"
 #include "gl/gl_imagetex.h"
 
-namespace gvr
+namespace sxr
 {
 /**
  * Binds the textures and uniforms in this material to the

@@ -25,7 +25,7 @@
 #include "bullet_object.h"
 
 class btConeTwistConstraint;
-namespace gvr {
+namespace sxr {
 
     class PhysicsRigidBody;
     class BulletRigidBody;

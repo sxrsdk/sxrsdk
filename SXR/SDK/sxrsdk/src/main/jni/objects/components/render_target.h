@@ -24,7 +24,7 @@
 #include "engine/renderer/renderer.h"
 
 
-namespace gvr {
+namespace sxr {
 class ShaderManager;
 class Scene;
 class RenderTexture;

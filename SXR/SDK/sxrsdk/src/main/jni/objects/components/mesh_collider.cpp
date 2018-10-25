@@ -23,12 +23,12 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_inverse.hpp"
 #include "glm/gtx/intersect.hpp"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 #include "mesh_collider.h"
 #include "render_data.h"
 #include "objects/scene_object.h"
 
-namespace gvr
+namespace sxr
 {
     MeshCollider::MeshCollider(Mesh* mesh) :
             Collider(getComponentType()), mesh_(mesh), pickCoordinates_(false),

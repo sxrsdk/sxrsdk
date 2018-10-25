@@ -24,15 +24,15 @@
 #include "util/ovr_configuration_helper.h"
 #include "VrApi_Types.h"
 
-namespace gvr {
+namespace sxr {
     class CameraRig;
     struct RenderTextureInfo;
 
-    class GVRActivity
+    class SXRActivity
     {
     public:
-        GVRActivity(JNIEnv& jni, jobject activity, jobject vrAppSettings);
-        ~GVRActivity();
+        SXRActivity(JNIEnv& jni, jobject activity, jobject vrAppSettings);
+        ~SXRActivity();
 
         bool updateSensoredScene(jobject jViewManager);
         void setCameraRig(jlong cameraRig);

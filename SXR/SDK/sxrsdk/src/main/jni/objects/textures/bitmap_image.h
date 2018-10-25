@@ -21,11 +21,11 @@
 #define BITMAP_IMAGE_H
 
 #include "image.h"
-#include "util/gvr_jni.h"
-#include "util/gvr_log.h"
+#include "util/sxr_jni.h"
+#include "util/sxr_log.h"
 #include "util/jni_utils.h"
 
-namespace gvr {
+namespace sxr {
     /*
      * Represents an image described by a 2D array of pixels.
      * The BitmapImage is uncompressed raw pixel data.

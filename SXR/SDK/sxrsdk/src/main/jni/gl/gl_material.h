@@ -22,7 +22,7 @@
 #include "objects/shader_data.h"
 #include "gl/gl_uniform_block.h"
 
-namespace gvr
+namespace sxr
 {
 
 /**

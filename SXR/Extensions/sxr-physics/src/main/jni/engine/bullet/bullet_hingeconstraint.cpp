@@ -23,7 +23,7 @@
 
 const char tag[] = "BulletHingeConstrN";
 
-namespace gvr {
+namespace sxr {
 
     BulletHingeConstraint::BulletHingeConstraint(PhysicsRigidBody *rigidBodyB, const float *pivotInA,
                                                  const float *pivotInB, const float *axisInA,

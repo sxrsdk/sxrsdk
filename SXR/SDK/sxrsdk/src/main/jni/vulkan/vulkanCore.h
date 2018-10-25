@@ -17,7 +17,7 @@
 #ifndef FRAMEWORK_VULKANCORE_H
 #define FRAMEWORK_VULKANCORE_H
 
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 #include <android/native_window_jni.h>	// for native window JNI
 #include <string>
 #include <unordered_map>
@@ -25,12 +25,12 @@
 #include "vk_texture.h"
 #include "vulkan_flags.h"
 
-#define GVR_VK_CHECK(X) if (!(X)) { FAIL("VK_CHECK Failure"); }
-#define GVR_VK_VERTEX_BUFFER_BIND_ID 0
-#define GVR_VK_SAMPLE_NAME "GVR Vulkan"
+#define SXR_VK_CHECK(X) if (!(X)) { FAIL("VK_CHECK Failure"); }
+#define SXR_VK_VERTEX_BUFFER_BIND_ID 0
+#define SXR_VK_SAMPLE_NAME "SXR Vulkan"
 #define VK_KHR_ANDROID_SURFACE_EXTENSION_NAME "VK_KHR_android_surface"
 
-namespace gvr {
+namespace sxr {
 class VulkanUniformBlock;
 
 extern  void setImageLayout(VkImageMemoryBarrier imageMemoryBarrier, VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspectMask, VkImageLayout oldImageLayout, VkImageLayout newImageLayout, VkImageSubresourceRange subresourceRange,
@@ -131,7 +131,7 @@ public:
 
     VkFence createFenceObject();
     VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level);
-    void InitPipelineForRenderData(const GVR_VK_Vertices *m_vertices, VulkanRenderData *rdata, VulkanShader* shader, int, VkRenderPass, int sampleCount);
+    void InitPipelineForRenderData(const SXR_VK_Vertices *m_vertices, VulkanRenderData *rdata, VulkanShader* shader, int, VkRenderPass, int sampleCount);
     void submitCmdBuffer(VkFence fence, VkCommandBuffer cmdBuffer);
 
     bool GetMemoryTypeFromProperties(uint32_t typeBits, VkFlags requirements_mask,

@@ -19,7 +19,7 @@
 #include "objects/textures/image.h"
 #include "vk_imagebase.h"
 
-namespace gvr
+namespace sxr
 {
     class VulkanImage : public vkImageBase, public Image
     {

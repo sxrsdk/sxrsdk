@@ -9,12 +9,12 @@
 #endif
 #include "glm/glm.hpp"
 #include "gl/gl_program.h"
-#include "util/gvr_gl.h"
+#include "util/sxr_gl.h"
 
 #include "objects/vertex_buffer.h"
 
 
-namespace gvr {
+namespace sxr {
     class IndexBuffer;
     class Shader;
 
@@ -38,5 +38,5 @@ namespace gvr {
         GLuint          mProgramID;
     };
 
-} // end gvrf
+} // end sxrf
 

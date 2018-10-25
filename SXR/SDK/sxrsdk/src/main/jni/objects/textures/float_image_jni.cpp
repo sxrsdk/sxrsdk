@@ -19,17 +19,17 @@
 
 #include "float_image.h"
 
-namespace gvr {
+namespace sxr {
 extern "C"
 {
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeFloatImage_update(JNIEnv* env, jobject obj, jlong jimage,
+    Java_com_samsungxr_NativeFloatImage_update(JNIEnv* env, jobject obj, jlong jimage,
                                              jint width, jint height,
                                              jint pixelFormat, jfloatArray jdata);
 };
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeFloatImage_update(JNIEnv* env, jobject obj, jlong jimage,
+Java_com_samsungxr_NativeFloatImage_update(JNIEnv* env, jobject obj, jlong jimage,
                                          jint width, jint height,
                                          jint pixelFormat, jfloatArray jdata)
 {

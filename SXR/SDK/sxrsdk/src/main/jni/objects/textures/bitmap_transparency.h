@@ -18,11 +18,11 @@
  ***************************************************************************/
 
 #include "android/bitmap.h"
-#include "util/gvr_jni.h"
-#include "util/gvr_log.h"
+#include "util/sxr_jni.h"
+#include "util/sxr_log.h"
 
 
-namespace gvr {
+namespace sxr {
 
 bool bitmap_has_transparency(JNIEnv *env, jobject jbitmap);
 

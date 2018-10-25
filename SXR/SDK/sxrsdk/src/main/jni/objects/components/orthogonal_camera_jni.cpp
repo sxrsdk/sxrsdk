@@ -20,66 +20,66 @@
 
 #include "orthogonal_camera.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_ctor(JNIEnv * env,
+Java_com_samsungxr_NativeOrthogonalCamera_ctor(JNIEnv * env,
         jobject obj);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_getLeftClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_getLeftClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_setLeftClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_setLeftClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera, jfloat left);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_getRightClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_getRightClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_setRightClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_setRightClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera, jfloat right);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_getBottomClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_getBottomClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_setBottomClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_setBottomClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera, jfloat bottom);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_getTopClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_getTopClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_setTopClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_setTopClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera, jfloat top);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_getNearClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_getNearClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_setNearClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_setNearClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera, jfloat near);
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_getFarClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_getFarClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_setFarClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_setFarClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera, jfloat far);
 }
 ;
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_ctor(JNIEnv * env,
+Java_com_samsungxr_NativeOrthogonalCamera_ctor(JNIEnv * env,
         jobject obj) {
     return reinterpret_cast<jlong>(new OrthogonalCamera());
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_getLeftClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_getLeftClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera) {
     OrthogonalCamera* orthogonal_camera =
             reinterpret_cast<OrthogonalCamera*>(jorthogonal_camera);
@@ -87,7 +87,7 @@ Java_org_gearvrf_NativeOrthogonalCamera_getLeftClippingDistance(
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_setLeftClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_setLeftClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera, jfloat left) {
     OrthogonalCamera* orthogonal_camera =
             reinterpret_cast<OrthogonalCamera*>(jorthogonal_camera);
@@ -95,7 +95,7 @@ Java_org_gearvrf_NativeOrthogonalCamera_setLeftClippingDistance(
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_getRightClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_getRightClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera) {
     OrthogonalCamera* orthogonal_camera =
             reinterpret_cast<OrthogonalCamera*>(jorthogonal_camera);
@@ -103,7 +103,7 @@ Java_org_gearvrf_NativeOrthogonalCamera_getRightClippingDistance(
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_setRightClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_setRightClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera, jfloat right) {
     OrthogonalCamera* orthogonal_camera =
             reinterpret_cast<OrthogonalCamera*>(jorthogonal_camera);
@@ -111,7 +111,7 @@ Java_org_gearvrf_NativeOrthogonalCamera_setRightClippingDistance(
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_getBottomClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_getBottomClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera) {
     OrthogonalCamera* orthogonal_camera =
             reinterpret_cast<OrthogonalCamera*>(jorthogonal_camera);
@@ -119,7 +119,7 @@ Java_org_gearvrf_NativeOrthogonalCamera_getBottomClippingDistance(
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_setBottomClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_setBottomClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera, jfloat bottom) {
     OrthogonalCamera* orthogonal_camera =
             reinterpret_cast<OrthogonalCamera*>(jorthogonal_camera);
@@ -127,7 +127,7 @@ Java_org_gearvrf_NativeOrthogonalCamera_setBottomClippingDistance(
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_getTopClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_getTopClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera) {
     OrthogonalCamera* orthogonal_camera =
             reinterpret_cast<OrthogonalCamera*>(jorthogonal_camera);
@@ -135,7 +135,7 @@ Java_org_gearvrf_NativeOrthogonalCamera_getTopClippingDistance(
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_setTopClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_setTopClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera, jfloat top) {
     OrthogonalCamera* orthogonal_camera =
             reinterpret_cast<OrthogonalCamera*>(jorthogonal_camera);
@@ -143,7 +143,7 @@ Java_org_gearvrf_NativeOrthogonalCamera_setTopClippingDistance(
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_getNearClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_getNearClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera) {
     OrthogonalCamera* orthogonal_camera =
             reinterpret_cast<OrthogonalCamera*>(jorthogonal_camera);
@@ -151,7 +151,7 @@ Java_org_gearvrf_NativeOrthogonalCamera_getNearClippingDistance(
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_setNearClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_setNearClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera, jfloat near) {
     OrthogonalCamera* orthogonal_camera =
             reinterpret_cast<OrthogonalCamera*>(jorthogonal_camera);
@@ -159,7 +159,7 @@ Java_org_gearvrf_NativeOrthogonalCamera_setNearClippingDistance(
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_getFarClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_getFarClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera) {
     OrthogonalCamera* orthogonal_camera =
             reinterpret_cast<OrthogonalCamera*>(jorthogonal_camera);
@@ -167,7 +167,7 @@ Java_org_gearvrf_NativeOrthogonalCamera_getFarClippingDistance(
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeOrthogonalCamera_setFarClippingDistance(
+Java_com_samsungxr_NativeOrthogonalCamera_setFarClippingDistance(
         JNIEnv * env, jobject obj, jlong jorthogonal_camera, jfloat far) {
     OrthogonalCamera* orthogonal_camera =
             reinterpret_cast<OrthogonalCamera*>(jorthogonal_camera);

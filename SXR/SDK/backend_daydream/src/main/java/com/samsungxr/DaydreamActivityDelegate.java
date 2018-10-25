@@ -73,7 +73,7 @@ final class DaydreamActivityDelegate extends SXRApplication.ActivityDelegateStub
     }
 
     @Override
-    public boolean setMain(SXRMain gvrMain, String dataFileName) {
+    public boolean setMain(SXRMain sxrMain, String dataFileName) {
         return true;
     }
 
@@ -120,8 +120,8 @@ final class DaydreamActivityDelegate extends SXRApplication.ActivityDelegateStub
      * using the set_projection_matrix call in the native renderer.
      */
     static class DaydreamCameraRig extends SXRCameraRig {
-        protected DaydreamCameraRig(SXRContext gvrContext) {
-            super(gvrContext);
+        protected DaydreamCameraRig(SXRContext sxrContext) {
+            super(sxrContext);
         }
 
         @Override

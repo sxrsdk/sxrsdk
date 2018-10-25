@@ -16,15 +16,15 @@
 #include "bullet/bullet_fixedconstraint.h"
 #include "physics_rigidbody.h"
 
-namespace gvr {
+namespace sxr {
 
     extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_Native3DFixedConstraint_ctor(JNIEnv * env, jobject obj, jlong rigidBodyB);
+    Java_com_samsungxr_physics_Native3DFixedConstraint_ctor(JNIEnv * env, jobject obj, jlong rigidBodyB);
     }
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_Native3DFixedConstraint_ctor(JNIEnv * env, jobject obj, jlong rigidBodyB) {
+    Java_com_samsungxr_physics_Native3DFixedConstraint_ctor(JNIEnv * env, jobject obj, jlong rigidBodyB) {
         return reinterpret_cast<jlong>(
                 new BulletFixedConstraint(reinterpret_cast<PhysicsRigidBody*>(rigidBodyB)));
     }

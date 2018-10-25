@@ -20,126 +20,126 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include "objects/components/camera_rig.h"
-#include "util/gvr_jni.h"
-#include "util/gvr_java_stack_trace.h"
+#include "util/sxr_jni.h"
+#include "util/sxr_java_stack_trace.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeCameraRig_getComponentType(JNIEnv * env, jobject obj);
+    Java_com_samsungxr_NativeCameraRig_getComponentType(JNIEnv * env, jobject obj);
 
     JNIEXPORT jint JNICALL
-    Java_org_gearvrf_NativeCameraRig_getCameraRigType(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_getCameraRigType(JNIEnv * env,
     jobject obj, jlong jcamera_rig);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_setCameraRigType(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_setCameraRigType(JNIEnv * env,
             jobject obj, jlong jcamera_rig, jint camera_rig_type);
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_NativeCameraRig_getDefaultCameraSeparationDistance(
+    Java_com_samsungxr_NativeCameraRig_getDefaultCameraSeparationDistance(
             JNIEnv * env, jobject obj);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_setDefaultCameraSeparationDistance(
+    Java_com_samsungxr_NativeCameraRig_setDefaultCameraSeparationDistance(
             JNIEnv * env, jobject obj, jfloat distance);
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_NativeCameraRig_getCameraSeparationDistance(
+    Java_com_samsungxr_NativeCameraRig_getCameraSeparationDistance(
             JNIEnv * env, jobject obj, jlong jcamera_rig);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_setCameraSeparationDistance(
+    Java_com_samsungxr_NativeCameraRig_setCameraSeparationDistance(
             JNIEnv * env, jobject obj, jlong jcamera_rig, jfloat distance);
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_NativeCameraRig_getFloat(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_getFloat(JNIEnv * env,
             jobject obj, jlong jcamera_rig, jstring key);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_setFloat(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_setFloat(JNIEnv * env,
             jobject obj, jlong jcamera_rig, jstring key, jfloat value);
     JNIEXPORT jfloatArray JNICALL
-    Java_org_gearvrf_NativeCameraRig_getVec2(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_getVec2(JNIEnv * env,
             jobject obj, jlong jcamera_rig, jstring key);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_setVec2(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_setVec2(JNIEnv * env,
             jobject obj, jlong jcamera_rig, jstring key, jfloat x, jfloat y);
     JNIEXPORT jfloatArray JNICALL
-    Java_org_gearvrf_NativeCameraRig_getVec3(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_getVec3(JNIEnv * env,
             jobject obj, jlong jcamera_rig, jstring key);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_setVec3(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_setVec3(JNIEnv * env,
             jobject obj, jlong jcamera_rig, jstring key, jfloat x, jfloat y,
             jfloat z);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_setVec4(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_setVec4(JNIEnv * env,
             jobject obj, jlong jcamera_rig, jstring key, jfloat x, jfloat y,
             jfloat z, jfloat w);
     JNIEXPORT jfloatArray JNICALL
-    Java_org_gearvrf_NativeCameraRig_getVec4(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_getVec4(JNIEnv * env,
             jobject obj, jlong jcamera_rig, jstring key);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_attachLeftCamera(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_attachLeftCamera(JNIEnv * env,
             jobject obj, jlong jcamera_rig, jlong jcamera);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_attachRightCamera(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_attachRightCamera(JNIEnv * env,
             jobject obj, jlong jcamera_rig, jlong jcamera);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_attachCenterCamera(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_attachCenterCamera(JNIEnv * env,
             jobject obj, jlong jcamera_rig, jlong jcamera);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_reset(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_reset(JNIEnv * env,
             jobject obj, jlong jcamera_rig);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_resetYaw(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_resetYaw(JNIEnv * env,
             jobject obj, jlong jcamera_rig);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_resetYawPitch(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_resetYawPitch(JNIEnv * env,
             jobject obj, jlong jcamera_rig);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeCameraRig_setRotationSensorData(
+    Java_com_samsungxr_NativeCameraRig_setRotationSensorData(
             JNIEnv * env, jobject obj, jlong jcamera_rig, jlong time_stamp,
             jfloat w, jfloat x, jfloat y, jfloat z, jfloat gyro_x, jfloat gyro_y,
             jfloat gyro_z);
 
     JNIEXPORT jfloatArray JNICALL
-    Java_org_gearvrf_NativeCameraRig_getLookAt(JNIEnv * env,
+    Java_com_samsungxr_NativeCameraRig_getLookAt(JNIEnv * env,
             jobject obj, jlong jcamera_rig);
 
-    JNIEXPORT void JNICALL Java_org_gearvrf_NativeCameraRig_updateRotation(
+    JNIEXPORT void JNICALL Java_com_samsungxr_NativeCameraRig_updateRotation(
             JNIEnv * env, jobject obj, jlong jcamera_rig, jfloat time)
     {
         CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
         camera_rig->updateRotation();
     }
 
-    JNIEXPORT jlong JNICALL Java_org_gearvrf_NativeCameraRig_ctor(JNIEnv* env, jobject obj) {
+    JNIEXPORT jlong JNICALL Java_com_samsungxr_NativeCameraRig_ctor(JNIEnv* env, jobject obj) {
         return reinterpret_cast<jlong>(new CameraRig());
     }
 }; // extern "C"
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeCameraRig_getComponentType(JNIEnv * env, jobject obj) {
+Java_com_samsungxr_NativeCameraRig_getComponentType(JNIEnv * env, jobject obj) {
     return CameraRig::getComponentType();
 }
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeCameraRig_getCameraRigType(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_getCameraRigType(JNIEnv * env,
         jobject obj, jlong jcamera_rig) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     return static_cast<jint>(camera_rig->camera_rig_type());
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_setCameraRigType(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_setCameraRigType(JNIEnv * env,
         jobject obj, jlong jcamera_rig, jint camera_rig_type) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     camera_rig->set_camera_rig_type(
@@ -147,33 +147,33 @@ Java_org_gearvrf_NativeCameraRig_setCameraRigType(JNIEnv * env,
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeCameraRig_getDefaultCameraSeparationDistance(
+Java_com_samsungxr_NativeCameraRig_getDefaultCameraSeparationDistance(
         JNIEnv * env, jobject obj) {
     return CameraRig::default_camera_separation_distance();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_setDefaultCameraSeparationDistance(
+Java_com_samsungxr_NativeCameraRig_setDefaultCameraSeparationDistance(
         JNIEnv * env, jobject obj, jfloat distance) {
     CameraRig::set_default_camera_separation_distance(distance);
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeCameraRig_getCameraSeparationDistance(
+Java_com_samsungxr_NativeCameraRig_getCameraSeparationDistance(
         JNIEnv * env, jobject obj, jlong jcamera_rig) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     return camera_rig->camera_separation_distance();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_setCameraSeparationDistance(
+Java_com_samsungxr_NativeCameraRig_setCameraSeparationDistance(
         JNIEnv * env, jobject obj, jlong jcamera_rig, jfloat distance) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     camera_rig->set_camera_separation_distance(distance);
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeCameraRig_getFloat(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_getFloat(JNIEnv * env,
         jobject obj, jlong jcamera_rig, jstring key) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     const char* char_key = env->GetStringUTFChars(key, 0);
@@ -184,7 +184,7 @@ Java_org_gearvrf_NativeCameraRig_getFloat(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_setFloat(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_setFloat(JNIEnv * env,
         jobject obj, jlong jcamera_rig, jstring key, jfloat value) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     const char* char_key = env->GetStringUTFChars(key, 0);
@@ -194,7 +194,7 @@ Java_org_gearvrf_NativeCameraRig_setFloat(JNIEnv * env,
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeCameraRig_getVec2(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_getVec2(JNIEnv * env,
         jobject obj, jlong jcamera_rig, jstring key) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     const char* char_key = env->GetStringUTFChars(key, 0);
@@ -214,7 +214,7 @@ Java_org_gearvrf_NativeCameraRig_getVec2(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_setVec2(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_setVec2(JNIEnv * env,
         jobject obj, jlong jcamera_rig, jstring key, jfloat x, jfloat y) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     const char* char_key = env->GetStringUTFChars(key, 0);
@@ -224,7 +224,7 @@ Java_org_gearvrf_NativeCameraRig_setVec2(JNIEnv * env,
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeCameraRig_getVec3(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_getVec3(JNIEnv * env,
         jobject obj, jlong jcamera_rig, jstring key) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     const char* char_key = env->GetStringUTFChars(key, 0);
@@ -244,7 +244,7 @@ Java_org_gearvrf_NativeCameraRig_getVec3(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_setVec3(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_setVec3(JNIEnv * env,
         jobject obj, jlong jcamera_rig, jstring key, jfloat x, jfloat y,
         jfloat z) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
@@ -255,7 +255,7 @@ Java_org_gearvrf_NativeCameraRig_setVec3(JNIEnv * env,
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeCameraRig_getVec4(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_getVec4(JNIEnv * env,
         jobject obj, jlong jcamera_rig, jstring key) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     const char* char_key = env->GetStringUTFChars(key, 0);
@@ -275,7 +275,7 @@ Java_org_gearvrf_NativeCameraRig_getVec4(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_setVec4(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_setVec4(JNIEnv * env,
         jobject obj, jlong jcamera_rig, jstring key, jfloat x, jfloat y,
         jfloat z, jfloat w) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
@@ -286,7 +286,7 @@ Java_org_gearvrf_NativeCameraRig_setVec4(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_attachLeftCamera(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_attachLeftCamera(JNIEnv * env,
         jobject obj, jlong jcamera_rig, jlong jcamera) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
@@ -294,7 +294,7 @@ Java_org_gearvrf_NativeCameraRig_attachLeftCamera(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_attachRightCamera(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_attachRightCamera(JNIEnv * env,
         jobject obj, jlong jcamera_rig, jlong jcamera) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
@@ -302,7 +302,7 @@ Java_org_gearvrf_NativeCameraRig_attachRightCamera(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_attachCenterCamera(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_attachCenterCamera(JNIEnv * env,
         jobject obj, jlong jcamera_rig, jlong jcamera) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     PerspectiveCamera* camera = reinterpret_cast<PerspectiveCamera*>(jcamera);
@@ -310,28 +310,28 @@ Java_org_gearvrf_NativeCameraRig_attachCenterCamera(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_reset(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_reset(JNIEnv * env,
         jobject obj, jlong jcamera_rig) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     camera_rig->reset();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_resetYaw(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_resetYaw(JNIEnv * env,
         jobject obj, jlong jcamera_rig) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     camera_rig->resetYaw();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_resetYawPitch(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_resetYawPitch(JNIEnv * env,
         jobject obj, jlong jcamera_rig) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     camera_rig->resetYawPitch();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeCameraRig_setRotationSensorData(
+Java_com_samsungxr_NativeCameraRig_setRotationSensorData(
         JNIEnv * env, jobject obj, jlong jcamera_rig, jlong time_stamp,
         jfloat w, jfloat x, jfloat y, jfloat z, jfloat gyro_x, jfloat gyro_y,
         jfloat gyro_z) {
@@ -341,7 +341,7 @@ Java_org_gearvrf_NativeCameraRig_setRotationSensorData(
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeCameraRig_getLookAt(JNIEnv * env,
+Java_com_samsungxr_NativeCameraRig_getLookAt(JNIEnv * env,
         jobject obj, jlong jcamera_rig) {
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
     glm::vec3 look_at_vector = camera_rig->getLookAt();

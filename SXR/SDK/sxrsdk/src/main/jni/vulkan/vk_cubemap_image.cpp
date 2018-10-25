@@ -24,7 +24,7 @@
 #include "util/jni_utils.h"
 #include "util/scope_exit.h"
 
-namespace gvr {
+namespace sxr {
 extern std::map<int, VkFormat> compressed_formats;
     VkCubemapImage::VkCubemapImage(int format) :
             vkImageBase(VK_IMAGE_VIEW_TYPE_CUBE),

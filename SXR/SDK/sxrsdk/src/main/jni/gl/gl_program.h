@@ -23,11 +23,11 @@
 #include <string>
 #include "gl/gl_headers.h"
 
-#include "util/gvr_log.h"
-#include "util/gvr_gl.h"
+#include "util/sxr_log.h"
+#include "util/sxr_gl.h"
 #include <string.h>
 
-namespace gvr {
+namespace sxr {
 class GLProgram final {
 public:
     explicit GLProgram(const char* pVertexSourceStrings,

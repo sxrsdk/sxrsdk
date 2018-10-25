@@ -30,7 +30,7 @@
 #include "glm/glm.hpp"
 #include "glm/geometric.hpp"
 
-namespace gvr {
+namespace sxr {
 class BoundingVolume final {
 public:
     BoundingVolume();

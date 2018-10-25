@@ -19,7 +19,7 @@
 #include "objects/light.h" // for DEBUG_LIGHT
 #include "objects/scene.h"
 
-namespace gvr {
+namespace sxr {
 
 /**
  * Constructs a render target component which renders to a designated texture.

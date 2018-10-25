@@ -31,9 +31,9 @@
 #include "objects/components/transform.h"
 #include "objects/rotation_sensor_data.h"
 
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
-namespace gvr {
+namespace sxr {
 class Camera;
 class PerspectiveCamera;
 

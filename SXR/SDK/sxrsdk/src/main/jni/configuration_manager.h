@@ -17,7 +17,7 @@
 #ifndef CONFIGURATION_MANAGER_H_
 #define CONFIGURATION_MANAGER_H_
 
-namespace gvr {
+namespace sxr {
 
     class ConfigurationManager {
     public:

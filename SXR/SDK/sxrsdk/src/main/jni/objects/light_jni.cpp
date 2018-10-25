@@ -19,87 +19,87 @@
 
 #include "light.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "scene.h"
 #include "lightlist.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeLight_ctor(JNIEnv * env, jobject obj, jstring juniformDesc);
+Java_com_samsungxr_NativeLight_ctor(JNIEnv * env, jobject obj, jstring juniformDesc);
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeLight_getComponentType(JNIEnv * env, jobject obj);
+Java_com_samsungxr_NativeLight_getComponentType(JNIEnv * env, jobject obj);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_enable(JNIEnv * env, jobject obj, jlong jlight);
+Java_com_samsungxr_NativeLight_enable(JNIEnv * env, jobject obj, jlong jlight);
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeLight_getLightName(JNIEnv * env, jobject obj, jlong jlight);
+Java_com_samsungxr_NativeLight_getLightName(JNIEnv * env, jobject obj, jlong jlight);
 
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_disable(JNIEnv * env, jobject obj, jlong jlight);
+Java_com_samsungxr_NativeLight_disable(JNIEnv * env, jobject obj, jlong jlight);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_getCastShadow(JNIEnv * env, jobject obj, jlong jlight);
+Java_com_samsungxr_NativeLight_getCastShadow(JNIEnv * env, jobject obj, jlong jlight);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_setTexture(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setTexture(JNIEnv* env, jobject obj,
                                         jlong jlight, jstring key, jlong jtexture);
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeLight_getFloat(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_getFloat(JNIEnv* env, jobject obj,
                                       jlong jlight, jstring key);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_setFloat(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setFloat(JNIEnv* env, jobject obj,
                                       jlong jlight, jstring key, jfloat value);
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeLight_getInt(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_getInt(JNIEnv* env, jobject obj,
                                     jlong jlight, jstring key);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setInt(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setInt(JNIEnv* env, jobject obj,
                                     jlong jlight, jstring key, jint value);
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeLight_getFloatVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_getFloatVec(JNIEnv* env, jobject obj,
                                          jlong jlight, jstring key);
 
 JNIEXPORT jintArray JNICALL
-Java_org_gearvrf_NativeLight_getIntVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_getIntVec(JNIEnv* env, jobject obj,
                                        jlong jlight, jstring key);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setFloatVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setFloatVec(JNIEnv* env, jobject obj,
                                          jlong jlight, jstring key,
                                          jfloatArray jvec, jint size);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setIntVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setIntVec(JNIEnv* env, jobject obj,
                                        jlong jlight, jstring key,
                                        jintArray jvec, jint size);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setVec2(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setVec2(JNIEnv* env, jobject obj,
                                      jlong jlight, jstring key,
                                      jfloat x, jfloat y);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setVec3(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setVec3(JNIEnv* env, jobject obj,
                                      jlong jlight, jstring key,
                                      jfloat x, jfloat y, jfloat z);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setVec4(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setVec4(JNIEnv* env, jobject obj,
                                      jlong jlight, jstring key,
                                      jfloat x, jfloat y, jfloat z, jfloat w);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setMat4(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setMat4(JNIEnv* env, jobject obj,
                                      jlong jlight, jstring key,
                                      jfloat x1, jfloat y1, jfloat z1, jfloat w1,
                                      jfloat x2, jfloat y2, jfloat z2, jfloat w2,
@@ -107,41 +107,41 @@ Java_org_gearvrf_NativeLight_setMat4(JNIEnv* env, jobject obj,
                                      jfloat x4, jfloat y4, jfloat z4, jfloat w4);
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeLight_getMat4(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_getMat4(JNIEnv* env, jobject obj,
                                      jlong jlight, jstring key);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_hasUniform(JNIEnv*, jobject, jlong, jstring);
+Java_com_samsungxr_NativeLight_hasUniform(JNIEnv*, jobject, jlong, jstring);
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_hasTexture(JNIEnv*, jobject, jlong, jstring);
+Java_com_samsungxr_NativeLight_hasTexture(JNIEnv*, jobject, jlong, jstring);
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeLight_getLightClass(JNIEnv * env,
+Java_com_samsungxr_NativeLight_getLightClass(JNIEnv * env,
                                         jobject obj, jlong jlight);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_setLightClass(JNIEnv * env, jobject obj, jlong jlight, jstring lightclass);
+Java_com_samsungxr_NativeLight_setLightClass(JNIEnv * env, jobject obj, jlong jlight, jstring lightclass);
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeLight_getLightIndex(JNIEnv * env, jobject obj, jlong jlight);
+Java_com_samsungxr_NativeLight_getLightIndex(JNIEnv * env, jobject obj, jlong jlight);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_setLightIndex(JNIEnv * env, jobject obj, jlong jlight, jint index);
+Java_com_samsungxr_NativeLight_setLightIndex(JNIEnv * env, jobject obj, jlong jlight, jint index);
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeLight_getShaderType(JNIEnv* env, jobject, jlong jlight, jstring jtype);
+Java_com_samsungxr_NativeLight_getShaderType(JNIEnv* env, jobject, jlong jlight, jstring jtype);
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeLight_makeShaderLayout(JNIEnv * env, jobject obj, jlong jlight);
+Java_com_samsungxr_NativeLight_makeShaderLayout(JNIEnv * env, jobject obj, jlong jlight);
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeLight_makeShaderBlock(JNIEnv * env, jobject obj, jlong jscene);
+Java_com_samsungxr_NativeLight_makeShaderBlock(JNIEnv * env, jobject obj, jlong jscene);
 
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeLight_ctor(JNIEnv * env, jobject obj, jstring juniformDesc)
+Java_com_samsungxr_NativeLight_ctor(JNIEnv * env, jobject obj, jstring juniformDesc)
 {
     const char* uniform_desc = env->GetStringUTFChars(juniformDesc, 0);
     const char* texture_desc = "";
@@ -153,20 +153,20 @@ Java_org_gearvrf_NativeLight_ctor(JNIEnv * env, jobject obj, jstring juniformDes
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeLight_getComponentType(JNIEnv * env, jobject obj)
+Java_com_samsungxr_NativeLight_getComponentType(JNIEnv * env, jobject obj)
 {
     return Light::getComponentType();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_enable(JNIEnv * env, jobject obj, jlong jlight) 
+Java_com_samsungxr_NativeLight_enable(JNIEnv * env, jobject obj, jlong jlight) 
 {
     Light* light = reinterpret_cast<Light*>(jlight);
     light->set_enable(true);
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_disable(JNIEnv * env, jobject obj, jlong jlight)
+Java_com_samsungxr_NativeLight_disable(JNIEnv * env, jobject obj, jlong jlight)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
     light->set_enable(false);
@@ -174,7 +174,7 @@ Java_org_gearvrf_NativeLight_disable(JNIEnv * env, jobject obj, jlong jlight)
 
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeLight_getLightClass(JNIEnv * env, jobject obj, jlong jlight)
+Java_com_samsungxr_NativeLight_getLightClass(JNIEnv * env, jobject obj, jlong jlight)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
     std::string clz = light->getLightClass();
@@ -182,7 +182,7 @@ Java_org_gearvrf_NativeLight_getLightClass(JNIEnv * env, jobject obj, jlong jlig
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_setLightClass(JNIEnv * env, jobject obj, jlong jlight, jstring jlightClass)
+Java_com_samsungxr_NativeLight_setLightClass(JNIEnv * env, jobject obj, jlong jlight, jstring jlightClass)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
     const char* char_id = env->GetStringUTFChars(jlightClass, 0);
@@ -190,14 +190,14 @@ Java_org_gearvrf_NativeLight_setLightClass(JNIEnv * env, jobject obj, jlong jlig
 }
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeLight_getLightIndex(JNIEnv * env, jobject obj, jlong jlight)
+Java_com_samsungxr_NativeLight_getLightIndex(JNIEnv * env, jobject obj, jlong jlight)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
     return light->getLightIndex();
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeLight_getLightName(JNIEnv * env, jobject obj, jlong jlight)
+Java_com_samsungxr_NativeLight_getLightName(JNIEnv * env, jobject obj, jlong jlight)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
     std::string clz = light->getLightName();
@@ -206,14 +206,14 @@ Java_org_gearvrf_NativeLight_getLightName(JNIEnv * env, jobject obj, jlong jligh
 
 
     JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_setLightIndex(JNIEnv * env, jobject obj, jlong jlight, jint index)
+Java_com_samsungxr_NativeLight_setLightIndex(JNIEnv * env, jobject obj, jlong jlight, jint index)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
     light->setLightIndex(index);
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_getCastShadow(JNIEnv * env, jobject obj, jlong jlight)
+Java_com_samsungxr_NativeLight_getCastShadow(JNIEnv * env, jobject obj, jlong jlight)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
     unsigned char rc = (unsigned char) light->castShadow();
@@ -221,7 +221,7 @@ Java_org_gearvrf_NativeLight_getCastShadow(JNIEnv * env, jobject obj, jlong jlig
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_setTexture(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setTexture(JNIEnv* env, jobject obj,
                                         jlong jlight, jstring key, jlong jtexture)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
@@ -232,7 +232,7 @@ Java_org_gearvrf_NativeLight_setTexture(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setIntVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setIntVec(JNIEnv* env, jobject obj,
                                        jlong jlight, jstring key,
                                        jintArray jvec, jint size)
 {
@@ -246,7 +246,7 @@ Java_org_gearvrf_NativeLight_setIntVec(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setFloatVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setFloatVec(JNIEnv* env, jobject obj,
                                          jlong jlight, jstring key,
                                          jfloatArray jvec, jint size)
 {
@@ -260,7 +260,7 @@ Java_org_gearvrf_NativeLight_setFloatVec(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeLight_getFloatVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_getFloatVec(JNIEnv* env, jobject obj,
                                          jlong jlight, jstring key)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
@@ -280,7 +280,7 @@ Java_org_gearvrf_NativeLight_getFloatVec(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jintArray JNICALL
-Java_org_gearvrf_NativeLight_getIntVec(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_getIntVec(JNIEnv* env, jobject obj,
                                             jlong jlight, jstring key)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
@@ -300,7 +300,7 @@ Java_org_gearvrf_NativeLight_getIntVec(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_NativeLight_getFloat(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_getFloat(JNIEnv* env, jobject obj,
                                       jlong jlight, jstring key)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
@@ -312,7 +312,7 @@ Java_org_gearvrf_NativeLight_getFloat(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_setFloat(JNIEnv* env, jobject obj, jlong jlight,
+Java_com_samsungxr_NativeLight_setFloat(JNIEnv* env, jobject obj, jlong jlight,
                                       jstring key, jfloat value)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
@@ -322,7 +322,7 @@ Java_org_gearvrf_NativeLight_setFloat(JNIEnv* env, jobject obj, jlong jlight,
 }
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_NativeLight_getInt(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_getInt(JNIEnv* env, jobject obj,
                                     jlong jlight, jstring key)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
@@ -334,7 +334,7 @@ Java_org_gearvrf_NativeLight_getInt(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setInt(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setInt(JNIEnv* env, jobject obj,
                                          jlong jlight, jstring key, jint value)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
@@ -346,7 +346,7 @@ Java_org_gearvrf_NativeLight_setInt(JNIEnv* env, jobject obj,
 
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setVec2(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setVec2(JNIEnv* env, jobject obj,
                                           jlong jlight, jstring key, jfloat x, jfloat y)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
@@ -358,7 +358,7 @@ Java_org_gearvrf_NativeLight_setVec2(JNIEnv* env, jobject obj,
 
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setVec3(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setVec3(JNIEnv* env, jobject obj,
                                           jlong jlight, jstring key, jfloat x, jfloat y,
                                           jfloat z)
 {
@@ -371,7 +371,7 @@ Java_org_gearvrf_NativeLight_setVec3(JNIEnv* env, jobject obj,
 
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setVec4(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setVec4(JNIEnv* env, jobject obj,
                                      jlong jlight, jstring key,
                                      jfloat x, jfloat y, jfloat z, jfloat w)
 {
@@ -383,7 +383,7 @@ Java_org_gearvrf_NativeLight_setVec4(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setMat4(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_setMat4(JNIEnv* env, jobject obj,
                                      jlong jlight, jstring key,
                                      jfloat x1, jfloat y1, jfloat z1, jfloat w1,
                                      jfloat x2, jfloat y2, jfloat z2, jfloat w2,
@@ -399,14 +399,14 @@ Java_org_gearvrf_NativeLight_setMat4(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeLight_getMat4(JNIEnv* env,
+Java_com_samsungxr_NativeLight_getMat4(JNIEnv* env,
                                           jobject obj, jlong jlight, jstring key)
 {
-    return Java_org_gearvrf_NativeLight_getFloatVec(env, obj, jlight, key);
+    return Java_com_samsungxr_NativeLight_getFloatVec(env, obj, jlight, key);
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_hasTexture(JNIEnv* env, jobject obj,
+Java_com_samsungxr_NativeLight_hasTexture(JNIEnv* env, jobject obj,
                                              jlong jlight, jstring key)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
@@ -417,7 +417,7 @@ Java_org_gearvrf_NativeLight_hasTexture(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_hasUniform(JNIEnv* env, jobject obj, jlong jlight, jstring key)
+Java_com_samsungxr_NativeLight_hasUniform(JNIEnv* env, jobject obj, jlong jlight, jstring key)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
     const char* char_key = env->GetStringUTFChars(key, 0);
@@ -428,7 +428,7 @@ Java_org_gearvrf_NativeLight_hasUniform(JNIEnv* env, jobject obj, jlong jlight, 
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeLight_getShaderType(JNIEnv* env, jobject, jlong jlight, jstring jtype)
+Java_com_samsungxr_NativeLight_getShaderType(JNIEnv* env, jobject, jlong jlight, jstring jtype)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
     const char* char_type = env->GetStringUTFChars(jtype, 0);
@@ -438,7 +438,7 @@ Java_org_gearvrf_NativeLight_getShaderType(JNIEnv* env, jobject, jlong jlight, j
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeLight_makeShaderLayout(JNIEnv* env, jobject obj, jlong jlight)
+Java_com_samsungxr_NativeLight_makeShaderLayout(JNIEnv* env, jobject obj, jlong jlight)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
     std::string layout;
@@ -447,7 +447,7 @@ Java_org_gearvrf_NativeLight_makeShaderLayout(JNIEnv* env, jobject obj, jlong jl
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeLight_makeShaderBlock(JNIEnv* env, jobject obj, jlong jscene)
+Java_com_samsungxr_NativeLight_makeShaderBlock(JNIEnv* env, jobject obj, jlong jscene)
 {
     Scene* scene = reinterpret_cast<Scene*>(jscene);
     const LightList& lights = scene->getLights();

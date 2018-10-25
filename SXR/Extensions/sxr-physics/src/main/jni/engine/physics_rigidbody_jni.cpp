@@ -18,154 +18,154 @@
 #include "bullet/bullet_rigidbody.h"
 #include "bullet/bullet_world.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_ctor(JNIEnv * env, jobject obj, jfloat mass);
+    Java_com_samsungxr_physics_Native3DRigidBody_ctor(JNIEnv * env, jobject obj, jfloat mass);
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_getComponentType(JNIEnv * env, jobject obj);
+    Java_com_samsungxr_physics_Native3DRigidBody_getComponentType(JNIEnv * env, jobject obj);
 
     JNIEXPORT jint JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_getSimulationType(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_getSimulationType(JNIEnv * env, jobject obj,
              jlong jrigid_body);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_setSimulationType(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_setSimulationType(JNIEnv * env, jobject obj,
              jlong jrigid_body, jint jtype);
     JNIEXPORT jfloat JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_getMass(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_getMass(JNIEnv * env, jobject obj,
             jlong jrigid_body);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_applyCentralForce(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_applyCentralForce(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat x, jfloat y, jfloat z);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_applyForce(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_applyForce(JNIEnv * env, jobject obj,
 			jlong jrigid_body, jfloat force_x, jfloat force_y, jfloat force_z,
 			jfloat rel_pos_x, jfloat rel_pos_y, jfloat rel_pos_z);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_applyCentralImpulse(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_applyCentralImpulse(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat x, jfloat y, jfloat z);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_applyImpulse(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_applyImpulse(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat impulse_x, jfloat impulse_y, jfloat impulse_z,
             jfloat rel_pos_x, jfloat rel_pos_y, jfloat rel_pos_z);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_applyTorque(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_applyTorque(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat x, jfloat y, jfloat z);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_applyTorqueImpulse(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_applyTorqueImpulse(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat x, jfloat y, jfloat z);
 
     JNIEXPORT void   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_setGravity(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_setGravity(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat x, jfloat y, jfloat z);
 
     JNIEXPORT void   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_setDamping(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_setDamping(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat linear, jfloat angular);
 
     JNIEXPORT void   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_setLinearVelocity(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_setLinearVelocity(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat x, jfloat y, jfloat z);
 
     JNIEXPORT void   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_setAngularVelocity(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_setAngularVelocity(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat x, jfloat y, jfloat z);
 
     JNIEXPORT void   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_setAngularFactor(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_setAngularFactor(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat x, jfloat y, jfloat z);
 
     JNIEXPORT void   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_setLinearFactor(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_setLinearFactor(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat x, jfloat y, jfloat z);
 
     JNIEXPORT void   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_setFriction(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_setFriction(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat n);
 
     JNIEXPORT void   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_setRestitution(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_setRestitution(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat n);
 
     JNIEXPORT void   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_setSleepingThresholds(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_setSleepingThresholds(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat linear, jfloat angular);
 
     JNIEXPORT void   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_setCcdMotionThreshold(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_setCcdMotionThreshold(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat n);
 
     JNIEXPORT void   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_setContactProcessingThreshold(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_setContactProcessingThreshold(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat n);
 
     JNIEXPORT void   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_setIgnoreCollisionCheck(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_setIgnoreCollisionCheck(JNIEnv * env, jobject obj,
             jlong jrigid_body, jobject collisionObj, jboolean ignore);
 
     JNIEXPORT jfloatArray   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_getGravity(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_getGravity(JNIEnv * env, jobject obj,
             jlong jrigid_body) ;
 
     JNIEXPORT jfloatArray   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_getLinearVelocity(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_getLinearVelocity(JNIEnv * env, jobject obj,
             jlong jrigid_body) ;
 
     JNIEXPORT jfloatArray   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_getAngularVelocity(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_getAngularVelocity(JNIEnv * env, jobject obj,
             jlong jrigid_body) ;
 
     JNIEXPORT jfloatArray   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_getAngularFactor(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_getAngularFactor(JNIEnv * env, jobject obj,
             jlong jrigid_body) ;
 
     JNIEXPORT jfloatArray   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_getLinearFactor(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_getLinearFactor(JNIEnv * env, jobject obj,
             jlong jrigid_body) ;
 
     JNIEXPORT jfloatArray   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_getDamping(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_getDamping(JNIEnv * env, jobject obj,
             jlong jrigid_body) ;
 
     JNIEXPORT jfloat   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_getFriction(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_getFriction(JNIEnv * env, jobject obj,
             jlong jrigid_body) ;
 
     JNIEXPORT jfloat   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_getRestitution(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_getRestitution(JNIEnv * env, jobject obj,
             jlong jrigid_body) ;
 
     JNIEXPORT jfloat   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_getCcdMotionThreshold(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_getCcdMotionThreshold(JNIEnv * env, jobject obj,
             jlong jrigid_body) ;
 
     JNIEXPORT jfloat   JNICALL
-    Java_org_gearvrf_physics_Native3DRigidBody_getContactProcessingThreshold(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DRigidBody_getContactProcessingThreshold(JNIEnv * env, jobject obj,
             jlong jrigid_body) ;
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_ctor(JNIEnv * env, jobject obj, jfloat mass) {
+Java_com_samsungxr_physics_Native3DRigidBody_ctor(JNIEnv * env, jobject obj, jfloat mass) {
     PhysicsRigidBody *rb = new BulletRigidBody();
     rb->setMass(mass);
     return reinterpret_cast<jlong>(rb);
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_getComponentType(JNIEnv * env, jobject obj) {
+Java_com_samsungxr_physics_Native3DRigidBody_getComponentType(JNIEnv * env, jobject obj) {
     return PhysicsRigidBody::getComponentType();
 }
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_getSimulationType(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_getSimulationType(JNIEnv * env, jobject obj,
           jlong jrigid_body)
 {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
@@ -173,7 +173,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_getSimulationType(JNIEnv * env, jobje
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_setSimulationType(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_setSimulationType(JNIEnv * env, jobject obj,
          jlong jrigid_body, jint jtype)
 {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
@@ -182,7 +182,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_setSimulationType(JNIEnv * env, jobje
 }
 
 JNIEXPORT jfloat JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_getMass(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_getMass(JNIEnv * env, jobject obj,
         jlong jrigid_body) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -190,7 +190,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_getMass(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_applyCentralForce(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_applyCentralForce(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat x, jfloat y, jfloat z) {
     PhysicsRigidBody *rigid_body = reinterpret_cast<PhysicsRigidBody *>(jrigid_body);
 
@@ -198,7 +198,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_applyCentralForce(JNIEnv * env, jobje
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_applyForce(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_applyForce(JNIEnv * env, jobject obj,
 		jlong jrigid_body, jfloat force_x, jfloat force_y, jfloat force_z,
 		jfloat rel_pos_x, jfloat rel_pos_y, jfloat rel_pos_z) {
 	PhysicsRigidBody *rigid_body = reinterpret_cast<PhysicsRigidBody *>(jrigid_body);
@@ -207,7 +207,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_applyForce(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_applyCentralImpulse(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_applyCentralImpulse(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat x, jfloat y, jfloat z) {
     PhysicsRigidBody *rigid_body = reinterpret_cast<PhysicsRigidBody *>(jrigid_body);
 
@@ -215,7 +215,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_applyCentralImpulse(JNIEnv * env, job
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_applyImpulse(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_applyImpulse(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat impulse_x, jfloat impulse_y, jfloat impulse_z,
         jfloat rel_pos_x, jfloat rel_pos_y, jfloat rel_pos_z) {
         PhysicsRigidBody *rigid_body = reinterpret_cast<PhysicsRigidBody *>(jrigid_body);
@@ -224,7 +224,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_applyImpulse(JNIEnv * env, jobject ob
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_applyTorque(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_applyTorque(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat x, jfloat y, jfloat z) {
     PhysicsRigidBody *rigid_body = reinterpret_cast<PhysicsRigidBody *>(jrigid_body);
 
@@ -232,7 +232,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_applyTorque(JNIEnv * env, jobject obj
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_applyTorqueImpulse(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_applyTorqueImpulse(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat x, jfloat y, jfloat z) {
     PhysicsRigidBody *rigid_body = reinterpret_cast<PhysicsRigidBody *>(jrigid_body);
 
@@ -240,7 +240,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_applyTorqueImpulse(JNIEnv * env, jobj
 }
 
 JNIEXPORT void   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_setGravity(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_setGravity(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat x, jfloat y, jfloat z) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -248,7 +248,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_setGravity(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT void   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_setDamping(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_setDamping(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat linear, jfloat angular) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -256,7 +256,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_setDamping(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT void   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_setLinearVelocity(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_setLinearVelocity(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat x, jfloat y, jfloat z) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -264,7 +264,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_setLinearVelocity(JNIEnv * env, jobje
 }
 
 JNIEXPORT void   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_setAngularVelocity(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_setAngularVelocity(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat x, jfloat y, jfloat z) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -272,7 +272,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_setAngularVelocity(JNIEnv * env, jobj
 }
 
 JNIEXPORT void   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_setAngularFactor(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_setAngularFactor(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat x, jfloat y, jfloat z) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -280,7 +280,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_setAngularFactor(JNIEnv * env, jobjec
 }
 
 JNIEXPORT void   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_setLinearFactor(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_setLinearFactor(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat x, jfloat y, jfloat z) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -288,7 +288,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_setLinearFactor(JNIEnv * env, jobject
 }
 
 JNIEXPORT void   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_setFriction(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_setFriction(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat n) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -296,7 +296,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_setFriction(JNIEnv * env, jobject obj
 }
 
 JNIEXPORT void   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_setRestitution(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_setRestitution(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat n) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -304,7 +304,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_setRestitution(JNIEnv * env, jobject 
 }
 
 JNIEXPORT void   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_setSleepingThresholds(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_setSleepingThresholds(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat linear, jfloat angular) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -312,7 +312,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_setSleepingThresholds(JNIEnv * env, j
 }
 
 JNIEXPORT void   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_setCcdMotionThreshold(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_setCcdMotionThreshold(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat n) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -320,7 +320,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_setCcdMotionThreshold(JNIEnv * env, j
 }
 
 JNIEXPORT void   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_setContactProcessingThreshold(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_setContactProcessingThreshold(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat n) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -328,7 +328,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_setContactProcessingThreshold(JNIEnv 
 }
 
 JNIEXPORT void   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_setIgnoreCollisionCheck(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_setIgnoreCollisionCheck(JNIEnv * env, jobject obj,
         jlong jrigid_body, jobject collisionObj, jboolean ignore) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -336,7 +336,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_setIgnoreCollisionCheck(JNIEnv * env,
 }
 
 JNIEXPORT jfloatArray   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_getGravity(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_getGravity(JNIEnv * env, jobject obj,
         jlong jrigid_body) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -352,7 +352,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_getGravity(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT jfloatArray   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_getLinearVelocity(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_getLinearVelocity(JNIEnv * env, jobject obj,
         jlong jrigid_body) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -368,7 +368,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_getLinearVelocity(JNIEnv * env, jobje
 }
 
 JNIEXPORT jfloatArray   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_getAngularVelocity(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_getAngularVelocity(JNIEnv * env, jobject obj,
         jlong jrigid_body) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -384,7 +384,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_getAngularVelocity(JNIEnv * env, jobj
 }
 
 JNIEXPORT jfloatArray   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_getAngularFactor(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_getAngularFactor(JNIEnv * env, jobject obj,
         jlong jrigid_body) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -400,7 +400,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_getAngularFactor(JNIEnv * env, jobjec
 }
 
 JNIEXPORT jfloatArray   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_getLinearFactor(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_getLinearFactor(JNIEnv * env, jobject obj,
         jlong jrigid_body) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -416,7 +416,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_getLinearFactor(JNIEnv * env, jobject
 }
 
 JNIEXPORT jfloatArray   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_getDamping(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_getDamping(JNIEnv * env, jobject obj,
         jlong jrigid_body) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -432,7 +432,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_getDamping(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT jfloat   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_getFriction(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_getFriction(JNIEnv * env, jobject obj,
         jlong jrigid_body) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -440,7 +440,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_getFriction(JNIEnv * env, jobject obj
 }
 
 JNIEXPORT jfloat   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_getRestitution(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_getRestitution(JNIEnv * env, jobject obj,
         jlong jrigid_body) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -448,7 +448,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_getRestitution(JNIEnv * env, jobject 
 }
 
 JNIEXPORT jfloat   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_getCcdMotionThreshold(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_getCcdMotionThreshold(JNIEnv * env, jobject obj,
         jlong jrigid_body) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
@@ -456,7 +456,7 @@ Java_org_gearvrf_physics_Native3DRigidBody_getCcdMotionThreshold(JNIEnv * env, j
 }
 
 JNIEXPORT jfloat   JNICALL
-Java_org_gearvrf_physics_Native3DRigidBody_getContactProcessingThreshold(JNIEnv * env, jobject obj,
+Java_com_samsungxr_physics_Native3DRigidBody_getContactProcessingThreshold(JNIEnv * env, jobject obj,
         jlong jrigid_body) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 

@@ -19,16 +19,16 @@
  ***************************************************************************/
 
 #include "collider.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeCollider_getComponentType(JNIEnv * env, jobject obj);
+    Java_com_samsungxr_NativeCollider_getComponentType(JNIEnv * env, jobject obj);
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeCollider_getComponentType(JNIEnv * env, jobject obj) {
+Java_com_samsungxr_NativeCollider_getComponentType(JNIEnv * env, jobject obj) {
     return Collider::getComponentType();
 }
 

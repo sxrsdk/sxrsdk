@@ -22,9 +22,9 @@
 
 #include "component.h"
 #include "util/jni_utils.h"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
-namespace gvr {
+namespace sxr {
     class SceneObject;
 
     class Scene;

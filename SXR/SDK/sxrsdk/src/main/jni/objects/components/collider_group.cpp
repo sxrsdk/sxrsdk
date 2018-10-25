@@ -24,7 +24,7 @@
 #include "glm/gtc/matrix_inverse.hpp"
 
 
-namespace gvr {
+namespace sxr {
 
     ColliderGroup::ColliderGroup() :
             Collider(ColliderGroup::getComponentType())

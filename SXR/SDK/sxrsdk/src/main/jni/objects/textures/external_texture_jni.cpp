@@ -21,16 +21,16 @@
 #include "objects/textures/texture.h"
 #include "engine/renderer/renderer.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeExternalTexture_ctor(JNIEnv * env,
+Java_com_samsungxr_NativeExternalTexture_ctor(JNIEnv * env,
         jobject obj);
 }
 ;
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeExternalTexture_ctor(JNIEnv * env,
+Java_com_samsungxr_NativeExternalTexture_ctor(JNIEnv * env,
         jobject obj) {
     return reinterpret_cast<jlong>(Renderer::getInstance()->createTexture(Texture::TextureType::TEXTURE_EXTERNAL));
 }

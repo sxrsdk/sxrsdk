@@ -24,7 +24,7 @@
 #include "gl/gl_headers.h"
 #include "gl_image.h"
 
-namespace gvr {
+namespace sxr {
     class GLBitmapImage : public GLImage, public BitmapImage
     {
     public:

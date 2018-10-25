@@ -19,14 +19,14 @@
 #include "objects/components/render_target.h"
 //#include "objects/components/camera.h"
 
-namespace gvr {
+namespace sxr {
 
 class Camera;
 class Scene;
 
 extern "C" {
 
-    void Java_org_gearvrf_GVRViewManager_makeShadowMaps(JNIEnv *jni, jclass clazz,
+    void Java_com_samsungxr_SXRViewManager_makeShadowMaps(JNIEnv *jni, jclass clazz,
                                                         jlong jscene, jobject javaSceneObject,
                                                         jlong jshader_manager,
                                                         jint width, jint height) {
@@ -39,7 +39,7 @@ extern "C" {
         jni->DeleteLocalRef(javaSceneObject);
     }
 
-    void Java_org_gearvrf_GVRViewManager_cullAndRender(JNIEnv *jni, jclass clazz,
+    void Java_com_samsungxr_SXRViewManager_cullAndRender(JNIEnv *jni, jclass clazz,
                                                       jlong jrenderTarget, jlong jscene,
                                                       jobject javaSceneObject,
                                                       jlong jshader_manager,
@@ -67,13 +67,13 @@ extern "C" {
     }
 
     void
-    Java_org_gearvrf_GVRRenderBundle_addRenderTarget(JNIEnv *jni, jclass clazz, jlong jrenderTarget,
+    Java_com_samsungxr_SXRRenderBundle_addRenderTarget(JNIEnv *jni, jclass clazz, jlong jrenderTarget,
                                                      jint eye, jint index) {
         RenderTarget *renderTarget = reinterpret_cast<RenderTarget *>(jrenderTarget);
         Renderer::getInstance()->addRenderTarget(renderTarget, EYE(eye), index);
     }
 
-    long Java_org_gearvrf_GVRRenderBundle_getRenderTextureNative(JNIEnv *jni, jclass clazz, jlong jrenderTextureInfo)
+    long Java_com_samsungxr_SXRRenderBundle_getRenderTextureNative(JNIEnv *jni, jclass clazz, jlong jrenderTextureInfo)
     {
         RenderTextureInfo* renderTextureInfo = reinterpret_cast<RenderTextureInfo*>(jrenderTextureInfo);
         RenderTexture* renderTexture = (Renderer::getInstance()->createRenderTexture(*renderTextureInfo));
@@ -82,13 +82,13 @@ extern "C" {
     }
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_GVRViewManager_readRenderResultNative(JNIEnv *env, jclass clazz,
+    Java_com_samsungxr_SXRViewManager_readRenderResultNative(JNIEnv *env, jclass clazz,
                                                            jobject jreadback_buffer, jlong jrenderTarget, jint eye, jboolean useMultiview);
 
 } // extern "C"
 
 
-JNIEXPORT void JNICALL Java_org_gearvrf_GVRViewManager_readRenderResultNative(JNIEnv *env, jclass clazz,
+JNIEXPORT void JNICALL Java_com_samsungxr_SXRViewManager_readRenderResultNative(JNIEnv *env, jclass clazz,
                                                                               jobject jreadback_buffer, jlong jrenderTarget, jint eye, jboolean useMultiview){
     uint8_t *readback_buffer = (uint8_t*) env->GetDirectBufferAddress(jreadback_buffer);
     RenderTarget* renderTarget = reinterpret_cast<RenderTarget*>(jrenderTarget);

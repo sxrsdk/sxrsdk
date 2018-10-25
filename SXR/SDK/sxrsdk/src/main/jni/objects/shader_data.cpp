@@ -17,7 +17,7 @@
 #include "shaders/shader.h"
 #include "objects/components/render_data.h"
 
-namespace gvr {
+namespace sxr {
 /**
  * Constructs a bnse material.
  * The material contains a UniformBlock describing the possible uniforms

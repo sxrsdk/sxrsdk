@@ -24,7 +24,7 @@
 #include "gl_headers.h"
 #include "gl_image.h"
 
-namespace gvr {
+namespace sxr {
 
 class GLCubemapImage : public GLImage, public CubemapImage
 {

@@ -7,7 +7,7 @@
 #include "objects/components/component.h"
 #include "objects/components/skeleton.h"
 
-namespace gvr {
+namespace sxr {
 class Renderer;
 class Shader;
 class UniformBlock;

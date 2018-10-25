@@ -25,7 +25,7 @@
 #include "glm/gtc/quaternion.hpp"
 #include <utility>
 
-namespace gvr {
+namespace sxr {
 
 class RotationSensorData {
 public:

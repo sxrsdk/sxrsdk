@@ -23,7 +23,7 @@
 #include "engine/renderer/renderer.h"
 #include "gl_light.h"
 
-namespace gvr {
+namespace sxr {
 
     GLShader::GLShader(int id,
                const char* signature,
@@ -403,4 +403,4 @@ std::string GLShader::makeLayout(const DataDescriptor& desc, const char* blockNa
     return stream.str();
 }
 
-} /* namespace gvr */
+} /* namespace sxr */

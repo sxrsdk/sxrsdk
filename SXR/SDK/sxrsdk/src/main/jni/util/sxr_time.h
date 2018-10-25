@@ -18,13 +18,13 @@
  * Utility functions about time.
  ***************************************************************************/
 
-#ifndef GVR_TIME_H_
-#define GVR_TIME_H_
+#ifndef SXR_TIME_H_
+#define SXR_TIME_H_
 
 #include "time.h"
-#include "util/gvr_log.h"
+#include "util/sxr_log.h"
 
-namespace gvr {
+namespace sxr {
 
 static long long getCurrentTime() {
     timespec ts;

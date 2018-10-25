@@ -26,7 +26,7 @@
 #include "../objects/scene_object.h"
 #include <list>
 
-namespace gvr {
+namespace sxr {
 
 struct ContactPoint {
 	PhysicsRigidBody* body0 = 0;

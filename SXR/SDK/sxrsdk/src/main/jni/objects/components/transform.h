@@ -31,7 +31,7 @@
 #include "objects/lazy.h"
 #include "component.h"
 
-namespace gvr {
+namespace sxr {
 
 class Transform: public Component {
 public:

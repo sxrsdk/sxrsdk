@@ -5,7 +5,7 @@
 
 #define MAX_BONES 60
 
-namespace gvr {
+namespace sxr {
     Skeleton::Skeleton(int* boneparents, int numbones)
        :  Component(COMPONENT_TYPE_SKELETON),
           mNumBones(numbones)

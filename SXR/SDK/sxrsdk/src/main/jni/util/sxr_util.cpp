@@ -12,17 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "util/gvr_util.h"
+#include "util/sxr_util.h"
 #include <sys/system_properties.h>
 #include <cstring>
 #include <jni.h>
 #include <cstdlib>
 
-namespace gvr {
+namespace sxr {
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_SystemPropertyUtil_isSystemPropertySet(JNIEnv *env, jclass type, jstring name_) {
+Java_com_samsungxr_SystemPropertyUtil_isSystemPropertySet(JNIEnv *env, jclass type, jstring name_) {
     const char *name = env->GetStringUTFChars(name_, 0);
     bool result = isSystemPropertySet(name);
     env->ReleaseStringUTFChars(name_, name);
@@ -32,7 +32,7 @@ Java_org_gearvrf_SystemPropertyUtil_isSystemPropertySet(JNIEnv *env, jclass type
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_SystemPropertyUtil_getSystemProperty(JNIEnv *env, jclass type, jstring name_) {
+Java_com_samsungxr_SystemPropertyUtil_getSystemProperty(JNIEnv *env, jclass type, jstring name_) {
     const char *name = env->GetStringUTFChars(name_, 0);
     int result = getSystemProperty(name);
     env->ReleaseStringUTFChars(name_, name);
@@ -42,7 +42,7 @@ Java_org_gearvrf_SystemPropertyUtil_getSystemProperty(JNIEnv *env, jclass type, 
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_SystemPropertyUtil_getSystemPropertyString(JNIEnv *env, jclass, jstring name_) {
+Java_com_samsungxr_SystemPropertyUtil_getSystemPropertyString(JNIEnv *env, jclass, jstring name_) {
     const char *name = env->GetStringUTFChars(name_, 0);
 
     char buffer[PROP_VALUE_MAX];

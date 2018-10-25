@@ -21,55 +21,55 @@
 #include <engine/renderer/renderer.h>
 #include "objects/index_buffer.h"
 
-#include "util/gvr_log.h"
-#include "util/gvr_jni.h"
+#include "util/sxr_log.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
     extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeIndexBuffer_ctor(JNIEnv* env, jobject obj,
+    Java_com_samsungxr_NativeIndexBuffer_ctor(JNIEnv* env, jobject obj,
                                             int bytesPerIndex, int vertexCount);
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeIndexBuffer_getIntVec(JNIEnv* env, jobject obj, jlong jibuf, jobject data);
+    Java_com_samsungxr_NativeIndexBuffer_getIntVec(JNIEnv* env, jobject obj, jlong jibuf, jobject data);
 
     JNIEXPORT jintArray JNICALL
-    Java_org_gearvrf_NativeIndexBuffer_getIntArray(JNIEnv* env, jobject obj, jlong jibuf);
+    Java_com_samsungxr_NativeIndexBuffer_getIntArray(JNIEnv* env, jobject obj, jlong jibuf);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeIndexBuffer_setIntArray(JNIEnv* env, jobject obj, jlong jibuf, jintArray data);
+    Java_com_samsungxr_NativeIndexBuffer_setIntArray(JNIEnv* env, jobject obj, jlong jibuf, jintArray data);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeIndexBuffer_setIntVec(JNIEnv* env, jobject obj, jlong jibuf, jobject jintbuf);
+    Java_com_samsungxr_NativeIndexBuffer_setIntVec(JNIEnv* env, jobject obj, jlong jibuf, jobject jintbuf);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeIndexBuffer_getShortVec(JNIEnv* env, jobject obj, jlong jibuf, jobject jshortbuf);
+    Java_com_samsungxr_NativeIndexBuffer_getShortVec(JNIEnv* env, jobject obj, jlong jibuf, jobject jshortbuf);
 
     JNIEXPORT jcharArray JNICALL
-    Java_org_gearvrf_NativeIndexBuffer_getShortArray(JNIEnv* env, jobject obj, jlong jibuf);
+    Java_com_samsungxr_NativeIndexBuffer_getShortArray(JNIEnv* env, jobject obj, jlong jibuf);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeIndexBuffer_setShortArray(JNIEnv* env, jobject obj, jlong jibuf, jcharArray data);
+    Java_com_samsungxr_NativeIndexBuffer_setShortArray(JNIEnv* env, jobject obj, jlong jibuf, jcharArray data);
 
     JNIEXPORT bool JNICALL
-    Java_org_gearvrf_NativeIndexBuffer_setShortVec(JNIEnv* env, jobject obj, jlong jibuf, jobject jshortbuf);
+    Java_com_samsungxr_NativeIndexBuffer_setShortVec(JNIEnv* env, jobject obj, jlong jibuf, jobject jshortbuf);
 
     JNIEXPORT int JNICALL
-    Java_org_gearvrf_NativeIndexBuffer_getIndexSize(JNIEnv* env, jobject obj, jlong jibuf);
+    Java_com_samsungxr_NativeIndexBuffer_getIndexSize(JNIEnv* env, jobject obj, jlong jibuf);
 
     JNIEXPORT int JNICALL
-    Java_org_gearvrf_NativeIndexBuffer_getIndexCount(JNIEnv* env, jobject obj, jlong jibuf);
+    Java_com_samsungxr_NativeIndexBuffer_getIndexCount(JNIEnv* env, jobject obj, jlong jibuf);
 
 };
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeIndexBuffer_ctor(JNIEnv* env, jobject obj, int bytesPerVertex, int vertexCount)
+Java_com_samsungxr_NativeIndexBuffer_ctor(JNIEnv* env, jobject obj, int bytesPerVertex, int vertexCount)
 {
     IndexBuffer* ibuf = Renderer::getInstance()->createIndexBuffer(bytesPerVertex, vertexCount);
     return reinterpret_cast<jlong>(ibuf);
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeIndexBuffer_getShortVec(JNIEnv * env, jobject obj, jlong jibuf, jobject jshortbuf)
+Java_com_samsungxr_NativeIndexBuffer_getShortVec(JNIEnv * env, jobject obj, jlong jibuf, jobject jshortbuf)
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     void* bufptr = env->GetDirectBufferAddress(jshortbuf);
@@ -84,7 +84,7 @@ Java_org_gearvrf_NativeIndexBuffer_getShortVec(JNIEnv * env, jobject obj, jlong 
 
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeIndexBuffer_getIntVec(JNIEnv * env, jobject obj, jlong jibuf, jobject jdata)
+Java_com_samsungxr_NativeIndexBuffer_getIntVec(JNIEnv * env, jobject obj, jlong jibuf, jobject jdata)
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     void* bufptr = env->GetDirectBufferAddress(jdata);
@@ -98,7 +98,7 @@ Java_org_gearvrf_NativeIndexBuffer_getIntVec(JNIEnv * env, jobject obj, jlong ji
 }
 
 JNIEXPORT jintArray JNICALL
-Java_org_gearvrf_NativeIndexBuffer_getIntArray(JNIEnv* env, jobject obj, jlong jibuf)
+Java_com_samsungxr_NativeIndexBuffer_getIntArray(JNIEnv* env, jobject obj, jlong jibuf)
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     int n = ibuf->getIndexCount();
@@ -110,7 +110,7 @@ Java_org_gearvrf_NativeIndexBuffer_getIntArray(JNIEnv* env, jobject obj, jlong j
 }
 
 JNIEXPORT jcharArray JNICALL
-Java_org_gearvrf_NativeIndexBuffer_getShortArray(JNIEnv* env, jobject obj, jlong jibuf)
+Java_com_samsungxr_NativeIndexBuffer_getShortArray(JNIEnv* env, jobject obj, jlong jibuf)
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     jchar n = ibuf->getIndexCount();
@@ -122,7 +122,7 @@ Java_org_gearvrf_NativeIndexBuffer_getShortArray(JNIEnv* env, jobject obj, jlong
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeIndexBuffer_setShortArray(JNIEnv * env, jobject obj, jlong jibuf, jcharArray jdata)
+Java_com_samsungxr_NativeIndexBuffer_setShortArray(JNIEnv * env, jobject obj, jlong jibuf, jcharArray jdata)
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     jchar* data = env->GetCharArrayElements(jdata, 0);
@@ -132,7 +132,7 @@ Java_org_gearvrf_NativeIndexBuffer_setShortArray(JNIEnv * env, jobject obj, jlon
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeIndexBuffer_setShortVec(JNIEnv * env, jobject obj, jlong jibuf, jobject jshortbuf)
+Java_com_samsungxr_NativeIndexBuffer_setShortVec(JNIEnv * env, jobject obj, jlong jibuf, jobject jshortbuf)
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     void* bufptr = env->GetDirectBufferAddress(jshortbuf);
@@ -146,7 +146,7 @@ Java_org_gearvrf_NativeIndexBuffer_setShortVec(JNIEnv * env, jobject obj, jlong 
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeIndexBuffer_setIntVec(JNIEnv* env, jobject obj, jlong jibuf, jobject jintbuf)
+Java_com_samsungxr_NativeIndexBuffer_setIntVec(JNIEnv* env, jobject obj, jlong jibuf, jobject jintbuf)
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     void* bufptr = env->GetDirectBufferAddress(jintbuf);
@@ -160,7 +160,7 @@ Java_org_gearvrf_NativeIndexBuffer_setIntVec(JNIEnv* env, jobject obj, jlong jib
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeIndexBuffer_setIntArray(JNIEnv * env, jobject obj, jlong jibuf, jintArray jdata)
+Java_com_samsungxr_NativeIndexBuffer_setIntArray(JNIEnv * env, jobject obj, jlong jibuf, jintArray jdata)
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     unsigned int* data = reinterpret_cast<unsigned int*>(env->GetIntArrayElements(jdata, 0));
@@ -171,14 +171,14 @@ Java_org_gearvrf_NativeIndexBuffer_setIntArray(JNIEnv * env, jobject obj, jlong 
 
 
 JNIEXPORT int JNICALL
-Java_org_gearvrf_NativeIndexBuffer_getIndexCount(JNIEnv* env, jobject obj, jlong jibuf)
+Java_com_samsungxr_NativeIndexBuffer_getIndexCount(JNIEnv* env, jobject obj, jlong jibuf)
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     return ibuf->getIndexCount();
 }
 
 JNIEXPORT int JNICALL
-Java_org_gearvrf_NativeIndexBuffer_getIndexSize(JNIEnv* env, jobject obj, jlong jibuf)
+Java_com_samsungxr_NativeIndexBuffer_getIndexSize(JNIEnv* env, jobject obj, jlong jibuf)
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     return ibuf->getIndexSize();

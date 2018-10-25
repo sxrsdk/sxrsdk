@@ -31,9 +31,9 @@
 #include "objects/components/camera_rig.h"
 #include "objects/components/collider.h"
 #include "objects/bounding_volume.h"
-#include "util/gvr_gl.h"
+#include "util/sxr_gl.h"
 
-namespace gvr {
+namespace sxr {
 class Camera;
 class CameraRig;
 

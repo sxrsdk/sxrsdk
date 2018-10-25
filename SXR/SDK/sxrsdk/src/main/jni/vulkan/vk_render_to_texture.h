@@ -21,7 +21,7 @@
 #include "vk_framebuffer.h"
 #include "vulkan/vk_texture.h"
 
-namespace gvr{
+namespace sxr{
 class VkRenderTexture : public RenderTexture, VKDeviceComponent
 {
 protected:

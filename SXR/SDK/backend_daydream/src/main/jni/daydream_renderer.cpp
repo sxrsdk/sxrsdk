@@ -22,7 +22,7 @@ namespace {
     static const gvr::Rectf kDefaultUV = {0.0f, 1.0f, 0.0f, 1.0f};
 
     // Use the same default clipping distances as the perspective camera
-    // TODO: Change this to read the values from the gvr.xml file
+    // TODO: Change this to read the values from the sxr.xml file
     static const float kZNear = 0.1f;
     static const float kZFar = 1000.0f;
 
@@ -72,7 +72,7 @@ DaydreamRenderer::~DaydreamRenderer() {
 void DaydreamRenderer::InitializeGl() {
     gvr_api_->InitializeGl();
 
-    //@todo read gvr.xml and obtain the values from EyeBufferParams
+    //@todo read sxr.xml and obtain the values from EyeBufferParams
     render_size_.height = kDefaultFboResolution;
     render_size_.width = kDefaultFboResolution;
     std::vector <gvr::BufferSpec> specs;
@@ -127,7 +127,7 @@ void DaydreamRenderer::DrawFrame(JNIEnv &env) {
 
     head_view_ = gvr_api_->GetHeadSpaceFromStartSpaceRotation(target_time);
 
-    gvr::Transform* t = cameraRig_->getHeadTransform();
+    sxr::Transform* t = cameraRig_->getHeadTransform();
     if (nullptr == t) {
         return;
     }
@@ -170,19 +170,19 @@ void DaydreamRenderer::SetViewport(const gvr::BufferViewport &viewport) {
 }
 
 void DaydreamRenderer::SetCameraRig(jlong native_camera) {
-    cameraRig_ = reinterpret_cast<gvr::CameraRig *>(native_camera);
+    cameraRig_ = reinterpret_cast<sxr::CameraRig *>(native_camera);
     scratch_viewport_list_->SetToRecommendedBufferViewports();
 
     scratch_viewport_list_->GetBufferViewport(0, &scratch_viewport_);
-    SetCameraProjectionMatrix((gvr::CustomCamera *) cameraRig_->left_camera(), scratch_viewport_
+    SetCameraProjectionMatrix((sxr::CustomCamera *) cameraRig_->left_camera(), scratch_viewport_
             .GetSourceFov(), kZNear, kZFar);
 
     scratch_viewport_list_->GetBufferViewport(1, &scratch_viewport_);
-    SetCameraProjectionMatrix((gvr::CustomCamera *) cameraRig_->right_camera(), scratch_viewport_
+    SetCameraProjectionMatrix((sxr::CustomCamera *) cameraRig_->right_camera(), scratch_viewport_
             .GetSourceFov(), kZNear, kZFar);
 }
 
-void DaydreamRenderer::SetCameraProjectionMatrix(gvr::CustomCamera *camera, const gvr::Rectf &fov,
+void DaydreamRenderer::SetCameraProjectionMatrix(sxr::CustomCamera *camera, const gvr::Rectf &fov,
                                                  float z_near, float z_far) {
     float x_left = -std::tan(fov.left * M_PI / 180.0f) * z_near;
     float x_right = std::tan(fov.right * M_PI / 180.0f) * z_near;

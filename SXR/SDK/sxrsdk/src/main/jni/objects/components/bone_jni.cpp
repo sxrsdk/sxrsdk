@@ -7,49 +7,49 @@
 
 #include "objects/components/bone.h"
 
-#include "util/gvr_jni.h"
+#include "util/sxr_jni.h"
 
-namespace gvr {
+namespace sxr {
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeBone_ctor(JNIEnv * env, jobject obj);
+    Java_com_samsungxr_NativeBone_ctor(JNIEnv * env, jobject obj);
 
     JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeBone_getComponentType(JNIEnv * env, jobject clz);
+    Java_com_samsungxr_NativeBone_getComponentType(JNIEnv * env, jobject clz);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBone_setName(JNIEnv * env, jobject clz, jlong ptr,
+    Java_com_samsungxr_NativeBone_setName(JNIEnv * env, jobject clz, jlong ptr,
             jstring name);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBone_setOffsetMatrix(JNIEnv * env, jobject clz, jlong ptr,
+    Java_com_samsungxr_NativeBone_setOffsetMatrix(JNIEnv * env, jobject clz, jlong ptr,
             jfloatArray jOffsetMatrix);
 
     JNIEXPORT jfloatArray JNICALL
-    Java_org_gearvrf_NativeBone_getOffsetMatrix(JNIEnv * env, jobject clz, jlong ptr);
+    Java_com_samsungxr_NativeBone_getOffsetMatrix(JNIEnv * env, jobject clz, jlong ptr);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBone_setFinalTransformMatrix(JNIEnv * env, jobject clz, jlong ptr,
+    Java_com_samsungxr_NativeBone_setFinalTransformMatrix(JNIEnv * env, jobject clz, jlong ptr,
             jfloatArray jOffsetMatrix);
 
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeBone_getFinalTransformMatrix(JNIEnv * env, jobject clz, jlong ptr, jobject jFloatBuffer);
+    Java_com_samsungxr_NativeBone_getFinalTransformMatrix(JNIEnv * env, jobject clz, jlong ptr, jobject jFloatBuffer);
 
 } // extern "C"
 
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeBone_ctor(JNIEnv * env, jobject clz) {
+Java_com_samsungxr_NativeBone_ctor(JNIEnv * env, jobject clz) {
     return reinterpret_cast<jlong>(new Bone());
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeBone_getComponentType(JNIEnv * env, jobject clz) {
+Java_com_samsungxr_NativeBone_getComponentType(JNIEnv * env, jobject clz) {
     return Bone::getComponentType();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeBone_setName(JNIEnv * env, jobject clz, jlong ptr,
+Java_com_samsungxr_NativeBone_setName(JNIEnv * env, jobject clz, jlong ptr,
         jstring name) {
     Bone* bone = reinterpret_cast<Bone*>(ptr);
     if (!name || !env->GetStringLength(name)) {
@@ -64,7 +64,7 @@ Java_org_gearvrf_NativeBone_setName(JNIEnv * env, jobject clz, jlong ptr,
 
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeBone_setOffsetMatrix(JNIEnv * env, jobject clz, jlong ptr,
+Java_com_samsungxr_NativeBone_setOffsetMatrix(JNIEnv * env, jobject clz, jlong ptr,
         jfloatArray jOffsetMatrix) {
     Bone* bone = reinterpret_cast<Bone*>(ptr);
     if (!jOffsetMatrix)
@@ -77,7 +77,7 @@ Java_org_gearvrf_NativeBone_setOffsetMatrix(JNIEnv * env, jobject clz, jlong ptr
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeBone_getOffsetMatrix(JNIEnv * env, jobject clz, jlong ptr) {
+Java_com_samsungxr_NativeBone_getOffsetMatrix(JNIEnv * env, jobject clz, jlong ptr) {
     Bone* bone = reinterpret_cast<Bone*>(ptr);
     glm::mat4 matrix;
 
@@ -93,7 +93,7 @@ Java_org_gearvrf_NativeBone_getOffsetMatrix(JNIEnv * env, jobject clz, jlong ptr
 
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeBone_setFinalTransformMatrix(JNIEnv * env, jobject clz, jlong ptr,
+Java_com_samsungxr_NativeBone_setFinalTransformMatrix(JNIEnv * env, jobject clz, jlong ptr,
         jfloatArray jTransform) {
     Bone* bone = reinterpret_cast<Bone*>(ptr);
     if (!jTransform)
@@ -106,11 +106,11 @@ Java_org_gearvrf_NativeBone_setFinalTransformMatrix(JNIEnv * env, jobject clz, j
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeBone_getFinalTransformMatrix(JNIEnv * env, jobject clz, jlong ptr, jobject buffer) {
+Java_com_samsungxr_NativeBone_getFinalTransformMatrix(JNIEnv * env, jobject clz, jlong ptr, jobject buffer) {
     Bone* bone = reinterpret_cast<Bone*>(ptr);
     glm::mat4 matrix = bone->getFinalTransformMatrix();
     float *ptrBuffer = static_cast<float*>(env->GetDirectBufferAddress(buffer));
     std::memcpy(ptrBuffer, glm::value_ptr(matrix), sizeof matrix);
 }
 
-} // namespace gvr
+} // namespace sxr

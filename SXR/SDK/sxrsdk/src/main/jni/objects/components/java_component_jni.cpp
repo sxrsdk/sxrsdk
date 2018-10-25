@@ -20,11 +20,11 @@
 #include <jni.h>
 #include "java_component.h"
 
-namespace gvr {
+namespace sxr {
 
 extern "C" {
 JNIEXPORT void JNICALL
-Java_org_gearvrf_GVRJavaComponent_setJava(JNIEnv *env, jobject instance, jlong nativeComponent) {
+Java_com_samsungxr_SXRJavaComponent_setJava(JNIEnv *env, jobject instance, jlong nativeComponent) {
     JavaComponent* component = reinterpret_cast<JavaComponent*>(nativeComponent);
     JavaVM *jvm;
     env->GetJavaVM(&jvm);

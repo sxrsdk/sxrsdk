@@ -14,10 +14,10 @@
  */
 #include <engine/renderer/vulkan_renderer.h>
 #include "vulkan_headers.h"
-#include "util/gvr_gl.h"
+#include "util/sxr_gl.h"
 #include "vulkan_shader.h"
 
-namespace gvr {
+namespace sxr {
 
     VulkanUniformBlock::VulkanUniformBlock(const char* descriptor, int bindingPoint, const char* blockName)
             : UniformBlock(descriptor, bindingPoint, blockName), vk_descriptor(nullptr)
@@ -37,8 +37,8 @@ namespace gvr {
 
         VkDescriptorType descriptorType = (sampler ? VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
                                                    : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC);
-        GVR_Uniform &uniform = getBuffer();
-        gvr::DescriptorWrite writeInfo = gvr::DescriptorWrite(
+        SXR_Uniform &uniform = getBuffer();
+        sxr::DescriptorWrite writeInfo = sxr::DescriptorWrite(
                 VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, binding_index, 1,
                 descriptorType, uniform.bufferInfo);
         writeDescriptorSet = *writeInfo;
@@ -115,7 +115,7 @@ namespace gvr {
 
         VkResult err = VK_SUCCESS;
         memset(&m_bufferInfo, 0, sizeof(m_bufferInfo));
-        err = vkCreateBuffer(device, gvr::BufferCreateInfo(mTotalSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT), NULL, &m_bufferInfo.buf);
+        err = vkCreateBuffer(device, sxr::BufferCreateInfo(mTotalSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT), NULL, &m_bufferInfo.buf);
         assert(!err);
         // Obtain the requirements on memory for this buffer
         VkMemoryRequirements mem_reqs;

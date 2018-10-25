@@ -17,8 +17,8 @@
 #include<stdlib.h>
 #include<unistd.h>
 #include <cstring>
-#include "gvr_log.h"
-#include "gvr_thread.h"
+#include "sxr_log.h"
+#include "sxr_thread.h"
 
 
 #ifdef __LP64__
