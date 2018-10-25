@@ -68,7 +68,7 @@ android {
         source.text += '    LOGI("BACKEND_OCULUS-CPP  HEAD: ' + commitId + '");\n'
         source.text += '    JNIEnv* env;\n';
         source.text += '    if(JNI_OK == vm->AttachCurrentThread(&env, 0)) {\n'
-        source.text += '        jclass java_class = env->FindClass("org/gearvrf/OvrBuildInfo");\n'
+        source.text += '        jclass java_class = env->FindClass("com/samsungxr/OvrBuildInfo");\n'
         source.text += '        if (env->ExceptionCheck()) {\n'
         source.text += '            env->ExceptionClear();\n'
         source.text += '        }\n'
@@ -117,7 +117,7 @@ android {
     }
 
     packagingOptions {
-        exclude 'lib/*/libsxr.so'
+        exclude 'lib/*/libsxrsdk.so'
     }
 }
 
