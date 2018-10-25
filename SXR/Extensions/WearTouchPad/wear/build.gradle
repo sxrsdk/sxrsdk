@@ -20,7 +20,7 @@ android {
     compileSdkVersion 26
 
     defaultConfig {
-        applicationId "org.gearvrf.weartouchpad"
+        applicationId "com.samsungxr.weartouchpad"
         minSdkVersion 20
         targetSdkVersion 24
         versionCode 1

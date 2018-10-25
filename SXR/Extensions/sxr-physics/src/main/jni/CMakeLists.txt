@@ -30,12 +30,12 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../../SDK/sxrsdk/src/ma
 
 string(TOLOWER ${CMAKE_BUILD_TYPE} buildType)
 
-add_library(sxr SHARED IMPORTED)
-set_property(TARGET sxr PROPERTY IMPORTED_LOCATION
-             ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../SDK/sxrsdk/build/intermediates/ndkBuild/${buildType}/obj/local/${ANDROID_ABI}/libsxr.so)
+add_library(sxrsdk SHARED IMPORTED)
+set_property(TARGET sxrsdk PROPERTY IMPORTED_LOCATION
+             ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../SDK/sxrsdk/build/intermediates/ndkBuild/${buildType}/obj/local/${ANDROID_ABI}/libsxrsdk.so)
 
 add_library(Bullet SHARED IMPORTED)
 set_property(TARGET Bullet PROPERTY IMPORTED_LOCATION
              ${CMAKE_CURRENT_SOURCE_DIR}/prebuilt/${ANDROID_ABI}/libBullet.so)
 
-target_link_libraries(sxr-physics sxr android log Bullet EGL GLESv3)
+target_link_libraries(sxr-physics sxrsdk android log Bullet EGL GLESv3)
