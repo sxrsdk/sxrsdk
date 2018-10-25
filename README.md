@@ -1,4 +1,4 @@
-## The GearVR framework (GearVRf)
+## The Samsung XR Java SDK (SXRSDK)
 
-### Project details can be found at www.gearvrf.org.
-### See https://github.com/gearvrf/GearVRf-Demos for sample apps.
+### Project details can be found at www.samsungxr.com.
+### See https://github.com/sxrsdk/sxrsdk-demos for sample apps.
