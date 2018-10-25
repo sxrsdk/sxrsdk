@@ -52,17 +52,17 @@ dependencies {
 }
 
 clean {}.doLast {
-    def gearvrfLibs = project.rootDir.absolutePath + "/../gearvrf-libs"
-    if (file(gearvrfLibs).exists()) {
-        project.delete(gearvrfLibs + '/' + project.name + '-release.aar')
-        project.delete(gearvrfLibs + '/' + project.name + '-debug.aar')
+    def sxrLibs = project.rootDir.absolutePath + "/../sxr-libs"
+    if (file(sxrLibs).exists()) {
+        project.delete(sxrLibs + '/' + project.name + '-release.aar')
+        project.delete(sxrLibs + '/' + project.name + '-debug.aar')
     }
 }
 
 task copyJarToBin(type: Copy) {
     outputs.upToDateWhen { false }
     from tasks.matching { it.name.startsWith('bundle') }
-    into project.rootDir.absolutePath + "/../gearvrf-libs"
+    into project.rootDir.absolutePath + "/../sxr-libs"
 }
 
 tasks.whenTaskAdded { task ->
