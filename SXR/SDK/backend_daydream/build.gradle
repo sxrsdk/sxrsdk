@@ -1,0 +1,94 @@
+apply plugin: 'com.android.library'
+
+repositories {
+    flatDir {
+        dirs 'src/main/libs'
+    }
+    // For GVR components, the official source of the .aars is the Google
+    // repository.
+    maven {
+        url "http://google.bintray.com/googlevr"
+    }
+}
+
+android {
+    compileSdkVersion 26
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 21
+        externalNativeBuild {
+            cmake {
+                arguments.add('-DANDROID_STL=c++_shared')
+            }
+        }
+        ndk {
+            moduleName "sxr-daydream"
+            if (rootProject.hasProperty("ARM64")) {
+                abiFilters "arm64-v8a"
+            } else {
+                abiFilters "armeabi-v7a"
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable = true
+            jniDebuggable = true
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'src/main/jni/CMakeLists.txt'
+        }
+    }
+
+    packagingOptions {
+        exclude 'lib/armeabi-v7a/libgvr.so'
+        exclude 'lib/arm64-v8a/libgvr.so'
+    }
+}
+
+project.ext.jomlVersion = "1.9.3-SNAPSHOT"
+project.ext.daydreamVersion = '1.130.0'
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'src/main/libs')
+    implementation "com.google.vr:sdk-base:${daydreamVersion}"
+    implementation "com.google.vr:sdk-controller:${daydreamVersion}"
+    implementation project(':sxrsdk')
+    implementation "org.joml:joml-android:${jomlVersion}"
+}
+
+clean {}.doLast {
+    def sxrLibs = project.rootDir.absolutePath + "/../sxr-libs"
+    if (file(sxrLibs).exists()) {
+        project.delete(sxrLibs + '/' + project.name + '-release.aar')
+        project.delete(sxrLibs + '/' + project.name + '-debug.aar')
+    }
+}
+
+task copyJarToBin(type: Copy) {
+    outputs.upToDateWhen { false }
+    from tasks.matching { it.name.startsWith('bundle') }
+    into project.rootDir.absolutePath + "/../sxr-libs"
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'bundleDebug') {
+        task.finalizedBy(copyJarToBin)
+    } else if (task.name == 'bundleRelease') {
+        task.finalizedBy(copyJarToBin)
+    } else if (task.name == 'externalNativeBuildRelease') {
+        task.dependsOn ":sxrsdk:externalNativeBuildRelease"
+    } else if (task.name == 'externalNativeBuildDebug') {
+        task.dependsOn ":sxrsdk:externalNativeBuildDebug"
+    }
+}

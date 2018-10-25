@@ -1,0 +1,89 @@
+apply plugin: 'com.android.library'
+
+repositories {
+    flatDir {
+        dirs '../../sxr-libs/'
+    }
+}
+
+android {
+    compileSdkVersion 26
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 21
+
+        ndk {
+            moduleName "sxr-physics"
+            if (rootProject.hasProperty("ARM64")) {
+                abiFilters = ['arm64-v8a']
+            } else {
+                abiFilters = ['armeabi-v7a']
+            }
+        }
+        externalNativeBuild {
+            cmake {
+                arguments.add('-DANDROID_STL=c++_shared')
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable = true
+            jniDebuggable = true
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+        }
+        debug {
+            jniDebuggable true
+        }
+    }
+
+    sourceSets.main {
+        java.srcDirs = ['src/main/java']
+        jni.srcDirs = [] // no auto generation of Android.mk
+        jniLibs.srcDir 'src/main/jni/prebuilt' // pre-compiled libraries
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'src/main/jni/CMakeLists.txt'
+        }
+    }
+}
+
+project.ext.jomlVersion = "1.9.3-SNAPSHOT"
+
+dependencies {
+    compile "org.joml:joml-android:${jomlVersion}"
+    if (findProject(':sxrsdk')) {
+        compile project (':sxrsdk')
+    } else {
+        compile(name: 'sxrsdk-debug', ext: 'aar')
+    }
+}
+
+clean {}.doLast {
+    def sxrLibs = project.rootDir.absolutePath + "/../sxr-libs"
+    if (file(sxrLibs).exists()) {
+        project.delete(sxrLibs + '/' + project.name + '-release.aar')
+        project.delete(sxrLibs + '/' + project.name + '-debug.aar')
+    }
+}
+
+task copyJarToBin(type: Copy) {
+    outputs.upToDateWhen { false }
+    from tasks.matching { it.name.startsWith('bundle') }
+    into project.rootDir.absolutePath + "/../sxr-libs"
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'bundleDebug') {
+        task.finalizedBy(copyJarToBin)
+    } else if (task.name == 'bundleRelease') {
+        task.finalizedBy(copyJarToBin)
+    }
+}
