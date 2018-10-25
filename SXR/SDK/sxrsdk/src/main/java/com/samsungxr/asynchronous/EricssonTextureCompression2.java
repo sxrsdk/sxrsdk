@@ -22,7 +22,7 @@ import com.samsungxr.utility.RuntimeAssertion;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
-class EricssonTextureCompression2 extends GVRCompressedTextureLoader {
+class EricssonTextureCompression2 extends SXRCompressedTextureLoader {
 
     private static final int PKM_SIGNATURE = 0x204d4b50; // "PKM "
     private static final int VERSION2_SIGNATURE = 0x00003032; // "20\u0000\u0000"

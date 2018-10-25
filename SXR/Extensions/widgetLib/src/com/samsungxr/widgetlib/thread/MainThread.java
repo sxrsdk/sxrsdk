@@ -2,7 +2,7 @@ package com.samsungxr.widgetlib.thread;
 
 import java.util.concurrent.CountDownLatch;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 
 import com.samsungxr.widgetlib.log.Log;
 
@@ -24,7 +24,7 @@ public final class MainThread {
      * @throws InterruptedException
      *             if the thread wasn't successfully started.
      */
-    public MainThread(GVRContext gvrContext) throws InterruptedException {
+    public MainThread(SXRContext gvrContext) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         mainThread = new Thread("MainThread") {
             public void run() {

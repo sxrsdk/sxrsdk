@@ -19,9 +19,9 @@ import android.app.Activity;
 import com.samsungxr.utility.Log;
 
 /**
- * Perform an entitlement check. To use do this in your GVRScript/GVRMain's onInit
+ * Perform an entitlement check. To use do this in your SXRScript/SXRMain's onInit
  * <pre>
- *      public void onInit(final GVRContext gvrContext) {
+ *      public void onInit(final SXRContext gvrContext) {
  *          PlatformEntitlementCheck.start(gvrContext, "<your_app_id>", new PlatformEntitlementCheck.ResultListener() {
  *              @Override
  *              public void onSuccess() {
@@ -52,7 +52,7 @@ public final class PlatformEntitlementCheck {
      * @throws IllegalStateException in case the platform sdk cannot be initialized
      * @throws IllegalArgumentException if listener is null
      */
-    public static void start(final GVRContext context, final String appId, final ResultListener listener) {
+    public static void start(final SXRContext context, final String appId, final ResultListener listener) {
         if (null == listener) {
             throw new IllegalArgumentException("listener cannot be null");
         }
@@ -63,7 +63,7 @@ public final class PlatformEntitlementCheck {
             throw new IllegalStateException("Could not initialize the platform sdk; error code: " + result);
         }
 
-        context.registerDrawFrameListener(new GVRDrawFrameListener() {
+        context.registerDrawFrameListener(new SXRDrawFrameListener() {
             @Override
             public void onDrawFrame(float frameTime) {
                 final int result = processEntitlementCheckResponse();

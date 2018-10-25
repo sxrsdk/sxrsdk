@@ -14,7 +14,7 @@
  */
 package com.sample.hand.template;
 
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRSceneObject;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -59,9 +59,9 @@ public class IOJoint extends IOBaseComponent {
      * @param type            the type of the
      *                        {@link IOJoint}. Use the {@link IOJoint#getString(int)} call to
      *                        know the readable type of the joint.
-     * @param handSceneObject This is the root {@link GVRSceneObject} that represents the hand.
+     * @param handSceneObject This is the root {@link SXRSceneObject} that represents the hand.
      */
-    public IOJoint(int type, GVRSceneObject handSceneObject) {
+    public IOJoint(int type, SXRSceneObject handSceneObject) {
         super(type, handSceneObject);
     }
 }

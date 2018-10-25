@@ -20,10 +20,10 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRAndroidResource.CancelableCallback;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRCubemapImage;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRAndroidResource.CancelableCallback;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRCubemapImage;
 import com.samsungxr.asynchronous.Throttler.AsyncLoader;
 import com.samsungxr.asynchronous.Throttler.AsyncLoaderFactory;
 import com.samsungxr.asynchronous.Throttler.GlConverter;
@@ -46,9 +46,9 @@ class AsyncCubemapTexture {
      * The API
      */
 
-    static void loadTexture(GVRContext gvrContext,
-                            CancelableCallback<GVRCubemapImage> callback,
-            GVRAndroidResource resource, int priority, Map<String, Integer> map) {
+    static void loadTexture(SXRContext gvrContext,
+                            CancelableCallback<SXRCubemapImage> callback,
+            SXRAndroidResource resource, int priority, Map<String, Integer> map) {
         faceIndexMap = map;
         AsyncManager.get().getScheduler().registerCallback(gvrContext, TEXTURE_CLASS, callback,
                 resource, priority);
@@ -56,7 +56,7 @@ class AsyncCubemapTexture {
 
     private static Map<String, Integer> faceIndexMap;
     
-    private static final Class<GVRCubemapImage> TEXTURE_CLASS = GVRCubemapImage.class;
+    private static final Class<SXRCubemapImage> TEXTURE_CLASS = SXRCubemapImage.class;
     
     /*
      * Singleton
@@ -73,12 +73,12 @@ class AsyncCubemapTexture {
 
     private AsyncCubemapTexture() {
         AsyncManager.get().registerDatatype(TEXTURE_CLASS,
-                new AsyncLoaderFactory<GVRCubemapImage, Bitmap[]>() {
+                new AsyncLoaderFactory<SXRCubemapImage, Bitmap[]>() {
                     @Override
-                    AsyncLoader<GVRCubemapImage, Bitmap[]> threadProc(
-                            GVRContext gvrContext,
-                            GVRAndroidResource request,
-                            CancelableCallback<GVRCubemapImage> cancelableCallback,
+                    AsyncLoader<SXRCubemapImage, Bitmap[]> threadProc(
+                            SXRContext gvrContext,
+                            SXRAndroidResource request,
+                            CancelableCallback<SXRCubemapImage> cancelableCallback,
                             int priority) {
                         return new AsyncLoadCubemapTextureResource(gvrContext,
                                 request, cancelableCallback, priority);
@@ -91,20 +91,20 @@ class AsyncCubemapTexture {
      */
 
     private static class AsyncLoadCubemapTextureResource extends
-            AsyncLoader<GVRCubemapImage, Bitmap[]> {
+            AsyncLoader<SXRCubemapImage, Bitmap[]> {
 
-        private static final GlConverter<GVRCubemapImage, Bitmap[]> sConverter = new GlConverter<GVRCubemapImage, Bitmap[]>() {
+        private static final GlConverter<SXRCubemapImage, Bitmap[]> sConverter = new GlConverter<SXRCubemapImage, Bitmap[]>() {
 
             @Override
-            public GVRCubemapImage convert(GVRContext gvrContext,
+            public SXRCubemapImage convert(SXRContext gvrContext,
                                            Bitmap[] bitmapArray) {
-                return new GVRCubemapImage(gvrContext, bitmapArray);
+                return new SXRCubemapImage(gvrContext, bitmapArray);
             }
         };
 
-        protected AsyncLoadCubemapTextureResource(GVRContext gvrContext,
-                                                  GVRAndroidResource request,
-                                                  CancelableCallback<GVRCubemapImage> callback, int priority) {
+        protected AsyncLoadCubemapTextureResource(SXRContext gvrContext,
+                                                  SXRAndroidResource request,
+                                                  CancelableCallback<SXRCubemapImage> callback, int priority) {
             super(gvrContext, sConverter, request, callback);
         }
 

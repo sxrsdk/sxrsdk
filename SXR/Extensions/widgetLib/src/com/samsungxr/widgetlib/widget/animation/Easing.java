@@ -2,9 +2,9 @@ package com.samsungxr.widgetlib.widget.animation;
 
 import com.samsungxr.widgetlib.log.Log;
 
-import com.samsungxr.animation.GVRInterpolator;
+import com.samsungxr.animation.SXRInterpolator;
 
-public enum Easing implements GVRInterpolator {
+public enum Easing implements SXRInterpolator {
     BACK_IN {
         @Override
         public float mapRatio(float ratio) {

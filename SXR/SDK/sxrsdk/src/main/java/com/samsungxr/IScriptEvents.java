@@ -22,15 +22,15 @@ import com.samsungxr.script.IScriptable;
  * events that are handled by an application.
  */
 public interface IScriptEvents extends IEvents {
-    void onEarlyInit(GVRContext gvrContext);
+    void onEarlyInit(SXRContext gvrContext);
 
     /**
-     * Called after GVRMain.onInit returns for scripts which
+     * Called after SXRMain.onInit returns for scripts which
      * have been added during onInit.
      * @param gvrContext context to initialize.
      * @throws Throwable if exception occurs durint initialization.
      */
-    void onInit(GVRContext gvrContext) throws Throwable;
+    void onInit(SXRContext gvrContext) throws Throwable;
 
     void onAfterInit();
     

@@ -17,18 +17,18 @@ package com.samsungxr.mixedreality;
 
 import android.graphics.Bitmap;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRPicker;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRPicker;
+import com.samsungxr.SXRSceneObject;
 
 import java.util.ArrayList;
 
 public abstract class MRCommon implements IMRCommon {
     public static String TAG = MRCommon.class.getSimpleName();
 
-    protected final GVRContext mGvrContext;
+    protected final SXRContext mGvrContext;
 
-    public MRCommon(GVRContext gvrContext) {
+    public MRCommon(SXRContext gvrContext) {
         mGvrContext = gvrContext;
     }
 
@@ -43,7 +43,7 @@ public abstract class MRCommon implements IMRCommon {
     }
 
     @Override
-    public GVRSceneObject getPassThroughObject() {
+    public SXRSceneObject getPassThroughObject() {
         return onGetPassThroughObject();
     }
 
@@ -63,32 +63,32 @@ public abstract class MRCommon implements IMRCommon {
     }
 
     @Override
-    public ArrayList<GVRPlane> getAllPlanes() {
+    public ArrayList<SXRPlane> getAllPlanes() {
         return onGetAllPlanes();
     }
 
     @Override
-    public GVRAnchor createAnchor(float[] pose) {
+    public SXRAnchor createAnchor(float[] pose) {
         return onCreateAnchor(pose, null);
     }
 
     @Override
-    public GVRAnchor createAnchor(float[] pose, GVRSceneObject sceneObject) {
+    public SXRAnchor createAnchor(float[] pose, SXRSceneObject sceneObject) {
         return onCreateAnchor(pose, sceneObject);
     }
 
     @Override
-    public void updateAnchorPose(GVRAnchor anchor, float[] pose) {
+    public void updateAnchorPose(SXRAnchor anchor, float[] pose) {
         onUpdateAnchorPose(anchor, pose);
     }
 
     @Override
-    public void removeAnchor(GVRAnchor anchor) {
+    public void removeAnchor(SXRAnchor anchor) {
         onRemoveAnchor(anchor);
     }
 
     @Override
-    public void hostAnchor(GVRAnchor anchor, ICloudAnchorListener listener) {
+    public void hostAnchor(SXRAnchor anchor, ICloudAnchorListener listener) {
         onHostAnchor(anchor, listener);
     }
 
@@ -103,12 +103,12 @@ public abstract class MRCommon implements IMRCommon {
     }
 
     @Override
-    public GVRHitResult hitTest(GVRSceneObject sceneObj, GVRPicker.GVRPickedObject collision) {
+    public SXRHitResult hitTest(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) {
         return onHitTest(sceneObj, collision);
     }
 
     @Override
-    public GVRLightEstimate getLightEstimate() {
+    public SXRLightEstimate getLightEstimate() {
         return onGetLightEstimate();
     }
 
@@ -123,7 +123,7 @@ public abstract class MRCommon implements IMRCommon {
     }
 
     @Override
-    public ArrayList<GVRAugmentedImage> getAllAugmentedImages() {
+    public ArrayList<SXRAugmentedImage> getAllAugmentedImages() {
         return onGetAllAugmentedImages();
     }
 
@@ -131,7 +131,7 @@ public abstract class MRCommon implements IMRCommon {
 
     protected abstract void onPause();
 
-    protected abstract GVRSceneObject onGetPassThroughObject();
+    protected abstract SXRSceneObject onGetPassThroughObject();
 
     protected abstract void onRegisterPlaneListener(IPlaneEventsListener listener);
 
@@ -139,27 +139,27 @@ public abstract class MRCommon implements IMRCommon {
 
     protected abstract void onRegisterAugmentedImageListener(IAugmentedImageEventsListener listener);
 
-    protected abstract ArrayList<GVRPlane> onGetAllPlanes();
+    protected abstract ArrayList<SXRPlane> onGetAllPlanes();
 
-    protected abstract GVRAnchor onCreateAnchor(float[] pose, GVRSceneObject sceneObject);
+    protected abstract SXRAnchor onCreateAnchor(float[] pose, SXRSceneObject sceneObject);
 
-    protected abstract void onUpdateAnchorPose(GVRAnchor anchor, float[] pose);
+    protected abstract void onUpdateAnchorPose(SXRAnchor anchor, float[] pose);
 
-    protected abstract void onRemoveAnchor(GVRAnchor anchor);
+    protected abstract void onRemoveAnchor(SXRAnchor anchor);
 
-    protected  abstract void onHostAnchor(GVRAnchor anchor, ICloudAnchorListener listener);
+    protected  abstract void onHostAnchor(SXRAnchor anchor, ICloudAnchorListener listener);
 
     protected abstract void onResolveCloudAnchor(String anchorId, ICloudAnchorListener listener);
 
     protected abstract void onSetEnableCloudAnchor(boolean enableCloudAnchor);
 
-    protected abstract GVRHitResult onHitTest(GVRSceneObject sceneObj, GVRPicker.GVRPickedObject collision);
+    protected abstract SXRHitResult onHitTest(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision);
 
-    protected abstract GVRLightEstimate onGetLightEstimate();
+    protected abstract SXRLightEstimate onGetLightEstimate();
 
     protected abstract void onSetAugmentedImage(Bitmap image);
 
     protected abstract void onSetAugmentedImages(ArrayList<Bitmap> imagesList);
 
-    protected abstract ArrayList<GVRAugmentedImage> onGetAllAugmentedImages();
+    protected abstract ArrayList<SXRAugmentedImage> onGetAllAugmentedImages();
 }

@@ -18,12 +18,12 @@ package com.samsungxr.io.cursor3d;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.io.GVRCursorController;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.io.GVRControllerType;
+import com.samsungxr.SXRContext;
+import com.samsungxr.io.SXRCursorController;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.io.SXRControllerType;
 
-//TODO have this class extend GVRCursorController
+//TODO have this class extend SXRCursorController
 
 /**
  * An {@link IoDevice} controls the position of the {@link Cursor}.
@@ -37,7 +37,7 @@ import com.samsungxr.io.GVRControllerType;
  */
 public class IoDevice {
     private static final String TAG = IoDevice.class.getSimpleName();
-    private final GVRCursorController gvrCursorController;
+    private final SXRCursorController gvrCursorController;
     private boolean isConnected = true;
     private IoDeviceConnectionListener connectionListener;
     private int vendorId;
@@ -69,7 +69,7 @@ public class IoDevice {
      *                   IoDevice to the User.
      * @param vendorName name of the vendor for the {@link IoDevice}
      */
-    protected IoDevice(GVRContext ctx, String deviceId, int vendorId, int productId, String name, String
+    protected IoDevice(SXRContext ctx, String deviceId, int vendorId, int productId, String name, String
             vendorName) {
         this(ctx, deviceId, vendorId, productId, name, vendorName, true);
     }
@@ -96,19 +96,19 @@ public class IoDevice {
      *                    connected at initialization. The {@link IoDevice#setConnected(boolean)}
      *                    call can be used to indicate the hardware device connection later.
      */
-    protected IoDevice(GVRContext ctx, String deviceId, int vendorId, int productId, String name, String
+    protected IoDevice(SXRContext ctx, String deviceId, int vendorId, int productId, String name, String
             vendorName, boolean isConnected) {
         this(deviceId, vendorId, productId, name, vendorName, isConnected, new
-                GVRExternalCursorController(ctx));
+                SXRExternalCursorController(ctx));
     }
 
     IoDevice(String deviceId, int vendorId, int productId, String name, String
-            vendorName, GVRCursorController gvrCursorController) {
+            vendorName, SXRCursorController gvrCursorController) {
         this(deviceId, vendorId, productId, name, vendorName, true, gvrCursorController);
     }
 
     private IoDevice(String deviceId, int vendorId, int productId, String name, String
-            vendorName, boolean isConnected, GVRCursorController gvrCursorController) {
+            vendorName, boolean isConnected, SXRCursorController gvrCursorController) {
         this.vendorId = vendorId;
         this.productId = productId;
         this.deviceId = deviceId;
@@ -271,7 +271,7 @@ public class IoDevice {
             return;
         }
 
-        GVRSceneObject sceneObject = gvrCursorController.getCursor();
+        SXRSceneObject sceneObject = gvrCursorController.getCursor();
         if (sceneObject != null) {
             sceneObject.getTransform().setRotation(w, x, y, z);
         }
@@ -292,7 +292,7 @@ public class IoDevice {
      *              <code>false</code> turns off its visibility.
      */
     protected void setVisible(boolean visible) {
-        GVRSceneObject sceneObject = gvrCursorController.getCursor();
+        SXRSceneObject sceneObject = gvrCursorController.getCursor();
         if (sceneObject != null && sceneObject.isEnabled() != visible) {
             sceneObject.setEnable(visible);
         }
@@ -303,14 +303,14 @@ public class IoDevice {
         gvrCursorController.setCursor(null);
     }
 
-    void addControllerEventListener(GVRCursorController.IControllerEvent
+    void addControllerEventListener(SXRCursorController.IControllerEvent
                                             controllerEventListener) {
         if (controllerEventListener != null) {
             gvrCursorController.getEventReceiver().addListener(controllerEventListener);
         }
     }
 
-    void removeControllerEventListener(GVRCursorController.IControllerEvent
+    void removeControllerEventListener(SXRCursorController.IControllerEvent
                                                controllerEventListener) {
         if (controllerEventListener != null) {
             gvrCursorController.getEventReceiver().removeListener(controllerEventListener);
@@ -360,8 +360,8 @@ public class IoDevice {
      * @param keyEvent the event to be set.
      */
     protected void setKeyEvent(KeyEvent keyEvent) {
-        if (gvrCursorController instanceof GVRExternalCursorController) {
-            GVRExternalCursorController controller = (GVRExternalCursorController)
+        if (gvrCursorController instanceof SXRExternalCursorController) {
+            SXRExternalCursorController controller = (SXRExternalCursorController)
                     gvrCursorController;
             controller.setKeyEvent(keyEvent);
         } else {
@@ -425,10 +425,10 @@ public class IoDevice {
         return isConnected;
     }
 
-    //TODO this will go once GVRf is changed
-    static class GVRExternalCursorController extends GVRCursorController {
-        GVRExternalCursorController(GVRContext context) {
-            super(context, GVRControllerType.EXTERNAL);
+    //TODO this will go once SXRf is changed
+    static class SXRExternalCursorController extends SXRCursorController {
+        SXRExternalCursorController(SXRContext context) {
+            super(context, SXRControllerType.EXTERNAL);
         }
 
         public void setKeyEvent(KeyEvent keyEvent) {
@@ -448,7 +448,7 @@ public class IoDevice {
         public boolean dispatchKeyEvent(KeyEvent ev) { return false; }
     }
 
-    public GVRCursorController getGvrCursorController() {
+    public SXRCursorController getGvrCursorController() {
         return gvrCursorController;
     }
 }

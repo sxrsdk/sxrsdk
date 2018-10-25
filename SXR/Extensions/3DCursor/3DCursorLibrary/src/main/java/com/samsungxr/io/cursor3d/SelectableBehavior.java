@@ -2,13 +2,13 @@ package com.samsungxr.io.cursor3d;
 
 import android.util.SparseArray;
 
-import com.samsungxr.GVRBehavior;
-import com.samsungxr.GVRComponent;
-import com.samsungxr.GVRPicker;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRSphereCollider;
-import com.samsungxr.GVRSwitch;
-import com.samsungxr.GVRTransform;
+import com.samsungxr.SXRBehavior;
+import com.samsungxr.SXRComponent;
+import com.samsungxr.SXRPicker;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRSphereCollider;
+import com.samsungxr.SXRSwitch;
+import com.samsungxr.SXRTransform;
 import com.samsungxr.IEvents;
 import com.samsungxr.ITouchEvents;
 import org.joml.Vector3f;
@@ -16,19 +16,19 @@ import org.joml.Vector3f;
 import java.util.HashMap;
 
 /**
- * This class defines a {@link GVRBehavior} that can be attached to a {@link GVRSceneObject}, it
- * handles all the {@link ITouchEvents} on the associated {@link GVRSceneObject} and
+ * This class defines a {@link SXRBehavior} that can be attached to a {@link SXRSceneObject}, it
+ * handles all the {@link ITouchEvents} on the associated {@link SXRSceneObject} and
  * maintains the correct {@link ObjectState} based on the {@link ICursorEvents} received. This
- * class can associate a child {@link GVRSceneObject} with each {@link ObjectState} and is
- * responsible for making the correct {@link GVRSceneObject} visible according to the
+ * class can associate a child {@link SXRSceneObject} with each {@link ObjectState} and is
+ * responsible for making the correct {@link SXRSceneObject} visible according to the
  * {@link ObjectState}.
  */
-public class SelectableBehavior extends GVRBehavior {
+public class SelectableBehavior extends SXRBehavior {
     private static final String TAG = SelectableBehavior.class.getSimpleName();
     static private long TYPE_SELECTABLE = newComponentType(SelectableBehavior.class);
     private static final String DEFAULT_ASSET_NEEDED = "Asset for Default state should be " +
             "specified";
-    private GVRSwitch gvrSwitch;
+    private SXRSwitch gvrSwitch;
     private ObjectState state = ObjectState.DEFAULT;
     private HashMap<ObjectState, Integer> stateIndexMap;
     private boolean previousActive;
@@ -55,14 +55,14 @@ public class SelectableBehavior extends GVRBehavior {
          * is called whenever the state of the {@link SelectableBehavior} changes.
          *
          * @param behavior   the instance of {@link SelectableBehavior} associated with the
-         *                   GVRSceneObject
+         *                   SXRSceneObject
          * @param previous   the previous state
          * @param current    current state to be set.
          * @param cursor     the instance of {@link Cursor} that caused the state change
          * @param hit        the collision object which cause the change
          */
         void onStateChanged(SelectableBehavior behavior, ObjectState previous, ObjectState current,
-                            Cursor cursor, GVRPicker.GVRPickedObject hit);
+                            Cursor cursor, SXRPicker.SXRPickedObject hit);
     }
 
     /**
@@ -72,39 +72,39 @@ public class SelectableBehavior extends GVRBehavior {
         /**
          * The state in which the {@link SelectableBehavior} is initially. This represents the
          * normal
-         * appearance of the associated {@link GVRSceneObject}
+         * appearance of the associated {@link SXRSceneObject}
          */
         DEFAULT,
         /**
-         * This state means that a {@link Cursor} is behind the associated {@link GVRSceneObject}.
-         * Recommended appearance of the associated {@link GVRSceneObject} in this state is a wire
+         * This state means that a {@link Cursor} is behind the associated {@link SXRSceneObject}.
+         * Recommended appearance of the associated {@link SXRSceneObject} in this state is a wire
          * frame or a transparent texture, to allow the {@link Cursor} to be visible to the user.
          */
         BEHIND,
         /**
          * This state means that a
-         * {@link Cursor} is intersecting with the associated {@link GVRSceneObject}
-         * It is recommended that the appearance of the associated {@link GVRSceneObject} in this
+         * {@link Cursor} is intersecting with the associated {@link SXRSceneObject}
+         * It is recommended that the appearance of the associated {@link SXRSceneObject} in this
          * state changes from the {@link ObjectState#DEFAULT} to make the user aware of a collision.
          */
         COLLIDING,
         /**
          * This state means that a {@link Cursor} is intersecting with the associated
-         * {@link GVRSceneObject}. It is recommended
-         * that the appearance of the associated {@link GVRSceneObject} in this state changes
+         * {@link SXRSceneObject}. It is recommended
+         * that the appearance of the associated {@link SXRSceneObject} in this state changes
          * from the {@link ObjectState#DEFAULT} to make the user aware of the clicked state.
          */
         CLICKED,
         /**
-         * This state means that two {@link Cursor}s have selected this {@link GVRSceneObject} it
+         * This state means that two {@link Cursor}s have selected this {@link SXRSceneObject} it
          * will be scaled based on the relative distance between these two {@link Cursor}s
          */
         SCALE
     }
 
     /**
-     * Creates a {@link SelectableBehavior} to be attached to any {@link GVRSceneObject}. The
-     * instance thus created will not change the appearance of the linked {@link GVRSceneObject}
+     * Creates a {@link SelectableBehavior} to be attached to any {@link SXRSceneObject}. The
+     * instance thus created will not change the appearance of the linked {@link SXRSceneObject}
      * according to the {@link ObjectState}.
      *
      * @param cursorManager
@@ -114,18 +114,18 @@ public class SelectableBehavior extends GVRBehavior {
     }
 
     /**
-     * Creates a {@link SelectableBehavior} which is to be attached to a {@link GVRSceneObject}
-     * with a specific hierarchy where, the attached {@link GVRSceneObject} has a separate child
-     * {@link GVRSceneObject} for each {@link ObjectState}. The order of the child nodes has to
+     * Creates a {@link SelectableBehavior} which is to be attached to a {@link SXRSceneObject}
+     * with a specific hierarchy where, the attached {@link SXRSceneObject} has a separate child
+     * {@link SXRSceneObject} for each {@link ObjectState}. The order of the child nodes has to
      * follow {@link ObjectState#DEFAULT}, {@link ObjectState#BEHIND}, {@link ObjectState#COLLIDING},
      * and {@link ObjectState#CLICKED} from left to right where {@link ObjectState#DEFAULT}
      * corresponds to the first/left most child. The {@link SelectableBehavior} handles all the
-     * {@link ITouchEvents} on the linked {@link GVRSceneObject} and maintains the
-     * {@link ObjectState}. It also makes the correct child {@link GVRSceneObject} visible according
+     * {@link ITouchEvents} on the linked {@link SXRSceneObject} and maintains the
+     * {@link ObjectState}. It also makes the correct child {@link SXRSceneObject} visible according
      * to the {@link ObjectState}. It is recommended that the different nodes representing different
      * {@link ObjectState} share a common set of vertices if possible. Not having the needed
      * hierarchy will result in an {@link IllegalArgumentException} when calling
-     * {@link GVRSceneObject#attachComponent(GVRComponent)}
+     * {@link SXRSceneObject#attachComponent(SXRComponent)}
      *
      * @param cursorManager       the {@link CursorManager} instance
      * @param initializeAllStates flag to indicate whether to initialize all
@@ -134,7 +134,7 @@ public class SelectableBehavior extends GVRBehavior {
      *                            {@link ObjectState#BEHIND}, {@link ObjectState#COLLIDING}, and
      *                            {@link ObjectState#CLICKED}. <code>false</code> initializes only
      *                            the {@link ObjectState#DEFAULT} state. Which does not require the
-     *                            attached  {@link GVRSceneObject} to have a hierarchy.
+     *                            attached  {@link SXRSceneObject} to have a hierarchy.
      */
     public SelectableBehavior(CursorManager cursorManager, boolean initializeAllStates) {
         this(cursorManager, initializeAllStates ? new ObjectState[]{ObjectState.DEFAULT,
@@ -143,35 +143,35 @@ public class SelectableBehavior extends GVRBehavior {
     }
 
     /**
-     * Creates a {@link SelectableBehavior} which is to be attached to a {@link GVRSceneObject}
-     * with a specific hierarchy where, the {@link GVRSceneObject} to be attached has a root node at
+     * Creates a {@link SelectableBehavior} which is to be attached to a {@link SXRSceneObject}
+     * with a specific hierarchy where, the {@link SXRSceneObject} to be attached has a root node at
      * the top and a child for each of the states of the {@link SelectableBehavior}.
      * The {@link SelectableBehavior} handles all the {@link ITouchEvents} on the linked
-     * {@link GVRSceneObject} and maintains the {@link ObjectState}. It also makes the correct child
-     * {@link GVRSceneObject} visible according to the {@link ObjectState}. It is recommended to
+     * {@link SXRSceneObject} and maintains the {@link ObjectState}. It also makes the correct child
+     * {@link SXRSceneObject} visible according to the {@link ObjectState}. It is recommended to
      * have a child for each {@link ObjectState} value, however it is possible to have lesser
      * children as long as the mapping is correctly specified in {@param objectStates}. If the
-     * {@param objectStates} does not match the {@link GVRSceneObject} hierarchy it will result in
+     * {@param objectStates} does not match the {@link SXRSceneObject} hierarchy it will result in
      * an {@link IllegalArgumentException} when calling
-     * {@link GVRSceneObject#attachComponent(GVRComponent)}. To save on memory it is suggested that
-     * the children of the {@link GVRSceneObject} representing different {@link ObjectState}s share
+     * {@link SXRSceneObject#attachComponent(SXRComponent)}. To save on memory it is suggested that
+     * the children of the {@link SXRSceneObject} representing different {@link ObjectState}s share
      * a common set of vertices if possible.
      *
      * @param cursorManager the {@link CursorManager} instance
      * @param objectStates  array of {@link ObjectState}s that maps each child of the attached
-     *                      {@link GVRSceneObject} with an {@link ObjectState}. Where the first
+     *                      {@link SXRSceneObject} with an {@link ObjectState}. Where the first
      *                      element of the array maps to the left most/first child of the attached
-     *                      {@link GVRSceneObject}. This array should contain
+     *                      {@link SXRSceneObject}. This array should contain
      *                      {@link ObjectState#DEFAULT} as one of its elements else it will result
      *                      in an {@link IllegalArgumentException}.
      */
     public SelectableBehavior(CursorManager cursorManager, ObjectState[] objectStates) {
-        super(cursorManager.getGVRContext());
+        super(cursorManager.getSXRContext());
         mType = getComponentType();
         this.cursorManager = cursorManager;
         states = new SparseArray<ObjectState>();
         stateIndexMap = new HashMap<ObjectState, Integer>();
-        gvrSwitch = new GVRSwitch(cursorManager.getGVRContext());
+        gvrSwitch = new SXRSwitch(cursorManager.getSXRContext());
 
         boolean defaultState = false;
         for (int i = 0; i < objectStates.length; i++) {
@@ -188,7 +188,7 @@ public class SelectableBehavior extends GVRBehavior {
     }
 
     @Override
-    public void onAttach(GVRSceneObject sceneObject) {
+    public void onAttach(SXRSceneObject sceneObject) {
         super.onAttach(sceneObject);
         if (stateIndexMap.size() > 1 && sceneObject.getChildrenCount() != stateIndexMap.size()) {
             throw new IllegalArgumentException("Num of children in model:" + sceneObject
@@ -199,21 +199,21 @@ public class SelectableBehavior extends GVRBehavior {
         if (stateIndexMap.size() > 1) {
             if(!sceneObject.attachComponent(gvrSwitch)) {
                 throw new IllegalArgumentException("Cannot attach selectable behavior on a scene" +
-                        " object with a GVRSwitch component");
+                        " object with a SXRSwitch component");
             }
         }
         cursorManager.addSelectableObject(sceneObject);
         sceneObject.getEventReceiver().addListener(clickListener);
         if (sceneObject.getCollider() == null) {
-            sceneObject.attachCollider(new GVRSphereCollider(getGVRContext()));
+            sceneObject.attachCollider(new SXRSphereCollider(getSXRContext()));
         }
     }
 
     @Override
-    public void onDetach(GVRSceneObject sceneObject) {
+    public void onDetach(SXRSceneObject sceneObject) {
         super.onDetach(sceneObject);
         sceneObject.getEventReceiver().removeListener(clickListener);
-        sceneObject.detachComponent(GVRSwitch.getComponentType());
+        sceneObject.detachComponent(SXRSwitch.getComponentType());
         cursorManager.removeSelectableObject(sceneObject);
     }
 
@@ -236,7 +236,7 @@ public class SelectableBehavior extends GVRBehavior {
         return false;
     }
 
-    public void setScale(Cursor cursor, GVRPicker.GVRPickedObject hit) {
+    public void setScale(Cursor cursor, SXRPicker.SXRPickedObject hit) {
         int cursorId = cursor.getId();
         states.remove(cursorId);
         if(!isHigherOrEqualStatePresent(ObjectState.SCALE)) {
@@ -246,7 +246,7 @@ public class SelectableBehavior extends GVRBehavior {
         states.put(cursorId, ObjectState.SCALE);
     }
 
-    public void setButtonPress(Cursor cursor, GVRPicker.GVRPickedObject hit) {
+    public void setButtonPress(Cursor cursor, SXRPicker.SXRPickedObject hit) {
         int cursorId = cursor.getId();
         states.remove(cursorId);
         if (!isHigherOrEqualStatePresent(ObjectState.CLICKED)) {
@@ -256,7 +256,7 @@ public class SelectableBehavior extends GVRBehavior {
         states.put(cursorId, ObjectState.CLICKED);
     }
 
-    public void setIntersect(Cursor cursor, GVRPicker.GVRPickedObject hit) {
+    public void setIntersect(Cursor cursor, SXRPicker.SXRPickedObject hit) {
         int cursorId = cursor.getId();
         states.remove(cursorId);
         if (!isHigherOrEqualStatePresent(ObjectState.CLICKED)) {
@@ -266,7 +266,7 @@ public class SelectableBehavior extends GVRBehavior {
         states.put(cursorId, ObjectState.COLLIDING);
     }
 
-    public void setWireFrame(Cursor cursor, GVRPicker.GVRPickedObject hit) {
+    public void setWireFrame(Cursor cursor, SXRPicker.SXRPickedObject hit) {
         int cursorId = cursor.getId();
         states.remove(cursorId);
         if (!isHigherOrEqualStatePresent(ObjectState.BEHIND)) {
@@ -288,7 +288,7 @@ public class SelectableBehavior extends GVRBehavior {
         return highestPriority;
     }
 
-    public void setDefault(Cursor cursor, GVRPicker.GVRPickedObject hit) {
+    public void setDefault(Cursor cursor, SXRPicker.SXRPickedObject hit) {
         int cursorId = cursor.getId();
         states.remove(cursorId);
         ObjectState highestPriority = getHighestPriorityState();
@@ -299,7 +299,7 @@ public class SelectableBehavior extends GVRBehavior {
         states.put(cursorId, ObjectState.DEFAULT);
     }
 
-    private void setState(ObjectState state, Cursor cursor, GVRPicker.GVRPickedObject hit) {
+    private void setState(ObjectState state, Cursor cursor, SXRPicker.SXRPickedObject hit) {
         ObjectState prevState = this.state;
         this.state = state;
         Integer childIndex = stateIndexMap.get(state);
@@ -321,7 +321,7 @@ public class SelectableBehavior extends GVRBehavior {
             if (prevDistance != 0)
             {
                 float diff = distance / prevDistance;
-                GVRTransform transform = getOwnerObject().getTransform();
+                SXRTransform transform = getOwnerObject().getTransform();
                 float scaleX = transform.getScaleX() * diff;
                 float scaleY = transform.getScaleY() * diff;
                 float scaleZ = transform.getScaleZ() * diff;
@@ -331,7 +331,7 @@ public class SelectableBehavior extends GVRBehavior {
         }
 
 
-        public void onTouchStart(Cursor cursor, GVRPicker.GVRPickedObject hit)
+        public void onTouchStart(Cursor cursor, SXRPicker.SXRPickedObject hit)
         {
             if (clickCursor1 == null)
             {
@@ -345,7 +345,7 @@ public class SelectableBehavior extends GVRBehavior {
             }
         }
 
-        public void onTouchEnd(Cursor cursor, GVRPicker.GVRPickedObject hit)
+        public void onTouchEnd(Cursor cursor, SXRPicker.SXRPickedObject hit)
         {
             if (clickCursor1 == cursor)
             {
@@ -367,7 +367,7 @@ public class SelectableBehavior extends GVRBehavior {
             }
         }
 
-        public void onExit(Cursor cursor, GVRPicker.GVRPickedObject hit)
+        public void onExit(Cursor cursor, SXRPicker.SXRPickedObject hit)
         {
             if (clickCursor1 == cursor)
             {
@@ -388,12 +388,12 @@ public class SelectableBehavior extends GVRBehavior {
                 }
             }
         }
-        public void onEnter(Cursor cursor, GVRPicker.GVRPickedObject hit) { }
-        public void onDrag(Cursor cursor, GVRPicker.GVRPickedObject hit) { }
+        public void onEnter(Cursor cursor, SXRPicker.SXRPickedObject hit) { }
+        public void onDrag(Cursor cursor, SXRPicker.SXRPickedObject hit) { }
     };
 
-    float getDistance(GVRSceneObject object) {
-        GVRTransform transform = object.getTransform();
+    float getDistance(SXRSceneObject object) {
+        SXRTransform transform = object.getTransform();
         float x = transform.getPositionX();
         float y = transform.getPositionY();
         float z = transform.getPositionZ();
@@ -422,7 +422,7 @@ public class SelectableBehavior extends GVRBehavior {
 
     /**
      * Set the {@link StateChangedListener} to be associated with the {@link SelectableBehavior}.
-     * The {@link StateChangedListener#onStateChanged(SelectableBehavior, ObjectState, ObjectState, Cursor, GVRPicker.GVRPickedObject)}
+     * The {@link StateChangedListener#onStateChanged(SelectableBehavior, ObjectState, ObjectState, Cursor, SXRPicker.SXRPickedObject)}
      * is called every time the state of the {@link SelectableBehavior} is changed.
      *
      * @param listener the {@link StateChangedListener}
@@ -433,9 +433,9 @@ public class SelectableBehavior extends GVRBehavior {
 
     /**
      * Returns a unique long value Associated with the {@link SelectableBehavior} class. Each
-     * subclass of  {@link GVRBehavior} needs a unique component type value. Use this value to
-     * get the instance of {@link SelectableBehavior} attached to any {@link GVRSceneObject}
-     * using {@link GVRSceneObject#getComponent(long)}
+     * subclass of  {@link SXRBehavior} needs a unique component type value. Use this value to
+     * get the instance of {@link SelectableBehavior} attached to any {@link SXRSceneObject}
+     * using {@link SXRSceneObject#getComponent(long)}
      *
      * @return the component type value.
      */

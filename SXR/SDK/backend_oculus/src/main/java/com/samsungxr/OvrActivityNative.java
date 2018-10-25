@@ -26,7 +26,7 @@ class OvrActivityNative implements IActivityNative {
 
     private final long mPtr;
 
-    OvrActivityNative(GVRApplication application) {
+    OvrActivityNative(SXRApplication application) {
         mPtr = onCreate(application.getActivity(), application.getAppSettings());
     }
 
@@ -36,7 +36,7 @@ class OvrActivityNative implements IActivityNative {
     }
 
     @Override
-    public void setCameraRig(GVRCameraRig cameraRig) {
+    public void setCameraRig(SXRCameraRig cameraRig) {
         setCameraRig(mPtr, cameraRig.getNative());
     }
 

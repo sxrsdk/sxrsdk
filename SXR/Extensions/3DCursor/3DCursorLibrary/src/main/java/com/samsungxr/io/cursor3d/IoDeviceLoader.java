@@ -15,8 +15,8 @@
 
 package com.samsungxr.io.cursor3d;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.io.GVRCursorController;
+import com.samsungxr.SXRContext;
+import com.samsungxr.io.SXRCursorController;
 
 class IoDeviceLoader {
     private static final String TAG = IoDeviceLoader.class.getSimpleName();
@@ -60,7 +60,7 @@ class IoDeviceLoader {
                 CONTROLLER_PRODUCT_ID && ioDevice.getDeviceId().equals(CONTROLLER_DEVICE_ID));
     }
 
-    static IoDevice getIoDevice(GVRCursorController gvrController) {
+    static IoDevice getIoDevice(SXRCursorController gvrController) {
         switch (gvrController.getControllerType()) {
             case MOUSE:
                 return new IoDevice(MOUSE_DEVICE_ID, MOUSE_VENDOR_ID, MOUSE_PRODUCT_ID,
@@ -81,7 +81,7 @@ class IoDeviceLoader {
         }
     }
 
-    static IoDevice getGearVrIoDevice(GVRContext ctx) {
+    static IoDevice getGearVrIoDevice(SXRContext ctx) {
         return new IoDevice(ctx, GEARVR_DEVICE_ID, SAMSUNG_VENDOR_ID, GEARVR_PRODUCT_ID,
                 GEARVR_NAME, SAMSUNG_VENDOR_NAME, true);
     }

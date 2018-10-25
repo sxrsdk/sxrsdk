@@ -18,11 +18,11 @@ package com.samsungxr.io.cursor3d;
 
 import android.util.SparseArray;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.animation.GVRAnimationEngine;
-import com.samsungxr.animation.GVRAnimator;
-import com.samsungxr.animation.GVRRepeatMode;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.animation.SXRAnimationEngine;
+import com.samsungxr.animation.SXRAnimator;
+import com.samsungxr.animation.SXRRepeatMode;
 import com.samsungxr.utility.Log;
 
 import java.io.IOException;
@@ -33,21 +33,21 @@ import java.io.IOException;
 class ObjectCursorAsset extends CursorAsset {
     private static final String TAG = ObjectCursorAsset.class.getSimpleName();
     private final String assetName;
-    private SparseArray<GVRSceneObject> objects;
-    private GVRAnimationEngine animationEngine;
+    private SparseArray<SXRSceneObject> objects;
+    private SXRAnimationEngine animationEngine;
     private int LOOP_REPEAT_COUNT = -1;
 
-    ObjectCursorAsset(GVRContext context, CursorType type, Action action, String assetName) {
+    ObjectCursorAsset(SXRContext context, CursorType type, Action action, String assetName) {
         super(context, type, action);
         this.assetName = assetName;
-        objects = new SparseArray<GVRSceneObject>();
+        objects = new SparseArray<SXRSceneObject>();
         animationEngine = context.getAnimationEngine();
     }
 
     @Override
     void set(Cursor cursor) {
         super.set(cursor);
-        GVRSceneObject modelSceneObject = objects.get(cursor.getId());
+        SXRSceneObject modelSceneObject = objects.get(cursor.getId());
 
         if (modelSceneObject == null) {
             Log.e(TAG, "Model not found, should not happen");
@@ -55,17 +55,17 @@ class ObjectCursorAsset extends CursorAsset {
         }
         modelSceneObject.setEnable(true);
 
-        GVRAnimator animator = (GVRAnimator) modelSceneObject.getComponent(GVRAnimator.getComponentType());
+        SXRAnimator animator = (SXRAnimator) modelSceneObject.getComponent(SXRAnimator.getComponentType());
         if (animator != null)
         {
-            animator.setRepeatMode(GVRRepeatMode.REPEATED);
+            animator.setRepeatMode(SXRRepeatMode.REPEATED);
             animator.setRepeatCount(LOOP_REPEAT_COUNT);
             animator.start();
         }
     }
 
-    private GVRSceneObject loadModelSceneObject() {
-        GVRSceneObject modelSceneObject = null;
+    private SXRSceneObject loadModelSceneObject() {
+        SXRSceneObject modelSceneObject = null;
         try {
             modelSceneObject = context.getAssetLoader().loadModel(assetName);
         } catch (IOException e) {
@@ -79,13 +79,13 @@ class ObjectCursorAsset extends CursorAsset {
     void reset(Cursor cursor) {
         super.reset(cursor);
 
-        GVRSceneObject modelSceneObject = objects.get(cursor.getId());
+        SXRSceneObject modelSceneObject = objects.get(cursor.getId());
 
         modelSceneObject.setEnable(false);
-        GVRAnimator animator = (GVRAnimator) modelSceneObject.getComponent(GVRAnimator.getComponentType());
+        SXRAnimator animator = (SXRAnimator) modelSceneObject.getComponent(SXRAnimator.getComponentType());
         if (animator != null)
         {
-            animator.setRepeatMode(GVRRepeatMode.ONCE);
+            animator.setRepeatMode(SXRRepeatMode.ONCE);
             animator.setRepeatCount(0);
             animator.start();
         }
@@ -94,7 +94,7 @@ class ObjectCursorAsset extends CursorAsset {
     @Override
     void load(Cursor cursor) {
         Integer key = cursor.getId();
-        GVRSceneObject modelSceneObject = objects.get(key);
+        SXRSceneObject modelSceneObject = objects.get(key);
 
         if (modelSceneObject == null) {
             modelSceneObject = loadModelSceneObject();
@@ -107,7 +107,7 @@ class ObjectCursorAsset extends CursorAsset {
 
     @Override
     void unload(Cursor cursor) {
-        GVRSceneObject assetSceneObject = objects.get(cursor.getId());
+        SXRSceneObject assetSceneObject = objects.get(cursor.getId());
         cursor.removeChildObject(assetSceneObject);
         objects.remove(cursor.getId());
     }

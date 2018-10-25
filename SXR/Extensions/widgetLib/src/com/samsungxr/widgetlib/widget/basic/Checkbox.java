@@ -4,9 +4,9 @@ import com.samsungxr.widgetlib.widget.Widget;
 import com.samsungxr.widgetlib.widget.NodeEntry;
 import com.samsungxr.widgetlib.widget.layout.Layout;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRMesh;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRSceneObject;
 
 /**
  * A checkbox is a specific type of two-state button that can be either checked or unchecked.
@@ -19,34 +19,34 @@ public class Checkbox extends CheckableButton {
      * @param width
      * @param height
      */
-    public Checkbox(GVRContext context, float width, float height) {
+    public Checkbox(SXRContext context, float width, float height) {
         super(context, width, height);
     }
 
     /**
-     * Create new instance of Checkbox wrapping around GVRF sceneObject parsed from the model
+     * Create new instance of Checkbox wrapping around SXRF sceneObject parsed from the model
      * @param context
      * @param sceneObject
      * @param attributes
      * @throws InstantiationException
      */
     @Deprecated
-    public Checkbox(GVRContext context, GVRSceneObject sceneObject,
+    public Checkbox(SXRContext context, SXRSceneObject sceneObject,
             NodeEntry attributes) throws InstantiationException {
         super(context, sceneObject, attributes);
     }
 
     /**
-     * Create new instance of Checkbox wrapping around GVRF sceneObject
+     * Create new instance of Checkbox wrapping around SXRF sceneObject
      *
      * @param context
      * @param sceneObject
      */
-    public Checkbox(GVRContext context, GVRSceneObject sceneObject) {
+    public Checkbox(SXRContext context, SXRSceneObject sceneObject) {
         super(context, sceneObject);
     }
 
-    protected Checkbox(GVRContext context, GVRMesh mesh) {
+    protected Checkbox(SXRContext context, SXRMesh mesh) {
         super(context, mesh);
     }
 
@@ -63,14 +63,14 @@ public class Checkbox extends CheckableButton {
 
     @Override
     protected Widget createGraphicWidget() {
-        Widget graphic = new Graphic(getGVRContext(), getHeight());
+        Widget graphic = new Graphic(getSXRContext(), getHeight());
         graphic.setPositionZ(PADDING_Z);
         graphic.setRenderingOrder(getRenderingOrder() + 1);
         return graphic;
     }
 
     static private class Graphic extends Widget {
-        Graphic(GVRContext context, float size) {
+        Graphic(SXRContext context, float size) {
             super(context, size, size);
         }
     }

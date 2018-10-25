@@ -22,13 +22,13 @@ import com.samsungxr.utility.VrAppSettings;
 /**
  * {@inheritDoc}
  */
-final class OvrActivityDelegate extends GVRApplication.ActivityDelegateStubs {
-    private GVRApplication mApplication;
+final class OvrActivityDelegate extends SXRApplication.ActivityDelegateStubs {
+    private SXRApplication mApplication;
     private OvrViewManager mActiveViewManager;
     private OvrActivityNative mActivityNative;
 
     @Override
-    public void onCreate(GVRApplication application) {
+    public void onCreate(SXRApplication application) {
         mApplication = application;
 
         mActivityNative = new OvrActivityNative(mApplication);
@@ -41,17 +41,17 @@ final class OvrActivityDelegate extends GVRApplication.ActivityDelegateStubs {
     }
 
     @Override
-    public GVRViewManager makeViewManager() {
+    public SXRViewManager makeViewManager() {
         return new OvrViewManager(mApplication, mApplication.getMain(), mXmlParser);
     }
 
     @Override
-    public GVRCameraRig makeCameraRig(GVRContext context) {
-        return new GVRCameraRig(context);
+    public SXRCameraRig makeCameraRig(SXRContext context) {
+        return new SXRCameraRig(context);
     }
 
     @Override
-    public GVRConfigurationManager makeConfigurationManager() {
+    public SXRConfigurationManager makeConfigurationManager() {
         return new OvrConfigurationManager(mApplication);
     }
 
@@ -90,7 +90,7 @@ final class OvrActivityDelegate extends GVRApplication.ActivityDelegateStubs {
     }
 
     @Override
-    public boolean setMain(GVRMain gvrMain, String dataFileName) {
+    public boolean setMain(SXRMain gvrMain, String dataFileName) {
         if (null != mActivityHandler) {
             mActivityHandler.onSetScript();
         }
@@ -98,7 +98,7 @@ final class OvrActivityDelegate extends GVRApplication.ActivityDelegateStubs {
     }
 
     @Override
-    public void setViewManager(GVRViewManager viewManager) {
+    public void setViewManager(SXRViewManager viewManager) {
         mActiveViewManager = (OvrViewManager)viewManager;
         mActivityHandler.setViewManager(mActiveViewManager);
     }

@@ -3,11 +3,11 @@ package com.samsungxr.widgetlib.widget;
 import com.samsungxr.widgetlib.log.Log;
 import com.samsungxr.widgetlib.main.Selector;
 
-import com.samsungxr.GVRCollider;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRMeshCollider;
-import com.samsungxr.GVRPicker.GVRPickedObject;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRCollider;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRMeshCollider;
+import com.samsungxr.SXRPicker.SXRPickedObject;
+import com.samsungxr.SXRSceneObject;
 
 import java.lang.ref.WeakReference;
 import java.util.LinkedHashSet;
@@ -28,37 +28,37 @@ public class TouchManager {
          * To determine if a sceneObject is touchable.
          *
          * @param sceneObject
-         * @param coords      GVRF raw coordinates
+         * @param coords      SXRF raw coordinates
          * @return True, when event has been handled & no further processing
          * needed. False, when event was intercepted and may need future
          * processing
          */
-        boolean touch(GVRSceneObject sceneObject, final float[] coords);
+        boolean touch(SXRSceneObject sceneObject, final float[] coords);
 
         /**
          * To determine if a sceneObject is processing back key.
          *
          * @param sceneObject
-         * @param coords      GVRF raw coordinates
+         * @param coords      SXRF raw coordinates
          * @return True, when back key event has been handled & no further processing
          * needed. False, when event was intercepted and may need future
          * processing
          */
-        boolean onBackKey(GVRSceneObject sceneObject, final float[] coords);
+        boolean onBackKey(SXRSceneObject sceneObject, final float[] coords);
     }
 
     /**
      * Creates TouchManager
      * @param gvrContext
      */
-    public TouchManager(GVRContext gvrContext) {
-        mGVRContext = gvrContext;
+    public TouchManager(SXRContext gvrContext) {
+        mSXRContext = gvrContext;
         mPickHandler = new WidgetPickHandler();
         gvrContext.getInputManager().selectController(mPickHandler);
     }
 
     public void clear() {
-        mGVRContext.getInputManager().clear();
+        mSXRContext.getInputManager().clear();
     }
 
 
@@ -69,7 +69,7 @@ public class TouchManager {
      * @param sceneObject
      * @param handler
      */
-    public void makeTouchable(GVRSceneObject sceneObject, OnTouch handler) {
+    public void makeTouchable(SXRSceneObject sceneObject, OnTouch handler) {
         if (handler != null) {
             if (sceneObject.getRenderData() != null) {
                 if (!touchHandlers.containsKey(sceneObject)) {
@@ -77,7 +77,7 @@ public class TouchManager {
                     touchHandlers.put(sceneObject, new WeakReference<>(handler));
                 }
             } else if (sceneObject.getChildrenCount() > 0) {
-                for (GVRSceneObject child : sceneObject.getChildren()) {
+                for (SXRSceneObject child : sceneObject.getChildren()) {
                     makeTouchable(child, handler);
                 }
             }
@@ -89,8 +89,8 @@ public class TouchManager {
      * @param sceneObject
      * @return true if the handler has been successfully removed
      */
-    public boolean removeHandlerFor(final GVRSceneObject sceneObject) {
-        sceneObject.detachComponent(GVRCollider.getComponentType());
+    public boolean removeHandlerFor(final SXRSceneObject sceneObject) {
+        sceneObject.detachComponent(SXRCollider.getComponentType());
         return null != touchHandlers.remove(sceneObject);
     }
 
@@ -100,9 +100,9 @@ public class TouchManager {
      *
      * @param sceneObject
      */
-    public void makePickable(GVRSceneObject sceneObject) {
+    public void makePickable(SXRSceneObject sceneObject) {
         try {
-            GVRMeshCollider collider = new GVRMeshCollider(sceneObject.getGVRContext(), false);
+            SXRMeshCollider collider = new SXRMeshCollider(sceneObject.getSXRContext(), false);
             sceneObject.attachComponent(collider);
         } catch (Exception e) {
             // Possible that some objects (X3D panel nodes) are without mesh
@@ -116,7 +116,7 @@ public class TouchManager {
      * @param sceneObject
      * @return true if the object is touchable, false otherwise
      */
-    public boolean isTouchable(GVRSceneObject sceneObject) {
+    public boolean isTouchable(SXRSceneObject sceneObject) {
         return touchHandlers.containsKey(sceneObject);
     }
 
@@ -130,7 +130,7 @@ public class TouchManager {
      * Touch Filter specifies the objects interested in processing the touch.
      * {@link Selector#select} defines the selection
      */
-    public interface TouchManagerFilter extends Selector<GVRSceneObject> {
+    public interface TouchManagerFilter extends Selector<SXRSceneObject> {
     }
 
     /**
@@ -174,7 +174,7 @@ public class TouchManager {
      * @param event touch event code
      * @return true if the input has been accepted and processed by some object, otherwise - false
      */
-    public boolean handleClick(List<GVRPickedObject> pickedObjectList, int event) {
+    public boolean handleClick(List<SXRPickedObject> pickedObjectList, int event) {
         Log.d(Log.SUBSYSTEM.INPUT, TAG, "handleClick(): new click event");
         boolean isClickableItem = false;
         if (pickedObjectList == null) {
@@ -188,12 +188,12 @@ public class TouchManager {
         }
 
         // Process result(s)
-        for (GVRPickedObject pickedObject : pickedObjectList) {
+        for (SXRPickedObject pickedObject : pickedObjectList) {
             if (pickedObject == null) {
                 Log.w(Log.SUBSYSTEM.INPUT, TAG, "handleClick(): got a null reference in the pickedObject");
                 continue;
             }
-            GVRSceneObject sceneObject = pickedObject.getHitObject();
+            SXRSceneObject sceneObject = pickedObject.getHitObject();
             if (sceneObject == null) {
                 Log.w(Log.SUBSYSTEM.INPUT, TAG, "handleClick(): got a null reference in the pickedObject.getHitObject()");
                 continue;
@@ -328,8 +328,8 @@ public class TouchManager {
     }
 
     /**
-     * Add a interceptor for {@linkplain OnTouch#touch(GVRSceneObject, float[])}
-     * and {@linkplain OnTouch#onBackKey(GVRSceneObject, float[])}} to handle the touch event
+     * Add a interceptor for {@linkplain OnTouch#touch(SXRSceneObject, float[])}
+     * and {@linkplain OnTouch#onBackKey(SXRSceneObject, float[])}} to handle the touch event
      * before it will be passed to other scene objects
      *
      * @param interceptor
@@ -363,7 +363,7 @@ public class TouchManager {
         return mPickHandler.getFlingHandler();
     }
 
-    private final Map<GVRSceneObject, WeakReference<OnTouch>> touchHandlers = new WeakHashMap<GVRSceneObject, WeakReference<OnTouch>>();
+    private final Map<SXRSceneObject, WeakReference<OnTouch>> touchHandlers = new WeakHashMap<SXRSceneObject, WeakReference<OnTouch>>();
     private Runnable defaultLeftClickAction = null;
     private Runnable defaultRightClickAction = null;
     private Set<OnTouch> mOnTouchInterceptors = new LinkedHashSet<>();
@@ -372,7 +372,7 @@ public class TouchManager {
     private Set<TouchManagerFilter> mBackKeyFilters = new LinkedHashSet<>();
 
     private final static String TAG = com.samsungxr.utility.Log.tag(TouchManager.class);
-    private GVRContext mGVRContext;
+    private SXRContext mSXRContext;
 
     private final WidgetPickHandler mPickHandler;
 }

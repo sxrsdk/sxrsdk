@@ -3,10 +3,10 @@ package com.samsungxr.widgetlib.widget;
 import java.io.IOException;
 import java.util.Iterator;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRMaterial;
-import com.samsungxr.GVRMaterial.GVRShaderType;
-import com.samsungxr.GVRShaderId;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRMaterial;
+import com.samsungxr.SXRMaterial.SXRShaderType;
+import com.samsungxr.SXRShaderId;
 import com.samsungxr.utility.Exceptions;
 import static com.samsungxr.utility.Log.tag;
 
@@ -34,7 +34,7 @@ class WidgetStateInfo {
     WidgetStateInfo(Widget parent, JSONObject info)
             throws JSONException, NoSuchMethodException, IOException {
         Widget levelWidget = null;
-        GVRMaterial material = null;
+        SXRMaterial material = null;
         AnimationFactory.Factory factory = null;
 
         Iterator<String> iter = info.keys();
@@ -122,13 +122,13 @@ class WidgetStateInfo {
         shader_type, main_texture, textures, color, ambient_color, diffuse_color, specular_color, specular_exponent, opacity
     }
 
-    private GVRMaterial getMaterial(Widget widget, JSONObject materialSpec)
+    private SXRMaterial getMaterial(Widget widget, JSONObject materialSpec)
             throws JSONException, IOException {
-        final GVRContext gvrContext = widget.getGVRContext();
+        final SXRContext gvrContext = widget.getSXRContext();
         return getMaterial(gvrContext, materialSpec);
     }
 
-    static private GVRShaderId getShaderId(JSONObject materialSpec) throws JSONException, IOException {
+    static private SXRShaderId getShaderId(JSONObject materialSpec) throws JSONException, IOException {
         final Iterator<String> iter = materialSpec.keys();
         while (iter.hasNext()) {
             final String key = iter.next();
@@ -136,9 +136,9 @@ class WidgetStateInfo {
                 case shader_type:
                     final String shaderType = materialSpec.getString(key);
                     if (shaderType.equalsIgnoreCase("texture")) {
-                        return GVRShaderType.Texture.ID;
+                        return SXRShaderType.Texture.ID;
                     } else if (shaderType.equalsIgnoreCase("cubemap")) {
-                        return GVRShaderType.Cubemap.ID;
+                        return SXRShaderType.Cubemap.ID;
                     } else {
                         throw Exceptions
                                 .RuntimeAssertion("Unsupported shader type '%s' specified for state",
@@ -146,15 +146,15 @@ class WidgetStateInfo {
                     }
             }
         }
-        return GVRShaderType.Texture.ID;
+        return SXRShaderType.Texture.ID;
     }
 
     // TODO: MaterialFactory
-    static private GVRMaterial getMaterial(final GVRContext gvrContext,
+    static private SXRMaterial getMaterial(final SXRContext gvrContext,
             JSONObject materialSpec) throws JSONException, IOException {
 
-        GVRShaderId shaderId = getShaderId(materialSpec);
-        GVRMaterial material = new GVRMaterial(gvrContext, shaderId);
+        SXRShaderId shaderId = getShaderId(materialSpec);
+        SXRMaterial material = new SXRMaterial(gvrContext, shaderId);
 
         final Iterator<String> iter = materialSpec.keys();
         while (iter.hasNext()) {
@@ -217,7 +217,7 @@ class WidgetStateInfo {
 
     final private Widget mLevelWidget;
     final private AnimationFactory.Factory mAnimationFactory;
-    final private GVRMaterial mMaterial;
+    final private SXRMaterial mMaterial;
     private Animation mAnimation;
 
     private static final String TAG = tag(WidgetStateInfo.class);

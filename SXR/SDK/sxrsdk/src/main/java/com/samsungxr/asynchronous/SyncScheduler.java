@@ -3,10 +3,10 @@ package com.samsungxr.asynchronous;
 import java.io.IOException;
 import java.util.Map;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRAndroidResource.CancelableCallback;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRHybridObject;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRAndroidResource.CancelableCallback;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRHybridObject;
 import com.samsungxr.asynchronous.Throttler.AsyncLoader;
 import com.samsungxr.asynchronous.Throttler.AsyncLoaderFactory;
 import com.samsungxr.utility.Log;
@@ -45,9 +45,9 @@ public class SyncScheduler implements Scheduler {
      */
 
     @Override
-    public <OUTPUT extends GVRHybridObject, INTER> void registerCallback(GVRContext gvrContext,
+    public <OUTPUT extends SXRHybridObject, INTER> void registerCallback(SXRContext gvrContext,
             Class<OUTPUT> outClass,
-            CancelableCallback<OUTPUT> callback, GVRAndroidResource request,
+            CancelableCallback<OUTPUT> callback, SXRAndroidResource request,
             int priority) {
         @SuppressWarnings("unchecked")
         AsyncLoaderFactory<OUTPUT, INTER> factory = (AsyncLoaderFactory<OUTPUT, INTER>) getFactories().get(outClass);
@@ -63,7 +63,7 @@ public class SyncScheduler implements Scheduler {
         loader.run();
     }
 
-    private Map<Class<? extends GVRHybridObject>, AsyncLoaderFactory<? extends GVRHybridObject, ?>> getFactories() {
+    private Map<Class<? extends SXRHybridObject>, AsyncLoaderFactory<? extends SXRHybridObject, ?>> getFactories() {
         return AsyncManager.get().getFactories();
     }
 }

@@ -18,8 +18,8 @@ package com.sample.template;
 import android.os.Handler;
 import android.view.KeyEvent;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRScene;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRScene;
 import com.samsungxr.io.cursor3d.IoDevice;
 import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
@@ -49,10 +49,10 @@ public class TemplateDevice extends IoDevice {
 
     private static final int SET_CONNECTED_DELAY = 1000;
 
-    private GVRContext context;
+    private SXRContext context;
     private Thread thread;
 
-    public TemplateDevice(GVRContext context, String deviceId, String name) {
+    public TemplateDevice(SXRContext context, String deviceId, String name) {
         /** The last param (boolean) denotes that the device is not ready when this constructor
          * is called. We will use the setConnected call to let the framework know that the device
          * is ready. */
@@ -112,7 +112,7 @@ public class TemplateDevice extends IoDevice {
      *          for the absolute position.
      */
     public void processPosition(float x, float y, float z) {
-        GVRScene scene = context.getMainScene();
+        SXRScene scene = context.getMainScene();
         if (scene != null) {
             float depth = z * MAX_DEPTH;
             float frustumWidth, frustumHeight;

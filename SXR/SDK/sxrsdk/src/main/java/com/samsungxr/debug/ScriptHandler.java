@@ -21,7 +21,7 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 import com.samsungxr.debug.cli.LineProcessor;
 
 /*package*/ class ScriptHandler implements LineProcessor {
@@ -30,7 +30,7 @@ import com.samsungxr.debug.cli.LineProcessor;
     protected ScriptContext mScriptContext;
     protected StringWriter mWriter;
 
-    public ScriptHandler(GVRContext gvrContext, String prompt, ScriptEngine engine) {
+    public ScriptHandler(SXRContext gvrContext, String prompt, ScriptEngine engine) {
         this.prompt = prompt;
         mScriptEngine = engine;
         mScriptContext = mScriptEngine.getContext();

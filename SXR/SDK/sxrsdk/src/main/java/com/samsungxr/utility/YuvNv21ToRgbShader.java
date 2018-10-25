@@ -16,8 +16,8 @@
 
 package com.samsungxr.utility;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRShader;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRShader;
 
 import android.content.Context;
 import com.samsungxr.utility.TextFile;
@@ -31,12 +31,12 @@ import com.samsungxr.utility.TextFile;
  * ByteBuffer mUvBuffer = ByteBuffer.allocateDirect(width*height/2);
  * myBuffer.order(ByteOrder.nativeOrder());
  * muvBuffer.order(ByteOrder.nativeOrder());
- * GVRTexture mYBufferTexture = new GVRBitmapTexture(context, new GVRTextureParameters());
- * GVRTexture mUVBufferTexture = new GVRBitmapTexture(context, new GVRTextureParameters());
+ * SXRTexture mYBufferTexture = new SXRBitmapTexture(context, new SXRTextureParameters());
+ * SXRTexture mUVBufferTexture = new SXRBitmapTexture(context, new SXRTextureParameters());
  *
- * GVRShaderId yuvShader = new GVRShaderId(context, YuvNv21ToRgbShader.class);
- * GVRSceneObject quad = new GVRSceneObject(context, 3f, 1.5f, null, yuvShader);
- * GVRMaterial material = quad.getRenderData().getMaterial();
+ * SXRShaderId yuvShader = new SXRShaderId(context, YuvNv21ToRgbShader.class);
+ * SXRSceneObject quad = new SXRSceneObject(context, 3f, 1.5f, null, yuvShader);
+ * SXRMaterial material = quad.getRenderData().getMaterial();
  * material.setTexture("y_texture", mYBufferTexture);
  * material.setTexture("uv_texture", mUVBufferTexture);
  * </pre>
@@ -52,9 +52,9 @@ import com.samsungxr.utility.TextFile;
  * </pre>
  */
 
-public class YuvNv21ToRgbShader extends GVRShader
+public class YuvNv21ToRgbShader extends SXRShader
 {
-    public YuvNv21ToRgbShader(GVRContext ctx)
+    public YuvNv21ToRgbShader(SXRContext ctx)
     {
         super("", "sampler2D y_texture, sampler2D uv_texture", "float3 a_position float2 a_texcoord", GLSLESVersion.VULKAN);
         Context context = ctx.getContext();

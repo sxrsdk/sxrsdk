@@ -15,29 +15,29 @@
 
 
 /**
- * You need to understand key points of this package to create a GVRF application.
+ * You need to understand key points of this package to create a SXRF application.
  * 
  * The {@link android.app.Activity} that your {@code AndroidManifest.xml} file declares
  * handles the {@code "android.intent.action.MAIN"} ({@link 
  * android.content.Intent#ACTION_MAIN}) <em>must</em> descend from {@link 
- * com.samsungxr.GVRActivity}, not directly from {@code Activity}.
+ * com.samsungxr.SXRActivity}, not directly from {@code Activity}.
  * 
- * <p>Your {@code GVRActivity} descendant <em>must</em> create an instance of a class 
- * that descends from {@link com.samsungxr.GVRMain} and pass
+ * <p>Your {@code SXRActivity} descendant <em>must</em> create an instance of a class 
+ * that descends from {@link com.samsungxr.SXRMain} and pass
  * that instance to {@link 
- * com.samsungxr.GVRActivity#setMain(com.samsungxr.GVRMain, java.lang.String)}
+ * com.samsungxr.SXRActivity#setMain(com.samsungxr.SXRMain, java.lang.String)}
  *
- * A {@linkplain com.samsungxr.GVRScene scene graph} contains any 
- * number of {@linkplain com.samsungxr.GVRSceneObject scene 
- * objects.} Scene objects have an {@linkplain com.samsungxr.GVRTransform 
+ * A {@linkplain com.samsungxr.SXRScene scene graph} contains any 
+ * number of {@linkplain com.samsungxr.SXRSceneObject scene 
+ * objects.} Scene objects have an {@linkplain com.samsungxr.SXRTransform 
  * 4x4 matrix} which positions them in the scene. Each scene object can have child
  * scene objects: moving the parent moves the children, maintaining the children's
  * positions with relation to each other.
  * 
  * <p>
- * To be visible, a scene object must have {@linkplain com.samsungxr.GVRRenderData
- * render data,} including a {@linkplain com.samsungxr.GVRMesh GL 
- * mesh} which defines the surface geometry and a {@linkplain com.samsungxr.GVRMaterial
+ * To be visible, a scene object must have {@linkplain com.samsungxr.SXRRenderData
+ * render data,} including a {@linkplain com.samsungxr.SXRMesh GL 
+ * mesh} which defines the surface geometry and a {@linkplain com.samsungxr.SXRMaterial
  * material} which defines the surface appearance by specifying a GL shader and
  * its parameters.
  * 
@@ -84,15 +84,15 @@
  * <a name="async"><h3>Asynchronous Resource Loading</h3></a>
  * 
  * Loading an Android {@link android.graphics.Bitmap} to create a {@link 
- * com.samsungxr.GVRBitmapTexture} can take hundreds of milliseconds;
- * loading a {@link com.samsungxr.GVRMesh} can take even longer. These
+ * com.samsungxr.SXRBitmapTexture} can take hundreds of milliseconds;
+ * loading a {@link com.samsungxr.SXRMesh} can take even longer. These
  * are not operations that you want to do on the GL thread!
  * 
  * <p>
- * GVRF includes an asynchronous loading facility, which improves throughput in 
+ * SXRF includes an asynchronous loading facility, which improves throughput in 
  * three ways. First, by doing all the work on a background thread, then 
  * delivering the loaded resource to the GL thread on a {@link 
- * com.samsungxr.GVRContext#runOnGlThread(Runnable)
+ * com.samsungxr.SXRContext#runOnGlThread(Runnable)
  * runOnGlThread()} callback. Second, they use a throttler to avoid
  * overloading the system and/or running out of memory. Third, they do
  * 'request consolidation' - if you issue any requests for a particular file
@@ -107,8 +107,8 @@
  * 
  * <li>Priorities are 32-bit Java {@code int}s, but not every {@code int} is a 
  * valid priority. Priorities run from {@link 
- * com.samsungxr.GVRContext#LOWEST_PRIORITY} to {@link 
- * com.samsungxr.GVRContext#HIGHEST_PRIORITY}. 
+ * com.samsungxr.SXRContext#LOWEST_PRIORITY} to {@link 
+ * com.samsungxr.SXRContext#HIGHEST_PRIORITY}. 
  * 
  * <li>Priorities use numerical order: a 2 is higher than a 1, and will run first.
  * 

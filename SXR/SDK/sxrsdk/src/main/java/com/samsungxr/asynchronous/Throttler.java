@@ -25,12 +25,12 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRAndroidResource.Callback;
-import com.samsungxr.GVRAndroidResource.CancelableCallback;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRHybridObject;
-import com.samsungxr.GVRMesh;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRAndroidResource.Callback;
+import com.samsungxr.SXRAndroidResource.CancelableCallback;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRHybridObject;
+import com.samsungxr.SXRMesh;
 import com.samsungxr.utility.Exceptions;
 import com.samsungxr.utility.Log;
 import com.samsungxr.utility.RuntimeAssertion;
@@ -54,9 +54,9 @@ class Throttler implements Scheduler {
      */
 
     @Override
-    public <OUTPUT extends GVRHybridObject, INTER> void registerCallback(
-            GVRContext gvrContext, Class<OUTPUT> outClass,
-            CancelableCallback<OUTPUT> callback, GVRAndroidResource request,
+    public <OUTPUT extends SXRHybridObject, INTER> void registerCallback(
+            SXRContext gvrContext, Class<OUTPUT> outClass,
+            CancelableCallback<OUTPUT> callback, SXRAndroidResource request,
             int priority) {
         requests.registerCallback(gvrContext, outClass, callback, request,
                 priority);
@@ -111,10 +111,10 @@ class Throttler implements Scheduler {
      * Two main things happen once an async resource load has started running.
      * The expensive part happens on a CPU background thread (<i>i.e.</i> not
      * the GUI thread and not the GL thread): we convert the stream to a Java
-     * object. This may or may not be the GVRF type that we want: image loading
+     * object. This may or may not be the SXRF type that we want: image loading
      * generates a {@link Bitmap} while mesh loading goes straight to a
-     * {@link GVRMesh}. When we have an intermediate data type, we need to do a
-     * (cheap) conversion on the GL thread before we can pass the GVRF type to
+     * {@link SXRMesh}. When we have an intermediate data type, we need to do a
+     * (cheap) conversion on the GL thread before we can pass the SXRF type to
      * the app's callback.
      * 
      * <p>
@@ -123,13 +123,13 @@ class Throttler implements Scheduler {
      * {@code input} parameter.)
      * 
      * @param <OUTPUT>
-     *            The GVRF type that we will pass to the app's callback
+     *            The SXRF type that we will pass to the app's callback
      * @param <INTERMEDIATE>
      *            The possibly different type that we got from the background
      *            thread
      */
-    interface GlConverter<OUTPUT extends GVRHybridObject, INTERMEDIATE> {
-        OUTPUT convert(GVRContext gvrContext, INTERMEDIATE input);
+    interface GlConverter<OUTPUT extends SXRHybridObject, INTERMEDIATE> {
+        OUTPUT convert(SXRContext gvrContext, INTERMEDIATE input);
     }
 
     /**
@@ -137,39 +137,39 @@ class Throttler implements Scheduler {
      * 
      * An {@link AsyncLoader} is-a {@link Runnable}, which runs on a background
      * thread. The {@link #run()} method calls {@link #loadResource()} which
-     * does the actual work of reading the {@link GVRAndroidResource} stream and
+     * does the actual work of reading the {@link SXRAndroidResource} stream and
      * converting it to the {@code INTERMEDIATE} type. If the load succeeds,
      * {@code run()} pushes a {@code Runnable} to the GL thread, which does any
-     * needed conversions (like {@code Bitmap} to {@code GVRTGexture}) and then
+     * needed conversions (like {@code Bitmap} to {@code SXRTGexture}) and then
      * calls the app's
-     * {@link Callback#loaded(GVRHybridObject, GVRAndroidResource) loaded()}
+     * {@link Callback#loaded(SXRHybridObject, SXRAndroidResource) loaded()}
      * callback from the GL thread. If the load throws an exception or returns
      * {@code null}, {@code run()} calls the app's
-     * {@link Callback#failed(Throwable, GVRAndroidResource) failed()} callback,
+     * {@link Callback#failed(Throwable, SXRAndroidResource) failed()} callback,
      * from the background thread.
      * 
      * <p>
      * Descendants must implement {@link #loadResource()}.
      * 
      * @param <OUTPUT>
-     *            The GVRF type, delivered to the app's
-     *            {@link Callback#loaded(GVRHybridObject, GVRAndroidResource)
+     *            The SXRF type, delivered to the app's
+     *            {@link Callback#loaded(SXRHybridObject, SXRAndroidResource)
      *            loaded()} callback
      * @param <INTERMEDIATE>
      *            The type generated on the background thread by the
      *            {@link #loadResource()} method
      */
-    static abstract class AsyncLoader<OUTPUT extends GVRHybridObject, INTERMEDIATE>
+    static abstract class AsyncLoader<OUTPUT extends SXRHybridObject, INTERMEDIATE>
             implements Cancelable {
 
-        protected final GVRContext gvrContext;
-        protected final GVRAndroidResource resource;
+        protected final SXRContext gvrContext;
+        protected final SXRAndroidResource resource;
         protected final GlConverter<OUTPUT, INTERMEDIATE> converter;
         protected final CancelableCallback<OUTPUT> callback;
 
-        protected AsyncLoader(GVRContext gvrContext,
+        protected AsyncLoader(SXRContext gvrContext,
                 GlConverter<OUTPUT, INTERMEDIATE> converter,
-                GVRAndroidResource request,
+                SXRAndroidResource request,
                 CancelableCallback<OUTPUT> callback) {
             this.gvrContext = gvrContext;
             this.converter = converter;
@@ -213,10 +213,10 @@ class Throttler implements Scheduler {
         /**
          * Reads {@link #resource}; returns a Java data type, which may need
          * conversion before being passed to the app's
-         * {@link Callback#loaded(GVRHybridObject, GVRAndroidResource) loaded()}
+         * {@link Callback#loaded(SXRHybridObject, SXRAndroidResource) loaded()}
          * callback
          * 
-         * @return An Android or GVRF resource type
+         * @return An Android or SXRF resource type
          * @throws InterruptedException
          */
         protected abstract INTERMEDIATE loadResource()
@@ -230,24 +230,24 @@ class Throttler implements Scheduler {
      * {@link Throttler#registerDatatype(Class, AsyncLoaderFactory)} to
      * associate an {@link AsyncLoaderFactory} with a target {@code .class}
      * constant.
-     * {@link Throttler#registerCallback(GVRContext, Class, CancelableCallback, GVRAndroidResource, int)}
+     * {@link Throttler#registerCallback(SXRContext, Class, CancelableCallback, SXRAndroidResource, int)}
      * uses the {@code .class} constant to find the right
      * {@link AsyncLoaderFactory} when it's time to actually run a request; it
      * creates an {@link AsyncLoaderFactory} and runs it on a
      * {@link Threads#spawn(Runnable) background thread.}
      * 
      * @param <OUTPUT>
-     *            The GVRF type, delivered to the app's
-     *            {@link Callback#loaded(GVRHybridObject, GVRAndroidResource)
+     *            The SXRF type, delivered to the app's
+     *            {@link Callback#loaded(SXRHybridObject, SXRAndroidResource)
      *            loaded()} callback
      * @param <INTERMEDIATE>
      *            The type generated on the background thread by the
      *            {@link AsyncLoader#loadResource()} method
      */
-    static abstract class AsyncLoaderFactory<OUTPUT extends GVRHybridObject, INTERMEDIATE> {
+    static abstract class AsyncLoaderFactory<OUTPUT extends SXRHybridObject, INTERMEDIATE> {
         /** Create an AsyncLoader of the right type */
         abstract AsyncLoader<OUTPUT, INTERMEDIATE> threadProc(
-                GVRContext gvrContext, GVRAndroidResource request,
+                SXRContext gvrContext, SXRAndroidResource request,
                 CancelableCallback<OUTPUT> cancelableCallback, int priority);
     }
 
@@ -274,10 +274,10 @@ class Throttler implements Scheduler {
 
         private static final String TAG = Log.tag(PendingRequests.class);
 
-        private final Map<GVRAndroidResource, PendingRequest<? extends GVRHybridObject, ?>> pendingRequests =
-                new ConcurrentHashMap<GVRAndroidResource, PendingRequest<? extends GVRHybridObject, ?>>();
+        private final Map<SXRAndroidResource, PendingRequest<? extends SXRHybridObject, ?>> pendingRequests =
+                new ConcurrentHashMap<SXRAndroidResource, PendingRequest<? extends SXRHybridObject, ?>>();
 
-        private Map<Class<? extends GVRHybridObject>, AsyncLoaderFactory<? extends GVRHybridObject, ?>> getFactories() {
+        private Map<Class<? extends SXRHybridObject>, AsyncLoaderFactory<? extends SXRHybridObject, ?>> getFactories() {
             return AsyncManager.get().getFactories();
         }
 
@@ -287,10 +287,10 @@ class Throttler implements Scheduler {
                 /* Don't exceed DECODE_THREAD_LIMIT when a download gets wedged */
                 Integer.MAX_VALUE);
 
-        <OUTPUT extends GVRHybridObject, INTER> void registerCallback(GVRContext gvrContext,
+        <OUTPUT extends SXRHybridObject, INTER> void registerCallback(SXRContext gvrContext,
                 Class<OUTPUT> outClass,
                 CancelableCallback<OUTPUT> callback,
-                GVRAndroidResource request, int priority) {
+                SXRAndroidResource request, int priority) {
             if (VERBOSE_SCHEDULING) {
                 Log.d(TAG, "registerCallback(%s, %s)", request, callback);
             }
@@ -347,21 +347,21 @@ class Throttler implements Scheduler {
             }
         }
 
-        private class PendingRequest<OUTPUT extends GVRHybridObject, INTER> implements
+        private class PendingRequest<OUTPUT extends SXRHybridObject, INTER> implements
                 CancelableCallback<OUTPUT>, PriorityCancelable {
 
             private final String TAG = Log.tag(PendingRequest.class);
 
-            private final int EMPTY_LIST = GVRContext.LOWEST_PRIORITY - 1;
+            private final int EMPTY_LIST = SXRContext.LOWEST_PRIORITY - 1;
 
-            private final GVRAndroidResource request;
+            private final SXRAndroidResource request;
             private final List<CancelableCallback<OUTPUT>> callbacks = new ArrayList<CancelableCallback<OUTPUT>>(1);
             private final Cancelable cancelable;
             private int priority = EMPTY_LIST;
             private int highestPriority = priority;
 
-            public PendingRequest(GVRContext gvrContext,
-                    GVRAndroidResource request,
+            public PendingRequest(SXRContext gvrContext,
+                    SXRAndroidResource request,
                     CancelableCallback<OUTPUT> callback,
                     int priority, Class<OUTPUT> outClass) {
                 this.request = request;
@@ -386,7 +386,7 @@ class Throttler implements Scheduler {
 
             @Override
             public void loaded(final OUTPUT gvrResource,
-                    final GVRAndroidResource androidResource) {
+                    final SXRAndroidResource androidResource) {
                 if (VERBOSE_SCHEDULING) {
                     Log.d(TAG, "%s loaded(%s, %s), thread %d: request %s",
                             this, gvrResource, androidResource, threadId(),
@@ -452,7 +452,7 @@ class Throttler implements Scheduler {
             }
 
             @Override
-            public void failed(Throwable t, GVRAndroidResource androidResource) {
+            public void failed(Throwable t, SXRAndroidResource androidResource) {
                 synchronized (pendingRequests) {
                     List<CancelableCallback<OUTPUT>> listeners = new ArrayList<CancelableCallback<OUTPUT>>();
                     /*
@@ -491,7 +491,7 @@ class Throttler implements Scheduler {
             }
 
             @Override
-            public boolean stillWanted(GVRAndroidResource request) {
+            public boolean stillWanted(SXRAndroidResource request) {
                 for (CancelableCallback<OUTPUT> callback : callbacks) {
                     if (callback.stillWanted(request)) {
                         return true;

@@ -22,12 +22,12 @@ import com.samsungxr.utility.VrAppSettings;
 /**
  * {@inheritDoc}
  */
-final class DaydreamActivityDelegate extends GVRApplication.ActivityDelegateStubs implements IActivityNative {
-    private GVRApplication mApplication;
+final class DaydreamActivityDelegate extends SXRApplication.ActivityDelegateStubs implements IActivityNative {
+    private SXRApplication mApplication;
     private DaydreamViewManager daydreamViewManager;
 
     @Override
-    public void onCreate(GVRApplication application) {
+    public void onCreate(SXRApplication application) {
         mApplication = application;
     }
 
@@ -37,18 +37,18 @@ final class DaydreamActivityDelegate extends GVRApplication.ActivityDelegateStub
     }
 
     @Override
-    public GVRViewManager makeViewManager() {
+    public SXRViewManager makeViewManager() {
         return new DaydreamViewManager(mApplication, mApplication.getMain());
     }
 
     @Override
-    public GVRCameraRig makeCameraRig(GVRContext context) {
+    public SXRCameraRig makeCameraRig(SXRContext context) {
         return new DaydreamCameraRig(context);
     }
 
     @Override
-    public GVRConfigurationManager makeConfigurationManager() {
-        return new GVRConfigurationManager(mApplication) {
+    public SXRConfigurationManager makeConfigurationManager() {
+        return new SXRConfigurationManager(mApplication) {
             @Override
             public boolean isHmtConnected() {
                 return false;
@@ -63,7 +63,7 @@ final class DaydreamActivityDelegate extends GVRApplication.ActivityDelegateStub
     @Override
     public void onInitAppSettings(VrAppSettings appSettings) {
         // This is the only place where the setDockListenerRequired flag can be set before
-        // the check in GVRActivity.
+        // the check in SXRActivity.
         mApplication.getConfigurationManager().setDockListenerRequired(false);
     }
 
@@ -73,12 +73,12 @@ final class DaydreamActivityDelegate extends GVRApplication.ActivityDelegateStub
     }
 
     @Override
-    public boolean setMain(GVRMain gvrMain, String dataFileName) {
+    public boolean setMain(SXRMain gvrMain, String dataFileName) {
         return true;
     }
 
     @Override
-    public void setViewManager(GVRViewManager viewManager) {
+    public void setViewManager(SXRViewManager viewManager) {
         daydreamViewManager = (DaydreamViewManager) viewManager;
     }
 
@@ -92,7 +92,7 @@ final class DaydreamActivityDelegate extends GVRApplication.ActivityDelegateStub
     }
 
     @Override
-    public void setCameraRig(GVRCameraRig cameraRig) {
+    public void setCameraRig(SXRCameraRig cameraRig) {
         if (daydreamViewManager != null) {
             daydreamViewManager.setCameraRig(cameraRig);
         }
@@ -119,22 +119,22 @@ final class DaydreamActivityDelegate extends GVRApplication.ActivityDelegateStub
      * allows us to set the projection matrix from the glFrustum call against the custom camera
      * using the set_projection_matrix call in the native renderer.
      */
-    static class DaydreamCameraRig extends GVRCameraRig {
-        protected DaydreamCameraRig(GVRContext gvrContext) {
+    static class DaydreamCameraRig extends SXRCameraRig {
+        protected DaydreamCameraRig(SXRContext gvrContext) {
             super(gvrContext);
         }
 
         @Override
-        public void attachLeftCamera(GVRCamera camera) {
-            GVRCamera leftCamera = new GVRCustomCamera(getGVRContext());
-            leftCamera.setRenderMask(GVRRenderData.GVRRenderMaskBit.Left);
+        public void attachLeftCamera(SXRCamera camera) {
+            SXRCamera leftCamera = new SXRCustomCamera(getSXRContext());
+            leftCamera.setRenderMask(SXRRenderData.SXRRenderMaskBit.Left);
             super.attachLeftCamera(leftCamera);
         }
 
         @Override
-        public void attachRightCamera(GVRCamera camera) {
-            GVRCamera rightCamera = new GVRCustomCamera(getGVRContext());
-            rightCamera.setRenderMask(GVRRenderData.GVRRenderMaskBit.Right);
+        public void attachRightCamera(SXRCamera camera) {
+            SXRCamera rightCamera = new SXRCustomCamera(getSXRContext());
+            rightCamera.setRenderMask(SXRRenderData.SXRRenderMaskBit.Right);
             super.attachRightCamera(rightCamera);
         }
     }

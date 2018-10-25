@@ -15,16 +15,16 @@
 
 package com.samsungxr.io.cursor3d;
 
-import com.samsungxr.GVRPicker;
+import com.samsungxr.SXRPicker;
 import com.samsungxr.IEvents;
 
 
 public interface ICursorEvents extends IEvents
 {
     public void onCursorScale(Cursor cursor);
-    public void onTouchStart(Cursor cursor, GVRPicker.GVRPickedObject hit);
-    public void onTouchEnd(Cursor cursor, GVRPicker.GVRPickedObject hit);
-    public void onExit(Cursor cursor, GVRPicker.GVRPickedObject hit);
-    public void onEnter(Cursor cursor, GVRPicker.GVRPickedObject hit);
-    public void onDrag(Cursor cursor, GVRPicker.GVRPickedObject hit);
+    public void onTouchStart(Cursor cursor, SXRPicker.SXRPickedObject hit);
+    public void onTouchEnd(Cursor cursor, SXRPicker.SXRPickedObject hit);
+    public void onExit(Cursor cursor, SXRPicker.SXRPickedObject hit);
+    public void onEnter(Cursor cursor, SXRPicker.SXRPickedObject hit);
+    public void onDrag(Cursor cursor, SXRPicker.SXRPickedObject hit);
 }

@@ -2,8 +2,8 @@ package com.samsungxr.widgetlib.widget.animation;
 
 import com.samsungxr.widgetlib.widget.Widget;
 
-import com.samsungxr.GVRHybridObject;
-import com.samsungxr.animation.GVRRelativeMotionAnimation;
+import com.samsungxr.SXRHybridObject;
+import com.samsungxr.animation.SXRRelativeMotionAnimation;
 import org.joml.Vector3f;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,13 +70,13 @@ public class RelativeMotionAnimation extends TransformAnimation {
         return mAdapter;
     }
 
-    private class Adapter extends GVRRelativeMotionAnimation implements Animation.AnimationAdapter{
+    private class Adapter extends SXRRelativeMotionAnimation implements Animation.AnimationAdapter{
         Adapter(Widget widget, float duration, float deltaX, float deltaY, float deltaZ) {
             super(widget.getSceneObject(), duration, deltaX, deltaY, deltaZ);
         }
 
         @Override
-        public void animate(GVRHybridObject target, float ratio) {
+        public void animate(SXRHybridObject target, float ratio) {
             doAnimate(ratio);
         }
 

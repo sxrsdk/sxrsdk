@@ -17,21 +17,21 @@ package com.samsungxr.x3d;
 
 import java.util.concurrent.Future;
 
-import com.samsungxr.GVRIndexBuffer;
-import com.samsungxr.GVRMaterial;
-import com.samsungxr.scene_objects.GVRTextViewSceneObject;
+import com.samsungxr.SXRIndexBuffer;
+import com.samsungxr.SXRMaterial;
+import com.samsungxr.scene_objects.SXRTextViewSceneObject;
 /*
  * Used in Array List for items DEFined in X3D (using the DEF="...." parameter).
  * Another item using the USE="...." parameter will search the array list for the 
  * matching item.
  */
 
-import com.samsungxr.GVRMesh;
-import com.samsungxr.GVRRenderData;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRTexture;
-import com.samsungxr.GVRVertexBuffer;
-import com.samsungxr.scene_objects.GVRVideoSceneObject;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRRenderData;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRTexture;
+import com.samsungxr.SXRVertexBuffer;
+import com.samsungxr.scene_objects.SXRVideoSceneObject;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 import org.joml.Vector2f;
@@ -42,12 +42,12 @@ import com.samsungxr.x3d.data_types.SFFloat;
 /**
  * @author m1.williams DefinedItem is an array list of each X3D node that has a
  *         DEF="some_name" between the < > brackets. The name is saved, and a
- *         reference to the GVR structure
+ *         reference to the SXR structure
  *         <p/>
  *         For example <IndexedFaceSet DEF="myIFS"> will create a DefinedItem
- *         setting name to "myIFS" and gvrMesh will point to a GVRmesh object.
+ *         setting name to "myIFS" and gvrMesh will point to a SXRmesh object.
  *         Later, if an <IndexedFaceSet USE="myIFS">, both IndexedFaceSet will
- *         point to the same GVRmesh.
+ *         point to the same SXRmesh.
  *         <p/>
  *         This also allows implementation of X3D's working with with HTML5
  *         Document Object Model (DOM) getElementByTagName() method since every
@@ -56,16 +56,16 @@ import com.samsungxr.x3d.data_types.SFFloat;
 public class DefinedItem {
 
     private String name = "";
-    private GVRMesh gvrMesh = null;
-    private GVRIndexBuffer gvrIndexBuffer = null;
-    private GVRVertexBuffer gvrVertexBuffer = null;
-    private GVRSceneObject gvrSceneObject = null;
-    private GVRTexture gvrTexture = null;
-    private GVRRenderData gvrRenderData = null;
-    private GVRMaterial gvrMaterial = null;
-    private GVRVideoSceneObject gvrVideoSceneObject = null;
+    private SXRMesh gvrMesh = null;
+    private SXRIndexBuffer gvrIndexBuffer = null;
+    private SXRVertexBuffer gvrVertexBuffer = null;
+    private SXRSceneObject gvrSceneObject = null;
+    private SXRTexture gvrTexture = null;
+    private SXRRenderData gvrRenderData = null;
+    private SXRMaterial gvrMaterial = null;
+    private SXRVideoSceneObject gvrVideoSceneObject = null;
     private Viewpoint viewpoint = null;
-    private GVRTextViewSceneObject gvrTextViewSceneObject = null;
+    private SXRTextViewSceneObject gvrTextViewSceneObject = null;
     /**
      * X3D Transforms use AxisAngle format for rotations,
      * and float3 for the SpotLight, DirectionalLight direction
@@ -145,67 +145,67 @@ public class DefinedItem {
         return this.rotationAxisAngle;
     }
 
-    public void setGVRRenderData(GVRRenderData gvrRenderData) {
+    public void setSXRRenderData(SXRRenderData gvrRenderData) {
         this.gvrRenderData = gvrRenderData;
     }
 
-    public GVRRenderData getGVRRenderData() {
+    public SXRRenderData getSXRRenderData() {
         return this.gvrRenderData;
     }
 
-    public void setGVRTexture(GVRTexture gvrTexture) {
+    public void setSXRTexture(SXRTexture gvrTexture) {
         this.gvrTexture = gvrTexture;
     }
 
-    public GVRTexture getGVRTexture() {
+    public SXRTexture getSXRTexture() {
         return this.gvrTexture;
     }
-    public void setGVRVideoSceneObject(GVRVideoSceneObject gvrVideoSceneObject) {
+    public void setSXRVideoSceneObject(SXRVideoSceneObject gvrVideoSceneObject) {
         this.gvrVideoSceneObject = gvrVideoSceneObject;
     }
 
-    public GVRVideoSceneObject getGVRVideoSceneObject() {
+    public SXRVideoSceneObject getSXRVideoSceneObject() {
         return this.gvrVideoSceneObject;
     }
 
-    public void setGVRMesh(GVRMesh gvrMesh) {
+    public void setSXRMesh(SXRMesh gvrMesh) {
         this.gvrMesh = gvrMesh;
     }
 
-    public GVRMesh getGVRMesh() {
+    public SXRMesh getSXRMesh() {
         return this.gvrMesh;
     }
 
-    public void setVertexBuffer(GVRVertexBuffer vbuf) { gvrVertexBuffer = vbuf; }
+    public void setVertexBuffer(SXRVertexBuffer vbuf) { gvrVertexBuffer = vbuf; }
 
-    public GVRVertexBuffer getVertexBuffer() { return gvrVertexBuffer; }
+    public SXRVertexBuffer getVertexBuffer() { return gvrVertexBuffer; }
 
-    public void setIndexBuffer(GVRIndexBuffer ibuf) { gvrIndexBuffer = ibuf; }
+    public void setIndexBuffer(SXRIndexBuffer ibuf) { gvrIndexBuffer = ibuf; }
 
-    public GVRIndexBuffer getIndexBuffer() { return gvrIndexBuffer; }
+    public SXRIndexBuffer getIndexBuffer() { return gvrIndexBuffer; }
 
-    public void setGVRMaterial(GVRMaterial gvrMaterial) {
+    public void setSXRMaterial(SXRMaterial gvrMaterial) {
         this.gvrMaterial = gvrMaterial;
     }
 
-    public GVRMaterial getGVRMaterial() {
+    public SXRMaterial getSXRMaterial() {
         return this.gvrMaterial;
     }
 
 
-    public void setGVRTextViewSceneObject(GVRTextViewSceneObject gvrTextViewSceneObject) {
+    public void setSXRTextViewSceneObject(SXRTextViewSceneObject gvrTextViewSceneObject) {
         this.gvrTextViewSceneObject = gvrTextViewSceneObject;
     }
 
-    public GVRTextViewSceneObject getGVRTextViewSceneObject() {
+    public SXRTextViewSceneObject getSXRTextViewSceneObject() {
         return this.gvrTextViewSceneObject;
     }
 
-    public void setGVRSceneObject(GVRSceneObject gvrSceneObject) {
+    public void setSXRSceneObject(SXRSceneObject gvrSceneObject) {
         this.gvrSceneObject = gvrSceneObject;
     }
 
-    public GVRSceneObject getGVRSceneObject() {
+    public SXRSceneObject getSXRSceneObject() {
         return this.gvrSceneObject;
     }
 

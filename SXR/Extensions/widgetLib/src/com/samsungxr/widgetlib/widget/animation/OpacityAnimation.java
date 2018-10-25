@@ -2,8 +2,8 @@ package com.samsungxr.widgetlib.widget.animation;
 
 import com.samsungxr.widgetlib.widget.Widget;
 
-import com.samsungxr.GVRHybridObject;
-import com.samsungxr.animation.GVROpacityAnimation;
+import com.samsungxr.SXRHybridObject;
+import com.samsungxr.animation.SXROpacityAnimation;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -44,7 +44,7 @@ public class OpacityAnimation extends MaterialAnimation {
         return mAdapter;
     }
 
-    private class Adapter extends GVROpacityAnimation implements
+    private class Adapter extends SXROpacityAnimation implements
             Animation.AnimationAdapter {
 
         public Adapter(Widget target, float duration, float opacity) {
@@ -52,7 +52,7 @@ public class OpacityAnimation extends MaterialAnimation {
         }
 
         @Override
-        public void animate(GVRHybridObject target, float ratio) {
+        public void animate(SXRHybridObject target, float ratio) {
             doAnimate(ratio);
         }
 

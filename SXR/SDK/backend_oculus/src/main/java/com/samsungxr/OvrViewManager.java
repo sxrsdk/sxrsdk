@@ -18,10 +18,10 @@ package com.samsungxr;
 import android.app.Activity;
 import android.util.DisplayMetrics;
 
-import com.samsungxr.debug.GVRFPSTracer;
-import com.samsungxr.debug.GVRMethodCallTracer;
-import com.samsungxr.debug.GVRStatsLine;
-import com.samsungxr.io.GVRGearCursorController;
+import com.samsungxr.debug.SXRFPSTracer;
+import com.samsungxr.debug.SXRMethodCallTracer;
+import com.samsungxr.debug.SXRStatsLine;
+import com.samsungxr.io.SXRGearCursorController;
 import com.samsungxr.utility.Log;
 import com.samsungxr.utility.VrAppSettings;
 
@@ -41,14 +41,14 @@ import com.samsungxr.utility.VrAppSettings;
  * There might be some pros by doing some rendering related stuffs outside the GL thread,
  * but since I thought simplicity of the structure results in efficiency, I didn't do that.
  * 
- * Now it's about the GL thread. It lets the user handle the scene by calling the users GVRMain.onStep().
- * There are also GVRFrameListeners, GVRAnimationEngine, and Runnables but they aren't that special.
+ * Now it's about the GL thread. It lets the user handle the scene by calling the users SXRMain.onStep().
+ * There are also SXRFrameListeners, SXRAnimationEngine, and Runnables but they aren't that special.
  */
 
 /**
  * This is the core internal class.
  *
- * It implements {@link GVRContext}. It handles Android application callbacks
+ * It implements {@link SXRContext}. It handles Android application callbacks
  * like cycles such as the standard Android {@link Activity#onResume()},
  * {@link Activity#onPause()}, and {@link Activity#onDestroy()}.
  *
@@ -58,7 +58,7 @@ import com.samsungxr.utility.VrAppSettings;
  * {@link #onRotationSensor(long, float, float, float, float, float, float, float)
  * onRotationSensor()} to draw the scene graph properly.
  */
-class OvrViewManager extends GVRViewManager {
+class OvrViewManager extends SXRViewManager {
 
     private static final String TAG = Log.tag(OvrViewManager.class);
 
@@ -66,35 +66,35 @@ class OvrViewManager extends GVRViewManager {
     protected int mCurrentEye;
 
     // Statistic debug info
-    private GVRStatsLine mStatsLine;
-    private GVRFPSTracer mFPSTracer;
-    private GVRMethodCallTracer mTracerBeforeDrawEyes;
-    private GVRMethodCallTracer mTracerAfterDrawEyes;
-    private GVRMethodCallTracer mTracerDrawEyes;
-    private GVRMethodCallTracer mTracerDrawEyes1;
-    private GVRMethodCallTracer mTracerDrawEyes2;
-    private GVRMethodCallTracer mTracerDrawFrame;
-    private GVRMethodCallTracer mTracerDrawFrameGap;
+    private SXRStatsLine mStatsLine;
+    private SXRFPSTracer mFPSTracer;
+    private SXRMethodCallTracer mTracerBeforeDrawEyes;
+    private SXRMethodCallTracer mTracerAfterDrawEyes;
+    private SXRMethodCallTracer mTracerDrawEyes;
+    private SXRMethodCallTracer mTracerDrawEyes1;
+    private SXRMethodCallTracer mTracerDrawEyes2;
+    private SXRMethodCallTracer mTracerDrawFrame;
+    private SXRMethodCallTracer mTracerDrawFrameGap;
 
     /**
-     * Constructs OvrViewManager object with GVRMain which controls GL
+     * Constructs OvrViewManager object with SXRMain which controls GL
      * activities
      *
      * @param application
      *            Current activity object
      * @param gvrMain
-     *            {@link GVRMain} which describes
+     *            {@link SXRMain} which describes
      */
-    OvrViewManager(GVRApplication application, GVRMain gvrMain, OvrXMLParser xmlParser) {
+    OvrViewManager(SXRApplication application, SXRMain gvrMain, OvrXMLParser xmlParser) {
         super(application, gvrMain);
 
         // Apply view manager preferences
-        GVRPreference prefs = GVRPreference.get();
-        DEBUG_STATS = prefs.getBooleanProperty(GVRPreference.KEY_DEBUG_STATS, false);
-        DEBUG_STATS_PERIOD_MS = prefs.getIntegerProperty(GVRPreference.KEY_DEBUG_STATS_PERIOD_MS, 1000);
+        SXRPreference prefs = SXRPreference.get();
+        DEBUG_STATS = prefs.getBooleanProperty(SXRPreference.KEY_DEBUG_STATS, false);
+        DEBUG_STATS_PERIOD_MS = prefs.getIntegerProperty(SXRPreference.KEY_DEBUG_STATS_PERIOD_MS, 1000);
         try {
-            GVRStatsLine.sFormat = GVRStatsLine.FORMAT
-                    .valueOf(prefs.getProperty(GVRPreference.KEY_STATS_FORMAT, GVRStatsLine.FORMAT.DEFAULT.toString()));
+            SXRStatsLine.sFormat = SXRStatsLine.FORMAT
+                    .valueOf(prefs.getProperty(SXRPreference.KEY_STATS_FORMAT, SXRStatsLine.FORMAT.DEFAULT.toString()));
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
@@ -115,16 +115,16 @@ class OvrViewManager extends GVRViewManager {
                 vrAppSettings);
 
         // Debug statistics
-        mStatsLine = new GVRStatsLine("gvrf-stats");
+        mStatsLine = new SXRStatsLine("gvrf-stats");
 
-        mFPSTracer = new GVRFPSTracer("DrawFPS");
-        mTracerDrawFrame = new GVRMethodCallTracer("drawFrame");
-        mTracerDrawFrameGap = new GVRMethodCallTracer("drawFrameGap");
-        mTracerBeforeDrawEyes = new GVRMethodCallTracer("beforeDrawEyes");
-        mTracerDrawEyes = new GVRMethodCallTracer("drawEyes");
-        mTracerDrawEyes1 = new GVRMethodCallTracer("drawEyes1");
-        mTracerDrawEyes2 = new GVRMethodCallTracer("drawEyes2");
-        mTracerAfterDrawEyes = new GVRMethodCallTracer("afterDrawEyes");
+        mFPSTracer = new SXRFPSTracer("DrawFPS");
+        mTracerDrawFrame = new SXRMethodCallTracer("drawFrame");
+        mTracerDrawFrameGap = new SXRMethodCallTracer("drawFrameGap");
+        mTracerBeforeDrawEyes = new SXRMethodCallTracer("beforeDrawEyes");
+        mTracerDrawEyes = new SXRMethodCallTracer("drawEyes");
+        mTracerDrawEyes1 = new SXRMethodCallTracer("drawEyes1");
+        mTracerDrawEyes2 = new SXRMethodCallTracer("drawEyes2");
+        mTracerAfterDrawEyes = new SXRMethodCallTracer("afterDrawEyes");
 
         mStatsLine.addColumn(mFPSTracer.getStatColumn());
         mStatsLine.addColumn(mTracerDrawFrame.getStatColumn());
@@ -174,7 +174,7 @@ class OvrViewManager extends GVRViewManager {
     void onDrawEye(int eye, int swapChainIndex, boolean use_multiview) {
         mCurrentEye = eye;
         if (!(mSensoredScene == null || !mMainScene.equals(mSensoredScene))) {
-            GVRCameraRig mainCameraRig = mMainScene.getMainCameraRig();
+            SXRCameraRig mainCameraRig = mMainScene.getMainCameraRig();
 
             if (use_multiview) {
 
@@ -182,9 +182,9 @@ class OvrViewManager extends GVRViewManager {
                     mTracerDrawEyes1.enter(); // this eye is drawn first
                     mTracerDrawEyes2.enter();
                 }
-                 GVRRenderTarget renderTarget = mRenderBundle.getRenderTarget(EYE.MULTIVIEW, swapChainIndex);
-                 GVRCamera camera = mMainScene.getMainCameraRig().getCenterCamera();
-                 GVRCamera left_camera = mMainScene.getMainCameraRig().getLeftCamera();
+                 SXRRenderTarget renderTarget = mRenderBundle.getRenderTarget(EYE.MULTIVIEW, swapChainIndex);
+                 SXRCamera camera = mMainScene.getMainCameraRig().getCenterCamera();
+                 SXRCamera left_camera = mMainScene.getMainCameraRig().getLeftCamera();
                  renderTarget.cullFromCamera(mMainScene, camera,mRenderBundle.getShaderManager());
 
                 captureCenterEye(renderTarget, true);
@@ -211,8 +211,8 @@ class OvrViewManager extends GVRViewManager {
                         mTracerDrawEyes1.enter();
                     }
 
-                     GVRCamera rightCamera = mainCameraRig.getRightCamera();
-                     GVRRenderTarget renderTarget = mRenderBundle.getRenderTarget(EYE.RIGHT, swapChainIndex);
+                     SXRCamera rightCamera = mainCameraRig.getRightCamera();
+                     SXRRenderTarget renderTarget = mRenderBundle.getRenderTarget(EYE.RIGHT, swapChainIndex);
                      renderTarget.render(mMainScene, rightCamera, mRenderBundle.getShaderManager(), mRenderBundle.getPostEffectRenderTextureA(),
                              mRenderBundle.getPostEffectRenderTextureB());
                     captureRightEye(renderTarget, false);
@@ -229,8 +229,8 @@ class OvrViewManager extends GVRViewManager {
                     }
 
 
-                    GVRRenderTarget renderTarget = mRenderBundle.getRenderTarget(EYE.LEFT, swapChainIndex);
-                    GVRCamera leftCamera = mainCameraRig.getLeftCamera();
+                    SXRRenderTarget renderTarget = mRenderBundle.getRenderTarget(EYE.LEFT, swapChainIndex);
+                    SXRCamera leftCamera = mainCameraRig.getLeftCamera();
 
                     capture3DScreenShot(renderTarget, false);
 
@@ -273,14 +273,14 @@ class OvrViewManager extends GVRViewManager {
             mFPSTracer.tick();
             mStatsLine.printLine(DEBUG_STATS_PERIOD_MS);
 
-            mMainScene.addStatMessage(System.lineSeparator() + mStatsLine.getStats(GVRStatsLine.FORMAT.MULTILINE));
+            mMainScene.addStatMessage(System.lineSeparator() + mStatsLine.getStats(SXRStatsLine.FORMAT.MULTILINE));
         }
     }
 
     @Override
     void onSurfaceCreated() {
         super.onSurfaceCreated();
-        GVRGearCursorController gearController = mInputManager.getGearController();
+        SXRGearCursorController gearController = mInputManager.getGearController();
         if (gearController != null)
             gearController.attachReader(mControllerReader);
 
@@ -293,23 +293,23 @@ class OvrViewManager extends GVRViewManager {
 
             if(isMultiview){
                 long renderTextureInfo = getRenderTextureInfo(mApplication.getActivityNative().getNative(), i, EYE.MULTIVIEW.ordinal());
-                mRenderBundle.createRenderTarget(i, EYE.MULTIVIEW, new GVRRenderTexture(mApplication.getGVRContext(),  width , height,
-                        GVRRenderBundle.getRenderTextureNative(renderTextureInfo)));
+                mRenderBundle.createRenderTarget(i, EYE.MULTIVIEW, new SXRRenderTexture(mApplication.getSXRContext(),  width , height,
+                        SXRRenderBundle.getRenderTextureNative(renderTextureInfo)));
             }
             else {
                 long renderTextureInfo = getRenderTextureInfo(mApplication.getActivityNative().getNative(), i, EYE.LEFT.ordinal());
-                mRenderBundle.createRenderTarget(i, EYE.LEFT, new GVRRenderTexture(mApplication.getGVRContext(),  width , height,
-                        GVRRenderBundle.getRenderTextureNative(renderTextureInfo)));
+                mRenderBundle.createRenderTarget(i, EYE.LEFT, new SXRRenderTexture(mApplication.getSXRContext(),  width , height,
+                        SXRRenderBundle.getRenderTextureNative(renderTextureInfo)));
                 renderTextureInfo = getRenderTextureInfo(mApplication.getActivityNative().getNative(), i, EYE.RIGHT.ordinal());
-                mRenderBundle.createRenderTarget(i, EYE.RIGHT, new GVRRenderTexture(mApplication.getGVRContext(),  width , height,
-                        GVRRenderBundle.getRenderTextureNative(renderTextureInfo)));
+                mRenderBundle.createRenderTarget(i, EYE.RIGHT, new SXRRenderTexture(mApplication.getSXRContext(),  width , height,
+                        SXRRenderBundle.getRenderTextureNative(renderTextureInfo)));
             }
         }
 
         mRenderBundle.createRenderTargetChain(isMultiview);
     }
     /*
-     * GVRF APIs
+     * SXRF APIs
      */
 
     private native long getRenderTextureInfo(long ptr, int index, int eye );

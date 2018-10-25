@@ -30,9 +30,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRScene;
-import com.samsungxr.io.GVRTouchPadGestureListener;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRScene;
+import com.samsungxr.io.SXRTouchPadGestureListener;
 import com.samsungxr.io.cursor3d.Cursor;
 import com.samsungxr.io.cursor3d.CursorManager;
 import com.samsungxr.io.cursor3d.CursorType;
@@ -69,7 +69,7 @@ public class SettingsView extends BaseView implements OnCheckedChangeListener
     }
 
     //Called on main thread
-    public SettingsView(final GVRContext context, final GVRScene
+    public SettingsView(final SXRContext context, final SXRScene
             scene, CursorManager cursorManager, int settingsCursorId, final Cursor currentCursor,
                         SettingsChangeListener changeListener)
     {
@@ -118,7 +118,7 @@ public class SettingsView extends BaseView implements OnCheckedChangeListener
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                setGestureDetector(new GestureDetector(currentCursor.getGVRContext().getContext(), swipeListener));
+                setGestureDetector(new GestureDetector(currentCursor.getSXRContext().getContext(), swipeListener));
             }
         });
     }
@@ -178,10 +178,10 @@ public class SettingsView extends BaseView implements OnCheckedChangeListener
 
     };
 
-    GVRTouchPadGestureListener swipeListener =
-            new GVRTouchPadGestureListener()
+    SXRTouchPadGestureListener swipeListener =
+            new SXRTouchPadGestureListener()
             {
-                public boolean onSwipe(MotionEvent e, GVRTouchPadGestureListener.Action action, float vx, float vy)
+                public boolean onSwipe(MotionEvent e, SXRTouchPadGestureListener.Action action, float vx, float vy)
                 {
                     hide();
                     changeListener.onBack(false);

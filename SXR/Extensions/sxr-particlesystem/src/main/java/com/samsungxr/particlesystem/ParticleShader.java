@@ -15,22 +15,22 @@
 
 package com.samsungxr.particlesystem;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRShader;
-import com.samsungxr.GVRShaderData;
-import com.samsungxr.GVRShaderTemplate;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRShader;
+import com.samsungxr.SXRShaderData;
+import com.samsungxr.SXRShaderTemplate;
 import com.samsungxr.utility.TextFile;
 
-public class ParticleShader extends GVRShaderTemplate
+public class ParticleShader extends SXRShaderTemplate
 {
     private static String fragTemplate;
     private static String vtxTemplate;
 
-    public ParticleShader(GVRContext context)
+    public ParticleShader(SXRContext context)
     {
         super("float4 u_color; float3 u_acceleration; float u_particle_age; float u_size_change_rate; " +
                 "float u_time, float u_particle_size; float u_fade; float u_noise_factor", "sampler2D u_texture",
-                "float3 a_position float2 a_texcoord float3 a_normal", GVRShader.GLSLESVersion.VULKAN);
+                "float3 a_position float2 a_texcoord float3 a_normal", SXRShader.GLSLESVersion.VULKAN);
 
         fragTemplate = TextFile.readTextFile(context.getContext(), R.raw.particle_frag);
         vtxTemplate = TextFile.readTextFile(context.getContext(), R.raw.particle_vert);
@@ -39,7 +39,7 @@ public class ParticleShader extends GVRShaderTemplate
         setSegment("FragmentTemplate", fragTemplate);
     }
 
-    protected void setMaterialDefaults(GVRShaderData material)
+    protected void setMaterialDefaults(SXRShaderData material)
     {
         material.setVec4("u_color", 1, 1, 1, 1);
         material.setFloat("u_particle_age", 1);

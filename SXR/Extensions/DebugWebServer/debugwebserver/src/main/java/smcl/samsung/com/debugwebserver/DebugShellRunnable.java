@@ -1,7 +1,7 @@
 package smcl.samsung.com.debugwebserver;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.debug.GVRConsoleFactory;
+import com.samsungxr.SXRContext;
+import com.samsungxr.debug.SXRConsoleFactory;
 import com.samsungxr.debug.ShellCommandHandler;
 import com.samsungxr.debug.cli.Shell;
 import com.samsungxr.utility.Log;
@@ -20,10 +20,10 @@ class DebugShellRunnable implements Runnable {
 
     Shell shell;
 
-    DebugShellRunnable(GVRContext gvrContext, InputStream inputStream, OutputStream
+    DebugShellRunnable(SXRContext gvrContext, InputStream inputStream, OutputStream
             outputStream) {
         PrintStream printStream = new PrintStream(outputStream);
-        shell = GVRConsoleFactory.createConsoleShell(PROMPT, APP_NAME, new ShellCommandHandler
+        shell = SXRConsoleFactory.createConsoleShell(PROMPT, APP_NAME, new ShellCommandHandler
                         (gvrContext), new BufferedReader(new InputStreamReader(inputStream)),
                 printStream, printStream, null);
     }

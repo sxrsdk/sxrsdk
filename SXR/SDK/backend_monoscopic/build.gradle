@@ -58,7 +58,7 @@ android {
         if (source.exists() && source.text.contains(commitId)) {
             return
         }
-        def javaSource = new File(projectDir.absolutePath + '/src/main/java/org/gearvrf/', 'MonoscopicBuildInfo.java')
+        def javaSource = new File(projectDir.absolutePath + '/src/main/java/com/samsungxr/', 'MonoscopicBuildInfo.java')
 
         source.text = '#include "util/gvr_log.h"\n'
         source.text += '#include <jni.h>\n\n'

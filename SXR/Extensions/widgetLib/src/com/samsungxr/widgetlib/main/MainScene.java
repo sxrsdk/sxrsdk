@@ -11,12 +11,12 @@ import com.samsungxr.widgetlib.widget.Widget.Visibility;
 
 import com.samsungxr.widgetlib.widget.layout.basic.AbsoluteLayout;
 
-import com.samsungxr.GVRCameraRig;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRPerspectiveCamera;
-import com.samsungxr.GVRScene;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRTransform;
+import com.samsungxr.SXRCameraRig;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRPerspectiveCamera;
+import com.samsungxr.SXRScene;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRTransform;
 import static com.samsungxr.utility.Log.tag;
 
 import org.joml.Quaternionf;
@@ -28,7 +28,7 @@ import java.util.Set;
 
 /**
  * Encapsulates common operations on the main scene, the main camera rig, and
- * the left and right cameras. A {@link GVRSceneObject} instance is used as the
+ * the left and right cameras. A {@link SXRSceneObject} instance is used as the
  * base of the scene graph; this allows the entire scene graph to be scaled
  * without requiring any support from other objects in the scene graph.
  */
@@ -56,8 +56,8 @@ public class MainScene {
      * be notified of {@linkplain MainScene#setScale(float) changes to the
      * scene's scale}. Generally speaking this is not necessary: scene objects
      * that have been added to either the
-     * {@linkplain MainScene#addSceneObject(GVRSceneObject) scene} or the
-     * {@linkplain MainScene#addChildObjectToCamera(GVRSceneObject) camera} will
+     * {@linkplain MainScene#addSceneObject(SXRSceneObject) scene} or the
+     * {@linkplain MainScene#addChildObjectToCamera(SXRSceneObject) camera} will
      * already be scaled as needed.
      */
     public interface OnScaledListener {
@@ -92,18 +92,18 @@ public class MainScene {
     /**
      * Construct a MainScene instance.
      * <p>
-     * The underlying GVRScene is obtained using
-     * {@link GVRContext#getMainScene()} and frustum culling is
-     * {@linkplain GVRScene#setFrustumCulling(boolean) enabled}.
+     * The underlying SXRScene is obtained using
+     * {@link SXRContext#getMainScene()} and frustum culling is
+     * {@linkplain SXRScene#setFrustumCulling(boolean) enabled}.
      *
-     * @param gvrContext A valid GVRContext instance.
+     * @param gvrContext A valid SXRContext instance.
      */
-    public MainScene(final GVRContext gvrContext) {
+    public MainScene(final SXRContext gvrContext) {
         mContext = gvrContext;
-        mSceneRootObject = new GVRSceneObject(gvrContext);
-        mMainCameraRootObject = new GVRSceneObject(gvrContext);
-        mLeftCameraRootObject = new GVRSceneObject(gvrContext);
-        mRightCameraRootObject = new GVRSceneObject(gvrContext);
+        mSceneRootObject = new SXRSceneObject(gvrContext);
+        mMainCameraRootObject = new SXRSceneObject(gvrContext);
+        mLeftCameraRootObject = new SXRSceneObject(gvrContext);
+        mRightCameraRootObject = new SXRSceneObject(gvrContext);
 
         mSceneRootWidget = new RootWidget(mSceneRootObject);
         mSceneRootWidget.setName(TAG);
@@ -129,7 +129,7 @@ public class MainScene {
     }
 
     /**
-     * Calling on first {@link com.samsungxr.GVRMain#onStep} to process first rendering
+     * Calling on first {@link com.samsungxr.SXRMain#onStep} to process first rendering
      * @return true if it is first rendering, otherwise - false
      */
     private boolean onFirstStep() {
@@ -209,25 +209,25 @@ public class MainScene {
     /**
      * Add a scene object to the scene.
      *
-     * @param sceneObject The {@link GVRSceneObject} to add.
+     * @param sceneObject The {@link SXRSceneObject} to add.
      */
-    public void addSceneObject(final GVRSceneObject sceneObject) {
+    public void addSceneObject(final SXRSceneObject sceneObject) {
         mSceneRootObject.addChildObject(sceneObject);
     }
 
     /**
      * Remove a scene object from the scene.
      *
-     * @param sceneObject The {@link GVRSceneObject} to remove.
+     * @param sceneObject The {@link SXRSceneObject} to remove.
      */
-    public void removeSceneObject(final GVRSceneObject sceneObject) {
+    public void removeSceneObject(final SXRSceneObject sceneObject) {
         mSceneRootObject.removeChildObject(sceneObject);
     }
 
     /**
      * Add a scene object to the scene.
      *
-     * @param sceneObject The {@link GVRSceneObject} to add.
+     * @param sceneObject The {@link SXRSceneObject} to add.
      */
     public void addSceneObject(final Widget sceneObject) {
         mSceneRootWidget.addChild(sceneObject);
@@ -236,7 +236,7 @@ public class MainScene {
     /**
      * Remove a scene object from the scene.
      *
-     * @param sceneObject The {@link GVRSceneObject} to remove.
+     * @param sceneObject The {@link SXRSceneObject} to remove.
      */
     public void removeSceneObject(final Widget sceneObject) {
         mSceneRootWidget.removeChild(sceneObject);
@@ -254,16 +254,16 @@ public class MainScene {
     }
 
     /**
-     * @return A recursive count of the {@link GVRSceneObject} children of the
+     * @return A recursive count of the {@link SXRSceneObject} children of the
      * scene's root.
      */
     public int getChildSceneObjectCount() {
         return getSceneObjectChildCount(mSceneRootObject);
     }
 
-    private int getSceneObjectChildCount(final GVRSceneObject root) {
+    private int getSceneObjectChildCount(final SXRSceneObject root) {
         int count = 0;
-        for (GVRSceneObject child : root.getChildren()) {
+        for (SXRSceneObject child : root.getChildren()) {
             ++count;
             count += getSceneObjectChildCount(child);
         }
@@ -294,21 +294,21 @@ public class MainScene {
      * Convenience method to add a scene object to both the left and right
      * cameras.
      *
-     * @param child The {@link GVRSceneObject} to add.
-     * @see #addChildObjectToCamera(GVRSceneObject, int)
+     * @param child The {@link SXRSceneObject} to add.
+     * @see #addChildObjectToCamera(SXRSceneObject, int)
      */
-    public void addChildObjectToCamera(final GVRSceneObject child) {
+    public void addChildObjectToCamera(final SXRSceneObject child) {
         addChildObjectToCamera(child, BOTH_CAMERAS);
     }
 
     /**
      * Adds a scene object to one or both of the left and right cameras.
      *
-     * @param child  The {@link GVRSceneObject} to add.
+     * @param child  The {@link SXRSceneObject} to add.
      * @param camera {@link #LEFT_CAMERA} or {@link #RIGHT_CAMERA}; these can be
      *               or'd together to add {@code child} to both cameras.
      */
-    public void addChildObjectToCamera(final GVRSceneObject child, int camera) {
+    public void addChildObjectToCamera(final SXRSceneObject child, int camera) {
         switch (camera) {
             case LEFT_CAMERA:
                 mLeftCameraRootObject.addChildObject(child);
@@ -326,21 +326,21 @@ public class MainScene {
      * Convenience method to remove a scene object from both the left and right
      * cameras.
      *
-     * @param child The {@link GVRSceneObject} to remove.
-     * @see #removeChildObjectFromCamera(GVRSceneObject, int)
+     * @param child The {@link SXRSceneObject} to remove.
+     * @see #removeChildObjectFromCamera(SXRSceneObject, int)
      */
-    public void removeChildObjectFromCamera(final GVRSceneObject child) {
+    public void removeChildObjectFromCamera(final SXRSceneObject child) {
         removeChildObjectFromCamera(child, BOTH_CAMERAS);
     }
 
     /**
      * Removes a scene object from one or both of the left and right cameras.
      *
-     * @param child  The {@link GVRSceneObject} to remove.
+     * @param child  The {@link SXRSceneObject} to remove.
      * @param camera {@link #LEFT_CAMERA} or {@link #RIGHT_CAMERA}; these can be
      *               or'd together to remove {@code child} from both cameras.
      */
-    public void removeChildObjectFromCamera(final GVRSceneObject child,
+    public void removeChildObjectFromCamera(final SXRSceneObject child,
                                             int camera) {
         switch (camera) {
             case LEFT_CAMERA:
@@ -436,7 +436,7 @@ public class MainScene {
      * @return The camera's absolute yaw in degrees.
      */
     public float getMainCameraRigYaw() {
-        GVRTransform transform = getMainCameraRig().getHeadTransform();
+        SXRTransform transform = getMainCameraRig().getHeadTransform();
 
         float yaw = transform.getRotationYaw();
         float z = getMainCameraRig().getLookAt()[2];
@@ -462,9 +462,9 @@ public class MainScene {
      *
      * @param transform The transform to modify.
      */
-    public void rotateToFaceCamera(final GVRTransform transform) {
+    public void rotateToFaceCamera(final SXRTransform transform) {
         //see http://stackoverflow.com/questions/5782658/extracting-yaw-from-a-quaternion
-        final GVRTransform t = getMainCameraRig().getHeadTransform();
+        final SXRTransform t = getMainCameraRig().getHeadTransform();
         final Quaternionf q = new Quaternionf(0, t.getRotationY(), 0, t.getRotationW()).normalize();
 
         transform.rotateWithPivot(q.w, q.x, q.y, q.z, 0, 0, 0);
@@ -481,7 +481,7 @@ public class MainScene {
      */
     public float rotateToFaceCamera(final Widget widget) {
         final float yaw = getMainCameraRigYaw();
-        GVRTransform t = getMainCameraRig().getHeadTransform();
+        SXRTransform t = getMainCameraRig().getHeadTransform();
         widget.rotateWithPivot(t.getRotationW(), 0, t.getRotationY(), 0, 0, 0, 0);
         return yaw;
     }
@@ -519,7 +519,7 @@ public class MainScene {
      * Rotate transform to make it facing to the front of the scene
      * @param transform
      */
-    public void rotateToFront(final GVRTransform transform) {
+    public void rotateToFront(final SXRTransform transform) {
         transform.rotateByAxisWithPivot(-frontFacingRotation + 180, 0, 1, 0, 0, 0, 0);
     }
 
@@ -535,25 +535,25 @@ public class MainScene {
      * Rotate root widget to make it facing to the front of the scene
      */
     public void rotateToFront() {
-        GVRTransform transform = mSceneRootObject.getTransform();
+        SXRTransform transform = mSceneRootObject.getTransform();
         transform.setRotation(1, 0, 0, 0);
         transform.rotateByAxisWithPivot(-frontFacingRotation + 180, 0, 1, 0, 0, 0, 0);
     }
 
     /**
-     * Set the {@link com.samsungxr.GVRCameraRig.GVRCameraRigType type} of the camera rig.
+     * Set the {@link com.samsungxr.SXRCameraRig.SXRCameraRigType type} of the camera rig.
      *
      * @param cameraRigType
-     *            The rig {@link com.samsungxr.GVRCameraRig.GVRCameraRigType type}.
+     *            The rig {@link com.samsungxr.SXRCameraRig.SXRCameraRigType type}.
      */
     public void setCameraRigType(final int cameraRigType) {
         getMainCameraRig().setCameraRigType(cameraRigType);
     }
 
     /**
-     * Get the {@link com.samsungxr.GVRCameraRig.GVRCameraRigType type} of the camera rig.
+     * Get the {@link com.samsungxr.SXRCameraRig.SXRCameraRigType type} of the camera rig.
      *
-     * @return The rig {@link com.samsungxr.GVRCameraRig.GVRCameraRigType type}.
+     * @return The rig {@link com.samsungxr.SXRCameraRig.SXRCameraRigType type}.
      */
     public int getCameraRigType() {
         return getMainCameraRig().getCameraRigType();
@@ -582,28 +582,28 @@ public class MainScene {
         }
     }
 
-    private GVRPerspectiveCamera getCenterCamera() {
+    private SXRPerspectiveCamera getCenterCamera() {
         return getMainCameraRig().getCenterCamera();
     }
 
-    private GVRPerspectiveCamera getLeftCamera() {
-        return (GVRPerspectiveCamera) getMainCameraRig().getLeftCamera();
+    private SXRPerspectiveCamera getLeftCamera() {
+        return (SXRPerspectiveCamera) getMainCameraRig().getLeftCamera();
     }
 
-    private GVRPerspectiveCamera getRightCamera() {
-        return (GVRPerspectiveCamera) getMainCameraRig().getRightCamera();
+    private SXRPerspectiveCamera getRightCamera() {
+        return (SXRPerspectiveCamera) getMainCameraRig().getRightCamera();
     }
 
-    private GVRCameraRig getMainCameraRig() {
+    private SXRCameraRig getMainCameraRig() {
         return mMainScene.getMainCameraRig();
     }
 
-    private void setScale(final GVRSceneObject sceneObject, final float scale) {
+    private void setScale(final SXRSceneObject sceneObject, final float scale) {
         sceneObject.getTransform().setScale(scale, scale, scale);
     }
 
     @SuppressWarnings("unused")
-    private static void adjustClippingDistance(GVRPerspectiveCamera camera) {
+    private static void adjustClippingDistance(SXRPerspectiveCamera camera) {
         float distance = camera.getFarClippingDistance();
         final float horizon = HORIZON;
         if (horizon > 500 && distance <= 1000) {
@@ -616,8 +616,8 @@ public class MainScene {
     private class RootWidget extends GroupWidget {
         private String TAG = tag(RootWidget.class);
 
-        public RootWidget(GVRSceneObject sceneObject) {
-            super(sceneObject.getGVRContext(), sceneObject);
+        public RootWidget(SXRSceneObject sceneObject) {
+            super(sceneObject.getSXRContext(), sceneObject);
             applyLayout(new AbsoluteLayout());
         }
 
@@ -696,12 +696,12 @@ public class MainScene {
         private volatile boolean mInLayout;
     }
 
-    private final GVRContext mContext;
-    private final GVRScene mMainScene;
-    private final GVRSceneObject mSceneRootObject;
-    private final GVRSceneObject mMainCameraRootObject;
-    private final GVRSceneObject mLeftCameraRootObject;
-    private final GVRSceneObject mRightCameraRootObject;
+    private final SXRContext mContext;
+    private final SXRScene mMainScene;
+    private final SXRSceneObject mSceneRootObject;
+    private final SXRSceneObject mMainCameraRootObject;
+    private final SXRSceneObject mLeftCameraRootObject;
+    private final SXRSceneObject mRightCameraRootObject;
     private final RootWidget mSceneRootWidget;
     private final GroupWidget mMainCameraRootWidget;
     private final GroupWidget mLeftCameraRootWidget;

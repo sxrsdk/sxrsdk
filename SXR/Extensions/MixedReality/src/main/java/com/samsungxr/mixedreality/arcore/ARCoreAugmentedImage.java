@@ -17,18 +17,18 @@ package com.samsungxr.mixedreality.arcore;
 
 import com.google.ar.core.AugmentedImage;
 
-import com.samsungxr.mixedreality.GVRAugmentedImage;
-import com.samsungxr.mixedreality.GVRTrackingState;
+import com.samsungxr.mixedreality.SXRAugmentedImage;
+import com.samsungxr.mixedreality.SXRTrackingState;
 
 /**
  * Represents an ARCore Augmented Image
  */
-public class ARCoreAugmentedImage extends GVRAugmentedImage {
+public class ARCoreAugmentedImage extends SXRAugmentedImage {
     private AugmentedImage mAugmentedImage;
 
     protected ARCoreAugmentedImage(AugmentedImage augmentedImage) {
         mAugmentedImage = augmentedImage;
-        mTrackingState = GVRTrackingState.PAUSED;
+        mTrackingState = SXRTrackingState.PAUSED;
     }
 
     /**
@@ -62,7 +62,7 @@ public class ARCoreAugmentedImage extends GVRAugmentedImage {
      * @return The tracking state
      */
     @Override
-    public GVRTrackingState getTrackingState() {
+    public SXRTrackingState getTrackingState() {
         return mTrackingState;
     }
 
@@ -71,7 +71,7 @@ public class ARCoreAugmentedImage extends GVRAugmentedImage {
      *
      * @param state
      */
-    protected void setTrackingState(GVRTrackingState state) {
+    protected void setTrackingState(SXRTrackingState state) {
         mTrackingState = state;
     }
 }

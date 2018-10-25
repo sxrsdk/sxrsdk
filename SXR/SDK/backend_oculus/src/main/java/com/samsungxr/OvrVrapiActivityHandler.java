@@ -45,7 +45,7 @@ import javax.microedition.khronos.opengles.GL10;
  */
 final class OvrVrapiActivityHandler implements OvrActivityHandler {
 
-    private final GVRApplication mApplication;
+    private final SXRApplication mApplication;
     private long mPtr;
     private GLSurfaceView mSurfaceView;
     private EGLSurface mPixelBuffer;
@@ -55,7 +55,7 @@ final class OvrVrapiActivityHandler implements OvrActivityHandler {
     private OvrViewManager mViewManager;
     private int mCurrentSurfaceWidth, mCurrentSurfaceHeight;
 
-    OvrVrapiActivityHandler(final GVRApplication application, final OvrActivityNative activityNative) throws VrapiNotAvailableException {
+    OvrVrapiActivityHandler(final SXRApplication application, final OvrActivityNative activityNative) throws VrapiNotAvailableException {
         if (null == application) {
             throw new IllegalArgumentException();
         }
@@ -139,7 +139,7 @@ final class OvrVrapiActivityHandler implements OvrActivityHandler {
     }
 
     @Override
-    public void setViewManager(GVRViewManager viewManager) {
+    public void setViewManager(SXRViewManager viewManager) {
         mViewManager = (OvrViewManager)viewManager;
     }
 

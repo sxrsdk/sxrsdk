@@ -15,10 +15,10 @@
 
 package com.samsungxr.x3d;
 
-import com.samsungxr.GVRSensor;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRSensor;
+import com.samsungxr.SXRSceneObject;
 import com.samsungxr.ISensorEvents;
-import com.samsungxr.animation.keyframe.GVRNodeAnimation;
+import com.samsungxr.animation.keyframe.SXRNodeAnimation;
 import com.samsungxr.x3d.data_types.SFFloat;
 import com.samsungxr.x3d.data_types.SFRotation;
 import com.samsungxr.x3d.data_types.SFVec2f;
@@ -32,7 +32,7 @@ import org.joml.Vector3f;
  *         animations based on if an object is touched, visible, within
  *         proximity of the camera.
  */
-public class Sensor extends GVRSensor
+public class Sensor extends SXRSensor
 {
 
   public enum Type
@@ -47,7 +47,7 @@ public class Sensor extends GVRSensor
   private String name = null;
   private boolean mEnabled = true;
   private Type sensorType;
-  private GVRNodeAnimation gvrKeyFrameAnimation = null;
+  private SXRNodeAnimation gvrKeyFrameAnimation = null;
   private String anchorURL = null;
   private Vector3f hitPoint = new Vector3f();
   // PlaneSensor values
@@ -60,9 +60,9 @@ public class Sensor extends GVRSensor
 
 
 
-  public Sensor(String name, Type sensorType, GVRSceneObject sensorSceneObject, boolean enabled)
+  public Sensor(String name, Type sensorType, SXRSceneObject sensorSceneObject, boolean enabled)
   {
-    super(sensorSceneObject.getGVRContext());
+    super(sensorSceneObject.getSXRContext());
     this.name = name;
     this.sensorType = sensorType;
     sensorSceneObject.attachComponent(this);
@@ -83,11 +83,11 @@ public class Sensor extends GVRSensor
     return this.mEnabled;
   }
 
-  public void setGVRKeyFrameAnimation(GVRNodeAnimation gvrKeyFrameAnimation)
+  public void setSXRKeyFrameAnimation(SXRNodeAnimation gvrKeyFrameAnimation)
   {
     this.gvrKeyFrameAnimation = gvrKeyFrameAnimation;
   }
-  public GVRNodeAnimation getGVRKeyFrameAnimation()
+  public SXRNodeAnimation getSXRKeyFrameAnimation()
   {
     return this.gvrKeyFrameAnimation;
   }

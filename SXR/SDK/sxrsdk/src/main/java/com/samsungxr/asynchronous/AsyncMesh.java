@@ -15,10 +15,10 @@
 
 package com.samsungxr.asynchronous;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRAndroidResource.CancelableCallback;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRMesh;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRAndroidResource.CancelableCallback;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRMesh;
 import com.samsungxr.asynchronous.Throttler.AsyncLoader;
 import com.samsungxr.asynchronous.Throttler.AsyncLoaderFactory;
 import com.samsungxr.asynchronous.Throttler.GlConverter;
@@ -40,8 +40,8 @@ class AsyncMesh {
      * The API
      */
 
-    void loadMesh(GVRContext gvrContext,
-            CancelableCallback<GVRMesh> callback, GVRAndroidResource resource,
+    void loadMesh(SXRContext gvrContext,
+            CancelableCallback<SXRMesh> callback, SXRAndroidResource resource,
             int priority) {
         AsyncManager.get().getScheduler().registerCallback(gvrContext, MESH_CLASS, callback, resource,
                 priority);
@@ -52,7 +52,7 @@ class AsyncMesh {
      */
     
 
-    private static final Class<GVRMesh> MESH_CLASS = GVRMesh.class;
+    private static final Class<SXRMesh> MESH_CLASS = SXRMesh.class;
 
     private static AsyncMesh sInstance = new AsyncMesh();
 
@@ -66,12 +66,12 @@ class AsyncMesh {
 
     private AsyncMesh() {
         AsyncManager.get().registerDatatype(MESH_CLASS,
-                new AsyncLoaderFactory<GVRMesh, GVRMesh>() {
+                new AsyncLoaderFactory<SXRMesh, SXRMesh>() {
                     @Override
-                    AsyncLoader<GVRMesh, GVRMesh> threadProc(
-                            GVRContext gvrContext,
-                            GVRAndroidResource request,
-                            CancelableCallback<GVRMesh> callback,
+                    AsyncLoader<SXRMesh, SXRMesh> threadProc(
+                            SXRContext gvrContext,
+                            SXRAndroidResource request,
+                            CancelableCallback<SXRMesh> callback,
                             int priority) {
                         return new AsyncLoadMesh(gvrContext, request, callback, priority);
                     }
@@ -82,22 +82,22 @@ class AsyncMesh {
      * The implementation
      */
 
-    private static class AsyncLoadMesh extends AsyncLoader<GVRMesh, GVRMesh> {
-        static final GlConverter<GVRMesh, GVRMesh> sConverter = new GlConverter<GVRMesh, GVRMesh>() {
+    private static class AsyncLoadMesh extends AsyncLoader<SXRMesh, SXRMesh> {
+        static final GlConverter<SXRMesh, SXRMesh> sConverter = new GlConverter<SXRMesh, SXRMesh>() {
 
             @Override
-            public GVRMesh convert(GVRContext gvrContext, GVRMesh mesh) {
+            public SXRMesh convert(SXRContext gvrContext, SXRMesh mesh) {
                 return mesh;
             }
         };
 
-        AsyncLoadMesh(GVRContext gvrContext, GVRAndroidResource request,
-                CancelableCallback<GVRMesh> callback, int priority) {
+        AsyncLoadMesh(SXRContext gvrContext, SXRAndroidResource request,
+                CancelableCallback<SXRMesh> callback, int priority) {
             super(gvrContext, sConverter, request, callback);
         }
 
         @Override
-        protected GVRMesh loadResource() throws InterruptedException, IOException {
+        protected SXRMesh loadResource() throws InterruptedException, IOException {
             return gvrContext.getAssetLoader().loadMesh(resource);
         }
     }

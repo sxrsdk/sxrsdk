@@ -1,20 +1,20 @@
 package com.samsungxr.widgetlib.widget;
 
-import com.samsungxr.GVRBehavior;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRBehavior;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRSceneObject;
 
-class WidgetBehavior extends GVRBehavior {
+class WidgetBehavior extends SXRBehavior {
 
     static public long getComponentType() { return TYPE_WIDGET; }
 
-    WidgetBehavior(GVRContext gvrContext, Widget target) {
+    WidgetBehavior(SXRContext gvrContext, Widget target) {
         super(gvrContext);
         mType = WidgetBehavior.TYPE_WIDGET;
         mTarget = target;
     }
 
-    static Widget getTarget(GVRSceneObject sceneObject) {
+    static Widget getTarget(SXRSceneObject sceneObject) {
         WidgetBehavior behavior = (WidgetBehavior) sceneObject.getComponent(getComponentType());
         if (behavior != null) {
             return behavior.mTarget;

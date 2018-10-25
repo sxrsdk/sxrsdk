@@ -4,11 +4,11 @@ public interface ISceneEvents extends IEvents {
     /**
      * Called when the scene has been initialized.
      * @param gvrContext
-     *         The GVRContext.
+     *         The SXRContext.
      * @param scene
-     *         The GVRScene.
+     *         The SXRScene.
      */
-    void onInit(GVRContext gvrContext, GVRScene scene);
+    void onInit(SXRContext gvrContext, SXRScene scene);
 
     /**
      * Called after all handlers of onInit are completed.

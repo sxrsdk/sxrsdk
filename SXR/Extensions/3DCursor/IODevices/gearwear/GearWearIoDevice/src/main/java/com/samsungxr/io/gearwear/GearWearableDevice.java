@@ -40,9 +40,9 @@ import com.samsung.mpl.gearwearlibrary.models.events.TouchEnd;
 import com.samsung.mpl.gearwearlibrary.models.events.TouchMove;
 import com.samsung.mpl.gearwearlibrary.models.events.TouchStart;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRScene;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRScene;
+import com.samsungxr.SXRSceneObject;
 import com.samsungxr.io.cursor3d.CustomKeyEvent;
 import com.samsungxr.io.cursor3d.IoDevice;
 import com.samsungxr.utility.Log;
@@ -93,11 +93,11 @@ public class GearWearableDevice extends IoDevice {
     private static final float MIDDLE_RADIUS = 45;
     private static final float INNER_RADIUS = 20;
 
-    private GVRContext gvrContext;
+    private SXRContext gvrContext;
     private Context context;
     private EventReceiver eventReceiver;
     private boolean enabled;
-    private GVRSceneObject internalObject;
+    private SXRSceneObject internalObject;
     private HandlerThread thread;
     private EventHandler handler;
     private final PositionData positionData;
@@ -147,17 +147,17 @@ public class GearWearableDevice extends IoDevice {
         }
     }
 
-    public GearWearableDevice(GVRContext gvrContext, String deviceId, String name) {
+    public GearWearableDevice(SXRContext gvrContext, String deviceId, String name) {
         this(gvrContext, deviceId, name, MovementMode.TRACKPAD);
     }
 
-    public GearWearableDevice(GVRContext gvrContext, String deviceId, String name, MovementMode
+    public GearWearableDevice(SXRContext gvrContext, String deviceId, String name, MovementMode
             movementMode) {
         super(gvrContext, deviceId, VENDOR_ID, PRODUCT_ID, name, VENDOR_NAME, false);
         this.gvrContext = gvrContext;
         this.context = gvrContext.getContext();
         this.eventReceiver = new EventReceiver();
-        internalObject = new GVRSceneObject(gvrContext);
+        internalObject = new SXRSceneObject(gvrContext);
         positionData = new PositionData(0.0f, 0.0f, 0.0f);
         this.movementMode = movementMode;
         prevPositionData = new PositionData(0.0f, 0.0f, 0.0f);
@@ -505,7 +505,7 @@ public class GearWearableDevice extends IoDevice {
             positionData.setZ(0.0f);
         }
 
-        GVRScene scene = gvrContext.getMainScene();
+        SXRScene scene = gvrContext.getMainScene();
         if (scene != null) {
             float[] viewMatrix = scene.getMainCameraRig().getHeadTransform()
                     .getModelMatrix();

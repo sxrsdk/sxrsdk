@@ -29,9 +29,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRScene;
-import com.samsungxr.io.GVRTouchPadGestureListener;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRScene;
+import com.samsungxr.io.SXRTouchPadGestureListener;
 import com.samsungxr.io.cursor3d.Cursor;
 import com.samsungxr.io.cursor3d.CursorManager;
 import com.samsungxr.io.cursor3d.CursorTheme;
@@ -69,8 +69,8 @@ class CursorConfigView extends BaseView implements View.OnClickListener {
     private SettingsChangeListener changeListener;
 
     //Called on main thread
-    CursorConfigView(final GVRContext context, CursorManager cursorManager, Cursor cursor, Cursor
-            currentCursor, final GVRScene scene, int
+    CursorConfigView(final SXRContext context, CursorManager cursorManager, Cursor cursor, Cursor
+            currentCursor, final SXRScene scene, int
                              settingsCursorId, SettingsChangeListener changeListener) {
         super(context, scene, settingsCursorId, R.layout.cursor_configuration_layout);
         final Activity activity = context.getActivity();
@@ -312,12 +312,12 @@ class CursorConfigView extends BaseView implements View.OnClickListener {
         changeListener.onBack(cascading);
     }
 
-    GVRTouchPadGestureListener swipeListener =
-            new GVRTouchPadGestureListener()
+    SXRTouchPadGestureListener swipeListener =
+            new SXRTouchPadGestureListener()
             {
-                public boolean onSwipe(MotionEvent e, GVRTouchPadGestureListener.Action action, float vx, float vy)
+                public boolean onSwipe(MotionEvent e, SXRTouchPadGestureListener.Action action, float vx, float vy)
                 {
-                    if (action == GVRTouchPadGestureListener.Action.SwipeForward)
+                    if (action == SXRTouchPadGestureListener.Action.SwipeForward)
                     {
                         navigateBack(false);
                     }

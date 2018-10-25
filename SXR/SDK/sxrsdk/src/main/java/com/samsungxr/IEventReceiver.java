@@ -25,5 +25,5 @@ public interface IEventReceiver {
      * Returns the event receiver implementation so that events can be delivered.
      * @return event receiver
      */
-    GVREventReceiver getEventReceiver();
+    SXREventReceiver getEventReceiver();
 }

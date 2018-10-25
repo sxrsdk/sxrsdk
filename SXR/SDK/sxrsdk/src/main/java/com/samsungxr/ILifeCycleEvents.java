@@ -13,8 +13,8 @@ public interface ILifeCycleEvents extends IEvents {
     void onAfterInit();
 
     /**
-     * Called before rendering the scene. This is not called if a {@link GVRSceneObject}
-     * is not added to a {@link GVRScene}.
+     * Called before rendering the scene. This is not called if a {@link SXRSceneObject}
+     * is not added to a {@link SXRScene}.
      */
     void onStep();
 }

@@ -1,11 +1,11 @@
 package com.samsungxr.physics;
 
-import com.samsungxr.GVRBoxCollider;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRTransform;
-import com.samsungxr.io.GVRCursorController;
-import com.samsungxr.io.GVRInputManager;
+import com.samsungxr.SXRBoxCollider;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRTransform;
+import com.samsungxr.io.SXRCursorController;
+import com.samsungxr.io.SXRInputManager;
 import com.samsungxr.utility.Log;
 
 /**
@@ -26,18 +26,18 @@ class PhysicsDragger {
 
     private final Object mLock = new Object();
 
-    private final GVRContext mContext;
+    private final SXRContext mContext;
 
-    private GVRSceneObject mPivotObject = null;
-    private GVRSceneObject mDragMe = null;
-    private GVRCursorController mCursorController = null;
+    private SXRSceneObject mPivotObject = null;
+    private SXRSceneObject mDragMe = null;
+    private SXRCursorController mCursorController = null;
 
-    PhysicsDragger(GVRContext gvrContext) {
+    PhysicsDragger(SXRContext gvrContext) {
         mContext = gvrContext;
 
-        gvrContext.getInputManager().selectController(new GVRInputManager.ICursorControllerSelectListener() {
+        gvrContext.getInputManager().selectController(new SXRInputManager.ICursorControllerSelectListener() {
             @Override
-            public void onCursorControllerSelected(GVRCursorController newController, GVRCursorController oldController) {
+            public void onCursorControllerSelected(SXRCursorController newController, SXRCursorController oldController) {
                 synchronized (mLock) {
                     mCursorController = newController;
                 }
@@ -45,9 +45,9 @@ class PhysicsDragger {
         });
     }
 
-    private static GVRSceneObject onCreatePivotObject(GVRContext gvrContext) {
-        GVRSceneObject virtualObj = new GVRSceneObject(gvrContext);
-        GVRBoxCollider collider = new GVRBoxCollider(gvrContext);
+    private static SXRSceneObject onCreatePivotObject(SXRContext gvrContext) {
+        SXRSceneObject virtualObj = new SXRSceneObject(gvrContext);
+        SXRBoxCollider collider = new SXRBoxCollider(gvrContext);
         collider.setHalfExtents(COLLIDER_HALF_EXT_X, COLLIDER_HALF_EXT_Y, COLLIDER_HALF_EXT_Z);
         virtualObj.attachComponent(collider);
 
@@ -64,7 +64,7 @@ class PhysicsDragger {
      *
      * @return Pivot instance if success, otherwise returns null.
      */
-    public GVRSceneObject startDrag(GVRSceneObject dragMe, float relX, float relY, float relZ) {
+    public SXRSceneObject startDrag(SXRSceneObject dragMe, float relX, float relY, float relZ) {
         synchronized (mLock) {
             if (mCursorController == null) {
                 Log.w(TAG, "Physics drag failed: Cursor controller not found!");
@@ -82,7 +82,7 @@ class PhysicsDragger {
 
             mDragMe = dragMe;
 
-            GVRTransform t = dragMe.getTransform();
+            SXRTransform t = dragMe.getTransform();
 
             /* It is not possible to drag a rigid body directly, we need a pivot object.
             We are using the pivot object's position as pivot of the dragging's physics constraint.

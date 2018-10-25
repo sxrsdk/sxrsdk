@@ -17,18 +17,18 @@ package com.samsungxr.io.cursor3d;
 
 import android.util.SparseArray;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRHybridObject;
-import com.samsungxr.GVRMaterial;
-import com.samsungxr.GVRMesh;
-import com.samsungxr.GVRRenderData;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRTexture;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRHybridObject;
+import com.samsungxr.SXRMaterial;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRRenderData;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRTexture;
 import com.samsungxr.ZipLoader;
-import com.samsungxr.animation.GVRAnimation;
-import com.samsungxr.animation.GVRAnimationEngine;
-import com.samsungxr.animation.GVRRepeatMode;
+import com.samsungxr.animation.SXRAnimation;
+import com.samsungxr.animation.SXRAnimationEngine;
+import com.samsungxr.animation.SXRRepeatMode;
 import com.samsungxr.utility.Log;
 
 import java.io.IOException;
@@ -43,28 +43,28 @@ import java.util.concurrent.Future;
  * files that help animate the {@link Cursor}.
  *
  * This class in itself only defines texture animations. It is assumed that the object that uses
- * this {@link CursorAsset} already has a {@link GVRMesh} and a {@link GVRMaterial} set.
+ * this {@link CursorAsset} already has a {@link SXRMesh} and a {@link SXRMaterial} set.
  */
 class AnimatedCursorAsset extends MeshCursorAsset {
     private static final String TAG = AnimatedCursorAsset.class.getSimpleName();
-    private List<GVRTexture> loaderTextures;
+    private List<SXRTexture> loaderTextures;
     private final static float LOADING_IMAGE_FRAME_ANIMATION_DURATION = 1f;
     private float animationDuration = LOADING_IMAGE_FRAME_ANIMATION_DURATION;
     private final static int LOOP_REPEAT = -1;
-    private SparseArray<GVRImageFrameAnimation> animations;
-    private final GVRAnimationEngine animationEngine;
+    private SparseArray<SXRImageFrameAnimation> animations;
+    private final SXRAnimationEngine animationEngine;
 
     private String zipFileName;
 
-    AnimatedCursorAsset(GVRContext context, CursorType type, Action action, String zipFileName,
+    AnimatedCursorAsset(SXRContext context, CursorType type, Action action, String zipFileName,
                         String mesh) {
         super(context, type, action, mesh, null);
         this.zipFileName = zipFileName;
-        animations = new SparseArray<GVRImageFrameAnimation>();
+        animations = new SparseArray<SXRImageFrameAnimation>();
         animationEngine = context.getAnimationEngine();
     }
 
-    AnimatedCursorAsset(GVRContext context, CursorType type, Action action, String zipFileName) {
+    AnimatedCursorAsset(SXRContext context, CursorType type, Action action, String zipFileName) {
         this(context, type, action, zipFileName, null);
     }
 
@@ -73,20 +73,20 @@ class AnimatedCursorAsset extends MeshCursorAsset {
         super.set(cursor);
 
         int key = cursor.getId();
-        GVRImageFrameAnimation animation = animations.get(key);
+        SXRImageFrameAnimation animation = animations.get(key);
         if (animation == null) {
-            GVRSceneObject assetSceneObject = sceneObjectArray.get(key);
+            SXRSceneObject assetSceneObject = sceneObjectArray.get(key);
             if (assetSceneObject == null) {
                 Log.e(TAG, "Render data not found, should not happen");
                 return;
             }
-            GVRRenderData renderData = assetSceneObject.getRenderData();
-            GVRMaterial loadingMaterial = renderData.getMaterial();
+            SXRRenderData renderData = assetSceneObject.getRenderData();
+            SXRMaterial loadingMaterial = renderData.getMaterial();
             loadingMaterial.setMainTexture(loaderTextures.get(0));
-            animation = new GVRImageFrameAnimation(loadingMaterial,
+            animation = new SXRImageFrameAnimation(loadingMaterial,
                     animationDuration, loaderTextures);
             //Usual animations have a repeat behavior
-            animation.setRepeatMode(GVRRepeatMode.REPEATED);
+            animation.setRepeatMode(SXRRepeatMode.REPEATED);
             animation.setRepeatCount(LOOP_REPEAT);
             animations.append(key, animation);
         }
@@ -97,7 +97,7 @@ class AnimatedCursorAsset extends MeshCursorAsset {
     @Override
     void reset(Cursor cursor) {
         int key = cursor.getId();
-        GVRImageFrameAnimation animation = animations.get(key);
+        SXRImageFrameAnimation animation = animations.get(key);
         if (animation == null) {
             //nothing to do
             Log.d(TAG, "Animation is finished return, should not happen ");
@@ -108,7 +108,7 @@ class AnimatedCursorAsset extends MeshCursorAsset {
         if (animation.isFinished() == false) {
             if (animation.getRepeatCount() == LOOP_REPEAT) {
                 animation.setRepeatCount(0);
-                animation.setRepeatMode(GVRRepeatMode.ONCE);
+                animation.setRepeatMode(SXRRepeatMode.ONCE);
             }
             animationEngine.stop(animation);
         }
@@ -125,10 +125,10 @@ class AnimatedCursorAsset extends MeshCursorAsset {
         }
         try {
             loaderTextures = ZipLoader.load(context, zipFileName, new ZipLoader
-                    .ZipEntryProcessor<GVRTexture>() {
+                    .ZipEntryProcessor<SXRTexture>() {
 
                 @Override
-                public GVRTexture getItem(GVRContext context, GVRAndroidResource resource) {
+                public SXRTexture getItem(SXRContext context, SXRAndroidResource resource) {
                     return context.getAssetLoader().loadTexture(resource);
                 }
             });
@@ -160,24 +160,24 @@ class AnimatedCursorAsset extends MeshCursorAsset {
     /**
      * Implements texture update animation.
      */
-    private static class GVRImageFrameAnimation extends GVRAnimation {
-        private final List<GVRTexture> animationTextures;
+    private static class SXRImageFrameAnimation extends SXRAnimation {
+        private final List<SXRTexture> animationTextures;
         private int lastFileIndex = -1;
 
         /**
-         * @param material             {@link GVRMaterial} to animate
+         * @param material             {@link SXRMaterial} to animate
          * @param duration             The animation duration, in seconds.
-         * @param texturesForAnimation arrayList of GVRTexture used during animation
+         * @param texturesForAnimation arrayList of SXRTexture used during animation
          */
 
-        private GVRImageFrameAnimation(GVRMaterial material, float duration,
-                                       final List<GVRTexture> texturesForAnimation) {
+        private SXRImageFrameAnimation(SXRMaterial material, float duration,
+                                       final List<SXRTexture> texturesForAnimation) {
             super(material, duration);
             animationTextures = texturesForAnimation;
         }
 
         @Override
-        protected void animate(GVRHybridObject target, float ratio) {
+        protected void animate(SXRHybridObject target, float ratio) {
             final int size = animationTextures.size();
             final int fileIndex = (int) (ratio * size);
 
@@ -187,7 +187,7 @@ class AnimatedCursorAsset extends MeshCursorAsset {
 
             lastFileIndex = fileIndex;
 
-            GVRMaterial material = (GVRMaterial) target;
+            SXRMaterial material = (SXRMaterial) target;
             material.setMainTexture(animationTextures.get(fileIndex));
         }
     }

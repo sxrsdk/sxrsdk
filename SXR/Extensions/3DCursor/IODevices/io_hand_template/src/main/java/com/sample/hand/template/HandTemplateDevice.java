@@ -16,15 +16,15 @@ package com.sample.hand.template;
 
 import android.view.KeyEvent;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRCameraRig;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRMaterial;
-import com.samsungxr.GVRScene;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRTexture;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRCameraRig;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRMaterial;
+import com.samsungxr.SXRScene;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRTexture;
 import com.samsungxr.io.cursor3d.*;
-import com.samsungxr.scene_objects.GVRCubeSceneObject;
+import com.samsungxr.scene_objects.SXRCubeSceneObject;
 import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -51,7 +51,7 @@ public class HandTemplateDevice {
     // Adjust this value accordingly
     private static int DATA_SIZE = 127;
     private static int BYTE_TO_FLOAT = 4;
-    private GVRContext context;
+    private SXRContext context;
     private Thread thread;
     private ByteBuffer readbackBufferB;
     private FloatBuffer readbackBuffer;
@@ -64,7 +64,7 @@ public class HandTemplateDevice {
     private static final Quaternionf cursorRotation = new Quaternionf();
     private Quaternionf boneRotation = new Quaternionf();
 
-    private Future<GVRTexture> boneTexture;
+    private Future<SXRTexture> boneTexture;
 
     /**
      * Construct the Hand device object
@@ -72,7 +72,7 @@ public class HandTemplateDevice {
      * @param context
      * @param scene
      */
-    public HandTemplateDevice(GVRContext context, GVRScene scene) {
+    public HandTemplateDevice(SXRContext context, SXRScene scene) {
         this.context = context;
 
         // Create a readback buffer and forward it to the native layer
@@ -81,9 +81,9 @@ public class HandTemplateDevice {
         readbackBuffer = readbackBufferB.asFloatBuffer();
 
         try {
-            boneTexture = context.loadFutureTexture(new GVRAndroidResource
+            boneTexture = context.loadFutureTexture(new SXRAndroidResource
                     (context, "cube_texture.png"));
-            Future<GVRTexture> jointTexture = context.loadFutureTexture(new GVRAndroidResource
+            Future<SXRTexture> jointTexture = context.loadFutureTexture(new SXRAndroidResource
                     (context, "cube_texture.png"));
             rightHand = new IOHand(context);
             leftHand = new IOHand(context);
@@ -101,7 +101,7 @@ public class HandTemplateDevice {
         leftDevice = new HandIODevice(LEFT_HAND_ID + IOFinger.getString(IOFinger.INDEX), scene,
                 "Left Hand");
 
-        GVRCameraRig mainCameraRig = scene.getMainCameraRig();
+        SXRCameraRig mainCameraRig = scene.getMainCameraRig();
         mainCameraRig.addChildObject(leftHand.getSceneObject());
         mainCameraRig.addChildObject(rightHand.getSceneObject());
 
@@ -119,14 +119,14 @@ public class HandTemplateDevice {
         thread.start();
     }
 
-    void setJointSceneObject(IOHand hand, Future<GVRTexture> jointTexture) {
+    void setJointSceneObject(IOHand hand, Future<SXRTexture> jointTexture) {
         for (int i = 0; i < 5; i++) {
             IOFinger finger = hand.getIOFinger(i);
             for (int j = 1; j < 5; j++) {
                 // ignore index tip
                 if (!(i == IOFinger.INDEX && j == IOJoint.TIP)) {
                     IOJoint joint = finger.getIOJoint(j);
-                    joint.setSceneObject(new GVRCubeSceneObject(context, true, jointTexture));
+                    joint.setSceneObject(new SXRCubeSceneObject(context, true, jointTexture));
                     // Customize your joint scene object here
                     //joint.setSceneObject();
                 }
@@ -134,10 +134,10 @@ public class HandTemplateDevice {
         }
     }
 
-    void setPalmSceneObject(IOHand hand, Future<GVRTexture> jointTexture) {
-        GVRMaterial gvrMaterial = new GVRMaterial(context);
+    void setPalmSceneObject(IOHand hand, Future<SXRTexture> jointTexture) {
+        SXRMaterial gvrMaterial = new SXRMaterial(context);
         gvrMaterial.setMainTexture(jointTexture);
-        GVRCubeSceneObject palmSceneObject = new GVRCubeSceneObject(context, true, gvrMaterial,
+        SXRCubeSceneObject palmSceneObject = new SXRCubeSceneObject(context, true, gvrMaterial,
                 new Vector3f(5, 3, 1.0f));
         hand.addPalmSceneObject(palmSceneObject);
     }
@@ -190,7 +190,7 @@ public class HandTemplateDevice {
                 ioHand = rightHand;
                 device = rightDevice;
                 rightHandProcessed = true;
-                GVRSceneObject right = rightHand.getSceneObject();
+                SXRSceneObject right = rightHand.getSceneObject();
                 if (!right.isEnabled()) {
                     rightHand.getSceneObject().setEnable(true);
                     device.setVisible(true);
@@ -199,7 +199,7 @@ public class HandTemplateDevice {
                 ioHand = leftHand;
                 device = leftDevice;
                 leftHandProcessed = true;
-                GVRSceneObject left = leftHand.getSceneObject();
+                SXRSceneObject left = leftHand.getSceneObject();
                 if (!left.isEnabled()) {
                     leftHand.getSceneObject().setEnable(true);
                     device.setVisible(true);
@@ -259,14 +259,14 @@ public class HandTemplateDevice {
         }
 
         if (!rightHandProcessed) {
-            GVRSceneObject right = rightHand.getSceneObject();
+            SXRSceneObject right = rightHand.getSceneObject();
             if (right.isEnabled()) {
                 rightHand.getSceneObject().setEnable(false);
             }
             rightDevice.setVisible(false);
         }
         if (!leftHandProcessed) {
-            GVRSceneObject left = leftHand.getSceneObject();
+            SXRSceneObject left = leftHand.getSceneObject();
             if (left.isEnabled()) {
                 leftHand.getSceneObject().setEnable(false);
             }
@@ -283,7 +283,7 @@ public class HandTemplateDevice {
 
     public void processBones(IOFinger ioFinger, int bone, int prevBone, int nextBone) {
         IOBone ioBone = ioFinger.getIOBone(bone);
-        GVRSceneObject boneSceneObject = ioBone.sceneObject;
+        SXRSceneObject boneSceneObject = ioBone.sceneObject;
         Vector3f prev = ioFinger.getIOJoint(prevBone).getPosition();
         Vector3f next = ioFinger.getIOJoint(nextBone).getPosition();
         if (boneSceneObject == null) {
@@ -292,11 +292,11 @@ public class HandTemplateDevice {
                 return;
             }
 
-            GVRMaterial material = new GVRMaterial(context);
+            SXRMaterial material = new SXRMaterial(context);
             material.setMainTexture(boneTexture);
             // Customize your bone scene object here
             // add a cube
-            boneSceneObject = new GVRCubeSceneObject(context, true, material, new Vector3f(1.0f,
+            boneSceneObject = new SXRCubeSceneObject(context, true, material, new Vector3f(1.0f,
                     len - 0.5f, 1.0f));
             ioBone.setSceneObject(boneSceneObject);
         }
@@ -317,7 +317,7 @@ public class HandTemplateDevice {
      * this class as well.
      */
     private static class HandIODevice extends IoDevice {
-        private GVRScene scene;
+        private SXRScene scene;
         private boolean actionDown;
 
         private final Matrix4f cameraMatrix;
@@ -335,7 +335,7 @@ public class HandTemplateDevice {
         private static final int ACTION_DOWN = 0;
         private static final int ACTION_UP = 1;
 
-        protected HandIODevice(String deviceId, GVRScene scene, String name) {
+        protected HandIODevice(String deviceId, SXRScene scene, String name) {
             /** The last param (boolean) denotes that the device is not ready when this constructor
              * is called. We will use the setConnected call to let the framework know that the
              * device

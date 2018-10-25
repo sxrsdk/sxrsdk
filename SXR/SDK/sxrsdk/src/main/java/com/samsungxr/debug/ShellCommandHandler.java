@@ -19,8 +19,8 @@ import java.util.List;
 
 import javax.script.ScriptEngine;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRVersion;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRVersion;
 import com.samsungxr.debug.cli.Command;
 import com.samsungxr.debug.cli.HelpCommandHandler;
 import com.samsungxr.debug.cli.Shell;
@@ -28,18 +28,18 @@ import com.samsungxr.debug.cli.ShellDependent;
 import com.samsungxr.script.IScriptManager;
 
 /**
- * Shell commands for GVRf debug console.
+ * Shell commands for SXRf debug console.
  */
 public class ShellCommandHandler implements ShellDependent {
     protected Shell mShell;
-    protected GVRContext mGVRContext;
+    protected SXRContext mSXRContext;
     protected HelpCommandHandler mHelpHandler = new HelpCommandHandler();
 
     protected ScriptHandler mScriptHandler;
     protected List<String> mSavedPath;
 
-    public ShellCommandHandler(GVRContext gvrContext) {
-        mGVRContext = gvrContext;
+    public ShellCommandHandler(SXRContext gvrContext) {
+        mSXRContext = gvrContext;
     }
 
     @Command
@@ -48,7 +48,7 @@ public class ShellCommandHandler implements ShellDependent {
     }
 
     private String enterLanguage(String language) {
-        IScriptManager sm = mGVRContext.getScriptManager();
+        IScriptManager sm = mSXRContext.getScriptManager();
         if (sm == null) {
             return "Script extension is not enabled";
         }
@@ -58,7 +58,7 @@ public class ShellCommandHandler implements ShellDependent {
             return "Cannot find the language engine for " + language;
         }
 
-        mScriptHandler = new ScriptHandler(mGVRContext, language, engine);
+        mScriptHandler = new ScriptHandler(mSXRContext, language, engine);
         mShell.setLineProcessor(mScriptHandler);
 
         return null;
@@ -66,7 +66,7 @@ public class ShellCommandHandler implements ShellDependent {
 
     @Command
     public String version() {
-        return GVRVersion.CURRENT;
+        return SXRVersion.CURRENT;
     }
 
     @Command

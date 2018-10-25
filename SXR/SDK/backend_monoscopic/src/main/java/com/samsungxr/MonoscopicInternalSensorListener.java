@@ -58,7 +58,7 @@ class MonoscopicInternalSensorListener implements SensorEventListener {
         CONSTANT_EXPRESSION.mul(mQuaternion, mQuaternion);
         mQuaternion.mul(COORDINATE_QUATERNION);
 
-        mSensor.onInternalRotationSensor(GVRTime.getCurrentTime(), mQuaternion.w, mQuaternion.x, mQuaternion.y,
+        mSensor.onInternalRotationSensor(SXRTime.getCurrentTime(), mQuaternion.w, mQuaternion.x, mQuaternion.y,
                 mQuaternion.z, 0.0f, 0.0f, 0.0f);
     }
 

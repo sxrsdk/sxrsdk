@@ -3,24 +3,24 @@ package com.samsungxr.widgetlib.widget;
 import com.samsungxr.widgetlib.main.CommandBuffer;
 import com.samsungxr.widgetlib.main.CommandBuffer.Command;
 
-import com.samsungxr.GVRMaterial;
-import com.samsungxr.GVRMesh;
-import com.samsungxr.GVRRenderData;
-import com.samsungxr.GVRRenderPass;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRTexture;
+import com.samsungxr.SXRMaterial;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRRenderData;
+import com.samsungxr.SXRRenderPass;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRTexture;
 
 // TODO: Replace mExternalData references with posting opcodes to command buffer
-// TODO: Extend GVRRenderData for a static "identity" instance for "no render data" scenarios
+// TODO: Extend SXRRenderData for a static "identity" instance for "no render data" scenarios
 // IDEA: With above, once we're buffering operations, have a "postOp()" method that does a
 // centralized check for whether our render data is valid.  Overhead of fetching opcode instances
 // from pool and configuring them should be low, and it would be a much tidier approach than doing
 // "if (mRenderDataCache != null)" everywhere.
 class RenderDataCache {
-    RenderDataCache(GVRSceneObject sceneObject) {
+    RenderDataCache(SXRSceneObject sceneObject) {
         mExternalRenderData = sceneObject.getRenderData();
         if (mExternalRenderData != null) {
-            mRenderData = new GVRRenderData(sceneObject.getGVRContext());
+            mRenderData = new SXRRenderData(sceneObject.getSXRContext());
             mRenderData.setDepthTest(mExternalRenderData.getDepthTest());
             mRenderData.setMesh(mExternalRenderData.getMesh());
             mRenderData.setOffset(mExternalRenderData.getOffset());
@@ -32,7 +32,7 @@ class RenderDataCache {
 //            mRenderData.setStencilFunc(...);
 //            mRenderData.setStencilMask(renderData.getStencilMask());
 //            mRenderData.setStencilTest(renderData.getStencilTest());
-            final GVRMaterial material = mExternalRenderData.getMaterial();
+            final SXRMaterial material = mExternalRenderData.getMaterial();
             mRenderData.setMaterial(material);
             mMaterialCache = new MaterialCache(material);
         } else {
@@ -45,7 +45,7 @@ class RenderDataCache {
         return mRenderData != null;
     }
 
-    void setMesh(GVRMesh mesh) {
+    void setMesh(SXRMesh mesh) {
         if (mRenderData != null) {
             SET_MESH.buffer(mExternalRenderData, mesh);
             mRenderData.setMesh(mesh);
@@ -84,7 +84,7 @@ class RenderDataCache {
         return -1;
     }
 
-    GVRMesh getMesh() {
+    SXRMesh getMesh() {
         if (mRenderData != null) {
             return mRenderData.getMesh();
         }
@@ -105,7 +105,7 @@ class RenderDataCache {
         }
     }
 
-    void setCullFace(GVRRenderPass.GVRCullFaceEnum cullFace) {
+    void setCullFace(SXRRenderPass.SXRCullFaceEnum cullFace) {
         if (mRenderData != null) {
             SET_CULL_FACE.buffer(mExternalRenderData, cullFace);
             mRenderData.setCullFace(cullFace);
@@ -155,7 +155,7 @@ class RenderDataCache {
         return mMaterialCache;
     }
 
-    void setMaterial(GVRMaterial material) {
+    void setMaterial(SXRMaterial material) {
         if (mRenderData != null) {
             SET_MATERIAL.buffer(mExternalRenderData, material);
             mRenderData.setMaterial(material);
@@ -164,29 +164,29 @@ class RenderDataCache {
     }
 
     private static final class SET_MESH {
-        static void buffer(GVRRenderData renderData, GVRMesh mesh) {
+        static void buffer(SXRRenderData renderData, SXRMesh mesh) {
             CommandBuffer.Command.buffer(sExecutor, renderData, mesh);
         }
 
         private static final Command.Executor sExecutor = new Command.Executor() {
             @Override
             public void exec(Object... params) {
-                final GVRRenderData renderData = (GVRRenderData) params[0];
-                final GVRMesh mesh = (GVRMesh) params[1];
+                final SXRRenderData renderData = (SXRRenderData) params[0];
+                final SXRMesh mesh = (SXRMesh) params[1];
                 renderData.setMesh(mesh);
             }
         };
     }
 
     private static final class SET_OFFSET {
-        static void buffer(GVRRenderData renderData, boolean offset) {
+        static void buffer(SXRRenderData renderData, boolean offset) {
             CommandBuffer.Command.buffer(sExecutor, renderData, offset);
         }
 
         private static final Command.Executor sExecutor = new Command.Executor() {
             @Override
             public void exec(Object... params) {
-                final GVRRenderData renderData = (GVRRenderData) params[0];
+                final SXRRenderData renderData = (SXRRenderData) params[0];
                 final boolean offset = (boolean) params[1];
                 renderData.setOffset(offset);
             }
@@ -194,14 +194,14 @@ class RenderDataCache {
     }
 
     private static final class SET_OFFSET_FACTOR {
-        static void buffer(GVRRenderData renderData, float offsetFactor) {
+        static void buffer(SXRRenderData renderData, float offsetFactor) {
             CommandBuffer.Command.buffer(sExecutor, renderData, offsetFactor);
         }
 
         private static final Command.Executor sExecutor = new Command.Executor() {
             @Override
             public void exec(Object... params) {
-                final GVRRenderData renderData = (GVRRenderData) params[0];
+                final SXRRenderData renderData = (SXRRenderData) params[0];
                 final float offsetFactor = (float) params[1];
                 renderData.setOffsetFactor(offsetFactor);
             }
@@ -209,14 +209,14 @@ class RenderDataCache {
     }
 
     private static final class SET_RENDERING_ORDER {
-        static void buffer(GVRRenderData renderData, int renderingOrder) {
+        static void buffer(SXRRenderData renderData, int renderingOrder) {
             CommandBuffer.Command.buffer(sExecutor, renderData, renderingOrder);
         }
 
         private static final Command.Executor sExecutor = new Command.Executor() {
             @Override
             public void exec(Object... params) {
-                final GVRRenderData renderData = (GVRRenderData) params[0];
+                final SXRRenderData renderData = (SXRRenderData) params[0];
                 final int renderingOrder = (int) params[1];
                 renderData.setRenderingOrder(renderingOrder);
             }
@@ -224,29 +224,29 @@ class RenderDataCache {
     }
 
     private static final class SET_CULL_FACE {
-        static void buffer(GVRRenderData renderData, GVRRenderPass.GVRCullFaceEnum cullFace) {
+        static void buffer(SXRRenderData renderData, SXRRenderPass.SXRCullFaceEnum cullFace) {
             CommandBuffer.Command.buffer(sExecutor, renderData, cullFace);
         }
 
         private static final Command.Executor sExecutor = new Command.Executor() {
             @Override
             public void exec(Object... params) {
-                final GVRRenderData renderData = (GVRRenderData) params[0];
-                final GVRRenderPass.GVRCullFaceEnum cullFace = (GVRRenderPass.GVRCullFaceEnum)params[1];
+                final SXRRenderData renderData = (SXRRenderData) params[0];
+                final SXRRenderPass.SXRCullFaceEnum cullFace = (SXRRenderPass.SXRCullFaceEnum)params[1];
                 renderData.setCullFace(cullFace);
             }
         };
     }
 
     private static final class SET_OFFSET_UNITS {
-        static void buffer(GVRRenderData renderData, float offsetUnits) {
+        static void buffer(SXRRenderData renderData, float offsetUnits) {
             CommandBuffer.Command.buffer(sExecutor, renderData, offsetUnits);
         }
 
         private static final Command.Executor sExecutor = new Command.Executor() {
             @Override
             public void exec(Object... params) {
-                final GVRRenderData renderData = (GVRRenderData) params[0];
+                final SXRRenderData renderData = (SXRRenderData) params[0];
                 final float offsetUnits = (float) params[1];
                 renderData.setOffsetUnits(offsetUnits);
             }
@@ -254,14 +254,14 @@ class RenderDataCache {
     }
 
     private static final class SET_DEPTH_TEST {
-        static void buffer(GVRRenderData renderData, boolean depthTest) {
+        static void buffer(SXRRenderData renderData, boolean depthTest) {
             CommandBuffer.Command.buffer(sExecutor, renderData, depthTest);
         }
 
         private static final Command.Executor sExecutor = new Command.Executor() {
             @Override
             public void exec(Object... params) {
-                final GVRRenderData renderData = (GVRRenderData) params[0];
+                final SXRRenderData renderData = (SXRRenderData) params[0];
                 final boolean depthTest = (boolean) params[1];
                 renderData.setDepthTest(depthTest);
             }
@@ -269,14 +269,14 @@ class RenderDataCache {
     }
 
     private static final class SET_STENCIL_TEST {
-        static void buffer(GVRRenderData renderData) {
+        static void buffer(SXRRenderData renderData) {
             CommandBuffer.Command.buffer(sExecutor, renderData, true);
         }
 
         private static final Command.Executor sExecutor = new Command.Executor() {
             @Override
             public void exec(Object... params) {
-                final GVRRenderData renderData = (GVRRenderData) params[0];
+                final SXRRenderData renderData = (SXRRenderData) params[0];
                 final boolean flag = (boolean) params[1];
                 renderData.setStencilTest(flag);
             }
@@ -284,14 +284,14 @@ class RenderDataCache {
     }
 
     private static final class SET_STENCIL_FUNC {
-        static void buffer(GVRRenderData renderData, int func) {
+        static void buffer(SXRRenderData renderData, int func) {
             CommandBuffer.Command.buffer(sExecutor, renderData, func, 1, 0xFF);
         }
 
         private static final Command.Executor sExecutor = new Command.Executor() {
             @Override
             public void exec(Object... params) {
-                final GVRRenderData renderData = (GVRRenderData) params[0];
+                final SXRRenderData renderData = (SXRRenderData) params[0];
                 final int func = (int) params[1];
                 final int ref = (int) params[2];
                 final int mask = (int) params[3];
@@ -301,14 +301,14 @@ class RenderDataCache {
     }
 
     private static final class SET_STENCIL_MASK {
-        static void buffer(GVRRenderData renderData) {
+        static void buffer(SXRRenderData renderData) {
             CommandBuffer.Command.buffer(sExecutor, renderData, 0x00);
         }
 
         private static final Command.Executor sExecutor = new Command.Executor() {
             @Override
             public void exec(Object... params) {
-                final GVRRenderData renderData = (GVRRenderData) params[0];
+                final SXRRenderData renderData = (SXRRenderData) params[0];
                 final int mask = (int) params[1];
                 renderData.setStencilMask(mask);
             }
@@ -316,15 +316,15 @@ class RenderDataCache {
     }
 
     private static final class SET_MATERIAL {
-        public static void buffer(GVRRenderData renderData, GVRMaterial material) {
+        public static void buffer(SXRRenderData renderData, SXRMaterial material) {
             CommandBuffer.Command.buffer(sExecutor, renderData, material);
         }
 
         private static final Command.Executor sExecutor = new Command.Executor() {
             @Override
             public void exec(Object... params) {
-                GVRRenderData renderData = (GVRRenderData) params[0];
-                GVRMaterial material = (GVRMaterial) params[1];
+                SXRRenderData renderData = (SXRRenderData) params[0];
+                SXRMaterial material = (SXRMaterial) params[1];
                 renderData.setMaterial(material);
             }
         };
@@ -362,7 +362,7 @@ class RenderDataCache {
             }
         }
 
-        public void setTexture(GVRTexture texture) {
+        public void setTexture(SXRTexture texture) {
             if (mMaterial != null) {
                 SET_TEXTURE.buffer(mExternalMaterial, texture);
                 mMaterial.setMainTexture(texture);
@@ -371,7 +371,7 @@ class RenderDataCache {
             }
         }
 
-        public void setTexture(String name, GVRTexture texture) {
+        public void setTexture(String name, SXRTexture texture) {
             if (mMaterial != null) {
                 SET_NAMED_TEXTURE.buffer(mExternalMaterial, name, texture);
                 mMaterial.setTexture(name, texture);
@@ -396,13 +396,13 @@ class RenderDataCache {
 
         }
 
-        private MaterialCache(GVRMaterial material) {
+        private MaterialCache(SXRMaterial material) {
             set(material);
         }
 
-        private void set(GVRMaterial material) {
+        private void set(SXRMaterial material) {
             if (material != null) {
-                mMaterial = new GVRMaterial(material.getGVRContext());
+                mMaterial = new SXRMaterial(material.getSXRContext());
                 // TODO: Add named texture entry for main texture
                 mMaterial.setMainTexture(material.getMainTexture());
                 mMaterial.setOpacity(material.getOpacity());
@@ -417,14 +417,14 @@ class RenderDataCache {
         }
 
         private static final class SET_COLOR {
-            public static void buffer(GVRMaterial material, int color) {
+            public static void buffer(SXRMaterial material, int color) {
                 CommandBuffer.Command.buffer(sExecutor, material, color);
             }
 
             private static final Command.Executor sExecutor = new Command.Executor() {
                 @Override
                 public void exec(Object... params) {
-                    final GVRMaterial material = (GVRMaterial) params[0];
+                    final SXRMaterial material = (SXRMaterial) params[0];
                     final int color = (int) params[1];
                     material.setColor(color);
                 }
@@ -432,14 +432,14 @@ class RenderDataCache {
         }
 
         private static final class SET_COLOR_RGB {
-            public static void buffer(GVRMaterial material, float r, float g, float b) {
+            public static void buffer(SXRMaterial material, float r, float g, float b) {
                 CommandBuffer.Command.buffer(sExecutor, material, r, g, b);
             }
 
             private static final Command.Executor sExecutor = new Command.Executor() {
                 @Override
                 public void exec(Object... params) {
-                    final GVRMaterial material = (GVRMaterial) params[0];
+                    final SXRMaterial material = (SXRMaterial) params[0];
                     final float r = (float) params[1];
                     final float g = (float) params[2];
                     final float b = (float) params[3];
@@ -449,14 +449,14 @@ class RenderDataCache {
         }
 
         private static final class SET_OPACITY {
-            public static void buffer(GVRMaterial material, float opacity) {
+            public static void buffer(SXRMaterial material, float opacity) {
                 CommandBuffer.Command.buffer(sExecutor, material, opacity);
             }
 
             private static final Command.Executor sExecutor = new Command.Executor() {
                 @Override
                 public void exec(Object... params) {
-                    final GVRMaterial material = (GVRMaterial) params[0];
+                    final SXRMaterial material = (SXRMaterial) params[0];
                     final float opacity = (float) params[1];
                     material.setOpacity(opacity);
                 }
@@ -464,15 +464,15 @@ class RenderDataCache {
         }
 
         private static final class SET_TEXTURE {
-            public static void buffer(GVRMaterial material, GVRTexture texture) {
+            public static void buffer(SXRMaterial material, SXRTexture texture) {
                 CommandBuffer.Command.buffer(sExecutor, material, texture);
             }
 
             private static Command.Executor sExecutor = new Command.Executor() {
                 @Override
                 public void exec(Object... params) {
-                    final GVRMaterial material = (GVRMaterial) params[0];
-                    final GVRTexture texture = (GVRTexture) params[1];
+                    final SXRMaterial material = (SXRMaterial) params[0];
+                    final SXRTexture texture = (SXRTexture) params[1];
                     material.setMainTexture(texture);
                     material.setTexture(MATERIAL_DIFFUSE_TEXTURE, texture);
                 }
@@ -480,27 +480,27 @@ class RenderDataCache {
         }
 
         private static final class SET_NAMED_TEXTURE {
-            public static void buffer(GVRMaterial material, String key, GVRTexture texture) {
+            public static void buffer(SXRMaterial material, String key, SXRTexture texture) {
                 CommandBuffer.Command.buffer(sExecutor, material, key, texture);
             }
 
             private static final Command.Executor sExecutor = new Command.Executor() {
                 @Override
                 public void exec(Object... params) {
-                    final GVRMaterial material = (GVRMaterial) params[0];
+                    final SXRMaterial material = (SXRMaterial) params[0];
                     final String name = (String) params[1];
-                    final GVRTexture texture = (GVRTexture) params[2];
+                    final SXRTexture texture = (SXRTexture) params[2];
                     material.setTexture(name, texture);
                 }
             };
         }
 
-        private GVRMaterial mExternalMaterial;
-        private GVRMaterial mMaterial;
+        private SXRMaterial mExternalMaterial;
+        private SXRMaterial mMaterial;
 
     }
 
-    private final GVRRenderData mExternalRenderData;
-    private final GVRRenderData mRenderData;
+    private final SXRRenderData mExternalRenderData;
+    private final SXRRenderData mRenderData;
     private final MaterialCache mMaterialCache;
 }

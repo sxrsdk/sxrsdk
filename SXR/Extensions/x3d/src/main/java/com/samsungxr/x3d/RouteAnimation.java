@@ -16,7 +16,7 @@
 
 package com.samsungxr.x3d;
 
-import com.samsungxr.animation.keyframe.GVRNodeAnimation;
+import com.samsungxr.animation.keyframe.SXRNodeAnimation;
 
 
 /**
@@ -30,21 +30,21 @@ import com.samsungxr.animation.keyframe.GVRNodeAnimation;
 
 public class RouteAnimation extends Route {
 
-   // If a ROUTE is associated with GVRNodeAnimation, then
+   // If a ROUTE is associated with SXRNodeAnimation, then
    // this value will point to it.
    // Assists with Touch Sensors
-   private GVRNodeAnimation gvrAnimation = null;
+   private SXRNodeAnimation gvrAnimation = null;
 
   public RouteAnimation(String fromNode, String fromField, String toNode, String toField) {
     super(fromNode, fromField, toNode, toField);
   }
 
 
-  public void setAnimation(GVRNodeAnimation gvrKeyFrameAnimation) {
+  public void setAnimation(SXRNodeAnimation gvrKeyFrameAnimation) {
   	this.gvrAnimation = gvrKeyFrameAnimation;
   }
 
-  public GVRNodeAnimation getAnimation() {
+  public SXRNodeAnimation getAnimation() {
   	return this.gvrAnimation;
   }
 

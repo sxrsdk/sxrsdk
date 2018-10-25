@@ -15,10 +15,10 @@
 
 package com.samsungxr.io.cursor3d;
 
-import com.samsungxr.GVRBehavior;
-import com.samsungxr.GVRContext;
-import com.samsungxr.io.GVRCursorController;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRBehavior;
+import com.samsungxr.SXRContext;
+import com.samsungxr.io.SXRCursorController;
+import com.samsungxr.SXRSceneObject;
 import com.samsungxr.ITouchEvents;
 import com.samsungxr.io.cursor3d.CursorAsset.Action;
 import com.samsungxr.utility.Log;
@@ -30,7 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Represents a 3D cursor in GVRf, it encapsulates the intended behavior from a
+ * Represents a 3D cursor in SXRf, it encapsulates the intended behavior from a
  * device controlled 3D object.
  * <p>
  * While the application cannot create a {@link Cursor} object. There are two ways to obtain one:
@@ -50,7 +50,7 @@ import java.util.List;
  * </p>
  * Each {@link Cursor} object has a {@link CursorType} that defines the type of events generated.
  */
-public abstract class Cursor extends GVRBehavior
+public abstract class Cursor extends SXRBehavior
 {
     private static final String TAG = "Cursor";
     static private long TYPE_CURSOR = newComponentType(Cursor.class);
@@ -83,12 +83,12 @@ public abstract class Cursor extends GVRBehavior
         OTHER
     }
 
-    Cursor(GVRContext context, CursorType type, CursorManager cursorManager) {
-        super(cursorManager.getGVRContext());
+    Cursor(SXRContext context, CursorType type, CursorManager cursorManager) {
+        super(cursorManager.getSXRContext());
         mType = getComponentType();
         mCursorType = type;
         mCursorID = sUniqueCursorID++;
-        GVRSceneObject owner = new GVRSceneObject(context);
+        SXRSceneObject owner = new SXRSceneObject(context);
         mAudioManager = CursorAudioManager.getInstance(context.getContext());
         mCompatibleDevices = new ArrayList<PriorityIoDeviceTuple>();
         mTempPosition = new Vector3f();
@@ -99,9 +99,9 @@ public abstract class Cursor extends GVRBehavior
 
     /**
      * Returns a unique long value associated with the {@link Cursor} class. Each
-     * subclass of  {@link GVRBehavior} needs a unique component type value. Use this value to
-     * get the instance of {@link Cursor} attached to any {@link GVRSceneObject}
-     * using {@link GVRSceneObject#getComponent(long)}
+     * subclass of  {@link SXRBehavior} needs a unique component type value. Use this value to
+     * get the instance of {@link Cursor} attached to any {@link SXRSceneObject}
+     * using {@link SXRSceneObject#getComponent(long)}
      *
      * @return the component type value.
      */
@@ -211,7 +211,7 @@ public abstract class Cursor extends GVRBehavior
      */
     public float getPositionX()
     {
-        GVRSceneObject owner = getOwnerObject();
+        SXRSceneObject owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -227,7 +227,7 @@ public abstract class Cursor extends GVRBehavior
      */
     public float getPositionY()
     {
-        GVRSceneObject owner = getOwnerObject();
+        SXRSceneObject owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -243,7 +243,7 @@ public abstract class Cursor extends GVRBehavior
      */
     public float getPositionZ()
     {
-        GVRSceneObject owner = getOwnerObject();
+        SXRSceneObject owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -259,7 +259,7 @@ public abstract class Cursor extends GVRBehavior
      */
     public float getRotationW()
     {
-        GVRSceneObject owner = getOwnerObject();
+        SXRSceneObject owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -275,7 +275,7 @@ public abstract class Cursor extends GVRBehavior
      */
     public float getRotationX()
     {
-        GVRSceneObject owner = getOwnerObject();
+        SXRSceneObject owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -291,7 +291,7 @@ public abstract class Cursor extends GVRBehavior
      */
     public float getRotationY()
     {
-        GVRSceneObject owner = getOwnerObject();
+        SXRSceneObject owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -307,7 +307,7 @@ public abstract class Cursor extends GVRBehavior
      */
     public float getRotationZ()
     {
-        GVRSceneObject owner = getOwnerObject();
+        SXRSceneObject owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -316,11 +316,11 @@ public abstract class Cursor extends GVRBehavior
         return 0;
     }
 
-    public void addChildObject(GVRSceneObject child) {
+    public void addChildObject(SXRSceneObject child) {
         getOwnerObject().addChildObject(child);
     }
 
-    public void removeChildObject(GVRSceneObject child) {
+    public void removeChildObject(SXRSceneObject child) {
         getOwnerObject().removeChildObject(child);
     }
 
@@ -359,7 +359,7 @@ public abstract class Cursor extends GVRBehavior
      */
     void close() {
         mIODevice = null;
-        GVRSceneObject owner = getOwnerObject();
+        SXRSceneObject owner = getOwnerObject();
         if (owner.getParent() != null) {
             owner.getParent().removeChildObject(owner);
         }
@@ -619,7 +619,7 @@ public abstract class Cursor extends GVRBehavior
         if (mIODevice != null)
         {
             Log.d(TAG, "Marking ioDevice:" + mIODevice.getName() + " unused");
-            GVRCursorController controller = mIODevice.getGvrCursorController();
+            SXRCursorController controller = mIODevice.getGvrCursorController();
 
             controller.setCursor(null);
             controller.setEnable(false);

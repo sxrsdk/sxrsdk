@@ -4,12 +4,12 @@ import com.samsungxr.widgetlib.log.Log;
 import com.samsungxr.widgetlib.main.WidgetLib;
 import com.samsungxr.widgetlib.thread.FPSCounter;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRDrawFrameListener;
-import com.samsungxr.GVRPicker;
-import com.samsungxr.GVRPicker.GVRPickedObject;
-import com.samsungxr.GVRScene;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRDrawFrameListener;
+import com.samsungxr.SXRPicker;
+import com.samsungxr.SXRPicker.SXRPickedObject;
+import com.samsungxr.SXRScene;
+import com.samsungxr.SXRSceneObject;
 import com.samsungxr.widgetlib.widget.properties.JSONHelpers;
 import org.json.JSONObject;
 
@@ -68,7 +68,7 @@ public class FocusManager {
      * {@link TouchManager#addOnTouchInterceptor(TouchManager.OnTouch)}
      * TouchManager.setTouchInterceptor(OnTouch)}, instances of this interface
      * can be used to filter the delivery of focus events to
-     * {@linkplain GVRSceneObject scene objects}.
+     * {@linkplain SXRSceneObject scene objects}.
      */
     public interface FocusInterceptor {
         /**
@@ -78,16 +78,16 @@ public class FocusManager {
          * executed, return {@code false}.
          * <p>
          * Generally this is useful for restricting focus events to a subset of
-         * visible {@linkplain GVRSceneObject scene objects}: return
+         * visible {@linkplain SXRSceneObject scene objects}: return
          * {@code false} for the objects you want to get normal focus processing
          * for, and {@code true} for the ones you don't.
          *
          * @param sceneObject
-         *            The {@code GVRSceneObject} to filter
+         *            The {@code SXRSceneObject} to filter
          * @return {@code True} if the focus event has been handled,
          *         {@code false} otherwise.
          */
-        boolean onFocus(GVRSceneObject sceneObject);
+        boolean onFocus(SXRSceneObject sceneObject);
     }
 
     /**
@@ -112,7 +112,7 @@ public class FocusManager {
     /**
      * Creates FocusManager
      */
-    public FocusManager(GVRContext gvrContext) {
+    public FocusManager(SXRContext gvrContext) {
         final JSONObject properties = WidgetLib.getPropertyManager().getInstanceProperties(getClass(), TAG);
         Log.d(TAG, "FocusManager(): properties: %s", properties);
         mEnabled = JSONHelpers.optBoolean(properties, Properties.enabled, false);
@@ -148,7 +148,7 @@ public class FocusManager {
      * @param sceneObject
      * @param focusable
      */
-    public void register(final GVRSceneObject sceneObject, final Focusable focusable) {
+    public void register(final SXRSceneObject sceneObject, final Focusable focusable) {
         Log.d(Log.SUBSYSTEM.FOCUS, TAG, "register sceneObject %s , focusable = %s",
                 sceneObject.getName(), focusable);
         mFocusableMap.put(sceneObject, new WeakReference<>(focusable));
@@ -159,7 +159,7 @@ public class FocusManager {
      * has a focus, the focus will be released.
      * @param sceneObject
      */
-    public void unregister(final GVRSceneObject sceneObject) {
+    public void unregister(final SXRSceneObject sceneObject) {
         unregister(sceneObject, false);
     }
 
@@ -180,7 +180,7 @@ public class FocusManager {
         focusInterceptor = interceptor;
     }
 
-    void unregister(final GVRSceneObject sceneObject,
+    void unregister(final SXRSceneObject sceneObject,
             final boolean softUnregister) {
         Log.d(Log.SUBSYSTEM.FOCUS, TAG, "unregister sceneObject %s", sceneObject.getName());
         final WeakReference<Focusable> focusableRef = mFocusableMap
@@ -199,7 +199,7 @@ public class FocusManager {
         }
     }
 
-    private void init(GVRContext context) {
+    private void init(SXRContext context) {
         if (mContext == null) {
             mContext = context;
             if (mEnabled) {
@@ -231,13 +231,13 @@ public class FocusManager {
         }
     }
 
-    private GVRDrawFrameListener mDrawFrameListener = new GVRDrawFrameListener() {
+    private SXRDrawFrameListener mDrawFrameListener = new SXRDrawFrameListener() {
         @Override
         public void onDrawFrame(float frameTime) {
             FPSCounter.timeCheck("onDrawFrame <START>: " + this + " frameTime = " + frameTime);
 
-            final GVRScene mainScene = mContext.getMainScene();
-            mPickedObjects = GVRPicker.pickObjects(mainScene, 0, 0, 0, 0, 0, -1.0f);
+            final SXRScene mainScene = mContext.getMainScene();
+            mPickedObjects = SXRPicker.pickObjects(mainScene, 0, 0, 0, 0, 0, -1.0f);
 
             WidgetLib.getMainThread().runOnMainThread(mFocusRunnable);
             FPSCounter.timeCheck("onDrawFrame <END>: " + this + " frameTime = " + frameTime);
@@ -247,7 +247,7 @@ public class FocusManager {
     private final Runnable mFocusRunnable = new Runnable() {
         @Override
         public void run() {
-            final GVRPickedObject[] pickedObjectList = mPickedObjects;
+            final SXRPickedObject[] pickedObjectList = mPickedObjects;
             boolean noCurrentFocus =  mCurrentFocus == null;
 
             // release old focus
@@ -265,12 +265,12 @@ public class FocusManager {
             }
 
             Focusable focusable = null;
-            for (GVRPickedObject picked : pickedObjectList) {
+            for (SXRPickedObject picked : pickedObjectList) {
                 if (picked == null) {
                     Log.w(TAG, "onDrawFrame(): got a null reference in the pickedObjectList");
                     continue;
                 }
-                final GVRSceneObject quad = picked.getHitObject();
+                final SXRSceneObject quad = picked.getHitObject();
                 if (quad != null) {
                     if (!compareCurrentFocusName(quad)) {
                         Log.d(Log.SUBSYSTEM.FOCUS, TAG, "onDrawFrame(): checking '%s' for focus",
@@ -317,7 +317,7 @@ public class FocusManager {
             }
         }
 
-        private boolean compareCurrentFocusName(final GVRSceneObject quad) {
+        private boolean compareCurrentFocusName(final SXRSceneObject quad) {
             final String quadName = quad.getName();
             return (mCurrentFocusName == null && quadName == null)
                     || (mCurrentFocusName != null && mCurrentFocusName
@@ -338,7 +338,7 @@ public class FocusManager {
         return ret;
     }
 
-    private boolean takeNewFocus(final GVRSceneObject quad, final Focusable newFocusable) {
+    private boolean takeNewFocus(final SXRSceneObject quad, final Focusable newFocusable) {
         if (newFocusable != null &&
                 newFocusable.isFocusEnabled()) {
 
@@ -368,14 +368,14 @@ public class FocusManager {
         }
     }
 
-    private GVRContext mContext;
+    private SXRContext mContext;
     private final boolean mEnabled;
     private Focusable mCurrentFocus = null;
     private String mCurrentFocusName = "";
-    private Map<GVRSceneObject, WeakReference<Focusable>> mFocusableMap = new WeakHashMap<>();
+    private Map<SXRSceneObject, WeakReference<Focusable>> mFocusableMap = new WeakHashMap<>();
     private Set<CurrentFocusListener> mFocusListeners = new LinkedHashSet<>();
     private FocusInterceptor focusInterceptor;
-    private volatile GVRPickedObject[] mPickedObjects;
+    private volatile SXRPickedObject[] mPickedObjects;
 
     private final Runnable mLongFocusRunnable = new Runnable() {
 

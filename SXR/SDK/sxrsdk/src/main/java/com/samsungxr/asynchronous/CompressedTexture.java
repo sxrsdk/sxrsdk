@@ -21,25 +21,25 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
-import com.samsungxr.GVRCompressedImage;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRTextureParameters;
-import com.samsungxr.asynchronous.GVRCompressedTextureLoader.Reader;
+import com.samsungxr.SXRCompressedImage;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRTextureParameters;
+import com.samsungxr.asynchronous.SXRCompressedTextureLoader.Reader;
 
 import android.opengl.GLES20;
 
 /**
  * Represents a texture file, loaded into memory. Pass to EGL by calling
- * {@link #toTexture(GVRContext, int)}. Instances of this class hold the texture
+ * {@link #toTexture(SXRContext, int)}. Instances of this class hold the texture
  * file contents in memory: don't hold onto them any longer than necessary.
  * 
  * <p>
  * Get an instance by calling one of the {@code load()} overloads; register a
  * new loader by calling
- * {@link GVRCompressedTextureLoader#register()}
+ * {@link SXRCompressedTextureLoader#register()}
  * 
  * <p>
- * Note that {@link #toTexture(GVRContext, int)} <em>must</em> be called from
+ * Note that {@link #toTexture(SXRContext, int)} <em>must</em> be called from
  * the GL thread; other methods may be called from any thread.
  */
 public class CompressedTexture {
@@ -118,17 +118,17 @@ public class CompressedTexture {
         return data;
     }
 
-    GVRCompressedImage toTexture(GVRContext gvrContext, int quality) {
-        GVRCompressedImage tex = new GVRCompressedImage(gvrContext, width,
+    SXRCompressedImage toTexture(SXRContext gvrContext, int quality) {
+        SXRCompressedImage tex = new SXRCompressedImage(gvrContext, width,
                                                         height, imageSize, internalformat, getArray(), levels, quality);
         tex.setDataOffsets(new int[] { dataOffset });
         return tex;
     }
 
     // Texture parameters
-    GVRCompressedImage toTexture(GVRContext gvrContext, int quality,
-                                 GVRTextureParameters textureParameters) {
-        GVRCompressedImage tex = new GVRCompressedImage(gvrContext, width,
+    SXRCompressedImage toTexture(SXRContext gvrContext, int quality,
+                                 SXRTextureParameters textureParameters) {
+        SXRCompressedImage tex = new SXRCompressedImage(gvrContext, width,
                                                         height, imageSize, internalformat, getArray(), levels, quality);
         tex.setDataOffsets(new int[] { dataOffset });
         return tex;
@@ -136,7 +136,7 @@ public class CompressedTexture {
 
     /**
      * Loads a file into memory; detects type, and calls the appropriate
-     * {@link GVRCompressedTextureLoader#parse(byte[], Reader)} method.
+     * {@link SXRCompressedTextureLoader#parse(byte[], Reader)} method.
      * 
      * @param stream
      *            InputStream containing a compressed texture file
@@ -144,7 +144,7 @@ public class CompressedTexture {
      *            Max length to read. -1 for unlimited.
      * @param closeStream
      *            Close {@code stream} on exit?
-     * @return Normally, one and only one {@link GVRCompressedTextureLoader}
+     * @return Normally, one and only one {@link SXRCompressedTextureLoader}
      *         will recognize the file, and this method will return a
      *         {@link CompressedTexture}, ready to be passed to EGL via
      *         {@link CompressedTexture#glCompressedTexImage2D(int, int)}. If no
@@ -169,11 +169,11 @@ public class CompressedTexture {
 
         Reader reader = new Reader(data);
 
-        GVRCompressedTextureLoader valid = null;
-        List<GVRCompressedTextureLoader> loaders = GVRCompressedTextureLoader
+        SXRCompressedTextureLoader valid = null;
+        List<SXRCompressedTextureLoader> loaders = SXRCompressedTextureLoader
                 .getLoaders();
         synchronized (loaders) {
-            for (GVRCompressedTextureLoader loader : loaders) {
+            for (SXRCompressedTextureLoader loader : loaders) {
                 if (loader.sniff(data, reader)) {
                     if (valid != null) {
                         throw new IllegalArgumentException(
@@ -191,18 +191,18 @@ public class CompressedTexture {
         }
     }
 
-    public static GVRCompressedTextureLoader sniff(InputStream stream)
+    public static SXRCompressedTextureLoader sniff(InputStream stream)
             throws IOException {
         byte[] data = readBytes(stream,
-                GVRCompressedTextureLoader.maximumHeaderLength);
+                SXRCompressedTextureLoader.maximumHeaderLength);
 
         Reader reader = new Reader(data);
 
-        GVRCompressedTextureLoader valid = null;
-        List<GVRCompressedTextureLoader> loaders = GVRCompressedTextureLoader
+        SXRCompressedTextureLoader valid = null;
+        List<SXRCompressedTextureLoader> loaders = SXRCompressedTextureLoader
                 .getLoaders();
         synchronized (loaders) {
-            for (GVRCompressedTextureLoader loader : loaders) {
+            for (SXRCompressedTextureLoader loader : loaders) {
                 if (loader.sniff(data, reader)) {
                     if (valid != null) {
                         throw new IllegalArgumentException(
@@ -217,7 +217,7 @@ public class CompressedTexture {
     }
 
     static CompressedTexture parse(InputStream stream, boolean closeStream,
-            GVRCompressedTextureLoader loader) throws IOException {
+            SXRCompressedTextureLoader loader) throws IOException {
         byte[] data;
         try {
             data = readBytes(stream);

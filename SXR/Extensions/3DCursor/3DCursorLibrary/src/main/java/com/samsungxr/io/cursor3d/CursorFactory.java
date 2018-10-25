@@ -15,7 +15,7 @@
 
 package com.samsungxr.io.cursor3d;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 import com.samsungxr.utility.Log;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -43,7 +43,7 @@ class CursorFactory {
     private static final String XML_START_TAG = "<cursor ";
     private static final String XML_END_TAG = "</cursor";
 
-    static Cursor readCursor(XmlPullParser parser, GVRContext context, CursorManager
+    static Cursor readCursor(XmlPullParser parser, SXRContext context, CursorManager
             cursorManager) throws XmlPullParserException, IOException {
         Cursor cursor;
 

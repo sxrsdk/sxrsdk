@@ -17,7 +17,7 @@ package com.samsungxr;
 
 interface IActivityNative {
     void onDestroy();
-    void setCameraRig(GVRCameraRig cameraRig);
+    void setCameraRig(SXRCameraRig cameraRig);
     void onUndock();
     void onDock();
     long getNative();

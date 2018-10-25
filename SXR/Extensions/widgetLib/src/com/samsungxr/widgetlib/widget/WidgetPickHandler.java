@@ -5,12 +5,12 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 
-import com.samsungxr.GVRPicker;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRPicker;
+import com.samsungxr.SXRSceneObject;
 import com.samsungxr.IPickEvents;
 import com.samsungxr.ITouchEvents;
-import com.samsungxr.io.GVRCursorController;
-import com.samsungxr.io.GVRInputManager;
+import com.samsungxr.io.SXRCursorController;
+import com.samsungxr.io.SXRInputManager;
 
 import com.samsungxr.widgetlib.log.Log;
 import com.samsungxr.widgetlib.main.WidgetLib;
@@ -26,15 +26,15 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 
-class WidgetPickHandler implements GVRInputManager.ICursorControllerSelectListener,
-        GVRInputManager.ICursorControllerListener {
+class WidgetPickHandler implements SXRInputManager.ICursorControllerSelectListener,
+        SXRInputManager.ICursorControllerListener {
     private PickEventsListener mPickEventListener = new PickEventsListener();
     private TouchEventsListener mTouchEventsListener = new TouchEventsListener();
     private ControllerEvent mControllerEvent = new ControllerEvent();
 
     @Override
-    public void onCursorControllerSelected(GVRCursorController newController,
-                                           GVRCursorController oldController) {
+    public void onCursorControllerSelected(SXRCursorController newController,
+                                           SXRCursorController oldController) {
         if (oldController != null) {
             Log.d(Log.SUBSYSTEM.INPUT, TAG,
                     "onCursorControllerSelected(): removing from old controller (%s)",
@@ -47,7 +47,7 @@ class WidgetPickHandler implements GVRInputManager.ICursorControllerSelectListen
         Log.d(Log.SUBSYSTEM.INPUT, TAG,
                 "onCursorControllerSelected(): adding to new controller \"%s\" (%s)",
                 newController.getName(), newController.getClass().getSimpleName());
-        GVRPicker picker = newController.getPicker();
+        SXRPicker picker = newController.getPicker();
         picker.setPickClosest(false);
         newController.addPickEventListener(mPickEventListener);
         newController.addPickEventListener(mTouchEventsListener);
@@ -65,14 +65,14 @@ class WidgetPickHandler implements GVRInputManager.ICursorControllerSelectListen
     }
 
     @Override
-    public void onCursorControllerAdded(GVRCursorController gvrCursorController) {
+    public void onCursorControllerAdded(SXRCursorController gvrCursorController) {
         Log.d(Log.SUBSYSTEM.INPUT, TAG,"onCursorControllerAdded: %s",
                 gvrCursorController.getClass().getSimpleName());
 
     }
 
     @Override
-    public void onCursorControllerRemoved(GVRCursorController gvrCursorController) {
+    public void onCursorControllerRemoved(SXRCursorController gvrCursorController) {
         Log.d(Log.SUBSYSTEM.INPUT, TAG,"onCursorControllerRemoved: %s",
                 gvrCursorController.getClass().getSimpleName());
 
@@ -83,7 +83,7 @@ class WidgetPickHandler implements GVRInputManager.ICursorControllerSelectListen
 
     static private class PickEventsListener implements IPickEvents {
 
-        public void onEnter(final GVRSceneObject sceneObj, final GVRPicker.GVRPickedObject collision) {
+        public void onEnter(final SXRSceneObject sceneObj, final SXRPicker.SXRPickedObject collision) {
             WidgetLib.getMainThread().runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
@@ -98,7 +98,7 @@ class WidgetPickHandler implements GVRInputManager.ICursorControllerSelectListen
             });
         }
 
-        public void onExit(final GVRSceneObject sceneObj) {
+        public void onExit(final SXRSceneObject sceneObj) {
             WidgetLib.getMainThread().runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
@@ -124,13 +124,13 @@ class WidgetPickHandler implements GVRInputManager.ICursorControllerSelectListen
             return false;
         }
 
-        public void onPick(final GVRPicker picker) {
+        public void onPick(final SXRPicker picker) {
             if (picker.hasPickListChanged()) {
-                final List<GVRPicker.GVRPickedObject> pickedList =  Arrays.asList(picker.getPicked());
+                final List<SXRPicker.SXRPickedObject> pickedList =  Arrays.asList(picker.getPicked());
                 WidgetLib.getMainThread().runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        for (GVRPicker.GVRPickedObject hit : pickedList) {
+                        for (SXRPicker.SXRPickedObject hit : pickedList) {
                             Widget widget = WidgetBehavior.getTarget(hit.hitObject);
                             if (widget != null && mSelected.contains(widget) &&
                                     (widget.isFocused() ||
@@ -145,7 +145,7 @@ class WidgetPickHandler implements GVRInputManager.ICursorControllerSelectListen
             }
         }
 
-        public void onNoPick(final GVRPicker picker) {
+        public void onNoPick(final SXRPicker picker) {
             if (picker.hasPickListChanged()) {
                 WidgetLib.getMainThread().runOnMainThread(new Runnable() {
                     @Override
@@ -159,13 +159,13 @@ class WidgetPickHandler implements GVRInputManager.ICursorControllerSelectListen
 
         private final Set<Widget> mSelected = new HashSet<>();
 
-        public void onInside(GVRSceneObject sceneObj, GVRPicker.GVRPickedObject collision) {
+        public void onInside(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) {
         }
     }
 
     static private class TouchEventsListener implements ITouchEvents {
 
-        public void onTouchStart(final GVRSceneObject sceneObj, final GVRPicker.GVRPickedObject collision) {
+        public void onTouchStart(final SXRSceneObject sceneObj, final SXRPicker.SXRPickedObject collision) {
             WidgetLib.getMainThread().runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
@@ -181,7 +181,7 @@ class WidgetPickHandler implements GVRInputManager.ICursorControllerSelectListen
             });
         }
 
-        public void onTouchEnd(final GVRSceneObject sceneObj, final GVRPicker.GVRPickedObject collision) {
+        public void onTouchEnd(final SXRSceneObject sceneObj, final SXRPicker.SXRPickedObject collision) {
             WidgetLib.getMainThread().runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
@@ -201,16 +201,16 @@ class WidgetPickHandler implements GVRInputManager.ICursorControllerSelectListen
             });
         }
 
-        public void onExit(GVRSceneObject sceneObj, GVRPicker.GVRPickedObject collision) {
+        public void onExit(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) {
         }
 
-        public void onMotionOutside(final GVRPicker picker, final MotionEvent event) {
+        public void onMotionOutside(final SXRPicker picker, final MotionEvent event) {
             WidgetLib.getMainThread().runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
                     if (mFlingHandler != null) {
                         GestureDetector gestureDetector = new GestureDetector(
-                                picker.getGVRContext().getContext(), mGestureListener);
+                                picker.getSXRContext().getContext(), mGestureListener);
 
                         gestureDetector.onTouchEvent(event);
                         Vector3f pos = new Vector3f();
@@ -235,10 +235,10 @@ class WidgetPickHandler implements GVRInputManager.ICursorControllerSelectListen
 
         private final List<Widget> mTouched = new ArrayList<>();
         private FlingHandler mFlingHandler;
-        public void onEnter(GVRSceneObject sceneObj, GVRPicker.GVRPickedObject collision) {
+        public void onEnter(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) {
         }
 
-        public void onInside(GVRSceneObject sceneObj, GVRPicker.GVRPickedObject collision) {
+        public void onInside(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) {
         }
 
         private FlingHandler.FlingAction mFling;
@@ -335,9 +335,9 @@ class WidgetPickHandler implements GVRInputManager.ICursorControllerSelectListen
         };
     }
 
-    private class ControllerEvent implements GVRCursorController.IControllerEvent {
+    private class ControllerEvent implements SXRCursorController.IControllerEvent {
         @Override
-        public void onEvent(GVRCursorController controller, boolean isActive) {
+        public void onEvent(SXRCursorController controller, boolean isActive) {
             if (controller != null) {
                 final List<KeyEvent> keyEvents = controller.getKeyEvents();
                 Log.d(Log.SUBSYSTEM.INPUT, TAG, "onEvent(): Key events:");

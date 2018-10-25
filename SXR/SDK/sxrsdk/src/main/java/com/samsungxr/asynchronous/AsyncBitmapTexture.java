@@ -27,10 +27,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRAndroidResource.CancelableCallback;
-import com.samsungxr.GVRBitmapImage;
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRAndroidResource.CancelableCallback;
+import com.samsungxr.SXRBitmapImage;
+import com.samsungxr.SXRContext;
 import com.samsungxr.asynchronous.Throttler.AsyncLoader;
 import com.samsungxr.asynchronous.Throttler.AsyncLoaderFactory;
 import com.samsungxr.asynchronous.Throttler.GlConverter;
@@ -73,14 +73,14 @@ class AsyncBitmapTexture {
      * The API
      */
 
-    static void loadTexture(GVRContext gvrContext,
-            CancelableCallback<GVRBitmapImage> callback,
-            GVRAndroidResource resource, int priority) {
+    static void loadTexture(SXRContext gvrContext,
+            CancelableCallback<SXRBitmapImage> callback,
+            SXRAndroidResource resource, int priority) {
         AsyncManager.get().getScheduler().registerCallback(gvrContext, TEXTURE_CLASS, callback,
                 resource, priority);
     }
 
-    private static final Class<GVRBitmapImage> TEXTURE_CLASS = GVRBitmapImage.class;
+    private static final Class<SXRBitmapImage> TEXTURE_CLASS = SXRBitmapImage.class;
     /*
      * Singleton
      */
@@ -96,11 +96,11 @@ class AsyncBitmapTexture {
 
     private AsyncBitmapTexture() {
         AsyncManager.get().registerDatatype(TEXTURE_CLASS,
-                new AsyncLoaderFactory<GVRBitmapImage, Bitmap>() {
+                new AsyncLoaderFactory<SXRBitmapImage, Bitmap>() {
             @Override
-            AsyncLoader<GVRBitmapImage, Bitmap> threadProc(GVRContext gvrContext,
-                    GVRAndroidResource request,
-                    CancelableCallback<GVRBitmapImage> callback,
+            AsyncLoader<SXRBitmapImage, Bitmap> threadProc(SXRContext gvrContext,
+                    SXRAndroidResource request,
+                    CancelableCallback<SXRBitmapImage> callback,
                     int priority) {
                 return new AsyncLoadTextureResource(gvrContext,
                         request, callback, priority);
@@ -166,7 +166,7 @@ class AsyncBitmapTexture {
      * first use; the default settings are very conservative, and will usually
      * give much smaller textures than necessary.
      */
-    static Context setup(GVRContext context) {
+    static Context setup(SXRContext context) {
         return setup(context, null);
     }
 
@@ -176,7 +176,7 @@ class AsyncBitmapTexture {
      * first use; the default settings are very conservative, and will usually
      * give much smaller textures than necessary.
      */
-    static Context setup(GVRContext gvrContext, ImageSizePolicy sizePolicy) {
+    static Context setup(SXRContext gvrContext, ImageSizePolicy sizePolicy) {
         Context androidContext = gvrContext.getContext();
         Memory.setup(androidContext);
 
@@ -327,19 +327,19 @@ class AsyncBitmapTexture {
      */
 
     private static class AsyncLoadTextureResource extends
-            AsyncLoader<GVRBitmapImage, Bitmap> {
+            AsyncLoader<SXRBitmapImage, Bitmap> {
 
-        private static final GlConverter<GVRBitmapImage, Bitmap> sConverter = new GlConverter<GVRBitmapImage, Bitmap>() {
+        private static final GlConverter<SXRBitmapImage, Bitmap> sConverter = new GlConverter<SXRBitmapImage, Bitmap>() {
 
             @Override
-            public GVRBitmapImage convert(GVRContext gvrContext, Bitmap bitmap) {
-                return new GVRBitmapImage(gvrContext, bitmap);
+            public SXRBitmapImage convert(SXRContext gvrContext, Bitmap bitmap) {
+                return new SXRBitmapImage(gvrContext, bitmap);
             }
         };
 
-        protected AsyncLoadTextureResource(GVRContext gvrContext,
-                GVRAndroidResource request,
-                CancelableCallback<GVRBitmapImage> callback, int priority) {
+        protected AsyncLoadTextureResource(SXRContext gvrContext,
+                SXRAndroidResource request,
+                CancelableCallback<SXRBitmapImage> callback, int priority) {
             super(gvrContext, sConverter, request, callback);
         }
 

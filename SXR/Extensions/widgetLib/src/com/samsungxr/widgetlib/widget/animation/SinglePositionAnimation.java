@@ -1,7 +1,7 @@
 package com.samsungxr.widgetlib.widget.animation;
 
-import com.samsungxr.GVRHybridObject;
-import com.samsungxr.animation.GVRTransformAnimation;
+import com.samsungxr.SXRHybridObject;
+import com.samsungxr.animation.SXRTransformAnimation;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -76,7 +76,7 @@ public class SinglePositionAnimation extends TransformAnimation {
         return mAdapter;
     }
 
-    private class Adapter extends GVRTransformAnimation implements
+    private class Adapter extends SXRTransformAnimation implements
             Animation.AnimationAdapter {
         private final float mDelta;
         private final float mStart;
@@ -96,7 +96,7 @@ public class SinglePositionAnimation extends TransformAnimation {
         }
 
         @Override
-        public void animate(GVRHybridObject target, float ratio) {
+        public void animate(SXRHybridObject target, float ratio) {
             doAnimate(ratio);
         }
 

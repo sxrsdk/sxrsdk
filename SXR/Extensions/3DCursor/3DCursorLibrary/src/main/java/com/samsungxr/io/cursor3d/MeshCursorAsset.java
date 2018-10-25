@@ -18,15 +18,15 @@ package com.samsungxr.io.cursor3d;
 
 import android.util.SparseArray;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRMaterial;
-import com.samsungxr.GVRMaterial.GVRShaderType.Texture;
-import com.samsungxr.GVRMesh;
-import com.samsungxr.GVRRenderData;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRSwitch;
-import com.samsungxr.GVRTexture;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRMaterial;
+import com.samsungxr.SXRMaterial.SXRShaderType.Texture;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRRenderData;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRSwitch;
+import com.samsungxr.SXRTexture;
 import com.samsungxr.utility.Log;
 
 import java.io.IOException;
@@ -38,27 +38,27 @@ import java.util.concurrent.Future;
 class MeshCursorAsset extends CursorAsset {
     private static final String TAG = MeshCursorAsset.class.getSimpleName();
     private static final int OVERLAY_RENDER_ORDER = 100000;
-    private GVRTexture texture;
-    private GVRMesh mesh;
+    private SXRTexture texture;
+    private SXRMesh mesh;
     private float x;
     private float y;
-    protected SparseArray<GVRSceneObject> sceneObjectArray;
+    protected SparseArray<SXRSceneObject> sceneObjectArray;
 
-    MeshCursorAsset(GVRContext context, CursorType type, Action action, String texName) {
+    MeshCursorAsset(SXRContext context, CursorType type, Action action, String texName) {
         this(context, type, action, null, texName);
     }
 
-    MeshCursorAsset(GVRContext context, CursorType type, Action action, String meshName, String
+    MeshCursorAsset(SXRContext context, CursorType type, Action action, String meshName, String
             texName)
     {
         super(context, type, action);
-        sceneObjectArray = new SparseArray<GVRSceneObject>();
+        sceneObjectArray = new SparseArray<SXRSceneObject>();
 
         if (meshName != null)
         {
             try
             {
-                mesh = context.getAssetLoader().loadMesh(new GVRAndroidResource(context, meshName));
+                mesh = context.getAssetLoader().loadMesh(new SXRAndroidResource(context, meshName));
             }
             catch (IOException e)
             {
@@ -70,7 +70,7 @@ class MeshCursorAsset extends CursorAsset {
             try
             {
                 texture = context.getAssetLoader().loadTexture(
-                        new GVRAndroidResource(context, texName));
+                        new SXRAndroidResource(context, texName));
             }
             catch (IOException e)
             {
@@ -83,7 +83,7 @@ class MeshCursorAsset extends CursorAsset {
     void setQuadMesh(float x, float y) {
         this.x = x;
         this.y = y;
-        mesh = new GVRMesh(context, "float3 a_position float2 a_texcoord");
+        mesh = new SXRMesh(context, "float3 a_position float2 a_texcoord");
         mesh.createQuad(x, y);
     }
 
@@ -91,16 +91,16 @@ class MeshCursorAsset extends CursorAsset {
     void load(Cursor cursor)
     {
         Integer key = cursor.getId();
-        GVRSceneObject assetSceneObject = sceneObjectArray.get(key);
-        GVRRenderData renderData = null;
+        SXRSceneObject assetSceneObject = sceneObjectArray.get(key);
+        SXRRenderData renderData = null;
 
         if (assetSceneObject == null)
         {
-            assetSceneObject = new GVRSceneObject(context);
+            assetSceneObject = new SXRSceneObject(context);
             assetSceneObject.setName( getAction().toString() + key.toString());
             assetSceneObject.setEnable(false);
-            renderData = new GVRRenderData(context);
-            renderData.setMaterial(new GVRMaterial(context, Texture.ID));
+            renderData = new SXRRenderData(context);
+            renderData.setMaterial(new SXRMaterial(context, Texture.ID));
 
             if (cursorType == CursorType.LASER)
             {
@@ -127,7 +127,7 @@ class MeshCursorAsset extends CursorAsset {
     {
         int key = cursor.getId();
 
-        GVRSceneObject assetSceneObject = sceneObjectArray.get(key);
+        SXRSceneObject assetSceneObject = sceneObjectArray.get(key);
         cursor.removeChildObject(assetSceneObject);
         sceneObjectArray.remove(key);
         // check if there are cursors still using the texture
@@ -140,7 +140,7 @@ class MeshCursorAsset extends CursorAsset {
     void set(Cursor cursor)
     {
         super.set(cursor);
-        final GVRSceneObject assetSceneObject = sceneObjectArray.get(cursor.getId());
+        final SXRSceneObject assetSceneObject = sceneObjectArray.get(cursor.getId());
         if (assetSceneObject == null)
         {
             Log.e(TAG, "Render data not found, should not happen");
@@ -150,15 +150,15 @@ class MeshCursorAsset extends CursorAsset {
     }
 
     /**
-     * Use the reset method to remove this asset from the given {@link GVRSceneObject}.
+     * Use the reset method to remove this asset from the given {@link SXRSceneObject}.
      *
-     * @param cursor the {@link GVRSceneObject}  for the behavior to be removed
+     * @param cursor the {@link SXRSceneObject}  for the behavior to be removed
      */
 
     void reset(Cursor cursor)
     {
         super.reset(cursor);
-        GVRSceneObject assetSceneObject = sceneObjectArray.get(cursor.getId());
+        SXRSceneObject assetSceneObject = sceneObjectArray.get(cursor.getId());
         assetSceneObject.setEnable(false);
     }
 

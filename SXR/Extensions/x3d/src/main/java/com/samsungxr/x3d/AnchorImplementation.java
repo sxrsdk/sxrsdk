@@ -23,23 +23,23 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.samsungxr.GVRCameraRig;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRDrawFrameListener;
-import com.samsungxr.GVRExternalScene;
-import com.samsungxr.GVRMeshCollider;
-import com.samsungxr.GVRRenderData;
-import com.samsungxr.GVRScene;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRCameraRig;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRDrawFrameListener;
+import com.samsungxr.SXRExternalScene;
+import com.samsungxr.SXRMeshCollider;
+import com.samsungxr.SXRRenderData;
+import com.samsungxr.SXRScene;
+import com.samsungxr.SXRSceneObject;
 import com.samsungxr.ISensorEvents;
 import com.samsungxr.SensorEvent;
-import com.samsungxr.io.GVRControllerType;
-import com.samsungxr.io.GVRCursorController;
-import com.samsungxr.io.GVRInputManager;
-import com.samsungxr.scene_objects.GVRCubeSceneObject;
-import com.samsungxr.scene_objects.GVRSphereSceneObject;
-import com.samsungxr.scene_objects.GVRTextViewSceneObject;
-import com.samsungxr.scene_objects.GVRViewSceneObject;
+import com.samsungxr.io.SXRControllerType;
+import com.samsungxr.io.SXRCursorController;
+import com.samsungxr.io.SXRInputManager;
+import com.samsungxr.scene_objects.SXRCubeSceneObject;
+import com.samsungxr.scene_objects.SXRSphereSceneObject;
+import com.samsungxr.scene_objects.SXRTextViewSceneObject;
+import com.samsungxr.scene_objects.SXRViewSceneObject;
 import com.samsungxr.utility.Log;
 import com.samsungxr.utility.Threads;
 import org.joml.Vector3f;
@@ -76,13 +76,13 @@ public class AnchorImplementation {
     private static final String IS_OVER = "isOver";
     private static final String Is_ACTIVE = "isActive";
 
-    private GVRContext gvrContext = null;
-    private GVRSceneObject root = null;
+    private SXRContext gvrContext = null;
+    private SXRSceneObject root = null;
     private Vector<Viewpoint> viewpoints = new Vector<Viewpoint>();
 
     private PerFrameWebViewControl perFrameWebViewControl = new PerFrameWebViewControl();
 
-    private GVRSphereSceneObject gvrScaleObject = null;
+    private SXRSphereSceneObject gvrScaleObject = null;
     private final float[] scaleControlInitPosition = {-2, 1.5f, 0};
 
     private Vector3f translationObjectTranslationLocal = new Vector3f();
@@ -94,10 +94,10 @@ public class AnchorImplementation {
     private final Vector3f cubeUISize = new Vector3f(webViewDimensions[0], .5f, .2f);
     private final float[] cubeUIPosition = {0, (webViewDimensions[1] + cubeUISize.y)/2.0f, -cubeUISize.z/2.0f}; // center, above the web page
 
-    private GVRTextViewSceneObject gvrTextExitObject = null;
-    private GVRTextViewSceneObject gvrTextTranslationObject = null;
-    private GVRTextViewSceneObject gvrTextScaleObject = null;
-    private GVRTextViewSceneObject gvrTextRotateObject = null;
+    private SXRTextViewSceneObject gvrTextExitObject = null;
+    private SXRTextViewSceneObject gvrTextTranslationObject = null;
+    private SXRTextViewSceneObject gvrTextScaleObject = null;
+    private SXRTextViewSceneObject gvrTextRotateObject = null;
     private final float[] textExitPosition = {1.5f, 0, .125f};
     private final float[] textScalePosition = {-1.5f, 0, .125f};
     private final float[] textTranslatePosition = {-.5f, 0, .125f};
@@ -113,7 +113,7 @@ public class AnchorImplementation {
     private float[] initialHitPoint = new float[3];
 
 
-    private GVRSceneObject webPagePlusUISceneObject = null;
+    private SXRSceneObject webPagePlusUISceneObject = null;
 
     private final int textColorDefault = Color.BLACK;
     private final int textColorIsOver   = Color.LTGRAY;
@@ -125,7 +125,7 @@ public class AnchorImplementation {
     private final String TEXT_ROTATE_NAME = "rotate";
     private final String TEXT_SCALE_NAME = "scale";
 
-    private GVRDrawFrameListener mOnDrawFrame = null;
+    private SXRDrawFrameListener mOnDrawFrame = null;
     private boolean webViewTranslation = false;
     private boolean webViewScale = false;
     private WebView gvrWebView = null;
@@ -139,7 +139,7 @@ public class AnchorImplementation {
     private boolean webPageClosed = false;
 
 
-    public AnchorImplementation(GVRContext gvrContext, GVRSceneObject root, Vector<Viewpoint> viewpoints ) {
+    public AnchorImplementation(SXRContext gvrContext, SXRSceneObject root, Vector<Viewpoint> viewpoints ) {
         this.gvrContext = gvrContext;
         this.root = root;
         this.viewpoints = viewpoints;
@@ -157,11 +157,11 @@ public class AnchorImplementation {
         final InteractiveObject interactiveObjectFinal = interactiveObject;
 
         interactiveObject.getSensor().getOwnerObject().forAllDescendants(
-                new GVRSceneObject.SceneVisitor()
+                new SXRSceneObject.SceneVisitor()
                 {
-                    public boolean visit (GVRSceneObject obj)
+                    public boolean visit (SXRSceneObject obj)
                     {
-                        obj.attachCollider(new GVRMeshCollider(gvrContext, true));
+                        obj.attachCollider(new SXRMeshCollider(gvrContext, true));
                         return true;
                     }
                 });
@@ -191,8 +191,8 @@ public class AnchorImplementation {
                             if ( !newSceneLoaded ) {
                                 // Go to another X3D scene
                                 newSceneLoaded = true;
-                                GVRExternalScene gvrExternalScene = new GVRExternalScene(gvrContext, url, true);
-                                GVRSceneObject gvrSceneObjectAnchor = new GVRSceneObject(gvrContext);
+                                SXRExternalScene gvrExternalScene = new SXRExternalScene(gvrContext, url, true);
+                                SXRSceneObject gvrSceneObjectAnchor = new SXRSceneObject(gvrContext);
                                 gvrSceneObjectAnchor.attachComponent( gvrExternalScene );
                                 boolean load = gvrExternalScene.load(gvrContext.getMainScene());
                                 if (!load) Log.e(TAG, "Error loading new X3D scene " + url);
@@ -280,11 +280,11 @@ public class AnchorImplementation {
                     webPageClosed = false;
                 }
                 else if (event.isOver()) {
-                    GVRSceneObject sensorObj = interactiveObjectFinal.getSensor().getOwnerObject();
+                    SXRSceneObject sensorObj = interactiveObjectFinal.getSensor().getOwnerObject();
                     if (sensorObj != null) {
-                        GVRSceneObject sensorObj2 = sensorObj.getChildByIndex(0);
+                        SXRSceneObject sensorObj2 = sensorObj.getChildByIndex(0);
                         if (sensorObj2 != null) {
-                            GVRCameraRig mainCameraRig = gvrContext.getMainScene().getMainCameraRig();
+                            SXRCameraRig mainCameraRig = gvrContext.getMainScene().getMainCameraRig();
                             float[] cameraPosition = new float[3];
                             cameraPosition[0] = mainCameraRig.getTransform().getPositionX();
                             cameraPosition[1] = mainCameraRig.getTransform().getPositionY();
@@ -292,11 +292,11 @@ public class AnchorImplementation {
                         }
                     }
                 } else {
-                    GVRSceneObject sensorObj = interactiveObjectFinal.getSensor().getOwnerObject();
+                    SXRSceneObject sensorObj = interactiveObjectFinal.getSensor().getOwnerObject();
                     if (sensorObj != null) {
-                        GVRSceneObject sensorObj2 = sensorObj.getChildByIndex(0);
+                        SXRSceneObject sensorObj2 = sensorObj.getChildByIndex(0);
                         if (sensorObj2 != null) {
-                            GVRCameraRig mainCameraRig = gvrContext.getMainScene().getMainCameraRig();
+                            SXRCameraRig mainCameraRig = gvrContext.getMainScene().getMainCameraRig();
                             float[] cameraPosition = new float[3];
                             cameraPosition[0] = mainCameraRig.getTransform().getPositionX();
                             cameraPosition[1] = mainCameraRig.getTransform().getPositionY();
@@ -321,19 +321,19 @@ public class AnchorImplementation {
         }
         if ( vp != null ) {
             // found the Viewpoint matching the url
-            GVRCameraRig mainCameraRig = gvrContext.getMainScene().getMainCameraRig();
+            SXRCameraRig mainCameraRig = gvrContext.getMainScene().getMainCameraRig();
             float[] cameraPosition = vp.getPosition();
             mainCameraRig.getTransform().setPosition( cameraPosition[0], cameraPosition[1], cameraPosition[2] );
 
             // Set the Gaze controller position which is where the pick ray
             // begins in the direction of camera.lookt()
-            GVRCursorController gazeController = null;
-            GVRInputManager inputManager = gvrContext.getInputManager();
+            SXRCursorController gazeController = null;
+            SXRInputManager inputManager = gvrContext.getInputManager();
 
-            List<GVRCursorController> controllerList = inputManager.getCursorControllers();
+            List<SXRCursorController> controllerList = inputManager.getCursorControllers();
 
-            for(GVRCursorController controller: controllerList){
-                if(controller.getControllerType() == GVRControllerType.GAZE);
+            for(SXRCursorController controller: controllerList){
+                if(controller.getControllerType() == SXRControllerType.GAZE);
                 {
                     gazeController = controller;
                     break;
@@ -352,7 +352,7 @@ public class AnchorImplementation {
     private void LaunchWebPage(InteractiveObject interactiveObjectFinal, String url) {
         if (webPagePlusUISceneObject == null) {
             final String urlFinal = url;
-            final GVRSceneObject gvrSceneObjectAnchor = interactiveObjectFinal.getSensor().getOwnerObject();
+            final SXRSceneObject gvrSceneObjectAnchor = interactiveObjectFinal.getSensor().getOwnerObject();
             gvrContext.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -383,7 +383,7 @@ public class AnchorImplementation {
 
                     if (gvrWebView != null) {
 
-                        GVRViewSceneObject gvrWebViewSceneObject = new GVRViewSceneObject(gvrContext,
+                        SXRViewSceneObject gvrWebViewSceneObject = new SXRViewSceneObject(gvrContext,
                                 gvrWebView, webViewDimensions[0], webViewDimensions[1]);
                         gvrWebViewSceneObject.setName("Web View");
 
@@ -391,8 +391,8 @@ public class AnchorImplementation {
                         gvrWebViewSceneObject.getTransform().setPosition(0.0f, 0.0f, 0.0f);
                         gvrWebViewSceneObject.getRenderData().setRenderMask(0);
                         gvrWebViewSceneObject.getRenderData().setRenderMask(
-                                GVRRenderData.GVRRenderMaskBit.Left
-                                        | GVRRenderData.GVRRenderMaskBit.Right);
+                                SXRRenderData.SXRRenderMaskBit.Left
+                                        | SXRRenderData.SXRRenderMaskBit.Right);
 
                         if (useWebPageTranformControls) WebPageTranformControls( gvrWebViewSceneObject, gvrSceneObjectAnchor, urlFinal);
                         else WebPageCloseOnClick( gvrWebViewSceneObject, gvrSceneObjectAnchor, urlFinal);
@@ -405,18 +405,18 @@ public class AnchorImplementation {
 
 
     // Display web page, but no user interface - close
-    private void WebPageCloseOnClick(GVRViewSceneObject gvrWebViewSceneObject, GVRSceneObject gvrSceneObjectAnchor, String url) {
+    private void WebPageCloseOnClick(SXRViewSceneObject gvrWebViewSceneObject, SXRSceneObject gvrSceneObjectAnchor, String url) {
         final String urlFinal = url;
 
-        webPagePlusUISceneObject = new GVRSceneObject(gvrContext);
+        webPagePlusUISceneObject = new SXRSceneObject(gvrContext);
         webPagePlusUISceneObject.getTransform().setPosition(webPagePlusUIPosition[0], webPagePlusUIPosition[1], webPagePlusUIPosition[2]);
 
-        GVRScene mainScene = gvrContext.getMainScene();
+        SXRScene mainScene = gvrContext.getMainScene();
 
         Sensor webPageSensor = new Sensor(urlFinal, Sensor.Type.TOUCH, gvrWebViewSceneObject, true);
-        final GVRSceneObject gvrSceneObjectAnchorFinal = gvrSceneObjectAnchor;
-        final GVRSceneObject gvrWebViewSceneObjectFinal = gvrWebViewSceneObject;
-        final GVRSceneObject webPagePlusUISceneObjectFinal = webPagePlusUISceneObject;
+        final SXRSceneObject gvrSceneObjectAnchorFinal = gvrSceneObjectAnchor;
+        final SXRSceneObject gvrWebViewSceneObjectFinal = gvrWebViewSceneObject;
+        final SXRSceneObject webPagePlusUISceneObjectFinal = webPagePlusUISceneObject;
 
         webPagePlusUISceneObjectFinal.addChildObject(gvrWebViewSceneObjectFinal);
         gvrSceneObjectAnchorFinal.addChildObject(webPagePlusUISceneObjectFinal);
@@ -444,34 +444,34 @@ public class AnchorImplementation {
 
 
     // When we implement controls for dragging, scaling, closing, etc. a WebView
-    private void WebPageTranformControls(GVRViewSceneObject gvrWebViewSceneObject, GVRSceneObject gvrSceneObjectAnchor, String url) {
+    private void WebPageTranformControls(SXRViewSceneObject gvrWebViewSceneObject, SXRSceneObject gvrSceneObjectAnchor, String url) {
         final String urlFinal = url;
-        GVRCubeSceneObject gvrUICubeSceneObject = new GVRCubeSceneObject(gvrContext, true, cubeUISize);
+        SXRCubeSceneObject gvrUICubeSceneObject = new SXRCubeSceneObject(gvrContext, true, cubeUISize);
         gvrUICubeSceneObject.getTransform().setPosition(cubeUIPosition[0], cubeUIPosition[1], cubeUIPosition[2]);
         gvrUICubeSceneObject.getRenderData().getMaterial().setDiffuseColor(.3f, .5f, .7f, 1);
 
         // Add the icons to close, scale, translate and rotate
-        gvrTextExitObject = new GVRTextViewSceneObject(gvrContext, 0.5f, 0.45f, " x ");
+        gvrTextExitObject = new SXRTextViewSceneObject(gvrContext, 0.5f, 0.45f, " x ");
         gvrTextExitObject.setName(TEXT_EXIT_NAME);
         gvrTextExitObject.setTextColor(textColorDefault);
         gvrTextExitObject.setBackgroundColor(textColorBackground);
         gvrTextExitObject.getTransform().setPosition(textExitPosition[0], textExitPosition[1], textExitPosition[2]);
         gvrUICubeSceneObject.addChildObject(gvrTextExitObject);
-        gvrTextTranslationObject = new GVRTextViewSceneObject(gvrContext, 0.5f, 0.45f, " t ");
+        gvrTextTranslationObject = new SXRTextViewSceneObject(gvrContext, 0.5f, 0.45f, " t ");
         gvrTextTranslationObject.setName(TEXT_TRANSLATE_NAME);
         gvrTextTranslationObject.setTextColor(textColorDefault);
         gvrTextTranslationObject.setBackgroundColor(textColorBackground);
         gvrTextTranslationObject.getTransform().setPosition(textTranslatePosition[0], textTranslatePosition[1], textTranslatePosition[2]);
         gvrUICubeSceneObject.addChildObject(gvrTextTranslationObject);
 
-        gvrTextRotateObject = new GVRTextViewSceneObject(gvrContext, 0.5f, 0.45f, " r ");
+        gvrTextRotateObject = new SXRTextViewSceneObject(gvrContext, 0.5f, 0.45f, " r ");
         gvrTextRotateObject.setName(TEXT_ROTATE_NAME);
         gvrTextRotateObject.setTextColor(textColorDefault);
         gvrTextRotateObject.setBackgroundColor(textColorBackground);
         gvrTextRotateObject.getTransform().setPosition(textRotatePosition[0], textRotatePosition[1], textRotatePosition[2]);
         gvrUICubeSceneObject.addChildObject(gvrTextRotateObject);
 
-        gvrTextScaleObject = new GVRTextViewSceneObject(gvrContext, 0.5f, 0.45f, " s ");
+        gvrTextScaleObject = new SXRTextViewSceneObject(gvrContext, 0.5f, 0.45f, " s ");
         gvrTextScaleObject.setName(TEXT_SCALE_NAME);
         gvrTextScaleObject.setTextColor(textColorDefault);
         gvrTextScaleObject.setBackgroundColor(textColorBackground);
@@ -479,16 +479,16 @@ public class AnchorImplementation {
         gvrUICubeSceneObject.addChildObject(gvrTextScaleObject);
 
         // Currently req to show an object dynamically added
-        webPagePlusUISceneObject = new GVRSceneObject(gvrContext);
+        webPagePlusUISceneObject = new SXRSceneObject(gvrContext);
         webPagePlusUISceneObject.getTransform().setPosition(webPagePlusUIPosition[0], webPagePlusUIPosition[1], webPagePlusUIPosition[2]);
 
         // Set up sensor for the U.I.
         Sensor uibObjectSensor = new Sensor(urlFinal, Sensor.Type.TOUCH, gvrUICubeSceneObject, true);
-        final GVRSceneObject gvrWebViewSceneObjectFinal = gvrWebViewSceneObject;
-        final GVRSceneObject gvrUICubeSceneObjectFinal = gvrUICubeSceneObject;
-        final GVRSceneObject webPagePlusUISceneObjectFinal = webPagePlusUISceneObject;
+        final SXRSceneObject gvrWebViewSceneObjectFinal = gvrWebViewSceneObject;
+        final SXRSceneObject gvrUICubeSceneObjectFinal = gvrUICubeSceneObject;
+        final SXRSceneObject webPagePlusUISceneObjectFinal = webPagePlusUISceneObject;
 
-        final GVRSceneObject gvrSceneObjectAnchorFinal = gvrSceneObjectAnchor;
+        final SXRSceneObject gvrSceneObjectAnchorFinal = gvrSceneObjectAnchor;
 
         webPagePlusUISceneObjectFinal.addChildObject(gvrWebViewSceneObjectFinal);
         webPagePlusUISceneObjectFinal.addChildObject(gvrUICubeSceneObjectFinal);
@@ -614,9 +614,9 @@ public class AnchorImplementation {
         });
     }  //  end WebPageTranformControls
 
-    private void TranslationControl(GVRSceneObject gvrWebViewSceneObjectFinal) {
-        GVRScene mainScene = gvrContext.getMainScene();
-        GVRCameraRig gvrCameraRig = mainScene.getMainCameraRig();
+    private void TranslationControl(SXRSceneObject gvrWebViewSceneObjectFinal) {
+        SXRScene mainScene = gvrContext.getMainScene();
+        SXRCameraRig gvrCameraRig = mainScene.getMainCameraRig();
         initialCameralookAt = gvrCameraRig.getLookAt();
 
         gvrWebViewSceneObjectFinal.getTransform().getModelMatrix4f().getTranslation(translationObjectTranslationGlobal);
@@ -639,9 +639,9 @@ public class AnchorImplementation {
 
 
 
-    private void ScaleControl(GVRSceneObject gvrWebViewSceneObjectFinal, GVRSceneObject  gvrSceneObjectAnchorFinal, String urlFinal) {
-        GVRScene mainScene = gvrContext.getMainScene();
-        GVRCameraRig gvrCameraRig = mainScene.getMainCameraRig();
+    private void ScaleControl(SXRSceneObject gvrWebViewSceneObjectFinal, SXRSceneObject  gvrSceneObjectAnchorFinal, String urlFinal) {
+        SXRScene mainScene = gvrContext.getMainScene();
+        SXRCameraRig gvrCameraRig = mainScene.getMainCameraRig();
         initialCameralookAt = gvrCameraRig.getLookAt();
 
         gvrWebViewSceneObjectFinal.getTransform().getModelMatrix4f().getTranslation(translationObjectTranslationGlobal);
@@ -666,8 +666,8 @@ public class AnchorImplementation {
     private class PerFrameWebViewControl {
 
         final void onDrawFrame(float frameTime) {
-            GVRScene mainScene = gvrContext.getMainScene();
-            GVRCameraRig gvrCameraRig = mainScene.getMainCameraRig();
+            SXRScene mainScene = gvrContext.getMainScene();
+            SXRCameraRig gvrCameraRig = mainScene.getMainCameraRig();
             float[] currentCameraLookAt = gvrCameraRig.getLookAt();
             if ( webViewScale ) {
                 float zFactor = initialCameralookAt[2] / currentCameraLookAt[2];
@@ -699,7 +699,7 @@ public class AnchorImplementation {
         }  //  end onDrawFrame
     }  //  end private class PerFrameScripting
 
-    private final class DrawFrame implements GVRDrawFrameListener {
+    private final class DrawFrame implements SXRDrawFrameListener {
         @Override
         public void onDrawFrame(float frameTime) {
             perFrameWebViewControl.onDrawFrame(frameTime);

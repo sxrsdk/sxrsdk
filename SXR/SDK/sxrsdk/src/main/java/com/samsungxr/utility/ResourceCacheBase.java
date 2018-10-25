@@ -15,7 +15,7 @@
 
 package com.samsungxr.utility;
 
-import com.samsungxr.GVRAndroidResource;
+import com.samsungxr.SXRAndroidResource;
 
 import java.lang.ref.WeakReference;
 import java.util.Map;
@@ -32,18 +32,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ResourceCacheBase<T> {
     private static final String TAG = Log.tag(ResourceCacheBase.class);
 
-    private final Map<GVRAndroidResource, WeakReference<T>> cache //
-            = new ConcurrentHashMap<GVRAndroidResource, WeakReference<T>>();
+    private final Map<SXRAndroidResource, WeakReference<T>> cache //
+            = new ConcurrentHashMap<SXRAndroidResource, WeakReference<T>>();
 
     /** Save a weak reference to the resource */
-    public void put(GVRAndroidResource androidResource, T resource) {
+    public void put(SXRAndroidResource androidResource, T resource) {
         Log.d(TAG, "put resource %s to cache", androidResource);
 
         cache.put(androidResource, new WeakReference<T>(resource));
     }
 
     /** Get the cached resource, or {@code null} */
-    public T get(GVRAndroidResource androidResource) {
+    public T get(SXRAndroidResource androidResource) {
         WeakReference<T> reference = cache.get(androidResource);
         if (reference == null) {
             // Not in map

@@ -15,9 +15,9 @@
 
 package com.samsungxr.utility;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRMesh;
-import com.samsungxr.GVRVertexBuffer;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRVertexBuffer;
 
 /**
  * Utilities for mesh creation and manipulation.
@@ -32,7 +32,7 @@ public class MeshUtils {
      * @param y Scale to be applied on y-axis.
      * @param z Scale to be applied on z-axis.
      */
-    public static void scale(GVRMesh mesh, float x, float y, float z) {
+    public static void scale(SXRMesh mesh, float x, float y, float z) {
         final float [] vertices = mesh.getVertices();
         final int vsize = vertices.length;
 
@@ -51,7 +51,7 @@ public class MeshUtils {
      * @param mesh Mesh to be scaled.
      * @param ratio Scale to be applied.
      */
-    public static void scale(GVRMesh mesh, float ratio) {
+    public static void scale(SXRMesh mesh, float ratio) {
         scale(mesh, ratio, ratio, ratio);
     }
 
@@ -63,7 +63,7 @@ public class MeshUtils {
      * @param ysize Size for y-axis.
      * @param zsize Size fof z-axis.
      */
-    public static void resize(GVRMesh mesh, float xsize, float ysize, float zsize) {
+    public static void resize(SXRMesh mesh, float xsize, float ysize, float zsize) {
         float dim[] = getBoundingSize(mesh);
 
         scale(mesh, xsize / dim[0], ysize / dim[1], zsize / dim[2]);
@@ -74,7 +74,7 @@ public class MeshUtils {
      * @param mesh Mesh to be resized.
      * @param size Max size for the axis.
      */
-    public static void resize(GVRMesh mesh, float size) {
+    public static void resize(SXRMesh mesh, float size) {
         float dim[] = getBoundingSize(mesh);
         float maxsize = 0.0f;
 
@@ -86,15 +86,15 @@ public class MeshUtils {
     }
 
     /**
-     *  Create a new GVRMesh from the given mesh.
+     *  Create a new SXRMesh from the given mesh.
      *
-     * @param gvrContext current {@link GVRContext}
+     * @param gvrContext current {@link SXRContext}
      * @param mesh Mesh to be cloned.
-     * @return Return a new GVRMesh clone of given mesh.
+     * @return Return a new SXRMesh clone of given mesh.
      */
-    public static GVRMesh clone(GVRContext gvrContext, GVRMesh mesh) {
-        GVRVertexBuffer srcVerts = new GVRVertexBuffer(mesh.getVertexBuffer(), mesh.getVertexBuffer().getDescriptor());
-        GVRMesh newMesh = new GVRMesh(srcVerts, mesh.getIndexBuffer());
+    public static SXRMesh clone(SXRContext gvrContext, SXRMesh mesh) {
+        SXRVertexBuffer srcVerts = new SXRVertexBuffer(mesh.getVertexBuffer(), mesh.getVertexBuffer().getDescriptor());
+        SXRMesh newMesh = new SXRMesh(srcVerts, mesh.getIndexBuffer());
         return newMesh;
     }
 
@@ -104,7 +104,7 @@ public class MeshUtils {
      * @param mesh Mesh to calc its bouding size.
      * @return The bounding size for x, y and z axis.
      */
-    public static float[] getBoundingSize(GVRMesh mesh) {
+    public static float[] getBoundingSize(SXRMesh mesh) {
         final float [] dim = new float[3];
         final float [] vertices = mesh.getVertices();
         final int vsize = vertices.length;
@@ -137,7 +137,7 @@ public class MeshUtils {
      * Creates a quad consisting of two triangles, with the specified width and
      * height.
      *
-     * @param gvrContext current {@link GVRContext}
+     * @param gvrContext current {@link SXRContext}
      *
      * @param width
      *            the quad's width
@@ -145,8 +145,8 @@ public class MeshUtils {
      *            the quad's height
      * @return A 2D, rectangular mesh with four vertices and two triangles
      */
-    public static GVRMesh createQuad(GVRContext gvrContext, float width, float height) {
-        GVRMesh mesh = new GVRMesh(gvrContext);
+    public static SXRMesh createQuad(SXRContext gvrContext, float width, float height) {
+        SXRMesh mesh = new SXRMesh(gvrContext);
 
         float[] vertices = { width * -0.5f, height * 0.5f, 0.0f, width * -0.5f,
                 height * -0.5f, 0.0f, width * 0.5f, height * 0.5f, 0.0f,
@@ -170,7 +170,7 @@ public class MeshUtils {
     /**
      * Creates a rounded quad with the specified width and height.
      *
-     * @param gvrContext current {@link GVRContext}
+     * @param gvrContext current {@link SXRContext}
      * @param width The quad's width
      * @param height The quad's height
      * @param rx Ratio for x-axis.
@@ -179,9 +179,9 @@ public class MeshUtils {
      *
      * @return A 2D, rounded quad.
      */
-    public static GVRMesh createRoundQuad(GVRContext gvrContext, float width, float height,
+    public static SXRMesh createRoundQuad(SXRContext gvrContext, float width, float height,
                                             float rx, float ry, int segments) {
-        GVRMesh mesh = new GVRMesh(gvrContext);
+        SXRMesh mesh = new SXRMesh(gvrContext);
 
         if (segments < 0)
             segments = 0;

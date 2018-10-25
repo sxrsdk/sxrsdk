@@ -1,14 +1,14 @@
 package com.samsungxr.widgetlib.widget.properties;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRAssetLoader;
-import com.samsungxr.GVRBitmapImage;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRImage;
-import com.samsungxr.GVRMaterial;
-import com.samsungxr.GVRTexture;
-import com.samsungxr.GVRTextureParameters;
-import com.samsungxr.GVRCompressedImage;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRAssetLoader;
+import com.samsungxr.SXRBitmapImage;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRImage;
+import com.samsungxr.SXRMaterial;
+import com.samsungxr.SXRTexture;
+import com.samsungxr.SXRTextureParameters;
+import com.samsungxr.SXRCompressedImage;
 import static com.samsungxr.utility.Exceptions.RuntimeAssertion;
 
 import org.json.JSONException;
@@ -21,13 +21,13 @@ import java.util.concurrent.Future;
 
 import static com.samsungxr.widgetlib.main.Utility.getId;
 import com.samsungxr.widgetlib.log.Log;
-import com.samsungxr.widgetlib.main.GVRBitmapTexture;
+import com.samsungxr.widgetlib.main.SXRBitmapTexture;
 
 public class TextureFactory {
     static final private String TAG = TextureFactory.class.getSimpleName();
     static final String MAIN_TEXTURE = "main_texture";
 
-    static public GVRTexture loadTexture(GVRContext context, JSONObject textureSpec) {
+    static public SXRTexture loadTexture(SXRContext context, JSONObject textureSpec) {
         ImmediateLoader loader = new ImmediateLoader(context);
         try {
             loadOneTextureFromJSON(context, textureSpec, loader);
@@ -39,7 +39,7 @@ public class TextureFactory {
         }
     }
 
-    static public GVRTexture loadFutureTexture(GVRContext context, JSONObject textureSpec) {
+    static public SXRTexture loadFutureTexture(SXRContext context, JSONObject textureSpec) {
         ImmediateLoader loader = new ImmediateLoader(context);
         try {
             loadOneTextureFromJSON(context, textureSpec, loader);
@@ -51,7 +51,7 @@ public class TextureFactory {
         }
     }
 
-    static public void loadMaterialTextures(GVRMaterial material, JSONObject textureSpec) {
+    static public void loadMaterialTextures(SXRMaterial material, JSONObject textureSpec) {
         try {
             loadTexturesFromJSON(material, textureSpec);
         } catch (Exception e) {
@@ -61,12 +61,12 @@ public class TextureFactory {
         }
     }
 
-    static private void loadTexturesFromJSON(final GVRMaterial material,
+    static private void loadTexturesFromJSON(final SXRMaterial material,
                                              final JSONObject materialSpec) throws JSONException, IOException {
         final JSONObject mainTextureSpec = JSONHelpers
                 .optJSONObject(materialSpec, MaterialTextureProperties.main_texture);
         if (mainTextureSpec != null) {
-            loadOneTextureFromJSON(material.getGVRContext(), mainTextureSpec,
+            loadOneTextureFromJSON(material.getSXRContext(), mainTextureSpec,
                     new MaterialLoader(material, mainTextureSpec, "diffuseTexture"));
         }
 
@@ -78,14 +78,14 @@ public class TextureFactory {
                 String key = iter.next();
                 final JSONObject textureSpec = texturesSpec.optJSONObject(key);
                 if (textureSpec != null) {
-                    loadOneTextureFromJSON(material.getGVRContext(), textureSpec,
+                    loadOneTextureFromJSON(material.getSXRContext(), textureSpec,
                             new MaterialLoader(material, textureSpec, key));
                 }
             }
         }
     }
 
-    static private void loadOneTextureFromJSON(GVRContext context, final JSONObject textureSpec,
+    static private void loadOneTextureFromJSON(SXRContext context, final JSONObject textureSpec,
                                                Loader loader) throws JSONException,
             IOException {
         TextureType textureType = JSONHelpers.getEnum(textureSpec,
@@ -101,7 +101,7 @@ public class TextureFactory {
         }
     }
 
-    static private void loadBitmapTextureFromJSON(GVRContext context,
+    static private void loadBitmapTextureFromJSON(SXRContext context,
                                                   final JSONObject textureSpec,
                                                   Loader loader)
             throws JSONException, IOException {
@@ -110,14 +110,14 @@ public class TextureFactory {
                 .getString(BitmapProperties.resource_type.name());
         String id = bitmapSpec.getString(BitmapProperties.id.name());
         String type = bitmapSpec.getString(BitmapProperties.type.name());
-        final GVRAndroidResource resource;
+        final SXRAndroidResource resource;
 
         switch (BitmapResourceType.valueOf(resourceType)) {
             case asset:
-                resource = new GVRAndroidResource(context, id);
+                resource = new SXRAndroidResource(context, id);
                 break;
             case file:
-                resource = new GVRAndroidResource(id);
+                resource = new SXRAndroidResource(id);
                 break;
             case resource:
                 int resId = -1;
@@ -133,19 +133,19 @@ public class TextureFactory {
                     default:
                         break;
                 }
-                resource = new GVRAndroidResource(context, resId);
+                resource = new SXRAndroidResource(context, resId);
                 break;
             case user:
                 File docDir = JSONHelpers.getExternalJSONDocumentDirectory(context.getContext());
                 File texturePath = new File(docDir, id);
-                resource = new GVRAndroidResource(texturePath);
+                resource = new SXRAndroidResource(texturePath);
                 break;
             default:
                 throw RuntimeAssertion("Invalid bitmap texture resource type: %s",
                                 resourceType);
         }
 
-        final GVRTextureParameters textureParams;
+        final SXRTextureParameters textureParams;
         final JSONObject textureParamsSpec = JSONHelpers
                 .optJSONObject(textureSpec,
                         TextureParametersProperties.texture_parameters);
@@ -159,32 +159,32 @@ public class TextureFactory {
         loader.loadTexture(resource, textureParams);
     }
 
-    static private GVRTextureParameters textureParametersFromJSON(GVRContext context,
+    static private SXRTextureParameters textureParametersFromJSON(SXRContext context,
                                                                   final JSONObject textureParamsSpec) throws JSONException {
         if (textureParamsSpec == null || textureParamsSpec.length() == 0) {
             return null;
         }
 
-        final GVRTextureParameters textureParameters = new GVRTextureParameters(
+        final SXRTextureParameters textureParameters = new SXRTextureParameters(
                 context);
         final Iterator<String> iter = textureParamsSpec.keys();
         while (iter.hasNext()) {
             final String key = iter.next();
             switch (TextureParametersProperties.valueOf(key)) {
                 case min_filter_type:
-                    textureParameters.setMinFilterType(GVRTextureParameters.TextureFilterType
+                    textureParameters.setMinFilterType(SXRTextureParameters.TextureFilterType
                             .valueOf(textureParamsSpec.getString(key)));
                     break;
                 case mag_filter_type:
-                    textureParameters.setMagFilterType(GVRTextureParameters.TextureFilterType
+                    textureParameters.setMagFilterType(SXRTextureParameters.TextureFilterType
                             .valueOf(textureParamsSpec.getString(key)));
                     break;
                 case wrap_s_type:
-                    textureParameters.setWrapSType(GVRTextureParameters.TextureWrapType
+                    textureParameters.setWrapSType(SXRTextureParameters.TextureWrapType
                             .valueOf(textureParamsSpec.getString(key)));
                     break;
                 case wrap_t_type:
-                    textureParameters.setWrapTType(GVRTextureParameters.TextureWrapType
+                    textureParameters.setWrapTType(SXRTextureParameters.TextureWrapType
                             .valueOf(textureParamsSpec.getString(key)));
                     break;
                 case anisotropic_value:
@@ -222,62 +222,62 @@ public class TextureFactory {
     }
 
     private interface Loader {
-        void loadTexture(GVRAndroidResource resource, GVRTextureParameters parameters);
+        void loadTexture(SXRAndroidResource resource, SXRTextureParameters parameters);
     }
 
     private static class ImmediateLoader implements Loader {
-        ImmediateLoader(GVRContext context) {
+        ImmediateLoader(SXRContext context) {
             mContext = context;
         }
 
         @Override
-        public void loadTexture(GVRAndroidResource resource, GVRTextureParameters parameters) {
-            GVRAssetLoader assetLoader = mContext.getAssetLoader();
+        public void loadTexture(SXRAndroidResource resource, SXRTextureParameters parameters) {
+            SXRAssetLoader assetLoader = mContext.getAssetLoader();
             mTexture = assetLoader.loadTexture(resource, parameters);
         }
 
-        public GVRTexture getTexture() {
+        public SXRTexture getTexture() {
             return mTexture;
         }
 
-        private final GVRContext mContext;
-        private GVRTexture mTexture;
+        private final SXRContext mContext;
+        private SXRTexture mTexture;
     }
 
     private static class MaterialLoader implements Loader {
-        MaterialLoader(GVRMaterial material, JSONObject textureSpec, String key) {
+        MaterialLoader(SXRMaterial material, JSONObject textureSpec, String key) {
             mMaterial = material;
             mKey = key;
             mSpec = textureSpec;
         }
 
         @Override
-        public void loadTexture(GVRAndroidResource resource, GVRTextureParameters parameters) {
-            final GVRContext context = mMaterial.getGVRContext();
+        public void loadTexture(SXRAndroidResource resource, SXRTextureParameters parameters) {
+            final SXRContext context = mMaterial.getSXRContext();
             context.getAssetLoader().loadTexture(
-                    resource, new GVRAndroidResource.TextureCallback() {
+                    resource, new SXRAndroidResource.TextureCallback() {
                         @Override
-                        public void loaded(GVRImage resource11,
-                                           GVRAndroidResource androidResource) {
-                            mMaterial.setTexture(mKey, new GVRBitmapTexture(context, (GVRBitmapImage)resource11));
+                        public void loaded(SXRImage resource11,
+                                           SXRAndroidResource androidResource) {
+                            mMaterial.setTexture(mKey, new SXRBitmapTexture(context, (SXRBitmapImage)resource11));
                         }
 
                         @Override
-                        public void failed(Throwable t, GVRAndroidResource androidResource) {
+                        public void failed(Throwable t, SXRAndroidResource androidResource) {
                             t.printStackTrace();
                             Log.e(TAG, t, "Failed to load texture '%s' from spec: %s", mKey,
                                     mSpec);
                         }
 
                         @Override
-                        public boolean stillWanted(GVRAndroidResource androidResource) {
+                        public boolean stillWanted(SXRAndroidResource androidResource) {
                             return true;
                         }
                     },
-                    parameters, GVRAssetLoader.DEFAULT_PRIORITY, GVRCompressedImage.BALANCED);
+                    parameters, SXRAssetLoader.DEFAULT_PRIORITY, SXRCompressedImage.BALANCED);
         }
 
-        private final GVRMaterial mMaterial;
+        private final SXRMaterial mMaterial;
         private final String mKey;
         private final JSONObject mSpec;
     }

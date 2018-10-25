@@ -14,11 +14,11 @@
  */
 
 /**
- * Low-level utility code used in multiple GVRF packages. We can't keep you from
- * using this code in a GVRF application, but we <em>can</em> urge you not to: 
+ * Low-level utility code used in multiple SXRF packages. We can't keep you from
+ * using this code in a SXRF application, but we <em>can</em> urge you not to: 
  * everything in this package is minimally documented, internal code. We are not
  * making any promises about the behavior or performance of any code in this 
- * package; this package is not part of the GVRF API, and future releases may 
+ * package; this package is not part of the SXRF API, and future releases may 
  * change or remove classes or methods without providing for backward 
  * compatibility. 
  */

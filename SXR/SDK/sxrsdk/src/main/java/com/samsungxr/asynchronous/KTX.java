@@ -18,12 +18,12 @@ package com.samsungxr.asynchronous;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import com.samsungxr.GVRCompressedImage;
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRCompressedImage;
+import com.samsungxr.SXRContext;
 import com.samsungxr.utility.Log;
 import com.samsungxr.utility.RuntimeAssertion;
 
-class KTX extends GVRCompressedTextureLoader {
+class KTX extends SXRCompressedTextureLoader {
 
     private static final String TAG = Log.tag(KTX.class);
 
@@ -159,7 +159,7 @@ class KTX extends GVRCompressedTextureLoader {
         }
 
         @Override
-        public GVRCompressedImage toTexture(GVRContext gvrContext, int quality) {
+        public SXRCompressedImage toTexture(SXRContext gvrContext, int quality) {
 
             ByteBuffer data = getData();
             ByteOrder defaultOrder = data.order();
@@ -177,12 +177,12 @@ class KTX extends GVRCompressedTextureLoader {
                 outOffsets[fileLevel] = data.position();
                 data.position(data.position() + imageSize + imagePadding);
             }
-            GVRCompressedImage result = new GVRCompressedImage(gvrContext,
+            SXRCompressedImage result = new SXRCompressedImage(gvrContext,
                                                                width, height, imageSize, internalformat, data.array(), levels, quality);
             result.setDataOffsets(outOffsets);
 /*
-            GVRCompressedImage result = new GVRCompressedImage(gvrContext,
-                    GVRCompressedImage.GL_TARGET, levels, quality);
+            SXRCompressedImage result = new SXRCompressedImage(gvrContext,
+                    SXRCompressedImage.GL_TARGET, levels, quality);
             result.rebind();
 
             for (int fileLevel = 0; fileLevel < levels; ++fileLevel) {
@@ -211,8 +211,8 @@ class KTX extends GVRCompressedTextureLoader {
                         Math.max(1, height >> fileLevel), 0, imageSize, data);
                 data.position(data.position() + imageSize + imagePadding);
             }
-            GVRCompressedImage result2 = new GVRCompressedImage(gvrContext,
-                    GVRCompressedImage.GL_TARGET, width, height, outSize, outData, 0, levels, quality);
+            SXRCompressedImage result2 = new SXRCompressedImage(gvrContext,
+                    SXRCompressedImage.GL_TARGET, width, height, outSize, outData, 0, levels, quality);
             result.unbind();
 */
             return result;

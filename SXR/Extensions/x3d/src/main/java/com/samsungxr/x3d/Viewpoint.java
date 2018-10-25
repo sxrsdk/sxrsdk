@@ -15,7 +15,7 @@
 
 package com.samsungxr.x3d;
 
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRSceneObject;
 
 
 /**
@@ -46,7 +46,7 @@ public class Viewpoint
   };
   private boolean retainUserOffsets = false;
   private boolean isBound = false;
-  GVRSceneObject parent = null;
+  SXRSceneObject parent = null;
 
   public Viewpoint()
   {
@@ -54,7 +54,7 @@ public class Viewpoint
 
   public Viewpoint(float[] centerOfRotation, String description,
       float fieldOfView, boolean jump, String name, float[] orientation,
-      float[] position, boolean retainUserOffsets, GVRSceneObject parent)
+      float[] position, boolean retainUserOffsets, SXRSceneObject parent)
   {
     this.description = description;
     this.fieldOfView = fieldOfView;
@@ -111,7 +111,7 @@ public class Viewpoint
     return this.retainUserOffsets;
   }
 
-  public GVRSceneObject getParent()
+  public SXRSceneObject getParent()
   {
     return this.parent;
   }

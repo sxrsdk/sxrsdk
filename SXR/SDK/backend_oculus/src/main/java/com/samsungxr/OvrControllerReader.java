@@ -1,13 +1,13 @@
 package com.samsungxr;
 
-import com.samsungxr.io.GVRGearCursorController;
+import com.samsungxr.io.SXRGearCursorController;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-final class OvrControllerReader extends GVRGearCursorController.ControllerReaderStubs {
+final class OvrControllerReader extends SXRGearCursorController.ControllerReaderStubs {
 
     private FloatBuffer readbackBuffer;
     private final long mPtr;
@@ -21,8 +21,8 @@ final class OvrControllerReader extends GVRGearCursorController.ControllerReader
     }
 
     @Override
-    public void getEvents(int controllerID, ArrayList<GVRGearCursorController.ControllerEvent> controllerEvents) {
-        final GVRGearCursorController.ControllerEvent event = GVRGearCursorController.ControllerEvent.obtain();
+    public void getEvents(int controllerID, ArrayList<SXRGearCursorController.ControllerEvent> controllerEvents) {
+        final SXRGearCursorController.ControllerEvent event = SXRGearCursorController.ControllerEvent.obtain();
 
         event.handedness = readbackBuffer.get(INDEX_HANDEDNESS);
         event.pointF.set(readbackBuffer.get(INDEX_TOUCHPAD), readbackBuffer.get(INDEX_TOUCHPAD + 1));

@@ -2,9 +2,9 @@ package com.samsungxr.widgetlib.widget;
 
 import android.support.annotation.NonNull;
 
-import com.samsungxr.GVRMesh;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRTransform;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRTransform;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -32,9 +32,9 @@ public class BoundingBox {
             loadVertices(vertices);
             transform(this, widget);
         } else {
-            GVRSceneObject obj = widget.getSceneObject();
+            SXRSceneObject obj = widget.getSceneObject();
             if (obj != null) {
-                GVRSceneObject.BoundingVolume volume = obj.getBoundingVolume();
+                SXRSceneObject.BoundingVolume volume = obj.getBoundingVolume();
                 if (volume != null) {
                     mMinCorner = volume.minCorner;
                     mMaxCorner = volume.maxCorner;
@@ -232,7 +232,7 @@ public class BoundingBox {
      *
      * @param widget
      *            {@link Widget} to get a local model
-     *            {@linkplain GVRTransform#getLocalModelMatrix4f() matrix} from.
+     *            {@linkplain SXRTransform#getLocalModelMatrix4f() matrix} from.
      * @return A new axis-aligned bounding box for the transformed vertices.
      */
     private BoundingBox transform(final Widget widget) {
@@ -266,9 +266,9 @@ public class BoundingBox {
 
     static private float[] getVertices(final Widget widget) {
         float[] vertices = null;
-        GVRMesh mesh = widget.getMesh();
+        SXRMesh mesh = widget.getMesh();
         if (mesh != null) {
-            GVRMesh boundingBox = mesh.getBoundingBox();
+            SXRMesh boundingBox = mesh.getBoundingBox();
             vertices = boundingBox.getVertices();
         }
         return vertices;

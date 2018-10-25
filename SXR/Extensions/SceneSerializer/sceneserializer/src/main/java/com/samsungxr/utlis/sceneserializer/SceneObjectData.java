@@ -1,17 +1,17 @@
 package com.samsungxr.utlis.sceneserializer;
 
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRSceneObject;
 
 public class SceneObjectData {
     private float[] modelMatrix;
     private String src;
     private String name;
-    private transient GVRSceneObject gvrSceneObject;
+    private transient SXRSceneObject gvrSceneObject;
 
     public SceneObjectData() {
     }
 
-    public static SceneObjectData createSceneObjectData(GVRSceneObject gvrSceneObject, String
+    public static SceneObjectData createSceneObjectData(SXRSceneObject gvrSceneObject, String
             source) {
         SceneObjectData sceneObjectData = new SceneObjectData();
         sceneObjectData.setSrc(source);
@@ -37,11 +37,11 @@ public class SceneObjectData {
         this.modelMatrix = modelMatrix;
     }
 
-    public GVRSceneObject getGvrSceneObject() {
+    public SXRSceneObject getGvrSceneObject() {
         return gvrSceneObject;
     }
 
-    public void setGvrSceneObject(GVRSceneObject gvrSceneObject) {
+    public void setGvrSceneObject(SXRSceneObject gvrSceneObject) {
         this.gvrSceneObject = gvrSceneObject;
     }
 

@@ -34,7 +34,7 @@ class DaydreamRenderer implements GLSurfaceView.Renderer {
 
     private DaydreamViewManager mViewManager;
     private long nativeDaydreamRenderer;
-    private GVRCameraRig cameraRig;
+    private SXRCameraRig cameraRig;
     private final boolean[] mBlendEnabled = new boolean[1];
 
     public DaydreamRenderer(DaydreamViewManager viewManager, long nativeGvrContext) {
@@ -71,7 +71,7 @@ class DaydreamRenderer implements GLSurfaceView.Renderer {
         }
     }
 
-    public void setCameraRig(GVRCameraRig cameraRig) {
+    public void setCameraRig(SXRCameraRig cameraRig) {
         this.cameraRig = cameraRig;
         nativeSetCameraRig(nativeDaydreamRenderer, cameraRig.getNative());
     }

@@ -15,14 +15,14 @@
 
 package com.samsungxr.utility;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRAndroidResource.TextureCallback;
-import com.samsungxr.GVRAndroidResource.BitmapTextureCallback;
-import com.samsungxr.GVRAndroidResource.CompressedTextureCallback;
-import com.samsungxr.GVRHybridObject;
-import com.samsungxr.GVRAndroidResource.Callback;
-import com.samsungxr.GVRAndroidResource.CancelableCallback;
-import com.samsungxr.GVRImage;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRAndroidResource.TextureCallback;
+import com.samsungxr.SXRAndroidResource.BitmapTextureCallback;
+import com.samsungxr.SXRAndroidResource.CompressedTextureCallback;
+import com.samsungxr.SXRHybridObject;
+import com.samsungxr.SXRAndroidResource.Callback;
+import com.samsungxr.SXRAndroidResource.CancelableCallback;
+import com.samsungxr.SXRImage;
 
 /**
  * Basic cache-by-resource-description.
@@ -36,24 +36,24 @@ import com.samsungxr.GVRImage;
  * 
  * @since 2.0.2
  */
-public class ResourceCache<T extends GVRHybridObject> extends ResourceCacheBase {
+public class ResourceCache<T extends SXRHybridObject> extends ResourceCacheBase {
     private static final String TAG = Log.tag(ResourceCache.class);
 
     /** Save a weak reference to the resource */
-    public void put(GVRAndroidResource androidResource, T resource) {
+    public void put(SXRAndroidResource androidResource, T resource) {
         Log.d(TAG, "put resource %s to cache", androidResource);
 
         super.put(androidResource, resource);
     }
 
     /** Get the cached resource, or {@code null} */
-    public T get(GVRAndroidResource androidResource) {
+    public T get(SXRAndroidResource androidResource) {
         return (T) super.get(androidResource);
     }
 
     /**
      * Wrap the callback, to cache the
-     * {@link Callback#loaded(GVRHybridObject, GVRAndroidResource) loaded()}
+     * {@link Callback#loaded(SXRHybridObject, SXRAndroidResource) loaded()}
      * resource
      */
     public Callback<T> wrapCallback(Callback<T> callback) {
@@ -62,7 +62,7 @@ public class ResourceCache<T extends GVRHybridObject> extends ResourceCacheBase 
 
     /**
      * Wrap the callback, to cache the
-     * {@link CancelableCallback#loaded(GVRHybridObject, GVRAndroidResource)
+     * {@link CancelableCallback#loaded(SXRHybridObject, SXRAndroidResource)
      * loaded()} resource
      */
     public CancelableCallback<T> wrapCallback(CancelableCallback<T> callback) {
@@ -71,35 +71,35 @@ public class ResourceCache<T extends GVRHybridObject> extends ResourceCacheBase 
 
     /**
      * Wrap the callback, to cache the
-     * {@link CompressedTextureCallback#loaded(GVRHybridObject, GVRAndroidResource)
+     * {@link CompressedTextureCallback#loaded(SXRHybridObject, SXRAndroidResource)
      * loaded()} resource
      */
     public static CompressedTextureCallback wrapCallback(
-            ResourceCache<GVRImage> cache, CompressedTextureCallback callback) {
+            ResourceCache<SXRImage> cache, CompressedTextureCallback callback) {
         return new CompressedTextureCallbackWrapper(cache, callback);
     }
 
     /**
      * Wrap the callback, to cache the
-     * {@link BitmapTextureCallback#loaded(GVRHybridObject, GVRAndroidResource)
+     * {@link BitmapTextureCallback#loaded(SXRHybridObject, SXRAndroidResource)
      * loaded()} resource
      */
     public static BitmapTextureCallback wrapCallback(
-            ResourceCache<GVRImage> cache, BitmapTextureCallback callback) {
+            ResourceCache<SXRImage> cache, BitmapTextureCallback callback) {
         return new BitmapTextureCallbackWrapper(cache, callback);
     }
 
     /**
      * Wrap the callback, to cache the
-     * {@link TextureCallback#loaded(GVRHybridObject, GVRAndroidResource)
+     * {@link TextureCallback#loaded(SXRHybridObject, SXRAndroidResource)
      * loaded()} resource
      */
     public static TextureCallback wrapCallback(
-            ResourceCache<GVRImage> cache, TextureCallback callback) {
+            ResourceCache<SXRImage> cache, TextureCallback callback) {
         return new TextureCallbackWrapper(cache, callback);
     }
 
-    private static class CallbackWrapper<T extends GVRHybridObject> implements
+    private static class CallbackWrapper<T extends SXRHybridObject> implements
             CancelableCallback<T> {
 
         protected final ResourceCache<T> cache;
@@ -114,23 +114,23 @@ public class ResourceCache<T extends GVRHybridObject> extends ResourceCacheBase 
         }
 
         @Override
-        public void loaded(T resource, GVRAndroidResource androidResource) {
+        public void loaded(T resource, SXRAndroidResource androidResource) {
             cache.put(androidResource, resource);
             callback.loaded(resource, androidResource);
         }
 
         @Override
-        public void failed(Throwable t, GVRAndroidResource androidResource) {
+        public void failed(Throwable t, SXRAndroidResource androidResource) {
             callback.failed(t, androidResource);
         }
 
         @Override
-        public boolean stillWanted(GVRAndroidResource androidResource ) {
+        public boolean stillWanted(SXRAndroidResource androidResource ) {
             return true;
         }
     }
 
-    private static class CancelableCallbackWrapper<T extends GVRHybridObject>
+    private static class CancelableCallbackWrapper<T extends SXRHybridObject>
             extends CallbackWrapper<T> implements CancelableCallback<T> {
 
         private CancelableCallbackWrapper(ResourceCache<T> cache,
@@ -139,7 +139,7 @@ public class ResourceCache<T extends GVRHybridObject> extends ResourceCacheBase 
         }
 
         @Override
-        public boolean stillWanted(GVRAndroidResource androidResource) {
+        public boolean stillWanted(SXRAndroidResource androidResource) {
             return ((CancelableCallback<T>) callback)
                     .stillWanted(androidResource);
         }
@@ -147,27 +147,27 @@ public class ResourceCache<T extends GVRHybridObject> extends ResourceCacheBase 
 
     // Those 'convenience' interfaces are getting to be a real annoyance
     private static class CompressedTextureCallbackWrapper extends
-            CancelableCallbackWrapper<GVRImage> implements CompressedTextureCallback {
+            CancelableCallbackWrapper<SXRImage> implements CompressedTextureCallback {
 
-        CompressedTextureCallbackWrapper(ResourceCache<GVRImage> cache,
+        CompressedTextureCallbackWrapper(ResourceCache<SXRImage> cache,
                 CompressedTextureCallback callback) {
             super(cache, callback);
         }
     }
 
     private static class TextureCallbackWrapper extends
-            CancelableCallbackWrapper<GVRImage> implements
+            CancelableCallbackWrapper<SXRImage> implements
             TextureCallback {
-        TextureCallbackWrapper(ResourceCache<GVRImage> cache,
+        TextureCallbackWrapper(ResourceCache<SXRImage> cache,
                                TextureCallback callback) {
             super(cache, callback);
         }
     }
 
     private static class BitmapTextureCallbackWrapper extends
-            CancelableCallbackWrapper<GVRImage> implements
+            CancelableCallbackWrapper<SXRImage> implements
             BitmapTextureCallback {
-        BitmapTextureCallbackWrapper(ResourceCache<GVRImage> cache,
+        BitmapTextureCallbackWrapper(ResourceCache<SXRImage> cache,
                 BitmapTextureCallback callback) {
             super(cache, callback);
         }

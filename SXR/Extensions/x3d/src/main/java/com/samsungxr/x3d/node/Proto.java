@@ -15,7 +15,7 @@
 
 package com.samsungxr.x3d.node;
 
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRSceneObject;
 import com.samsungxr.utility.Log;
 import com.samsungxr.x3d.ScriptObject;
 import com.samsungxr.x3d.Utility;
@@ -59,7 +59,7 @@ public class Proto
 
     private X3Dobject mX3Dobject;
     private Utility mUtility;
-    private GVRSceneObject mGVRSceneObject = null;
+    private SXRSceneObject mSXRSceneObject = null;
     private String mName;
     private ScriptObject mScriptObject;
     private ArrayList<Field> mFieldObjects = new ArrayList<Field>();

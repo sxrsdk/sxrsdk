@@ -17,7 +17,7 @@ package com.samsungxr.io.cursor3d;
 
 import android.content.Context;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 import com.samsungxr.io.cursor3d.CursorAsset.Action;
 import com.samsungxr.utility.Log;
 import org.xmlpull.v1.XmlPullParser;
@@ -52,7 +52,7 @@ class CursorAssetFactory {
     private static final String PKM_EXTENSION = ".pkm";
     private static final String ZIP_EXTENSION = ".zip";
 
-    static CursorAsset readAsset(XmlPullParser parser, GVRContext context, CursorType type) throws
+    static CursorAsset readAsset(XmlPullParser parser, SXRContext context, CursorType type) throws
             XmlPullParserException, IOException {
         CursorAsset cursorAsset;
         AssetType assetType;
@@ -127,7 +127,7 @@ class CursorAssetFactory {
         return cursorAsset;
     }
 
-    private static CursorAsset getNew3DMeshAsset(GVRContext context, String src, CursorType type,
+    private static CursorAsset getNew3DMeshAsset(SXRContext context, String src, CursorType type,
                                                  Action action, boolean animated) {
         List<String> meshAssets = new ArrayList<String>(1);
         List<String> textureAssets = new ArrayList<String>();
@@ -157,7 +157,7 @@ class CursorAssetFactory {
                 fileName.endsWith(PKM_EXTENSION) || fileName.endsWith(JPEG_EXTENSION));
     }
 
-    private static MeshCursorAsset getNew2DMeshAsset(GVRContext context, String src, CursorType
+    private static MeshCursorAsset getNew2DMeshAsset(SXRContext context, String src, CursorType
             type, CursorAsset.Action action, XmlPullParser parser)
             throws XmlPullParserException {
         MeshCursorAsset asset = new MeshCursorAsset(context, type, action, src);
@@ -185,7 +185,7 @@ class CursorAssetFactory {
         return asset;
     }
 
-    private static AnimatedCursorAsset getNewAnimatedCursorAsset(GVRContext context, String src,
+    private static AnimatedCursorAsset getNewAnimatedCursorAsset(SXRContext context, String src,
                                                                  CursorType type, Action action,
                                                                  XmlPullParser parser)
             throws XmlPullParserException {

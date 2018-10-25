@@ -9,7 +9,7 @@ import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 import com.samsungxr.utility.Log;
 
 import java.io.IOException;
@@ -24,10 +24,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * This class creates a web server that serves webpage with a debug console for GVRf. It uses
+ * This class creates a web server that serves webpage with a debug console for SXRf. It uses
  * {@link com.samsungxr.debug.cli.ConsoleIO} internally to forward commands from the web-console to
- * GVRf. After creating the instance, call {@link DebugWebServer#listen(int)} to start the webserver.
- * You can enter http://\<hostname for device running the GVRf app\>:\<port\> in your browser to
+ * SXRf. After creating the instance, call {@link DebugWebServer#listen(int)} to start the webserver.
+ * You can enter http://\<hostname for device running the SXRf app\>:\<port\> in your browser to
  * access the console.
  *
  */
@@ -49,9 +49,9 @@ public class DebugWebServer {
      * Creates an instance of the {@link DebugWebServer}. After creating the instance, a call to
      * {@link DebugWebServer#listen(int)} is required to start the server and listen on a particular
      * port number.
-     * @param gvrContext the instance of {@link GVRContext} associated with the app.
+     * @param gvrContext the instance of {@link SXRContext} associated with the app.
      */
-    public DebugWebServer(final GVRContext gvrContext) {
+    public DebugWebServer(final SXRContext gvrContext) {
         webSocketConnections = new ArrayList<WebSocketConnection>(MAX_CLIENTS);
         server = new AsyncHttpServer();
         executorService = Executors.newFixedThreadPool(MAX_CLIENTS);

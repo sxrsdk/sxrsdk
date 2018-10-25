@@ -15,14 +15,14 @@
 
 package com.samsungxr.x3d;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRAssetLoader;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRImportSettings;
-import com.samsungxr.GVRMaterial;
-import com.samsungxr.GVRResourceVolume;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.animation.GVRAnimator;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRAssetLoader;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRImportSettings;
+import com.samsungxr.SXRMaterial;
+import com.samsungxr.SXRResourceVolume;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.animation.SXRAnimator;
 import com.samsungxr.utility.Log;
 
 import java.io.FileNotFoundException;
@@ -30,17 +30,17 @@ import java.io.IOException;
 import java.io.InputStream;
 
 final class X3DLoader {
-    public static GVRSceneObject load(final GVRContext context, final GVRAssetLoader.AssetRequest assetRequest, final GVRSceneObject root) throws IOException {
-        final GVRResourceVolume volume = assetRequest.getVolume();
+    public static SXRSceneObject load(final SXRContext context, final SXRAssetLoader.AssetRequest assetRequest, final SXRSceneObject root) throws IOException {
+        final SXRResourceVolume volume = assetRequest.getVolume();
         final String fileName = assetRequest.getBaseName();
-        final GVRAndroidResource resource = volume.openResource(fileName);
+        final SXRAndroidResource resource = volume.openResource(fileName);
         root.setName(fileName);
 
         X3Dobject x3dObject = new com.samsungxr.x3d.X3Dobject(assetRequest, root);
         try
         {
             InputStream inputStream;
-            ShaderSettings shaderSettings = new ShaderSettings(new GVRMaterial(context));
+            ShaderSettings shaderSettings = new ShaderSettings(new SXRMaterial(context));
             if (!X3Dobject.UNIVERSAL_LIGHTS)
             {
                 X3DparseLights x3dParseLights = new X3DparseLights(context, root);
@@ -62,11 +62,11 @@ final class X3DLoader {
             try {
                 x3dObject.Parse(inputStream, shaderSettings);
                 assetRequest.onModelLoaded(context, root, fileName);
-                GVRAnimator animator = (GVRAnimator) root.getComponent(GVRAnimator.getComponentType());
+                SXRAnimator animator = (SXRAnimator) root.getComponent(SXRAnimator.getComponentType());
 
-                if ((animator != null) && assetRequest.getImportSettings().contains(GVRImportSettings.NO_ANIMATION))
+                if ((animator != null) && assetRequest.getImportSettings().contains(SXRImportSettings.NO_ANIMATION))
                 {
-                    root.detachComponent(GVRAnimator.getComponentType());
+                    root.detachComponent(SXRAnimator.getComponentType());
                 }
             } finally {
                 inputStream.close();

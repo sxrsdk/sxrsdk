@@ -15,7 +15,7 @@
 
 package com.samsungxr.io.cursor3d;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 import com.samsungxr.io.cursor3d.CursorAsset.Action;
 import com.samsungxr.utility.Log;
 import org.xmlpull.v1.XmlPullParser;
@@ -39,7 +39,7 @@ class CursorThemeFactory {
     private static final String XML_START_TAG = "<theme ";
     private static final String XML_END_TAG = "</theme";
 
-    static CursorTheme readTheme(XmlPullParser parser, GVRContext context) throws
+    static CursorTheme readTheme(XmlPullParser parser, SXRContext context) throws
             XmlPullParserException,
             IOException {
         CursorTheme cursorTheme = new CursorTheme();

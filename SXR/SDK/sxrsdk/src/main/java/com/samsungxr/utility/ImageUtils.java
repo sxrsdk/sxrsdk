@@ -3,8 +3,8 @@ package com.samsungxr.utility;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRContext;
 
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;

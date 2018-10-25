@@ -16,7 +16,7 @@
 package com.samsungxr.weartouchpad;
 
 /**
- * This class should have the exact same values as defined in the GVRWearTouchpadBehavior in
+ * This class should have the exact same values as defined in the SXRWearTouchpadBehavior in
  * GearVR framework
  */
 public class WearMessageConstants {

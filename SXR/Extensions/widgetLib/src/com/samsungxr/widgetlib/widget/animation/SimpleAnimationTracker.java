@@ -4,10 +4,10 @@ import android.util.Pair;
 
 import com.samsungxr.widgetlib.log.Log;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.animation.GVRAnimation;
-import com.samsungxr.animation.GVROnFinish;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.animation.SXRAnimation;
+import com.samsungxr.animation.SXROnFinish;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -15,7 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import static com.samsungxr.utility.Threads.spawn;
 
 public final class SimpleAnimationTracker {
-    private final ConcurrentHashMap<GVRSceneObject, Pair<GVRAnimation, GVROnFinish>> tracker;
+    private final ConcurrentHashMap<SXRSceneObject, Pair<SXRAnimation, SXROnFinish>> tracker;
     private final LinkedBlockingQueue<AnimationRequest> requestQueue;
 
     public final Runnable clearTracker = new Runnable() {
@@ -29,8 +29,8 @@ public final class SimpleAnimationTracker {
     /**
      * Creates SimpleAnimationTracker
      */
-    public SimpleAnimationTracker(GVRContext gvrContext) {
-        tracker = new ConcurrentHashMap<GVRSceneObject, Pair<GVRAnimation, GVROnFinish>>();
+    public SimpleAnimationTracker(SXRContext gvrContext) {
+        tracker = new ConcurrentHashMap<SXRSceneObject, Pair<SXRAnimation, SXROnFinish>>();
         requestQueue = new LinkedBlockingQueue<AnimationRequest>();
         // start animation request worker thread
         spawn(new AnimationWorker(requestQueue));
@@ -46,42 +46,42 @@ public final class SimpleAnimationTracker {
         }
     }
 
-    public void interrupt(final GVRSceneObject target) {
+    public void interrupt(final SXRSceneObject target) {
         stop(target, tracker.remove(target));
     }
 
 
     public boolean interruptAll() {
         boolean ret = false;
-        for (GVRSceneObject target: tracker.keySet()) {
+        for (SXRSceneObject target: tracker.keySet()) {
             interrupt(target);
             ret = true;
         }
         return ret;
     }
 
-    public boolean inProgress(final GVRSceneObject target) {
+    public boolean inProgress(final SXRSceneObject target) {
         return tracker.containsKey(target);
     }
 
-    private void stop(final GVRSceneObject target, final Pair<GVRAnimation, GVROnFinish> pair) {
+    private void stop(final SXRSceneObject target, final Pair<SXRAnimation, SXROnFinish> pair) {
         if (null != pair) {
-            target.getGVRContext().getAnimationEngine().stop(pair.first);
+            target.getSXRContext().getAnimationEngine().stop(pair.first);
             Log.v(TAG, "stopping running animation for target %s",
                   target.getName());
             runUserFinisher(pair);
         }
     }
 
-    public void track(final GVRSceneObject target, final GVRAnimation anim) {
+    public void track(final SXRSceneObject target, final SXRAnimation anim) {
         track(target, anim, null, null);
     }
 
-    public void track(final GVRSceneObject target, final GVRAnimation anim, final GVROnFinish finisher) {
+    public void track(final SXRSceneObject target, final SXRAnimation anim, final SXROnFinish finisher) {
         track(target, anim, null, finisher);
     }
 
-    public void track(final GVRSceneObject target, final GVRAnimation anim, final Runnable starter, final GVROnFinish finisher) {
+    public void track(final SXRSceneObject target, final SXRAnimation anim, final Runnable starter, final SXROnFinish finisher) {
         if (target == null || anim == null) {
             return;
         }
@@ -95,11 +95,11 @@ public final class SimpleAnimationTracker {
     }
 
     class AnimationRequest {
-        private GVRAnimation anim;
-        private GVROnFinish finisher;
+        private SXRAnimation anim;
+        private SXROnFinish finisher;
         private Runnable starter;
-        private GVRSceneObject target;
-        AnimationRequest(final GVRSceneObject target, final GVRAnimation anim, final Runnable starter, final GVROnFinish finisher) {
+        private SXRSceneObject target;
+        AnimationRequest(final SXRSceneObject target, final SXRAnimation anim, final Runnable starter, final SXROnFinish finisher) {
             this.target = target;
             this.anim = anim;
             this.finisher = finisher;
@@ -107,17 +107,17 @@ public final class SimpleAnimationTracker {
         }
 
         void process() {
-            final Pair<GVRAnimation, GVROnFinish> pair;
+            final Pair<SXRAnimation, SXROnFinish> pair;
             pair = tracker
-                        .put(target, new Pair<GVRAnimation, GVROnFinish>(
+                        .put(target, new Pair<SXRAnimation, SXROnFinish>(
                                 anim, finisher));
 
             stop(target, pair);
 
-            anim.setOnFinish(new GVROnFinish() {
+            anim.setOnFinish(new SXROnFinish() {
                 @Override
-                public final void finished(final GVRAnimation animation) {
-                    final Pair<GVRAnimation, GVROnFinish> pair;
+                public final void finished(final SXRAnimation animation) {
+                    final Pair<SXRAnimation, SXROnFinish> pair;
                     pair = tracker.remove(target);
                     if (null != pair) {
                         runUserFinisher(pair);
@@ -128,7 +128,7 @@ public final class SimpleAnimationTracker {
             if (starter != null) {
                 starter.run();
             }
-            anim.start(target.getGVRContext().getAnimationEngine());
+            anim.start(target.getSXRContext().getAnimationEngine());
         }
     }
 
@@ -158,7 +158,7 @@ public final class SimpleAnimationTracker {
         }
     }
 
-    private void runUserFinisher(final Pair<GVRAnimation, GVROnFinish> pair) {
+    private void runUserFinisher(final Pair<SXRAnimation, SXROnFinish> pair) {
         if (null != pair.second) {
             try {
                 pair.second.finished(pair.first);

@@ -21,14 +21,14 @@ import android.graphics.PointF;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
-import com.samsungxr.io.GVRGearCursorController;
+import com.samsungxr.io.SXRGearCursorController;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
  * This interface defines the callback interface of an Android {@code Activity}.
- * User can add a listener to {@code GVRActivity.getEventReceiver()} to handle
- * these events, rather than subclassing {@link GVRActivity}.
+ * User can add a listener to {@code SXRActivity.getEventReceiver()} to handle
+ * these events, rather than subclassing {@link SXRActivity}.
  */
 public interface IActivityEvents extends IEvents {
     void onPause();
@@ -37,7 +37,7 @@ public interface IActivityEvents extends IEvents {
 
     void onDestroy();
 
-    void onSetMain(GVRMain script);
+    void onSetMain(SXRMain script);
 
     void onWindowFocusChanged(boolean hasFocus);
 
@@ -59,7 +59,7 @@ public interface IActivityEvents extends IEvents {
      * @param angularAcceleration   angularAcceleration of the controller
      * @param angularVelocity       angularVelocity of the controller
      */
-    void onControllerEvent(GVRGearCursorController.CONTROLLER_KEYS[] keys, Vector3f position, Quaternionf orientation, PointF touchpadPoint, boolean touched, Vector3f angularAcceleration,
+    void onControllerEvent(SXRGearCursorController.CONTROLLER_KEYS[] keys, Vector3f position, Quaternionf orientation, PointF touchpadPoint, boolean touched, Vector3f angularAcceleration,
                            Vector3f angularVelocity);
 
     void dispatchTouchEvent(MotionEvent event);

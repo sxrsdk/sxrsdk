@@ -9,8 +9,8 @@ import com.samsungxr.widgetlib.widget.layout.basic.LinearLayout;
 import com.samsungxr.widgetlib.widget.layout.OrientedLayout;
 import com.samsungxr.widgetlib.widget.Widget;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRMesh;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRMesh;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -41,7 +41,7 @@ public class ControlBar extends GroupWidget {
      * Basic control bar setup: horizontal linear layout, no background
      * @param context
      */
-    public ControlBar(GVRContext context) {
+    public ControlBar(SXRContext context) {
         this(context, BUTTON_GROUP_PADDING, OrientedLayout.Orientation.HORIZONTAL, -1, BAR_SIZE);
     }
 
@@ -51,7 +51,7 @@ public class ControlBar extends GroupWidget {
      * @param orientation Control bar orientation. It might be
      * {@link OrientedLayout.Orientation#HORIZONTAL} or {@link OrientedLayout.Orientation#VERTICAL}
      */
-    public ControlBar(GVRContext context, final OrientedLayout.Orientation orientation) {
+    public ControlBar(SXRContext context, final OrientedLayout.Orientation orientation) {
         this(context, BUTTON_GROUP_PADDING, orientation,
                 orientation == OrientedLayout.Orientation.HORIZONTAL ? -1 : BAR_SIZE,
                 orientation == OrientedLayout.Orientation.VERTICAL ? -1 : BAR_SIZE);
@@ -65,7 +65,7 @@ public class ControlBar extends GroupWidget {
      * @param width
      * @param height
      */
-    public ControlBar(GVRContext context, final float padding,
+    public ControlBar(SXRContext context, final float padding,
                       final OrientedLayout.Orientation orientation,
                       float width, float height) {
         this(context, packageProperties(TAG, padding, orientation, width, height));
@@ -74,11 +74,11 @@ public class ControlBar extends GroupWidget {
     /**
      * Core {@link ControlBar} constructor.
      *
-     * @param context A valid {@link GVRContext}.
+     * @param context A valid {@link SXRContext}.
      * @param properties A structured set of properties for the {@code ControlBar} instance. See
      *                       {@code controlbar.json} for schema.
      */
-    public ControlBar(GVRContext context, JSONObject properties) {
+    public ControlBar(SXRContext context, JSONObject properties) {
         super(context, fixupProperties(properties));
 
         properties = getObjectMetadata();
@@ -156,7 +156,7 @@ public class ControlBar extends GroupWidget {
         put(allowedProperties, Widget.Properties.size, new PointF(mControlDimensions.x, mControlDimensions.y));
         put(allowedProperties, Widget.Properties.states, optJSONObject(properties, Widget.Properties.states));
 
-        Widget control = new Widget(getGVRContext(), allowedProperties);
+        Widget control = new Widget(getSXRContext(), allowedProperties);
         setupControl(name, control, listener, -1);
     }
 
@@ -272,12 +272,12 @@ public class ControlBar extends GroupWidget {
     protected Widget createControlWidget(int resId, String name, String label) {
         Widget control;
         if (label == null) {
-            control = new Widget(getGVRContext(), mControlDimensions.x, mControlDimensions.y);
+            control = new Widget(getSXRContext(), mControlDimensions.x, mControlDimensions.y);
             control.setTexture(resId);
         } else {
-            control = new LightTextWidget(getGVRContext(),
+            control = new LightTextWidget(getSXRContext(),
                     mControlDimensions.x, mControlDimensions.y, label);
-            ((LightTextWidget) control).setBackGround(getGVRContext().getContext().getDrawable(resId));
+            ((LightTextWidget) control).setBackGround(getSXRContext().getContext().getDrawable(resId));
         }
         return control;
     }
@@ -298,7 +298,7 @@ public class ControlBar extends GroupWidget {
         float width = mBgResId != -1 ? getControlBarWidth() : 0;
         float height = mBgResId != -1 ? getControlBarHeight() : 0;
 
-        GVRMesh mesh = getGVRContext().createQuad(width, height);
+        SXRMesh mesh = getSXRContext().createQuad(width, height);
         setMesh(mesh);
     }
 

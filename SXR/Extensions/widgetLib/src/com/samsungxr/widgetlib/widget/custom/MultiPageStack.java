@@ -18,8 +18,8 @@ import com.samsungxr.widgetlib.widget.layout.OrientedLayout;
 
 import com.samsungxr.widgetlib.widget.layout.basic.LinearLayout;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRTexture;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRTexture;
 import static com.samsungxr.utility.Log.tag;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class MultiPageStack extends MultiPageWidget {
      * @param maxVisiblePageCount max number of pages visible on the screen at the same time
      * @param adapter data set adapter
      */
-    public MultiPageStack(final GVRContext context, final float pageWidth, final float pageHeight,
+    public MultiPageStack(final SXRContext context, final float pageWidth, final float pageHeight,
                           final int pageCount, final int maxVisiblePageCount,
                           final Adapter adapter) {
         super(context,
@@ -134,12 +134,12 @@ public class MultiPageStack extends MultiPageWidget {
     private static class PageAdapter extends BaseAdapter {
         private static final String TAG = tag(PageAdapter.class);
         private int mPageCount;
-        private final GVRContext mGvrContext;
+        private final SXRContext mGvrContext;
         private final float mPageWidth, mPageHeight;
 
         private final Map<Integer, ListWidget> mPages;
 
-        private final List<GVRTexture> mPageBgTextures;
+        private final List<SXRTexture> mPageBgTextures;
 
         private final static int[] mPageRainbowColors = {
                 Color.RED,
@@ -156,7 +156,7 @@ public class MultiPageStack extends MultiPageWidget {
                 Color.GRAY,
         };
 
-        PageAdapter(GVRContext gvrContext, int pageCount, float pageWidth,
+        PageAdapter(SXRContext gvrContext, int pageCount, float pageWidth,
                     float pageHeight) {
             mGvrContext = gvrContext;
             mPageCount = pageCount;

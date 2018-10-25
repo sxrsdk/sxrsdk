@@ -16,21 +16,21 @@
 package com.samsungxr;
 
 /**
- * This interface defines events for GVRSceneObject. Please note that the GVRSceneObject
+ * This interface defines events for SXRSceneObject. Please note that the SXRSceneObject
  * class does not implement this interface. To handle events delivered to it, user can
- * add an object that implements this interface to a GVRSceneObject using
- * {@link GVREventReceiver#addListener(IEvents)}. The GVREventReceiver can be obtained
- * using {@link GVRSceneObject#getEventReceiver()}.
+ * add an object that implements this interface to a SXRSceneObject using
+ * {@link SXREventReceiver#addListener(IEvents)}. The SXREventReceiver can be obtained
+ * using {@link SXRSceneObject#getEventReceiver()}.
  */
 public interface ISceneObjectEvents extends ILifeCycleEvents {
     /**
-     * Called when a {@link GVRSceneObject} is constructed.
+     * Called when a {@link SXRSceneObject} is constructed.
      * @param gvrContext
-     *         The GVRContext.
+     *         The SXRContext.
      * @param sceneObject
-     *         The GVRSceneObject itself.
+     *         The SXRSceneObject itself.
      */
-    void onInit(GVRContext gvrContext, GVRSceneObject sceneObject);
+    void onInit(SXRContext gvrContext, SXRSceneObject sceneObject);
 
     /**
      * Called after the object has been loaded from a model.

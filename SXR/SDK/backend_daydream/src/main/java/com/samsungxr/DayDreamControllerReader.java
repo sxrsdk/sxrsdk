@@ -4,7 +4,7 @@ import com.google.vr.sdk.controller.Controller;
 import com.google.vr.sdk.controller.Controller.ConnectionStates;
 import com.google.vr.sdk.controller.ControllerManager;
 
-import com.samsungxr.io.GVRGearCursorController;
+import com.samsungxr.io.SXRGearCursorController;
 import org.joml.Math;
 
 import java.nio.ByteBuffer;
@@ -12,7 +12,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-class DayDreamControllerReader extends GVRGearCursorController.ControllerReaderStubs {
+class DayDreamControllerReader extends SXRGearCursorController.ControllerReaderStubs {
 
     private ControllerManager mControllerManager;
     private Controller mController;
@@ -34,8 +34,8 @@ class DayDreamControllerReader extends GVRGearCursorController.ControllerReaderS
     }
 
     @Override
-    public void getEvents(int controllerID, ArrayList<GVRGearCursorController.ControllerEvent> controllerEvents) {
-        final GVRGearCursorController.ControllerEvent event = GVRGearCursorController.ControllerEvent.obtain();
+    public void getEvents(int controllerID, ArrayList<SXRGearCursorController.ControllerEvent> controllerEvents) {
+        final SXRGearCursorController.ControllerEvent event = SXRGearCursorController.ControllerEvent.obtain();
 
         event.handedness = readbackBuffer.get(0);
         event.pointF.set(mController.touch.x * OCULUS_SCALE, mController.touch.y * OCULUS_SCALE);
@@ -66,15 +66,15 @@ class DayDreamControllerReader extends GVRGearCursorController.ControllerReaderS
 
     private int getKey() {
         if(mController.appButtonState)
-            return GVRGearCursorController.CONTROLLER_KEYS.BUTTON_A.getNumVal();
+            return SXRGearCursorController.CONTROLLER_KEYS.BUTTON_A.getNumVal();
         if(mController.clickButtonState)
-            return GVRGearCursorController.CONTROLLER_KEYS.BUTTON_ENTER.getNumVal();
+            return SXRGearCursorController.CONTROLLER_KEYS.BUTTON_ENTER.getNumVal();
         if(mController.volumeUpButtonState)
-            return GVRGearCursorController.CONTROLLER_KEYS.BUTTON_VOLUME_UP.getNumVal();
+            return SXRGearCursorController.CONTROLLER_KEYS.BUTTON_VOLUME_UP.getNumVal();
         if(mController.volumeDownButtonState)
-            return GVRGearCursorController.CONTROLLER_KEYS.BUTTON_VOLUME_DOWN.getNumVal();
+            return SXRGearCursorController.CONTROLLER_KEYS.BUTTON_VOLUME_DOWN.getNumVal();
         if(mController.homeButtonState)
-            return GVRGearCursorController.CONTROLLER_KEYS.BUTTON_HOME.getNumVal();
+            return SXRGearCursorController.CONTROLLER_KEYS.BUTTON_HOME.getNumVal();
 
         return 0;
     }

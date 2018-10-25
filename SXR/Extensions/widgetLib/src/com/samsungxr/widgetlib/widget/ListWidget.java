@@ -30,7 +30,7 @@ import static com.samsungxr.widgetlib.widget.properties.JSONHelpers.optFloat;
 import static com.samsungxr.widgetlib.widget.properties.JSONHelpers.optJSONObject;
 
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -228,11 +228,11 @@ public class ListWidget extends GroupWidget implements ScrollableList {
      * Construct a new {@code ListWidget} instance with defined properties. Adapter is not setup
      *
      * @param gvrContext
-     *            The active {@link GVRContext}.
+     *            The active {@link SXRContext}.
      * @param properties A structured set of properties for the {@code ListWidget} instance. See
      *                       {@code widget.json} for schema.
      */
-    public ListWidget(final GVRContext gvrContext, final JSONObject properties) {
+    public ListWidget(final SXRContext gvrContext, final JSONObject properties) {
         super(gvrContext, properties);
         init(gvrContext, null);
     }
@@ -241,12 +241,12 @@ public class ListWidget extends GroupWidget implements ScrollableList {
      * Construct a new {@code ListWidget} instance with  LinearLayout applied by default
      *
      * @param gvrContext
-     *            The active {@link GVRContext}.
+     *            The active {@link SXRContext}.
      * @param adapter  {@link Adapter} associated with this layout.
      * @param width
      * @param height
      */
-    public ListWidget(final GVRContext gvrContext, final Adapter adapter, float width, float height) {
+    public ListWidget(final SXRContext gvrContext, final Adapter adapter, float width, float height) {
         super(gvrContext, width, height);
         init(gvrContext, adapter);
     }
@@ -1029,7 +1029,7 @@ public class ListWidget extends GroupWidget implements ScrollableList {
      * @param gvrContext
      * @return host view
      */
-    protected ListItemHostWidget makeHost(GVRContext gvrContext) {
+    protected ListItemHostWidget makeHost(SXRContext gvrContext) {
         ListItemHostWidget host = new ListItemHostWidget(gvrContext);
         return host;
     }
@@ -1042,7 +1042,7 @@ public class ListWidget extends GroupWidget implements ScrollableList {
      * no affecting the guest transformation.
      */
     protected class ListItemHostWidget extends GroupWidget {
-        public ListItemHostWidget(GVRContext gvrContext) {
+        public ListItemHostWidget(SXRContext gvrContext) {
             super(gvrContext, 0, 0);
             recycle();
         }
@@ -1287,7 +1287,7 @@ public class ListWidget extends GroupWidget implements ScrollableList {
 
     private class ContentWidget extends GroupWidget {
 
-        ContentWidget(GVRContext gvrContext) {
+        ContentWidget(SXRContext gvrContext) {
             super(gvrContext, 0, 0);
         }
         @Override
@@ -1446,7 +1446,7 @@ public class ListWidget extends GroupWidget implements ScrollableList {
                 Log.d(Log.SUBSYSTEM.LAYOUT, TAG, "reuse recycled view: %s", host);
 
             } else {
-                host = makeHost(getGVRContext());
+                host = makeHost(getSXRContext());
             }
         }
 
@@ -1467,7 +1467,7 @@ public class ListWidget extends GroupWidget implements ScrollableList {
         return mContent.inViewPort(dataIndex);
     }
 
-    private void init(final GVRContext gvrContext, final Adapter adapter) {
+    private void init(final SXRContext gvrContext, final Adapter adapter) {
         JSONObject properties = getObjectMetadata();
         JSONObject transitionAnimationProperties = optJSONObject(properties,
                 Properties.transition_animation, true);

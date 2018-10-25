@@ -18,10 +18,10 @@ package com.samsungxr.io.cursor3d;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRAssetLoader;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRAssetLoader;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRSceneObject;
 import com.samsungxr.utility.Log;
 
 import java.io.IOException;
@@ -80,7 +80,7 @@ abstract class CursorAsset {
 
     private AssetFileDescriptor soundFd;
     private CursorAudioManager audioManager;
-    protected GVRContext context;
+    protected SXRContext context;
     protected final CursorType cursorType;
     private GlobalSettings globalSettings;
 
@@ -96,10 +96,10 @@ abstract class CursorAsset {
     /**
      * Create a new asset object.
      *
-     * @param context the GVRf context
+     * @param context the SXRf context
      * @param action  the action associated with the asset
      */
-    CursorAsset(GVRContext context, CursorType cursorType, Action action) {
+    CursorAsset(SXRContext context, CursorType cursorType, Action action) {
         this.action = action;
         this.context = context;
         this.cursorType = cursorType;
@@ -166,17 +166,17 @@ abstract class CursorAsset {
     }
 
     /**
-     * In order to understand this method it is important to look at the way the GVRf framework,
-     * manages {@link GVRAndroidResource}s like the mesh and the texture:
+     * In order to understand this method it is important to look at the way the SXRf framework,
+     * manages {@link SXRAndroidResource}s like the mesh and the texture:
      * <p>
-     * GVRf maintains a copy of the mesh and the texture files in its own resource cache, it
+     * SXRf maintains a copy of the mesh and the texture files in its own resource cache, it
      * would be wasteful for this library to maintain a similar copy  of the asset resource
      * with the {@link CursorAsset} class as well. Instead every time a {@link CursorTheme}
      * is loaded all its accompanying assets are also loaded using this call.
      * </p>
      * In most cases the {@link CursorAsset} will use this method to issue a {@link
-     * GVRAssetLoader#loadMesh (GVRAndroidResource)} or {@link GVRAssetLoader#loadTexture(GVRAndroidResource)}
-     * call to check the GVRf resource cache to load an existing copy or to
+     * SXRAssetLoader#loadMesh (SXRAndroidResource)} or {@link SXRAssetLoader#loadTexture(SXRAndroidResource)}
+     * call to check the SXRf resource cache to load an existing copy or to
      * asynchronously load a new copy on demand.
      */
     abstract void load(Cursor cursor);
@@ -185,8 +185,8 @@ abstract class CursorAsset {
      * Use this method to clear references to the resources that were loaded when {@link #load
      * (Cursor)} was last called.
      * <p>
-     * This helps garbage collect the resources if not needed. GVRf maintains a cached copy of
-     * the objects and for cases where the resource is needed immediately the GVRf framework
+     * This helps garbage collect the resources if not needed. SXRf maintains a cached copy of
+     * the objects and for cases where the resource is needed immediately the SXRf framework
      * would do so with a resource cache provided it has not been garbage collected.
      * </p>
      */

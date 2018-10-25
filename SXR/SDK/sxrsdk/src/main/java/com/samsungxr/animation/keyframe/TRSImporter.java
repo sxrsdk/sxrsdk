@@ -1,11 +1,11 @@
 package com.samsungxr.animation.keyframe;
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRContext;
-import com.samsungxr.animation.GVRPose;
-import com.samsungxr.animation.GVRSkeleton;
-import com.samsungxr.animation.keyframe.GVRAnimationBehavior;
-import com.samsungxr.animation.keyframe.GVRAnimationChannel;
-import com.samsungxr.animation.keyframe.GVRSkeletonAnimation;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRContext;
+import com.samsungxr.animation.SXRPose;
+import com.samsungxr.animation.SXRSkeleton;
+import com.samsungxr.animation.keyframe.SXRAnimationBehavior;
+import com.samsungxr.animation.keyframe.SXRAnimationChannel;
+import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -21,16 +21,16 @@ import java.util.Map;
 
 public class TRSImporter
 {
-    private GVRSkeleton mSkeleton;
-    private final GVRContext mContext;
+    private SXRSkeleton mSkeleton;
+    private final SXRContext mContext;
     private String mFileName;
 
-    public TRSImporter(GVRContext ctx)
+    public TRSImporter(SXRContext ctx)
     {
         mContext = ctx;
     }
 
-    public GVRSkeletonAnimation importAnimation(GVRAndroidResource res, GVRSkeleton skel) throws IOException
+    public SXRSkeletonAnimation importAnimation(SXRAndroidResource res, SXRSkeleton skel) throws IOException
     {
         InputStream stream = res.getStream();
 
@@ -46,17 +46,17 @@ public class TRSImporter
         return readMotion(buffreader, skel);
     }
 
-    public GVRSkeletonAnimation readMotion(BufferedReader buffreader, GVRSkeleton skel) throws IOException
+    public SXRSkeletonAnimation readMotion(BufferedReader buffreader, SXRSkeleton skel) throws IOException
     {
         int         numbones = skel.getNumBones();
         String      line;
         String 		bonename = "";
         float       secondsPerFrame = 1 / 30.0f;
         float       curTime = 0;
-        GVRPose     curpose = null;
+        SXRPose     curpose = null;
         Matrix4f mtx = new Matrix4f();
         Quaternionf q = new Quaternionf();
-        ArrayList<GVRPose> posePerFrame = new ArrayList<>();
+        ArrayList<SXRPose> posePerFrame = new ArrayList<>();
 
         /*
          * Parse and accumulate all the motion keyframes.
@@ -91,7 +91,7 @@ public class TRSImporter
             q.normalize();
             if (boneIndex == 0)
             {
-                curpose = new GVRPose(skel);
+                curpose = new SXRPose(skel);
                 posePerFrame.add(curpose);
                 curTime =+ secondsPerFrame;
                 mtx.translationRotateScale(tx, ty, tz, q.x, q.y, q.z, q.w, sx, sy, sz);
@@ -110,8 +110,8 @@ public class TRSImporter
         /*
          * Create a skeleton animation with separate channels for each bone
          */
-        GVRSkeletonAnimation skelanim = new GVRSkeletonAnimation(mFileName, skel, curTime);
-        GVRAnimationChannel channel;
+        SXRSkeletonAnimation skelanim = new SXRSkeletonAnimation(mFileName, skel, curTime);
+        SXRAnimationChannel channel;
         Vector3f v = new Vector3f();
         int numKeys = posePerFrame.size();
 
@@ -121,7 +121,7 @@ public class TRSImporter
         float[] rotations = new float[numKeys * 5];
 
         bonename = skel.getBoneName(0);
-        for (GVRPose pose : posePerFrame)
+        for (SXRPose pose : posePerFrame)
         {
             int keyIndex = 0;
             int i = keyIndex * 4;
@@ -148,15 +148,15 @@ public class TRSImporter
             keyIndex++;
             curTime += secondsPerFrame;
         }
-        channel = new GVRAnimationChannel(bonename, positions, rotations, scales,
-                                          GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
+        channel = new SXRAnimationChannel(bonename, positions, rotations, scales,
+                                          SXRAnimationBehavior.DEFAULT, SXRAnimationBehavior.DEFAULT);
         skelanim.addChannel(bonename, channel);
         for (int boneIndex = 1; boneIndex < numbones; ++boneIndex)
         {
             rotations = new float[numKeys * 5];
             bonename = skel.getBoneName(boneIndex);
             curTime = 0;
-            for (GVRPose pose : posePerFrame)
+            for (SXRPose pose : posePerFrame)
             {
                 int keyIndex = 0;
                 int i = keyIndex * 5;
@@ -170,8 +170,8 @@ public class TRSImporter
                 keyIndex++;
                 curTime += secondsPerFrame;
             }
-            channel = new GVRAnimationChannel(bonename, null, rotations, null,
-                                              GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
+            channel = new SXRAnimationChannel(bonename, null, rotations, null,
+                                              SXRAnimationBehavior.DEFAULT, SXRAnimationBehavior.DEFAULT);
             skelanim.addChannel(bonename, channel);
         }
         return skelanim;

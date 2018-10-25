@@ -16,7 +16,7 @@
 package com.samsungxr.utility;
 
 import com.samsungxr.SystemPropertyUtil;
-import com.samsungxr.io.GVRControllerType;
+import com.samsungxr.io.SXRControllerType;
 
 import java.util.ArrayList;
 
@@ -518,7 +518,7 @@ public class VrAppSettings {
     protected boolean useMultiview;
 
     // List of cursor controller types to enable.
-    ArrayList<GVRControllerType> cursorControllerTypes;
+    ArrayList<SXRControllerType> cursorControllerTypes;
 
     public final ModeParams modeParams;
     public final EyeBufferParams eyeBufferParams;
@@ -596,7 +596,7 @@ public class VrAppSettings {
      * @return if current app is using the gaze cursor controller
      */
     public boolean useGazeCursorController() {
-        return cursorControllerTypes.contains(GVRControllerType.GAZE);
+        return cursorControllerTypes.contains(SXRControllerType.GAZE);
     }
 
     /**
@@ -607,28 +607,28 @@ public class VrAppSettings {
      */
     public void setUseGazeCursorController(boolean useGazeCursorController) {
         if (useGazeCursorController) {
-            removeControllerType(GVRControllerType.GAZE);
+            removeControllerType(SXRControllerType.GAZE);
         }
         else {
-            addControllerType(GVRControllerType.GAZE);
+            addControllerType(SXRControllerType.GAZE);
         }
     }
 
     /**
      * Get the current list of cursor controller types.
      */
-    public ArrayList<GVRControllerType> getCursorControllerTypes() { return cursorControllerTypes; }
+    public ArrayList<SXRControllerType> getCursorControllerTypes() { return cursorControllerTypes; }
 
     /**
      * Enable the use of the given controller type by
      * adding it to the cursor controller types list.
-     * @param controllerType GVRControllerType to add to the list
+     * @param controllerType SXRControllerType to add to the list
      */
-    public void addControllerType(GVRControllerType controllerType)
+    public void addControllerType(SXRControllerType controllerType)
     {
         if (cursorControllerTypes == null)
         {
-            cursorControllerTypes = new ArrayList<GVRControllerType>();
+            cursorControllerTypes = new ArrayList<SXRControllerType>();
         }
         else if (cursorControllerTypes.contains(controllerType))
         {
@@ -640,9 +640,9 @@ public class VrAppSettings {
     /**
      * Disable the use of the given controller type by
      * removing it from the cursor controller types list.
-     * @param controllerType GVRControllerType to remove from the list
+     * @param controllerType SXRControllerType to remove from the list
      */
-    public void removeControllerType(GVRControllerType controllerType)
+    public void removeControllerType(SXRControllerType controllerType)
     {
         if (cursorControllerTypes != null)
         {
@@ -656,7 +656,7 @@ public class VrAppSettings {
      * @return if current app is using the AndroidWearTouchpad
      */
     public boolean useAndroidWearTouchpad() {
-        return cursorControllerTypes.contains(GVRControllerType.WEARTOUCHPAD);
+        return cursorControllerTypes.contains(SXRControllerType.WEARTOUCHPAD);
     }
 
     /**
@@ -667,10 +667,10 @@ public class VrAppSettings {
      */
     public void setUseAndroidWearTouchpad(boolean useAndroidWearTouchpad) {
         if (useAndroidWearTouchpad) {
-            removeControllerType(GVRControllerType.WEARTOUCHPAD);
+            removeControllerType(SXRControllerType.WEARTOUCHPAD);
         }
         else {
-            addControllerType(GVRControllerType.WEARTOUCHPAD);
+            addControllerType(SXRControllerType.WEARTOUCHPAD);
         }
     }
 

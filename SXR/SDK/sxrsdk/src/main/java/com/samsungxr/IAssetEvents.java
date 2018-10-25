@@ -27,44 +27,44 @@ public interface IAssetEvents extends IEvents
      * Called when a model is successfully loaded.
      * This event will not be raised until the model and all of
      * its textures are loaded.
-     * @param context   GVRContext used to load the model
-     * @param model     GVRSceneObject root of the model scene graph, null if model did not load.
+     * @param context   SXRContext used to load the model
+     * @param model     SXRSceneObject root of the model scene graph, null if model did not load.
      * @param filePath  File path or URL of the model.
      * @param errors    String with loading errors or null if successful.
      */
-    public void onAssetLoaded(GVRContext context, GVRSceneObject model, String filePath, String errors);
+    public void onAssetLoaded(SXRContext context, SXRSceneObject model, String filePath, String errors);
     
     /**
      * Called when a model is successfully loaded.
      * This event is raised when the model file is loaded.
      * Texture files may still be loading in the background.
-     * @param context   GVRContext used to load the model
+     * @param context   SXRContext used to load the model
      * @param model root of the scene graph representing the model.
      * @param filePath  File path or URL of the model.
      */
-    public void onModelLoaded(GVRContext context, GVRSceneObject model, String filePath);
+    public void onModelLoaded(SXRContext context, SXRSceneObject model, String filePath);
     
     /**
      * Called when a texture is successfully loaded.
-     * @param context   GVRContext used to load the model
-     * @param texture   GVRTexture created from loading the texture file.
+     * @param context   SXRContext used to load the model
+     * @param texture   SXRTexture created from loading the texture file.
      * @param filePath  File path or URL of the texture file.
      */
-    public void onTextureLoaded(GVRContext context, GVRTexture texture, String filePath);
+    public void onTextureLoaded(SXRContext context, SXRTexture texture, String filePath);
     
     /**
      * Called when a model cannot be loaded.
-     * @param context   GVRContext used to load the model
+     * @param context   SXRContext used to load the model
      * @param error     error message
      * @param filePath  File path or URL of the model that failed to load.
      */
-    public void onModelError(GVRContext context, String error, String filePath);
+    public void onModelError(SXRContext context, String error, String filePath);
     
     /**
      * Called when a texture cannot be loaded.
-     * @param context   GVRContext used to load the model
+     * @param context   SXRContext used to load the model
      * @param error     error message
      * @param filePath  File path or URL of the texture that failed to load.
      */
-    public void onTextureError(GVRContext context, String error, String filePath);
+    public void onTextureError(SXRContext context, String error, String filePath);
 }

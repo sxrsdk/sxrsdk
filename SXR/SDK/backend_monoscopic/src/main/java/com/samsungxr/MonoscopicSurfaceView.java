@@ -31,16 +31,16 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 
 /**
- * This GVRSurfaceView class extends from {@link GLSurfaceView} which is used
- * for OpenGL rendering. In GVR, GVRSurfaceView acts the same way
- * {@link GLSurfaceView} does to render object and scene. GVRSurfaceView
+ * This SXRSurfaceView class extends from {@link GLSurfaceView} which is used
+ * for OpenGL rendering. In SXR, SXRSurfaceView acts the same way
+ * {@link GLSurfaceView} does to render object and scene. SXRSurfaceView
  * requires a valid {@link MonoscopicViewManager} which holds the main scene details to
  * be rendered
  */
 class MonoscopicSurfaceView extends GLSurfaceView implements
         android.view.Choreographer.FrameCallback {
     /**
-     * Constructs a GVRSurfaceView given by current GVR context without
+     * Constructs a SXRSurfaceView given by current SXR context without
      * MonoscopicViewManager
      *
      * @param context
@@ -51,7 +51,7 @@ class MonoscopicSurfaceView extends GLSurfaceView implements
     }
 
     /**
-     * Constructs a {@link MonoscopicSurfaceView} given by current {@link GVRContext}
+     * Constructs a {@link MonoscopicSurfaceView} given by current {@link SXRContext}
      * with {@link MonoscopicViewManager}
      *
      * @param context

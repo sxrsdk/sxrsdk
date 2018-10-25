@@ -1,10 +1,10 @@
 package com.samsungxr.widgetlib.widget.basic;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRMesh;
-import com.samsungxr.GVRRenderData.GVRRenderingOrder;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.scene_objects.GVRTextViewSceneObject.IntervalFrequency;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRRenderData.SXRRenderingOrder;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.scene_objects.SXRTextViewSceneObject.IntervalFrequency;
 import org.json.JSONObject;
 
 import android.graphics.PointF;
@@ -49,7 +49,7 @@ public class Button extends Widget implements TextContainer {
      * @param textWidgetWidth Width occupied for text
      * @param textWidgetHeight Height occupied for text
      */
-    public Button(GVRContext context, float width, float height,
+    public Button(SXRContext context, float width, float height,
                   float textWidgetWidth, float textWidgetHeight) {
         super(context, width, height);
         mTextContainer = init();
@@ -66,39 +66,39 @@ public class Button extends Widget implements TextContainer {
      * @param width The width of graphic part
      * @param height The height of graphic part
      */
-    public Button(GVRContext context, float width, float height) {
+    public Button(SXRContext context, float width, float height) {
         super(context, width, height);
         mTextContainer = init();
     }
 
-    public Button(GVRContext context) {
+    public Button(SXRContext context) {
         super(context);
         mTextContainer = init();
     }
 
     /**
-     * Create Button instance wrapping around the GVRF scene object
+     * Create Button instance wrapping around the SXRF scene object
      *
      * @param context
-     * @param sceneObject GVRF scene object
+     * @param sceneObject SXRF scene object
      * @param attributes NodeEntry parsed from the model
      * @throws InstantiationException
      */
     @Deprecated
-    public Button(GVRContext context, GVRSceneObject sceneObject,
+    public Button(SXRContext context, SXRSceneObject sceneObject,
             NodeEntry attributes) throws InstantiationException {
         super(context, sceneObject, attributes);
         mTextContainer = init();
     }
 
     /**
-     * Create Button instance wrapping around the GVRF scene object
+     * Create Button instance wrapping around the SXRF scene object
      *
      * @param context
-     * @param sceneObject GVRF scene object
+     * @param sceneObject SXRF scene object
      * @throws InstantiationException
      */
-    public Button(GVRContext context, GVRSceneObject sceneObject) {
+    public Button(SXRContext context, SXRSceneObject sceneObject) {
         super(context, sceneObject);
         mTextContainer = init();
     }
@@ -109,7 +109,7 @@ public class Button extends Widget implements TextContainer {
      * @param context
      * @param properties
      */
-    public Button(GVRContext context, JSONObject properties) {
+    public Button(SXRContext context, JSONObject properties) {
         super(context, properties);
         mTextContainer = init();
     }
@@ -231,7 +231,7 @@ public class Button extends Widget implements TextContainer {
         return mDefaultLayout;
     }
 
-    protected Button(GVRContext context, GVRMesh mesh) {
+    protected Button(SXRContext context, SXRMesh mesh) {
         super(context, mesh);
         mTextContainer = init();
     }
@@ -264,7 +264,7 @@ public class Button extends Widget implements TextContainer {
      * @return {@code Widget} instance or {@code null}
      */
     protected Widget createGraphicWidget() {
-        return new Graphic(getGVRContext(), getWidth(), getHeight());
+        return new Graphic(getSXRContext(), getWidth(), getHeight());
     }
 
     protected Widget getGraphic() {
@@ -301,11 +301,11 @@ public class Button extends Widget implements TextContainer {
 
     protected LightTextWidget createTextWidget() {
         Log.d(TAG, "createTextWidget(%s) [%f, %f]", getName(), getTextWidgetWidth(), getTextWidgetHeight());
-        final LightTextWidget textWidget = new LightTextWidget(getGVRContext(),
+        final LightTextWidget textWidget = new LightTextWidget(getSXRContext(),
                 getTextWidgetWidth(), getTextWidgetHeight());
         Log.d(TAG, "createTextWidget(%s): setting rendering order",
                 getName());
-        textWidget.setRenderingOrder(GVRRenderingOrder.TRANSPARENT);
+        textWidget.setRenderingOrder(SXRRenderingOrder.TRANSPARENT);
         Log.d(TAG, "createTextWidget(%s): setting gravity", getName());
         textWidget.setGravity(Gravity.CENTER);
         textWidget.setName(".text");
@@ -332,7 +332,7 @@ public class Button extends Widget implements TextContainer {
         mTextWidgetWidth = textWidgetSize.x;
         mTextWidgetHeight = textWidgetSize.y;
 
-        setRenderingOrder(GVRRenderingOrder.TRANSPARENT);
+        setRenderingOrder(SXRRenderingOrder.TRANSPARENT);
 
         setChildrenFollowFocus(true);
         setChildrenFollowInput(true);
@@ -349,12 +349,12 @@ public class Button extends Widget implements TextContainer {
         JSONObject textProperties = copy(metaData);
         put(textProperties, Widget.Properties.size, textWidgetSize);
         TextParams params = new TextParams();
-                params.setFromJSON(getGVRContext().getContext(), textProperties);
+                params.setFromJSON(getSXRContext().getContext(), textProperties);
         return params;
     }
 
     private static class Graphic extends Widget {
-        Graphic(GVRContext context, float width, float height) {
+        Graphic(SXRContext context, float width, float height) {
             super(context, width, height);
         }
     }

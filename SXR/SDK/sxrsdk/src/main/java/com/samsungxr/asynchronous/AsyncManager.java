@@ -18,7 +18,7 @@ package com.samsungxr.asynchronous;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.samsungxr.GVRHybridObject;
+import com.samsungxr.SXRHybridObject;
 import com.samsungxr.asynchronous.Throttler.AsyncLoaderFactory;
 
 public class AsyncManager {
@@ -60,12 +60,12 @@ public class AsyncManager {
      * @param asyncLoaderFactory
      *         The factory object.
      */
-    public void registerDatatype(Class<? extends GVRHybridObject> textureClass,
-            AsyncLoaderFactory<? extends GVRHybridObject, ?> asyncLoaderFactory) {
+    public void registerDatatype(Class<? extends SXRHybridObject> textureClass,
+            AsyncLoaderFactory<? extends SXRHybridObject, ?> asyncLoaderFactory) {
         mFactories.put(textureClass, asyncLoaderFactory);
     }
 
-    Map<Class<? extends GVRHybridObject>, AsyncLoaderFactory<? extends GVRHybridObject, ?>> getFactories() {
+    Map<Class<? extends SXRHybridObject>, AsyncLoaderFactory<? extends SXRHybridObject, ?>> getFactories() {
         return mFactories;
     }
 
@@ -73,13 +73,13 @@ public class AsyncManager {
     private Scheduler mScheduler;
 
     // Factories
-    private Map<Class<? extends GVRHybridObject>, AsyncLoaderFactory<? extends GVRHybridObject, ?>> mFactories;
+    private Map<Class<? extends SXRHybridObject>, AsyncLoaderFactory<? extends SXRHybridObject, ?>> mFactories;
 
     private AsyncManager() {
         // Make the static field available before this constructor returns
         sInstance = this;
 
-        mFactories = new HashMap<Class<? extends GVRHybridObject>, AsyncLoaderFactory<? extends GVRHybridObject, ?>>(); 
+        mFactories = new HashMap<Class<? extends SXRHybridObject>, AsyncLoaderFactory<? extends SXRHybridObject, ?>>(); 
 
         // Setup default scheduler to Throttler
         mScheduler = Throttler.get();

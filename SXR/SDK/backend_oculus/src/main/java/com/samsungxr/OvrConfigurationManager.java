@@ -15,16 +15,16 @@
 
 package com.samsungxr;
 
-final class OvrConfigurationManager extends GVRConfigurationManager {
+final class OvrConfigurationManager extends SXRConfigurationManager {
 
-    OvrConfigurationManager(GVRApplication application) {
+    OvrConfigurationManager(SXRApplication application) {
         super(application);
     }
 
     @Override
     public boolean isHmtConnected() {
 
-        final GVRApplication application = (GVRApplication) mApplication.get();
+        final SXRApplication application = (SXRApplication) mApplication.get();
         if (null == application) {
             return false;
         }

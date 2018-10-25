@@ -2,7 +2,7 @@ package com.samsungxr.widgetlib.widget;
 
 import com.samsungxr.widgetlib.log.Log;
 
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRSceneObject;
 import com.samsungxr.utility.RuntimeAssertion;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,11 +42,11 @@ public class NodeEntry {
      * Create the node based on the scene object. The mandatory keys should always be valid and
      * assigned based on the model parsing.
      *
-     * @param sceneObject {@link GVRSceneObject} to create the node from
+     * @param sceneObject {@link SXRSceneObject} to create the node from
      * @throws IllegalFormatException if the properties encoded in the scene object's {@linkplain
-     * GVRSceneObject#getName() name} don't include the mandatory 'name' property.
+     * SXRSceneObject#getName() name} don't include the mandatory 'name' property.
      */
-    public NodeEntry(GVRSceneObject sceneObject) throws IllegalFormatException {
+    public NodeEntry(SXRSceneObject sceneObject) throws IllegalFormatException {
         String name = sceneObject.getName();
         Log.d(TAG, "NodeEntry(): %s", name);
         if (ROOT_NODE_NAME.equals(name)) {

@@ -17,7 +17,7 @@ package com.samsungxr.io.cursor3d;
 
 import android.content.Context;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 import com.samsungxr.utility.Log;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -42,7 +42,7 @@ class SettingsParser {
     private static final String XML_START_TAG = "<settings>";
     private static final String XML_END_TAG = "</settings>";
 
-    static void parseSettings(GVRContext context, CursorManager cursorManager)
+    static void parseSettings(SXRContext context, CursorManager cursorManager)
             throws XmlPullParserException, IOException {
         InputStream in = getSettingsStream(context.getContext());
         try {
@@ -68,7 +68,7 @@ class SettingsParser {
     }
 
     //TODO: use a utility to read XML and convert to Object and use Objects to write XML
-    private static void readSettings(XmlPullParser parser, GVRContext context, CursorManager
+    private static void readSettings(XmlPullParser parser, SXRContext context, CursorManager
             cursorManager) throws XmlPullParserException, IOException {
 
         Map<String, CursorTheme> themes = cursorManager.getThemeMap();

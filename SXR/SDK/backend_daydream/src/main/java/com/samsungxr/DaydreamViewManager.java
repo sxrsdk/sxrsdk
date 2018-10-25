@@ -21,16 +21,16 @@ import android.view.WindowManager;
 import com.google.vr.ndk.base.AndroidCompat;
 import com.google.vr.ndk.base.GvrLayout;
 
-import com.samsungxr.io.GVRGearCursorController;
+import com.samsungxr.io.SXRGearCursorController;
 
-class DaydreamViewManager extends GVRViewManager {
+class DaydreamViewManager extends SXRViewManager {
     private static final String TAG = DaydreamViewManager.class.getSimpleName();
     private GvrLayout gvrLayout;
     private DaydreamRenderer renderer;
     private GLSurfaceView surfaceView;
-    private GVRCameraRig cameraRig;
+    private SXRCameraRig cameraRig;
     private boolean sensoredSceneUpdated = false;
-    private  GVRRenderTarget mDaydreamRenderTarget = null;
+    private  SXRRenderTarget mDaydreamRenderTarget = null;
 
     // This is done on the GL thread because refreshViewerProfile isn't thread-safe.
     private final Runnable refreshViewerProfileRunnable =
@@ -41,7 +41,7 @@ class DaydreamViewManager extends GVRViewManager {
                 }
             };
 
-    DaydreamViewManager(final GVRApplication application, GVRMain gvrMain) {
+    DaydreamViewManager(final SXRApplication application, SXRMain gvrMain) {
         super(application, gvrMain);
 
         // Initialize GvrLayout and the native renderer.
@@ -80,9 +80,9 @@ class DaydreamViewManager extends GVRViewManager {
     public long getNativeRenderer(){
         return renderer.getNativeDaydreamRenderer();
     }
-    public GVRRenderTarget getRenderTarget(){
+    public SXRRenderTarget getRenderTarget(){
         if(null == mDaydreamRenderTarget){
-            mDaydreamRenderTarget = new GVRRenderTarget(mApplication.getGVRContext());
+            mDaydreamRenderTarget = new SXRRenderTarget(mApplication.getSXRContext());
         }
         return mDaydreamRenderTarget;
     }
@@ -99,7 +99,7 @@ class DaydreamViewManager extends GVRViewManager {
     void onSurfaceCreated()
     {
         super.onSurfaceCreated();
-        GVRGearCursorController gearController = mInputManager.getGearController();
+        SXRGearCursorController gearController = mInputManager.getGearController();
         if (gearController != null)
             gearController.attachReader(mControllerReader);
     }
@@ -127,8 +127,8 @@ class DaydreamViewManager extends GVRViewManager {
         }
 
         if (eye == 0) {
-            GVRRenderTarget renderTarget = getRenderTarget();
-            GVRCamera leftCamera = cameraRig.getLeftCamera();
+            SXRRenderTarget renderTarget = getRenderTarget();
+            SXRCamera leftCamera = cameraRig.getLeftCamera();
             renderTarget.cullFromCamera(mMainScene,mMainScene.getMainCameraRig().getCenterCamera(),mRenderBundle.getShaderManager());
             captureCenterEye(renderTarget, false);
             capture3DScreenShot(renderTarget, false);
@@ -139,8 +139,8 @@ class DaydreamViewManager extends GVRViewManager {
 
             captureLeftEye(renderTarget, false);
         } else {
-            GVRCamera rightCamera = cameraRig.getRightCamera();
-            GVRRenderTarget renderTarget = getRenderTarget();
+            SXRCamera rightCamera = cameraRig.getRightCamera();
+            SXRRenderTarget renderTarget = getRenderTarget();
 
             renderTarget.render(mMainScene, rightCamera, mRenderBundle.getShaderManager(),mRenderBundle.getPostEffectRenderTextureA(),
                     mRenderBundle.getPostEffectRenderTextureB());
@@ -149,7 +149,7 @@ class DaydreamViewManager extends GVRViewManager {
         captureFinish();
     }
 
-    void setCameraRig(GVRCameraRig cameraRig) {
+    void setCameraRig(SXRCameraRig cameraRig) {
         this.cameraRig = cameraRig;
         renderer.setCameraRig(cameraRig);
         sensoredSceneUpdated = false;

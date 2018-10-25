@@ -2,10 +2,10 @@ package com.samsungxr.widgetlib.widget.layout;
 
 import com.samsungxr.widgetlib.widget.Widget;
 
-import com.samsungxr.GVRMesh;
-import com.samsungxr.GVRRenderData;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRTransform;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRRenderData;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRTransform;
 
 /**
  * Layout utilities
@@ -65,22 +65,22 @@ public final class LayoutHelpers {
 
     /**
      * Calculates the length of the edges of {@code item's}
-     * {@linkplain GVRMesh#getBoundingBox() bounding box}. These lengths are
+     * {@linkplain SXRMesh#getBoundingBox() bounding box}. These lengths are
      * relative to the object itself, and have the object's scaling applied to
      * it. Rotations are not taken into account.
      *
      * @param item
-     *            The {@link GVRSceneObject} to calculate with width for.
+     *            The {@link SXRSceneObject} to calculate with width for.
      * @return The dimensions of {@code item}.
      */
-    public static float[] calculateGeometricDimensions(final GVRSceneObject item) {
-        final GVRRenderData renderData = item.getRenderData();
+    public static float[] calculateGeometricDimensions(final SXRSceneObject item) {
+        final SXRRenderData renderData = item.getRenderData();
         if (renderData != null) {
-            final GVRMesh mesh = renderData.getMesh();
+            final SXRMesh mesh = renderData.getMesh();
             if (mesh != null) {
                 final float[] dimensions = calculateGeometricDimensions(mesh);
 
-                GVRTransform transform = item.getTransform();
+                SXRTransform transform = item.getTransform();
 
                 dimensions[0] *= transform.getScaleX();
                 dimensions[1] *= transform.getScaleY();
@@ -120,8 +120,8 @@ public final class LayoutHelpers {
     }
 
 
-    private static float[] calculateGeometricDimensions(final GVRMesh mesh) {
-        GVRMesh boundingBox = mesh.getBoundingBox();
+    private static float[] calculateGeometricDimensions(final SXRMesh mesh) {
+        SXRMesh boundingBox = mesh.getBoundingBox();
         final float[] vertices = boundingBox.getVertices();
         return calculateGeometricDimensions(vertices);
     }

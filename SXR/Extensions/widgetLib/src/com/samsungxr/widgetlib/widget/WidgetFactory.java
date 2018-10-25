@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.Map;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRSceneObject;
 
 import com.samsungxr.widgetlib.log.Log;
 import com.samsungxr.widgetlib.widget.NodeEntry.NameDemangler;
@@ -16,7 +16,7 @@ import com.samsungxr.widgetlib.widget.layout.basic.AbsoluteLayout;
 
 public class WidgetFactory {
     /**
-     * Create a {@link Widget} to wrap the specified {@link GVRSceneObject}. By
+     * Create a {@link Widget} to wrap the specified {@link SXRSceneObject}. By
      * default, {@code sceneObject} is wrapped in an {@link GroupWidget}. If
      * another {@code Widget} class is specified in {@code sceneObject}'s
      * metadata (as "{@code class_WidgetClassName}"), it will be wrapped in an
@@ -25,13 +25,13 @@ public class WidgetFactory {
      * @see NameDemangler#demangleString(String)
      *
      * @param sceneObject
-     *            The {@code GVRSceneObject} to wrap.
+     *            The {@code SXRSceneObject} to wrap.
      * @return A new {@code Widget} instance.
      * @throws InstantiationException
      *             If the {@code Widget} can't be instantiated for any reason.
      */
     @SuppressWarnings("unchecked")
-    static Widget createWidget(final GVRSceneObject sceneObject)
+    static Widget createWidget(final SXRSceneObject sceneObject)
             throws InstantiationException {
         Class<? extends Widget> widgetClass = GroupWidget.class;
         NodeEntry attributes = new NodeEntry(sceneObject);
@@ -55,10 +55,10 @@ public class WidgetFactory {
 
     /**
      * Create a {@link Widget} of the specified {@code widgetClass} to wrap
-     * {@link GVRSceneObject sceneObject}.
+     * {@link SXRSceneObject sceneObject}.
      *
      * @param sceneObject
-     *            The {@code GVRSceneObject} to wrap
+     *            The {@code SXRSceneObject} to wrap
      * @param widgetClass
      *            The {@linkplain Class} of the {@code Widget} to wrap
      *            {@code sceneObject} with.
@@ -66,7 +66,7 @@ public class WidgetFactory {
      * @throws InstantiationException
      *             If the {@code Widget} can't be instantiated for any reason.
      */
-    public static Widget createWidget(final GVRSceneObject sceneObject,
+    public static Widget createWidget(final SXRSceneObject sceneObject,
             Class<? extends Widget> widgetClass) throws InstantiationException {
         NodeEntry attributes = new NodeEntry(sceneObject);
         return createWidget(sceneObject, attributes, widgetClass);
@@ -74,18 +74,18 @@ public class WidgetFactory {
 
     /**
      * Create an {@link AbsoluteLayout} {@link Widget} to wrap a
-     * {@link GVRSceneObject} that is a child of the specified {@code root}
-     * {@code GVRSceneObject}.
+     * {@link SXRSceneObject} that is a child of the specified {@code root}
+     * {@code SXRSceneObject}.
      *
      * @param root
-     *            The root {@code GVRSceneObject} containing the desired child.
+     *            The root {@code SXRSceneObject} containing the desired child.
      * @param childName
      *            Name of the child of {@code root} to wrap.
      * @return A new {@code AbsoluteLayout} instance.
      * @throws InstantiationException
      *             If the {@code Widget} can't be instantiated for any reason.
      */
-    public static Widget createWidget(final GVRSceneObject root,
+    public static Widget createWidget(final SXRSceneObject root,
             final String childName) throws InstantiationException {
         GroupWidget widget = (GroupWidget)createWidget(root, childName, GroupWidget.class);
         widget.applyLayout(new AbsoluteLayout());
@@ -94,21 +94,21 @@ public class WidgetFactory {
 
     /**
      * Create an {@link Widget} of the specified {@code widgetClass} to wrap a
-     * {@link GVRSceneObject} that is a child of the specified {@code root}
-     * {@code GVRSceneObject}.
+     * {@link SXRSceneObject} that is a child of the specified {@code root}
+     * {@code SXRSceneObject}.
      *
      * @param root
-     *            The root {@code GVRSceneObject} containing the desired child.
+     *            The root {@code SXRSceneObject} containing the desired child.
      * @param childName
      *            Name of the child of {@code root} to wrap.
      * @param widgetClass
      *            The {@linkplain Class} of the {@code Widget} to wrap the child
-     *            {@code GVRSceneObject} with.
+     *            {@code SXRSceneObject} with.
      * @return A new {@code AbsoluteLayout} instance.
      * @throws InstantiationException
      *             If the {@code Widget} can't be instantiated for any reason.
      */
-    static public Widget createWidget(GVRSceneObject root,
+    static public Widget createWidget(SXRSceneObject root,
             final String childName, final Class<? extends Widget> widgetClass)
             throws InstantiationException {
         Widget result = null;
@@ -136,11 +136,11 @@ public class WidgetFactory {
     }
 
     /**
-     * Create an {@link AbsoluteLayout} to wrap the root {@link GVRSceneObject}
+     * Create an {@link AbsoluteLayout} to wrap the root {@link SXRSceneObject}
      * of the scene graph loaded from a file.
      *
      * @param gvrContext
-     *            The {@link GVRContext} to load the model into.
+     *            The {@link SXRContext} to load the model into.
      * @param modelFile
      *            The asset file to load the model from.
      * @return A new {@code AbsoluteLayout} instance.
@@ -150,7 +150,7 @@ public class WidgetFactory {
      *             If the model file can't be read.
      */
     @SuppressWarnings("unused")
-    public static Widget createWidgetFromModel(final GVRContext gvrContext,
+    public static Widget createWidgetFromModel(final SXRContext gvrContext,
             final String modelFile) throws InstantiationException, IOException {
         GroupWidget widget = (GroupWidget) createWidgetFromModel(gvrContext, modelFile,
                                      GroupWidget.class);
@@ -160,15 +160,15 @@ public class WidgetFactory {
 
     /**
      * Create a {@link Widget} of the specified {@code widgetClass} to wrap the
-     * root {@link GVRSceneObject} of the scene graph loaded from a file.
+     * root {@link SXRSceneObject} of the scene graph loaded from a file.
      *
      * @param gvrContext
-     *            The {@link GVRContext} to load the model into.
+     *            The {@link SXRContext} to load the model into.
      * @param modelFile
      *            The asset file to load the model from.
      * @param widgetClass
      *            The {@linkplain Class} of the {@code Widget} to wrap the root
-     *            {@code GVRSceneObject} with.
+     *            {@code SXRSceneObject} with.
      * @return A new {@code AbsoluteLayout} instance.
      * @throws InstantiationException
      *             If the {@code Widget} can't be instantiated for any reason.
@@ -176,20 +176,20 @@ public class WidgetFactory {
      *             If the model file can't be read.
      */
     @SuppressWarnings("WeakerAccess")
-    public static Widget createWidgetFromModel(final GVRContext gvrContext,
+    public static Widget createWidgetFromModel(final SXRContext gvrContext,
             final String modelFile, Class<? extends Widget> widgetClass)
             throws InstantiationException, IOException {
-        GVRSceneObject rootNode = loadModel(gvrContext, modelFile);
+        SXRSceneObject rootNode = loadModel(gvrContext, modelFile);
         return createWidget(rootNode, widgetClass);
     }
 
     /**
      * Create an {@link AbsoluteLayout} {@link Widget} to wrap a
-     * {@link GVRSceneObject} that is a child of the {@code root}
-     * {@code GVRSceneObject} of the scene graph loaded from a file.
+     * {@link SXRSceneObject} that is a child of the {@code root}
+     * {@code SXRSceneObject} of the scene graph loaded from a file.
      *
      * @param gvrContext
-     *            The {@link GVRContext} to load the model into.
+     *            The {@link SXRContext} to load the model into.
      * @param modelFile
      *            The asset file to load the model from.
      * @param nodeName
@@ -202,7 +202,7 @@ public class WidgetFactory {
      *             If the model file can't be read.
      */
     @SuppressWarnings("unused")
-    public static Widget createWidgetFromModel(final GVRContext gvrContext,
+    public static Widget createWidgetFromModel(final SXRContext gvrContext,
             final String modelFile, final String nodeName)
             throws InstantiationException, IOException {
         GroupWidget widget = (GroupWidget)createWidgetFromModel(gvrContext, modelFile, nodeName,
@@ -213,18 +213,18 @@ public class WidgetFactory {
 
     /**
      * Create a {@link Widget} of the specified {@code widgetClass} to wrap a
-     * {@link GVRSceneObject} that is a child of the {@code root}
-     * {@code GVRSceneObject} of the scene graph loaded from a file.
+     * {@link SXRSceneObject} that is a child of the {@code root}
+     * {@code SXRSceneObject} of the scene graph loaded from a file.
      *
      * @param gvrContext
-     *            The {@link GVRContext} to load the model into.
+     *            The {@link SXRContext} to load the model into.
      * @param modelFile
      *            The asset file to load the model from.
      * @param nodeName
      *            Name of the child of {@code root} to wrap.
      * @param widgetClass
      *            The {@linkplain Class} of the {@code Widget} to wrap the child
-     *            {@code GVRSceneObject} with.
+     *            {@code SXRSceneObject} with.
      * @return A new {@code Widget} instance.
      * @throws InstantiationException
      *             If the {@code AbsoluteLayout} can't be instantiated for any
@@ -232,11 +232,11 @@ public class WidgetFactory {
      * @throws IOException
      *             If the model file can't be read.
      */
-    public static Widget createWidgetFromModel(final GVRContext gvrContext,
+    public static Widget createWidgetFromModel(final SXRContext gvrContext,
             final String modelFile, final String nodeName,
             Class<? extends Widget> widgetClass) throws InstantiationException,
             IOException {
-        GVRSceneObject rootNode = loadModel(gvrContext, modelFile,
+        SXRSceneObject rootNode = loadModel(gvrContext, modelFile,
                                                     nodeName);
         return createWidget(rootNode, widgetClass);
     }
@@ -246,44 +246,44 @@ public class WidgetFactory {
     /**
      * Load model from file
      *
-     * @param gvrContext Valid {@link GVRContext} instance
+     * @param gvrContext Valid {@link SXRContext} instance
      * @param modelFile Path to the model's file, relative to the {@code assets} directory
-     * @return root object The root {@link GVRSceneObject} of the model
+     * @return root object The root {@link SXRSceneObject} of the model
      * @throws IOException If reading the model file fails
      */
-    public static GVRSceneObject loadModel(final GVRContext gvrContext,
+    public static SXRSceneObject loadModel(final SXRContext gvrContext,
                                            final String modelFile) throws IOException {
         return loadModel(gvrContext, modelFile, new HashMap<String, Integer>());
     }
 
     /**
      * Load model from file starting from the specific node name
-     * @param gvrContext Valid {@link GVRContext} instance
+     * @param gvrContext Valid {@link SXRContext} instance
      * @param modelFile Path to the model's file, relative to the {@code assets} directory
      * @param nodeName name of the starting node
      * @return root object
      * @throws IOException If reading the model file fails
      */
-    public static GVRSceneObject loadModel(final GVRContext gvrContext,
+    public static SXRSceneObject loadModel(final SXRContext gvrContext,
                                            final String modelFile, final String nodeName)
             throws IOException {
         return loadModel(gvrContext, modelFile, nodeName, new HashMap<String, Integer>());
     }
 
-    private static GVRSceneObject loadModel(final GVRContext gvrContext,
+    private static SXRSceneObject loadModel(final SXRContext gvrContext,
                                            final String modelFile,
                                             final HashMap<String, Integer> duplicates)
             throws IOException {
         return loadModel(gvrContext, modelFile, null, duplicates);
     }
 
-    private static GVRSceneObject loadModel(
-            final GVRContext gvrContext, final String modelFile,
+    private static SXRSceneObject loadModel(
+            final SXRContext gvrContext, final String modelFile,
             String nodeName, final HashMap<String, Integer> duplicates) throws IOException {
-        GVRSceneObject assimpScene = gvrContext.getAssetLoader().loadModel(modelFile,
-                com.samsungxr.GVRImportSettings.getRecommendedSettings(), true, null);
+        SXRSceneObject assimpScene = gvrContext.getAssetLoader().loadModel(modelFile,
+                com.samsungxr.SXRImportSettings.getRecommendedSettings(), true, null);
 //        printOutScene(assimpScene, 0);
-        GVRSceneObject root = getRootNode(assimpScene);
+        SXRSceneObject root = getRootNode(assimpScene);
 
         // JAssimp can create multiple objects for the same node.
         // It can happen, for instance, for multiple meshes nodes.
@@ -298,22 +298,22 @@ public class WidgetFactory {
     }
 
     @SuppressWarnings("unused")
-    private static void printOutScene(final GVRSceneObject scene, int level) {
+    private static void printOutScene(final SXRSceneObject scene, int level) {
         Log.d(TAG, "model:: %d) name = %s [%s], renderData = %s transfrom = %s",
                 level, scene.getName(), scene, scene.getRenderData(), scene.getTransform());
         if (scene.children() != null) {
-            for (GVRSceneObject child: scene.children()) {
+            for (SXRSceneObject child: scene.children()) {
                 printOutScene(child, level + 1);
             }
         }
     }
 
-    private static GVRSceneObject getRootNode(GVRSceneObject node) {
-        GVRSceneObject root = null;
+    private static SXRSceneObject getRootNode(SXRSceneObject node) {
+        SXRSceneObject root = null;
         if (ROOT_NODE_NAME.equals(node.getName())) {
             root = node;
         } else if (node.getChildrenCount() > 0) {
-            for (GVRSceneObject child: node.getChildren()) {
+            for (SXRSceneObject child: node.getChildren()) {
                 root = getRootNode(child);
                 if (root != null) {
                     break;
@@ -323,14 +323,14 @@ public class WidgetFactory {
         return root;
     }
 
-    private static GVRSceneObject findByName(final String name,
-                                            final GVRSceneObject root) {
+    private static SXRSceneObject findByName(final String name,
+                                            final SXRSceneObject root) {
         Log.d(TAG, "findByName(): searching for '%s' on node '%s'", name,
                 root.getName());
         return findByName(name, root, 0);
     }
 
-    private static void avoidNameDuplication(final GVRSceneObject root,
+    private static void avoidNameDuplication(final SXRSceneObject root,
                                             final Map<String, Integer> map, int level) {
         Log.d(TAG, "avoidNameDuplication(): %d '%s'", level, root.getName());
         NodeEntry entry = new NodeEntry(root);
@@ -351,21 +351,21 @@ public class WidgetFactory {
         }
 
         if (root.children() != null) {
-            for (GVRSceneObject child : root.children()) {
+            for (SXRSceneObject child : root.children()) {
                 avoidNameDuplication(child, map, level + 1);
             }
         }
     }
 
-    private static Widget createWidget(final GVRSceneObject sceneObject,
+    private static Widget createWidget(final SXRSceneObject sceneObject,
                                        NodeEntry attributes, Class<? extends Widget> widgetClass)
             throws InstantiationException {
         try {
             Constructor<? extends Widget> ctor = widgetClass
-                    .getConstructor(GVRContext.class, GVRSceneObject.class,
+                    .getConstructor(SXRContext.class, SXRSceneObject.class,
                             NodeEntry.class);
             return ctor.newInstance(sceneObject
-                    .getGVRContext(), sceneObject, attributes);
+                    .getSXRContext(), sceneObject, attributes);
         } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException e) {
             e.printStackTrace();
@@ -374,16 +374,16 @@ public class WidgetFactory {
         }
     }
 
-    private static GVRSceneObject findByName(final String name,
-                                             final GVRSceneObject root, int level) {
-        GVRSceneObject obj = null;
+    private static SXRSceneObject findByName(final String name,
+                                             final SXRSceneObject root, int level) {
+        SXRSceneObject obj = null;
         try {
             Log.d(TAG, "findByName():    %s (%d)", root.getName(), level);
             NodeEntry entry = new NodeEntry(root);
             if (name != null && name.equals(entry.getName())) {
                 obj = root;
             } else if (root.getChildrenCount() > 0) {
-                for (GVRSceneObject child: root.getChildren()) {
+                for (SXRSceneObject child: root.getChildren()) {
                     obj = findByName(name, child, level + 1);
                     if (obj != null) {
                         Log.d(TAG, "found object [%s] %s", name, obj.getName());

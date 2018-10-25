@@ -30,11 +30,11 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.upstream.AssetDataSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRImportSettings;
-import com.samsungxr.GVRIndexBuffer;
-import com.samsungxr.GVRVertexBuffer;
-import com.samsungxr.scene_objects.GVRVideoSceneObjectPlayer;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRImportSettings;
+import com.samsungxr.SXRIndexBuffer;
+import com.samsungxr.SXRVertexBuffer;
+import com.samsungxr.scene_objects.SXRVideoSceneObjectPlayer;
 import com.samsungxr.utility.Log;
 import org.joml.Vector3f;
 
@@ -61,7 +61,7 @@ public class Utility
 
     X3Dobject mX3DObject;
     MeshCreatorX meshCreator;
-    GVRContext gvrContext;
+    SXRContext gvrContext;
 
     public Utility()
     {
@@ -75,7 +75,7 @@ public class Utility
         mX3DObject = x3dObject;
     }
 */
-    public Utility(X3Dobject x3dObject, GVRContext _gvrContext, EnumSet<GVRImportSettings> settings) {
+    public Utility(X3Dobject x3dObject, SXRContext _gvrContext, EnumSet<SXRImportSettings> settings) {
         mX3DObject = x3dObject;
         this.gvrContext = _gvrContext;
         meshCreator = new MeshCreatorX(gvrContext, settings);
@@ -390,7 +390,7 @@ public class Utility
      * <p>
      * As the X3D file is parsed, the indices and vertex data are accumulated
      * internally to this class. When the entire mesh has been parsed,
-     * a GVRIndexBuffer and GVRVertexBuffer is produced from the X3D data.
+     * a SXRIndexBuffer and SXRVertexBuffer is produced from the X3D data.
      * Every effort is made to use the original vertices and indices if possible.
      * Vertices are only duplicated if necessary.
      * <p>
@@ -544,18 +544,18 @@ public class Utility
         private FloatArray mOutputPositions = new FloatArray(64 * 3);
         private FloatArray mOutputNormals = new FloatArray(64 * 3);
         private FloatArray mOutputTexCoords = new FloatArray(64 * 3);
-        private GVRContext mContext;
+        private SXRContext mContext;
         private DefinedItem mVertexBufferDefine;
         private float mMaxYTexcoord = Float.NEGATIVE_INFINITY;
         private boolean mUseNormals;
         private boolean mUseTexCoords;
 
-        MeshCreatorX(GVRContext ctx, EnumSet<GVRImportSettings> settings)
+        MeshCreatorX(SXRContext ctx, EnumSet<SXRImportSettings> settings)
         {
             mContext = ctx;
             mVertexBufferDefine = null;
-            mUseNormals = !settings.contains(GVRImportSettings.NO_LIGHTING);
-            mUseTexCoords = !settings.contains(GVRImportSettings.NO_TEXTURING);
+            mUseNormals = !settings.contains(SXRImportSettings.NO_LIGHTING);
+            mUseTexCoords = !settings.contains(SXRImportSettings.NO_TEXTURING);
         }
 
         void clear()
@@ -739,9 +739,9 @@ public class Utility
          * GearVRF keeps a single index table for the triangles
          * so there must be the same number of positions, normals
          * and texture coordinates. This function converts the
-         * X3D input data into a GVRVertexBuffer and GVRIndexBuffer.
+         * X3D input data into a SXRVertexBuffer and SXRIndexBuffer.
          */
-        GVRVertexBuffer organizeVertices(GVRIndexBuffer ibuf)
+        SXRVertexBuffer organizeVertices(SXRIndexBuffer ibuf)
         {
             boolean hasTexCoords = mUseTexCoords & (mInputTexCoords.getSize() > 0);;
             boolean hasNormals = mInputNormals.getSize() > 0;
@@ -834,7 +834,7 @@ public class Utility
                 }
                 newIndices[f] = newindex;
             }
-            GVRVertexBuffer vbuffer = new GVRVertexBuffer(mContext, descriptor, mOutputPositions.getSize() / 3);
+            SXRVertexBuffer vbuffer = new SXRVertexBuffer(mContext, descriptor, mOutputPositions.getSize() / 3);
             if (mVertexBufferDefine != null)
             {
                 mVertexBufferDefine.setVertexBuffer(vbuffer);
@@ -865,14 +865,14 @@ public class Utility
          * GearVRF keeps a single index table for the triangles
          * so there must be the same number of positions, normals
          * and texture coordinates. This function copies the positions
-         * from X3D input data into a GVRVertexBuffer and GVRIndexBuffer.
+         * from X3D input data into a SXRVertexBuffer and SXRIndexBuffer.
          * It optionally generates normals. Because there are no texture
          * coordinates, the order of the vertices is the same as in
          * the X3D file.
          */
-        public GVRVertexBuffer copyVertices(String descriptor, GVRIndexBuffer ibuf, boolean makeNormals)
+        public SXRVertexBuffer copyVertices(String descriptor, SXRIndexBuffer ibuf, boolean makeNormals)
         {
-            GVRVertexBuffer vbuffer = new GVRVertexBuffer(mContext, descriptor, mInputPositions.getSize() / 3);
+            SXRVertexBuffer vbuffer = new SXRVertexBuffer(mContext, descriptor, mInputPositions.getSize() / 3);
             if (mVertexBufferDefine != null)
             {
                 mVertexBufferDefine.setVertexBuffer(vbuffer);
@@ -916,9 +916,9 @@ public class Utility
 
 
 
-    protected GVRVideoSceneObjectPlayer<ExoPlayer> makeExoPlayer(String movieFileName ) {
+    protected SXRVideoSceneObjectPlayer<ExoPlayer> makeExoPlayer(String movieFileName ) {
 
-        GVRVideoSceneObjectPlayer<ExoPlayer> gvrVideoSceneObjectPlayer = null;
+        SXRVideoSceneObjectPlayer<ExoPlayer> gvrVideoSceneObjectPlayer = null;
 
         try {
             //final Context context = activityContext;
@@ -941,7 +941,7 @@ public class Utility
             player.prepare(mediaSource);
             Log.e(TAG, "Load movie " + movieFileNameFinal + ".");
 
-            gvrVideoSceneObjectPlayer = new GVRVideoSceneObjectPlayer<ExoPlayer>() {
+            gvrVideoSceneObjectPlayer = new SXRVideoSceneObjectPlayer<ExoPlayer>() {
                 @Override
                 public ExoPlayer getPlayer() {
                     return player;

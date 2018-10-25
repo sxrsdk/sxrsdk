@@ -25,13 +25,13 @@ import android.opengl.GLSurfaceView.Renderer;
  * management.
  * 
  * Most applications can do all their initialization in
- * {@link GVRMain#onInit(GVRContext)}. If you need explicit access to the
+ * {@link SXRMain#onInit(SXRContext)}. If you need explicit access to the
  * {@link EGLConfig}, or the difference between
  * {@link Renderer#onSurfaceCreated(GL10, EGLConfig)} and
  * {@link Renderer#onSurfaceChanged(GL10, int, int)} really matters to you,
  * declare a class which {@code extends MonoscopicSurfaceViewRenderer} and pass an
  * instance to
- * {@link GVRActivity#setMain(GVRMain, String)}.
+ * {@link SXRActivity#setMain(SXRMain, String)}.
  */
 class MonoscopicSurfaceViewRenderer implements GLSurfaceView.Renderer {
     private MonoscopicViewManager mViewManager = null;
@@ -67,14 +67,14 @@ class MonoscopicSurfaceViewRenderer implements GLSurfaceView.Renderer {
     /**
      * Generally, you should <em>not</em> override this.
      * 
-     * Your {@link GVRMain#onStep()} method will be called every frame, and
-     * GVRF provides mechanisms to dynamically add and subtract per-frame
+     * Your {@link SXRMain#onStep()} method will be called every frame, and
+     * SXRF provides mechanisms to dynamically add and subtract per-frame
      * callbacks. You can install
-     * {@linkplain GVRContext#runOnGlThread(Runnable) 'one-shot' callbacks} and
+     * {@linkplain SXRContext#runOnGlThread(Runnable) 'one-shot' callbacks} and
      * you can
-     * {@linkplain GVRContext#registerDrawFrameListener(GVRDrawFrameListener)
+     * {@linkplain SXRContext#registerDrawFrameListener(SXRDrawFrameListener)
      * add} and
-     * {@linkplain GVRContext#unregisterDrawFrameListener(GVRDrawFrameListener)
+     * {@linkplain SXRContext#unregisterDrawFrameListener(SXRDrawFrameListener)
      * remove} recurring callbacks.
      */
     @Override

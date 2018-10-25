@@ -15,9 +15,9 @@
 
 package com.samsungxr;
 
-final class MonoscopicConfigurationManager extends GVRConfigurationManager {
+final class MonoscopicConfigurationManager extends SXRConfigurationManager {
 
-    MonoscopicConfigurationManager(GVRApplication application) {
+    MonoscopicConfigurationManager(SXRApplication application) {
         super(application);
     }
 

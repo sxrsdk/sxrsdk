@@ -14,32 +14,32 @@
  */
 
 
-/** GVRF animations, version 2.0.
+/** SXRF animations, version 2.0.
  * 
  * <p>
- * You can animate any GVRF object's properties. By default, when you start an 
+ * You can animate any SXRF object's properties. By default, when you start an 
  * animation it runs once and terminates, without any need for further action
  * on your part. You can, however, specify an {@linkplain 
- * com.samsungxr.animation.GVRAnimation#setOnFinish(GVROnFinish)
+ * com.samsungxr.animation.SXRAnimation#setOnFinish(SXROnFinish)
  *  on-finish callback;} you can specify a {@linkplain 
- * com.samsungxr.animation.GVRAnimation#setRepeatCount(int) 
+ * com.samsungxr.animation.SXRAnimation#setRepeatCount(int) 
  * repeat count} and/or a {@linkplain 
- * com.samsungxr.animation.GVRAnimation#setRepeatMode(int)
+ * com.samsungxr.animation.SXRAnimation#setRepeatMode(int)
  * repeat mode}; you can even specify an {@linkplain 
- * com.samsungxr.animation.GVROnRepeat on-repeat callback}
+ * com.samsungxr.animation.SXROnRepeat on-repeat callback}
  * that lets you run an animation until your app reaches a desired state.
  * 
  * <p>
- * The animation engine is an optional part of GVRF; you need to create an instance
- * of the {@linkplain com.samsungxr.animation.GVRAnimationEngine animation 
+ * The animation engine is an optional part of SXRF; you need to create an instance
+ * of the {@linkplain com.samsungxr.animation.SXRAnimationEngine animation 
  * engine.} See {@link 
- * com.samsungxr.animation.GVRAnimation GVRAnimation} for the details, but
+ * com.samsungxr.animation.SXRAnimation SXRAnimation} for the details, but
  * the general use model is
  * <ul>
  * <li>{@code new} an animation, supplying the required parameters
  * <li>optionally, override any or all of the default parameters
  * <li>start the animation by calling {@linkplain 
- * com.samsungxr.animation.GVRAnimation#start(GVRAnimationEngine) 
+ * com.samsungxr.animation.SXRAnimation#start(SXRAnimationEngine) 
  * start(animationEngine)} 
  * </ul>
  * 

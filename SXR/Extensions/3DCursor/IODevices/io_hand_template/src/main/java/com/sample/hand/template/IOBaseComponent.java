@@ -14,7 +14,7 @@
  */
 package com.sample.hand.template;
 
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRSceneObject;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -23,9 +23,9 @@ import org.joml.Vector3f;
  * type,  position and   rotation .
  */
 public abstract class IOBaseComponent {
-    public GVRSceneObject sceneObject;
+    public SXRSceneObject sceneObject;
     private int type;
-    private GVRSceneObject handSceneObject;
+    private SXRSceneObject handSceneObject;
     private Vector3f componentPosition;
     private Quaternionf componentRotation;
 
@@ -33,9 +33,9 @@ public abstract class IOBaseComponent {
      * Create an {@link IOBaseComponent} of the provided type.
      *
      * @param type            the type of the {@link IOBaseComponent}.
-     * @param handSceneObject This is the root {@link GVRSceneObject} that represents the hand.
+     * @param handSceneObject This is the root {@link SXRSceneObject} that represents the hand.
      */
-    public IOBaseComponent(int type, GVRSceneObject handSceneObject) {
+    public IOBaseComponent(int type, SXRSceneObject handSceneObject) {
         this.type = type;
         this.handSceneObject = handSceneObject;
         componentPosition = new Vector3f();
@@ -47,17 +47,17 @@ public abstract class IOBaseComponent {
      *
      * @return This call returns null if no scene object has been set
      */
-    public GVRSceneObject getSceneObject() {
+    public SXRSceneObject getSceneObject() {
         return sceneObject;
     }
 
     /**
-     * This call sets the {@link GVRSceneObject} that represents this {@link IOBaseComponent} and
+     * This call sets the {@link SXRSceneObject} that represents this {@link IOBaseComponent} and
      * adds it to the root hand object.
      *
      * @param boneSceneObject
      */
-    public void setSceneObject(GVRSceneObject boneSceneObject) {
+    public void setSceneObject(SXRSceneObject boneSceneObject) {
         this.sceneObject = boneSceneObject;
         handSceneObject.addChildObject(boneSceneObject);
     }

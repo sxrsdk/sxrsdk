@@ -3,10 +3,10 @@ package com.samsungxr.widgetlib.widget.basic;
 import com.samsungxr.widgetlib.widget.NodeEntry;
 import com.samsungxr.widgetlib.widget.Widget;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRMesh;
-import com.samsungxr.GVRRenderData;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRRenderData;
+import com.samsungxr.SXRSceneObject;
 import org.json.JSONObject;
 
 /**
@@ -22,7 +22,7 @@ public class RadioButton extends CheckableButton {
      * @param width button width
      * @param height button height
      */
-    public RadioButton(GVRContext context, float width, float height) {
+    public RadioButton(SXRContext context, float width, float height) {
         super(context, width, height);
     }
 
@@ -30,7 +30,7 @@ public class RadioButton extends CheckableButton {
      * Create new instance of RadioButton with specified size
      * @param context
      */
-    public RadioButton(GVRContext context) {
+    public RadioButton(SXRContext context) {
         super(context);
     }
 
@@ -38,12 +38,12 @@ public class RadioButton extends CheckableButton {
      * Create new instance of RadioButton with specified size
      * @param context
      */
-    public RadioButton(GVRContext context, JSONObject properties) {
+    public RadioButton(SXRContext context, JSONObject properties) {
         super(context, properties);
     }
 
     /**
-     * Create new instance of RadioButton wrapping around GVRF sceneObject; parsed from the model
+     * Create new instance of RadioButton wrapping around SXRF sceneObject; parsed from the model
      *
      * @param context
      * @param sceneObject
@@ -51,23 +51,23 @@ public class RadioButton extends CheckableButton {
      * @throws InstantiationException
      */
     @Deprecated
-    public RadioButton(GVRContext context, GVRSceneObject sceneObject, NodeEntry attributes)
+    public RadioButton(SXRContext context, SXRSceneObject sceneObject, NodeEntry attributes)
             throws InstantiationException {
         super(context, sceneObject, attributes);
     }
 
     /**
-     * Create new instance of RadioButton wrapping around GVRF sceneObject
+     * Create new instance of RadioButton wrapping around SXRF sceneObject
      *
      * @param context
      * @param sceneObject
      * @throws InstantiationException
      */
-    public RadioButton(GVRContext context, GVRSceneObject sceneObject) {
+    public RadioButton(SXRContext context, SXRSceneObject sceneObject) {
         super(context, sceneObject);
     }
 
-    protected RadioButton(GVRContext context, GVRMesh mesh) {
+    protected RadioButton(SXRContext context, SXRMesh mesh) {
         super(context, mesh);
     }
 
@@ -84,13 +84,13 @@ public class RadioButton extends CheckableButton {
 
     @Override
     protected Widget createGraphicWidget() {
-        return new Graphic(getGVRContext(), getHeight());
+        return new Graphic(getSXRContext(), getHeight());
     }
 
     static private class Graphic extends Widget {
-        Graphic(GVRContext context, float size) {
+        Graphic(SXRContext context, float size) {
             super(context, size, size);
-            setRenderingOrder(GVRRenderData.GVRRenderingOrder.TRANSPARENT);
+            setRenderingOrder(SXRRenderData.SXRRenderingOrder.TRANSPARENT);
         }
     }
 }

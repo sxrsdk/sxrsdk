@@ -10,10 +10,10 @@ import com.samsungxr.widgetlib.widget.NodeEntry;
 import com.samsungxr.widgetlib.widget.Widget;
 import com.samsungxr.widgetlib.widget.layout.LayoutHelpers;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.scene_objects.GVRTextViewSceneObject;
-import com.samsungxr.scene_objects.GVRTextViewSceneObject.IntervalFrequency;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.scene_objects.SXRTextViewSceneObject;
+import com.samsungxr.scene_objects.SXRTextViewSceneObject.IntervalFrequency;
 import org.json.JSONObject;
 
 import static com.samsungxr.widgetlib.widget.properties.JSONHelpers.copy;
@@ -22,8 +22,8 @@ import static com.samsungxr.widgetlib.widget.properties.JSONHelpers.optString;
 import static com.samsungxr.widgetlib.widget.properties.JSONHelpers.put;
 
 /**
- * A user interface element that displays text to the user. {@link GVRTextViewSceneObject} is used
- * to represent the text. {@link GVRTextViewSceneObject} is actually using standard Android
+ * A user interface element that displays text to the user. {@link SXRTextViewSceneObject} is used
+ * to represent the text. {@link SXRTextViewSceneObject} is actually using standard Android
  * {@link TextView} for text UI.
  *
  */
@@ -31,34 +31,34 @@ import static com.samsungxr.widgetlib.widget.properties.JSONHelpers.put;
 public class TextWidget extends Widget implements TextContainer {
 
     /**
-     * Construct a wrapper for an existing {@link GVRSceneObject}.
+     * Construct a wrapper for an existing {@link SXRSceneObject}.
      *
      * @param context
-     *            The current {@link GVRContext}.
+     *            The current {@link SXRContext}.
      * @param sceneObject
-     *            The {@link GVRSceneObject} to wrap.
+     *            The {@link SXRSceneObject} to wrap.
      */
-    public TextWidget(final GVRContext context, final GVRSceneObject sceneObject) {
+    public TextWidget(final SXRContext context, final SXRSceneObject sceneObject) {
         super(context, sceneObject);
         mTextViewSceneObject = maybeWrap(getSceneObject());
         init();
     }
 
     /**
-     * A constructor for wrapping existing {@link GVRSceneObject} instances.
+     * A constructor for wrapping existing {@link SXRSceneObject} instances.
      * Deriving classes should override and do whatever processing is
      * appropriate.
      *
      * @param context
-     *            The current {@link GVRContext}
+     *            The current {@link SXRContext}
      * @param sceneObject
-     *            The {@link GVRSceneObject} to wrap.
+     *            The {@link SXRSceneObject} to wrap.
      * @param attributes
      *            A set of class-specific attributes.
      * @throws InstantiationException
      */
     @Deprecated
-    public TextWidget(GVRContext context, GVRSceneObject sceneObject,
+    public TextWidget(SXRContext context, SXRSceneObject sceneObject,
             NodeEntry attributes) throws InstantiationException {
         super(context, sceneObject, attributes);
         mTextViewSceneObject = maybeWrap(sceneObject);
@@ -68,13 +68,13 @@ public class TextWidget extends Widget implements TextContainer {
     /**
      * Core {@link TextWidget} constructor.
      *
-     * @param context A valid {@link GVRContext}.
+     * @param context A valid {@link SXRContext}.
      * @param properties A structured set of properties for the {@code TextWidget} instance. See
      *                       {@code textcontainer.json} for schema.
      */
-    public TextWidget(GVRContext context, JSONObject properties) {
+    public TextWidget(SXRContext context, JSONObject properties) {
         super(context, createPackagedTextView(context, properties));
-        mTextViewSceneObject = (GVRTextViewSceneObject) getSceneObject();
+        mTextViewSceneObject = (SXRTextViewSceneObject) getSceneObject();
         init();
     }
 
@@ -83,9 +83,9 @@ public class TextWidget extends Widget implements TextContainer {
      * default height and width.
      *
      * @param context
-     *            current {@link GVRContext}
+     *            current {@link SXRContext}
      * @param width
-     *            Widget height, in GVRF scene graph units.
+     *            Widget height, in SXRF scene graph units.
      *
      *            Please note that your widget's size is independent of the size
      *            of the internal {@code TextView}: a large mismatch between the
@@ -93,9 +93,9 @@ public class TextWidget extends Widget implements TextContainer {
      *            'spidery' or 'blocky' text.
      *
      * @param height
-     *            Widget width, in GVRF scene graph units.
+     *            Widget width, in SXRF scene graph units.
      */
-    public TextWidget(GVRContext context, float width, float height) {
+    public TextWidget(SXRContext context, float width, float height) {
         this(context, width, height, null);
     }
 
@@ -104,9 +104,9 @@ public class TextWidget extends Widget implements TextContainer {
      * default height and width.
      *
      * @param context
-     *            current {@link GVRContext}
+     *            current {@link SXRContext}
      * @param width
-     *            Widget height, in GVRF scene graph units.
+     *            Widget height, in SXRF scene graph units.
      *
      *            Please note that your widget's size is independent of the size
      *            of the internal {@code TextView}: a large mismatch between the
@@ -114,14 +114,14 @@ public class TextWidget extends Widget implements TextContainer {
      *            'spidery' or 'blocky' text.
      *
      * @param height
-     *            Widget width, in GVRF scene graph units.
+     *            Widget width, in SXRF scene graph units.
      * @param text
      *            {@link CharSequence} to show on the textView
      */
-    public TextWidget(GVRContext context, float width, float height,
+    public TextWidget(SXRContext context, float width, float height,
             CharSequence text) {
-        super(context, new GVRTextViewSceneObject(context, width, height, text));
-        mTextViewSceneObject = (GVRTextViewSceneObject) getSceneObject();
+        super(context, new SXRTextViewSceneObject(context, width, height, text));
+        mTextViewSceneObject = (SXRTextViewSceneObject) getSceneObject();
     }
 
     /**
@@ -232,34 +232,34 @@ public class TextWidget extends Widget implements TextContainer {
 
         TextParams params = new TextParams();
         params.setText(getText());
-        params.setFromJSON(getGVRContext().getContext(), properties);
+        params.setFromJSON(getSXRContext().getContext(), properties);
         setTextParams(params);
     }
 
-    private static JSONObject createPackagedTextView(GVRContext context, JSONObject properties) {
+    private static JSONObject createPackagedTextView(SXRContext context, JSONObject properties) {
         properties = copy(properties);
         PointF size = optPointF(properties, Widget.Properties.size, new PointF(0, 0));
         String text = optString(properties, TextContainer.Properties.text);
-        GVRTextViewSceneObject textViewSceneObject =
-                new GVRTextViewSceneObject(context, size.x, size.y, text);
+        SXRTextViewSceneObject textViewSceneObject =
+                new SXRTextViewSceneObject(context, size.x, size.y, text);
         put(properties, Widget.Properties.scene_object, textViewSceneObject);
         return properties;
     }
 
-    private GVRTextViewSceneObject maybeWrap(GVRSceneObject sceneObject) {
-        if (sceneObject instanceof GVRTextViewSceneObject) {
-            return (GVRTextViewSceneObject) sceneObject;
+    private SXRTextViewSceneObject maybeWrap(SXRSceneObject sceneObject) {
+        if (sceneObject instanceof SXRTextViewSceneObject) {
+            return (SXRTextViewSceneObject) sceneObject;
         } else {
             final float sizes[] = LayoutHelpers
                     .calculateGeometricDimensions(sceneObject);
-            final GVRSceneObject temp = new GVRTextViewSceneObject(
-                    sceneObject.getGVRContext(), sizes[0], sizes[1], "");
+            final SXRSceneObject temp = new SXRTextViewSceneObject(
+                    sceneObject.getSXRContext(), sizes[0], sizes[1], "");
             sceneObject.addChildObject(temp);
-            return (GVRTextViewSceneObject) temp;
+            return (SXRTextViewSceneObject) temp;
         }
     }
 
-    private final GVRTextViewSceneObject mTextViewSceneObject;
+    private final SXRTextViewSceneObject mTextViewSceneObject;
     private int mBackgroundColor;
     private int mTextColor;
 

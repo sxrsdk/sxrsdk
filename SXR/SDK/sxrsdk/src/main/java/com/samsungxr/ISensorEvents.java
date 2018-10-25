@@ -17,7 +17,7 @@ package com.samsungxr;
 
 /**
  * Use this listener to receive {@link SensorEvent}s for a given
- * {@link GVRSensor}.
+ * {@link SXRSensor}.
  * 
  * Note that the callbacks happen on the main UI thread.
  *
@@ -25,7 +25,7 @@ package com.samsungxr;
 public interface ISensorEvents extends IEvents {
     /**
      * The callback that returns the {@link SensorEvent}s for the corresponding
-     * {@link GVRSensor}.
+     * {@link SXRSensor}.
      * 
      * @param event
      *            The {@link ISensorEvents} returns one

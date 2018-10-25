@@ -17,18 +17,18 @@ package com.samsungxr.mixedreality.arcore;
 
 import com.google.ar.core.Plane;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.mixedreality.GVRPlane;
-import com.samsungxr.mixedreality.GVRTrackingState;
+import com.samsungxr.SXRContext;
+import com.samsungxr.mixedreality.SXRPlane;
+import com.samsungxr.mixedreality.SXRTrackingState;
 
 import java.nio.FloatBuffer;
 
 
-class ARCorePlane extends GVRPlane {
+class ARCorePlane extends SXRPlane {
     private Plane mARPlane;
     private ARCorePose mPose;
 
-    protected ARCorePlane(GVRContext gvrContext, Plane plane) {
+    protected ARCorePlane(SXRContext gvrContext, Plane plane) {
         super(gvrContext);
         mPose = new ARCorePose();
         mARPlane = plane;
@@ -49,7 +49,7 @@ class ARCorePlane extends GVRPlane {
      *
      * @param state
      */
-    protected void setTrackingState(GVRTrackingState state) {
+    protected void setTrackingState(SXRTrackingState state) {
         mTrackingState = state;
     }
 
@@ -58,12 +58,12 @@ class ARCorePlane extends GVRPlane {
      *
      * @param plane
      */
-    protected void setParentPlane(GVRPlane plane) {
+    protected void setParentPlane(SXRPlane plane) {
         mParentPlane = plane;
     }
 
     @Override
-    public GVRTrackingState getTrackingState() {
+    public SXRTrackingState getTrackingState() {
         return mTrackingState;
     }
 
@@ -95,7 +95,7 @@ class ARCorePlane extends GVRPlane {
     }
 
     @Override
-    public GVRPlane getParentPlane() {
+    public SXRPlane getParentPlane() {
         return mParentPlane;
     }
 
@@ -121,11 +121,11 @@ class ARCorePlane extends GVRPlane {
     }
     
     /**
-     * Converts from ARCore world space to GVRf's world space.
+     * Converts from ARCore world space to SXRf's world space.
      *
      * @param arViewMatrix Phone's camera view matrix
-     * @param vrCamMatrix GVRf Camera matrix
-     * @param scale Scale from AR to GVRf world
+     * @param vrCamMatrix SXRf Camera matrix
+     * @param scale Scale from AR to SXRf world
      */
     private void convertFromARtoVRSpace(float[] arViewMatrix, float[] vrCamMatrix, float scale) {
         mPose.update(mARPlane.getCenterPose(), arViewMatrix, vrCamMatrix, scale);

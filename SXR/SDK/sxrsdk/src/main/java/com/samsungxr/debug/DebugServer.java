@@ -26,19 +26,19 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 import com.samsungxr.debug.cli.Shell;
 
 import android.util.Log;
 
 /**
- * Debug server provides a command line interface (CLI) for GVRf
+ * Debug server provides a command line interface (CLI) for SXRf
  * framework. <p>
  *
  * The commands are defined in {@link ShellCommandHandler}. For example,
  * you can use the command 'lua' to enter lua mode, and the command 'js'
  * to enter Javascript mode. While in the script mode, you can access the
- * GVRContext object using the variable 'gvrf'. Type 'exit' to exit from
+ * SXRContext object using the variable 'gvrf'. Type 'exit' to exit from
  * the script shell, or the top-level shell. <p>
  *
  * To connect to the debug server, you can use telnet from Linux, or
@@ -58,7 +58,7 @@ public class DebugServer implements Runnable {
     private ServerSocket serverSocket;
     private DebugConnection debugConnection;
 
-    private GVRContext gvrContext;
+    private SXRContext gvrContext;
     int port;
     int maxClients;
 
@@ -77,14 +77,14 @@ public class DebugServer implements Runnable {
 
             if (SIMULATE_TELNET) {
                 // Supporting editing and history
-                shell = GVRConsoleFactory.createTelnetConsoleShell(PROMPT, APP_NAME,
+                shell = SXRConsoleFactory.createTelnetConsoleShell(PROMPT, APP_NAME,
                         new ShellCommandHandler(gvrContext),
                         socket.getInputStream(), socket.getOutputStream());
             } else {
                 // Simple console
                 PrintStream out = new PrintStream(socket.getOutputStream());
                 errorLog = out;
-                shell = GVRConsoleFactory.createConsoleShell(PROMPT, APP_NAME,
+                shell = SXRConsoleFactory.createConsoleShell(PROMPT, APP_NAME,
                         new ShellCommandHandler(gvrContext),
                         new BufferedReader(new InputStreamReader(socket.getInputStream())),
                         out, out, null);
@@ -121,7 +121,7 @@ public class DebugServer implements Runnable {
     /**
      * Constructor.
      *
-     * To start a debug server, add the following line to your {@link com.samsungxr.GVRMain#onInit(GVRContext)} method:
+     * To start a debug server, add the following line to your {@link com.samsungxr.SXRMain#onInit(SXRContext)} method:
      *
      * <pre>
      *     Threads.spawn(new DebugServer(gvrContext));
@@ -130,10 +130,10 @@ public class DebugServer implements Runnable {
      * The default port is 1645, and the default maximum number of connections is 2.
      *
      * @param gvrContext
-     *     The {@link GVRContext} object.
+     *     The {@link SXRContext} object.
      *
      */
-    public DebugServer(GVRContext gvrContext) {
+    public DebugServer(SXRContext gvrContext) {
         this(gvrContext, DEFAULT_DEBUG_PORT, NUM_CLIENTS);
     }
 
@@ -141,13 +141,13 @@ public class DebugServer implements Runnable {
      * Constructor.
      *
      * @param gvrContext
-     *     The {@link GVRContext} object.
+     *     The {@link SXRContext} object.
      * @param port
      *     The port to override the default port 1645.
      * @param maxClients
      *     Maximum number of clients.
      */
-    public DebugServer(GVRContext gvrContext, int port, int maxClients) {
+    public DebugServer(SXRContext gvrContext, int port, int maxClients) {
         this.gvrContext = gvrContext;
         this.port = port;
         this.maxClients = maxClients;

@@ -10,7 +10,7 @@ import com.samsungxr.widgetlib.widget.layout.basic.LinearLayout;
 import static com.samsungxr.widgetlib.main.Utility.equal;
 
 
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRSceneObject;
 import com.samsungxr.utility.RuntimeAssertion;
 
 import java.util.Collection;
@@ -501,21 +501,21 @@ abstract public class Layout {
 
         /**
          * Calculates the total width of data in the Container based on
-         * {@link GVRSceneObject.BoundingVolume}
+         * {@link SXRSceneObject.BoundingVolume}
          * @return total width
          */
         float getBoundsWidth();
 
         /**
          * Calculates the total height of data in the Container based on
-         * {@link GVRSceneObject.BoundingVolume}
+         * {@link SXRSceneObject.BoundingVolume}
          * @return total height
          */
         float getBoundsHeight();
 
         /**
          * Calculates the total depth of data in the Container  based on
-         * {@link GVRSceneObject.BoundingVolume}
+         * {@link SXRSceneObject.BoundingVolume}
          * @return total depth
          */
         float getBoundsDepth();

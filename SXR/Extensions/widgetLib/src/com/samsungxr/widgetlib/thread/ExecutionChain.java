@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 
 import android.app.Activity;
 
@@ -21,7 +21,7 @@ import static com.samsungxr.utility.Threads.spawn;
  * For example:
  * <ul>
  * <li>Background thread: load bitmaps</li>
- * <li>GL thread: create GVRBitmapTextures for those bitmaps</li>
+ * <li>GL thread: create SXRBitmapTextures for those bitmaps</li>
  * <li>Main thread: non-trivial set-up of quads that use the textures</li>
  * </ul>
  * <p>
@@ -67,7 +67,7 @@ import static com.samsungxr.utility.Threads.spawn;
  * <p>
  * {@code ExecutionChain} supports running tasks on the
  * {@link Activity#runOnUiThread(Runnable) UI thread}, {@link MainThread main
- * thread}, {@link GVRContext#runOnGlThread(Runnable) OpenGL thread}, and on
+ * thread}, {@link SXRContext#runOnGlThread(Runnable) OpenGL thread}, and on
  * {@link com.samsungxr.utility.Threads#spawn(Runnable) background threads}.
  */
 public class ExecutionChain {
@@ -230,9 +230,9 @@ public class ExecutionChain {
      * Construct a new ExecutionChain.
      *
      * @param gvrContext
-     *            A valid GVRContext.
+     *            A valid SXRContext.
      */
-    public ExecutionChain(GVRContext gvrContext) {
+    public ExecutionChain(SXRContext gvrContext) {
         this.gvrContext = gvrContext;
     }
 
@@ -272,7 +272,7 @@ public class ExecutionChain {
 
     /**
      * Add a {@link Task} to be run on the
-     * {@link GVRContext#runOnGlThread(Runnable) OpenGL thread}. It will be run
+     * {@link SXRContext#runOnGlThread(Runnable) OpenGL thread}. It will be run
      * after all Tasks added prior to this call.
      *
      * @param task
@@ -338,7 +338,7 @@ public class ExecutionChain {
 
     /**
      * A convenience method to wrap a {@link Runnable} in a {@link Task} to be
-     * run on the {@link GVRContext#runOnGlThread(Runnable) GL thread}.
+     * run on the {@link SXRContext#runOnGlThread(Runnable) GL thread}.
      *
      * @param r
      *            {@code Runnable} to run
@@ -576,7 +576,7 @@ public class ExecutionChain {
         }
     }
 
-    private final GVRContext gvrContext;
+    private final SXRContext gvrContext;
     private final List<Context<?, ?>> tasks = new ArrayList<Context<?, ?>>();
     private final AtomicReference<State> state = new AtomicReference<State>(
             State.STOPPED);

@@ -10,7 +10,7 @@ import com.samsungxr.widgetlib.widget.Widget;
 import com.samsungxr.widgetlib.widget.layout.Layout;
 import com.samsungxr.widgetlib.widget.layout.LayoutScroller;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +51,7 @@ public class MultiPageWidget extends ListWidget {
      * @param width
      * @param height
      */
-    public MultiPageWidget(GVRContext context, final Adapter pageAdapter,
+    public MultiPageWidget(SXRContext context, final Adapter pageAdapter,
                            float width, float height, int maxVisiblePageCount) {
         super(context, pageAdapter, width, height);
         setMaxVisiblePageCount(maxVisiblePageCount);

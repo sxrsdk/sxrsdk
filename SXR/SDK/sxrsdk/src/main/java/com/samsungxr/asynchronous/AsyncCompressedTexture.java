@@ -17,10 +17,10 @@ package com.samsungxr.asynchronous;
 
 import java.io.IOException;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRCompressedImage;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRAndroidResource.CancelableCallback;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRCompressedImage;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRAndroidResource.CancelableCallback;
 import com.samsungxr.asynchronous.Throttler.AsyncLoader;
 import com.samsungxr.asynchronous.Throttler.AsyncLoaderFactory;
 import com.samsungxr.asynchronous.Throttler.GlConverter;
@@ -37,9 +37,9 @@ class AsyncCompressedTexture {
     /*
      * The API
      */
-    static void loadTexture(GVRContext gvrContext,
-            CancelableCallback<GVRCompressedImage> callback,
-            GVRAndroidResource resource, int priority) {
+    static void loadTexture(SXRContext gvrContext,
+            CancelableCallback<SXRCompressedImage> callback,
+            SXRAndroidResource resource, int priority) {
         AsyncManager.get().getScheduler().registerCallback(gvrContext,
                 TEXTURE_CLASS, callback, resource, priority);
     }
@@ -48,7 +48,7 @@ class AsyncCompressedTexture {
      * Singleton
      */
 
-    private static final Class<GVRCompressedImage> TEXTURE_CLASS = GVRCompressedImage.class;
+    private static final Class<SXRCompressedImage> TEXTURE_CLASS = SXRCompressedImage.class;
     
     private static AsyncCompressedTexture sInstance = new AsyncCompressedTexture();
 
@@ -63,11 +63,11 @@ class AsyncCompressedTexture {
 
     private AsyncCompressedTexture() {
         AsyncManager.get().registerDatatype(TEXTURE_CLASS,
-                new AsyncLoaderFactory<GVRCompressedImage, CompressedTexture>() {
+                new AsyncLoaderFactory<SXRCompressedImage, CompressedTexture>() {
                     @Override
-                    AsyncLoader<GVRCompressedImage, CompressedTexture> threadProc(
-                            GVRContext gvrContext, GVRAndroidResource request,
-                            CancelableCallback<GVRCompressedImage> callback,
+                    AsyncLoader<SXRCompressedImage, CompressedTexture> threadProc(
+                            SXRContext gvrContext, SXRAndroidResource request,
+                            CancelableCallback<SXRCompressedImage> callback,
                             int priority) {
                         return new AsyncLoadTextureResource(gvrContext, request,
                                 callback, priority);
@@ -80,29 +80,29 @@ class AsyncCompressedTexture {
      */
 
     private static class AsyncLoadTextureResource
-            extends AsyncLoader<GVRCompressedImage, CompressedTexture> {
+            extends AsyncLoader<SXRCompressedImage, CompressedTexture> {
 
-        private static final GlConverter<GVRCompressedImage, CompressedTexture> sConverter = new GlConverter<GVRCompressedImage, CompressedTexture>() {
+        private static final GlConverter<SXRCompressedImage, CompressedTexture> sConverter = new GlConverter<SXRCompressedImage, CompressedTexture>() {
 
             @Override
-            public GVRCompressedImage convert(GVRContext gvrContext,
+            public SXRCompressedImage convert(SXRContext gvrContext,
                                               CompressedTexture compressedTexture) {
                 return compressedTexture == null ? null
                         : compressedTexture.toTexture(gvrContext,
-                                                      GVRCompressedImage.BALANCED);
+                                                      SXRCompressedImage.BALANCED);
             }
         };
 
-        protected AsyncLoadTextureResource(GVRContext gvrContext,
-                GVRAndroidResource request,
-                CancelableCallback<GVRCompressedImage> callback,
+        protected AsyncLoadTextureResource(SXRContext gvrContext,
+                SXRAndroidResource request,
+                CancelableCallback<SXRCompressedImage> callback,
                 int priority) {
             super(gvrContext, sConverter, request, callback);
         }
 
         @Override
         protected CompressedTexture loadResource() {
-            GVRCompressedTextureLoader loader = resource.getCompressedLoader();
+            SXRCompressedTextureLoader loader = resource.getCompressedLoader();
             CompressedTexture compressedTexture = null;
             try {
                 compressedTexture = CompressedTexture

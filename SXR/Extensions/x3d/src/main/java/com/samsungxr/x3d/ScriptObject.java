@@ -15,9 +15,9 @@
 
 package com.samsungxr.x3d;
 
-import com.samsungxr.script.GVRJavascriptScriptFile;
+import com.samsungxr.script.SXRJavascriptScriptFile;
 import com.samsungxr.utility.Log;
-import com.samsungxr.script.javascript.GVRJavascriptV8File;
+import com.samsungxr.script.javascript.SXRJavascriptV8File;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,8 +75,8 @@ public class ScriptObject {
     private String[] url;
 
     private String javaScriptCode = null;
-    private GVRJavascriptScriptFile gvrJavascriptScriptFile = null;
-    private GVRJavascriptV8File gvrJavascriptV8File = null;
+    private SXRJavascriptScriptFile gvrJavascriptScriptFile = null;
+    private SXRJavascriptV8File gvrJavascriptV8File = null;
     private String gearVRinitJavaScript;  // A text function to construct X3D data types
     // some JavaScript functions have a timeStamp and thus pass 2 parameters
     private boolean timeStampParameter = false;
@@ -211,18 +211,18 @@ public class ScriptObject {
     }
 
     // Methods related to the JavaScript code
-    // GVRJavaScriptScriptFile relates to Mozilla Rhino JavaScript Engine
-    public GVRJavascriptScriptFile getGVRJavascriptScriptFile() {
+    // SXRJavaScriptScriptFile relates to Mozilla Rhino JavaScript Engine
+    public SXRJavascriptScriptFile getSXRJavascriptScriptFile() {
         return this.gvrJavascriptScriptFile;
     }
-    public void setGVRJavascriptScriptFile(GVRJavascriptScriptFile gvrJavascriptScriptFile) {
+    public void setSXRJavascriptScriptFile(SXRJavascriptScriptFile gvrJavascriptScriptFile) {
         this.gvrJavascriptScriptFile = gvrJavascriptScriptFile;
     }
-    // GVRJavaScriptV8File relates to V8 JavaScript Engine
-    public GVRJavascriptV8File getGVRJavascriptV8File() {
+    // SXRJavaScriptV8File relates to V8 JavaScript Engine
+    public SXRJavascriptV8File getSXRJavascriptV8File() {
         return this.gvrJavascriptV8File;
     }
-    public void setGVRJavascriptV8File(GVRJavascriptV8File gvrJavascriptV8File) {
+    public void setSXRJavascriptV8File(SXRJavascriptV8File gvrJavascriptV8File) {
         this.gvrJavascriptV8File = gvrJavascriptV8File;
     }
 

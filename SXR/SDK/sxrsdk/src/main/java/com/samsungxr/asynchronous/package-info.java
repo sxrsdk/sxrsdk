@@ -17,13 +17,13 @@
  * Implementation of asynch resource loading.
  * 
  * Most classes are hidden, implementation details. You need to implement 
- * {@link com.samsungxr.asynchronous.GVRCompressedTextureLoader}
- * to use compressed texture formats that GVRF does not support; you may find 
- * {@link com.samsungxr.GVRCompressedImage}
+ * {@link com.samsungxr.asynchronous.SXRCompressedTextureLoader}
+ * to use compressed texture formats that SXRF does not support; you may find 
+ * {@link com.samsungxr.SXRCompressedImage}
  * useful for debugging. 
  * 
- * {@link com.samsungxr.asynchronous.GVRAsynchronousResourceLoader} 
- * is public only so that {@link com.samsungxr.GVRContext} can make cross-package
+ * {@link com.samsungxr.asynchronous.SXRAsynchronousResourceLoader} 
+ * is public only so that {@link com.samsungxr.SXRContext} can make cross-package
  * calls: It <em>is</em> an official part of the API, but we suggest you avoid 
  * using it directly.
  * 

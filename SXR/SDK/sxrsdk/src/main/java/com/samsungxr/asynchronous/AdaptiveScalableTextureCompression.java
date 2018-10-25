@@ -20,7 +20,7 @@ import static com.samsungxr.asynchronous.GLESX.*;
 import com.samsungxr.utility.RuntimeAssertion;
 
 /** .astc loader */
-class AdaptiveScalableTextureCompression extends GVRCompressedTextureLoader {
+class AdaptiveScalableTextureCompression extends SXRCompressedTextureLoader {
 
     // struct astc_header
     // {

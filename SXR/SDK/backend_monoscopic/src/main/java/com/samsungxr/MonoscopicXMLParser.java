@@ -17,7 +17,7 @@ package com.samsungxr;
 
 import android.content.res.AssetManager;
 
-import com.samsungxr.io.GVRControllerType;
+import com.samsungxr.io.SXRControllerType;
 import com.samsungxr.utility.VrAppSettings;
 import com.samsungxr.utility.VrAppSettings.EyeBufferParams.ColorFormat;
 import com.samsungxr.utility.VrAppSettings.EyeBufferParams.DepthFormat;
@@ -279,27 +279,27 @@ class MonoscopicXMLParser {
 
             if (match.equals("gaze"))
             {
-                settings.addControllerType(GVRControllerType.GAZE);
+                settings.addControllerType(SXRControllerType.GAZE);
             }
             else if (match.equals("controller"))
             {
-                settings.addControllerType(GVRControllerType.CONTROLLER);
+                settings.addControllerType(SXRControllerType.CONTROLLER);
             }
             else if (match.equals("gamepad"))
             {
-                settings.addControllerType(GVRControllerType.GAMEPAD);
+                settings.addControllerType(SXRControllerType.GAMEPAD);
             }
             else if (match.equals("weartouchpad"))
             {
-                settings.addControllerType(GVRControllerType.WEARTOUCHPAD);
+                settings.addControllerType(SXRControllerType.WEARTOUCHPAD);
             }
             else if (match.equals("mouse"))
             {
-                settings.addControllerType(GVRControllerType.MOUSE);
+                settings.addControllerType(SXRControllerType.MOUSE);
             }
             else if (match.equals("external"))
             {
-                settings.addControllerType(GVRControllerType.EXTERNAL);
+                settings.addControllerType(SXRControllerType.EXTERNAL);
             }
         }
     }

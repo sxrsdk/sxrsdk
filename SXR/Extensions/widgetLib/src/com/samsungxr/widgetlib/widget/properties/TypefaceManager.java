@@ -7,7 +7,7 @@ import android.os.Environment;
 
 import com.samsungxr.widgetlib.log.Log;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,7 +21,7 @@ public class TypefaceManager {
     /**
      * Creates TypefaceManager
      */
-    public TypefaceManager(GVRContext gvrContext) {
+    public TypefaceManager(SXRContext gvrContext) {
         mGvrContext = gvrContext;
     }
 
@@ -132,7 +132,7 @@ public class TypefaceManager {
         return optEnum(json, Attributes.resource_type, ResourceType.class);
     }
 
-    private final GVRContext mGvrContext;
+    private final SXRContext mGvrContext;
     private final Map<Object, Typeface> mTypefaceCache = new HashMap<>();
 
     private static final String TAG = TypefaceManager.class.getSimpleName();

@@ -24,5 +24,5 @@ public interface ICloudAnchorListener {
      *
      * @param anchor
      */
-    void onTaskComplete(GVRAnchor anchor);
+    void onTaskComplete(SXRAnchor anchor);
 }

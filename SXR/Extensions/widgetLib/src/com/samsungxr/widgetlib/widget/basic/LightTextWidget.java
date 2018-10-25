@@ -1,12 +1,12 @@
 package com.samsungxr.widgetlib.widget.basic;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRRenderData;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRTexture;
-import com.samsungxr.GVRTextureParameters;
-import com.samsungxr.scene_objects.GVRTextViewSceneObject;
-import com.samsungxr.scene_objects.GVRTextViewSceneObject.IntervalFrequency;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRRenderData;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRTexture;
+import com.samsungxr.SXRTextureParameters;
+import com.samsungxr.scene_objects.SXRTextViewSceneObject;
+import com.samsungxr.scene_objects.SXRTextViewSceneObject.IntervalFrequency;
 import org.json.JSONObject;
 
 import android.graphics.Bitmap;
@@ -21,13 +21,13 @@ import android.view.Gravity;
 
 import com.samsungxr.widgetlib.log.Log;
 
-import com.samsungxr.widgetlib.main.GVRBitmapTexture;
+import com.samsungxr.widgetlib.main.SXRBitmapTexture;
 import com.samsungxr.widgetlib.widget.Widget;
 import com.samsungxr.widgetlib.widget.NodeEntry;
 
 /**
  * Lightweight version of TextWidget.
- * Standard {@link TextWidget} uses {@link GVRTextViewSceneObject} to display the text, making
+ * Standard {@link TextWidget} uses {@link SXRTextViewSceneObject} to display the text, making
  * TextWidget a quite heavy object. Using many of them in the same scene might affect UI performance.
  * LightTextWidget implementation uses canvas.drawText to display the text.
  */
@@ -36,12 +36,12 @@ import com.samsungxr.widgetlib.widget.NodeEntry;
 public class LightTextWidget extends Widget implements TextContainer {
     private static final String ELLIPSIS = "\u2026";
     /**
-     * Construct LightTextWidget wrapper for an existing {@link GVRSceneObject}.
+     * Construct LightTextWidget wrapper for an existing {@link SXRSceneObject}.
      *
-     * @param context     The current {@link GVRContext}.
-     * @param sceneObject The {@link GVRSceneObject} to wrap.
+     * @param context     The current {@link SXRContext}.
+     * @param sceneObject The {@link SXRSceneObject} to wrap.
      */
-    public LightTextWidget(final GVRContext context, final GVRSceneObject sceneObject) {
+    public LightTextWidget(final SXRContext context, final SXRSceneObject sceneObject) {
         super(context, sceneObject);
         init((CharSequence) null);
     }
@@ -49,25 +49,25 @@ public class LightTextWidget extends Widget implements TextContainer {
     /**
      * Core {@link LightTextWidget} constructor.
      *
-     * @param context     The current {@link GVRContext}.
+     * @param context     The current {@link SXRContext}.
      * @param properties A structured set of properties for the {@code LightTextWidget} instance.
      *                   See {@code lighttextwidget.json} for schema.
      */
-    public LightTextWidget(GVRContext context, JSONObject properties) {
+    public LightTextWidget(SXRContext context, JSONObject properties) {
         super(context, properties);
         init((CharSequence) null);
     }
 
     /**
-     * A constructor for wrapping existing {@link GVRSceneObject} instances parsed from a model.
+     * A constructor for wrapping existing {@link SXRSceneObject} instances parsed from a model.
      *
-     * @param context     The current {@link GVRContext}
-     * @param sceneObject The {@link GVRSceneObject} to wrap.
+     * @param context     The current {@link SXRContext}
+     * @param sceneObject The {@link SXRSceneObject} to wrap.
      * @param attributes  A set of class-specific attributes.
      * @throws InstantiationException
      */
     @Deprecated
-    public LightTextWidget(GVRContext context, GVRSceneObject sceneObject,
+    public LightTextWidget(SXRContext context, SXRSceneObject sceneObject,
                            NodeEntry attributes) throws InstantiationException {
         super(context, sceneObject, attributes);
         init((CharSequence) null);
@@ -76,12 +76,12 @@ public class LightTextWidget extends Widget implements TextContainer {
     /**
      * Shows a {@link LightTextWidget} on a {@linkplain Widget widget}
      *
-     * @param context current {@link GVRContext}
-     * @param width   Widget height, in GVRF scene graph units.
+     * @param context current {@link SXRContext}
+     * @param width   Widget height, in SXRF scene graph units.
      *                <p>
-     * @param height  Widget width, in GVRF scene graph units.
+     * @param height  Widget width, in SXRF scene graph units.
      */
-    public LightTextWidget(GVRContext context, float width, float height) {
+    public LightTextWidget(SXRContext context, float width, float height) {
         super(context, width, height);
         init((CharSequence) null);
     }
@@ -89,26 +89,26 @@ public class LightTextWidget extends Widget implements TextContainer {
     /**
      * Shows a {@link LightTextWidget} on a {@linkplain Widget widget}
      *
-     * @param context current {@link GVRContext}
-     * @param width   Widget height, in GVRF scene graph units.
+     * @param context current {@link SXRContext}
+     * @param width   Widget height, in SXRF scene graph units.
      *                <p>
-     * @param height  Widget width, in GVRF scene graph units.
+     * @param height  Widget width, in SXRF scene graph units.
      * @param text    {@link CharSequence} to show on the textView
      */
-    public LightTextWidget(GVRContext context, float width, float height,
+    public LightTextWidget(SXRContext context, float width, float height,
                            CharSequence text) {
         super(context, width, height);
         init(text);
     }
 
     /**
-     * Construct LightTextWidget wrapper for an existing {@link GVRSceneObject}.
+     * Construct LightTextWidget wrapper for an existing {@link SXRSceneObject}.
      *
-     * @param context     The current {@link GVRContext}.
-     * @param sceneObject The {@link GVRSceneObject} to wrap.
+     * @param context     The current {@link SXRContext}.
+     * @param sceneObject The {@link SXRSceneObject} to wrap.
      * @param text
      */
-    public LightTextWidget(GVRContext context, GVRSceneObject sceneObject, CharSequence text) {
+    public LightTextWidget(SXRContext context, SXRSceneObject sceneObject, CharSequence text) {
         super(context, sceneObject);
         init(text);
     }
@@ -250,7 +250,7 @@ public class LightTextWidget extends Widget implements TextContainer {
         params.setText(text);
         try {
             JSONObject properties = getObjectMetadata();
-            params.setFromJSON(getGVRContext().getContext(), properties);
+            params.setFromJSON(getSXRContext().getContext(), properties);
         } finally {
             mNoApply = false;
         }
@@ -317,7 +317,7 @@ public class LightTextWidget extends Widget implements TextContainer {
         // draw bg color
         int bgColor = params.getBackgroundColor();
         if (bgColor == Color.TRANSPARENT) {
-            setRenderingOrder(GVRRenderData.GVRRenderingOrder.TRANSPARENT);
+            setRenderingOrder(SXRRenderData.SXRRenderingOrder.TRANSPARENT);
         }
         Log.d(TAG, "apply(%s): bgColor = %d", getName(), bgColor);
 
@@ -411,10 +411,10 @@ public class LightTextWidget extends Widget implements TextContainer {
             canvas.drawText(text, x, y, mTextPaint);
         }
 
-        GVRTexture texture = new GVRBitmapTexture(getGVRContext(), bitmap);
+        SXRTexture texture = new SXRBitmapTexture(getSXRContext(), bitmap);
         // Apply trilinear and anisotropic filtering
-        GVRTextureParameters textureParameters = new GVRTextureParameters(getGVRContext());
-        textureParameters.setMinFilterType(GVRTextureParameters.TextureFilterType.GL_LINEAR_MIPMAP_LINEAR);
+        SXRTextureParameters textureParameters = new SXRTextureParameters(getSXRContext());
+        textureParameters.setMinFilterType(SXRTextureParameters.TextureFilterType.GL_LINEAR_MIPMAP_LINEAR);
         textureParameters.setAnisotropicValue(4);
         try {
             texture.updateTextureParameters(textureParameters);

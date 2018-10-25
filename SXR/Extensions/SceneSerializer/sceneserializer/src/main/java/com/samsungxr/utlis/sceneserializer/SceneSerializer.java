@@ -7,16 +7,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRImportSettings;
-import com.samsungxr.GVRMaterial;
-import com.samsungxr.GVRScene;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRTexture;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRImportSettings;
+import com.samsungxr.SXRMaterial;
+import com.samsungxr.SXRScene;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRTexture;
 import com.samsungxr.IAssetEvents;
-import com.samsungxr.scene_objects.GVRCubeSceneObject;
-import com.samsungxr.scene_objects.GVRSphereSceneObject;
+import com.samsungxr.scene_objects.SXRCubeSceneObject;
+import com.samsungxr.scene_objects.SXRSphereSceneObject;
 import com.samsungxr.utility.Log;
 
 import java.io.BufferedWriter;
@@ -40,22 +40,22 @@ public class SceneSerializer {
     private SceneLoaderListener sceneLoaderListener;
 
     public interface SceneLoaderListener {
-        void onEnvironmentLoaded(GVRSceneObject envSceneObject);
-        void onSceneObjectLoaded(GVRSceneObject sceneObject);
+        void onEnvironmentLoaded(SXRSceneObject envSceneObject);
+        void onSceneObjectLoaded(SXRSceneObject sceneObject);
     }
 
     public SceneSerializer() {
         gson = new Gson();
     }
 
-    public void importScene(GVRContext gvrContext, GVRScene gvrScene, SceneLoaderListener
+    public void importScene(SXRContext gvrContext, SXRScene gvrScene, SceneLoaderListener
             sceneLoaderListener) {
         File location = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
                 File.separator + DEFAULT_SCENE_NAME);
         importScene(gvrContext,gvrScene,location,sceneLoaderListener);
     }
 
-    public void importScene(GVRContext gvrContext, GVRScene gvrScene, File location,
+    public void importScene(SXRContext gvrContext, SXRScene gvrScene, File location,
                             SceneLoaderListener sceneLoaderListener) {
         this.sceneLoaderListener = sceneLoaderListener;
         JsonParser parser = new JsonParser();
@@ -111,17 +111,17 @@ public class SceneSerializer {
         }
     }
 
-    public void addToSceneData(GVRSceneObject sceneObject, String source) {
+    public void addToSceneData(SXRSceneObject sceneObject, String source) {
         initializeSceneData();
         sceneData.addToSceneData(sceneObject, source);
     }
 
-    public void removeFromSceneData(GVRSceneObject sceneObject) {
+    public void removeFromSceneData(SXRSceneObject sceneObject) {
         initializeSceneData();
         sceneData.removeFromSceneData(sceneObject);
     }
 
-    private void loadEnvironment(GVRContext gvrContext, GVRScene gvrScene) {
+    private void loadEnvironment(SXRContext gvrContext, SXRScene gvrScene) {
         if(sceneData == null || sceneData.getEnvironmentData() == null || sceneData
                 .getEnvironmentData().getSrc() == null) {
             if(sceneLoaderListener != null) {
@@ -130,9 +130,9 @@ public class SceneSerializer {
             return;
         }
         EnvironmentData environmentData = sceneData.getEnvironmentData();
-        GVRAndroidResource resource = null;
+        SXRAndroidResource resource = null;
         try {
-            resource = new GVRAndroidResource(environmentData.getSrc());
+            resource = new SXRAndroidResource(environmentData.getSrc());
         } catch (IOException e) {
             Log.e(TAG, "Could not load texture file:%s", e.getMessage());
             if(sceneLoaderListener != null) {
@@ -145,24 +145,24 @@ public class SceneSerializer {
             targetScale = DEFAULT_ENVIRONMENT_SCALE;
             environmentData.setScale(targetScale);
         }
-        GVRSceneObject environmentSceneObject;
+        SXRSceneObject environmentSceneObject;
         if (environmentData.getSrc().endsWith(CUBEMAP_EXTENSION)) {
-            GVRMaterial cubemapMaterial = new GVRMaterial(gvrContext,
-                    GVRMaterial.GVRShaderType.Cubemap.ID);
-            environmentSceneObject = new GVRCubeSceneObject(gvrContext, false,
+            SXRMaterial cubemapMaterial = new SXRMaterial(gvrContext,
+                    SXRMaterial.SXRShaderType.Cubemap.ID);
+            environmentSceneObject = new SXRCubeSceneObject(gvrContext, false,
                     cubemapMaterial);
             environmentSceneObject.getTransform().setScale(targetScale, targetScale, targetScale);
-            GVRTexture futureCubeTexture = gvrContext.getAssetLoader().loadCubemapTexture
+            SXRTexture futureCubeTexture = gvrContext.getAssetLoader().loadCubemapTexture
                     (resource);
             environmentSceneObject.getRenderData().getMaterial().setMainTexture
                     (futureCubeTexture);
             gvrScene.addSceneObject(environmentSceneObject);
         } else {
-            GVRMaterial material = new GVRMaterial(gvrContext);
-            environmentSceneObject = new GVRSphereSceneObject(gvrContext, false,
+            SXRMaterial material = new SXRMaterial(gvrContext);
+            environmentSceneObject = new SXRSphereSceneObject(gvrContext, false,
                     material);
             environmentSceneObject.getTransform().setScale(targetScale, targetScale, targetScale);
-            GVRTexture futureSphereTexture = gvrContext.getAssetLoader().loadTexture(resource);
+            SXRTexture futureSphereTexture = gvrContext.getAssetLoader().loadTexture(resource);
             environmentSceneObject.getRenderData().getMaterial().setMainTexture(futureSphereTexture);
             gvrScene.addSceneObject(environmentSceneObject);
         }
@@ -171,7 +171,7 @@ public class SceneSerializer {
         }
     }
 
-    private void loadSceneObjects(GVRContext gvrContext, GVRScene gvrScene) {
+    private void loadSceneObjects(SXRContext gvrContext, SXRScene gvrScene) {
         if(sceneData == null) {
             return;
         }
@@ -186,12 +186,12 @@ public class SceneSerializer {
 
     private class AssetObserver implements IAssetEvents {
         Collection<SceneObjectData> sceneObjectDatas;
-        GVRContext context;
-        GVRScene scene;
+        SXRContext context;
+        SXRScene scene;
         Iterator<SceneObjectData> iterator;
         SceneObjectData currentSod;
 
-        AssetObserver(Collection<SceneObjectData> sceneObjectDatas, GVRContext context, GVRScene
+        AssetObserver(Collection<SceneObjectData> sceneObjectDatas, SXRContext context, SXRScene
                 scene) {
             this.sceneObjectDatas = sceneObjectDatas;
             this.scene = scene;
@@ -204,7 +204,7 @@ public class SceneSerializer {
         }
 
         @Override
-        public void onAssetLoaded(GVRContext context, GVRSceneObject model, String filePath,
+        public void onAssetLoaded(SXRContext context, SXRSceneObject model, String filePath,
                                   String errors) {
             if (currentSod != null && currentSod.getSrc().endsWith(filePath)) {
                 model.getTransform().setModelMatrix(currentSod.getModelMatrix());
@@ -219,7 +219,7 @@ public class SceneSerializer {
         }
 
         @Override
-        public void onModelLoaded(GVRContext context, GVRSceneObject model, String filePath) {
+        public void onModelLoaded(SXRContext context, SXRSceneObject model, String filePath) {
             if (currentSod != null && currentSod.getSrc().endsWith(filePath)) {
                 model.getTransform().setModelMatrix(currentSod.getModelMatrix());
                 model.setName(currentSod.getName());
@@ -233,14 +233,14 @@ public class SceneSerializer {
         }
 
         @Override
-        public void onTextureLoaded(GVRContext context, GVRTexture texture, String filePath) {
+        public void onTextureLoaded(SXRContext context, SXRTexture texture, String filePath) {
             if (currentSod != null && currentSod.getSrc().endsWith(filePath)) {
                 Log.d(TAG, "Texture loaded:%s", filePath);
             }
         }
 
         @Override
-        public void onModelError(GVRContext context, String error, String filePath) {
+        public void onModelError(SXRContext context, String error, String filePath) {
             if (currentSod != null && currentSod.getSrc().endsWith(filePath)) {
                 Log.e(TAG, "Model Loading Error for %s", filePath);
                 iterator.remove();
@@ -249,7 +249,7 @@ public class SceneSerializer {
         }
 
         @Override
-        public void onTextureError(GVRContext context, String error, String filePath) {
+        public void onTextureError(SXRContext context, String error, String filePath) {
             if (currentSod != null && currentSod.getSrc().endsWith(filePath)) {
                 Log.e(TAG, "Texture Loading error for %s", filePath);
                 loadNextAsset();
@@ -261,7 +261,7 @@ public class SceneSerializer {
                 currentSod = iterator.next();
                 try {
                     context.getAssetLoader().loadModel(
-                            "sd:" + currentSod.getSrc(), GVRImportSettings.getRecommendedSettings(),
+                            "sd:" + currentSod.getSrc(), SXRImportSettings.getRecommendedSettings(),
                             true, null);
                     break;
                 } catch (IOException e) {

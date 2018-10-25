@@ -3,8 +3,8 @@ package com.samsungxr.widgetlib.widget.animation;
 import com.samsungxr.widgetlib.log.Log;
 import com.samsungxr.widgetlib.widget.Widget;
 
-import com.samsungxr.GVRHybridObject;
-import com.samsungxr.animation.GVRScaleAnimation;
+import com.samsungxr.SXRHybridObject;
+import com.samsungxr.animation.SXRScaleAnimation;
 import org.joml.Vector3f;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +90,7 @@ public class ScaleAnimation extends TransformAnimation {
         return mAdapter;
     }
 
-    private class Adapter extends GVRScaleAnimation implements
+    private class Adapter extends SXRScaleAnimation implements
             Animation.AnimationAdapter {
         Adapter(Widget widget, float duration, float scale) {
             super(widget.getSceneObject(), duration, scale);
@@ -102,7 +102,7 @@ public class ScaleAnimation extends TransformAnimation {
         }
 
         @Override
-        public void animate(GVRHybridObject target, float ratio) {
+        public void animate(SXRHybridObject target, float ratio) {
             doAnimate(ratio);
         }
 

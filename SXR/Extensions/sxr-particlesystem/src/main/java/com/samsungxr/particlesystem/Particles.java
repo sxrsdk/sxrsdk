@@ -15,13 +15,13 @@
 
 package com.samsungxr.particlesystem;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRMaterial;
-import com.samsungxr.GVRMesh;
-import com.samsungxr.GVRRenderData;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRShaderId;
-import com.samsungxr.GVRTexture;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRMaterial;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRRenderData;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRShaderId;
+import com.samsungxr.SXRTexture;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -34,25 +34,25 @@ import static android.opengl.GLES20.GL_POINTS;
 
 class Particles {
 
-    private  GVRContext mGVRContext;
-    private GVRMaterial material;
-    private GVRMesh mParticleMesh;
+    private  SXRContext mSXRContext;
+    private SXRMaterial material;
+    private SXRMesh mParticleMesh;
     private float mAge;
     private float mSize;
     private Vector3f mAcceleration;
     private float mParticleSizeRate;
     private float mFadeWithAge;
-    private GVRTexture mTexture;
+    private SXRTexture mTexture;
     private Vector4f mColorMultiplier;
     private float mNoiseFactor;
 
-    private GVRShaderId particleID;
+    private SXRShaderId particleID;
 
-    Particles(GVRContext gvrContext, float age, float particleSize,
+    Particles(SXRContext gvrContext, float age, float particleSize,
                      Vector3f acceleration, float particleSizeRate, boolean fadeWithAge,
-                     GVRTexture tex, Vector4f color, float noiseFactor) {
+                     SXRTexture tex, Vector4f color, float noiseFactor) {
 
-        mGVRContext = gvrContext;
+        mSXRContext = gvrContext;
         mAge = age;
         mSize = particleSize;
         mAcceleration = acceleration;
@@ -67,19 +67,19 @@ class Particles {
     }
 
     /**
-     * Creates and returns a GVRSceneObject with the specified mesh attributes.
+     * Creates and returns a SXRSceneObject with the specified mesh attributes.
      *
      * @param vertices the vertex positions of that make up the mesh. (x1, y1, z1, x2, y2, z2, ...)
      * @param velocities the velocity attributes for each vertex. (vx1, vy1, vz1, vx2, vy2, vz2...)
      * @param particleTimeStamps the spawning times of each vertex. (t1, 0,  t2, 0,  t3, 0 ..)
      *
-     * @return The GVRSceneObject with this mesh.
+     * @return The SXRSceneObject with this mesh.
      */
 
-    GVRSceneObject makeParticleMesh(float[] vertices, float[] velocities,
+    SXRSceneObject makeParticleMesh(float[] vertices, float[] velocities,
                                            float[] particleTimeStamps )
     {
-        mParticleMesh = new GVRMesh(mGVRContext);
+        mParticleMesh = new SXRMesh(mSXRContext);
 
         //pass the particle positions as vertices, velocities as normals, and
         //spawning times as texture coordinates.
@@ -87,8 +87,8 @@ class Particles {
         mParticleMesh.setNormals(velocities);
         mParticleMesh.setTexCoords(particleTimeStamps);
 
-        particleID = new GVRShaderId(ParticleShader.class);
-        material = new GVRMaterial(mGVRContext, particleID);
+        particleID = new SXRShaderId(ParticleShader.class);
+        material = new SXRMaterial(mSXRContext, particleID);
 
         material.setVec4("u_color", mColorMultiplier.x, mColorMultiplier.y,
                 mColorMultiplier.z, mColorMultiplier.w);
@@ -99,12 +99,12 @@ class Particles {
         material.setFloat("u_fade", mFadeWithAge);
         material.setFloat("u_noise_factor", mNoiseFactor);
 
-        GVRRenderData renderData = new GVRRenderData(mGVRContext);
+        SXRRenderData renderData = new SXRRenderData(mSXRContext);
         renderData.setMaterial(material);
         renderData.setMesh(mParticleMesh);
         material.setMainTexture(mTexture);
 
-        GVRSceneObject meshObject = new GVRSceneObject(mGVRContext);
+        SXRSceneObject meshObject = new SXRSceneObject(mSXRContext);
         meshObject.attachRenderData(renderData);
         meshObject.getRenderData().setMaterial(material);
 
@@ -117,7 +117,7 @@ class Particles {
         meshObject.getRenderData().setDrawMode(GL_POINTS);
         meshObject.getRenderData().setDepthTest(true);
         meshObject.getRenderData().setDepthMask(false);
-        meshObject.getRenderData().setRenderingOrder(GVRRenderData.GVRRenderingOrder.TRANSPARENT);
+        meshObject.getRenderData().setRenderingOrder(SXRRenderData.SXRRenderingOrder.TRANSPARENT);
 
         return meshObject;
     }

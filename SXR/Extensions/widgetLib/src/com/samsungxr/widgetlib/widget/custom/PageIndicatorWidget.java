@@ -10,7 +10,7 @@ import com.samsungxr.widgetlib.widget.basic.Checkable;
 import com.samsungxr.widgetlib.widget.basic.CheckableButton;
 import com.samsungxr.widgetlib.widget.layout.Layout;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 import org.json.JSONObject;
 
 import java.util.LinkedHashSet;
@@ -39,11 +39,11 @@ public class PageIndicatorWidget extends CheckableGroup {
     /**
      * Core {@link PageIndicatorWidget} constructor.
      *
-     * @param context A valid {@link GVRContext}.
+     * @param context A valid {@link SXRContext}.
      * @param properties A structured set of properties for the {@code PageIndicatorWidget} instance.
      *                   See {@code pageindicatorwidget.json} for schema.
      */
-    public PageIndicatorWidget(GVRContext context, JSONObject properties) {
+    public PageIndicatorWidget(SXRContext context, JSONObject properties) {
         super(context, properties);
         init();
     }
@@ -54,7 +54,7 @@ public class PageIndicatorWidget extends CheckableGroup {
      * @param numIndicators number of pages
      * @param defaultPageId default selected page
      */
-    public PageIndicatorWidget(GVRContext context, int numIndicators, int defaultPageId) {
+    public PageIndicatorWidget(SXRContext context, int numIndicators, int defaultPageId) {
         this(context, packProperties(numIndicators, defaultPageId));
         init();
     }
@@ -71,7 +71,7 @@ public class PageIndicatorWidget extends CheckableGroup {
      * @param touchEnabled true if touch enable and the page can be selected by touching on page dot.
      *                     The page cannot be unselected by touching on dot;
      */
-    public PageIndicatorWidget(GVRContext context, int numIndicators, int defaultPageId,
+    public PageIndicatorWidget(SXRContext context, int numIndicators, int defaultPageId,
                                float indicatorWidth, float indicatorHeight, boolean touchEnabled) {
         super(context, packProperties(numIndicators, defaultPageId, indicatorWidth, indicatorHeight,
                 touchEnabled));
@@ -234,7 +234,7 @@ public class PageIndicatorWidget extends CheckableGroup {
     private void addIndicatorChildren(int numIndicators) {
         Log.d(Log.SUBSYSTEM.WIDGET, TAG, "addIndicatorChildren %d", numIndicators);
         while (numIndicators-- > 0) {
-            PageIndicatorButton buttonWidget = new PageIndicatorButton(getGVRContext(),
+            PageIndicatorButton buttonWidget = new PageIndicatorButton(getSXRContext(),
                     mPageIndicatorButtonSize);
             buttonWidget.setName("PageIndicatorButton." + getCheckableCount());
             addChild(buttonWidget, true);
@@ -262,18 +262,18 @@ public class PageIndicatorWidget extends CheckableGroup {
         private final String TAG = PageIndicatorButton.class.getSimpleName();
         private final PointF mSize;
 
-        private PageIndicatorButton(GVRContext context, PointF size) {
+        private PageIndicatorButton(SXRContext context, PointF size) {
             super(context, 0, 0);
             mSize = size;
         }
 
         @Override
         protected Widget createGraphicWidget() {
-            return new PageIndicatorButton.Graphic(getGVRContext(), mSize);
+            return new PageIndicatorButton.Graphic(getSXRContext(), mSize);
         }
 
         private class Graphic extends Widget {
-            Graphic(GVRContext context, PointF size) {
+            Graphic(SXRContext context, PointF size) {
                 super(context, size.x, size.y);
             }
         }

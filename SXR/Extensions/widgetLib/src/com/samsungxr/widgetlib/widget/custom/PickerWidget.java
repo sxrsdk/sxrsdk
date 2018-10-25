@@ -1,6 +1,6 @@
 package com.samsungxr.widgetlib.widget.custom;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 import com.samsungxr.widgetlib.main.WidgetLib;
 import com.samsungxr.widgetlib.widget.animation.ScaleAnimation;
 import org.joml.Vector3f;
@@ -33,7 +33,7 @@ public final class PickerWidget extends ListWidget {
      * @param width
      * @param height
      */
-    public PickerWidget(GVRContext context, final Adapter adapter, float width, float height) {
+    public PickerWidget(SXRContext context, final Adapter adapter, float width, float height) {
         super(context, adapter, width, height);
         addOnItemFocusListener(mItemFocusListener);
 

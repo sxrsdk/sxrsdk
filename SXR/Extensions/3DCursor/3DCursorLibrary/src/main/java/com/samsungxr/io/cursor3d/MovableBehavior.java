@@ -1,18 +1,18 @@
 package com.samsungxr.io.cursor3d;
 
-import com.samsungxr.GVRBehavior;
-import com.samsungxr.GVRComponent;
-import com.samsungxr.io.GVRCursorController;
-import com.samsungxr.GVRPicker;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRBehavior;
+import com.samsungxr.SXRComponent;
+import com.samsungxr.io.SXRCursorController;
+import com.samsungxr.SXRPicker;
+import com.samsungxr.SXRSceneObject;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
- * This class defines a {@link SelectableBehavior} that can be attached to a {@link GVRSceneObject}.
+ * This class defines a {@link SelectableBehavior} that can be attached to a {@link SXRSceneObject}.
  * In addition to all the functionality of a {@link SelectableBehavior} this makes the associated
- * {@link GVRSceneObject} movable with a {@link Cursor}.
+ * {@link SXRSceneObject} movable with a {@link Cursor}.
  */
 public class MovableBehavior extends SelectableBehavior {
     public static final String TAG = MovableBehavior.class.getSimpleName();
@@ -21,15 +21,15 @@ public class MovableBehavior extends SelectableBehavior {
     private Quaternionf mRotation;
     private Vector3f mTempCross;
 
-    private GVRSceneObject mSelected;
+    private SXRSceneObject mSelected;
     private Cursor mCurrentCursor;
-    private GVRSceneObject mOwnerParent;
+    private SXRSceneObject mOwnerParent;
     private static final Matrix4f mTempParentMatrix = new Matrix4f();
     private static final Matrix4f mTempSelectedMatrix = new Matrix4f();
 
     /**
-     * Creates a {@link MovableBehavior} to be attached to any {@link GVRSceneObject}. The
-     * instance thus created will not change the appearance of the linked {@link GVRSceneObject}
+     * Creates a {@link MovableBehavior} to be attached to any {@link SXRSceneObject}. The
+     * instance thus created will not change the appearance of the linked {@link SXRSceneObject}
      * according to the {@link ObjectState}.
      *
      * @param cursorManager the {@link CursorManager} instance
@@ -39,19 +39,19 @@ public class MovableBehavior extends SelectableBehavior {
     }
 
     /**
-     * Creates a {@link MovableBehavior} which is to be attached to a {@link GVRSceneObject}
-     * with a specific hierarchy where, the {@link GVRSceneObject} to be attached has a root node at
+     * Creates a {@link MovableBehavior} which is to be attached to a {@link SXRSceneObject}
+     * with a specific hierarchy where, the {@link SXRSceneObject} to be attached has a root node at
      * the top and a child for each of the states of the {@link MovableBehavior}.
      * The order of the child nodes has to follow {@link ObjectState#DEFAULT},
      * {@link ObjectState#BEHIND}, {@link ObjectState#COLLIDING}, and {@link ObjectState#CLICKED}
      * from left to right.The {@link MovableBehavior} handles all the {@link ICursorEvents} on the
-     * linked {@link GVRSceneObject} and maintains the {@link ObjectState} as well as moving the
-     * {@link GVRSceneObject} with the movement of a {@link Cursor}. It also makes the correct child
-     * {@link GVRSceneObject} visible according to the {@link ObjectState}. It is recommended that
+     * linked {@link SXRSceneObject} and maintains the {@link ObjectState} as well as moving the
+     * {@link SXRSceneObject} with the movement of a {@link Cursor}. It also makes the correct child
+     * {@link SXRSceneObject} visible according to the {@link ObjectState}. It is recommended that
      * the different nodes representing different {@link ObjectState} share a common set of vertices
      * if possible. Not having the needed hierarchy will result in an
      * {@link IllegalArgumentException} when calling
-     * {@link GVRSceneObject#attachComponent(GVRComponent)}
+     * {@link SXRSceneObject#attachComponent(SXRComponent)}
      *
      * @param cursorManager       the {@link CursorManager} instance
      * @param initializeAllStates flag to indicate whether to initialize all
@@ -60,7 +60,7 @@ public class MovableBehavior extends SelectableBehavior {
      *                            {@link ObjectState#BEHIND}, {@link ObjectState#COLLIDING}, and
      *                            {@link ObjectState#CLICKED}. <code>false</code> initializes only
      *                            the {@link ObjectState#DEFAULT} state. Which does not require the
-     *                            attached  {@link GVRSceneObject} to have a hierarchy.
+     *                            attached  {@link SXRSceneObject} to have a hierarchy.
      */
     public MovableBehavior(CursorManager cursorManager, boolean initializeAllStates) {
         super(cursorManager, initializeAllStates);
@@ -68,26 +68,26 @@ public class MovableBehavior extends SelectableBehavior {
     }
 
     /**
-     * Creates a {@link MovableBehavior} which is to be attached to a {@link GVRSceneObject}
-     * with a specific hierarchy where, the {@link GVRSceneObject} to be attached has a root node at
+     * Creates a {@link MovableBehavior} which is to be attached to a {@link SXRSceneObject}
+     * with a specific hierarchy where, the {@link SXRSceneObject} to be attached has a root node at
      * the top and a child for each of the states of the {@link MovableBehavior}.
      * The {@link MovableBehavior} handles all the {@link ICursorEvents} on the linked
-     * {@link GVRSceneObject} and maintains the {@link ObjectState} as well as moves the associated
-     * {@link GVRSceneObject} with the {@link Cursor}. It also makes the correct child
-     * {@link GVRSceneObject} visible according to the {@link ObjectState}. It is recommended to
+     * {@link SXRSceneObject} and maintains the {@link ObjectState} as well as moves the associated
+     * {@link SXRSceneObject} with the {@link Cursor}. It also makes the correct child
+     * {@link SXRSceneObject} visible according to the {@link ObjectState}. It is recommended to
      * have a child for each {@link ObjectState} value, however it is possible to have lesser
      * children as long as the mapping is correctly specified in {@param objectStates}. If the
-     * {@param objectStates} does not match the {@link GVRSceneObject} hierarchy it will result in
+     * {@param objectStates} does not match the {@link SXRSceneObject} hierarchy it will result in
      * an {@link IllegalArgumentException} when calling
-     * {@link GVRSceneObject#attachComponent(GVRComponent)}. To save on memory it is suggested that
-     * the children of the {@link GVRSceneObject} representing different {@link ObjectState}s share
+     * {@link SXRSceneObject#attachComponent(SXRComponent)}. To save on memory it is suggested that
+     * the children of the {@link SXRSceneObject} representing different {@link ObjectState}s share
      * a common set of vertices if possible.
      *
      * @param cursorManager the {@link CursorManager} instance
      * @param objectStates  array of {@link ObjectState}s that maps each child of the attached
-     *                      {@link GVRSceneObject} with an {@link ObjectState}. Where the first
+     *                      {@link SXRSceneObject} with an {@link ObjectState}. Where the first
      *                      element of the array maps to the left most/first child of the attached
-     *                      {@link GVRSceneObject}. This array should contain
+     *                      {@link SXRSceneObject}. This array should contain
      *                      {@link ObjectState#DEFAULT} as one of its elements else it will result
      *                      in an {@link IllegalArgumentException}.
      */
@@ -104,12 +104,12 @@ public class MovableBehavior extends SelectableBehavior {
         clickListener = new ICursorEvents()
         {
             public void onCursorScale(Cursor c) { }
-            public void onEnter(Cursor c, GVRPicker.GVRPickedObject hit) { }
-            public void onTouchStart(Cursor c, GVRPicker.GVRPickedObject hit)
+            public void onEnter(Cursor c, SXRPicker.SXRPickedObject hit) { }
+            public void onTouchStart(Cursor c, SXRPicker.SXRPickedObject hit)
             {
                 synchronized (this)
                 {
-                    GVRCursorController controller = hit.getPicker().getController();
+                    SXRCursorController controller = hit.getPicker().getController();
 
                     if (mSelected != null)
                     {
@@ -121,14 +121,14 @@ public class MovableBehavior extends SelectableBehavior {
                 }
             }
 
-            public void onDrag(Cursor c, GVRPicker.GVRPickedObject hit) { }
+            public void onDrag(Cursor c, SXRPicker.SXRPickedObject hit) { }
 
-            public void onExit(Cursor c, GVRPicker.GVRPickedObject hit)
+            public void onExit(Cursor c, SXRPicker.SXRPickedObject hit)
             {
                 onTouchEnd(c, hit);
             }
 
-            public void onTouchEnd(Cursor c, GVRPicker.GVRPickedObject hit)
+            public void onTouchEnd(Cursor c, SXRPicker.SXRPickedObject hit)
             {
                 synchronized (this)
                 {
@@ -136,7 +136,7 @@ public class MovableBehavior extends SelectableBehavior {
                     {
                         return;
                     }
-                    GVRCursorController controller = hit.getPicker().getController();
+                    SXRCursorController controller = hit.getPicker().getController();
 
                     controller.stopDrag();
                     mSelected = null;
@@ -196,9 +196,9 @@ public class MovableBehavior extends SelectableBehavior {
 
     /**
      * Returns a unique long value associated with the {@link MovableBehavior} class. Each
-     * subclass of  {@link GVRBehavior} needs a unique component type value. Use this value to
-     * get the instance of {@link MovableBehavior} attached to any {@link GVRSceneObject}
-     * using {@link GVRSceneObject#getComponent(long)}
+     * subclass of  {@link SXRBehavior} needs a unique component type value. Use this value to
+     * get the instance of {@link MovableBehavior} attached to any {@link SXRSceneObject}
+     * using {@link SXRSceneObject#getComponent(long)}
      *
      * @return the component type value.
      */

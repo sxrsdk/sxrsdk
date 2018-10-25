@@ -18,10 +18,10 @@ package com.samsungxr.x3d;
 import java.util.ArrayList;
 import java.util.concurrent.Future;
 
-import com.samsungxr.GVRMaterial;
+import com.samsungxr.SXRMaterial;
 
 
-import com.samsungxr.GVRTexture;
+import com.samsungxr.SXRTexture;
 import com.samsungxr.utility.Log;
 
 import com.samsungxr.x3d.data_types.MFString;
@@ -60,8 +60,8 @@ public class ShaderSettings
   private boolean multiTexture = false; // set true if multi-texturing
   private String nameMultiTexture = ""; // set if there is a DEF in
   // MultiTexture node
-  private GVRTexture textureMap0 = null;
-  private GVRTexture textureMap1 = null;
+  private SXRTexture textureMap0 = null;
+  private SXRTexture textureMap1 = null;
   private MFString multiTextureModeMFString = new MFString();
   private X3Dobject.MultiTextureModes multiTextureMode = X3Dobject.MultiTextureModes.MULTIPLY;
 
@@ -91,14 +91,14 @@ public class ShaderSettings
   public float[] modelMatrix = new float[16];
 
 
-  public GVRTexture texture = null;
+  public SXRTexture texture = null;
     public ArrayList<String> movieTextures = new ArrayList<String>();
 
   public String fragmentShaderLights = "";
   
-  public GVRMaterial material;
+  public SXRMaterial material;
 
-  public void initializeTextureMaterial(GVRMaterial m)
+  public void initializeTextureMaterial(SXRMaterial m)
   {
 	material = m;
     nameAppearance = ""; // set if there is a DEF in Appearance node
@@ -155,7 +155,7 @@ public class ShaderSettings
 
 
 
-  public ShaderSettings(GVRMaterial material)
+  public ShaderSettings(SXRMaterial material)
   {
     initializeTextureMaterial(material);
   }
@@ -260,7 +260,7 @@ public class ShaderSettings
     return this.transparency;
   }
 
-  public void setTexture(GVRTexture texture)
+  public void setTexture(SXRTexture texture)
   {
     this.texture = texture;
     this.material.setTexture("diffuseTexture", texture);
@@ -357,7 +357,7 @@ public class ShaderSettings
   {
     return this.multiTextureMode;
   }
-  protected void setMultiTextureGVRTexture(GVRTexture textureMap)
+  protected void setMultiTextureSXRTexture(SXRTexture textureMap)
   {
     if (this.textureMap0 != null) {
       if (this.textureMap1 == null) this.textureMap1 = textureMap;
@@ -365,13 +365,13 @@ public class ShaderSettings
     }
     else this.textureMap0 = textureMap;
   }
-  protected void setMultiTextureGVRTexture(GVRTexture textureMap, int number)
+  protected void setMultiTextureSXRTexture(SXRTexture textureMap, int number)
   {
     if ( (number >= 2) || (number < 0) ) Log.e(TAG, "Mutli-texture texture number must be 0 or 1");
     else if (number == 1) this.textureMap1 = textureMap;
     else this.textureMap0 = textureMap;
   }
-  protected GVRTexture getMultiTextureGVRTexture(int number)
+  protected SXRTexture getMultiTextureSXRTexture(int number)
   {
     if ( (number >= 2) || (number < 0) ) Log.e(TAG, "Mutli-texture texture number must be 0 or 1");
     else if (number == 1) return this.textureMap1;

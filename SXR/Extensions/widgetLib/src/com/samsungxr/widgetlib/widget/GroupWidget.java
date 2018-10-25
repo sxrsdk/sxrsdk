@@ -4,8 +4,8 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRSceneObject;
 import org.json.JSONObject;
 
 import com.samsungxr.widgetlib.log.Log;
@@ -21,32 +21,32 @@ public class GroupWidget extends Widget {
     }
 
     /**
-     * Construct a wrapper for an existing {@link GVRSceneObject}.
+     * Construct a wrapper for an existing {@link SXRSceneObject}.
      *
      * @param context
-     *            The current {@link GVRContext}.
+     *            The current {@link SXRContext}.
      * @param sceneObject
-     *            The {@link GVRSceneObject} to wrap.
+     *            The {@link SXRSceneObject} to wrap.
      */
-    public GroupWidget(GVRContext context, GVRSceneObject sceneObject) {
+    public GroupWidget(SXRContext context, SXRSceneObject sceneObject) {
         super(context, sceneObject);
     }
 
     /**
-     * A constructor for wrapping existing {@link GVRSceneObject} instances.
+     * A constructor for wrapping existing {@link SXRSceneObject} instances.
      * Deriving classes should override and do whatever processing is
      * appropriate.
      *
      * @param context
-     *            The current {@link GVRContext}
+     *            The current {@link SXRContext}
      * @param sceneObject
-     *            The {@link GVRSceneObject} to wrap.
+     *            The {@link SXRSceneObject} to wrap.
      * @param attributes
      *            TODO
      * @throws InstantiationException
      */
-    public GroupWidget(final GVRContext context,
-            final GVRSceneObject sceneObject, NodeEntry attributes)
+    public GroupWidget(final SXRContext context,
+            final SXRSceneObject sceneObject, NodeEntry attributes)
             throws InstantiationException {
         super(context, sceneObject, attributes);
     }
@@ -55,22 +55,22 @@ public class GroupWidget extends Widget {
      * Construct a new {@link GroupWidget}.
      *
      * @param context
-     *            A valid {@link GVRContext} instance.
+     *            A valid {@link SXRContext} instance.
      * @param width
      * @param height
      */
-    public GroupWidget(GVRContext context, float width, float height) {
+    public GroupWidget(SXRContext context, float width, float height) {
         super(context, width, height);
     }
 
     /**
      * Core {@link GroupWidget} constructor.
      *
-     * @param context A valid {@link GVRContext}.
+     * @param context A valid {@link SXRContext}.
      * @param properties A structured set of properties for the {@code GroupWidget} instance. See
      *                       {@code widget.json} for schema.
      */
-    public GroupWidget(GVRContext context, @NonNull JSONObject properties) {
+    public GroupWidget(SXRContext context, @NonNull JSONObject properties) {
         super(context, properties);
     }
 
@@ -79,9 +79,9 @@ public class GroupWidget extends Widget {
      * metadata.
      *
      * @param context
-     *            The current {@link GVRContext}.
+     *            The current {@link SXRContext}.
      */
-    protected GroupWidget(GVRContext context) {
+    protected GroupWidget(SXRContext context) {
         super(context);
     }
 
@@ -262,25 +262,25 @@ public class GroupWidget extends Widget {
     }
 
     /**
-     * Create a child {@link Widget} to wrap a {@link GVRSceneObject}. Deriving
+     * Create a child {@link Widget} to wrap a {@link SXRSceneObject}. Deriving
      * classes can override this method to handle creation of specific Widgets.
      *
      * @param context
-     *            The current {@link GVRContext}.
+     *            The current {@link SXRContext}.
      * @param sceneObjectChild
-     *            The {@link GVRSceneObject} to wrap.
+     *            The {@link SXRSceneObject} to wrap.
      * @return
      * @throws InstantiationException
      */
     @Override
-    protected Widget createChild(final GVRContext context,
-            GVRSceneObject sceneObjectChild) throws InstantiationException {
+    protected Widget createChild(final SXRContext context,
+            SXRSceneObject sceneObjectChild) throws InstantiationException {
         return super.createChild(context, sceneObjectChild);
     }
 
     @Override
-    protected void createChildren(final GVRContext context,
-                                  final GVRSceneObject sceneObject, JSONObject properties) throws InstantiationException {
+    protected void createChildren(final SXRContext context,
+                                  final SXRSceneObject sceneObject, JSONObject properties) throws InstantiationException {
         super.createChildren(context, sceneObject, properties);
     }
 

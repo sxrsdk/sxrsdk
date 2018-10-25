@@ -23,9 +23,9 @@
 
 package com.samsungxr.x3d;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.animation.GVRRepeatMode;
-import com.samsungxr.animation.keyframe.GVRNodeAnimation;
+import com.samsungxr.SXRContext;
+import com.samsungxr.animation.SXRRepeatMode;
+import com.samsungxr.animation.keyframe.SXRNodeAnimation;
 
 import java.util.ArrayList;
 
@@ -38,7 +38,7 @@ public class TimeSensor {
 	float resumeTime = 0;
 	float startTime = 0;
 	float stopTime = 0;
-    private ArrayList<GVRNodeAnimation> gvrKeyFrameAnimations = new ArrayList<GVRNodeAnimation>();
+    private ArrayList<SXRNodeAnimation> gvrKeyFrameAnimations = new ArrayList<SXRNodeAnimation>();
 
 	public TimeSensor() {
 		this.name = null;
@@ -73,13 +73,13 @@ public class TimeSensor {
      * @param enable
      * @param gvrContext
      */
-    public void setEnabled(boolean enable, GVRContext gvrContext) {
+    public void setEnabled(boolean enable, SXRContext gvrContext) {
         if (this.enabled != enabled ) {
             // a change in the animation stopping / starting
-            for (GVRNodeAnimation gvrKeyFrameAnimation : gvrKeyFrameAnimations) {
+            for (SXRNodeAnimation gvrKeyFrameAnimation : gvrKeyFrameAnimations) {
                 if (enable) gvrKeyFrameAnimation.start(gvrContext.getAnimationEngine());
                 else {
-                    gvrKeyFrameAnimation.setRepeatMode(GVRRepeatMode.ONCE);
+                    gvrKeyFrameAnimation.setRepeatMode(SXRRepeatMode.ONCE);
                 }
             }
             this.enabled = enable;
@@ -87,22 +87,22 @@ public class TimeSensor {
     }
 
     /**
-     * SetLoop will either set the GVRNodeAnimation's Repeat Mode to REPEATED if loop is true.
-     * or it will set the GVRNodeAnimation's Repeat Mode to ONCE if loop is false
+     * SetLoop will either set the SXRNodeAnimation's Repeat Mode to REPEATED if loop is true.
+     * or it will set the SXRNodeAnimation's Repeat Mode to ONCE if loop is false
      * if loop is set to TRUE, when it was previously FALSE, then start the Animation.
      * @param doLoop
      * @param gvrContext
      */
-    public void setLoop(boolean doLoop, GVRContext gvrContext) {
+    public void setLoop(boolean doLoop, SXRContext gvrContext) {
         if (this.loop != doLoop ) {
             // a change in the loop
-            for (GVRNodeAnimation gvrKeyFrameAnimation : gvrKeyFrameAnimations) {
-                if (doLoop) gvrKeyFrameAnimation.setRepeatMode(GVRRepeatMode.REPEATED);
-                else gvrKeyFrameAnimation.setRepeatMode(GVRRepeatMode.ONCE);
+            for (SXRNodeAnimation gvrKeyFrameAnimation : gvrKeyFrameAnimations) {
+                if (doLoop) gvrKeyFrameAnimation.setRepeatMode(SXRRepeatMode.REPEATED);
+                else gvrKeyFrameAnimation.setRepeatMode(SXRRepeatMode.ONCE);
             }
             // be sure to start the animations if loop is true
             if ( doLoop ) {
-                for (GVRNodeAnimation gvrKeyFrameAnimation : gvrKeyFrameAnimations) {
+                for (SXRNodeAnimation gvrKeyFrameAnimation : gvrKeyFrameAnimations) {
                     gvrKeyFrameAnimation.start(gvrContext.getAnimationEngine() );
                 }
             }
@@ -125,8 +125,8 @@ public class TimeSensor {
      */
     public void setCycleInterval(float newCycleInterval) {
         if ( (this.cycleInterval != newCycleInterval) && (newCycleInterval > 0) ) {
-            for (GVRNodeAnimation gvrKeyFrameAnimation : gvrKeyFrameAnimations) {
-                //TODO Cannot easily change the GVRAnimation's GVRChannel once set.
+            for (SXRNodeAnimation gvrKeyFrameAnimation : gvrKeyFrameAnimations) {
+                //TODO Cannot easily change the SXRAnimation's SXRChannel once set.
             }
             this.cycleInterval = newCycleInterval;
         }
@@ -142,11 +142,11 @@ public class TimeSensor {
 
     /**
      * A TimeSensor can control several X3D animations and thus we have an array list
-     * of all the GVRAnimations involved with this TimeSensor so we can set the loop or
+     * of all the SXRAnimations involved with this TimeSensor so we can set the loop or
      * enabled properties for this single TimeSensor
      * @param gvrKeyFrameAnimation
      */
-    public void addGVRKeyFrameAnimation(GVRNodeAnimation gvrKeyFrameAnimation) {
+    public void addSXRKeyFrameAnimation(SXRNodeAnimation gvrKeyFrameAnimation) {
         this.gvrKeyFrameAnimations.add(gvrKeyFrameAnimation);
     }
 

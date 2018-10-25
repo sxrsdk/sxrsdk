@@ -15,10 +15,10 @@
 
 package com.samsungxr.mixedreality.arcore;
 
-import com.samsungxr.mixedreality.GVRLightEstimate;
+import com.samsungxr.mixedreality.SXRLightEstimate;
 
 
-public class ARCoreLightEstimate extends GVRLightEstimate {
+public class ARCoreLightEstimate extends SXRLightEstimate {
     /**
      * Set the pixel intensity of light
      *
@@ -33,7 +33,7 @@ public class ARCoreLightEstimate extends GVRLightEstimate {
      *
      * @param state
      */
-    protected void setState(GVRLightEstimateState state) {
+    protected void setState(SXRLightEstimateState state) {
         mState = state;
     }
 
@@ -43,7 +43,7 @@ public class ARCoreLightEstimate extends GVRLightEstimate {
     }
 
     @Override
-    public GVRLightEstimateState getLightEstimateState() {
+    public SXRLightEstimateState getLightEstimateState() {
         return mState;
     }
 }

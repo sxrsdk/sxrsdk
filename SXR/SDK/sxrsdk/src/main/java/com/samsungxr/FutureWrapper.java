@@ -7,9 +7,9 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * This is a wrapper to convert T to Future<T> so that we do not need many
- * versions of constructor for {@link GVRSceneObject} for different combinations
- * of {@link GVRMesh} or Future<{@link GVRMesh}>, {@link GVRTexture} or Future<
- * {@link GVRTexture}>.
+ * versions of constructor for {@link SXRSceneObject} for different combinations
+ * of {@link SXRMesh} or Future<{@link SXRMesh}>, {@link SXRTexture} or Future<
+ * {@link SXRTexture}>.
  * 
  * @param <V>
  *            Internal type to be wrapped. It can be either mesh or texture.

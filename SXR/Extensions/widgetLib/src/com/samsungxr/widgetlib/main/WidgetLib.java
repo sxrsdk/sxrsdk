@@ -10,7 +10,7 @@ import com.samsungxr.widgetlib.widget.animation.SimpleAnimationTracker;
 import com.samsungxr.widgetlib.widget.properties.PropertyManager;
 import com.samsungxr.widgetlib.widget.properties.TypefaceManager;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 import org.json.JSONException;
 
 import java.lang.ref.WeakReference;
@@ -32,13 +32,13 @@ public class WidgetLib {
     private final MainThread mMainThread;
     private final PropertyManager mPropertyManager;
     private final CommandBuffer mCommandBuffer;
-    private final GVRContext mGVRContext;
+    private final SXRContext mSXRContext;
 
     /**
      * Initialize an instance of Widget Lib. It has to be done before any usage of library.
      * The application needs to hold onto the returned WidgetLib reference for as long as the
      * library is going to be used.
-     * @param gvrContext A valid {@link GVRContext} instance
+     * @param gvrContext A valid {@link SXRContext} instance
      * @param customPropertiesAsset An optional asset JSON file containing custom and overridden
      *                              properties for the application
      * @return Instance of Widget library
@@ -46,7 +46,7 @@ public class WidgetLib {
      * @throws JSONException
      * @throws NoSuchMethodException
      */
-    public static WidgetLib init(GVRContext gvrContext, String customPropertiesAsset)
+    public static WidgetLib init(SXRContext gvrContext, String customPropertiesAsset)
             throws InterruptedException, JSONException, NoSuchMethodException {
         if (mInstance == null) {
             // Constructor sets mInstance to ensure the initialization order
@@ -157,11 +157,11 @@ public class WidgetLib {
         return get().mCommandBuffer;
     }
 
-    private WidgetLib(GVRContext gvrContext, String customPropertiesAsset)
+    private WidgetLib(SXRContext gvrContext, String customPropertiesAsset)
             throws InterruptedException, JSONException, NoSuchMethodException {
         mInstance = new WeakReference<>(this);
 
-        mGVRContext = gvrContext;
+        mSXRContext = gvrContext;
         mTextureHelper = new TextureFutureHelper(gvrContext);
         mMainThread = new MainThread(gvrContext);
         mTypefaceManager = new TypefaceManager(gvrContext);

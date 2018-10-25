@@ -14,8 +14,8 @@
  */
 package com.sample.hand.template;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRSceneObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,16 +26,16 @@ import java.util.Map;
 public class IOHand {
     private static int PALM_KEY = 0;
     private Map<Integer, IOFinger> fingerMap;
-    private Map<Integer, GVRSceneObject> auxSceneObjects;
-    private GVRSceneObject handSceneObject;
+    private Map<Integer, SXRSceneObject> auxSceneObjects;
+    private SXRSceneObject handSceneObject;
 
     /**
      * Create an {@link IOHand} object.
      *
      * @param gvrContext
      */
-    public IOHand(GVRContext gvrContext) {
-        handSceneObject = new GVRSceneObject(gvrContext);
+    public IOHand(SXRContext gvrContext) {
+        handSceneObject = new SXRSceneObject(gvrContext);
 
         // Create the fingers
         IOFinger index = new IOFinger(IOFinger.INDEX, handSceneObject);
@@ -47,7 +47,7 @@ public class IOHand {
         fingerMap = new HashMap<Integer, IOFinger>(5);
 
         // Create a map to add auxiliary objects that may be added to the IOHand
-        auxSceneObjects = new HashMap<Integer, GVRSceneObject>();
+        auxSceneObjects = new HashMap<Integer, SXRSceneObject>();
 
         // add the fingers to the map.
         fingerMap.put(IOFinger.INDEX, index);
@@ -58,23 +58,23 @@ public class IOHand {
     }
 
     /**
-     * Return the {@link GVRSceneObject} that is controlled by this {@link IOHand}
+     * Return the {@link SXRSceneObject} that is controlled by this {@link IOHand}
      *
      * @return
      */
-    public GVRSceneObject getSceneObject() {
+    public SXRSceneObject getSceneObject() {
         return handSceneObject;
     }
 
     /**
-     * Add a {@link GVRSceneObject} to this {@link IOHand}
+     * Add a {@link SXRSceneObject} to this {@link IOHand}
      *
-     * @param key         an int value that uniquely helps identify this {@link GVRSceneObject}.
+     * @param key         an int value that uniquely helps identify this {@link SXRSceneObject}.
      *                    So that
      *                    it can easily be looked up later on.
-     * @param sceneObject {@link GVRSceneObject} that is to be added.
+     * @param sceneObject {@link SXRSceneObject} that is to be added.
      */
-    public void addSceneObject(int key, GVRSceneObject sceneObject) {
+    public void addSceneObject(int key, SXRSceneObject sceneObject) {
         // only add if not present
         if (!auxSceneObjects.containsKey(key)) {
             auxSceneObjects.put(key, sceneObject);
@@ -87,26 +87,26 @@ public class IOHand {
      *
      * @param sceneObject
      */
-    public void addPalmSceneObject(GVRSceneObject sceneObject) {
+    public void addPalmSceneObject(SXRSceneObject sceneObject) {
         addSceneObject(PALM_KEY, sceneObject);
     }
 
     /**
-     * Use the provided key to look up the {@link GVRSceneObject}
+     * Use the provided key to look up the {@link SXRSceneObject}
      *
      * @param key
      * @return
      */
-    public GVRSceneObject getSceneObject(int key) {
+    public SXRSceneObject getSceneObject(int key) {
         return auxSceneObjects.get(key);
     }
 
     /**
-     * Get the {@link GVRSceneObject} corresponding to the palm (if there is one)
+     * Get the {@link SXRSceneObject} corresponding to the palm (if there is one)
      *
      * @return
      */
-    public GVRSceneObject getPalmSceneObject() {
+    public SXRSceneObject getPalmSceneObject() {
         return auxSceneObjects.get(PALM_KEY);
     }
 

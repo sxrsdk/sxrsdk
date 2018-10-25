@@ -18,19 +18,19 @@ package com.samsungxr.mixedreality.arcore;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.TrackingState;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.mixedreality.GVRAnchor;
-import com.samsungxr.mixedreality.GVRTrackingState;
+import com.samsungxr.SXRContext;
+import com.samsungxr.mixedreality.SXRAnchor;
+import com.samsungxr.mixedreality.SXRTrackingState;
 
 /**
  * Represents a ARCore anchor in the scene.
  *
  */
-public class ARCoreAnchor extends GVRAnchor {
+public class ARCoreAnchor extends SXRAnchor {
     private Anchor mAnchor;
     private ARCorePose mPose;
 
-    protected ARCoreAnchor(GVRContext gvrContext) {
+    protected ARCoreAnchor(SXRContext gvrContext) {
         super(gvrContext);
         mPose = new ARCorePose();
     }
@@ -49,7 +49,7 @@ public class ARCoreAnchor extends GVRAnchor {
      *
      * @param state
      */
-    protected void setTrackingState(GVRTrackingState state) { mTrackingState = state; }
+    protected void setTrackingState(SXRTrackingState state) { mTrackingState = state; }
 
     /**
      * @return ARCore Anchor instance
@@ -59,7 +59,7 @@ public class ARCoreAnchor extends GVRAnchor {
     }
 
     @Override
-    public GVRTrackingState getTrackingState() {
+    public SXRTrackingState getTrackingState() {
         return mTrackingState;
     }
 
@@ -85,11 +85,11 @@ public class ARCoreAnchor extends GVRAnchor {
     }
 
     /**
-     * Converts from ARCore world space to GVRf's world space.
+     * Converts from ARCore world space to SXRf's world space.
      *
      * @param arViewMatrix Phone's camera view matrix.
-     * @param vrCamMatrix GVRf Camera matrix.
-     * @param scale Scale from AR to GVRf world.
+     * @param vrCamMatrix SXRf Camera matrix.
+     * @param scale Scale from AR to SXRf world.
      */
     protected void convertFromARtoVRSpace(float[] arViewMatrix, float[] vrCamMatrix, float scale) {
         mPose.update(mAnchor.getPose(), arViewMatrix, vrCamMatrix, scale);

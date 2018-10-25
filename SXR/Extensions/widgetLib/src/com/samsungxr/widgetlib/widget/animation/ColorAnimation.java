@@ -2,8 +2,8 @@ package com.samsungxr.widgetlib.widget.animation;
 
 import java.util.Arrays;
 
-import com.samsungxr.GVRHybridObject;
-import com.samsungxr.animation.GVRColorAnimation;
+import com.samsungxr.SXRHybridObject;
+import com.samsungxr.animation.SXRColorAnimation;
 import com.samsungxr.utility.Colors;
 
 import org.json.JSONException;
@@ -50,7 +50,7 @@ public class ColorAnimation extends MaterialAnimation {
         return mAdapter;
     }
 
-    private class Adapter extends GVRColorAnimation implements
+    private class Adapter extends SXRColorAnimation implements
             Animation.AnimationAdapter {
 
         public Adapter(Widget target, float duration, float[] rgb) {
@@ -58,7 +58,7 @@ public class ColorAnimation extends MaterialAnimation {
         }
 
         @Override
-        public void animate(GVRHybridObject target, float ratio) {
+        public void animate(SXRHybridObject target, float ratio) {
             doAnimate(ratio);
         }
 

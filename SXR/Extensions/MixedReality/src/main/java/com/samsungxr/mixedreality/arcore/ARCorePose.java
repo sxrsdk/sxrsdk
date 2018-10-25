@@ -25,25 +25,25 @@ import com.google.ar.core.Pose;
 public class ARCorePose {
     // Aux matrix to convert from AR world space to AR cam space.
     private static float[] mModelViewMatrix = new float[16];
-    // Represents a AR Pose at GVRf's world space
+    // Represents a AR Pose at SXRf's world space
     private float[] mPoseMatrix = new float[16];
 
     /**
-     * Returns the ARCore Pose matrix in GVRf's world space
+     * Returns the ARCore Pose matrix in SXRf's world space
      *
-     * @return The pose matrix in GVRf's world space.
+     * @return The pose matrix in SXRf's world space.
      */
     public float[] getPoseMatrix() {
         return mPoseMatrix;
     }
 
     /**
-     * Converts from ARCore world space to GVRf's world space
+     * Converts from ARCore world space to SXRf's world space
      *
      * @param pose AR Core Pose instance
      * @param arViewMatrix Phone's camera view matrix
-     * @param vrCamMatrix GVRf Camera matrix
-     * @param scale Scale from AR to GVRf world
+     * @param vrCamMatrix SXRf Camera matrix
+     * @param scale Scale from AR to SXRf world
      */
     public void update(Pose pose, float[] arViewMatrix, float[] vrCamMatrix, float scale) {
         pose.toMatrix(mPoseMatrix, 0);
@@ -52,13 +52,13 @@ public class ARCorePose {
     }
 
     /**
-     * Converts from AR world space to GVRf world space.
+     * Converts from AR world space to SXRf world space.
      */
-    private void ar2gvr(float[] ARViewMatrix, float[] GVRCamMatrix, float scale) {
+    private void ar2gvr(float[] ARViewMatrix, float[] SXRCamMatrix, float scale) {
         // From AR world space to AR camera space.
         Matrix.multiplyMM(mModelViewMatrix, 0, ARViewMatrix, 0, mPoseMatrix, 0);
-        // From AR Camera space to GVRf world space
-        Matrix.multiplyMM(mPoseMatrix, 0, GVRCamMatrix, 0, mModelViewMatrix, 0);
+        // From AR Camera space to SXRf world space
+        Matrix.multiplyMM(mPoseMatrix, 0, SXRCamMatrix, 0, mModelViewMatrix, 0);
 
         // Real world scale
         Matrix.scaleM(mPoseMatrix, 0, scale, scale, scale);

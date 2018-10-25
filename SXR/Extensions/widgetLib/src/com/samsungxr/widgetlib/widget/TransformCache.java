@@ -1,6 +1,6 @@
 package com.samsungxr.widgetlib.widget;
 
-import com.samsungxr.GVRTransform;
+import com.samsungxr.SXRTransform;
 import org.joml.AxisAngle4f;
 import org.joml.Math;
 import org.joml.Matrix3f;
@@ -16,7 +16,7 @@ public class TransformCache {
 
     }
 
-    public TransformCache(final GVRTransform transform) {
+    public TransformCache(final SXRTransform transform) {
         save(transform);
     }
 
@@ -24,11 +24,11 @@ public class TransformCache {
         save(widget);
     }
 
-    public void save(GVRTransform transform) {
+    public void save(SXRTransform transform) {
         save(transform, false);
     }
 
-    public boolean save(GVRTransform transform, boolean notify) {
+    public boolean save(SXRTransform transform, boolean notify) {
         if (notify) {
             return setPosX(transform.getPositionX())
                     | setPosY(transform.getPositionY())
@@ -55,13 +55,13 @@ public class TransformCache {
         }
     }
 
-    public void restore(GVRTransform transform) {
+    public void restore(SXRTransform transform) {
         transform.setScale(getScaleX(), getScaleY(), getScaleZ());
         transform.setPosition(getPosX(), getPosY(), getPosZ());
         transform.setRotation(getRotW(), getRotX(), getRotY(), getRotZ());
     }
 
-    public boolean changed(final GVRTransform transform) {
+    public boolean changed(final SXRTransform transform) {
         return !(equal(getPosX(), transform.getPositionX())
                 && equal(getPosY(), transform.getPositionY())
                 && equal(getPosZ(), transform.getPositionZ())

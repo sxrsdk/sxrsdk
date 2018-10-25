@@ -2,18 +2,18 @@ package com.samsungxr.x3d;
 
 import android.content.Context;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRRenderData;
-import com.samsungxr.GVRScene;
-import com.samsungxr.GVRShaderData;
-import com.samsungxr.GVRShaderTemplate;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRRenderData;
+import com.samsungxr.SXRScene;
+import com.samsungxr.SXRShaderData;
+import com.samsungxr.SXRShaderTemplate;
 import com.samsungxr.IRenderable;
 import com.samsungxr.utility.TextFile;
 
 import java.util.HashMap;
 
 
-public class X3DShader extends GVRShaderTemplate
+public class X3DShader extends SXRShaderTemplate
 {
     private static String fragTemplate = null;
     private static String vtxTemplate = null;
@@ -21,7 +21,7 @@ public class X3DShader extends GVRShaderTemplate
     private static String addLight = null;
     private static String vtxShader = null;
 
-    public X3DShader(GVRContext gvrcontext)
+    public X3DShader(SXRContext gvrcontext)
     {
         super("float4 ambient_color; float4 diffuse_color; float4 specular_color; float4 emissive_color; mat3 texture_matrix; float specular_exponent; int diffuseTexture1_blendop",
               "sampler2D diffuseTexture sampler2D diffuseTexture1",
@@ -51,7 +51,7 @@ public class X3DShader extends GVRShaderTemplate
         mUsesLights = true;
     }
 
-    public HashMap<String, Integer> getRenderDefines(IRenderable renderable, GVRScene scene)
+    public HashMap<String, Integer> getRenderDefines(IRenderable renderable, SXRScene scene)
     {
         HashMap<String, Integer> defines = super.getRenderDefines(renderable, scene);
 
@@ -62,7 +62,7 @@ public class X3DShader extends GVRShaderTemplate
         return defines;
     }
 
-    protected void setMaterialDefaults(GVRShaderData material)
+    protected void setMaterialDefaults(SXRShaderData material)
     {
         material.setVec4("ambient_color", 0.2f, 0.2f, 0.2f, 1.0f);
         material.setVec4("diffuse_color", 0.8f, 0.8f, 0.8f, 1.0f);

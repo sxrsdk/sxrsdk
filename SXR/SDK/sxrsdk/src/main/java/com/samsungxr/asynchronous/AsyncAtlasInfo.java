@@ -20,7 +20,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.samsungxr.GVRAtlasInformation;
+import com.samsungxr.SXRAtlasInformation;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,7 +38,7 @@ abstract class AsyncAtlasInfo {
      *
      * @return List of atlas information.
      */
-    public static List<GVRAtlasInformation> loadAtlasInformation(InputStream ins) {
+    public static List<SXRAtlasInformation> loadAtlasInformation(InputStream ins) {
         try {
             int size = ins.available();
             byte[] buffer = new byte[size];
@@ -55,8 +55,8 @@ abstract class AsyncAtlasInfo {
         return null;
     }
 
-    private static List<GVRAtlasInformation> loadAtlasInformation(JSONArray jsonInfo) throws JSONException {
-        List<GVRAtlasInformation> list = new ArrayList<GVRAtlasInformation>();
+    private static List<SXRAtlasInformation> loadAtlasInformation(JSONArray jsonInfo) throws JSONException {
+        List<SXRAtlasInformation> list = new ArrayList<SXRAtlasInformation>();
         int length = jsonInfo.length();
 
         for (int i = 0; i < length; i++) {
@@ -68,12 +68,12 @@ abstract class AsyncAtlasInfo {
         return list;
     }
 
-    private static GVRAtlasInformation parseAtlasInformation(JSONObject jsonObj) throws JSONException {
+    private static SXRAtlasInformation parseAtlasInformation(JSONObject jsonObj) throws JSONException {
         String name = jsonObj.getString("name");
         float[] offset = {(float) jsonObj.getDouble("offset.x"), (float) jsonObj.getDouble("offset.y")};
         float[] scale = {(float) jsonObj.getDouble("scale.x"), (float) jsonObj.getDouble("scale.y")};
 
-        return new GVRAtlasInformation(name, offset, scale);
+        return new SXRAtlasInformation(name, offset, scale);
     }
 
 }

@@ -8,8 +8,8 @@ import com.samsungxr.widgetlib.widget.layout.Layout;
 import com.samsungxr.widgetlib.widget.layout.OrientedLayout;
 import com.samsungxr.widgetlib.widget.layout.basic.LinearLayout;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRSceneObject;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -45,41 +45,41 @@ public class CheckableGroup extends GroupWidget {
     /**
      * Core {@link CheckableGroup} constructor.
      *
-     * @param context A valid {@link GVRContext}.
+     * @param context A valid {@link SXRContext}.
      * @param properties A structured set of properties for the {@code GroupWidget} instance. See
      *                       {@code widget.json} for schema.
      */
-    public CheckableGroup(GVRContext context, JSONObject properties) {
+    public CheckableGroup(SXRContext context, JSONObject properties) {
         super(context, properties);
         init();
     }
 
     /**
-     * Construct a wrapper for an existing {@link GVRSceneObject}.
+     * Construct a wrapper for an existing {@link SXRSceneObject}.
      *
      * @param context
-     *            The current {@link GVRContext}.
+     *            The current {@link SXRContext}.
      * @param sceneObject
-     *            The {@link GVRSceneObject} to wrap.
+     *            The {@link SXRSceneObject} to wrap.
      */
-    public CheckableGroup(GVRContext context, GVRSceneObject sceneObject) {
+    public CheckableGroup(SXRContext context, SXRSceneObject sceneObject) {
         super(context, sceneObject);
         init();
     }
 
     /**
-     * A constructor for wrapping existing {@link GVRSceneObject} instances.
+     * A constructor for wrapping existing {@link SXRSceneObject} instances.
      *
      * @param context
-     *            The current {@link GVRContext}
+     *            The current {@link SXRContext}
      * @param sceneObject
-     *            The {@link GVRSceneObject} to wrap.
+     *            The {@link SXRSceneObject} to wrap.
      * @param attributes
      *            TODO
      * @throws InstantiationException
      */
     @Deprecated
-    public CheckableGroup(GVRContext context, GVRSceneObject sceneObject, NodeEntry attributes)
+    public CheckableGroup(SXRContext context, SXRSceneObject sceneObject, NodeEntry attributes)
             throws InstantiationException {
         super(context, sceneObject, attributes);
         init();
@@ -94,11 +94,11 @@ public class CheckableGroup extends GroupWidget {
      * Construct a new {@link CheckableGroup}.
      *
      * @param context
-     *            A valid {@link GVRContext} instance.
+     *            A valid {@link SXRContext} instance.
      * @param width
      * @param height
      */
-    public CheckableGroup(GVRContext context, float width, float height) {
+    public CheckableGroup(SXRContext context, float width, float height) {
         super(context, width, height);
         init();
     }

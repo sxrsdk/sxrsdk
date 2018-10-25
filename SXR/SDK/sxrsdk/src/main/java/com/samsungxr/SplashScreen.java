@@ -17,19 +17,19 @@ package com.samsungxr;
 
 import com.samsungxr.utility.Log;
 
-class SplashScreen extends GVRSceneObject {
+class SplashScreen extends SXRSceneObject {
 
     private static final String TAG = Log.tag(SplashScreen.class);
 
     private boolean mCloseRequested;
     /**
      * Earliest time to close splash screen. Unit is nanos, as returned by
-     * {@link GVRTime#getCurrentTime()}
+     * {@link SXRTime#getCurrentTime()}
      */
     final long mTimeout;
 
-    SplashScreen(GVRContext gvrContext, GVRMesh mesh, GVRTexture texture,
-            GVRShaderId shaderId, GVRMain script) {
+    SplashScreen(SXRContext gvrContext, SXRMesh mesh, SXRTexture texture,
+            SXRShaderId shaderId, SXRMain script) {
         super(gvrContext, mesh, texture, shaderId);
         mCloseRequested = false; // unnecessary, but ...
 
@@ -40,7 +40,7 @@ class SplashScreen extends GVRSceneObject {
         if (splashDisplayTime < 0f) {
             mTimeout = Long.MAX_VALUE;
         } else {
-            long currentTime = GVRTime.getCurrentTime();
+            long currentTime = SXRTime.getCurrentTime();
             mTimeout = currentTime + (long) (splashDisplayTime * 1e9f);
             Log.d(TAG, "currentTime = %,d, timeout = %,d", currentTime, mTimeout);
         }

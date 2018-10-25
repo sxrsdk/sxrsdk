@@ -8,9 +8,9 @@ import com.samsungxr.widgetlib.widget.layout.Layout;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRMesh;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRSceneObject;
 import org.json.JSONObject;
 
 /**
@@ -24,12 +24,12 @@ public abstract class CheckableButton extends Button implements Checkable {
      * @param width button width
      * @param height button height
      */
-    public CheckableButton(GVRContext context, float width, float height) {
+    public CheckableButton(SXRContext context, float width, float height) {
         super(context, width, height);
         init();
     }
 
-    public CheckableButton(GVRContext context) {
+    public CheckableButton(SXRContext context) {
         super(context);
         init();
     }
@@ -38,13 +38,13 @@ public abstract class CheckableButton extends Button implements Checkable {
      * Create new instance of CheckableButton with specified size
      * @param context
      */
-    public CheckableButton(GVRContext context, JSONObject properties) {
+    public CheckableButton(SXRContext context, JSONObject properties) {
         super(context, properties);
         init();
     }
 
     /**
-     * Create new instance of CheckableButton wrapping around GVRF sceneObject parsed from the model
+     * Create new instance of CheckableButton wrapping around SXRF sceneObject parsed from the model
      *
      * @param context
      * @param sceneObject
@@ -52,7 +52,7 @@ public abstract class CheckableButton extends Button implements Checkable {
      * @throws InstantiationException
      */
     @Deprecated
-    public CheckableButton(GVRContext context, GVRSceneObject sceneObject,
+    public CheckableButton(SXRContext context, SXRSceneObject sceneObject,
                            NodeEntry attributes) throws InstantiationException {
         super(context, sceneObject, attributes);
 
@@ -62,13 +62,13 @@ public abstract class CheckableButton extends Button implements Checkable {
     }
 
     /**
-     * Create new instance of CheckableButton wrapping around GVRF sceneObject
+     * Create new instance of CheckableButton wrapping around SXRF sceneObject
      *
      * @param context
      * @param sceneObject
      * @throws InstantiationException
      */
-    public CheckableButton(GVRContext context, GVRSceneObject sceneObject) {
+    public CheckableButton(SXRContext context, SXRSceneObject sceneObject) {
         super(context, sceneObject);
         init();
     }
@@ -120,7 +120,7 @@ public abstract class CheckableButton extends Button implements Checkable {
         return mDefaultLayout;
     }
 
-    protected CheckableButton(GVRContext context, GVRMesh mesh) {
+    protected CheckableButton(SXRContext context, SXRMesh mesh) {
         super(context, mesh);
         init();
     }

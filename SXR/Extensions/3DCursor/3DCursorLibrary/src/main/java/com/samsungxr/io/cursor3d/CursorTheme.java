@@ -15,8 +15,8 @@
 
 package com.samsungxr.io.cursor3d;
 
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRSwitch;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRSwitch;
 import com.samsungxr.io.cursor3d.CursorAsset.Action;
 
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public class CursorTheme {
     private String name;
     private String description;
     private Map<Action, CursorAsset> assets;
-    private GVRSceneObject assetRoot;
+    private SXRSceneObject assetRoot;
     private CursorType type;
 
     CursorTheme() {
@@ -155,8 +155,8 @@ public class CursorTheme {
      * Ready this {@link CursorTheme} by loading all the available {@link CursorAsset}s
      */
     void load(Cursor cursor) {
-        assetRoot = new GVRSceneObject(cursor.getGVRContext());
-        assetRoot.attachComponent(new GVRSwitch(cursor.getGVRContext()));
+        assetRoot = new SXRSceneObject(cursor.getSXRContext());
+        assetRoot.attachComponent(new SXRSwitch(cursor.getSXRContext()));
         for (CursorAsset asset : assets.values()) {
             asset.load(cursor);
         }

@@ -14,7 +14,7 @@
  */
 package com.sample.hand.template;
 
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRSceneObject;
 
 /**
  * This class represents a bone. Use the class methods to set its properties.
@@ -52,9 +52,9 @@ public class IOBone extends IOBaseComponent {
      * @param type            the type of the
      *                        {@link IOBone}. Use the {@link IOBone#getString(int)} call to
      *                        know the readable type of the bone.
-     * @param handSceneObject This is the root {@link GVRSceneObject} that represents the hand.
+     * @param handSceneObject This is the root {@link SXRSceneObject} that represents the hand.
      */
-    public IOBone(int type, GVRSceneObject handSceneObject) {
+    public IOBone(int type, SXRSceneObject handSceneObject) {
         super(type, handSceneObject);
     }
 }

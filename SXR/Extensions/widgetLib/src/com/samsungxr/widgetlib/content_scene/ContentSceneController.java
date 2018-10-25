@@ -2,7 +2,7 @@ package com.samsungxr.widgetlib.content_scene;
 
 import java.util.LinkedList;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 
 import com.samsungxr.widgetlib.main.WidgetLib;
 import com.samsungxr.widgetlib.thread.MainThread;
@@ -97,7 +97,7 @@ public class ContentSceneController {
      * Creates ContentSceneController
      * @param gvrContext
      */
-    public ContentSceneController(GVRContext gvrContext) {
+    public ContentSceneController(SXRContext gvrContext) {
         mGvrContext = gvrContext;
     }
 
@@ -329,7 +329,7 @@ public class ContentSceneController {
      * In other words, only modify from the {@link Runnable#run() run()} method
      * of a task passed to {@link #executeHideShowCycle}.
      */
-    private GVRContext mGvrContext;
+    private SXRContext mGvrContext;
 
     private static final String TAG = tag(ContentSceneController.class);
 }

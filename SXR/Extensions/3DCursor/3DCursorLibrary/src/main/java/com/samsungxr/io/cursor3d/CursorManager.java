@@ -18,24 +18,24 @@ package com.samsungxr.io.cursor3d;
 
 import android.view.MotionEvent;
 
-import com.samsungxr.GVRBoundsPicker;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVREventReceiver;
-import com.samsungxr.GVRMesh;
-import com.samsungxr.GVRPicker;
-import com.samsungxr.GVRScene;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.GVRSensor;
-import com.samsungxr.GVRSwitch;
+import com.samsungxr.SXRBoundsPicker;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXREventReceiver;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRPicker;
+import com.samsungxr.SXRScene;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRSensor;
+import com.samsungxr.SXRSwitch;
 import com.samsungxr.IEventReceiver;
 import com.samsungxr.IEvents;
 import com.samsungxr.ITouchEvents;
-import com.samsungxr.io.GVRCursorController;
-import com.samsungxr.io.GVRGearCursorController;
-import com.samsungxr.io.GVRInputManager;
+import com.samsungxr.io.SXRCursorController;
+import com.samsungxr.io.SXRGearCursorController;
+import com.samsungxr.io.SXRInputManager;
 import com.samsungxr.io.cursor3d.settings.SettingsView;
 import com.samsungxr.io.cursor3d.settings.SettingsView.SettingsChangeListener;
-import com.samsungxr.scene_objects.GVRViewSceneObject;
+import com.samsungxr.scene_objects.SXRViewSceneObject;
 import com.samsungxr.utility.Log;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -66,8 +66,8 @@ public final class CursorManager implements IEventReceiver
     private static final float DEFAULT_CURSOR_SCALE = 10.0f;
     static String SETTINGS_SOURCE = "settings.xml";
 
-    private GVRContext context;
-    private GVRScene scene;
+    private SXRContext context;
+    private SXRScene scene;
     // List of all the cursors available to the user.
     private final List<Cursor> mCursors = new ArrayList<>();;
     private final List<IoDevice> mIODevices = new ArrayList<IoDevice>();
@@ -79,26 +79,26 @@ public final class CursorManager implements IEventReceiver
     private float settingsIoDeviceFarDepth, settingsIoDeviceNearDepth;
     private ICursorActivationListener activationListener;
     private List<SelectableBehavior> selectableBehaviors;
-    private GVRBoundsPicker objectCursorPicker;
-    private GVREventReceiver listeners;
+    private SXRBoundsPicker objectCursorPicker;
+    private SXREventReceiver listeners;
 
     /**
      * Create a {@link CursorManager}.
      * <p/>
-     * Use the {@link CursorManager#CursorManager(GVRContext, GVRScene)} constructor to
+     * Use the {@link CursorManager#CursorManager(SXRContext, SXRScene)} constructor to
      * create a
      * manager and also add any {@link Cursor} objects created to be automatically added to the
      * set scene.
      * <p/>
-     * If a GVRScene is not set then it is up to the application to add/remove the
+     * If a SXRScene is not set then it is up to the application to add/remove the
      * {@link Cursor} to/from the scene.
      * <p/>
-     * Use the {@link #setScene(GVRScene)} call to set the {@link GVRScene}
+     * Use the {@link #setScene(SXRScene)} call to set the {@link SXRScene}
      * explicitly.
      *
-     * @param context The GVRf Context
+     * @param context The SXRf Context
      */
-    public CursorManager(GVRContext context) {
+    public CursorManager(SXRContext context) {
         this(context, null, null);
     }
 
@@ -106,12 +106,12 @@ public final class CursorManager implements IEventReceiver
      * Create a {@link CursorManager}.
      * <p/>
      * Any {@link Cursor} object created would be added to the provided
-     * {@link GVRScene} by default.
+     * {@link SXRScene} by default.
      *
-     * @param context The GVRf Context
-     * @param scene   the default {@link GVRScene} to use while adding/removing Cursor objects.
+     * @param context The SXRf Context
+     * @param scene   the default {@link SXRScene} to use while adding/removing Cursor objects.
      */
-    public CursorManager(GVRContext context, GVRScene scene) {
+    public CursorManager(SXRContext context, SXRScene scene) {
         this(context, scene, null);
     }
 
@@ -124,19 +124,19 @@ public final class CursorManager implements IEventReceiver
      * only be assigned to a {@link Cursor} if that particular {@link Cursor} has not been attached
      * to any {@link IoDevice} yet.
      *
-     * @param context   The GVRf Context
-     * @param scene     the default {@link GVRScene} to use while adding/removing Cursor
+     * @param context   The SXRf Context
+     * @param scene     the default {@link SXRScene} to use while adding/removing Cursor
      *                  objects.
      * @param ioDevices A list of {@link IoDevice}s to add to the {@link
      *                  CursorManager} at initialization.
      */
-    public CursorManager(GVRContext context, GVRScene scene, List<IoDevice> ioDevices) {
+    public CursorManager(SXRContext context, SXRScene scene, List<IoDevice> ioDevices) {
         if (context == null) {
-            throw new IllegalArgumentException("GVRContext cannot be null");
+            throw new IllegalArgumentException("SXRContext cannot be null");
         }
         this.scene = scene;
         this.context = context;
-        listeners = new GVREventReceiver(this);
+        listeners = new SXREventReceiver(this);
         globalSettings = GlobalSettings.getInstance();
         themes = new HashMap<String, CursorTheme>();
         selectableBehaviors = new ArrayList<SelectableBehavior>();
@@ -163,7 +163,7 @@ public final class CursorManager implements IEventReceiver
             }
         }
 
-        GVRInputManager inputMgr = context.getInputManager();
+        SXRInputManager inputMgr = context.getInputManager();
         if (ioDevices != null)
         {
             for (IoDevice ioDevice : ioDevices)
@@ -188,11 +188,11 @@ public final class CursorManager implements IEventReceiver
     }
 
     /**
-     * Get the {@link GVREventReceiver} which dispatches cursor events.
-     * @return {@link GVREventReceiver} for cursor events.
-     * @see GVREventReceiver#addListener(IEvents)
+     * Get the {@link SXREventReceiver} which dispatches cursor events.
+     * @return {@link SXREventReceiver} for cursor events.
+     * @see SXREventReceiver#addListener(IEvents)
      */
-    public GVREventReceiver getEventReceiver() { return listeners; }
+    public SXREventReceiver getEventReceiver() { return listeners; }
 
     /**
      * Gives a list of all the {@link CursorTheme}s listed in the settings.xml file. Use this
@@ -226,7 +226,7 @@ public final class CursorManager implements IEventReceiver
 
     public boolean isDeviceActive(IoDevice device)
     {
-        GVRCursorController controller = device.getGvrCursorController();
+        SXRCursorController controller = device.getGvrCursorController();
         if ((controller != null) && controller.isEnabled())
             return (controller.getCursor() != null);
         return false;
@@ -321,19 +321,19 @@ public final class CursorManager implements IEventReceiver
     }
 
     /**
-     * Use this method to set a {@link GVRScene}. This call replaces the currently set {@link
-     * GVRScene} (if one was set either using the constructor or a previous {@link
-     * CursorManager#setScene(GVRScene)} call).
+     * Use this method to set a {@link SXRScene}. This call replaces the currently set {@link
+     * SXRScene} (if one was set either using the constructor or a previous {@link
+     * CursorManager#setScene(SXRScene)} call).
      * <br/>
      * <br/>
      *
-     * If the provided {@link GVRScene} matches the currently set {@link GVRScene} then this call
+     * If the provided {@link SXRScene} matches the currently set {@link SXRScene} then this call
      * has no effect. Calling this method with a <code>null</code> resets the scene currently set
      * with the {@link CursorManager}.
      *
-     * @param scene the {@link GVRScene} to be set, or <code>null</code>.
+     * @param scene the {@link SXRScene} to be set, or <code>null</code>.
      */
-    public void setScene(GVRScene scene) {
+    public void setScene(SXRScene scene) {
         if (this.scene == scene) {
             //do nothing return
             return;
@@ -359,11 +359,11 @@ public final class CursorManager implements IEventReceiver
     /**
      * This method modifies the {@link Cursor} passed in the argument to a settings cursor. A
      * settings cursor is a {@link Cursor} of type {@link CursorType#LASER} used to interact with a
-     * {@link GVRViewSceneObject}. Since it is easier to use a {@link Cursor} of type
-     * {@link CursorType#LASER} to interract with {@link GVRViewSceneObject} this convinience
+     * {@link SXRViewSceneObject}. Since it is easier to use a {@link Cursor} of type
+     * {@link CursorType#LASER} to interract with {@link SXRViewSceneObject} this convinience
      * method is provided, so that the applications which do not use a {@link Cursor} of type
      * {@link CursorType#LASER} do not have to instantiate and manage two cursors while
-     * interracting with a {@link GVRViewSceneObject}.
+     * interracting with a {@link SXRViewSceneObject}.
      *
      * @param cursor The {@link Cursor} whose {@link IoDevice} will be used for the settings
      *               cursor.
@@ -383,7 +383,7 @@ public final class CursorManager implements IEventReceiver
      * This method disables the settings cursor enabled by the
      * {@link CursorManager#enableSettingsCursor(Cursor)} method and restores the {@link Cursor}
      * that was passed as an argument to the {@link CursorManager#enableSettingsCursor(Cursor)}
-     * method. This method is used once interraction with a {@link GVRViewSceneObject} is not
+     * method. This method is used once interraction with a {@link SXRViewSceneObject} is not
      * longer needed.
      */
     public void disableSettingsCursor() {
@@ -519,19 +519,19 @@ public final class CursorManager implements IEventReceiver
 
 
     /**
-     * Use this call to make all the {@link GVRSceneObject}s in the provided GVRScene to be
+     * Use this call to make all the {@link SXRSceneObject}s in the provided SXRScene to be
      * selectable.
      * <p/>
      * In order to have more control over objects that can be made selectable make use of the
-     * {@link #addSelectableObject(GVRSceneObject)} method.
+     * {@link #addSelectableObject(SXRSceneObject)} method.
      * <p/>
      * Note that this call will set the current scene as the provided scene. If the provided
      * scene is same the currently set scene then this method will have no effect. Passing null
      * will remove any objects that are selectable and set the scene to null
      *
-     * @param scene the {@link GVRScene} to be made selectable or <code>null</code>.
+     * @param scene the {@link SXRScene} to be made selectable or <code>null</code>.
      */
-    public void makeSceneSelectable(GVRScene scene) {
+    public void makeSceneSelectable(SXRScene scene) {
         if (this.scene == scene) {
             //do nothing return
             return;
@@ -549,7 +549,7 @@ public final class CursorManager implements IEventReceiver
             return;
         }
         // process the new scene
-        for (GVRSceneObject object : scene.getSceneObjects()) {
+        for (SXRSceneObject object : scene.getSceneObjects()) {
             addSelectableObject(object);
         }
         //true to add
@@ -558,13 +558,13 @@ public final class CursorManager implements IEventReceiver
 
     void addCursorToScene(Cursor cursor) {
         IoDevice ioDevice = cursor.getIoDevice();
-        GVRCursorController controller = ioDevice.getGvrCursorController();
+        SXRCursorController controller = ioDevice.getGvrCursorController();
 
         controller.setEnable(true);
         controller.setCursor(cursor.getOwnerObject());
-        if (controller instanceof GVRGearCursorController)
+        if (controller instanceof SXRGearCursorController)
         {
-            ((GVRGearCursorController) controller).showControllerModel(true);
+            ((SXRGearCursorController) controller).showControllerModel(true);
         }
         cursor.setCursorDepth(mCursorDepth);
         if (cursor instanceof ObjectCursor)
@@ -572,8 +572,8 @@ public final class CursorManager implements IEventReceiver
             ObjectCursor ocurs = (ObjectCursor) cursor;
             if (objectCursorPicker == null)
             {
-                objectCursorPicker = new GVRBoundsPicker(scene, false);
-                objectCursorPicker.getEventReceiver().addListener(GVRSensor.getPickHandler());
+                objectCursorPicker = new SXRBoundsPicker(scene, false);
+                objectCursorPicker.getEventReceiver().addListener(SXRSensor.getPickHandler());
                 objectCursorPicker.getEventReceiver().addListener(touchListener);
             }
             if (ocurs.getColliderID() < 0)
@@ -582,14 +582,14 @@ public final class CursorManager implements IEventReceiver
             }
             objectCursorPicker.setController(controller);
             controller.removePickEventListener(touchListener);
-            controller.removePickEventListener(GVRSensor.getPickHandler());
-            controller.setCursorControl(GVRCursorController.CursorControl.CURSOR_DEPTH_FROM_CONTROLLER);
+            controller.removePickEventListener(SXRSensor.getPickHandler());
+            controller.setCursorControl(SXRCursorController.CursorControl.CURSOR_DEPTH_FROM_CONTROLLER);
         }
         else
         {
             controller.addPickEventListener(touchListener);
-            controller.addPickEventListener(GVRSensor.getPickHandler());
-            controller.setCursorControl(GVRCursorController.CursorControl.PROJECT_CURSOR_ON_SURFACE);
+            controller.addPickEventListener(SXRSensor.getPickHandler());
+            controller.setCursorControl(SXRCursorController.CursorControl.PROJECT_CURSOR_ON_SURFACE);
         }
     }
 
@@ -615,10 +615,10 @@ public final class CursorManager implements IEventReceiver
     /**
      * Add or remove the active cursors from the provided scene.
      *
-     * @param scene The GVRScene.
+     * @param scene The SXRScene.
      * @param add   <code>true</code> for add, <code>false</code> to remove
      */
-    private void updateCursorsInScene(GVRScene scene, boolean add) {
+    private void updateCursorsInScene(SXRScene scene, boolean add) {
         synchronized (mCursors) {
             for (Cursor cursor : mCursors) {
                 if (cursor.isActive()) {
@@ -633,50 +633,50 @@ public final class CursorManager implements IEventReceiver
     }
 
     /**
-     * This call makes sure that the {@link GVRSceneObject} passed is a
+     * This call makes sure that the {@link SXRSceneObject} passed is a
      * {@link Cursor} selectable object. The {@link Cursor} would deliver events
-     * every time an interaction happens with the {@link GVRSceneObject}.
+     * every time an interaction happens with the {@link SXRSceneObject}.
      * <p/>
      * The Cursor would also provide a visual cue when over an object that this
      * selectable to notify that the user can interact with the object.
      * <p/>
      * Passing an object makes it and its descendant tree selectable.
      * If the entire scene has been made selectable and the
-     * {@link GVRSceneObject} is a part of the Scene, then this call will have
+     * {@link SXRSceneObject} is a part of the Scene, then this call will have
      * no effect.
      *
-     * @param object the {@link GVRSceneObject} that is to be made selectable.
+     * @param object the {@link SXRSceneObject} that is to be made selectable.
      * @return <code>true</code> on success or <code>false</code> if the object
-     * does not have a {@link GVRMesh} or in case the object was already
+     * does not have a {@link SXRMesh} or in case the object was already
      * set as selectable.
      */
-    public boolean addSelectableObject(GVRSceneObject object) {
+    public boolean addSelectableObject(SXRSceneObject object) {
         if (null == object) {
-            throw new IllegalArgumentException("GVRSceneObject cannot be null");
+            throw new IllegalArgumentException("SXRSceneObject cannot be null");
         }
         addSelectableBehavior(object);
         return true;
     }
 
     /**
-     * This call is for objects for which {@link CursorManager#addSelectableObject(GVRSceneObject)}
-     * was called. After calling this on a {@link GVRSceneObject} there will be no
+     * This call is for objects for which {@link CursorManager#addSelectableObject(SXRSceneObject)}
+     * was called. After calling this on a {@link SXRSceneObject} there will be no
      * events generated when a {@link Cursor} interacts with this
-     * {@link GVRSceneObject}. The {@link GVRSceneObject} that was passed in
-     * {@link CursorManager#addSelectableObject(GVRSceneObject)} should be passed in here.
-     * @param object The {@link GVRSceneObject} that is to be made un-selectable.
-     * @return <code>true</code> on success or <code>false</code> if {@link GVRSceneObject} was not
-     * set as selectable using the {@link CursorManager#addSelectableObject(GVRSceneObject)}
+     * {@link SXRSceneObject}. The {@link SXRSceneObject} that was passed in
+     * {@link CursorManager#addSelectableObject(SXRSceneObject)} should be passed in here.
+     * @param object The {@link SXRSceneObject} that is to be made un-selectable.
+     * @return <code>true</code> on success or <code>false</code> if {@link SXRSceneObject} was not
+     * set as selectable using the {@link CursorManager#addSelectableObject(SXRSceneObject)}
      */
-    public boolean removeSelectableObject(GVRSceneObject object) {
+    public boolean removeSelectableObject(SXRSceneObject object) {
         if (null == object) {
-            throw new IllegalArgumentException("GVRSceneObject cannot be null");
+            throw new IllegalArgumentException("SXRSceneObject cannot be null");
         }
         removeSelectableBehavior(object);
         return true;
     }
 
-    private void addSelectableBehavior(GVRSceneObject object) {
+    private void addSelectableBehavior(SXRSceneObject object) {
         SelectableBehavior selectableBehavior = (SelectableBehavior) object.getComponent(
                 SelectableBehavior.getComponentType());
         if (selectableBehavior == null) {
@@ -702,7 +702,7 @@ public final class CursorManager implements IEventReceiver
         }
     }
 
-    private void removeSelectableBehavior(GVRSceneObject object) {
+    private void removeSelectableBehavior(SXRSceneObject object) {
         SelectableBehavior selectableBehavior = (SelectableBehavior) object.getComponent(
                 SelectableBehavior.getComponentType());
         if (selectableBehavior == null) {
@@ -715,10 +715,10 @@ public final class CursorManager implements IEventReceiver
                 selectableBehaviors.remove(selectableBehavior);
             }
         }
-        object.detachComponent(GVRSwitch.getComponentType());
+        object.detachComponent(SXRSwitch.getComponentType());
     }
 
-    private float getDistance(GVRSceneObject object) {
+    private float getDistance(SXRSceneObject object) {
         // distance is simple since the origin is 0,0,0
         float x = object.getTransform().getPositionX();
         float y = object.getTransform().getPositionY();
@@ -913,8 +913,8 @@ public final class CursorManager implements IEventReceiver
 
     private int attachCursorToDevice(final Cursor cursor, final IoDevice device, int action, int priority)
     {
-        getGVRContext().getEventManager().sendEvent(getGVRContext().getInputManager(),
-                                                    GVRInputManager.ICursorControllerSelectListener.class,
+        getSXRContext().getEventManager().sendEvent(getSXRContext().getInputManager(),
+                                                    SXRInputManager.ICursorControllerSelectListener.class,
                                                     "onCursorControllerSelected",
                                                     device.getGvrCursorController(),
                                                     null);
@@ -938,7 +938,7 @@ public final class CursorManager implements IEventReceiver
     {
         if (getNumUnusedDevices() == 0)
         {
-            getGVRContext().getInputManager().scanControllers();
+            getSXRContext().getInputManager().scanControllers();
         }
         else
         {
@@ -949,7 +949,7 @@ public final class CursorManager implements IEventReceiver
         }
     }
 
-    public Cursor findCursorForController(GVRCursorController controller)
+    public Cursor findCursorForController(SXRCursorController controller)
     {
         synchronized (mCursors)
         {
@@ -1022,9 +1022,9 @@ public final class CursorManager implements IEventReceiver
         context.getEventManager().sendEvent(this, ICursorActivationListener.class, "onActivated", cursor);
     }
 
-    private GVRInputManager.ICursorControllerListener cursorIoDeviceListener = new GVRInputManager.ICursorControllerListener() {
+    private SXRInputManager.ICursorControllerListener cursorIoDeviceListener = new SXRInputManager.ICursorControllerListener() {
         @Override
-        public void onCursorControllerAdded(GVRCursorController controller) {
+        public void onCursorControllerAdded(SXRCursorController controller) {
             IoDevice ioDevice = IoDeviceLoader.getIoDevice(controller);
             Log.d(TAG, "IoDevice added:" + ioDevice.getDeviceId());
             synchronized (mIODevices)
@@ -1050,7 +1050,7 @@ public final class CursorManager implements IEventReceiver
         }
 
         @Override
-        public void onCursorControllerRemoved(GVRCursorController controller)
+        public void onCursorControllerRemoved(SXRCursorController controller)
         {
             IoDevice removedIoDevice = IoDeviceLoader.getIoDevice(controller);
             Log.d(TAG, "IoDevice removed:" + removedIoDevice.getDeviceId());
@@ -1082,7 +1082,7 @@ public final class CursorManager implements IEventReceiver
             }
             if (getNumUnusedDevices() == 0)
             {
-                getGVRContext().getInputManager().scanControllers();
+                getSXRContext().getInputManager().scanControllers();
             }
             else
             {
@@ -1094,13 +1094,13 @@ public final class CursorManager implements IEventReceiver
 
     protected ITouchEvents touchListener = new ITouchEvents()
     {
-        protected Cursor findCursor(GVRPicker.GVRPickedObject hit)
+        protected Cursor findCursor(SXRPicker.SXRPickedObject hit)
         {
-            GVRCursorController controller = hit.getPicker().getController();
+            SXRCursorController controller = hit.getPicker().getController();
             if (hit.collidableIndex >= 0)
             {
-                GVRBoundsPicker picker = (GVRBoundsPicker) hit.getPicker();
-                GVRSceneObject cursorObj = picker.getCollidable(hit.collidableIndex);
+                SXRBoundsPicker picker = (SXRBoundsPicker) hit.getPicker();
+                SXRSceneObject cursorObj = picker.getCollidable(hit.collidableIndex);
                 if (cursorObj != null)
                 {
                     return (Cursor) cursorObj.getComponent(Cursor.getComponentType());
@@ -1115,7 +1115,7 @@ public final class CursorManager implements IEventReceiver
         }
 
 
-        protected SelectableBehavior findSelector(GVRSceneObject obj)
+        protected SelectableBehavior findSelector(SXRSceneObject obj)
         {
             MovableBehavior b1 = (MovableBehavior) obj.getComponent(MovableBehavior.getComponentType());
             if (b1 != null)
@@ -1125,7 +1125,7 @@ public final class CursorManager implements IEventReceiver
             return (SelectableBehavior) obj.getComponent(SelectableBehavior.getComponentType());
         }
 
-        public void onEnter(GVRSceneObject obj, GVRPicker.GVRPickedObject hit)
+        public void onEnter(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
         {
             Cursor cursor = findCursor(hit);
             SelectableBehavior selector = findSelector(obj);
@@ -1146,12 +1146,12 @@ public final class CursorManager implements IEventReceiver
             {
                 selector.setIntersect(cursor, hit);
             }
-            getGVRContext().getEventManager().sendEvent(obj,
+            getSXRContext().getEventManager().sendEvent(obj,
                                                         ICursorEvents.class,
                                                         "onEnter", cursor, hit);
         }
 
-        public void onExit(GVRSceneObject obj, GVRPicker.GVRPickedObject hit)
+        public void onExit(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
         {
             Cursor cursor = findCursor(hit);
             if (cursor == null)
@@ -1164,12 +1164,12 @@ public final class CursorManager implements IEventReceiver
             {
                 selector.setDefault(cursor, hit);
             }
-            getGVRContext().getEventManager().sendEvent(obj,
+            getSXRContext().getEventManager().sendEvent(obj,
                                                         ICursorEvents.class,
                                                         "onExit", cursor, hit);
         }
 
-        public void onTouchStart(GVRSceneObject obj, GVRPicker.GVRPickedObject hit)
+        public void onTouchStart(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
         {
             Cursor cursor = findCursor(hit);
             if (cursor == null)
@@ -1182,12 +1182,12 @@ public final class CursorManager implements IEventReceiver
             {
                 selector.setButtonPress(cursor, hit);
             }
-            getGVRContext().getEventManager().sendEvent(obj,
+            getSXRContext().getEventManager().sendEvent(obj,
                                                         ICursorEvents.class,
                                                         "onTouchStart", cursor, hit);
         }
 
-        public void onTouchEnd(GVRSceneObject obj, GVRPicker.GVRPickedObject hit)
+        public void onTouchEnd(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
         {
             Cursor cursor = findCursor(hit);
 
@@ -1200,12 +1200,12 @@ public final class CursorManager implements IEventReceiver
             {
                 selector.setDefault(cursor, hit);
             }
-            getGVRContext().getEventManager().sendEvent(obj,
+            getSXRContext().getEventManager().sendEvent(obj,
                                                         ICursorEvents.class,
                                                         "onTouchEnd", cursor, hit);
         }
 
-        public void onInside(GVRSceneObject obj, GVRPicker.GVRPickedObject hit)
+        public void onInside(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
         {
             Cursor cursor = findCursor(hit);
 
@@ -1218,20 +1218,20 @@ public final class CursorManager implements IEventReceiver
                 float depth = cursor.getCursorDepth();
                 if (depth != cursor.getIoDevice().getGvrCursorController().getCursorDepth())
                 {
-                    getGVRContext().getEventManager().sendEvent(cursor.getOwnerObject(),
+                    getSXRContext().getEventManager().sendEvent(cursor.getOwnerObject(),
                                                                 ICursorEvents.class,
                                                                 "onCursorScale", cursor);
                 }
-                getGVRContext().getEventManager().sendEvent(obj,
+                getSXRContext().getEventManager().sendEvent(obj,
                                                             ICursorEvents.class,
                                                             "onDrag", findCursor(hit), hit);
             }
             onEnter(obj, hit);
         }
 
-        public void onMotionOutside(GVRPicker picker, MotionEvent event)
+        public void onMotionOutside(SXRPicker picker, MotionEvent event)
         {
-            GVRCursorController controller = picker.getController();
+            SXRCursorController controller = picker.getController();
             if (controller != null)
             {
                 Cursor cursor = findCursorForController(controller);
@@ -1240,7 +1240,7 @@ public final class CursorManager implements IEventReceiver
                     float depth = cursor.getCursorDepth();
                     if (depth != cursor.getIoDevice().getGvrCursorController().getCursorDepth())
                     {
-                        getGVRContext().getEventManager().sendEvent(cursor.getOwnerObject(),
+                        getSXRContext().getEventManager().sendEvent(cursor.getOwnerObject(),
                                                                     ICursorEvents.class,
                                                                     "onCursorScale", cursor);
                     }
@@ -1282,7 +1282,7 @@ public final class CursorManager implements IEventReceiver
 
             @Override
             public void onActivated(Cursor cursor) {
-                GVRCursorController controller = cursor.getIoDevice().getGvrCursorController();
+                SXRCursorController controller = cursor.getIoDevice().getGvrCursorController();
                 Log.d(TAG, "On CursorActivated");
                 synchronized (selectableBehaviors)
                 {
@@ -1304,11 +1304,11 @@ public final class CursorManager implements IEventReceiver
     }
 
     /**
-     * Gets the {@link GVRContext} instance associated with the {@link CursorManager}. This is
-     * the {@link GVRContext} object passed in the constructor.
-     * @return the {@link GVRContext} instance.
+     * Gets the {@link SXRContext} instance associated with the {@link CursorManager}. This is
+     * the {@link SXRContext} object passed in the constructor.
+     * @return the {@link SXRContext} instance.
      */
-    public GVRContext getGVRContext() {
+    public SXRContext getSXRContext() {
         return context;
     }
 }

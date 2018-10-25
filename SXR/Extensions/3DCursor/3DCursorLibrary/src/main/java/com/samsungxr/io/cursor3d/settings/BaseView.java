@@ -23,42 +23,42 @@ import android.view.GestureDetector;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.samsungxr.GVRActivity;
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRScene;
+import com.samsungxr.SXRActivity;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRScene;
 import com.samsungxr.IViewEvents;
-import com.samsungxr.scene_objects.GVRViewSceneObject;
+import com.samsungxr.scene_objects.SXRViewSceneObject;
 
 abstract class BaseView {
     private static final String TAG = BaseView.class.getSimpleName();
     private static final float DEFAULT_SCALE = 10.0f;
     public static final float QUAD_DEPTH = -13f;
 
-    GVRScene scene;
-    GVRContext context;
+    SXRScene scene;
+    SXRContext context;
     Activity activity;
-    private GVRViewSceneObject layoutSceneObject;
+    private SXRViewSceneObject layoutSceneObject;
     int settingsCursorId;
 
-    BaseView(GVRContext context, GVRScene scene, int settingsCursorId, int layoutID) {
+    BaseView(SXRContext context, SXRScene scene, int settingsCursorId, int layoutID) {
         this(context, scene, settingsCursorId, layoutID, DEFAULT_SCALE);
     }
 
-    BaseView(final GVRContext context, final GVRScene scene,
+    BaseView(final SXRContext context, final SXRScene scene,
              final int settingsCursorId, final int layoutID, final float scale) {
         this.context = context;
         this.scene = scene;
         this.activity = context.getActivity();
         this.settingsCursorId = settingsCursorId;
 
-        layoutSceneObject = new GVRViewSceneObject(context, layoutID, new IViewEvents() {
+        layoutSceneObject = new SXRViewSceneObject(context, layoutID, new IViewEvents() {
             @Override
-            public void onInitView(GVRViewSceneObject gvrViewSceneObject, View view) {
+            public void onInitView(SXRViewSceneObject gvrViewSceneObject, View view) {
                 BaseView.this.onInitView(view);
             }
 
             @Override
-            public void onStartRendering(GVRViewSceneObject gvrViewSceneObject, View view) {
+            public void onStartRendering(SXRViewSceneObject gvrViewSceneObject, View view) {
                 gvrViewSceneObject.getTransform().setScale(scale, scale, 1.0f);
                 BaseView.this.onStartRendering();
             }

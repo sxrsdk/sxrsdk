@@ -7,14 +7,14 @@ import com.samsungxr.widgetlib.thread.ConcurrentObjectPool;
 import com.samsungxr.widgetlib.thread.MainThread;
 import com.samsungxr.widgetlib.widget.Widget;
 
-import com.samsungxr.GVRContext;
+import com.samsungxr.SXRContext;
 import com.samsungxr.utility.Log;
 
 import java.util.List;
 
 /**
  * A utility class for buffering {@link Runnable} "commands" for batch execution on the {@linkplain
- * GVRContext#runOnGlThread(Runnable) GL thread}.
+ * SXRContext#runOnGlThread(Runnable) GL thread}.
  * <p>
  * Although instances of {@link Runnable} can be directly {@linkplain CommandBuffer#add(Runnable)
  * added to the buffer}, the {@link Command} class makes management of command instances a bit
@@ -134,7 +134,7 @@ public class CommandBuffer {
 
     /**
      * Add a {@link Runnable} to the current buffer.  If no buffer has been {@linkplain #start()
-     * started}, {@code command} will be {@linkplain GVRContext#runOnGlThread(Runnable) posted}
+     * started}, {@code command} will be {@linkplain SXRContext#runOnGlThread(Runnable) posted}
      * directly to the GL thread to be executed in the next frame.
      *
      * @param command The command to add to the buffer.  Should be non-null.
@@ -150,7 +150,7 @@ public class CommandBuffer {
     }
 
     /**
-     * {@linkplain GVRContext#runOnGlThread(Runnable) Post} the current buffer to the GL thread for
+     * {@linkplain SXRContext#runOnGlThread(Runnable) Post} the current buffer to the GL thread for
      * execution.  The number of calls to {@code flush()} must match the number of calls to {@link
      * #start()}.
      *
@@ -172,7 +172,7 @@ public class CommandBuffer {
     }
 
     /* package */
-    CommandBuffer(GVRContext context) {
+    CommandBuffer(SXRContext context) {
         mContext = context;
     }
 
@@ -194,7 +194,7 @@ public class CommandBuffer {
         private List<Runnable> mBuffer;
     }
 
-    private final GVRContext mContext;
+    private final SXRContext mContext;
     private final ConcurrentListPool<Runnable> mBuffers = new ConcurrentListPool<>(TAG) ;
     private int mBufferDepth;
     private final Object[] mBufferLock = new Object[0];

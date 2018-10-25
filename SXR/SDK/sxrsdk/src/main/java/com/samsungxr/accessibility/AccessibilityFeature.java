@@ -14,8 +14,8 @@ package com.samsungxr.accessibility;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRSceneObject;
 import com.samsungxr.R;
 
 import android.content.Context;
@@ -30,18 +30,18 @@ final class AccessibilityFeature {
     private String zoomIn;
     private String zoomOut;
     private String invertedColors;
-    private GVRAccessibilityManager managerFeatures;
+    private SXRAccessibilityManager managerFeatures;
     private AudioManager mAudioManager;
-    private GVRContext mGvrContext;
+    private SXRContext mGvrContext;
     private static AccessibilityFeature instance;
 
-    private AccessibilityFeature(GVRContext gvrContext) {
+    private AccessibilityFeature(SXRContext gvrContext) {
         mGvrContext = gvrContext;
         mAudioManager = (AudioManager) gvrContext.getActivity().getSystemService(Context.AUDIO_SERVICE);
-        managerFeatures = new GVRAccessibilityManager(gvrContext);
+        managerFeatures = new SXRAccessibilityManager(gvrContext);
     }
 
-    public static synchronized AccessibilityFeature getInstance(GVRContext gvrContext) {
+    public static synchronized AccessibilityFeature getInstance(SXRContext gvrContext) {
         if (instance == null) {
             instance = new AccessibilityFeature(gvrContext);
         }
@@ -101,11 +101,11 @@ final class AccessibilityFeature {
      * find all accessibility object and set active true for enable talk back.
      */
     private void enableTalkBack() {
-        GVRSceneObject[] sceneObjects = mGvrContext.getMainScene().getWholeSceneObjects();
-        for (GVRSceneObject sceneObject : sceneObjects) {
-            if (sceneObject instanceof GVRAccessiblityObject)
-                if (((GVRAccessiblityObject) sceneObject).getTalkBack() != null)
-                    ((GVRAccessiblityObject) sceneObject).getTalkBack().setActive(true);
+        SXRSceneObject[] sceneObjects = mGvrContext.getMainScene().getWholeSceneObjects();
+        for (SXRSceneObject sceneObject : sceneObjects) {
+            if (sceneObject instanceof SXRAccessiblityObject)
+                if (((SXRAccessiblityObject) sceneObject).getTalkBack() != null)
+                    ((SXRAccessiblityObject) sceneObject).getTalkBack().setActive(true);
         }
     }
 
@@ -113,11 +113,11 @@ final class AccessibilityFeature {
      * find all accessibility object and set active false for enable talk back.
      */
     private void disableTalkBack() {
-        GVRSceneObject[] sceneObjects = mGvrContext.getMainScene().getWholeSceneObjects();
-        for (GVRSceneObject sceneObject : sceneObjects) {
-            if (sceneObject instanceof GVRAccessiblityObject)
-                if (((GVRAccessiblityObject) sceneObject).getTalkBack() != null)
-                    ((GVRAccessiblityObject) sceneObject).getTalkBack().setActive(false);
+        SXRSceneObject[] sceneObjects = mGvrContext.getMainScene().getWholeSceneObjects();
+        for (SXRSceneObject sceneObject : sceneObjects) {
+            if (sceneObject instanceof SXRAccessiblityObject)
+                if (((SXRAccessiblityObject) sceneObject).getTalkBack() != null)
+                    ((SXRAccessiblityObject) sceneObject).getTalkBack().setActive(false);
 
         }
     }

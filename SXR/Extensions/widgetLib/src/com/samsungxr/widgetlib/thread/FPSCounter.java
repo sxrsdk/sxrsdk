@@ -9,7 +9,7 @@ import com.samsungxr.widgetlib.log.Log;
  */
 public class FPSCounter {
     /**
-     * This method should be called every frame in {@link com.samsungxr.GVRMain#onStep}
+     * This method should be called every frame in {@link com.samsungxr.SXRMain#onStep}
      * to do FPS calculation.
      * If main debug subsystem is enabled the FPS measurements will be printed out each frame.
      */

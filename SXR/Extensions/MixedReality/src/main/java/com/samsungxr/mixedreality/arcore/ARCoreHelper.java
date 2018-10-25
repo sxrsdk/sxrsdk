@@ -23,15 +23,15 @@ import com.google.ar.core.Plane;
 import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRScene;
-import com.samsungxr.GVRSceneObject;
-import com.samsungxr.mixedreality.GVRAnchor;
-import com.samsungxr.mixedreality.GVRAugmentedImage;
-import com.samsungxr.mixedreality.GVRHitResult;
-import com.samsungxr.mixedreality.GVRLightEstimate;
-import com.samsungxr.mixedreality.GVRPlane;
-import com.samsungxr.mixedreality.GVRTrackingState;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRScene;
+import com.samsungxr.SXRSceneObject;
+import com.samsungxr.mixedreality.SXRAnchor;
+import com.samsungxr.mixedreality.SXRAugmentedImage;
+import com.samsungxr.mixedreality.SXRHitResult;
+import com.samsungxr.mixedreality.SXRLightEstimate;
+import com.samsungxr.mixedreality.SXRPlane;
+import com.samsungxr.mixedreality.SXRTrackingState;
 import com.samsungxr.mixedreality.IAnchorEventsListener;
 import com.samsungxr.mixedreality.IAugmentedImageEventsListener;
 import com.samsungxr.mixedreality.IPlaneEventsListener;
@@ -43,8 +43,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ARCoreHelper {
-    private GVRContext mGvrContext;
-    private GVRScene mGvrScene;
+    private SXRContext mGvrContext;
+    private SXRScene mGvrScene;
 
     private Map<Plane, ARCorePlane> mArPlanes;
     private Map<AugmentedImage, ARCoreAugmentedImage> mArAugmentedImages;
@@ -54,7 +54,7 @@ public class ARCoreHelper {
     private ArrayList<IAnchorEventsListener> anchorEventsListeners = new ArrayList<>();
     private ArrayList<IAugmentedImageEventsListener> augmentedImageEventsListeners = new ArrayList<>();
 
-    public ARCoreHelper(GVRContext gvrContext, GVRScene gvrScene) {
+    public ARCoreHelper(SXRContext gvrContext, SXRScene gvrScene) {
         mGvrContext = gvrContext;
         mGvrScene = gvrScene;
         mArPlanes = new HashMap<>();
@@ -82,19 +82,19 @@ public class ARCoreHelper {
             arCorePlane = mArPlanes.get(plane);
 
             if (plane.getTrackingState() == TrackingState.TRACKING &&
-                    arCorePlane.getTrackingState() != GVRTrackingState.TRACKING) {
-                arCorePlane.setTrackingState(GVRTrackingState.TRACKING);
-                notifyPlaneStateChangeListeners(arCorePlane, GVRTrackingState.TRACKING);
+                    arCorePlane.getTrackingState() != SXRTrackingState.TRACKING) {
+                arCorePlane.setTrackingState(SXRTrackingState.TRACKING);
+                notifyPlaneStateChangeListeners(arCorePlane, SXRTrackingState.TRACKING);
             }
             else if (plane.getTrackingState() == TrackingState.PAUSED &&
-                    arCorePlane.getTrackingState() != GVRTrackingState.PAUSED) {
-                arCorePlane.setTrackingState(GVRTrackingState.PAUSED);
-                notifyPlaneStateChangeListeners(arCorePlane, GVRTrackingState.PAUSED);
+                    arCorePlane.getTrackingState() != SXRTrackingState.PAUSED) {
+                arCorePlane.setTrackingState(SXRTrackingState.PAUSED);
+                notifyPlaneStateChangeListeners(arCorePlane, SXRTrackingState.PAUSED);
             }
             else if (plane.getTrackingState() == TrackingState.STOPPED &&
-                    arCorePlane.getTrackingState() != GVRTrackingState.STOPPED) {
-                arCorePlane.setTrackingState(GVRTrackingState.STOPPED);
-                notifyPlaneStateChangeListeners(arCorePlane, GVRTrackingState.STOPPED);
+                    arCorePlane.getTrackingState() != SXRTrackingState.STOPPED) {
+                arCorePlane.setTrackingState(SXRTrackingState.STOPPED);
+                notifyPlaneStateChangeListeners(arCorePlane, SXRTrackingState.STOPPED);
             }
 
             if (plane.getSubsumedBy() != null && arCorePlane.getParentPlane() == null) {
@@ -125,19 +125,19 @@ public class ARCoreHelper {
             arCoreAugmentedImage = mArAugmentedImages.get(augmentedImage);
 
             if (augmentedImage.getTrackingState() == TrackingState.TRACKING &&
-                    arCoreAugmentedImage.getTrackingState() != GVRTrackingState.TRACKING) {
-                arCoreAugmentedImage.setTrackingState(GVRTrackingState.TRACKING);
-                notifyAugmentedImageStateChangeListeners(arCoreAugmentedImage, GVRTrackingState.TRACKING);
+                    arCoreAugmentedImage.getTrackingState() != SXRTrackingState.TRACKING) {
+                arCoreAugmentedImage.setTrackingState(SXRTrackingState.TRACKING);
+                notifyAugmentedImageStateChangeListeners(arCoreAugmentedImage, SXRTrackingState.TRACKING);
             }
             else if (augmentedImage.getTrackingState() == TrackingState.PAUSED &&
-                    arCoreAugmentedImage.getTrackingState() != GVRTrackingState.PAUSED) {
-                arCoreAugmentedImage.setTrackingState(GVRTrackingState.PAUSED);
-                notifyAugmentedImageStateChangeListeners(arCoreAugmentedImage, GVRTrackingState.PAUSED);
+                    arCoreAugmentedImage.getTrackingState() != SXRTrackingState.PAUSED) {
+                arCoreAugmentedImage.setTrackingState(SXRTrackingState.PAUSED);
+                notifyAugmentedImageStateChangeListeners(arCoreAugmentedImage, SXRTrackingState.PAUSED);
             }
             else if (augmentedImage.getTrackingState() == TrackingState.STOPPED &&
-                    arCoreAugmentedImage.getTrackingState() != GVRTrackingState.STOPPED) {
-                arCoreAugmentedImage.setTrackingState(GVRTrackingState.STOPPED);
-                notifyAugmentedImageStateChangeListeners(arCoreAugmentedImage, GVRTrackingState.STOPPED);
+                    arCoreAugmentedImage.getTrackingState() != SXRTrackingState.STOPPED) {
+                arCoreAugmentedImage.setTrackingState(SXRTrackingState.STOPPED);
+                notifyAugmentedImageStateChangeListeners(arCoreAugmentedImage, SXRTrackingState.STOPPED);
             }
         }
     }
@@ -147,27 +147,27 @@ public class ARCoreHelper {
             Anchor arAnchor = anchor.getAnchorAR();
 
             if (arAnchor.getTrackingState() == TrackingState.TRACKING &&
-                    anchor.getTrackingState() != GVRTrackingState.TRACKING) {
-                anchor.setTrackingState(GVRTrackingState.TRACKING);
-                notifyAnchorStateChangeListeners(anchor, GVRTrackingState.TRACKING);
+                    anchor.getTrackingState() != SXRTrackingState.TRACKING) {
+                anchor.setTrackingState(SXRTrackingState.TRACKING);
+                notifyAnchorStateChangeListeners(anchor, SXRTrackingState.TRACKING);
             }
             else if (arAnchor.getTrackingState() == TrackingState.PAUSED &&
-                    anchor.getTrackingState() != GVRTrackingState.PAUSED) {
-                anchor.setTrackingState(GVRTrackingState.PAUSED);
-                notifyAnchorStateChangeListeners(anchor, GVRTrackingState.PAUSED);
+                    anchor.getTrackingState() != SXRTrackingState.PAUSED) {
+                anchor.setTrackingState(SXRTrackingState.PAUSED);
+                notifyAnchorStateChangeListeners(anchor, SXRTrackingState.PAUSED);
             }
             else if (arAnchor.getTrackingState() == TrackingState.STOPPED &&
-                    anchor.getTrackingState() != GVRTrackingState.STOPPED) {
-                anchor.setTrackingState(GVRTrackingState.STOPPED);
-                notifyAnchorStateChangeListeners(anchor, GVRTrackingState.STOPPED);
+                    anchor.getTrackingState() != SXRTrackingState.STOPPED) {
+                anchor.setTrackingState(SXRTrackingState.STOPPED);
+                notifyAnchorStateChangeListeners(anchor, SXRTrackingState.STOPPED);
             }
 
             anchor.update(arViewMatrix, vrCamMatrix, scale);
         }
     }
 
-    public ArrayList<GVRPlane> getAllPlanes() {
-        ArrayList<GVRPlane> allPlanes = new ArrayList<>();
+    public ArrayList<SXRPlane> getAllPlanes() {
+        ArrayList<SXRPlane> allPlanes = new ArrayList<>();
 
         for (Plane plane: mArPlanes.keySet()) {
             allPlanes.add(mArPlanes.get(plane));
@@ -176,8 +176,8 @@ public class ARCoreHelper {
         return allPlanes;
     }
 
-    public ArrayList<GVRAugmentedImage> getAllAugmentedImages() {
-        ArrayList<GVRAugmentedImage> allAugmentedImages = new ArrayList<>();
+    public ArrayList<SXRAugmentedImage> getAllAugmentedImages() {
+        ArrayList<SXRAugmentedImage> allAugmentedImages = new ArrayList<>();
 
         for (AugmentedImage augmentedImage: mArAugmentedImages.keySet()) {
             allAugmentedImages.add(mArAugmentedImages.get(augmentedImage));
@@ -197,7 +197,7 @@ public class ARCoreHelper {
         return arCoreAugmentedImage;
     }
 
-    public GVRAnchor createAnchor(Anchor arAnchor, GVRSceneObject sceneObject) {
+    public SXRAnchor createAnchor(Anchor arAnchor, SXRSceneObject sceneObject) {
         ARCoreAnchor arCoreAnchor = new ARCoreAnchor(mGvrContext);
         arCoreAnchor.setAnchorAR(arAnchor);
         mArAnchors.add(arCoreAnchor);
@@ -222,7 +222,7 @@ public class ARCoreHelper {
         mGvrScene.removeSceneObject(anchor);
     }
 
-    public GVRHitResult hitTest(List<HitResult> hitResult) {
+    public SXRHitResult hitTest(List<HitResult> hitResult) {
         for (HitResult hit : hitResult) {
             // Check if any plane was hit, and if it was hit inside the plane polygon
             Trackable trackable = hit.getTrackable();
@@ -230,7 +230,7 @@ public class ARCoreHelper {
             if ((trackable instanceof Plane
                     && ((Plane) trackable).isPoseInPolygon(hit.getHitPose()))
                     && ((Plane) trackable).getSubsumedBy() == null) {
-                GVRHitResult gvrHitResult = new GVRHitResult();
+                SXRHitResult gvrHitResult = new SXRHitResult();
                 float[] hitPose = new float[16];
 
                 hit.getHitPose().toMatrix(hitPose, 0);
@@ -245,14 +245,14 @@ public class ARCoreHelper {
         return null;
     }
 
-    public GVRLightEstimate getLightEstimate(LightEstimate lightEstimate) {
+    public SXRLightEstimate getLightEstimate(LightEstimate lightEstimate) {
         ARCoreLightEstimate arCoreLightEstimate = new ARCoreLightEstimate();
-        GVRLightEstimate.GVRLightEstimateState state;
+        SXRLightEstimate.SXRLightEstimateState state;
 
         arCoreLightEstimate.setPixelIntensity(lightEstimate.getPixelIntensity());
         state = (lightEstimate.getState() == LightEstimate.State.VALID) ?
-                GVRLightEstimate.GVRLightEstimateState.VALID :
-                GVRLightEstimate.GVRLightEstimateState.NOT_VALID;
+                SXRLightEstimate.SXRLightEstimateState.VALID :
+                SXRLightEstimate.SXRLightEstimateState.NOT_VALID;
         arCoreLightEstimate.setState(state);
 
         return arCoreLightEstimate;
@@ -270,37 +270,37 @@ public class ARCoreHelper {
         augmentedImageEventsListeners.add(listener);
     }
 
-    private void notifyPlaneDetectionListeners(GVRPlane plane) {
+    private void notifyPlaneDetectionListeners(SXRPlane plane) {
         for (IPlaneEventsListener listener: planeEventsListeners) {
             listener.onPlaneDetection(plane);
         }
     }
 
-    private void notifyPlaneStateChangeListeners(GVRPlane plane, GVRTrackingState trackingState) {
+    private void notifyPlaneStateChangeListeners(SXRPlane plane, SXRTrackingState trackingState) {
         for (IPlaneEventsListener listener: planeEventsListeners) {
             listener.onPlaneStateChange(plane, trackingState);
         }
     }
 
-    private void notifyMergedPlane(GVRPlane childPlane, GVRPlane parentPlane) {
+    private void notifyMergedPlane(SXRPlane childPlane, SXRPlane parentPlane) {
         for (IPlaneEventsListener listener: planeEventsListeners) {
             listener.onPlaneMerging(childPlane, parentPlane);
         }
     }
 
-    private void notifyAnchorStateChangeListeners(GVRAnchor anchor, GVRTrackingState trackingState) {
+    private void notifyAnchorStateChangeListeners(SXRAnchor anchor, SXRTrackingState trackingState) {
         for (IAnchorEventsListener listener: anchorEventsListeners) {
             listener.onAnchorStateChange(anchor, trackingState);
         }
     }
 
-    private void notifyAugmentedImageDetectionListeners(GVRAugmentedImage image) {
+    private void notifyAugmentedImageDetectionListeners(SXRAugmentedImage image) {
         for (IAugmentedImageEventsListener listener: augmentedImageEventsListeners) {
             listener.onAugmentedImageDetection(image);
         }
     }
 
-    private void notifyAugmentedImageStateChangeListeners(GVRAugmentedImage image, GVRTrackingState trackingState) {
+    private void notifyAugmentedImageStateChangeListeners(SXRAugmentedImage image, SXRTrackingState trackingState) {
         for (IAugmentedImageEventsListener listener: augmentedImageEventsListeners) {
             listener.onAugmentedImageStateChange(image, trackingState);
         }

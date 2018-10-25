@@ -31,8 +31,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.samsungxr.GVRContext;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRSceneObject;
 
 /**
  * 
@@ -44,14 +44,14 @@ public class X3DparseLights
 
   private static final String TAG = "X3D Parse Lights";
 
-  private GVRContext gvrContext = null;
+  private SXRContext gvrContext = null;
 
-  private GVRSceneObject root = null;
-  private GVRSceneObject currentSceneObject = null;
+  private SXRSceneObject root = null;
+  private SXRSceneObject currentSceneObject = null;
 
   private ShaderSettings shaderSettings = null;
 
-  public X3DparseLights(GVRContext gvrContext, GVRSceneObject root)
+  public X3DparseLights(SXRContext gvrContext, SXRSceneObject root)
   {
     this.gvrContext = gvrContext;
     this.root = root;

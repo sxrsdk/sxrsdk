@@ -15,23 +15,23 @@
 
 /** Schedule Runnables to run on the GL thread, in the future.
  * 
- * This is an optional component of GVRF: You need to {@linkplain 
- * com.samsungxr.periodic.GVRPeriodicEngine#getInstance(com.samsungxr.GVRContext)
+ * This is an optional component of SXRF: You need to {@linkplain 
+ * com.samsungxr.periodic.SXRPeriodicEngine#getInstance(com.samsungxr.SXRContext)
  * get an instance} to use it.
  * 
  * <p>
  * You can then schedule {@linkplain 
- * com.samsungxr.periodic.GVRPeriodicEngine#runAfter(Runnable, float) 
+ * com.samsungxr.periodic.SXRPeriodicEngine#runAfter(Runnable, float) 
  * run-once events} and periodic events. Periodic events {@linkplain 
- * com.samsungxr.periodic.GVRPeriodicEngine#runEvery(Runnable, float, float, com.samsungxr.periodic.GVRPeriodicEngine.KeepRunning)
+ * com.samsungxr.periodic.SXRPeriodicEngine#runEvery(Runnable, float, float, com.samsungxr.periodic.SXRPeriodicEngine.KeepRunning)
  * may} or {@linkplain 
- * com.samsungxr.periodic.GVRPeriodicEngine#runEvery(Runnable, float, float) 
+ * com.samsungxr.periodic.SXRPeriodicEngine#runEvery(Runnable, float, float) 
  * may not} have a {@linkplain 
- * com.samsungxr.periodic.GVRPeriodicEngine.KeepRunning callback.}
+ * com.samsungxr.periodic.SXRPeriodicEngine.KeepRunning callback.}
  * 
  * <p>
  * Scheduling an event gives you {@linkplain 
- * com.samsungxr.periodic.GVRPeriodicEngine.PeriodicEvent 
+ * com.samsungxr.periodic.SXRPeriodicEngine.PeriodicEvent 
  * an interface} you can use to check on the event's status and/or to change its
  * scheduling.
  */

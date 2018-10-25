@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 package com.samsungxr.animation.keyframe;
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRContext;
-import com.samsungxr.animation.GVRAnimation;
-import com.samsungxr.animation.GVRPose;
-import com.samsungxr.animation.GVRSkeleton;
-import com.samsungxr.animation.keyframe.GVRAnimationBehavior;
-import com.samsungxr.animation.keyframe.GVRAnimationChannel;
-import com.samsungxr.animation.keyframe.GVRSkeletonAnimation;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRContext;
+import com.samsungxr.animation.SXRAnimation;
+import com.samsungxr.animation.SXRPose;
+import com.samsungxr.animation.SXRSkeleton;
+import com.samsungxr.animation.keyframe.SXRAnimationBehavior;
+import com.samsungxr.animation.keyframe.SXRAnimationChannel;
+import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -37,7 +37,7 @@ import java.util.Stack;
 public class BVHImporter
 {
     private String mFileName;
-    private final GVRContext mContext;
+    private final SXRContext mContext;
     private final ArrayList<String> mBoneNames = new ArrayList();
     private final ArrayList<Vector3f> mBonePositions = new ArrayList();
     private final ArrayList<Integer> mBoneParents = new ArrayList();
@@ -51,12 +51,12 @@ public class BVHImporter
     private int yRotOffset;
     private int zRotOffset;
 
-    public BVHImporter(GVRContext ctx)
+    public BVHImporter(SXRContext ctx)
     {
         mContext = ctx;
     }
 
-    public GVRSkeletonAnimation importAnimation(GVRAndroidResource res, GVRSkeleton skel) throws IOException
+    public SXRSkeletonAnimation importAnimation(SXRAndroidResource res, SXRSkeleton skel) throws IOException
     {
         InputStream stream = res.getStream();
 
@@ -71,7 +71,7 @@ public class BVHImporter
         return readMotion(skel);
     }
 
-    public GVRPose importPose(GVRAndroidResource res)  throws IOException
+    public SXRPose importPose(SXRAndroidResource res)  throws IOException
     {
         InputStream stream = res.getStream();
 
@@ -82,11 +82,11 @@ public class BVHImporter
         InputStreamReader inputreader = new InputStreamReader(stream);
         mReader = new BufferedReader(inputreader);
         readSkeleton();
-        GVRSkeleton skel = createSkeleton();
+        SXRSkeleton skel = createSkeleton();
         return readPose(skel);
     }
 
-    public GVRSkeleton importSkeleton(GVRAndroidResource res) throws IOException
+    public SXRSkeleton importSkeleton(SXRAndroidResource res) throws IOException
     {
         InputStream stream = res.getStream();
 
@@ -206,17 +206,17 @@ public class BVHImporter
         }
     }
 
-    public GVRSkeleton createSkeleton()
+    public SXRSkeleton createSkeleton()
     {
         int[] boneparents = new int[mBoneParents.size()];
-        GVRSkeleton skel;
+        SXRSkeleton skel;
 
         for (int i = 0; i < mBoneParents.size(); ++i)
         {
             boneparents[i] = mBoneParents.get(i);
         }
-        skel = new GVRSkeleton(mContext, boneparents);
-        GVRPose bindpose = new GVRPose(skel);
+        skel = new SXRSkeleton(mContext, boneparents);
+        SXRPose bindpose = new SXRPose(skel);
 
         for (int i = 0; i < mBoneNames.size(); ++i)
         {
@@ -228,13 +228,13 @@ public class BVHImporter
         return skel;
     }
 
-    private GVRPose readPose(GVRSkeleton skel) throws IOException
+    private SXRPose readPose(SXRSkeleton skel) throws IOException
     {
         float       x, y, z;
         String      line;
         String      bvhbonename = "";
         Quaternionf q = new Quaternionf();
-        GVRPose     pose = new GVRPose(skel);
+        SXRPose     pose = new SXRPose(skel);
 
         /*
          * Parse and accumulate all the motion keyframes.
@@ -335,7 +335,7 @@ public class BVHImporter
         return pose;
     }
 
-    public GVRSkeletonAnimation readMotion(GVRSkeleton skel) throws IOException
+    public SXRSkeletonAnimation readMotion(SXRSkeleton skel) throws IOException
     {
         int         numbones = skel.getNumBones();
         float       x, y, z;
@@ -349,7 +349,7 @@ public class BVHImporter
         ArrayList<float[]> posKeysPerBone = new ArrayList<>(numbones);
         Quaternionf q = new Quaternionf();
         Quaternionf b = new Quaternionf();
-        GVRPose bindpose = skel.getBindPose();
+        SXRPose bindpose = skel.getBindPose();
         int frameIndex = 0;
         int numFrames = 0;
 
@@ -495,8 +495,8 @@ public class BVHImporter
         /*
          * Create a skeleton animation with separate channels for each bone
          */
-        GVRAnimationChannel channel;
-        GVRSkeletonAnimation skelanim = new GVRSkeletonAnimation(mFileName, skel, curTime);
+        SXRAnimationChannel channel;
+        SXRSkeletonAnimation skelanim = new SXRSkeletonAnimation(mFileName, skel, curTime);
         Vector3f pos = new Vector3f();
         for (int boneIndex = 0; boneIndex < mBoneNames.size(); ++boneIndex)
         {
@@ -512,8 +512,8 @@ public class BVHImporter
                 skel.getBindPose().getLocalPosition(boneIndex, pos);
                 posKeys = new float[] { 0, pos.x, pos.y, pos.z };
             }
-            channel = new GVRAnimationChannel(bonename, posKeys, rotKeys, null,
-                    GVRAnimationBehavior.DEFAULT, GVRAnimationBehavior.DEFAULT);
+            channel = new SXRAnimationChannel(bonename, posKeys, rotKeys, null,
+                    SXRAnimationBehavior.DEFAULT, SXRAnimationBehavior.DEFAULT);
             skelanim.addChannel(bonename, channel);
         }
         return skelanim;

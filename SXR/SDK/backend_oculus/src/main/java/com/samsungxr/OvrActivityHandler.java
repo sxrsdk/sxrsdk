@@ -11,5 +11,5 @@ interface OvrActivityHandler {
 
     boolean onBack();
 
-    void setViewManager(GVRViewManager viewManager);
+    void setViewManager(SXRViewManager viewManager);
 }

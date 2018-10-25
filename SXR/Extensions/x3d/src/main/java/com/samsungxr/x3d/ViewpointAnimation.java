@@ -2,7 +2,7 @@ package com.samsungxr.x3d;
 
 import java.util.Date;
 
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRSceneObject;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector4f;

@@ -3,11 +3,11 @@ package com.samsungxr.widgetlib.widget.animation;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.samsungxr.GVRHybridObject;
-import com.samsungxr.animation.GVRAnimation;
-import com.samsungxr.animation.GVRAnimationEngine;
-import com.samsungxr.animation.GVRInterpolator;
-import com.samsungxr.animation.GVROnFinish;
+import com.samsungxr.SXRHybridObject;
+import com.samsungxr.animation.SXRAnimation;
+import com.samsungxr.animation.SXRAnimationEngine;
+import com.samsungxr.animation.SXRInterpolator;
+import com.samsungxr.animation.SXROnFinish;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,7 +17,7 @@ import com.samsungxr.widgetlib.log.Log;
 import static com.samsungxr.widgetlib.widget.properties.JSONHelpers.getFloat;
 
 /**
- * A wrapper for {@link GVRAnimation} and derived classes. Client code can
+ * A wrapper for {@link SXRAnimation} and derived classes. Client code can
  * derive directly from this class (or its descendants) and override
  * {@link #animate(Widget, float)} to implement {@link Widget} animations.
  * <p>
@@ -48,8 +48,8 @@ public abstract class Animation {
 
     public void track(SimpleAnimationTracker tracker, final Widget target,
             final Runnable onStart, OnFinish onFinish) {
-        tracker.track(target.getSceneObject(), (GVRAnimation) getAnimation(),
-                      onStart, new GVROnFinishProxy(onFinish));
+        tracker.track(target.getSceneObject(), (SXRAnimation) getAnimation(),
+                      onStart, new SXROnFinishProxy(onFinish));
     }
 
     public void track(SimpleAnimationTracker tracker) {
@@ -62,8 +62,8 @@ public abstract class Animation {
 
     public void track(SimpleAnimationTracker tracker, final Runnable onStart,
             OnFinish onFinish) {
-        tracker.track(mTarget.getSceneObject(), (GVRAnimation) getAnimation(),
-                      onStart, new GVROnFinishProxy(onFinish));
+        tracker.track(mTarget.getSceneObject(), (SXRAnimation) getAnimation(),
+                      onStart, new SXROnFinishProxy(onFinish));
     }
 
     public Animation(Widget target, float duration) {
@@ -72,7 +72,7 @@ public abstract class Animation {
         mAnimation = animationAdapter;
     }
 
-    public Animation setInterpolator(GVRInterpolator interpolator) {
+    public Animation setInterpolator(SXRInterpolator interpolator) {
         mInterpolator = interpolator;
         getAnimation().setInterpolator(interpolator);
         return this;
@@ -117,11 +117,11 @@ public abstract class Animation {
     }
 
     @Deprecated
-    public Animation setOnFinish(final GVROnFinish onFinish) {
+    public Animation setOnFinish(final SXROnFinish onFinish) {
         return addOnFinish(new OnFinish() {
             @Override
             public void finished(Animation animation) {
-                onFinish.finished((GVRAnimation) animation.getAnimation());
+                onFinish.finished((SXRAnimation) animation.getAnimation());
             }
         });
     }
@@ -156,7 +156,7 @@ public abstract class Animation {
      *         of calls.
      */
     public Animation start() {
-        return start(GVRAnimationEngine.getInstance(mTarget.getGVRContext()));
+        return start(SXRAnimationEngine.getInstance(mTarget.getSXRContext()));
     }
 
     /**
@@ -170,8 +170,8 @@ public abstract class Animation {
      * @return {@code this}, so you can save the instance at the end of a chain
      *         of calls.
      */
-    public Animation start(GVRAnimationEngine engine) {
-        ((GVRAnimation) getAnimation()).start(engine);
+    public Animation start(SXRAnimationEngine engine) {
+        ((SXRAnimation) getAnimation()).start(engine);
         mIsRunning = true;
         return this;
     }
@@ -184,7 +184,7 @@ public abstract class Animation {
      * <ul>
      * <li>Use {@link #setRepeatCount(int) setRepeatCount(0)} to 'schedule'
      * termination at the end of the current repetition, or
-     * <li>Call {@link #finish(GVRAnimationEngine) finish()} to set the
+     * <li>Call {@link #finish(SXRAnimationEngine) finish()} to set the
      * animation to its end state and notify any {@linkplain OnFinish listeners}
      * </ul>
      * You <em>may</em> want to {@code stop()} an animation if you are also
@@ -193,7 +193,7 @@ public abstract class Animation {
      * in mid-animation is harmless.
      */
     public void stop() {
-        stop(GVRAnimationEngine.getInstance(mTarget.getGVRContext()));
+        stop(SXRAnimationEngine.getInstance(mTarget.getSXRContext()));
     }
 
     /**
@@ -204,7 +204,7 @@ public abstract class Animation {
      * <ul>
      * <li>Use {@link #setRepeatCount(int) setRepeatCount(0)} to 'schedule'
      * termination at the end of the current repetition, or
-     * <li>Call {@link #finish(GVRAnimationEngine) finish()} to set the
+     * <li>Call {@link #finish(SXRAnimationEngine) finish()} to set the
      * animation to its end state and notify any {@linkplain OnFinish listeners}
      * </ul>
      * You <em>may</em> want to {@code stop()} an animation if you are also
@@ -215,8 +215,8 @@ public abstract class Animation {
      * @param engine
      *            The global animation engine.
      */
-    public void stop(GVRAnimationEngine engine) {
-        engine.stop((GVRAnimation) getAnimation());
+    public void stop(SXRAnimationEngine engine) {
+        engine.stop((SXRAnimation) getAnimation());
         mIsRunning = false;
     }
 
@@ -229,7 +229,7 @@ public abstract class Animation {
      *         successful; {@code false} if the animation was not running.
      */
     public boolean finish() {
-        return finish(GVRAnimationEngine.getInstance(mTarget.getGVRContext()));
+        return finish(SXRAnimationEngine.getInstance(mTarget.getSXRContext()));
     }
 
     /**
@@ -242,12 +242,12 @@ public abstract class Animation {
      * @return {@code True} if the animation was running and finishing was
      *         successful; {@code false} if the animation was not running.
      */
-    public boolean finish(GVRAnimationEngine engine) {
+    public boolean finish(SXRAnimationEngine engine) {
         if (mIsRunning) {
             stop(engine);
             getAnimation().animate(mTarget.getSceneObject(), 1);
             if (mOnFinish != null) {
-                mOnFinish.finished((GVRAnimation) getAnimation());
+                mOnFinish.finished((SXRAnimation) getAnimation());
             }
             return true;
         }
@@ -316,7 +316,7 @@ public abstract class Animation {
 
     /* package */
     interface AnimationAdapter {
-        void animate(GVRHybridObject target, float ratio);
+        void animate(SXRHybridObject target, float ratio);
 
         float getElapsedTime();
 
@@ -328,42 +328,42 @@ public abstract class Animation {
 
         boolean isFinished();
 
-        GVRAnimation setOnFinish(GVROnFinish onFinish);
+        SXRAnimation setOnFinish(SXROnFinish onFinish);
 
-        GVRAnimation setRepeatMode(int mode);
+        SXRAnimation setRepeatMode(int mode);
 
-        GVRAnimation setInterpolator(GVRInterpolator interpolator);
+        SXRAnimation setInterpolator(SXRInterpolator interpolator);
     }
 
-    private class Adapter extends GVRAnimation implements AnimationAdapter {
+    private class Adapter extends SXRAnimation implements AnimationAdapter {
 
         public Adapter(Widget target, float duration) {
             super(target.getSceneObject(), duration);
         }
 
         @Override
-        public void animate(GVRHybridObject target, float ratio) {
+        public void animate(SXRHybridObject target, float ratio) {
             doAnimate(ratio);
         }
     }
 
-    private class GVROnFinishProxy implements GVROnFinish {
+    private class SXROnFinishProxy implements SXROnFinish {
 
-        public GVROnFinishProxy(OnFinish onFinish) {
+        public SXROnFinishProxy(OnFinish onFinish) {
             mOnFinish = onFinish;
         }
 
         @Override
-        public void finished(GVRAnimation animation) {
+        public void finished(SXRAnimation animation) {
             mOnFinish.finished(Animation.this);
         }
 
         private final OnFinish mOnFinish;
     }
 
-    private class OnFinishManager implements GVROnFinish {
+    private class OnFinishManager implements SXROnFinish {
         @Override
-        public void finished(GVRAnimation unused) {
+        public void finished(SXRAnimation unused) {
             mIsRunning = false;
             for (OnFinish listener : mListeners) {
                 try {
@@ -386,7 +386,7 @@ public abstract class Animation {
         private Set<OnFinish> mListeners = new LinkedHashSet<OnFinish>();
     }
 
-    protected GVRInterpolator mInterpolator;
+    protected SXRInterpolator mInterpolator;
     protected int mMode = -1;
     private final Widget mTarget;
     private AnimationAdapter mAnimation;

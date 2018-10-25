@@ -1,6 +1,6 @@
 package com.samsungxr.utlis.sceneserializer;
 
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRSceneObject;
 import com.samsungxr.utility.Log;
 
 import java.io.File;
@@ -36,7 +36,7 @@ public class SceneData {
         this.environmentData = environmentData;
     }
 
-    void addToSceneData(GVRSceneObject gvrSceneObject, String filePath) {
+    void addToSceneData(SXRSceneObject gvrSceneObject, String filePath) {
         if (sceneObjectDataList == null) {
             sceneObjectDataList = new ArrayList<SceneObjectData>();
         }
@@ -60,7 +60,7 @@ public class SceneData {
         sceneObjectDataList.add(sod);
     }
 
-    void removeFromSceneData(GVRSceneObject gvrSceneObject) {
+    void removeFromSceneData(SXRSceneObject gvrSceneObject) {
         Iterator<SceneObjectData> iterator = sceneObjectDataList.iterator();
         while (iterator.hasNext()) {
             SceneObjectData sod = iterator.next();
@@ -76,7 +76,7 @@ public class SceneData {
             return;
         }
         for (SceneObjectData sod : sceneObjectDataList) {
-            GVRSceneObject so = sod.getGvrSceneObject();
+            SXRSceneObject so = sod.getGvrSceneObject();
             if(so != null) {
                 sod.setModelMatrix(so.getTransform().getModelMatrix());
                 sod.setName(sod.getGvrSceneObject().getName());

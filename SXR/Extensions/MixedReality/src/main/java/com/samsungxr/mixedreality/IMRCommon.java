@@ -18,8 +18,8 @@ package com.samsungxr.mixedreality;
 
 import android.graphics.Bitmap;
 
-import com.samsungxr.GVRPicker;
-import com.samsungxr.GVRSceneObject;
+import com.samsungxr.SXRPicker;
+import com.samsungxr.SXRSceneObject;
 
 import java.util.ArrayList;
 
@@ -41,24 +41,24 @@ public interface IMRCommon {
      *
      * @return The passthrough object
      */
-    GVRSceneObject getPassThroughObject();
+    SXRSceneObject getPassThroughObject();
 
     /**
-     * Register a listener to GVRPlane events.
+     * Register a listener to SXRPlane events.
      *
      * @param listener
      */
     void registerPlaneListener(IPlaneEventsListener listener);
 
     /**
-     * Register a listener to GVRAnchor events.
+     * Register a listener to SXRAnchor events.
      *
      * @param listener
      */
     void registerAnchorListener(IAnchorEventsListener listener);
 
     /**
-     * Register a listener to GVRAugmentedImage events.
+     * Register a listener to SXRAugmentedImage events.
      *
      * @param listener
      */
@@ -67,9 +67,9 @@ public interface IMRCommon {
     /**
      * Gets all detected planes.
      *
-     * @return A ArrayList of GVRPlanes
+     * @return A ArrayList of SXRPlanes
      */
-    ArrayList<GVRPlane> getAllPlanes();
+    ArrayList<SXRPlane> getAllPlanes();
 
     /**
      * Create an anchor on pose specified.
@@ -77,7 +77,7 @@ public interface IMRCommon {
      * @param pose
      * @return The anchor created
      */
-    GVRAnchor createAnchor(float[] pose);
+    SXRAnchor createAnchor(float[] pose);
 
     /**
      * Create an anchor on pose specified and associate to the sceneObject
@@ -86,7 +86,7 @@ public interface IMRCommon {
      * @param sceneObject
      * @return The anchor created
      */
-    GVRAnchor createAnchor(float[] pose, GVRSceneObject sceneObject);
+    SXRAnchor createAnchor(float[] pose, SXRSceneObject sceneObject);
 
     /**
      * Update the pose of an anchor
@@ -94,21 +94,21 @@ public interface IMRCommon {
      * @param anchor
      * @param pose
      */
-    void updateAnchorPose(GVRAnchor anchor, float[] pose);
+    void updateAnchorPose(SXRAnchor anchor, float[] pose);
 
     /**
      * Remove the anchor specified
      *
      * @param anchor
      */
-    void removeAnchor(GVRAnchor anchor);
+    void removeAnchor(SXRAnchor anchor);
 
     /**
      * Host an anchor to be shared
      *
      * @param anchor
      */
-    void hostAnchor(GVRAnchor anchor, ICloudAnchorListener listener);
+    void hostAnchor(SXRAnchor anchor, ICloudAnchorListener listener);
 
     /**
      * Get an anchor previously hosted
@@ -131,13 +131,13 @@ public interface IMRCommon {
      * @param collision
      * @return
      */
-    GVRHitResult hitTest(GVRSceneObject sceneObj, GVRPicker.GVRPickedObject collision);
+    SXRHitResult hitTest(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision);
 
     /**
      *
      * @return The light estimate
      */
-    GVRLightEstimate getLightEstimate();
+    SXRLightEstimate getLightEstimate();
 
     /**
      * Set an image to be detected
@@ -156,7 +156,7 @@ public interface IMRCommon {
     /**
      * Get all detected augmented images
      *
-     * @return An ArrayList of GVRAugmentedImage
+     * @return An ArrayList of SXRAugmentedImage
      */
-    ArrayList<GVRAugmentedImage> getAllAugmentedImages();
+    ArrayList<SXRAugmentedImage> getAllAugmentedImages();
 }

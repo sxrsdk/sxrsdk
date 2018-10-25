@@ -22,9 +22,9 @@ import com.samsungxr.utility.VrAppSettings;
 /**
  * {@inheritDoc}
  */
-final class MonoscopicActivityDelegate extends GVRApplication.ActivityDelegateStubs {
+final class MonoscopicActivityDelegate extends SXRApplication.ActivityDelegateStubs {
     @Override
-    public void onCreate(GVRApplication activity) {
+    public void onCreate(SXRApplication activity) {
         if (null == activity) {
             throw new IllegalArgumentException();
         }
@@ -33,17 +33,17 @@ final class MonoscopicActivityDelegate extends GVRApplication.ActivityDelegateSt
     }
 
     @Override
-    public GVRViewManager makeViewManager() {
+    public SXRViewManager makeViewManager() {
         return new MonoscopicViewManager(mApplication, mApplication.getMain(), mXmlParser);
     }
 
     @Override
-    public GVRCameraRig makeCameraRig(GVRContext context) {
-        return new GVRCameraRig(context);
+    public SXRCameraRig makeCameraRig(SXRContext context) {
+        return new SXRCameraRig(context);
     }
 
     @Override
-    public GVRConfigurationManager makeConfigurationManager() {
+    public SXRConfigurationManager makeConfigurationManager() {
         return new MonoscopicConfigurationManager(mApplication);
     }
 
@@ -58,7 +58,7 @@ final class MonoscopicActivityDelegate extends GVRApplication.ActivityDelegateSt
     }
 
     @Override
-    public boolean setMain(GVRMain gvrMain, String dataFileName) {
+    public boolean setMain(SXRMain gvrMain, String dataFileName) {
         return true;
     }
 
@@ -67,6 +67,6 @@ final class MonoscopicActivityDelegate extends GVRApplication.ActivityDelegateSt
         return new MonoscopicVrAppSettings();
     }
 
-    private GVRApplication mApplication;
+    private SXRApplication mApplication;
     private MonoscopicXMLParser mXmlParser;
 }

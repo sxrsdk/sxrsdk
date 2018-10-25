@@ -15,10 +15,10 @@
 
 package com.samsungxr.script;
 
-import com.samsungxr.GVRAndroidResource;
-import com.samsungxr.GVRMain;
-import com.samsungxr.GVRResourceVolume;
-import com.samsungxr.GVRScene;
+import com.samsungxr.SXRAndroidResource;
+import com.samsungxr.SXRMain;
+import com.samsungxr.SXRResourceVolume;
+import com.samsungxr.SXRScene;
 
 import java.io.IOException;
 
@@ -57,14 +57,14 @@ public interface IScriptManager {
     void destroy();
 
     /**
-     * Loads a script file using {@link GVRAndroidResource}.
+     * Loads a script file using {@link SXRAndroidResource}.
      * @param resource The resource object.
      * @param language The language string.
      * @return A script file object or {@code null} if not found.
      * @throws IOException if script file cannot be read.
-     * @throws GVRScriptException if script processing error occurs.
+     * @throws SXRScriptException if script processing error occurs.
      */
-    IScriptFile loadScript(GVRAndroidResource resource, String language) throws IOException, GVRScriptException;
+    IScriptFile loadScript(SXRAndroidResource resource, String language) throws IOException, SXRScriptException;
 
     /**
      * Attach a script file to a scriptable target.
@@ -96,32 +96,32 @@ public interface IScriptManager {
     void addGlobalBindings(ScriptEngine engine);
 
     /**
-     * Load a script bundle file. It defines bindings between scripts and GVRf objects
-     * (e.g., scene objects and the {@link GVRMain} object).
+     * Load a script bundle file. It defines bindings between scripts and SXRf objects
+     * (e.g., scene objects and the {@link SXRMain} object).
      *
      * @param filePath
      *        The path and filename of the script bundle.
      * @param volume
-     *        The {@link GVRResourceVolume} from which to load the bundle file and scripts.
+     *        The {@link SXRResourceVolume} from which to load the bundle file and scripts.
      * @return
      *         The loaded {@linkplain IScriptBundle script bundle}.
      *
      * @throws IOException if script bundle file cannot be read.
      */
-    IScriptBundle loadScriptBundle(String filePath, GVRResourceVolume volume) throws IOException;
+    IScriptBundle loadScriptBundle(String filePath, SXRResourceVolume volume) throws IOException;
 
     /**
-     * Binds a script bundle to a {@link GVRScene} object.
+     * Binds a script bundle to a {@link SXRScene} object.
      *
      * @param scriptBundle
      *     The script bundle.
      * @param gvrMain
-     *     The {@link GVRMain} to bind to.
+     *     The {@link SXRMain} to bind to.
      * @param bindToMainScene
-     *     If {@code true}, also bind it to the main scene on the event {@link GVRMain#onAfterInit}.
+     *     If {@code true}, also bind it to the main scene on the event {@link SXRMain#onAfterInit}.
      * @throws IOException if script bundle file cannot be read.
-     * @throws GVRScriptException if script processing error occurs.
+     * @throws SXRScriptException if script processing error occurs.
      */
-    void bindScriptBundle(IScriptBundle scriptBundle, GVRMain gvrMain, boolean bindToMainScene)
-            throws IOException, GVRScriptException;
+    void bindScriptBundle(IScriptBundle scriptBundle, SXRMain gvrMain, boolean bindToMainScene)
+            throws IOException, SXRScriptException;
 }
