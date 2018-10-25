@@ -115,7 +115,7 @@ android {
     }
 
     packagingOptions {
-        exclude 'lib/*/libsxr.so'
+        exclude 'lib/*/libsxrsdk.so'
     }
 }
 
