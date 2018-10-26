@@ -49,11 +49,11 @@ import android.view.View;
  * {@link #onTouchEvent(MotionEvent)}. The methods defined in your callback will
  * be executed when the events occur.
  * <li>
- * If you are using a {@link SXRViewSceneObject} you can call {@link SXRViewSceneObject#setGestureDetector}
+ * If you are using a {@link SXRViewNode} you can call {@link SXRViewNode#setGestureDetector}
  * to add an Android GestureDetector for that view
  * </li>
  * </ul>
- * @see com.samsungxr.scene_objects.SXRViewSceneObject
+ * @see com.samsungxr.nodes.SXRViewNode
  */
 public class SXRTouchPadGestureListener implements OnGestureListener
 {

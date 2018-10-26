@@ -31,8 +31,8 @@ import com.samsungxr.io.SXRCursorController;
 import com.samsungxr.SXRMeshCollider;
 import com.samsungxr.io.SXRControllerType;
 import com.samsungxr.io.SXRInputManager;
-import com.samsungxr.scene_objects.SXRVideoSceneObject;
-import com.samsungxr.scene_objects.SXRVideoSceneObjectPlayer;
+import com.samsungxr.nodes.SXRVideoNode;
+import com.samsungxr.nodes.SXRVideoNodePlayer;
 import com.samsungxr.utility.Log;
 
 import java.io.FileNotFoundException;
@@ -100,7 +100,7 @@ import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRRenderData.SXRRenderMaskBit;
 import com.samsungxr.SXRRenderData.SXRRenderingOrder;
 import com.samsungxr.SXRRenderPass.SXRCullFaceEnum;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRSpotLight;
 import com.samsungxr.SXRSwitch;
 import com.samsungxr.SXRTexture;
@@ -108,11 +108,11 @@ import com.samsungxr.SXRTextureParameters;
 import com.samsungxr.SXRTextureParameters.TextureWrapType;
 import com.samsungxr.SXRTransform;
 import com.samsungxr.SXRVertexBuffer;
-import com.samsungxr.scene_objects.SXRConeSceneObject;
-import com.samsungxr.scene_objects.SXRCubeSceneObject;
-import com.samsungxr.scene_objects.SXRCylinderSceneObject;
-import com.samsungxr.scene_objects.SXRSphereSceneObject;
-import com.samsungxr.scene_objects.SXRTextViewSceneObject;
+import com.samsungxr.nodes.SXRConeNode;
+import com.samsungxr.nodes.SXRCubeNode;
+import com.samsungxr.nodes.SXRCylinderNode;
+import com.samsungxr.nodes.SXRSphereNode;
+import com.samsungxr.nodes.SXRTextViewNode;
 
 import org.joml.Vector3f;
 import org.joml.Quaternionf;
@@ -136,7 +136,7 @@ public class X3Dobject {
 
     /**
      * Allows developers to access the root of X3D scene graph
-     * by calling: SXRSceneObject.getSceneObjectByName(X3D_ROOT_NODE);
+     * by calling: SXRNode.getNodeByName(X3D_ROOT_NODE);
      */
     public static final String X3D_ROOT_NODE = "x3d_root_node_";
 
@@ -151,7 +151,7 @@ public class X3Dobject {
     private final static String JAVASCRIPT_IMPORT_PACKAGE = "importPackage(com.samsungxr.x3d.data_types)\nimportPackage(org.joml)\nimportPackage(com.samsungxr)";
 
     // Strings appended to SXRScene names when there are multiple
-    // animations on the same <Transform> or SXRSceneObject
+    // animations on the same <Transform> or SXRNode
 
     private static final String TRANSFORM_CENTER_ = "_Transform_Center_";
     private static final String TRANSFORM_NEGATIVE_CENTER_ = "_Transform_Neg_Center_";
@@ -162,7 +162,7 @@ public class X3Dobject {
     private static final String TRANSFORM_NEGATIVE_SCALE_ORIENTATION_ = "_Transform_Neg_Scale_Orientation_";
 
     // Append this incremented value to SXRScene names to insure unique
-    // SXRSceneObjects
+    // SXRNodes
     // when new SXRScene objects are generated to support animation
     private static int animationCount = 1;
 
@@ -190,7 +190,7 @@ public class X3Dobject {
     private SXRContext gvrContext = null;
     private Context activityContext = null;
 
-    private SXRSceneObject root = null;
+    private SXRNode root = null;
     /**
      * Array list of DEFined items Clones objects with 'USE' parameter
      * As public, enables implementation of HTML5 DOM's
@@ -202,10 +202,10 @@ public class X3Dobject {
     // When Translation object has multiple properties (center, scale, rotation
     // plus translation)
     // the mesh must be attached to the bottom of these multiply attached
-    // SXRSceneObject's but
-    // the currentSceneObject's parent must be with the original Transform's
+    // SXRNode's but
+    // the currentNode's parent must be with the original Transform's
     // parent.
-    private SXRSceneObject currentSceneObject = null;
+    private SXRNode currentNode = null;
 
     // Since Script Object are made of multiple parts during parsing,
     // this variable will be the active ScriptObject being built
@@ -213,12 +213,12 @@ public class X3Dobject {
 
     // Since SXRShapeObject contains LOD range, 'shapeLODSceneObj' is used only
     // when it's embedded into a Level-of-Detail
-    private SXRSceneObject shapeLODSceneObject = null;
+    private SXRNode shapeLODNode = null;
 
     // points to a sensor that wraps around other nodes.
     private Sensor currentSensor = null;
 
-    private SXRSceneObject meshAttachedSceneObject = null;
+    private SXRNode meshAttachedNode = null;
     private SXRRenderData gvrRenderData = null;
     private SXRVertexBuffer gvrVertexBuffer = null;
     private SXRIndexBuffer gvrIndexBuffer = null;
@@ -229,7 +229,7 @@ public class X3Dobject {
     // gvrRenderingData for x3d
     // SHAPE node
     private boolean gvrGroupingNodeUSEd = false; // for DEFine and USE
-    // gvrSceneObject for x3d
+    // gvrNode for x3d
     // TRANSFORM and GROUP nodes
 
 
@@ -262,7 +262,7 @@ public class X3Dobject {
 
 
     private ShaderSettings shaderSettings = null;
-    private SXRTextViewSceneObject gvrTextViewSceneObject = null;
+    private SXRTextViewNode gvrTextViewNode = null;
 
     private LODmanager lodManager = null;
     private SXRCameraRig cameraRigAtRoot = null;
@@ -297,7 +297,7 @@ public class X3Dobject {
 
     // The Text_Font Params class and Reset() function handle
     // the values set in the <Text> and <FontStyle> nodes, which are
-    // then passed to the SXRTextViewSceneObject constructor
+    // then passed to the SXRTextViewNode constructor
     private static class Text_FontParams {
         static float[] length = null;
         static float maxExtent = 0;
@@ -306,11 +306,11 @@ public class X3Dobject {
         static boolean solid = false;
 
         static String nameFontStyle = ""; // DEFind name associated with FontStyle node
-        static String family = SXRTextViewSceneObject.DEFAULT_FONT;
-        static SXRTextViewSceneObject.justifyTypes justify = SXRTextViewSceneObject.justifyTypes.BEGIN;
+        static String family = SXRTextViewNode.DEFAULT_FONT;
+        static SXRTextViewNode.justifyTypes justify = SXRTextViewNode.justifyTypes.BEGIN;
         static float spacing = 0.0f;
         static float size = 10.0f;
-        static SXRTextViewSceneObject.fontStyleTypes style = SXRTextViewSceneObject.fontStyleTypes.PLAIN;
+        static SXRTextViewNode.fontStyleTypes style = SXRTextViewNode.fontStyleTypes.PLAIN;
     };
 
     private void Init_Text_FontParams() {
@@ -320,11 +320,11 @@ public class X3Dobject {
         Text_FontParams.solid = false;
 
         Text_FontParams.nameFontStyle = ""; // DEFind name associated with FontStyle node
-        Text_FontParams.family = SXRTextViewSceneObject.DEFAULT_FONT;
-        Text_FontParams.justify = SXRTextViewSceneObject.justifyTypes.BEGIN;
+        Text_FontParams.family = SXRTextViewNode.DEFAULT_FONT;
+        Text_FontParams.justify = SXRTextViewNode.justifyTypes.BEGIN;
         Text_FontParams.spacing = 0.0f;
         Text_FontParams.size = 10.0f;
-        Text_FontParams.style = SXRTextViewSceneObject.fontStyleTypes.PLAIN;
+        Text_FontParams.style = SXRTextViewNode.fontStyleTypes.PLAIN;
     }
 
     //Called after parsing </Shape>
@@ -333,12 +333,12 @@ public class X3Dobject {
             // SHAPE node not being USEd (shared) elsewhere
 
             // Shape containts Text
-            if (gvrTextViewSceneObject != null) {
-                gvrTextViewSceneObject.setTextColor((((0xFF << 8)
+            if (gvrTextViewNode != null) {
+                gvrTextViewNode.setTextColor((((0xFF << 8)
                         + (int) (shaderSettings.diffuseColor[0] * 255) << 8)
                         + (int) (shaderSettings.diffuseColor[1] * 255) << 8)
                         + (int) (shaderSettings.diffuseColor[2] * 255));
-                gvrTextViewSceneObject = null;
+                gvrTextViewNode = null;
             }
 
             {
@@ -346,11 +346,11 @@ public class X3Dobject {
 
                 if (!gvrMaterialUSEd) { // if SXRMaterial is NOT set by a USE statement.
 
-                    if (meshAttachedSceneObject == null) {
+                    if (meshAttachedNode == null) {
                         gvrMaterial = shaderSettings.material;
                         gvrRenderData.setMaterial(gvrMaterial);
                     } else {
-                        // This SXRSceneObject came with a SXRRenderData and SXRMaterial
+                        // This SXRNode came with a SXRRenderData and SXRMaterial
                         // already attached.  Examples of this are Text or primitives
                         // such as the Box, Cone, Cylinder, Sphere
 
@@ -366,7 +366,7 @@ public class X3Dobject {
                                 }
                             }
                         }
-                        gvrRenderData = meshAttachedSceneObject.getRenderData();
+                        gvrRenderData = meshAttachedNode.getRenderData();
                         // reset the DEF item to now point to the shader
                         if (definedGRRenderingData != null)
                             definedGRRenderingData.setSXRRenderData(gvrRenderData);
@@ -430,31 +430,31 @@ public class X3Dobject {
 
                     if ( !shaderSettings.movieTextures.isEmpty()) {
                         try {
-                            SXRVideoSceneObjectPlayer<?> videoSceneObjectPlayer = null;
+                            SXRVideoNodePlayer<?> videoNodePlayer = null;
                             try {
-                                videoSceneObjectPlayer = utility.makeExoPlayer(shaderSettings.movieTextures.get(0));
+                                videoNodePlayer = utility.makeExoPlayer(shaderSettings.movieTextures.get(0));
                             }
                             catch (Exception e) {
-                                Log.e(TAG, "Exception getting videoSceneObjectPlayer: " + e);
+                                Log.e(TAG, "Exception getting videoNodePlayer: " + e);
                             }
-                            videoSceneObjectPlayer.start();
+                            videoNodePlayer.start();
 
-                            SXRVideoSceneObject gvrVideoSceneObject =
-                                    new SXRVideoSceneObject(gvrContext, gvrRenderData.getMesh(), videoSceneObjectPlayer,
-                                            SXRVideoSceneObject.SXRVideoType.MONO);
-                            currentSceneObject.addChildObject(gvrVideoSceneObject);
+                            SXRVideoNode gvrVideoNode =
+                                    new SXRVideoNode(gvrContext, gvrRenderData.getMesh(), videoNodePlayer,
+                                            SXRVideoNode.SXRVideoType.MONO);
+                            currentNode.addChildObject(gvrVideoNode);
                             // Primitives such as Box, Cone, etc come with their own mesh
                             // so we need to remove these.
-                            if ( meshAttachedSceneObject != null) {
-                                SXRSceneObject primitiveParent = meshAttachedSceneObject.getParent();
-                                primitiveParent.removeChildObject(meshAttachedSceneObject);
+                            if ( meshAttachedNode != null) {
+                                SXRNode primitiveParent = meshAttachedNode.getParent();
+                                primitiveParent.removeChildObject(meshAttachedNode);
                             }
-                            meshAttachedSceneObject = gvrVideoSceneObject;
+                            meshAttachedNode = gvrVideoNode;
 
                             if (shaderSettings.getMovieTextureName() != null) {
-                                gvrVideoSceneObject.setName(shaderSettings.getMovieTextureName());
+                                gvrVideoNode.setName(shaderSettings.getMovieTextureName());
                                 DefinedItem item = new DefinedItem(shaderSettings.getMovieTextureName());
-                                item.setSXRVideoSceneObject(gvrVideoSceneObject);
+                                item.setSXRVideoNode(gvrVideoNode);
                                 mDefinedItems.add(item);
                             }
                         } catch (Exception e) {
@@ -468,7 +468,7 @@ public class X3Dobject {
                     // GearVR may not be doing texture transforms on primitives or text
                     // crash otherwise.
 
-                    if (meshAttachedSceneObject == null) {
+                    if (meshAttachedNode == null) {
                         if (!shaderSettings.getTextureTransformName().isEmpty()) {
                             DefinedItem definedItem = new DefinedItem(
                                     shaderSettings.getTextureTransformName());
@@ -519,20 +519,20 @@ public class X3Dobject {
             }
         } // end !gvrRenderingDataUSEd
 
-        if (meshAttachedSceneObject != null) {
-            // gvrRenderData already attached to a SXRSceneObject such as a
+        if (meshAttachedNode != null) {
+            // gvrRenderData already attached to a SXRNode such as a
             // Cone or Cylinder or a Movie Texture
-            meshAttachedSceneObject = null;
+            meshAttachedNode = null;
         } else
-            currentSceneObject.attachRenderData(gvrRenderData);
+            currentNode.attachRenderData(gvrRenderData);
 
-        if (lodManager.shapeLODSceneObject != null) {
+        if (lodManager.shapeLODNode != null) {
             // if this Shape node was a direct child of a
             // Level-of-Detial (LOD),then restore the parent object
-            // since we had to add a SXRSceneObject to support
+            // since we had to add a SXRNode to support
             // the Shape node's attachement to LOD.
-            currentSceneObject = currentSceneObject.getParent();
-            lodManager.shapeLODSceneObject = null;
+            currentNode = currentNode.getParent();
+            lodManager.shapeLODNode = null;
         }
 
         gvrMaterialUSEd = false; // for DEFine and USE, true if we encounter a
@@ -547,13 +547,13 @@ public class X3Dobject {
      * X3DObject parses and X3D file using Java SAX parser.
      * Constructor sets up camera rig structure and
      * enables getting to the root of the scene graph by
-     * calling SXRSceneObject.getSceneObjectByName(X3D_ROOT_NODE);
+     * calling SXRNode.getNodeByName(X3D_ROOT_NODE);
      */
     /*********************************************/
     /********** X3Dobject Constructor ************/
     /*********************************************/
     public X3Dobject(SXRAssetLoader.AssetRequest assetRequest,
-                     SXRSceneObject root) {
+                     SXRNode root) {
         try {
             this.assetRequest = assetRequest;
             this.gvrContext = assetRequest.getContext();
@@ -628,14 +628,14 @@ public class X3Dobject {
 
         private void ReplicateSXRSceneObjStructure(String attributeValue) {
             // TODO: needs to complete implementation.  May instead
-            // become a clone() or copy() function in SXRSceneObject
+            // become a clone() or copy() function in SXRNode
             // Transform or Group node to be shared / re-used
-            // Transform or Group constructs a SXRSceneObject. DEF/USE 'shares'
-            // that SXRSceneObject. However, having a SXRSceneObject as a child
+            // Transform or Group constructs a SXRNode. DEF/USE 'shares'
+            // that SXRNode. However, having a SXRNode as a child
 
-            // of another SXRSceneObject (which a <Transform USE="..." /> would do)
+            // of another SXRNode (which a <Transform USE="..." /> would do)
             // causes an infinite loop in the renderer.
-            // Solution therefore is to duplicate SXRSceneObject(s) including children
+            // Solution therefore is to duplicate SXRNode(s) including children
             // and share the SXRMesh and SXRMaterials.
             DefinedItem useItem = null;
             for (DefinedItem definedItem : mDefinedItems) {
@@ -645,43 +645,43 @@ public class X3Dobject {
                 }
             }
             if (useItem != null) {
-                // Get the SXRSceneObject to replicate from the DEFinedItem list.
-                SXRSceneObject gvrSceneObjectDEFitem = useItem.getSXRSceneObject();
+                // Get the SXRNode to replicate from the DEFinedItem list.
+                SXRNode gvrNodeDEFitem = useItem.getSXRNode();
                 String useItemName = useItem.getName();
                 // need to parse through
 
-                while (!gvrSceneObjectDEFitem.hasMesh()) {
-                    String name = gvrSceneObjectDEFitem.getName();
+                while (!gvrNodeDEFitem.hasMesh()) {
+                    String name = gvrNodeDEFitem.getName();
                     String[] splitName = name.split(useItemName);
-                    currentSceneObject = AddSXRSceneObject();
+                    currentNode = AddSXRNode();
                     if (splitName.length > 1)
-                        currentSceneObject.setName("USE_" + useItemName + splitName[1]);
-                    currentSceneObject.getTransform()
-                            .setPosition(gvrSceneObjectDEFitem.getTransform().getPositionX(),
-                                    gvrSceneObjectDEFitem.getTransform().getPositionY(),
-                                    gvrSceneObjectDEFitem.getTransform().getPositionZ());
-                    currentSceneObject.getTransform()
-                            .setRotation(gvrSceneObjectDEFitem.getTransform().getRotationW(),
-                                    gvrSceneObjectDEFitem.getTransform().getRotationX(),
-                                    gvrSceneObjectDEFitem.getTransform().getRotationY(),
-                                    gvrSceneObjectDEFitem.getTransform().getRotationZ());
-                    currentSceneObject.getTransform()
-                            .setScale(gvrSceneObjectDEFitem.getTransform().getScaleX(),
-                                    gvrSceneObjectDEFitem.getTransform().getScaleY(),
-                                    gvrSceneObjectDEFitem.getTransform().getScaleZ());
-                    gvrSceneObjectDEFitem = gvrSceneObjectDEFitem.getChildByIndex(0);
+                        currentNode.setName("USE_" + useItemName + splitName[1]);
+                    currentNode.getTransform()
+                            .setPosition(gvrNodeDEFitem.getTransform().getPositionX(),
+                                    gvrNodeDEFitem.getTransform().getPositionY(),
+                                    gvrNodeDEFitem.getTransform().getPositionZ());
+                    currentNode.getTransform()
+                            .setRotation(gvrNodeDEFitem.getTransform().getRotationW(),
+                                    gvrNodeDEFitem.getTransform().getRotationX(),
+                                    gvrNodeDEFitem.getTransform().getRotationY(),
+                                    gvrNodeDEFitem.getTransform().getRotationZ());
+                    currentNode.getTransform()
+                            .setScale(gvrNodeDEFitem.getTransform().getScaleX(),
+                                    gvrNodeDEFitem.getTransform().getScaleY(),
+                                    gvrNodeDEFitem.getTransform().getScaleZ());
+                    gvrNodeDEFitem = gvrNodeDEFitem.getChildByIndex(0);
                 }
-                if (gvrSceneObjectDEFitem.hasMesh()) {
-                    String name = gvrSceneObjectDEFitem.getName();
-                    SXRRenderData gvrRenderDataDEFitem = gvrSceneObjectDEFitem
+                if (gvrNodeDEFitem.hasMesh()) {
+                    String name = gvrNodeDEFitem.getName();
+                    SXRRenderData gvrRenderDataDEFitem = gvrNodeDEFitem
                             .getRenderData();
-                    currentSceneObject = AddSXRSceneObject();
-                    currentSceneObject.setName("USE_" + useItemName);
+                    currentNode = AddSXRNode();
+                    currentNode.setName("USE_" + useItemName);
                     gvrRenderData = new SXRRenderData(gvrContext);
                     // we are backface culling by default
 
                     gvrRenderData.setCullFace(SXRCullFaceEnum.Back);
-                    currentSceneObject.attachRenderData(gvrRenderData);
+                    currentNode.attachRenderData(gvrRenderData);
                     gvrRenderData.setMaterial(gvrRenderDataDEFitem.getMaterial());
                     gvrRenderData.setMesh(gvrRenderDataDEFitem.getMesh());
                 } else {
@@ -691,15 +691,15 @@ public class X3Dobject {
         } // end ReplicateSXRSceneObjStructure
 
 
-        private SXRSceneObject AddSXRSceneObject() {
-            SXRSceneObject newObject = new SXRSceneObject(gvrContext);
-            if (currentSceneObject == null)
+        private SXRNode AddSXRNode() {
+            SXRNode newObject = new SXRNode(gvrContext);
+            if (currentNode == null)
                 root.addChildObject(newObject);
             else
-                currentSceneObject.addChildObject(newObject);
+                currentNode.addChildObject(newObject);
             return newObject;
 
-        } // end AddSXRSceneObject
+        } // end AddSXRNode
 
         /**
          * Called by the Java SAX parser implementation
@@ -781,12 +781,12 @@ public class X3Dobject {
                         scale = utility.parseFixedLengthFloatString(attributeValue, 3, false, false);
                     }
 
-                    currentSceneObject = AddSXRSceneObject();
+                    currentNode = AddSXRNode();
                     if (name.isEmpty()) {
                         // There is no DEF, thus no animation or interactivity applied to
                         // this Transform.
-                        // Therefore, just set the values in a single SXRSceneObject
-                        SXRTransform transform = currentSceneObject.getTransform();
+                        // Therefore, just set the values in a single SXRNode
+                        SXRTransform transform = currentNode.getTransform();
                         transform.setPosition(translation[0], translation[1],
                                 translation[2]);
                         transform.rotateByAxisWithPivot((float) Math.toDegrees(rotation[3]),
@@ -796,85 +796,85 @@ public class X3Dobject {
                         transform.setScale(scale[0], scale[1], scale[2]);
                     } else {
 
-                        // There is a 'DEF="...."' parameter so save SXRSceneObject
+                        // There is a 'DEF="...."' parameter so save SXRNode
                         // to the DefinedItem's array list in case it's referenced
                         // somewhere else in the X3D file.
 
                         // Array list of DEFined items
                         // Clones objects with USE
                         // This transform may be animated later, which means we must have
-                        // separate SXRSceneObjects
+                        // separate SXRNodes
                         // for each transformation plus center and scaleOrientation if
                         // needed
                         // Order for Transformations:
                         // P' = T * C * R * SR * S * -SR * -C * P
                         // First add the translation
-                        currentSceneObject.getTransform()
+                        currentNode.getTransform()
                                 .setPosition(translation[0], translation[1], translation[2]);
-                        currentSceneObject.setName(name + TRANSFORM_TRANSLATION_);
+                        currentNode.setName(name + TRANSFORM_TRANSLATION_);
                         // now check if we have a center value.
                         if ((center[0] != 0) || (center[1] != 0) || (center[2] != 0)) {
-                            currentSceneObject = AddSXRSceneObject();
-                            currentSceneObject.getTransform()
+                            currentNode = AddSXRNode();
+                            currentNode.getTransform()
                                     .setPosition(center[0], center[1], center[2]);
-                            currentSceneObject.setName(name + TRANSFORM_CENTER_);
+                            currentNode.setName(name + TRANSFORM_CENTER_);
                         }
                         // add rotation
-                        currentSceneObject = AddSXRSceneObject();
-                        currentSceneObject.getTransform()
+                        currentNode = AddSXRNode();
+                        currentNode.getTransform()
                                 .setRotationByAxis((float) Math.toDegrees(rotation[3]),
                                         rotation[0], rotation[1], rotation[2]);
-                        currentSceneObject.setName(name + TRANSFORM_ROTATION_);
+                        currentNode.setName(name + TRANSFORM_ROTATION_);
                         // now check if we have a scale orientation value.
                         if ((scaleOrientation[0] != 0) || (scaleOrientation[1] != 0)
                                 || (scaleOrientation[2] != 1) || (scaleOrientation[3] != 0)) {
-                            currentSceneObject = AddSXRSceneObject();
-                            currentSceneObject.getTransform()
+                            currentNode = AddSXRNode();
+                            currentNode.getTransform()
                                     .setRotationByAxis((float) Math
                                                     .toDegrees(scaleOrientation[3]), scaleOrientation[0],
                                             scaleOrientation[1], scaleOrientation[2]);
-                            currentSceneObject.setName(name + TRANSFORM_SCALE_ORIENTATION_);
+                            currentNode.setName(name + TRANSFORM_SCALE_ORIENTATION_);
                         }
                         // add rotation
-                        currentSceneObject = AddSXRSceneObject();
-                        currentSceneObject.getTransform().setScale(scale[0], scale[1],
+                        currentNode = AddSXRNode();
+                        currentNode.getTransform().setScale(scale[0], scale[1],
                                 scale[2]);
-                        currentSceneObject.setName(name + TRANSFORM_SCALE_);
+                        currentNode.setName(name + TRANSFORM_SCALE_);
                         // if we had a scale orientation, now we have to negate it.
                         if ((scaleOrientation[0] != 0) || (scaleOrientation[1] != 0)
                                 || (scaleOrientation[2] != 1) || (scaleOrientation[3] != 0)) {
-                            currentSceneObject = AddSXRSceneObject();
-                            currentSceneObject.getTransform()
+                            currentNode = AddSXRNode();
+                            currentNode.getTransform()
                                     .setRotationByAxis((float) Math
                                                     .toDegrees(-scaleOrientation[3]), scaleOrientation[0],
                                             scaleOrientation[1], scaleOrientation[2]);
-                            currentSceneObject
+                            currentNode
                                     .setName(name + TRANSFORM_NEGATIVE_SCALE_ORIENTATION_);
                         }
                         // now check if we have a center value.
                         if ((center[0] != 0) || (center[1] != 0) || (center[2] != 0)) {
-                            currentSceneObject = AddSXRSceneObject();
-                            currentSceneObject.getTransform()
+                            currentNode = AddSXRNode();
+                            currentNode.getTransform()
                                     .setPosition(-center[0], -center[1], -center[2]);
-                            currentSceneObject.setName(name + TRANSFORM_NEGATIVE_CENTER_);
+                            currentNode.setName(name + TRANSFORM_NEGATIVE_CENTER_);
                         }
                         // Actual object that will have SXRendering and SXRMesh attached
-                        currentSceneObject = AddSXRSceneObject();
-                        currentSceneObject.setName(name);
+                        currentNode = AddSXRNode();
+                        currentNode.setName(name);
 
                         // save the object for Interactivity, Animation and Scripts
                         // The AxisAngle is saved for Scripts which is how X3D describes
                         // rotations, not quaternions.
                         DefinedItem definedItem = new DefinedItem(name, rotation[3],
                                 rotation[0], rotation[1], rotation[2]);
-                        definedItem.setSXRSceneObject(currentSceneObject);
+                        definedItem.setSXRNode(currentNode);
                         mDefinedItems.add(definedItem); // Array list of DEFined items
                     } // end if DEF name and thus possible animation / interactivity
 
                     // Check if there is an active Level-of-Detail (LOD)
-                    // and if so add this currentSceneObject if is
+                    // and if so add this currentNode if is
                     // a direct child of this LOD.
-                    if (lodManager.isActive()) lodManager.AddLODSceneObject( currentSceneObject );
+                    if (lodManager.isActive()) lodManager.AddLODNode( currentNode );
 
                     if ( proto != null) {
                         if ( proto.isProtoStateProtoBody()) {
@@ -901,19 +901,19 @@ public class X3Dobject {
                     // There is a 'DEF="...."' parameter so save it to the DefinedItem's
                     // array list
 
-                    currentSceneObject = AddSXRSceneObject();
+                    currentNode = AddSXRNode();
                     attributeValue = attributes.getValue("DEF");
                     if (attributeValue != null) {
-                        currentSceneObject.setName(attributeValue);
+                        currentNode.setName(attributeValue);
                         DefinedItem definedItem = new DefinedItem(attributeValue);
-                        definedItem.setSXRSceneObject(currentSceneObject);
+                        definedItem.setSXRNode(currentNode);
                         mDefinedItems.add(definedItem); // Array list of DEFined items
                     }
 
                     // Check if there is an active Level-of-Detail (LOD)
-                    // and add this currentSceneObject if is
+                    // and add this currentNode if is
                     // a direct child of this LOD.
-                    if (lodManager.isActive()) lodManager.AddLODSceneObject( currentSceneObject );
+                    if (lodManager.isActive()) lodManager.AddLODNode( currentNode );
                 }
 
             } // end <Group> node
@@ -930,16 +930,16 @@ public class X3Dobject {
 
                 // Check if this Shape node is part of a Level-of-Detail
                 // If there is an active Level-of-Detail (LOD)
-                // add this Shape node to new SXRSceneObject as a
+                // add this Shape node to new SXRNode as a
                 // a direct child of this LOD.
                 if (lodManager.isActive()) {
-                    if ( lodManager.transformLODSceneObject == currentSceneObject ) {
+                    if ( lodManager.transformLODNode == currentNode ) {
                         // <Shape> node not under a <Transform> inside a LOD node
-                        // so we need to attach it to a SXRSceneObject, and
+                        // so we need to attach it to a SXRNode, and
                         // then attach it to the LOD
-                        lodManager.shapeLODSceneObject = AddSXRSceneObject();
-                        currentSceneObject = lodManager.shapeLODSceneObject;
-                        lodManager.AddLODSceneObject( currentSceneObject );
+                        lodManager.shapeLODNode = AddSXRNode();
+                        currentNode = lodManager.shapeLODNode;
+                        lodManager.AddLODNode( currentNode );
                     }
                 }
 
@@ -1511,12 +1511,12 @@ public class X3Dobject {
                             // SXRf does not allow a light attached at two places
                             // so copy the attributes of the original light into the second
                             // light
-                            SXRSceneObject definedSceneObject = useItem.getSXRSceneObject();
-                            SXRPointLight definedPtLight = (SXRPointLight) definedSceneObject
+                            SXRNode definedNode = useItem.getSXRNode();
+                            SXRPointLight definedPtLight = (SXRPointLight) definedNode
                                     .getLight();
                             SXRTransform definedTransform = definedPtLight.getTransform();
 
-                            SXRSceneObject newPtLightSceneObj = AddSXRSceneObject();
+                            SXRNode newPtLightSceneObj = AddSXRNode();
                             newPtLightSceneObj.getTransform()
                                     .setPosition(definedTransform.getPositionX(),
                                             definedTransform.getPositionY(),
@@ -1564,7 +1564,7 @@ public class X3Dobject {
                         boolean on = true;
                         float radius = 100;
 
-                        SXRSceneObject newPtLightSceneObj = AddSXRSceneObject();
+                        SXRNode newPtLightSceneObj = AddSXRNode();
                         SXRPointLight newPtLight = new SXRPointLight(gvrContext);
                         newPtLightSceneObj.attachLight(newPtLight);
 
@@ -1572,7 +1572,7 @@ public class X3Dobject {
                         if (attributeValue != null) {
                             newPtLightSceneObj.setName(attributeValue);
                             DefinedItem definedItem = new DefinedItem(attributeValue);
-                            definedItem.setSXRSceneObject(newPtLightSceneObj);
+                            definedItem.setSXRNode(newPtLightSceneObj);
                             mDefinedItems.add(definedItem); // Array list of DEFined items
                             // Clones objects with USE
                         }
@@ -1659,12 +1659,12 @@ public class X3Dobject {
                             // SXRf does not allow a light attached at two places
                             // so copy the attributes of the original light into the second
                             // light
-                            SXRSceneObject definedSceneObject = useItem.getSXRSceneObject();
-                            SXRDirectLight definedDirectLight = (SXRDirectLight) definedSceneObject
+                            SXRNode definedNode = useItem.getSXRNode();
+                            SXRDirectLight definedDirectLight = (SXRDirectLight) definedNode
                                     .getLight();
                             SXRTransform definedTransform = definedDirectLight.getTransform();
 
-                            SXRSceneObject newDirectLightSceneObj = AddSXRSceneObject();
+                            SXRNode newDirectLightSceneObj = AddSXRNode();
                             newDirectLightSceneObj.getTransform()
                                     .setRotation(definedTransform.getRotationW(),
                                             definedTransform.getRotationX(),
@@ -1704,7 +1704,7 @@ public class X3Dobject {
                         float intensity = 1;
                         boolean on = true;
 
-                        SXRSceneObject newDirectionalLightSceneObj = AddSXRSceneObject();
+                        SXRNode newDirectionalLightSceneObj = AddSXRNode();
                         SXRDirectLight newDirectionalLight = new SXRDirectLight(gvrContext);
                         newDirectionalLightSceneObj.attachLight(newDirectionalLight);
                         DefinedItem definedItem = null;
@@ -1713,7 +1713,7 @@ public class X3Dobject {
                         if (attributeValue != null) {
                             newDirectionalLightSceneObj.setName(attributeValue);
                             definedItem = new DefinedItem(attributeValue);
-                            definedItem.setSXRSceneObject(newDirectionalLightSceneObj);
+                            definedItem.setSXRNode(newDirectionalLightSceneObj);
                             mDefinedItems.add(definedItem); // Array list of DEFined items
                             // Clones objects with USE
                         }
@@ -1788,12 +1788,12 @@ public class X3Dobject {
                             // SXRf does not allow a light attached at two places
                             // so copy the attributes of the original light into the second
                             // light
-                            SXRSceneObject definedSceneObject = useItem.getSXRSceneObject();
-                            SXRSpotLight definedSpotLight = (SXRSpotLight) definedSceneObject
+                            SXRNode definedNode = useItem.getSXRNode();
+                            SXRSpotLight definedSpotLight = (SXRSpotLight) definedNode
                                     .getLight();
                             SXRTransform definedTransform = definedSpotLight.getTransform();
 
-                            SXRSceneObject newSpotLightSceneObj = AddSXRSceneObject();
+                            SXRNode newSpotLightSceneObj = AddSXRNode();
                             newSpotLightSceneObj.getTransform()
                                     .setPosition(definedTransform.getPositionX(),
                                             definedTransform.getPositionY(),
@@ -1856,7 +1856,7 @@ public class X3Dobject {
                         boolean on = true;
                         float radius = 100;
 
-                        SXRSceneObject newSpotLightSceneObj = AddSXRSceneObject();
+                        SXRNode newSpotLightSceneObj = AddSXRNode();
                         SXRSpotLight newSpotLight = new SXRSpotLight(gvrContext);
                         newSpotLightSceneObj.attachLight(newSpotLight);
 
@@ -1866,7 +1866,7 @@ public class X3Dobject {
                         if (attributeValue != null) {
                             newSpotLightSceneObj.setName(attributeValue);
                             definedItem = new DefinedItem(attributeValue);
-                            definedItem.setSXRSceneObject(newSpotLightSceneObj);
+                            definedItem.setSXRNode(newSpotLightSceneObj);
                             mDefinedItems.add(definedItem); // Array list of DEFined items
                             // Clones objects with USE
                         }
@@ -2150,9 +2150,9 @@ public class X3Dobject {
                         solid = utility.parseBooleanString(attributeValue);
                     }
                     Vector3f sizeVector = new Vector3f(size[0], size[1], size[2]);
-                    SXRCubeSceneObject gvrCubeSceneObject = new SXRCubeSceneObject(
+                    SXRCubeNode gvrCubeNode = new SXRCubeNode(
                             gvrContext, solid, sizeVector);
-                    gvrCubeSceneObject.getRenderData().setMaterial(new SXRMaterial(gvrContext, x3DShader));
+                    gvrCubeNode.getRenderData().setMaterial(new SXRMaterial(gvrContext, x3DShader));
 
                     if ( proto != null ) {
                         if (proto.getGeometry() == null) {
@@ -2162,9 +2162,9 @@ public class X3Dobject {
                             geometry.setBox( boxObj );
                         }
                     }
-                    else currentSceneObject.addChildObject(gvrCubeSceneObject);
+                    else currentNode.addChildObject(gvrCubeNode);
 
-                    meshAttachedSceneObject = gvrCubeSceneObject;
+                    meshAttachedNode = gvrCubeNode;
                 } // end <Box> node
 
 
@@ -2196,7 +2196,7 @@ public class X3Dobject {
                     if (attributeValue != null) {
                         solid = utility.parseBooleanString(attributeValue);
                     }
-                    SXRCylinderSceneObject.CylinderParams params = new SXRCylinderSceneObject.CylinderParams();
+                    SXRCylinderNode.CylinderParams params = new SXRCylinderNode.CylinderParams();
                     params.BottomRadius = bottomRadius;
                     params.TopRadius = 0;
                     params.Height = height;
@@ -2204,7 +2204,7 @@ public class X3Dobject {
                     params.HasTopCap = false;
                     params.HasBottomCap = bottom;
                     params.Material = new SXRMaterial(gvrContext, x3DShader);
-                    SXRCylinderSceneObject gvrConeSceneObject = new SXRCylinderSceneObject(gvrContext,
+                    SXRCylinderNode gvrConeNode = new SXRCylinderNode(gvrContext,
                             params);
 
                     if ( proto != null ) {
@@ -2215,10 +2215,10 @@ public class X3Dobject {
                             geometry.setCone( coneObj );
                         }
                     }
-                    else currentSceneObject.addChildObject(gvrConeSceneObject);
-                    //currentSceneObject.addChildObject(cone);
-                    //meshAttachedSceneObject = cone;
-                    meshAttachedSceneObject = gvrConeSceneObject;
+                    else currentNode.addChildObject(gvrConeNode);
+                    //currentNode.addChildObject(cone);
+                    //meshAttachedNode = cone;
+                    meshAttachedNode = gvrConeNode;
                 }  // end <Cone> node
 
 
@@ -2255,7 +2255,7 @@ public class X3Dobject {
                     if (attributeValue != null) {
                         top = utility.parseBooleanString(attributeValue);
                     }
-                    SXRCylinderSceneObject.CylinderParams params = new SXRCylinderSceneObject.CylinderParams();
+                    SXRCylinderNode.CylinderParams params = new SXRCylinderNode.CylinderParams();
                     params.BottomRadius = radius;
                     params.TopRadius = radius;
                     params.Height = height;
@@ -2263,7 +2263,7 @@ public class X3Dobject {
                     params.HasTopCap = top;
                     params.FacingOut = solid;
                     params.Material = new SXRMaterial(gvrContext, x3DShader);
-                    SXRCylinderSceneObject gvrCylinderSceneObject = new SXRCylinderSceneObject(
+                    SXRCylinderNode gvrCylinderNode = new SXRCylinderNode(
                             gvrContext, params);
                     if ( proto != null ) {
                         if (proto.getGeometry() == null) {
@@ -2273,8 +2273,8 @@ public class X3Dobject {
                             geometry.setCylinder( cylinder );
                         }
                     }
-                    else currentSceneObject.addChildObject(gvrCylinderSceneObject);
-                    meshAttachedSceneObject = gvrCylinderSceneObject;
+                    else currentNode.addChildObject(gvrCylinderNode);
+                    meshAttachedNode = gvrCylinderNode;
 
                 } // end <Cylinder> node
 
@@ -2291,7 +2291,7 @@ public class X3Dobject {
                     if (attributeValue != null) {
                         solid = utility.parseBooleanString(attributeValue);
                     }
-                    SXRSphereSceneObject gvrSphereSceneObject = new SXRSphereSceneObject(
+                    SXRSphereNode gvrSphereNode = new SXRSphereNode(
                             gvrContext, solid, new SXRMaterial(gvrContext, x3DShader), radius);
 
                     if ( proto != null ) {
@@ -2302,8 +2302,8 @@ public class X3Dobject {
                             geometry.setSphere( sphere );
                         }
                     }
-                    else currentSceneObject.addChildObject(gvrSphereSceneObject);
-                    meshAttachedSceneObject = gvrSphereSceneObject;
+                    else currentNode.addChildObject(gvrSphereNode);
+                    meshAttachedNode = gvrSphereNode;
 
                 } // end <Sphere> node
 
@@ -2373,7 +2373,7 @@ public class X3Dobject {
                     // Since viewpoints can be under a Transform, save the parent.
                     Viewpoint viewpoint = new Viewpoint(centerOfRotation, description,
                             fieldOfView, jump, name, orientation, position, retainUserOffsets,
-                            currentSceneObject);
+                            currentNode);
                     viewpoints.add(viewpoint);
 
                     if ( !name.equals("") ) {
@@ -2453,14 +2453,14 @@ public class X3Dobject {
                     attributeValue = attributes.getValue("USE");
                     if (attributeValue != null) { // shared FontStyle
                         // copy the values from a defined style type
-                        SXRSceneObject definedSceneObject = root.getSceneObjectByName(attributeValue);
-                        if ( definedSceneObject.getClass().equals(SXRTextViewSceneObject.class) ) {
-                            SXRTextViewSceneObject gvrTextViewSceneObject = (SXRTextViewSceneObject) definedSceneObject;
-                            Text_FontParams.family = gvrTextViewSceneObject.getFontFamily();
-                            Text_FontParams.justify = gvrTextViewSceneObject.getJustification();
-                            Text_FontParams.spacing = gvrTextViewSceneObject.getLineSpacing();
-                            Text_FontParams.size = gvrTextViewSceneObject.getSize();
-                            Text_FontParams.style = gvrTextViewSceneObject.getStyleType();
+                        SXRNode definedNode = root.getNodeByName(attributeValue);
+                        if ( definedNode.getClass().equals(SXRTextViewNode.class) ) {
+                            SXRTextViewNode gvrTextViewNode = (SXRTextViewNode) definedNode;
+                            Text_FontParams.family = gvrTextViewNode.getFontFamily();
+                            Text_FontParams.justify = gvrTextViewNode.getJustification();
+                            Text_FontParams.spacing = gvrTextViewNode.getLineSpacing();
+                            Text_FontParams.size = gvrTextViewNode.getSize();
+                            Text_FontParams.style = gvrTextViewNode.getStyleType();
                         }
                         else {
                             Log.e(TAG, "Error: FontStyle USE='" + attributeValue + "'; No matching DEF='" + attributeValue + "'.");
@@ -2493,15 +2493,15 @@ public class X3Dobject {
                         if (attributeValue != null) {
                             //String[] justifyMFString = utility.parseMFString(attributeValue);
                             justifyMFString = utility.parseMFString(attributeValue);
-                            SXRTextViewSceneObject.justifyTypes[] justify = new SXRTextViewSceneObject.justifyTypes[justifyMFString.length];
+                            SXRTextViewNode.justifyTypes[] justify = new SXRTextViewNode.justifyTypes[justifyMFString.length];
                             for (int i = 0; i < justify.length; i++) {
                                 if (justifyMFString[i].equalsIgnoreCase("END"))
-                                    justify[i] = SXRTextViewSceneObject.justifyTypes.END;
+                                    justify[i] = SXRTextViewNode.justifyTypes.END;
                                 else if (justifyMFString[i].equalsIgnoreCase("FIRST"))
-                                    justify[i] = SXRTextViewSceneObject.justifyTypes.FIRST;
+                                    justify[i] = SXRTextViewNode.justifyTypes.FIRST;
                                 else if (justifyMFString[i].equalsIgnoreCase("MIDDLE"))
-                                    justify[i] = SXRTextViewSceneObject.justifyTypes.MIDDLE;
-                                else justify[i] = SXRTextViewSceneObject.justifyTypes.BEGIN;
+                                    justify[i] = SXRTextViewNode.justifyTypes.MIDDLE;
+                                else justify[i] = SXRTextViewNode.justifyTypes.BEGIN;
                             }
                             Text_FontParams.justify = justify[0]; // we only accept one justification per string
                         }
@@ -2526,13 +2526,13 @@ public class X3Dobject {
                         attributeValue = attributes.getValue("style");
                         if (attributeValue != null) {
                             if (attributeValue.equalsIgnoreCase("BOLD")) {
-                                Text_FontParams.style = SXRTextViewSceneObject.fontStyleTypes.BOLD;
+                                Text_FontParams.style = SXRTextViewNode.fontStyleTypes.BOLD;
                             } else if (attributeValue.equalsIgnoreCase("ITALIC")) {
-                                Text_FontParams.style = SXRTextViewSceneObject.fontStyleTypes.ITALIC;
+                                Text_FontParams.style = SXRTextViewNode.fontStyleTypes.ITALIC;
                             } else if (attributeValue.equalsIgnoreCase("BOLDITALIC")) {
-                                Text_FontParams.style = SXRTextViewSceneObject.fontStyleTypes.BOLDITALIC;
+                                Text_FontParams.style = SXRTextViewNode.fontStyleTypes.BOLDITALIC;
                             } else {
-                                Text_FontParams.style = SXRTextViewSceneObject.fontStyleTypes.PLAIN;
+                                Text_FontParams.style = SXRTextViewNode.fontStyleTypes.PLAIN;
                             }
                         }
                         attributeValue = attributes.getValue("topToBottom");
@@ -2588,34 +2588,34 @@ public class X3Dobject {
                     attributeValue = attributes.getValue("url");
                     if (attributeValue != null) {
                         url[0] = attributeValue;
-                        SXRSceneObject inlineSXRSceneObject = currentSceneObject; // preserve
+                        SXRNode inlineSXRNode = currentNode; // preserve
                         // the
-                        // currentSceneObject
+                        // currentNode
                         if (lodManager.isActive()  &&
-                                (inlineSXRSceneObject.getComponent(SXRLODGroup.getComponentType()) != null)) {
-                            inlineSXRSceneObject = AddSXRSceneObject();
-                            inlineSXRSceneObject.setName("inlineSXRSceneObject"
+                                (inlineSXRNode.getComponent(SXRLODGroup.getComponentType()) != null)) {
+                            inlineSXRNode = AddSXRNode();
+                            inlineSXRNode.setName("inlineSXRNode"
                                     + lodManager.getCurrentRangeIndex());
-                            final SXRSceneObject parent = inlineSXRSceneObject.getParent();
+                            final SXRNode parent = inlineSXRNode.getParent();
                             if (null == parent.getComponent(SXRLODGroup.getComponentType())) {
                                 parent.attachComponent(new SXRLODGroup(gvrContext));
                             }
                             final SXRLODGroup lodGroup = (SXRLODGroup) parent.getComponent(SXRLODGroup.getComponentType());
-                            lodGroup.addRange(lodManager.getMinRange(), inlineSXRSceneObject);
+                            lodGroup.addRange(lodManager.getMinRange(), inlineSXRNode);
                             lodManager.increment();
                         }
-                        InlineObject inlineObject = new InlineObject(inlineSXRSceneObject,
+                        InlineObject inlineObject = new InlineObject(inlineSXRNode,
                                 url);
                         inlineObjects.add(inlineObject);
                     }
 
-                    // LOD has it's own SXRSceneObject which has a
+                    // LOD has it's own SXRNode which has a
                     // SXRLODGroup component attached
-                    if (lodManager.isActive() && lodManager.transformLODSceneObject == null) {
-                    //if (lodManager.transformLODSceneObject == null) {
-                        lodManager.transformLODSceneObject = AddSXRSceneObject();
-                        lodManager.transformLODSceneObject.attachComponent(new SXRLODGroup(gvrContext));
-                        currentSceneObject = lodManager.transformLODSceneObject;
+                    if (lodManager.isActive() && lodManager.transformLODNode == null) {
+                    //if (lodManager.transformLODNode == null) {
+                        lodManager.transformLODNode = AddSXRNode();
+                        lodManager.transformLODNode.attachComponent(new SXRLODGroup(gvrContext));
+                        currentNode = lodManager.transformLODNode;
                     }
                 } // end <Inline> node
 
@@ -2650,12 +2650,12 @@ public class X3Dobject {
                     }
                     lodManager.set(range, center);
 
-                    // LOD has it's own SXRSceneObject which has a
+                    // LOD has it's own SXRNode which has a
                     // SXRLODGroup component attached
-                    if (lodManager.transformLODSceneObject == null) {
-                        lodManager.transformLODSceneObject = AddSXRSceneObject();
-                        lodManager.transformLODSceneObject.attachComponent(new SXRLODGroup(gvrContext));
-                        currentSceneObject = lodManager.transformLODSceneObject;
+                    if (lodManager.transformLODNode == null) {
+                        lodManager.transformLODNode = AddSXRNode();
+                        lodManager.transformLODNode.attachComponent(new SXRLODGroup(gvrContext));
+                        currentNode = lodManager.transformLODNode;
                     }
 
                 } // end <LOD> Level-of-Detail node
@@ -2674,15 +2674,15 @@ public class X3Dobject {
                     if (attributeValue != null) {
                         whichChoice = utility.parseIntegerString(attributeValue);
                     }
-                    currentSceneObject = AddSXRSceneObject();
-                    currentSceneObject.setName( name );
+                    currentNode = AddSXRNode();
+                    currentNode.setName( name );
 
                     SXRSwitch gvrSwitch = new SXRSwitch( gvrContext );
                     gvrSwitch.setSwitchIndex( whichChoice );
-                    currentSceneObject.attachComponent(gvrSwitch);
+                    currentNode.attachComponent(gvrSwitch);
 
-                    DefinedItem definedItem = new DefinedItem(currentSceneObject.getName());
-                    definedItem.setSXRSceneObject(currentSceneObject);
+                    DefinedItem definedItem = new DefinedItem(currentNode.getName());
+                    definedItem.setSXRNode(currentNode);
                     mDefinedItems.add(definedItem); // Array list of DEFined items in the X3D scene
                 } // end <Switch> node
 
@@ -2715,10 +2715,10 @@ public class X3Dobject {
                     }
                     // Set the currentSensor pointer so that child objects will be added
                     // to the list of eye pointer objects.
-                    currentSceneObject = AddSXRSceneObject();
-                    currentSceneObject.setName(name);
+                    currentNode = AddSXRNode();
+                    currentNode.setName(name);
                     Sensor sensor = new Sensor(name, Sensor.Type.ANCHOR,
-                            currentSceneObject, true);
+                            currentNode, true);
                     sensor.setAnchorURL(url);
                     sensors.add(sensor);
                     animationInteractivityManager.BuildInteractiveObjectFromAnchor(sensor, url);
@@ -2743,10 +2743,10 @@ public class X3Dobject {
                         enabled = utility.parseBooleanString(attributeValue);
                     }
 
-                    Sensor sensor = new Sensor(name, Sensor.Type.TOUCH, currentSceneObject, enabled);
+                    Sensor sensor = new Sensor(name, Sensor.Type.TOUCH, currentNode, enabled);
                     sensors.add(sensor);
                     // add colliders to all objects under the touch sensor
-                    currentSceneObject.attachCollider(new SXRMeshCollider(gvrContext, true));
+                    currentNode.attachCollider(new SXRMeshCollider(gvrContext, true));
                 } // end <TouchSensor> node
 
 
@@ -2780,11 +2780,11 @@ public class X3Dobject {
                         minPosition.setValue(minValues[0], minValues[1]);
                     }
 
-                    Sensor sensor = new Sensor(name, Sensor.Type.PLANE, currentSceneObject, enabled);
+                    Sensor sensor = new Sensor(name, Sensor.Type.PLANE, currentNode, enabled);
                     sensor.setMinMaxValues(minPosition, maxPosition);
                     sensors.add(sensor);
                     // add colliders to all objects under the touch sensor
-                    currentSceneObject.attachCollider(new SXRMeshCollider(gvrContext, true));
+                    currentNode.attachCollider(new SXRMeshCollider(gvrContext, true));
                 } // end <PlaneSensor> node
 
 
@@ -2834,12 +2834,12 @@ public class X3Dobject {
                         minAngle.setValue(minValue);
                     }
 
-                    Sensor sensor = new Sensor(name, Sensor.Type.CYLINDER, currentSceneObject, enabled.getValue() );
+                    Sensor sensor = new Sensor(name, Sensor.Type.CYLINDER, currentNode, enabled.getValue() );
                     sensor.setMinMaxAngle(minAngle, maxAngle);
                     sensor.setAxisRotation( axisRotation );
                     sensors.add(sensor);
                     // add colliders to all objects under the touch sensor
-                    currentSceneObject.attachCollider(new SXRMeshCollider(gvrContext, true));
+                    currentNode.attachCollider(new SXRMeshCollider(gvrContext, true));
                 } // end <CylinderSensor> node
 
 
@@ -2861,10 +2861,10 @@ public class X3Dobject {
                         enabled = utility.parseBooleanString(attributeValue);
                     }
 
-                    Sensor sensor = new Sensor(name, Sensor.Type.SPHERE, currentSceneObject, enabled);
+                    Sensor sensor = new Sensor(name, Sensor.Type.SPHERE, currentNode, enabled);
                     sensors.add(sensor);
                     // add colliders to all objects under the touch sensor
-                    currentSceneObject.attachCollider(new SXRMeshCollider(gvrContext, true));
+                    currentNode.attachCollider(new SXRMeshCollider(gvrContext, true));
                 } // end <SphereSensor> node
 
 
@@ -3154,12 +3154,12 @@ public class X3Dobject {
                                 "NavigationInfo visibilityLimit attribute not implemented. ");
                     }
                     if (headlight) {
-                        SXRSceneObject headlightSceneObject = new SXRSceneObject(gvrContext);
+                        SXRNode headlightNode = new SXRNode(gvrContext);
                         SXRDirectLight headLight = new SXRDirectLight(gvrContext);
-                        headlightSceneObject.attachLight(headLight);
+                        headlightNode.attachLight(headLight);
                         headLight.setDiffuseIntensity(1, 1, 1, 1);
-                        headlightSceneObject.setName("HeadLight");
-                        SXRSceneObject cameraHeadTransform = cameraRigAtRoot.getHeadTransformObject();
+                        headlightNode.setName("HeadLight");
+                        SXRNode cameraHeadTransform = cameraRigAtRoot.getHeadTransformObject();
                         SXRPerspectiveCamera gvrCenterCamera = cameraRigAtRoot.getCenterCamera();
                         cameraHeadTransform.attachLight(headLight);
                     }
@@ -3302,7 +3302,7 @@ public class X3Dobject {
                                             gvrContext, assetID)));
                         }
 
-                        SXRCubeSceneObject mCubeEvironment = new SXRCubeSceneObject(
+                        SXRCubeNode mCubeEvironment = new SXRCubeNode(
                                 gvrContext, false, textureList);
                         mCubeEvironment.getRenderData().setMaterial(new SXRMaterial(gvrContext, x3DShader));
                         mCubeEvironment.getTransform().setScale(CUBE_WIDTH, CUBE_WIDTH,
@@ -3824,34 +3824,34 @@ public class X3Dobject {
                 throws SAXException {
             if (qName.equalsIgnoreCase("Transform")) {
                 if (!gvrGroupingNodeUSEd) {
-                    if (currentSceneObject.getParent() == root)
-                        currentSceneObject = null;
+                    if (currentNode.getParent() == root)
+                        currentNode = null;
                     else {
-                        String name = currentSceneObject.getName();
-                        currentSceneObject = currentSceneObject.getParent();
-                        while (currentSceneObject.getName()
+                        String name = currentNode.getName();
+                        currentNode = currentNode.getParent();
+                        while (currentNode.getName()
                                 .equals(name + TRANSFORM_ROTATION_)
-                                || currentSceneObject.getName()
+                                || currentNode.getName()
                                 .equals(name + TRANSFORM_TRANSLATION_)
-                                || currentSceneObject.getName().equals(name + TRANSFORM_SCALE_)
-                                || currentSceneObject.getName().equals(name + TRANSFORM_CENTER_)
-                                || currentSceneObject.getName()
+                                || currentNode.getName().equals(name + TRANSFORM_SCALE_)
+                                || currentNode.getName().equals(name + TRANSFORM_CENTER_)
+                                || currentNode.getName()
                                 .equals(name + TRANSFORM_NEGATIVE_CENTER_)
-                                || currentSceneObject.getName()
+                                || currentNode.getName()
                                 .equals(name + TRANSFORM_SCALE_ORIENTATION_)
-                                || currentSceneObject.getName()
+                                || currentNode.getName()
                                 .equals(name + TRANSFORM_NEGATIVE_SCALE_ORIENTATION_)) {
-                            currentSceneObject = currentSceneObject.getParent();
+                            currentNode = currentNode.getParent();
                         }
                     }
                 }
                 gvrGroupingNodeUSEd = false;
             } // end </Transform> parsing
             else if (qName.equalsIgnoreCase("Group")) {
-                if (currentSceneObject.getParent() == root)
-                    currentSceneObject = null;
+                if (currentNode.getParent() == root)
+                    currentNode = null;
                 else
-                    currentSceneObject = currentSceneObject.getParent();
+                    currentNode = currentNode.getParent();
             } else if (qName.equalsIgnoreCase("Shape")) {
                 if (proto == null) ShapePostParsing();
             } // end of ending Shape node
@@ -3932,62 +3932,62 @@ public class X3Dobject {
                 ;
             } else if (qName.equalsIgnoreCase("Text")) {
                 if ( proto == null ) {
-                    gvrTextViewSceneObject = new SXRTextViewSceneObject(gvrContext,
+                    gvrTextViewNode = new SXRTextViewNode(gvrContext,
                             Text_FontParams.nameFontStyle,
                             Text_FontParams.string, Text_FontParams.family, Text_FontParams.justify,
                             Text_FontParams.spacing, Text_FontParams.size, Text_FontParams.style);
 
-                    SXRRenderData gvrRenderData = gvrTextViewSceneObject.getRenderData();
+                    SXRRenderData gvrRenderData = gvrTextViewNode.getRenderData();
                     gvrRenderData.setRenderingOrder(SXRRenderData.SXRRenderingOrder.TRANSPARENT);
 
 
                     if (!Text_FontParams.nameTextAttribute.equals("")) {
                         // add it to the list of DEFined objects
                         DefinedItem definedItem = new DefinedItem(Text_FontParams.nameTextAttribute);
-                        definedItem.setSXRTextViewSceneObject(gvrTextViewSceneObject);
+                        definedItem.setSXRTextViewNode(gvrTextViewNode);
                         mDefinedItems.add(definedItem); // Array list of DEFined items
                     }
                     if (!Text_FontParams.nameFontStyle.equals("")) {
                         // add FontStyle to the list of DEFined objects
                         DefinedItem definedItem = new DefinedItem(Text_FontParams.nameFontStyle);
-                        definedItem.setSXRTextViewSceneObject(gvrTextViewSceneObject);
+                        definedItem.setSXRTextViewNode(gvrTextViewNode);
                         mDefinedItems.add(definedItem); // Array list of DEFined items
                     }
 
-                    gvrTextViewSceneObject.setTextColor(Color.WHITE); // default
-                    gvrTextViewSceneObject.setBackgroundColor(Color.TRANSPARENT); // default
-                    currentSceneObject.addChildObject(gvrTextViewSceneObject);
+                    gvrTextViewNode.setTextColor(Color.WHITE); // default
+                    gvrTextViewNode.setBackgroundColor(Color.TRANSPARENT); // default
+                    currentNode.addChildObject(gvrTextViewNode);
                 }
             } else if (qName.equalsIgnoreCase("FontStyle")) {
                 ;
             } else if (qName.equalsIgnoreCase("Billboard")) {
                 ;
             } else if (qName.equalsIgnoreCase("Anchor")) {
-                if (currentSceneObject.getParent() == root)
-                    currentSceneObject = null;
+                if (currentNode.getParent() == root)
+                    currentNode = null;
                 else
-                    currentSceneObject = currentSceneObject.getParent();
+                    currentNode = currentNode.getParent();
             } else if (qName.equalsIgnoreCase("Inline")) {
                 ;
             } else if (qName.equalsIgnoreCase("LOD")) {
                 // End of LOD so go to the parent of the current
-                // SXRSceneObject which was added to support LOD
-                if (currentSceneObject == lodManager.transformLODSceneObject) {
-                    currentSceneObject = currentSceneObject.getParent();
+                // SXRNode which was added to support LOD
+                if (currentNode == lodManager.transformLODNode) {
+                    currentNode = currentNode.getParent();
                 }
-                lodManager.transformLODSceneObject = null;
+                lodManager.transformLODNode = null;
             } else if (qName.equalsIgnoreCase("Switch")) {
                 // Verify the Switch index is between 0 and (max number of children - 1)
                 // if it is not, then no object should appear per the X3D spec.
-                SXRSwitch gvrSwitch = (SXRSwitch)currentSceneObject.getComponent(SXRSwitch.getComponentType());
+                SXRSwitch gvrSwitch = (SXRSwitch)currentNode.getComponent(SXRSwitch.getComponentType());
                 if ( gvrSwitch != null) {
-                    if ( (gvrSwitch.getSwitchIndex() < 0) || (gvrSwitch.getSwitchIndex() >= currentSceneObject.getChildrenCount()) ) {
+                    if ( (gvrSwitch.getSwitchIndex() < 0) || (gvrSwitch.getSwitchIndex() >= currentNode.getChildrenCount()) ) {
                         // if the switch index is outside the array of possible children (which is legal in X3D)
                         // then no object should appear, which occurs when SXRSwitch is set higher than possilble # children.
-                        gvrSwitch.setSwitchIndex( currentSceneObject.getChildrenCount() );
+                        gvrSwitch.setSwitchIndex( currentNode.getChildrenCount() );
                     }
                 }
-                currentSceneObject = currentSceneObject.getParent();
+                currentNode = currentNode.getParent();
             } else if (qName.equalsIgnoreCase("Box")) {
                 ;
             } else if (qName.equalsIgnoreCase("Cone")) {
@@ -4071,14 +4071,14 @@ public class X3Dobject {
                     if ( box != null ) {
                         float[] size = box.getSize();
                         Vector3f sizeVector = new Vector3f(size[0], size[1], size[2]);
-                        SXRCubeSceneObject gvrCubeSceneObject = new SXRCubeSceneObject(
+                        SXRCubeNode gvrCubeNode = new SXRCubeNode(
                                 gvrContext, box.getSolid(), sizeVector);
-                        gvrCubeSceneObject.getRenderData().setMaterial(new SXRMaterial(gvrContext, x3DShader));
-                        currentSceneObject.addChildObject(gvrCubeSceneObject);
-                        meshAttachedSceneObject = gvrCubeSceneObject;
+                        gvrCubeNode.getRenderData().setMaterial(new SXRMaterial(gvrContext, x3DShader));
+                        currentNode.addChildObject(gvrCubeNode);
+                        meshAttachedNode = gvrCubeNode;
                     }
                     if ( cylinder != null ) {
-                        SXRCylinderSceneObject.CylinderParams params = new SXRCylinderSceneObject.CylinderParams();
+                        SXRCylinderNode.CylinderParams params = new SXRCylinderNode.CylinderParams();
                         params.BottomRadius = cylinder.getRadius();
                         params.TopRadius = cylinder.getRadius();
                         params.Height = cylinder.getHeight();
@@ -4087,13 +4087,13 @@ public class X3Dobject {
                         params.FacingOut = cylinder.getSolid();
 
                         params.Material = new SXRMaterial(gvrContext, x3DShader);
-                        SXRCylinderSceneObject gvrCylinderSceneObject = new SXRCylinderSceneObject(
+                        SXRCylinderNode gvrCylinderNode = new SXRCylinderNode(
                                 gvrContext, params);
-                        currentSceneObject.addChildObject(gvrCylinderSceneObject);
-                        meshAttachedSceneObject = gvrCylinderSceneObject;
+                        currentNode.addChildObject(gvrCylinderNode);
+                        meshAttachedNode = gvrCylinderNode;
                     }
                     if ( cone != null ) {
-                        SXRCylinderSceneObject.CylinderParams params = new SXRCylinderSceneObject.CylinderParams();
+                        SXRCylinderNode.CylinderParams params = new SXRCylinderNode.CylinderParams();
                         params.BottomRadius = cone.getBottomRadius();
                         params.TopRadius = 0;
                         params.Height = cone.getHeight();
@@ -4102,17 +4102,17 @@ public class X3Dobject {
                         params.FacingOut = cone.getSolid();
 
                         params.Material = new SXRMaterial(gvrContext, x3DShader);
-                        SXRCylinderSceneObject gvrCylinderSceneObject = new SXRCylinderSceneObject(
+                        SXRCylinderNode gvrCylinderNode = new SXRCylinderNode(
                                 gvrContext, params);
-                        currentSceneObject.addChildObject(gvrCylinderSceneObject);
-                        meshAttachedSceneObject = gvrCylinderSceneObject;
+                        currentNode.addChildObject(gvrCylinderNode);
+                        meshAttachedNode = gvrCylinderNode;
                     }
                     if ( sphere != null ) {
-                        SXRSphereSceneObject gvrSphereSceneObject = new SXRSphereSceneObject(
+                        SXRSphereNode gvrSphereNode = new SXRSphereNode(
                                 gvrContext, sphere.getSolid(),
                                 new SXRMaterial(gvrContext, x3DShader), sphere.getRadius());
-                        currentSceneObject.addChildObject(gvrSphereSceneObject);
-                        meshAttachedSceneObject = gvrSphereSceneObject;
+                        currentNode.addChildObject(gvrSphereNode);
+                        meshAttachedNode = gvrSphereNode;
                     }
                     if ( indexedFaceSet != null ) {
 
@@ -4156,9 +4156,9 @@ public class X3Dobject {
                         mesh.setVertexBuffer(gvrVertexBuffer);
 
                         gvrRenderData.setMesh( mesh );
-                        SXRSceneObject gvrSceneObject = new SXRSceneObject(gvrContext);
-                        gvrSceneObject.attachRenderData(gvrRenderData);
-                        currentSceneObject.addChildObject(gvrSceneObject);
+                        SXRNode gvrNode = new SXRNode(gvrContext);
+                        gvrNode.attachRenderData(gvrRenderData);
+                        currentNode.addChildObject(gvrNode);
                     }
                     if ( text != null ) {
                         Init_Text_FontParams();
@@ -4174,19 +4174,19 @@ public class X3Dobject {
                             }
                         }
 
-                        SXRTextViewSceneObject.justifyTypes jutifyType = SXRTextViewSceneObject.justifyTypes.BEGIN;
-                        if ( fontStyle.getJustify()[0].equalsIgnoreCase("MIDDLE")) jutifyType = SXRTextViewSceneObject.justifyTypes.MIDDLE;
-                        else if ( fontStyle.getJustify()[0].equalsIgnoreCase("END")) jutifyType = SXRTextViewSceneObject.justifyTypes.END;
+                        SXRTextViewNode.justifyTypes jutifyType = SXRTextViewNode.justifyTypes.BEGIN;
+                        if ( fontStyle.getJustify()[0].equalsIgnoreCase("MIDDLE")) jutifyType = SXRTextViewNode.justifyTypes.MIDDLE;
+                        else if ( fontStyle.getJustify()[0].equalsIgnoreCase("END")) jutifyType = SXRTextViewNode.justifyTypes.END;
 
                         String fontFamily = Text_FontParams.family;
                         if (fontStyle.getFamily() != null) fontFamily = fontStyle.getFamily()[0];
 
-                        SXRTextViewSceneObject.fontStyleTypes fontStyleType = SXRTextViewSceneObject.fontStyleTypes.PLAIN;
-                        if ( fontStyle.getStyle().equalsIgnoreCase("BOLD")) fontStyleType = SXRTextViewSceneObject.fontStyleTypes.BOLD;
-                        else if ( fontStyle.getStyle().equalsIgnoreCase("ITALIC")) fontStyleType = SXRTextViewSceneObject.fontStyleTypes.ITALIC;
-                        else if ( fontStyle.getStyle().equalsIgnoreCase("BOLDITALIC")) fontStyleType = SXRTextViewSceneObject.fontStyleTypes.BOLDITALIC;
+                        SXRTextViewNode.fontStyleTypes fontStyleType = SXRTextViewNode.fontStyleTypes.PLAIN;
+                        if ( fontStyle.getStyle().equalsIgnoreCase("BOLD")) fontStyleType = SXRTextViewNode.fontStyleTypes.BOLD;
+                        else if ( fontStyle.getStyle().equalsIgnoreCase("ITALIC")) fontStyleType = SXRTextViewNode.fontStyleTypes.ITALIC;
+                        else if ( fontStyle.getStyle().equalsIgnoreCase("BOLDITALIC")) fontStyleType = SXRTextViewNode.fontStyleTypes.BOLDITALIC;
 
-                        gvrTextViewSceneObject = new SXRTextViewSceneObject(gvrContext,
+                        gvrTextViewNode = new SXRTextViewNode(gvrContext,
                                 "PROTOtext",
                                 textString,
                                 fontFamily,
@@ -4195,11 +4195,11 @@ public class X3Dobject {
                                 fontStyle.getSize(),
                                 fontStyleType);
 
-                        gvrTextViewSceneObject.setTextColor(Color.WHITE); // default
-                        gvrTextViewSceneObject.setBackgroundColor(Color.TRANSPARENT); // default
+                        gvrTextViewNode.setTextColor(Color.WHITE); // default
+                        gvrTextViewNode.setBackgroundColor(Color.TRANSPARENT); // default
 
-                        if (currentSceneObject == null) root.addChildObject(gvrTextViewSceneObject);
-                        else currentSceneObject.addChildObject(gvrTextViewSceneObject);
+                        if (currentNode == null) root.addChildObject(gvrTextViewNode);
+                        else currentNode.addChildObject(gvrTextViewNode);
 
                         gvrRenderData.setRenderingOrder(SXRRenderData.SXRRenderingOrder.TRANSPARENT);
 
@@ -4334,14 +4334,14 @@ public class X3Dobject {
 
                             if ( filename.toLowerCase().endsWith(".x3d")) {
                                 inputStream = gvrAndroidResource.getStream();
-                                currentSceneObject = inlineObject.getInlineSXRSceneObject();
+                                currentNode = inlineObject.getInlineSXRNode();
                                 saxParser.parse(inputStream, userhandler);
                             }
                             else {
                                 SXRExternalScene gvrExternalScene = new SXRExternalScene(gvrContext, urls[j], false);
-                                currentSceneObject = inlineObject.getInlineSXRSceneObject();
-                                if (currentSceneObject == null) root.attachComponent(gvrExternalScene);
-                                else currentSceneObject.attachComponent(gvrExternalScene);
+                                currentNode = inlineObject.getInlineSXRNode();
+                                if (currentNode == null) root.attachComponent(gvrExternalScene);
+                                else currentNode.attachComponent(gvrExternalScene);
                                 SXRScene gvrScene = gvrContext.getMainScene();
                                 gvrExternalScene.load(gvrScene);
                                 SXRAnimator gvrAnimator = gvrExternalScene.getAnimator();

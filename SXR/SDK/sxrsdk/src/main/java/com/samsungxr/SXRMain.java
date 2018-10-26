@@ -123,7 +123,7 @@ public abstract class SXRMain implements IScriptEvents, IScriptable, IEventRecei
      * Called every frame.
      *
      * This is where you start animations, and where you add or change
-     * {@linkplain SXRSceneObject scene objects.} Keep this method as short as
+     * {@linkplain SXRNode scene objects.} Keep this method as short as
      * possible, to avoid dropping any frames.
      *
      * <p>
@@ -336,7 +336,7 @@ public abstract class SXRMain implements IScriptEvents, IScriptable, IEventRecei
      *
      * @since 1.6.4
      */
-    public void onSplashScreenCreated(SXRSceneObject splashScreen) {
+    public void onSplashScreenCreated(SXRNode splashScreen) {
         SXRTransform transform = splashScreen.getTransform();
         transform.setPosition(0, 0, DEFAULT_SPLASH_Z);
     }

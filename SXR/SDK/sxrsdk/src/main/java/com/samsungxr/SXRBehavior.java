@@ -24,13 +24,13 @@ import java.lang.reflect.Method;
  * This class listens for draw frame events when it is attached to a scene object.
  * You can override these callbacks to implement custom components.
  * - onDrawFrame(float frametime) called once every frame before rendering.
- * - onAttach(SXRSceneObject) called when this behavior is attached to a scene object.
- * - onDetach(SXRSceneObject) called when this behavior is detached from a scene object.
+ * - onAttach(SXRNode) called when this behavior is attached to a scene object.
+ * - onDetach(SXRNode) called when this behavior is detached from a scene object.
  * 
  * @see SXRComponent
- * @see SXRSceneObject#attachComponent(SXRComponent)
- * @see SXRSceneObject#getComponent(long)
- * @see SXRSceneObject#detachComponent(long)
+ * @see SXRNode#attachComponent(SXRComponent)
+ * @see SXRNode#getComponent(long)
+ * @see SXRNode#detachComponent(long)
  */
 public class SXRBehavior extends SXRComponent implements SXRDrawFrameListener
 {
@@ -90,10 +90,10 @@ public class SXRBehavior extends SXRComponent implements SXRDrawFrameListener
      * Attaching a behavior to a scene object will cause it
      * to start listening to scene events.
      * 
-     * @param newOwner  SXRSceneObject the behavior is attached to.
+     * @param newOwner  SXRNode the behavior is attached to.
      */
     @Override
-    public void onAttach(SXRSceneObject newOwner)
+    public void onAttach(SXRNode newOwner)
     {
         startListening();
     }
@@ -104,10 +104,10 @@ public class SXRBehavior extends SXRComponent implements SXRDrawFrameListener
      * Detaching a behavior from a scene object will cause it
      * to stop listening to scene events (onStep won't be called).
      *
-     * @param oldOwner  SXRSceneObject the behavior was detached from.
+     * @param oldOwner  SXRNode the behavior was detached from.
      */
     @Override
-    public void onDetach(SXRSceneObject oldOwner)
+    public void onDetach(SXRNode oldOwner)
     {
         stopListening();
     }
@@ -115,7 +115,7 @@ public class SXRBehavior extends SXRComponent implements SXRDrawFrameListener
     /**
      * Called each frame before rendering the scene.
      * It is not called if this behavior is not attached
-     * to a {@link SXRSceneObject}.
+     * to a {@link SXRNode}.
      */
     public void onDrawFrame(float frameTime) { }
     

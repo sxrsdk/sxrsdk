@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "batch.h"
-#include "objects/scene_object.h"
+#include "objects/node.h"
 #include "objects/scene.h"
 #include "shaders/shader.h"
 

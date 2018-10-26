@@ -17,7 +17,7 @@ package com.samsungxr.animation;
 
 import com.samsungxr.SXRHybridObject;
 import com.samsungxr.SXRMaterial;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.utility.Colors;
 
 /** Animate the overlay color. */
@@ -71,7 +71,7 @@ public class SXRColorAnimation extends SXRMaterialAnimation {
      * color.}
      * 
      * @param target
-     *            {@link SXRSceneObject} containing a {@link SXRMaterial} to
+     *            {@link SXRNode} containing a {@link SXRMaterial} to
      *            animate
      * @param duration
      *            The animation duration, in seconds.
@@ -79,7 +79,7 @@ public class SXRColorAnimation extends SXRMaterialAnimation {
      *            A float[3] array, containing rgb values in GL format, from 0
      *            to 1
      */
-    public SXRColorAnimation(SXRSceneObject target, float duration, float[] rgb) {
+    public SXRColorAnimation(SXRNode target, float duration, float[] rgb) {
         this(getMaterial(target), duration, rgb);
     }
 
@@ -88,14 +88,14 @@ public class SXRColorAnimation extends SXRMaterialAnimation {
      * color.}
      * 
      * @param target
-     *            {@link SXRSceneObject} containing a {@link SXRMaterial} to
+     *            {@link SXRNode} containing a {@link SXRMaterial} to
      *            animate
      * @param duration
      *            The animation duration, in seconds.
      * @param color
      *            An Android {@link android.graphics.Color} value
      */
-    public SXRColorAnimation(SXRSceneObject target, float duration, int color) {
+    public SXRColorAnimation(SXRNode target, float duration, int color) {
         this(target, duration, Colors.toColors(color));
     }
 

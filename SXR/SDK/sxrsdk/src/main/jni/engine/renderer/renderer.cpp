@@ -48,8 +48,8 @@ Renderer::Renderer() : numberDrawCalls(0),
         batch_manager = new BatchManager(BATCH_SIZE, MAX_INDICES);
     }
 }
-void Renderer::frustum_cull(glm::vec3 camera_position, SceneObject *object,
-        float frustum[6][4], std::vector<SceneObject*>& scene_objects,
+void Renderer::frustum_cull(glm::vec3 camera_position, Node *object,
+        float frustum[6][4], std::vector<Node*>& nodes,
         bool need_cull, int planeMask) {
 
     // frustumCull() return 3 possible values:
@@ -91,7 +91,7 @@ void Renderer::frustum_cull(glm::vec3 camera_position, SceneObject *object,
 
         if (cullVal >= 2) {
             object->setCullStatus(false);
-            scene_objects.push_back(object);
+            nodes.push_back(object);
         }
 
         if (cullVal == 3) {
@@ -100,12 +100,12 @@ void Renderer::frustum_cull(glm::vec3 camera_position, SceneObject *object,
         }
     } else {
         object->setCullStatus(false);
-        scene_objects.push_back(object);
+        nodes.push_back(object);
     }
 
-    const std::vector<SceneObject*> children = object->children();
+    const std::vector<Node*> children = object->children();
     for (auto it = children.begin(); it != children.end(); ++it) {
-        frustum_cull(camera_position, *it, frustum, scene_objects, need_cull, planeMask);
+        frustum_cull(camera_position, *it, frustum, nodes, need_cull, planeMask);
     }
 }
 
@@ -156,15 +156,15 @@ bool isRenderPassEqual(RenderData* rdata1, RenderData* rdata2){
 /*
  * Perform view frustum culling from a specific camera viewpoint
  */
-void Renderer::cullFromCamera(Scene *scene, jobject javaSceneObject, Camera* camera,
+void Renderer::cullFromCamera(Scene *scene, jobject javaNode, Camera* camera,
         ShaderManager* shader_manager, std::vector<RenderData*>* render_data_vector, bool is_multiview)
 {
-    std::vector<SceneObject*> scene_objects;
+    std::vector<Node*> nodes;
     LightList& lights = scene->getLights();
     RenderState rstate;
 
     render_data_vector->clear();
-    scene_objects.clear();
+    nodes.clear();
     rstate.is_multiview = is_multiview;
     rstate.material_override = NULL;
     rstate.shader_manager = shader_manager;
@@ -174,7 +174,7 @@ void Renderer::cullFromCamera(Scene *scene, jobject javaSceneObject, Camera* cam
     rstate.scene = scene;
     rstate.render_mask = camera->render_mask();
     rstate.uniforms.u_right = (rstate.render_mask & RenderData::RenderMaskBit::Right) ? 1 : 0;
-    rstate.javaSceneObject = javaSceneObject;
+    rstate.javaNode = javaNode;
     rstate.lightsChanged = lights.isDirty();
     glm::mat4 vp_matrix = glm::mat4(rstate.uniforms.u_proj * rstate.uniforms.u_view);
     glm::vec3 campos(rstate.uniforms.u_view[3]);
@@ -185,17 +185,17 @@ void Renderer::cullFromCamera(Scene *scene, jobject javaSceneObject, Camera* cam
     build_frustum(frustum, (const float*) glm::value_ptr(vp_matrix));
 
     // 2. Iteratively execute frustum culling for each root object (as well as its children objects recursively)
-    SceneObject *object = scene->getRoot();
+    Node *object = scene->getRoot();
     if (DEBUG_RENDERER) {
         LOGD("FRUSTUM: start frustum culling for root %s\n", object->name().c_str());
     }
-    //    frustum_cull(camera->owner_object()->transform()->position(), object, frustum, scene_objects, scene->get_frustum_culling(), 0);
-    frustum_cull(campos, object, frustum, scene_objects, scene->get_frustum_culling(), 0);
+    //    frustum_cull(camera->owner_object()->transform()->position(), object, frustum, nodes, scene->get_frustum_culling(), 0);
+    frustum_cull(campos, object, frustum, nodes, scene->get_frustum_culling(), 0);
     if (DEBUG_RENDERER) {
         LOGD("FRUSTUM: end frustum culling for root %s\n", object->name().c_str());
     }
     // 3. do occlusion culling, if enabled
-    occlusion_cull(rstate, scene_objects, render_data_vector);
+    occlusion_cull(rstate, nodes, render_data_vector);
 }
 
 
@@ -207,17 +207,17 @@ void Renderer::addRenderData(RenderData *render_data, RenderState& rstate, std::
     }
 }
 
-bool Renderer::occlusion_cull_init(RenderState& renderState, std::vector<SceneObject*>& scene_objects,  std::vector<RenderData*>* render_data_vector){
+bool Renderer::occlusion_cull_init(RenderState& renderState, std::vector<Node*>& nodes,  std::vector<RenderData*>* render_data_vector){
 
     renderState.scene->lockColliders();
     renderState.scene->clearVisibleColliders();
     bool do_culling = renderState.scene->get_occlusion_culling();
     if (!do_culling) {
-        for (auto it = scene_objects.begin(); it != scene_objects.end(); ++it) {
-            SceneObject *scene_object = (*it);
-            RenderData* render_data = scene_object->render_data();
+        for (auto it = nodes.begin(); it != nodes.end(); ++it) {
+            Node *node = (*it);
+            RenderData* render_data = node->render_data();
             addRenderData(render_data, renderState, *render_data_vector);
-            renderState.scene->pick(scene_object);
+            renderState.scene->pick(node);
         }
         renderState.scene->unlockColliders();
         return false;
@@ -406,7 +406,7 @@ bool Renderer::renderPostEffectData(RenderState& rstate, RenderTexture* input_te
         JNIEnv* env = nullptr;
         int rc = rstate.scene->get_java_env(&env);
 
-        post_effect->bindShader(env, rstate.javaSceneObject, rstate.is_multiview);
+        post_effect->bindShader(env, rstate.javaNode, rstate.is_multiview);
         if (rc > 0)
         {
             rstate.scene->detach_java_env();

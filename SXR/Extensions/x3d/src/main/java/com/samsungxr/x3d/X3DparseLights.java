@@ -32,7 +32,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 /**
  * 
@@ -46,12 +46,12 @@ public class X3DparseLights
 
   private SXRContext gvrContext = null;
 
-  private SXRSceneObject root = null;
-  private SXRSceneObject currentSceneObject = null;
+  private SXRNode root = null;
+  private SXRNode currentNode = null;
 
   private ShaderSettings shaderSettings = null;
 
-  public X3DparseLights(SXRContext gvrContext, SXRSceneObject root)
+  public X3DparseLights(SXRContext gvrContext, SXRNode root)
   {
     this.gvrContext = gvrContext;
     this.root = root;

@@ -5,7 +5,7 @@ import android.util.SparseArray;
 import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRPicker;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRSphereCollider;
 import com.samsungxr.SXRSwitch;
 import com.samsungxr.SXRTransform;
@@ -16,11 +16,11 @@ import org.joml.Vector3f;
 import java.util.HashMap;
 
 /**
- * This class defines a {@link SXRBehavior} that can be attached to a {@link SXRSceneObject}, it
- * handles all the {@link ITouchEvents} on the associated {@link SXRSceneObject} and
+ * This class defines a {@link SXRBehavior} that can be attached to a {@link SXRNode}, it
+ * handles all the {@link ITouchEvents} on the associated {@link SXRNode} and
  * maintains the correct {@link ObjectState} based on the {@link ICursorEvents} received. This
- * class can associate a child {@link SXRSceneObject} with each {@link ObjectState} and is
- * responsible for making the correct {@link SXRSceneObject} visible according to the
+ * class can associate a child {@link SXRNode} with each {@link ObjectState} and is
+ * responsible for making the correct {@link SXRNode} visible according to the
  * {@link ObjectState}.
  */
 public class SelectableBehavior extends SXRBehavior {
@@ -55,7 +55,7 @@ public class SelectableBehavior extends SXRBehavior {
          * is called whenever the state of the {@link SelectableBehavior} changes.
          *
          * @param behavior   the instance of {@link SelectableBehavior} associated with the
-         *                   SXRSceneObject
+         *                   SXRNode
          * @param previous   the previous state
          * @param current    current state to be set.
          * @param cursor     the instance of {@link Cursor} that caused the state change
@@ -72,39 +72,39 @@ public class SelectableBehavior extends SXRBehavior {
         /**
          * The state in which the {@link SelectableBehavior} is initially. This represents the
          * normal
-         * appearance of the associated {@link SXRSceneObject}
+         * appearance of the associated {@link SXRNode}
          */
         DEFAULT,
         /**
-         * This state means that a {@link Cursor} is behind the associated {@link SXRSceneObject}.
-         * Recommended appearance of the associated {@link SXRSceneObject} in this state is a wire
+         * This state means that a {@link Cursor} is behind the associated {@link SXRNode}.
+         * Recommended appearance of the associated {@link SXRNode} in this state is a wire
          * frame or a transparent texture, to allow the {@link Cursor} to be visible to the user.
          */
         BEHIND,
         /**
          * This state means that a
-         * {@link Cursor} is intersecting with the associated {@link SXRSceneObject}
-         * It is recommended that the appearance of the associated {@link SXRSceneObject} in this
+         * {@link Cursor} is intersecting with the associated {@link SXRNode}
+         * It is recommended that the appearance of the associated {@link SXRNode} in this
          * state changes from the {@link ObjectState#DEFAULT} to make the user aware of a collision.
          */
         COLLIDING,
         /**
          * This state means that a {@link Cursor} is intersecting with the associated
-         * {@link SXRSceneObject}. It is recommended
-         * that the appearance of the associated {@link SXRSceneObject} in this state changes
+         * {@link SXRNode}. It is recommended
+         * that the appearance of the associated {@link SXRNode} in this state changes
          * from the {@link ObjectState#DEFAULT} to make the user aware of the clicked state.
          */
         CLICKED,
         /**
-         * This state means that two {@link Cursor}s have selected this {@link SXRSceneObject} it
+         * This state means that two {@link Cursor}s have selected this {@link SXRNode} it
          * will be scaled based on the relative distance between these two {@link Cursor}s
          */
         SCALE
     }
 
     /**
-     * Creates a {@link SelectableBehavior} to be attached to any {@link SXRSceneObject}. The
-     * instance thus created will not change the appearance of the linked {@link SXRSceneObject}
+     * Creates a {@link SelectableBehavior} to be attached to any {@link SXRNode}. The
+     * instance thus created will not change the appearance of the linked {@link SXRNode}
      * according to the {@link ObjectState}.
      *
      * @param cursorManager
@@ -114,18 +114,18 @@ public class SelectableBehavior extends SXRBehavior {
     }
 
     /**
-     * Creates a {@link SelectableBehavior} which is to be attached to a {@link SXRSceneObject}
-     * with a specific hierarchy where, the attached {@link SXRSceneObject} has a separate child
-     * {@link SXRSceneObject} for each {@link ObjectState}. The order of the child nodes has to
+     * Creates a {@link SelectableBehavior} which is to be attached to a {@link SXRNode}
+     * with a specific hierarchy where, the attached {@link SXRNode} has a separate child
+     * {@link SXRNode} for each {@link ObjectState}. The order of the child nodes has to
      * follow {@link ObjectState#DEFAULT}, {@link ObjectState#BEHIND}, {@link ObjectState#COLLIDING},
      * and {@link ObjectState#CLICKED} from left to right where {@link ObjectState#DEFAULT}
      * corresponds to the first/left most child. The {@link SelectableBehavior} handles all the
-     * {@link ITouchEvents} on the linked {@link SXRSceneObject} and maintains the
-     * {@link ObjectState}. It also makes the correct child {@link SXRSceneObject} visible according
+     * {@link ITouchEvents} on the linked {@link SXRNode} and maintains the
+     * {@link ObjectState}. It also makes the correct child {@link SXRNode} visible according
      * to the {@link ObjectState}. It is recommended that the different nodes representing different
      * {@link ObjectState} share a common set of vertices if possible. Not having the needed
      * hierarchy will result in an {@link IllegalArgumentException} when calling
-     * {@link SXRSceneObject#attachComponent(SXRComponent)}
+     * {@link SXRNode#attachComponent(SXRComponent)}
      *
      * @param cursorManager       the {@link CursorManager} instance
      * @param initializeAllStates flag to indicate whether to initialize all
@@ -134,7 +134,7 @@ public class SelectableBehavior extends SXRBehavior {
      *                            {@link ObjectState#BEHIND}, {@link ObjectState#COLLIDING}, and
      *                            {@link ObjectState#CLICKED}. <code>false</code> initializes only
      *                            the {@link ObjectState#DEFAULT} state. Which does not require the
-     *                            attached  {@link SXRSceneObject} to have a hierarchy.
+     *                            attached  {@link SXRNode} to have a hierarchy.
      */
     public SelectableBehavior(CursorManager cursorManager, boolean initializeAllStates) {
         this(cursorManager, initializeAllStates ? new ObjectState[]{ObjectState.DEFAULT,
@@ -143,25 +143,25 @@ public class SelectableBehavior extends SXRBehavior {
     }
 
     /**
-     * Creates a {@link SelectableBehavior} which is to be attached to a {@link SXRSceneObject}
-     * with a specific hierarchy where, the {@link SXRSceneObject} to be attached has a root node at
+     * Creates a {@link SelectableBehavior} which is to be attached to a {@link SXRNode}
+     * with a specific hierarchy where, the {@link SXRNode} to be attached has a root node at
      * the top and a child for each of the states of the {@link SelectableBehavior}.
      * The {@link SelectableBehavior} handles all the {@link ITouchEvents} on the linked
-     * {@link SXRSceneObject} and maintains the {@link ObjectState}. It also makes the correct child
-     * {@link SXRSceneObject} visible according to the {@link ObjectState}. It is recommended to
+     * {@link SXRNode} and maintains the {@link ObjectState}. It also makes the correct child
+     * {@link SXRNode} visible according to the {@link ObjectState}. It is recommended to
      * have a child for each {@link ObjectState} value, however it is possible to have lesser
      * children as long as the mapping is correctly specified in {@param objectStates}. If the
-     * {@param objectStates} does not match the {@link SXRSceneObject} hierarchy it will result in
+     * {@param objectStates} does not match the {@link SXRNode} hierarchy it will result in
      * an {@link IllegalArgumentException} when calling
-     * {@link SXRSceneObject#attachComponent(SXRComponent)}. To save on memory it is suggested that
-     * the children of the {@link SXRSceneObject} representing different {@link ObjectState}s share
+     * {@link SXRNode#attachComponent(SXRComponent)}. To save on memory it is suggested that
+     * the children of the {@link SXRNode} representing different {@link ObjectState}s share
      * a common set of vertices if possible.
      *
      * @param cursorManager the {@link CursorManager} instance
      * @param objectStates  array of {@link ObjectState}s that maps each child of the attached
-     *                      {@link SXRSceneObject} with an {@link ObjectState}. Where the first
+     *                      {@link SXRNode} with an {@link ObjectState}. Where the first
      *                      element of the array maps to the left most/first child of the attached
-     *                      {@link SXRSceneObject}. This array should contain
+     *                      {@link SXRNode}. This array should contain
      *                      {@link ObjectState#DEFAULT} as one of its elements else it will result
      *                      in an {@link IllegalArgumentException}.
      */
@@ -188,7 +188,7 @@ public class SelectableBehavior extends SXRBehavior {
     }
 
     @Override
-    public void onAttach(SXRSceneObject sceneObject) {
+    public void onAttach(SXRNode sceneObject) {
         super.onAttach(sceneObject);
         if (stateIndexMap.size() > 1 && sceneObject.getChildrenCount() != stateIndexMap.size()) {
             throw new IllegalArgumentException("Num of children in model:" + sceneObject
@@ -210,7 +210,7 @@ public class SelectableBehavior extends SXRBehavior {
     }
 
     @Override
-    public void onDetach(SXRSceneObject sceneObject) {
+    public void onDetach(SXRNode sceneObject) {
         super.onDetach(sceneObject);
         sceneObject.getEventReceiver().removeListener(clickListener);
         sceneObject.detachComponent(SXRSwitch.getComponentType());
@@ -392,7 +392,7 @@ public class SelectableBehavior extends SXRBehavior {
         public void onDrag(Cursor cursor, SXRPicker.SXRPickedObject hit) { }
     };
 
-    float getDistance(SXRSceneObject object) {
+    float getDistance(SXRNode object) {
         SXRTransform transform = object.getTransform();
         float x = transform.getPositionX();
         float y = transform.getPositionY();
@@ -434,8 +434,8 @@ public class SelectableBehavior extends SXRBehavior {
     /**
      * Returns a unique long value Associated with the {@link SelectableBehavior} class. Each
      * subclass of  {@link SXRBehavior} needs a unique component type value. Use this value to
-     * get the instance of {@link SelectableBehavior} attached to any {@link SXRSceneObject}
-     * using {@link SXRSceneObject#getComponent(long)}
+     * get the instance of {@link SelectableBehavior} attached to any {@link SXRNode}
+     * using {@link SXRNode#getComponent(long)}
      *
      * @return the component type value.
      */

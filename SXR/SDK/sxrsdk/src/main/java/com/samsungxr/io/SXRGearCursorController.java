@@ -31,9 +31,9 @@ import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.IActivityEvents;
-import com.samsungxr.scene_objects.SXRLineSceneObject;
+import com.samsungxr.nodes.SXRLineNode;
 import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -174,10 +174,10 @@ public final class SXRGearCursorController extends SXRCursorController
         LEFT, RIGHT
     }
 
-    private SXRSceneObject mControllerModel;
-    private SXRSceneObject mRayModel;
-    private final SXRSceneObject mPivotRoot;
-    private SXRSceneObject mControllerGroup;
+    private SXRNode mControllerModel;
+    private SXRNode mRayModel;
+    private final SXRNode mPivotRoot;
+    private SXRNode mControllerGroup;
     private ControllerReader mControllerReader;
     private boolean mShowControllerModel = false;
     private Matrix4f mTempPivotMtx = new Matrix4f();
@@ -204,9 +204,9 @@ public final class SXRGearCursorController extends SXRCursorController
     {
         super(context, SXRControllerType.CONTROLLER);
         controllerID = id;
-        mPivotRoot = new SXRSceneObject(context);
+        mPivotRoot = new SXRNode(context);
         mPivotRoot.setName("GearCursorController_Pivot");
-        mControllerGroup = new SXRSceneObject(context);
+        mControllerGroup = new SXRNode(context);
         mControllerGroup.setName("GearCursorController_ControllerGroup");
         mPivotRoot.addChildObject(mControllerGroup);
         mControllerGroup.addChildObject(mDragRoot);
@@ -260,10 +260,10 @@ public final class SXRGearCursorController extends SXRCursorController
      * Get the model currently being used to depict the controller
      * in the scene.
      * @return controller model
-     * @see #setControllerModel(SXRSceneObject)
+     * @see #setControllerModel(SXRNode)
      * @see #showControllerModel(boolean)
      */
-    public SXRSceneObject getControllerModel() { return mControllerModel; }
+    public SXRNode getControllerModel() { return mControllerModel; }
 
     /**
      * Replaces the model used to depict the controller in the scene.
@@ -272,7 +272,7 @@ public final class SXRGearCursorController extends SXRCursorController
      * @see #getControllerModel()
      * @see #showControllerModel(boolean)
      */
-    public void setControllerModel(SXRSceneObject controllerModel)
+    public void setControllerModel(SXRNode controllerModel)
     {
         if (mControllerModel != null)
         {
@@ -354,7 +354,7 @@ public final class SXRGearCursorController extends SXRCursorController
     {
         if (mRayModel == null)
         {
-            mRayModel = new SXRLineSceneObject(context, 1, new Vector4f(1, 0, 0, 1),
+            mRayModel = new SXRLineNode(context, 1, new Vector4f(1, 0, 0, 1),
                                                new Vector4f(1, 0, 0, 0));
             final SXRRenderData renderData = mRayModel.getRenderData();
             final SXRMaterial rayMaterial = renderData.getMaterial();
@@ -389,7 +389,7 @@ public final class SXRGearCursorController extends SXRCursorController
     public void setScene(SXRScene scene)
     {
         synchronized (mPivotRoot) {
-            SXRSceneObject parent = mPivotRoot.getParent();
+            SXRNode parent = mPivotRoot.getParent();
 
             mPicker.setScene(scene);
             this.scene = scene;
@@ -397,7 +397,7 @@ public final class SXRGearCursorController extends SXRCursorController
                 parent.removeChildObject(mPivotRoot);
             }
             if (scene != null) {
-                scene.addSceneObject(mPivotRoot);
+                scene.addNode(mPivotRoot);
             }
         }
         showControllerModel(mShowControllerModel);

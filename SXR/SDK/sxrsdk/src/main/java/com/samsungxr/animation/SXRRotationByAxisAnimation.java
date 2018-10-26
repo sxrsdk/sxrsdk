@@ -16,7 +16,7 @@
 package com.samsungxr.animation;
 
 import com.samsungxr.SXRHybridObject;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 import com.samsungxr.utility.Log;
 import org.joml.Quaternionf;
@@ -60,7 +60,7 @@ public class SXRRotationByAxisAnimation extends SXRTransformAnimation
      * an animated rotation about a specific axis.
      *
      * @param target
-     *            {@link SXRSceneObject} containing a {@link SXRTransform}
+     *            {@link SXRNode} containing a {@link SXRTransform}
      * @param duration
      *            The animation duration, in seconds.
      * @param angle
@@ -72,7 +72,7 @@ public class SXRRotationByAxisAnimation extends SXRTransformAnimation
      * @param z
      *            the normalized axis z component
      */
-    public SXRRotationByAxisAnimation(SXRSceneObject target, float duration,
+    public SXRRotationByAxisAnimation(SXRNode target, float duration,
                                       float angle, float x, float y, float z)
     {
         this(target.getTransform(), duration, angle, x, y, z);

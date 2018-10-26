@@ -47,12 +47,12 @@ extern "C" {
             jobject obj, jlong jscene, jlong jtransform, jfloat ox, jfloat oy, jfloat oz, jfloat dx,
             jfloat dy, jfloat dz);
     JNIEXPORT jobject JNICALL
-    Java_com_samsungxr_NativePicker_pickSceneObject(JNIEnv * env,
-            jobject obj, jlong jscene_object, jfloat ox, jfloat oy, jfloat oz,
+    Java_com_samsungxr_NativePicker_pickNode(JNIEnv * env,
+            jobject obj, jlong jnode, jfloat ox, jfloat oy, jfloat oz,
             jfloat dx, jfloat dy, jfloat dz);
     JNIEXPORT bool JNICALL
-    Java_com_samsungxr_NativePicker_pickSceneObjectAgainstBoundingBox(JNIEnv * env,
-            jobject obj, jlong jscene_object, jfloat ox, jfloat oy, jfloat oz, jfloat dx,
+    Java_com_samsungxr_NativePicker_pickNodeAgainstBoundingBox(JNIEnv * env,
+            jobject obj, jlong jnode, jfloat ox, jfloat oy, jfloat oz, jfloat dx,
             jfloat dy, jfloat dz, jobject jreadback_buffer);
     JNIEXPORT jobjectArray JNICALL
     Java_com_samsungxr_NativePicker_pickVisible(JNIEnv * env,
@@ -212,14 +212,14 @@ Java_com_samsungxr_NativePicker_pickBounds(JNIEnv * env, jobject obj,
     jmethodID nativeMethod = env->GetMethodID(hybridClass, "getNative", "()J");
     Scene *scene = reinterpret_cast<Scene *>(jscene);
     std::vector<ColliderData> colliders;
-    std::vector<SceneObject *> collidables;
+    std::vector<Node *> collidables;
 
     for (i = 0; i < n; ++i)
     {
         jobject sceneObj = env->CallObjectMethod(jcollidables, getMethod, i);
         if (sceneObj != NULL)
         {
-            SceneObject* nativePtr = reinterpret_cast<SceneObject*>
+            Node* nativePtr = reinterpret_cast<Node*>
                     (env->CallLongMethod(sceneObj, nativeMethod));
             collidables.push_back(nativePtr);
         }
@@ -271,18 +271,18 @@ Java_com_samsungxr_NativePicker_pickBounds(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT jobject JNICALL
-Java_com_samsungxr_NativePicker_pickSceneObject(JNIEnv * env,
-                                              jobject obj, jlong jscene_object,
+Java_com_samsungxr_NativePicker_pickNode(JNIEnv * env,
+                                              jobject obj, jlong jnode,
                                               jfloat ox, jfloat oy, jfloat oz,
                                               jfloat dx, jfloat dy, jfloat dz) {
     jclass pickerClass = env->FindClass("com/samsungxr/SXRPicker");
     jmethodID makeHitMesh = env->GetStaticMethodID(pickerClass, "makeHitMesh", "(JFFFFIFFFFFFFF)Lcom/samsungxr/SXRPicker$SXRPickedObject;");
     jmethodID makeHit = env->GetStaticMethodID(pickerClass, "makeHit", "(JFFFF)Lcom/samsungxr/SXRPicker$SXRPickedObject;");
 
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
+    Node* node = reinterpret_cast<Node*>(jnode);
 
     ColliderData data;
-    Picker::pickSceneObject(scene_object, ox, oy, oz, dx, dy, dz, data);
+    Picker::pickNode(node, ox, oy, oz, dx, dy, dz, data);
     jlong pointerCollider = reinterpret_cast<jlong>(data.ColliderHit);
     jobject hitObject;
     MeshCollider* meshCollider = (MeshCollider *) data.ColliderHit;
@@ -306,13 +306,13 @@ Java_com_samsungxr_NativePicker_pickSceneObject(JNIEnv * env,
 }
 
 JNIEXPORT bool JNICALL
-Java_com_samsungxr_NativePicker_pickSceneObjectAgainstBoundingBox(JNIEnv * env,
-        jobject obj, jlong jscene_object,  jfloat ox, jfloat oy, jfloat oz, jfloat dx,
+Java_com_samsungxr_NativePicker_pickNodeAgainstBoundingBox(JNIEnv * env,
+        jobject obj, jlong jnode,  jfloat ox, jfloat oy, jfloat oz, jfloat dx,
         jfloat dy, jfloat dz, jobject jreadback_buffer) {
-    SceneObject* scene_object =
-            reinterpret_cast<SceneObject*>(jscene_object);
+    Node* node =
+            reinterpret_cast<Node*>(jnode);
     float *data = (float *) env->GetDirectBufferAddress(jreadback_buffer);
-    glm::vec3 hit =  Picker::pickSceneObjectAgainstBoundingBox(scene_object,
+    glm::vec3 hit =  Picker::pickNodeAgainstBoundingBox(node,
             ox, oy, oz,  dx, dy, dz);
 
     if (hit == glm::vec3(std::numeric_limits<float>::infinity())){

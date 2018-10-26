@@ -10,7 +10,7 @@ import java.util.Set;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMesh;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import org.json.JSONObject;
 
 /**
@@ -52,7 +52,7 @@ public abstract class CheckableButton extends Button implements Checkable {
      * @throws InstantiationException
      */
     @Deprecated
-    public CheckableButton(SXRContext context, SXRSceneObject sceneObject,
+    public CheckableButton(SXRContext context, SXRNode sceneObject,
                            NodeEntry attributes) throws InstantiationException {
         super(context, sceneObject, attributes);
 
@@ -68,7 +68,7 @@ public abstract class CheckableButton extends Button implements Checkable {
      * @param sceneObject
      * @throws InstantiationException
      */
-    public CheckableButton(SXRContext context, SXRSceneObject sceneObject) {
+    public CheckableButton(SXRContext context, SXRNode sceneObject) {
         super(context, sceneObject);
         init();
     }

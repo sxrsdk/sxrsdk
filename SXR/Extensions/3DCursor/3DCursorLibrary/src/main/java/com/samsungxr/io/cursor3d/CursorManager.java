@@ -24,7 +24,7 @@ import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRSensor;
 import com.samsungxr.SXRSwitch;
 import com.samsungxr.IEventReceiver;
@@ -35,7 +35,7 @@ import com.samsungxr.io.SXRGearCursorController;
 import com.samsungxr.io.SXRInputManager;
 import com.samsungxr.io.cursor3d.settings.SettingsView;
 import com.samsungxr.io.cursor3d.settings.SettingsView.SettingsChangeListener;
-import com.samsungxr.scene_objects.SXRViewSceneObject;
+import com.samsungxr.nodes.SXRViewNode;
 import com.samsungxr.utility.Log;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -359,11 +359,11 @@ public final class CursorManager implements IEventReceiver
     /**
      * This method modifies the {@link Cursor} passed in the argument to a settings cursor. A
      * settings cursor is a {@link Cursor} of type {@link CursorType#LASER} used to interact with a
-     * {@link SXRViewSceneObject}. Since it is easier to use a {@link Cursor} of type
-     * {@link CursorType#LASER} to interract with {@link SXRViewSceneObject} this convinience
+     * {@link SXRViewNode}. Since it is easier to use a {@link Cursor} of type
+     * {@link CursorType#LASER} to interract with {@link SXRViewNode} this convinience
      * method is provided, so that the applications which do not use a {@link Cursor} of type
      * {@link CursorType#LASER} do not have to instantiate and manage two cursors while
-     * interracting with a {@link SXRViewSceneObject}.
+     * interracting with a {@link SXRViewNode}.
      *
      * @param cursor The {@link Cursor} whose {@link IoDevice} will be used for the settings
      *               cursor.
@@ -383,7 +383,7 @@ public final class CursorManager implements IEventReceiver
      * This method disables the settings cursor enabled by the
      * {@link CursorManager#enableSettingsCursor(Cursor)} method and restores the {@link Cursor}
      * that was passed as an argument to the {@link CursorManager#enableSettingsCursor(Cursor)}
-     * method. This method is used once interraction with a {@link SXRViewSceneObject} is not
+     * method. This method is used once interraction with a {@link SXRViewNode} is not
      * longer needed.
      */
     public void disableSettingsCursor() {
@@ -519,11 +519,11 @@ public final class CursorManager implements IEventReceiver
 
 
     /**
-     * Use this call to make all the {@link SXRSceneObject}s in the provided SXRScene to be
+     * Use this call to make all the {@link SXRNode}s in the provided SXRScene to be
      * selectable.
      * <p/>
      * In order to have more control over objects that can be made selectable make use of the
-     * {@link #addSelectableObject(SXRSceneObject)} method.
+     * {@link #addSelectableObject(SXRNode)} method.
      * <p/>
      * Note that this call will set the current scene as the provided scene. If the provided
      * scene is same the currently set scene then this method will have no effect. Passing null
@@ -549,7 +549,7 @@ public final class CursorManager implements IEventReceiver
             return;
         }
         // process the new scene
-        for (SXRSceneObject object : scene.getSceneObjects()) {
+        for (SXRNode object : scene.getNodes()) {
             addSelectableObject(object);
         }
         //true to add
@@ -633,50 +633,50 @@ public final class CursorManager implements IEventReceiver
     }
 
     /**
-     * This call makes sure that the {@link SXRSceneObject} passed is a
+     * This call makes sure that the {@link SXRNode} passed is a
      * {@link Cursor} selectable object. The {@link Cursor} would deliver events
-     * every time an interaction happens with the {@link SXRSceneObject}.
+     * every time an interaction happens with the {@link SXRNode}.
      * <p/>
      * The Cursor would also provide a visual cue when over an object that this
      * selectable to notify that the user can interact with the object.
      * <p/>
      * Passing an object makes it and its descendant tree selectable.
      * If the entire scene has been made selectable and the
-     * {@link SXRSceneObject} is a part of the Scene, then this call will have
+     * {@link SXRNode} is a part of the Scene, then this call will have
      * no effect.
      *
-     * @param object the {@link SXRSceneObject} that is to be made selectable.
+     * @param object the {@link SXRNode} that is to be made selectable.
      * @return <code>true</code> on success or <code>false</code> if the object
      * does not have a {@link SXRMesh} or in case the object was already
      * set as selectable.
      */
-    public boolean addSelectableObject(SXRSceneObject object) {
+    public boolean addSelectableObject(SXRNode object) {
         if (null == object) {
-            throw new IllegalArgumentException("SXRSceneObject cannot be null");
+            throw new IllegalArgumentException("SXRNode cannot be null");
         }
         addSelectableBehavior(object);
         return true;
     }
 
     /**
-     * This call is for objects for which {@link CursorManager#addSelectableObject(SXRSceneObject)}
-     * was called. After calling this on a {@link SXRSceneObject} there will be no
+     * This call is for objects for which {@link CursorManager#addSelectableObject(SXRNode)}
+     * was called. After calling this on a {@link SXRNode} there will be no
      * events generated when a {@link Cursor} interacts with this
-     * {@link SXRSceneObject}. The {@link SXRSceneObject} that was passed in
-     * {@link CursorManager#addSelectableObject(SXRSceneObject)} should be passed in here.
-     * @param object The {@link SXRSceneObject} that is to be made un-selectable.
-     * @return <code>true</code> on success or <code>false</code> if {@link SXRSceneObject} was not
-     * set as selectable using the {@link CursorManager#addSelectableObject(SXRSceneObject)}
+     * {@link SXRNode}. The {@link SXRNode} that was passed in
+     * {@link CursorManager#addSelectableObject(SXRNode)} should be passed in here.
+     * @param object The {@link SXRNode} that is to be made un-selectable.
+     * @return <code>true</code> on success or <code>false</code> if {@link SXRNode} was not
+     * set as selectable using the {@link CursorManager#addSelectableObject(SXRNode)}
      */
-    public boolean removeSelectableObject(SXRSceneObject object) {
+    public boolean removeSelectableObject(SXRNode object) {
         if (null == object) {
-            throw new IllegalArgumentException("SXRSceneObject cannot be null");
+            throw new IllegalArgumentException("SXRNode cannot be null");
         }
         removeSelectableBehavior(object);
         return true;
     }
 
-    private void addSelectableBehavior(SXRSceneObject object) {
+    private void addSelectableBehavior(SXRNode object) {
         SelectableBehavior selectableBehavior = (SelectableBehavior) object.getComponent(
                 SelectableBehavior.getComponentType());
         if (selectableBehavior == null) {
@@ -702,7 +702,7 @@ public final class CursorManager implements IEventReceiver
         }
     }
 
-    private void removeSelectableBehavior(SXRSceneObject object) {
+    private void removeSelectableBehavior(SXRNode object) {
         SelectableBehavior selectableBehavior = (SelectableBehavior) object.getComponent(
                 SelectableBehavior.getComponentType());
         if (selectableBehavior == null) {
@@ -718,7 +718,7 @@ public final class CursorManager implements IEventReceiver
         object.detachComponent(SXRSwitch.getComponentType());
     }
 
-    private float getDistance(SXRSceneObject object) {
+    private float getDistance(SXRNode object) {
         // distance is simple since the origin is 0,0,0
         float x = object.getTransform().getPositionX();
         float y = object.getTransform().getPositionY();
@@ -1100,7 +1100,7 @@ public final class CursorManager implements IEventReceiver
             if (hit.collidableIndex >= 0)
             {
                 SXRBoundsPicker picker = (SXRBoundsPicker) hit.getPicker();
-                SXRSceneObject cursorObj = picker.getCollidable(hit.collidableIndex);
+                SXRNode cursorObj = picker.getCollidable(hit.collidableIndex);
                 if (cursorObj != null)
                 {
                     return (Cursor) cursorObj.getComponent(Cursor.getComponentType());
@@ -1115,7 +1115,7 @@ public final class CursorManager implements IEventReceiver
         }
 
 
-        protected SelectableBehavior findSelector(SXRSceneObject obj)
+        protected SelectableBehavior findSelector(SXRNode obj)
         {
             MovableBehavior b1 = (MovableBehavior) obj.getComponent(MovableBehavior.getComponentType());
             if (b1 != null)
@@ -1125,7 +1125,7 @@ public final class CursorManager implements IEventReceiver
             return (SelectableBehavior) obj.getComponent(SelectableBehavior.getComponentType());
         }
 
-        public void onEnter(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
+        public void onEnter(SXRNode obj, SXRPicker.SXRPickedObject hit)
         {
             Cursor cursor = findCursor(hit);
             SelectableBehavior selector = findSelector(obj);
@@ -1151,7 +1151,7 @@ public final class CursorManager implements IEventReceiver
                                                         "onEnter", cursor, hit);
         }
 
-        public void onExit(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
+        public void onExit(SXRNode obj, SXRPicker.SXRPickedObject hit)
         {
             Cursor cursor = findCursor(hit);
             if (cursor == null)
@@ -1169,7 +1169,7 @@ public final class CursorManager implements IEventReceiver
                                                         "onExit", cursor, hit);
         }
 
-        public void onTouchStart(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
+        public void onTouchStart(SXRNode obj, SXRPicker.SXRPickedObject hit)
         {
             Cursor cursor = findCursor(hit);
             if (cursor == null)
@@ -1187,7 +1187,7 @@ public final class CursorManager implements IEventReceiver
                                                         "onTouchStart", cursor, hit);
         }
 
-        public void onTouchEnd(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
+        public void onTouchEnd(SXRNode obj, SXRPicker.SXRPickedObject hit)
         {
             Cursor cursor = findCursor(hit);
 
@@ -1205,7 +1205,7 @@ public final class CursorManager implements IEventReceiver
                                                         "onTouchEnd", cursor, hit);
         }
 
-        public void onInside(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
+        public void onInside(SXRNode obj, SXRPicker.SXRPickedObject hit)
         {
             Cursor cursor = findCursor(hit);
 

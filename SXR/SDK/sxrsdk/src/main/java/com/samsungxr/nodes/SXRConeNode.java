@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-package com.samsungxr.scene_objects;
+package com.samsungxr.nodes;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.utility.Log;
 
-public class SXRConeSceneObject extends SXRCylinderSceneObject {
+public class SXRConeNode extends SXRCylinderNode {
 
     @SuppressWarnings("unused")
-    private static final String TAG = Log.tag(SXRConeSceneObject.class);
+    private static final String TAG = Log.tag(SXRConeNode.class);
 
     private static final int STACK_NUMBER = 10;
     private static final int SLICE_NUMBER = 36;
@@ -40,7 +40,7 @@ public class SXRConeSceneObject extends SXRCylinderSceneObject {
      * @param gvrContext
      *            current {@link SXRContext}
      */
-    public SXRConeSceneObject(SXRContext gvrContext) {
+    public SXRConeNode(SXRContext gvrContext) {
         super(gvrContext, BASE_RADIUS, TOP_RADIUS, HEIGHT, STACK_NUMBER,
                 SLICE_NUMBER, true);
     }
@@ -59,7 +59,7 @@ public class SXRConeSceneObject extends SXRCylinderSceneObject {
      *            whether the triangles and normals should be facing in or
      *            facing out.
      */
-    public SXRConeSceneObject(SXRContext gvrContext, boolean facingOut) {
+    public SXRConeNode(SXRContext gvrContext, boolean facingOut) {
         super(gvrContext, BASE_RADIUS, TOP_RADIUS, HEIGHT, STACK_NUMBER,
                 SLICE_NUMBER, facingOut);
     }
@@ -81,7 +81,7 @@ public class SXRConeSceneObject extends SXRCylinderSceneObject {
      * @param material
      *            the material for the cone.
      */
-    public SXRConeSceneObject(SXRContext gvrContext, boolean facingOut,
+    public SXRConeNode(SXRContext gvrContext, boolean facingOut,
             SXRMaterial material) {
         super(gvrContext, BASE_RADIUS, TOP_RADIUS, HEIGHT, STACK_NUMBER,
                 SLICE_NUMBER, facingOut, material);

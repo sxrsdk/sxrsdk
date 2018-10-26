@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.samsungxr.scene_objects;
+package com.samsungxr.nodes;
 
 import android.app.Activity;
 import android.content.Context;
@@ -38,13 +38,13 @@ import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMaterial.SXRShaderType;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 
 import java.lang.ref.WeakReference;
 
-public class SXRTextViewSceneObject extends SXRSceneObject {
-    private static final String TAG = SXRTextViewSceneObject.class.getSimpleName();
+public class SXRTextViewNode extends SXRNode {
+    private static final String TAG = SXRTextViewNode.class.getSimpleName();
 
     private static final int REALTIME_REFRESH_INTERVAL = 1;
     private static final int HIGH_REFRESH_INTERVAL = 10; // frames
@@ -116,7 +116,7 @@ public class SXRTextViewSceneObject extends SXRSceneObject {
     private final SXRDrawFrameListenerImpl mFrameListener;
 
     /**
-     * Shows a {@link TextView} on a {@linkplain SXRSceneObject scene object}
+     * Shows a {@link TextView} on a {@linkplain SXRNode scene object}
      * with view's default height and width.
      *
      * @param gvrContext
@@ -128,7 +128,7 @@ public class SXRTextViewSceneObject extends SXRSceneObject {
      * @param text
      *            {@link CharSequence} to show on the textView
      */
-    public SXRTextViewSceneObject(SXRContext gvrContext, float width, float height, CharSequence text) {
+    public SXRTextViewNode(SXRContext gvrContext, float width, float height, CharSequence text) {
         super(gvrContext, SXRMesh.createQuad(gvrContext, "float3 a_position float2 a_texcoord", width, height));
 
         //cap the canvas dimensions
@@ -177,7 +177,7 @@ public class SXRTextViewSceneObject extends SXRSceneObject {
     }
 
     /**
-     * Shows a {@link TextView} on a {@linkplain SXRSceneObject scene object}
+     * Shows a {@link TextView} on a {@linkplain SXRNode scene object}
      * with both view's default height and width and quad's default height and
      * width.
      *
@@ -186,12 +186,12 @@ public class SXRTextViewSceneObject extends SXRSceneObject {
      * @param text
      *            {@link CharSequence} to show on the textView
      */
-    public SXRTextViewSceneObject(SXRContext gvrContext, CharSequence text) {
+    public SXRTextViewNode(SXRContext gvrContext, CharSequence text) {
         this(gvrContext, DEFAULT_QUAD_WIDTH, DEFAULT_QUAD_HEIGHT, text);
     }
 
     /**
-     * Shows a {@link TextView} on a {@linkplain SXRSceneObject scene object}
+     * Shows a {@link TextView} on a {@linkplain SXRNode scene object}
      * with both view's default height and width and quad's default height and
      * width. The initial text will be the private {@code DEFAULT_TEXT}
      * constant, or {@code ""}.
@@ -199,13 +199,13 @@ public class SXRTextViewSceneObject extends SXRSceneObject {
      * @param gvrContext
      *            current {@link SXRContext}
      */
-    public SXRTextViewSceneObject(SXRContext gvrContext) {
+    public SXRTextViewNode(SXRContext gvrContext) {
         this(gvrContext, DEFAULT_TEXT);
     }
 
 
     /**
-     * Constructs a SXRTextViewSceneObject that will be on a plane contoured to the size
+     * Constructs a SXRTextViewNode that will be on a plane contoured to the size
      * of the longest line of text and the number of lines of text.
      * @param gvrContext
      *            current {@link SXRContext}
@@ -225,7 +225,7 @@ public class SXRTextViewSceneObject extends SXRSceneObject {
      * @param style
      *          Specifies plain, bold, italic or bolditalic based on enumerated type value
      */
-    public SXRTextViewSceneObject(SXRContext gvrContext, String name, String string, String font,
+    public SXRTextViewNode(SXRContext gvrContext, String name, String string, String font,
                                   justifyTypes justify, float spacing, float size, fontStyleTypes style) {
         super(gvrContext);
 
@@ -331,7 +331,7 @@ public class SXRTextViewSceneObject extends SXRSceneObject {
     }
 
     /**
-     * getSize is the size saved within SXRTextViewSceneObject and differs
+     * getSize is the size saved within SXRTextViewNode and differs
      * from the textSize modified within Android's TextView class.
      * @return
      */
@@ -589,7 +589,7 @@ public class SXRTextViewSceneObject extends SXRSceneObject {
      * changed.
      *
      * @param frequency
-     *            The refresh frequency of this TextViewSceneObject.
+     *            The refresh frequency of this TextViewNode.
      */
     public void setRefreshFrequency(IntervalFrequency frequency) {
         if (NONE_REFRESH_INTERVAL == mRefreshInterval && IntervalFrequency.NONE != frequency) {
@@ -621,7 +621,7 @@ public class SXRTextViewSceneObject extends SXRSceneObject {
     /**
      * Get the refresh frequency of this scene object.
      *
-     * @return The refresh frequency of this TextViewSceneObject.
+     * @return The refresh frequency of this TextViewNode.
      */
 
     public IntervalFrequency getRefreshFrequency() {
@@ -640,14 +640,14 @@ public class SXRTextViewSceneObject extends SXRSceneObject {
     }
 
     private static final class SXRDrawFrameListenerImpl implements SXRDrawFrameListener {
-        SXRDrawFrameListenerImpl(final SXRTextViewSceneObject sceneObject) {
-            mRef = new WeakReference<SXRTextViewSceneObject>(sceneObject);
+        SXRDrawFrameListenerImpl(final SXRTextViewNode sceneObject) {
+            mRef = new WeakReference<SXRTextViewNode>(sceneObject);
             mContext = sceneObject.getSXRContext();
         }
 
         @Override
         public void onDrawFrame(float frameTime) {
-            final SXRTextViewSceneObject sceneObject = mRef.get();
+            final SXRTextViewNode sceneObject = mRef.get();
             if (null != sceneObject) {
                 int refreshInterval = sceneObject.mRefreshInterval;
                 if ((sceneObject.mFirstFrame || sceneObject.mIsChanged) &&
@@ -671,7 +671,7 @@ public class SXRTextViewSceneObject extends SXRSceneObject {
             }
         }
 
-        private final WeakReference<SXRTextViewSceneObject> mRef;
+        private final WeakReference<SXRTextViewNode> mRef;
         private final SXRContext mContext;
     };
 

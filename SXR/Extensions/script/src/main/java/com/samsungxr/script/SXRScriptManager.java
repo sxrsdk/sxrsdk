@@ -21,7 +21,7 @@ import com.samsungxr.SXREventListeners;
 import com.samsungxr.SXRMain;
 import com.samsungxr.SXRResourceVolume;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.IScriptEvents;
 import com.samsungxr.script.javascript.RhinoScriptEngineFactory;
 
@@ -311,8 +311,8 @@ public class SXRScriptManager implements IScriptManager {
      * @throws SXRScriptException if script processing error occurs.
      */
     public void bindScriptBundleToScene(SXRScriptBundle scriptBundle, SXRScene scene) throws IOException, SXRScriptException {
-        for (SXRSceneObject sceneObject : scene.getSceneObjects()) {
-            bindBundleToSceneObject(scriptBundle, sceneObject);
+        for (SXRNode sceneObject : scene.getNodes()) {
+            bindBundleToNode(scriptBundle, sceneObject);
         }
     }
 
@@ -320,15 +320,15 @@ public class SXRScriptManager implements IScriptManager {
      * Binds a script bundle to scene graph rooted at a scene object.
      * @param scriptBundle
      *         The {@code SXRScriptBundle} object containing script binding information.
-     * @param rootSceneObject
+     * @param rootNode
      *         The root of the scene object tree to which the scripts are bound.
      * @throws IOException if script bundle file cannot be read.
      * @throws SXRScriptException if a script processing error occurs.
      */
-    public void bindBundleToSceneObject(SXRScriptBundle scriptBundle, SXRSceneObject rootSceneObject)
+    public void bindBundleToNode(SXRScriptBundle scriptBundle, SXRNode rootNode)
             throws IOException, SXRScriptException
     {
-        bindHelper(scriptBundle, rootSceneObject, BIND_MASK_SCENE_OBJECTS);
+        bindHelper(scriptBundle, rootNode, BIND_MASK_SCENE_OBJECTS);
     }
 
     protected int BIND_MASK_SCENE_OBJECTS = 0x0001;
@@ -336,7 +336,7 @@ public class SXRScriptManager implements IScriptManager {
     protected int BIND_MASK_SXRACTIVITY   = 0x0004;
 
     // Helper function to bind script bundler to various targets
-    protected void bindHelper(SXRScriptBundle scriptBundle, SXRSceneObject rootSceneObject, int bindMask)
+    protected void bindHelper(SXRScriptBundle scriptBundle, SXRNode rootNode, int bindMask)
             throws IOException, SXRScriptException
     {
         for (SXRScriptBindingEntry entry : scriptBundle.file.binding) {
@@ -374,14 +374,14 @@ public class SXRScriptManager implements IScriptManager {
                 }
             } else {
                 if ((bindMask & BIND_MASK_SCENE_OBJECTS) != 0) {
-                    if (targetName.equals(rootSceneObject.getName())) {
-                        attachScriptFile(rootSceneObject, scriptFile);
+                    if (targetName.equals(rootNode.getName())) {
+                        attachScriptFile(rootNode, scriptFile);
                     }
 
                     // Search in children
-                    SXRSceneObject[] sceneObjects = rootSceneObject.getSceneObjectsByName(targetName);
+                    SXRNode[] sceneObjects = rootNode.getNodesByName(targetName);
                     if (sceneObjects != null) {
-                        for (SXRSceneObject sceneObject : sceneObjects) {
+                        for (SXRNode sceneObject : sceneObjects) {
                             SXRScriptBehavior b = new SXRScriptBehavior(sceneObject.getSXRContext());
                             b.setScriptFile(scriptFile);
                             sceneObject.attachComponent(b);

@@ -15,16 +15,16 @@
 
 package com.samsungxr;
 
-import com.samsungxr.scene_objects.SXRKeyboardSceneObject;
+import com.samsungxr.nodes.SXRKeyboardNode;
 
 /**
  * Interface definition for a callback to be invoked when a key event is dispatched
- * to a {@link SXRSceneObject}.
+ * to a {@link SXRNode}.
  */
 public interface IKeyboardEvents extends IEvents {
     /**
      * Send a key press to the listener.
-     * @param sceneObject {@linkplain SXRKeyboardSceneObject view scene object}
+     * @param sceneObject {@linkplain SXRKeyboardNode view scene object}
      * @param primaryCode this is the key that was pressed
      * @param keyCodes the codes for all the possible alternative keys
      * with the primary code being the first. If the primary key code is
@@ -33,7 +33,7 @@ public interface IKeyboardEvents extends IEvents {
      * These codes are useful to correct for accidental presses of a key adjacent to
      * the intended key.
      */
-    void onKey(SXRKeyboardSceneObject sceneObject, int primaryCode, int[] keyCodes);
-    void onStartInput(SXRKeyboardSceneObject sceneObject);
-    void onStopInput(SXRKeyboardSceneObject sceneObject);
+    void onKey(SXRKeyboardNode sceneObject, int primaryCode, int[] keyCodes);
+    void onStartInput(SXRKeyboardNode sceneObject);
+    void onStopInput(SXRKeyboardNode sceneObject);
 }

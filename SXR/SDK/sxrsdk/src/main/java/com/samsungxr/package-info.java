@@ -28,7 +28,7 @@
  * com.samsungxr.SXRActivity#setMain(com.samsungxr.SXRMain, java.lang.String)}
  *
  * A {@linkplain com.samsungxr.SXRScene scene graph} contains any 
- * number of {@linkplain com.samsungxr.SXRSceneObject scene 
+ * number of {@linkplain com.samsungxr.SXRNode scene 
  * objects.} Scene objects have an {@linkplain com.samsungxr.SXRTransform 
  * 4x4 matrix} which positions them in the scene. Each scene object can have child
  * scene objects: moving the parent moves the children, maintaining the children's

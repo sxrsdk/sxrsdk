@@ -2,7 +2,7 @@ package com.samsungxr.physics;
 
 import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
      * @param owner Owner of the {@link SXRRigidBody}
      * @return Returns the {@link SXRWorld} of the scene.
      */
-    private static SXRWorld getWorld(SXRSceneObject owner) {
+    private static SXRWorld getWorld(SXRNode owner) {
         return getWorldFromAscendant(owner);
     }
 
@@ -41,7 +41,7 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
      * @param worldOwner Scene object to search for a physics world in the scene.
      * @return Physics world from the scene.
      */
-    private static SXRWorld getWorldFromAscendant(SXRSceneObject worldOwner) {
+    private static SXRWorld getWorldFromAscendant(SXRNode worldOwner) {
         SXRComponent world = null;
 
         while (worldOwner != null && world == null) {
@@ -53,7 +53,7 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
     }
 
     @Override
-    public void onAttach(SXRSceneObject newOwner) {
+    public void onAttach(SXRNode newOwner) {
         super.onAttach(newOwner);
         if (isEnabled()) {
             addToWorld(getWorld(newOwner));
@@ -61,7 +61,7 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
     }
 
     @Override
-    public void onDetach(SXRSceneObject oldOwner) {
+    public void onDetach(SXRNode oldOwner) {
         super.onDetach(oldOwner);
         if (isEnabled()) {
             removeFromWorld(getWorld(oldOwner));
@@ -69,14 +69,14 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
     }
 
     @Override
-    public void onNewOwnersParent(SXRSceneObject newOwnersParent) {
+    public void onNewOwnersParent(SXRNode newOwnersParent) {
         if (isEnabled()) {
             addToWorld(getWorld(newOwnersParent));
         }
     }
 
     @Override
-    public void onRemoveOwnersParent(SXRSceneObject oldOwnersParent) {
+    public void onRemoveOwnersParent(SXRNode oldOwnersParent) {
         if (isEnabled()) {
             removeFromWorld(getWorld(oldOwnersParent));
         }

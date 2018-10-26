@@ -18,7 +18,7 @@ package com.samsungxr.io.cursor3d;
 import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
 import com.samsungxr.io.SXRCursorController;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.ITouchEvents;
 import com.samsungxr.io.cursor3d.CursorAsset.Action;
 import com.samsungxr.utility.Log;
@@ -88,7 +88,7 @@ public abstract class Cursor extends SXRBehavior
         mType = getComponentType();
         mCursorType = type;
         mCursorID = sUniqueCursorID++;
-        SXRSceneObject owner = new SXRSceneObject(context);
+        SXRNode owner = new SXRNode(context);
         mAudioManager = CursorAudioManager.getInstance(context.getContext());
         mCompatibleDevices = new ArrayList<PriorityIoDeviceTuple>();
         mTempPosition = new Vector3f();
@@ -100,8 +100,8 @@ public abstract class Cursor extends SXRBehavior
     /**
      * Returns a unique long value associated with the {@link Cursor} class. Each
      * subclass of  {@link SXRBehavior} needs a unique component type value. Use this value to
-     * get the instance of {@link Cursor} attached to any {@link SXRSceneObject}
-     * using {@link SXRSceneObject#getComponent(long)}
+     * get the instance of {@link Cursor} attached to any {@link SXRNode}
+     * using {@link SXRNode#getComponent(long)}
      *
      * @return the component type value.
      */
@@ -123,7 +123,7 @@ public abstract class Cursor extends SXRBehavior
         }
         ioDevice.setEnable(false);
         ioDevice.getGvrCursorController().removePickEventListener(getTouchListener());
-        ioDevice.resetSceneObject();
+        ioDevice.resetNode();
     }
 
     /**
@@ -211,7 +211,7 @@ public abstract class Cursor extends SXRBehavior
      */
     public float getPositionX()
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -227,7 +227,7 @@ public abstract class Cursor extends SXRBehavior
      */
     public float getPositionY()
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -243,7 +243,7 @@ public abstract class Cursor extends SXRBehavior
      */
     public float getPositionZ()
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -259,7 +259,7 @@ public abstract class Cursor extends SXRBehavior
      */
     public float getRotationW()
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -275,7 +275,7 @@ public abstract class Cursor extends SXRBehavior
      */
     public float getRotationX()
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -291,7 +291,7 @@ public abstract class Cursor extends SXRBehavior
      */
     public float getRotationY()
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -307,7 +307,7 @@ public abstract class Cursor extends SXRBehavior
      */
     public float getRotationZ()
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -316,11 +316,11 @@ public abstract class Cursor extends SXRBehavior
         return 0;
     }
 
-    public void addChildObject(SXRSceneObject child) {
+    public void addChildObject(SXRNode child) {
         getOwnerObject().addChildObject(child);
     }
 
-    public void removeChildObject(SXRSceneObject child) {
+    public void removeChildObject(SXRNode child) {
         getOwnerObject().removeChildObject(child);
     }
 
@@ -359,7 +359,7 @@ public abstract class Cursor extends SXRBehavior
      */
     void close() {
         mIODevice = null;
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
         if (owner.getParent() != null) {
             owner.getParent().removeChildObject(owner);
         }

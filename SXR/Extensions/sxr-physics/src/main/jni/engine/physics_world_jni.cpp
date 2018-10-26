@@ -117,7 +117,7 @@ Java_com_samsungxr_physics_NativePhysics3DWorld_startDrag(JNIEnv * env, jobject 
         jlong jworld, jlong jpivot_obj, jlong jtarget,
         jfloat relx, jfloat rely, jfloat relz) {
     PhysicsWorld *world = reinterpret_cast<PhysicsWorld*>(jworld);
-    SceneObject *pivot_obj = reinterpret_cast<SceneObject*>(jpivot_obj);
+    Node *pivot_obj = reinterpret_cast<Node*>(jpivot_obj);
     PhysicsRigidBody* target = reinterpret_cast<PhysicsRigidBody*>(jtarget);
 
     world->startDrag(pivot_obj, target, relx, rely, relz);

@@ -26,7 +26,7 @@
 #include "util/sxr_log.h"
 #include "mesh_collider.h"
 #include "render_data.h"
-#include "objects/scene_object.h"
+#include "objects/node.h"
 
 namespace sxr
 {
@@ -60,16 +60,16 @@ namespace sxr
  * The hit point computed is in local coordinates (same coordinate
  * space as the mesh vertices).
  *
- * @param owner       SceneObject which owns this collider.
+ * @param owner       Node which owns this collider.
  *                    If the collider is part of a group,
- *                    this will be the SceneObject which
+ *                    this will be the Node which
  *                    owns the collider group
  * @param rayStart      origin of the ray in world coordinates
  * @param rayDir        direction of the ray in world coordinates
  *
  * @returns ColliderData structure with collision information
  */
-    ColliderData MeshCollider::isHit(SceneObject* owner, const glm::vec3& rayStart, const glm::vec3& rayDir)
+    ColliderData MeshCollider::isHit(Node* owner, const glm::vec3& rayStart, const glm::vec3& rayDir)
     {
         Mesh* mesh = mesh_;
         bool pickCoordinates = pickCoordinates_;
@@ -123,15 +123,15 @@ namespace sxr
  * The hit point computed is in local coordinates (same coordinate
  * space as the mesh vertices).
  *
- * @param owner       SceneObject which owns this collider.
+ * @param owner       Node which owns this collider.
  *                    If the collider is part of a group,
- *                    this will be the SceneObject which
+ *                    this will be the Node which
  *                    owns the collider group
  * @param sphere      array with origin of the sphere and radius in world coordinates
  *
  * @returns ColliderData structure with hit point and distance from camera
  */
-    ColliderData MeshCollider::isHit(SceneObject* owner, const float sphere[])
+    ColliderData MeshCollider::isHit(Node* owner, const float sphere[])
     {
         Mesh* mesh = mesh_;
         RenderData* rd = owner->render_data();

@@ -3,7 +3,7 @@ package com.samsungxr.widgetlib.widget;
 import android.support.annotation.NonNull;
 
 import com.samsungxr.SXRMesh;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -32,9 +32,9 @@ public class BoundingBox {
             loadVertices(vertices);
             transform(this, widget);
         } else {
-            SXRSceneObject obj = widget.getSceneObject();
+            SXRNode obj = widget.getNode();
             if (obj != null) {
-                SXRSceneObject.BoundingVolume volume = obj.getBoundingVolume();
+                SXRNode.BoundingVolume volume = obj.getBoundingVolume();
                 if (volume != null) {
                     mMinCorner = volume.minCorner;
                     mMaxCorner = volume.maxCorner;

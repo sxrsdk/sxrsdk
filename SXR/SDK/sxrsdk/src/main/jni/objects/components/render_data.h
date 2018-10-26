@@ -150,7 +150,7 @@ public:
      * Select or generate a shader for this render data.
      * This function executes a Java task on the Framework thread.
      */
-    void bindShader(JNIEnv* env, jobject localSceneObject, bool);
+    void bindShader(JNIEnv* env, jobject localNode, bool);
     void markDirty() {
         render_data_flags.dirty_ = true;
     }

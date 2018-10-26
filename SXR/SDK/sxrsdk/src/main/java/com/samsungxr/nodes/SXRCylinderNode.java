@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-package com.samsungxr.scene_objects;
+package com.samsungxr.nodes;
 
 import java.util.ArrayList;
 import java.util.concurrent.Future;
 
 import com.samsungxr.FutureWrapper;
 import com.samsungxr.SXRMaterial;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.utility.Log;
 
-public class SXRCylinderSceneObject extends SXRSceneObject {
+public class SXRCylinderNode extends SXRNode {
     public static class CylinderParams {
         public float       Height = 1.0f;
         public float       TopRadius = 0.5f;
@@ -42,7 +42,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
     };
     
     @SuppressWarnings("unused")
-    private static final String TAG = Log.tag(SXRCylinderSceneObject.class);
+    private static final String TAG = Log.tag(SXRCylinderNode.class);
 
     private static final int STACK_NUMBER = 10;
     private static final int SLICE_NUMBER = 36;
@@ -75,7 +75,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
      *            current {@link SXRContext}
      * @param params    CylinderParams object with cylinder construction parameters.
      */
-    public SXRCylinderSceneObject(SXRContext gvrContext, CylinderParams params) {
+    public SXRCylinderNode(SXRContext gvrContext, CylinderParams params) {
         super(gvrContext);
         generateCylinderObject(gvrContext, params);
     }
@@ -90,7 +90,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
      * @param gvrContext
      *            current {@link SXRContext}
      */
-    public SXRCylinderSceneObject(SXRContext gvrContext) {
+    public SXRCylinderNode(SXRContext gvrContext) {
         super(gvrContext);
         CylinderParams params = new CylinderParams();
         params.Material = new SXRMaterial(gvrContext);
@@ -111,7 +111,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
      *            whether the triangles and normals should be facing in or
      *            facing out.
      */
-    public SXRCylinderSceneObject(SXRContext gvrContext, boolean facingOut) {
+    public SXRCylinderNode(SXRContext gvrContext, boolean facingOut) {
         super(gvrContext);
         CylinderParams params = new CylinderParams();
         params.Material = new SXRMaterial(gvrContext);
@@ -136,7 +136,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
      * @param texture
      *            the texture for the cylinder.
      */
-    public SXRCylinderSceneObject(SXRContext gvrContext, boolean facingOut,
+    public SXRCylinderNode(SXRContext gvrContext, boolean facingOut,
             SXRTexture texture) {
         super(gvrContext);
         CylinderParams params = new CylinderParams();
@@ -164,7 +164,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
      * @param material
      *            the material for the cylinder.
      */
-    public SXRCylinderSceneObject(SXRContext gvrContext, boolean facingOut,
+    public SXRCylinderNode(SXRContext gvrContext, boolean facingOut,
             SXRMaterial material) {
         super(gvrContext);
         CylinderParams params = new CylinderParams();
@@ -189,7 +189,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
      * @param textureList
      *            the list of three textures for the cylinder for top, side, and bottom faces respectively.
      */
-    public SXRCylinderSceneObject(SXRContext gvrContext, boolean facingOut,
+    public SXRCylinderNode(SXRContext gvrContext, boolean facingOut,
             ArrayList<SXRTexture> textureList) {
         super(gvrContext);
         CylinderParams params = new CylinderParams();
@@ -231,7 +231,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
      * @param facingOut
      *            true for normals facing out, false for normals facing in.
      */
-    public SXRCylinderSceneObject(SXRContext gvrContext, float bottomRadius,
+    public SXRCylinderNode(SXRContext gvrContext, float bottomRadius,
             float topRadius, float height, int stackNumber, int sliceNumber,
             boolean facingOut) {
         super(gvrContext);
@@ -290,7 +290,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
      * @param facingOut
      *            true for normals facing out, false for normals facing in.
      */
-    public SXRCylinderSceneObject(SXRContext gvrContext, float bottomRadius,
+    public SXRCylinderNode(SXRContext gvrContext, float bottomRadius,
             float topRadius, float height, int stackNumber, int sliceNumber,
             boolean facingOut, SXRMaterial material) {
         super(gvrContext);
@@ -349,7 +349,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
      * @param facingOut
      *            true for normals facing out, false for normals facing in.
      */
-    public SXRCylinderSceneObject(SXRContext gvrContext, float bottomRadius,
+    public SXRCylinderNode(SXRContext gvrContext, float bottomRadius,
             float topRadius, float height, int stackNumber, int sliceNumber,
             boolean facingOut, ArrayList<SXRTexture> textureList) {
         super(gvrContext);
@@ -426,7 +426,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
      * @param facingOut
      *            true for normals facing out, false for normals facing in.
      */
-    public SXRCylinderSceneObject(SXRContext gvrContext, float bottomRadius,
+    public SXRCylinderNode(SXRContext gvrContext, float bottomRadius,
             float topRadius, float height, int stackNumber, int sliceNumber,
             boolean facingOut, ArrayList<SXRTexture> textureList, int stackSegmentNumber, int sliceSegmentNumber) {
         super(gvrContext);
@@ -515,7 +515,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
      * @param facingOut
      *            true for normals facing out, false for normals facing in.
      */
-    public SXRCylinderSceneObject(SXRContext gvrContext, float bottomRadius,
+    public SXRCylinderNode(SXRContext gvrContext, float bottomRadius,
             float topRadius, float height, int stackNumber, int sliceNumber,
             boolean facingOut, SXRMaterial material, int stackSegmentNumber, int sliceSegmentNumber) {
         super(gvrContext);
@@ -896,7 +896,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
         }
         mesh.setIndices(indices);
 
-        SXRSceneObject child = new SXRSceneObject(gvrContext, mesh, texture);
+        SXRNode child = new SXRNode(gvrContext, mesh, texture);
         addChildObject(child);        
    }
 
@@ -937,7 +937,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
         }
         mesh.setIndices(indices);
 
-        SXRSceneObject child = new SXRSceneObject(gvrContext, mesh, texture);
+        SXRNode child = new SXRNode(gvrContext, mesh, texture);
         addChildObject(child);        
     }
 
@@ -1091,7 +1091,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
                 mesh.setNormals(normals);
                 mesh.setTexCoords(texCoords);
                 mesh.setIndices(indices);
-                SXRSceneObject childObject = new SXRSceneObject(gvrContext,
+                SXRNode childObject = new SXRNode(gvrContext,
                         mesh);
                 childObject.getRenderData().setMaterial(material);
                 addChildObject(childObject);
@@ -1289,7 +1289,7 @@ public class SXRCylinderSceneObject extends SXRSceneObject {
                     mesh.setTexCoords(texCoords);
                 }
                 mesh.setIndices(indices);
-                SXRSceneObject childObject = new SXRSceneObject(gvrContext,
+                SXRNode childObject = new SXRNode(gvrContext,
                         mesh);
                 childObject.getRenderData().setMaterial(params.Material);
                 addChildObject(childObject);

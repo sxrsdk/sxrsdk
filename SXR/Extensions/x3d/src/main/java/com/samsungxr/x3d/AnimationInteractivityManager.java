@@ -40,7 +40,7 @@ import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRPointLight;
 import com.samsungxr.SXRSpotLight;
 import com.samsungxr.SXRDirectLight;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRSwitch;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.SXRTextureParameters;
@@ -56,9 +56,9 @@ import com.samsungxr.animation.keyframe.SXRAnimationChannel;
 import com.samsungxr.animation.keyframe.SXRNodeAnimation;
 
 import com.samsungxr.animation.keyframe.SXRNodeAnimation;
-import com.samsungxr.scene_objects.SXRVideoSceneObject;
-import com.samsungxr.scene_objects.SXRVideoSceneObjectPlayer;
-import com.samsungxr.scene_objects.SXRTextViewSceneObject;
+import com.samsungxr.nodes.SXRVideoNode;
+import com.samsungxr.nodes.SXRVideoNodePlayer;
+import com.samsungxr.nodes.SXRTextViewNode;
 import com.samsungxr.script.SXRJavascriptScriptFile;
 
 import com.samsungxr.SXRDrawFrameListener;
@@ -124,7 +124,7 @@ public class AnimationInteractivityManager {
 
     private X3Dobject x3dObject = null;
     private SXRContext gvrContext = null;
-    private SXRSceneObject root = null;
+    private SXRNode root = null;
     private Vector<DefinedItem> definedItems = null;
     private Vector<Interpolator> interpolators = null;
     private Vector<Sensor> sensors = null;
@@ -140,13 +140,13 @@ public class AnimationInteractivityManager {
     private PerFrameScripting perFrameScripting = new PerFrameScripting();
     private SensorImplementation sensorImplementation = new SensorImplementation();
 
-    // Append this incremented value to SXRSceneObject names to insure unique
-    // SXRSceneObjects when new SXRScene objects are generated to support animation
+    // Append this incremented value to SXRNode names to insure unique
+    // SXRNodes when new SXRScene objects are generated to support animation
     private static int animationCount = 1;
 
 
     public AnimationInteractivityManager(X3Dobject x3dObject, SXRContext gvrContext,
-                                         SXRSceneObject root,
+                                         SXRNode root,
                                          Vector<DefinedItem> definedItems,
                                          Vector<Interpolator> interpolators,
                                          Vector<Sensor> sensors,
@@ -516,7 +516,7 @@ public class AnimationInteractivityManager {
         for (InteractiveObject interactiveObject : interactiveObjects) {
             SXRAnimationChannel gvrAnimationChannel = null;
             SXRNodeAnimation gvrKeyFrameAnimation = null;
-            SXRSceneObject gvrAnimatedObject = null;
+            SXRNode gvrAnimatedObject = null;
 
             // both animated and interactive objects currently must have a time
             // sensor, interpolator and a Transform node with a DEF="..." parameter
@@ -528,7 +528,7 @@ public class AnimationInteractivityManager {
                 if ((interactiveObject.getDefinedItemToField().toLowerCase().endsWith(TRANSLATION)) ||
                         (interactiveObject.getDefinedItemToField().toLowerCase().endsWith(POSITION))) {
                     gvrAnimatedObject = root
-                            .getSceneObjectByName((interactiveObject.getDefinedItem().getName() + x3dObject.TRANSFORM_TRANSLATION_));
+                            .getNodeByName((interactiveObject.getDefinedItem().getName() + x3dObject.TRANSFORM_TRANSLATION_));
                     gvrAnimationChannel = new SXRAnimationChannel(
                             gvrAnimatedObject.getName(),
                             interactiveObject.getInterpolator().key.length, 0, 0,
@@ -546,7 +546,7 @@ public class AnimationInteractivityManager {
                 else if ((interactiveObject.getDefinedItemToField().toLowerCase().endsWith(ROTATION)) ||
                         (interactiveObject.getDefinedItemToField().toLowerCase().endsWith(ORIENTATION))) {
                     gvrAnimatedObject = root
-                            .getSceneObjectByName((interactiveObject.getDefinedItem().getName() + x3dObject.TRANSFORM_ROTATION_));
+                            .getNodeByName((interactiveObject.getDefinedItem().getName() + x3dObject.TRANSFORM_ROTATION_));
                     gvrAnimationChannel = new SXRAnimationChannel(
                             gvrAnimatedObject.getName(), 0,
                             interactiveObject.getInterpolator().key.length, 0,
@@ -569,7 +569,7 @@ public class AnimationInteractivityManager {
 
                 else if (interactiveObject.getDefinedItemToField().toLowerCase().endsWith(SCALE)) {
                     gvrAnimatedObject = root
-                            .getSceneObjectByName((interactiveObject.getDefinedItem().getName() + x3dObject.TRANSFORM_SCALE_));
+                            .getNodeByName((interactiveObject.getDefinedItem().getName() + x3dObject.TRANSFORM_SCALE_));
                     gvrAnimationChannel = new SXRAnimationChannel(
                             gvrAnimatedObject.getName(), 0, 0,
                             interactiveObject.getInterpolator().key.length, SXRAnimationBehavior.DEFAULT,
@@ -612,9 +612,9 @@ public class AnimationInteractivityManager {
                         final InteractiveObject interactiveObjectFinal = interactiveObject;
                         final SXRNodeAnimation gvrKeyFrameAnimationFinal = gvrKeyFrameAnimation;
                         interactiveObject.getSensor().getOwnerObject().forAllDescendants(
-                                new SXRSceneObject.SceneVisitor()
+                                new SXRNode.SceneVisitor()
                                 {
-                                    public boolean visit (SXRSceneObject obj)
+                                    public boolean visit (SXRNode obj)
                                     {
                                         obj.attachCollider(new SXRMeshCollider(gvrContext, true));
                                         return true;
@@ -662,9 +662,9 @@ public class AnimationInteractivityManager {
 
                 if (interactiveObject.getSensor().getSensorType() == Sensor.Type.TOUCH) {
                     interactiveObject.getSensor().getOwnerObject().forAllDescendants(
-                            new SXRSceneObject.SceneVisitor()
+                            new SXRNode.SceneVisitor()
                             {
-                                public boolean visit (SXRSceneObject obj)
+                                public boolean visit (SXRNode obj)
                                 {
                                     obj.attachCollider(new SXRMeshCollider(gvrContext, true));
                                     return true;
@@ -684,9 +684,9 @@ public class AnimationInteractivityManager {
                                     eventUtility.setToggle(!eventUtility.getToggle());
                                     for (InteractiveObject interactiveObject : interactiveObjectsFinal) {
                                         if (interactiveObject.getEventUtility() == interactiveObjectFinal.getEventUtility()) {
-                                            SXRSceneObject gvrSceneObject = root
-                                                    .getSceneObjectByName(interactiveObject.getDefinedItem().getName());
-                                            SXRComponent gvrComponent = gvrSceneObject.getComponent(
+                                            SXRNode gvrNode = root
+                                                    .getNodeByName(interactiveObject.getDefinedItem().getName());
+                                            SXRComponent gvrComponent = gvrNode.getComponent(
                                                     SXRLight.getComponentType());
                                             gvrComponent.setEnable(eventUtility.getToggle());
                                         }
@@ -713,9 +713,9 @@ public class AnimationInteractivityManager {
                     if (interactiveObject.getSensor().getSensorType() == Sensor.Type.PLANE) {
                         // a Plane Sensor
                         interactiveObject.getSensor().getOwnerObject().forAllDescendants(
-                                new SXRSceneObject.SceneVisitor()
+                                new SXRNode.SceneVisitor()
                                 {
-                                    public boolean visit (SXRSceneObject obj)
+                                    public boolean visit (SXRNode obj)
                                     {
                                         obj.attachCollider(new SXRMeshCollider(gvrContext, true));
                                         return true;
@@ -728,7 +728,7 @@ public class AnimationInteractivityManager {
                             float[] initPlaneTranslation = new float[3];
                             float[] initHitLocation = null;
                             float[] planeTranslation = new float[3];
-                            SXRSceneObject gvrSceneObject = null;
+                            SXRNode gvrNode = null;
 
                             @Override
                             public void onSensorEvent(SensorEvent event) {
@@ -739,21 +739,21 @@ public class AnimationInteractivityManager {
                                         float[] lookAt = gvrCameraRig.getLookAt();
                                         initCameraDir = new Vector3f(lookAt[0], lookAt[1], lookAt[2]);
                                         initHitLocation = gvrPickedObject.getHitLocation();
-                                        SXRSceneObject hitObjectSceneObject = gvrPickedObject.getHitObject();
-                                        // Primitives are a child of the SXRSceneObject with the name.
-                                        if ( hitObjectSceneObject.getName().isEmpty() ) {
-                                            hitObjectSceneObject = hitObjectSceneObject.getParent();
+                                        SXRNode hitObjectNode = gvrPickedObject.getHitObject();
+                                        // Primitives are a child of the SXRNode with the name.
+                                        if ( hitObjectNode.getName().isEmpty() ) {
+                                            hitObjectNode = hitObjectNode.getParent();
                                         }
-                                        gvrSceneObject = root
-                                                .getSceneObjectByName((hitObjectSceneObject.getName() + x3dObject.TRANSFORM_TRANSLATION_));
+                                        gvrNode = root
+                                                .getNodeByName((hitObjectNode.getName() + x3dObject.TRANSFORM_TRANSLATION_));
 
-                                        initPlaneTranslation[0] = gvrSceneObject.getTransform().getPositionX();
-                                        initPlaneTranslation[1] = gvrSceneObject.getTransform().getPositionY();
-                                        initPlaneTranslation[2] = gvrSceneObject.getTransform().getPositionZ();
+                                        initPlaneTranslation[0] = gvrNode.getTransform().getPositionX();
+                                        initPlaneTranslation[1] = gvrNode.getTransform().getPositionY();
+                                        initPlaneTranslation[2] = gvrNode.getTransform().getPositionZ();
                                     }
                                     // initialize the input values for planeSensor and run the javaScript.
-                                    planeTranslation[0] = gvrSceneObject.getTransform().getPositionX();
-                                    planeTranslation[1] = gvrSceneObject.getTransform().getPositionY();
+                                    planeTranslation[0] = gvrNode.getTransform().getPositionX();
+                                    planeTranslation[1] = gvrNode.getTransform().getPositionY();
                                     Object[] parameters = SetJavaScriptArguments(interactiveObjectFinal, planeTranslation[0], planeTranslation[1], 0, 0,true);
                                     ScriptObject scriptObject = interactiveObjectFinal.getScriptObject();
                                     ScriptObject.Field firstField = scriptObject.getField(0);
@@ -770,9 +770,9 @@ public class AnimationInteractivityManager {
                     else if (interactiveObject.getSensor().getSensorType() == Sensor.Type.TOUCH) {
                         // A Touch Sensor
                         interactiveObject.getSensor().getOwnerObject().forAllDescendants(
-                                new SXRSceneObject.SceneVisitor()
+                                new SXRNode.SceneVisitor()
                                 {
-                                    public boolean visit (SXRSceneObject obj)
+                                    public boolean visit (SXRNode obj)
                                     {
                                         obj.attachCollider(new SXRMeshCollider(gvrContext, true));
                                         return true;
@@ -829,9 +829,9 @@ public class AnimationInteractivityManager {
                     }  // end if sensor == TOUCH
                     else if (interactiveObject.getSensor().getSensorType() == Sensor.Type.CYLINDER) {
                         interactiveObject.getSensor().getOwnerObject().forAllDescendants(
-                                new SXRSceneObject.SceneVisitor()
+                                new SXRNode.SceneVisitor()
                                 {
-                                    public boolean visit (SXRSceneObject obj)
+                                    public boolean visit (SXRNode obj)
                                     {
                                         obj.attachCollider(new SXRMeshCollider(gvrContext, true));
                                         return true;
@@ -845,7 +845,7 @@ public class AnimationInteractivityManager {
                             boolean initialized = false;
                             Quaternionf cylinderRotation = new Quaternionf();
                             AxisAngle4f cylRotAxisAngle = new AxisAngle4f();
-                            SXRSceneObject gvrSceneObject = null;
+                            SXRNode gvrNode = null;
 
                             @Override
                             public void onSensorEvent(SensorEvent event) {
@@ -853,19 +853,19 @@ public class AnimationInteractivityManager {
                                     SXRPicker.SXRPickedObject gvrPickedObject = event.getPickedObject();
                                     if ( !initialized ) {
                                         initialized = true;
-                                        SXRSceneObject hitObjectSceneObject = gvrPickedObject.getHitObject();
-                                        // Primitives are a child of the SXRSceneObject with the name.
-                                        while ( hitObjectSceneObject.getName().isEmpty() ) {
-                                            hitObjectSceneObject = hitObjectSceneObject.getParent();
+                                        SXRNode hitObjectNode = gvrPickedObject.getHitObject();
+                                        // Primitives are a child of the SXRNode with the name.
+                                        while ( hitObjectNode.getName().isEmpty() ) {
+                                            hitObjectNode = hitObjectNode.getParent();
                                         }
-                                        gvrSceneObject = root
-                                                .getSceneObjectByName((hitObjectSceneObject.getName() + x3dObject.TRANSFORM_ROTATION_));
+                                        gvrNode = root
+                                                .getNodeByName((hitObjectNode.getName() + x3dObject.TRANSFORM_ROTATION_));
                                     }  //  end initialization
                                     // initialize the input values for planeSensor and run the javaScript.
-                                    cylinderRotation.w = gvrSceneObject.getTransform().getRotationW();
-                                    cylinderRotation.x = gvrSceneObject.getTransform().getRotationX();
-                                    cylinderRotation.y = gvrSceneObject.getTransform().getRotationY();
-                                    cylinderRotation.z = gvrSceneObject.getTransform().getRotationZ();
+                                    cylinderRotation.w = gvrNode.getTransform().getRotationW();
+                                    cylinderRotation.x = gvrNode.getTransform().getRotationX();
+                                    cylinderRotation.y = gvrNode.getTransform().getRotationY();
+                                    cylinderRotation.z = gvrNode.getTransform().getRotationZ();
                                     cylinderRotation.get( cylRotAxisAngle );
 
                                     // Quaternion to Axis-Angle flips the sign on the rotation
@@ -890,9 +890,9 @@ public class AnimationInteractivityManager {
 
                         //Set up the Sensor call back
                         interactiveObject.getSensor().getOwnerObject().forAllDescendants(
-                                new SXRSceneObject.SceneVisitor()
+                                new SXRNode.SceneVisitor()
                                 {
-                                    public boolean visit (SXRSceneObject obj)
+                                    public boolean visit (SXRNode obj)
                                     {
                                         obj.attachCollider(new SXRMeshCollider(gvrContext, true));
                                         return true;
@@ -902,7 +902,7 @@ public class AnimationInteractivityManager {
                             boolean initialized = false;
                             Quaternionf sphereRotation = new Quaternionf();
                             AxisAngle4f sphereRotAxisAngle = new AxisAngle4f();
-                            SXRSceneObject gvrSceneObject = null;
+                            SXRNode gvrNode = null;
 
                             @Override
                             public void onSensorEvent(SensorEvent event) {
@@ -910,20 +910,20 @@ public class AnimationInteractivityManager {
                                     SXRPicker.SXRPickedObject gvrPickedObject = event.getPickedObject();
                                     if ( !initialized ) {
                                         initialized = true;
-                                        SXRSceneObject hitObjectSceneObject = gvrPickedObject.getHitObject();
-                                        // Primitives are a child of the SXRSceneObject with the name.
-                                        while ( hitObjectSceneObject.getName().isEmpty() ) {
-                                            hitObjectSceneObject = hitObjectSceneObject.getParent();
+                                        SXRNode hitObjectNode = gvrPickedObject.getHitObject();
+                                        // Primitives are a child of the SXRNode with the name.
+                                        while ( hitObjectNode.getName().isEmpty() ) {
+                                            hitObjectNode = hitObjectNode.getParent();
                                         }
-                                        gvrSceneObject = root
-                                                .getSceneObjectByName((hitObjectSceneObject.getName() + x3dObject.TRANSFORM_ROTATION_));
+                                        gvrNode = root
+                                                .getNodeByName((hitObjectNode.getName() + x3dObject.TRANSFORM_ROTATION_));
 
                                     }  //  end initialization
                                     // initialize the input values for planeSensor and run the javaScript.
-                                    sphereRotation.w = gvrSceneObject.getTransform().getRotationW();
-                                    sphereRotation.x = gvrSceneObject.getTransform().getRotationX();
-                                    sphereRotation.y = gvrSceneObject.getTransform().getRotationY();
-                                    sphereRotation.z = gvrSceneObject.getTransform().getRotationZ();
+                                    sphereRotation.w = gvrNode.getTransform().getRotationW();
+                                    sphereRotation.x = gvrNode.getTransform().getRotationX();
+                                    sphereRotation.y = gvrNode.getTransform().getRotationY();
+                                    sphereRotation.z = gvrNode.getTransform().getRotationZ();
                                     sphereRotation.get( sphereRotAxisAngle );
 
                                     // Quaternion to Axis-Angle flips the sign on the rotation
@@ -958,8 +958,8 @@ public class AnimationInteractivityManager {
                 final InteractiveObject interactiveObjectFinal = interactiveObject;
                 if (interactiveObject.getSensor().getSensorType() == Sensor.Type.TOUCH) {
                     interactiveObject.getSensor().getOwnerObject().forAllDescendants(
-                            new SXRSceneObject.SceneVisitor() {
-                                public boolean visit(SXRSceneObject obj) {
+                            new SXRNode.SceneVisitor() {
+                                public boolean visit(SXRNode obj) {
                                     obj.attachCollider(new SXRMeshCollider(gvrContext, true));
                                     return true;
                                 }
@@ -970,9 +970,9 @@ public class AnimationInteractivityManager {
                         @Override
                         public void onSensorEvent(SensorEvent event) {
                             //Setup SensorEvent callback here
-                            SXRSceneObject gvrSceneObject = root
-                                    .getSceneObjectByName(interactiveObjectFinal.getDefinedItem().getName());
-                            SXRComponent gvrComponent = gvrSceneObject.getComponent(SXRLight.getComponentType());
+                            SXRNode gvrNode = root
+                                    .getNodeByName(interactiveObjectFinal.getDefinedItem().getName());
+                            SXRComponent gvrComponent = gvrNode.getComponent(SXRLight.getComponentType());
 
                             if (gvrComponent != null) {
                                 if (event.isOver() && interactiveObjectFinal.getSensorFromField().equals(Sensor.IS_OVER)) {
@@ -980,21 +980,21 @@ public class AnimationInteractivityManager {
                                 } else {
                                     if (gvrComponent != null) gvrComponent.setEnable(false);
                                 }
-                            } else if (gvrSceneObject instanceof SXRVideoSceneObject) {
+                            } else if (gvrNode instanceof SXRVideoNode) {
                                 // isOver, but only go thru once per isOver.
                                 if (event.isOver() && !isMovieStateSet) {
-                                    SXRVideoSceneObject gvrVideoSceneObject = (SXRVideoSceneObject) gvrSceneObject;
-                                    SXRVideoSceneObjectPlayer gvrVideoSceneObjectPlayer = gvrVideoSceneObject.getMediaPlayer();
+                                    SXRVideoNode gvrVideoNode = (SXRVideoNode) gvrNode;
+                                    SXRVideoNodePlayer gvrVideoNodePlayer = gvrVideoNode.getMediaPlayer();
                                     try {
                                         if (interactiveObjectFinal.getSensorFromField().contains("touchTime")) {
                                             if (interactiveObjectFinal.getDefinedItemToField().endsWith("stopTime")) {
-                                                gvrVideoSceneObjectPlayer.pause();
-                                                ExoPlayer exoPlayer = (ExoPlayer) gvrVideoSceneObjectPlayer.getPlayer();
+                                                gvrVideoNodePlayer.pause();
+                                                ExoPlayer exoPlayer = (ExoPlayer) gvrVideoNodePlayer.getPlayer();
                                                 exoPlayer.seekTo(0);
                                             } else if (interactiveObjectFinal.getDefinedItemToField().endsWith("pauseTime")) {
-                                                gvrVideoSceneObjectPlayer.pause();
+                                                gvrVideoNodePlayer.pause();
                                             } else if (interactiveObjectFinal.getDefinedItemToField().endsWith("startTime")) {
-                                                gvrVideoSceneObjectPlayer.start();
+                                                gvrVideoNodePlayer.start();
                                             } else {
                                                 Log.e(TAG, "Error: ROUTE to MovieTexture, " + interactiveObjectFinal.getDefinedItemToField() + " not implemented");
                                             }
@@ -1014,14 +1014,14 @@ public class AnimationInteractivityManager {
                                     // No longer over the TouchSensor
                                     isMovieStateSet = false;
                                 }
-                            } // end if gvrSceneObject
+                            } // end if gvrNode
                         }
                     });
                 }  // end if sensor == TOUCH
                 else if (interactiveObject.getSensor().getSensorType() == Sensor.Type.PLANE) {
                     interactiveObject.getSensor().getOwnerObject().forAllDescendants(
-                            new SXRSceneObject.SceneVisitor() {
-                                public boolean visit(SXRSceneObject obj) {
+                            new SXRNode.SceneVisitor() {
+                                public boolean visit(SXRNode obj) {
                                     obj.attachCollider(new SXRMeshCollider(gvrContext, true));
                                     return true;
                                 }
@@ -1048,9 +1048,9 @@ public class AnimationInteractivityManager {
                 }  // end if sensor == PLANESensor
                 else if (interactiveObject.getSensor().getSensorType() == Sensor.Type.CYLINDER) {
                     interactiveObject.getSensor().getOwnerObject().forAllDescendants(
-                            new SXRSceneObject.SceneVisitor()
+                            new SXRNode.SceneVisitor()
                             {
-                                public boolean visit (SXRSceneObject obj)
+                                public boolean visit (SXRNode obj)
                                 {
                                     obj.attachCollider(new SXRMeshCollider(gvrContext, true));
                                     return true;
@@ -1076,9 +1076,9 @@ public class AnimationInteractivityManager {
                 }  // end if sensor == CylinderSensor
                 else if (interactiveObject.getSensor().getSensorType() == Sensor.Type.SPHERE) {
                     interactiveObject.getSensor().getOwnerObject().forAllDescendants(
-                            new SXRSceneObject.SceneVisitor()
+                            new SXRNode.SceneVisitor()
                             {
-                                public boolean visit (SXRSceneObject obj)
+                                public boolean visit (SXRNode obj)
                                 {
                                     obj.attachCollider(new SXRMeshCollider(gvrContext, true));
                                     return true;
@@ -1113,9 +1113,9 @@ public class AnimationInteractivityManager {
 
                 if (interactiveObject.getSensor().getSensorType() == Sensor.Type.TOUCH) {
                     interactiveObject.getSensor().getOwnerObject().forAllDescendants(
-                            new SXRSceneObject.SceneVisitor()
+                            new SXRNode.SceneVisitor()
                             {
-                                public boolean visit (SXRSceneObject obj)
+                                public boolean visit (SXRNode obj)
                                 {
                                     obj.attachCollider(new SXRMeshCollider(gvrContext, true));
                                     return true;
@@ -1174,7 +1174,7 @@ public class AnimationInteractivityManager {
         SXRDrawFrameListener mSensorOnDrawFrame = null;
         InteractiveObject mInteractiveObjectFinal = null;
         SXRPicker.SXRPickedObject mSXRPickedObject = null;
-        SXRSceneObject mSXRSceneObject = null;
+        SXRNode mSXRNode = null;
         Sensor.Type mSensorType;
         String fromField = "";
         String toField = "";
@@ -1263,22 +1263,22 @@ public class AnimationInteractivityManager {
 
                 // initialize the 'to' object information
                 if (mInteractiveObjectFinal.getDefinedItem() != null) {
-                    mSXRSceneObject = mInteractiveObjectFinal.getDefinedItem().getSXRSceneObject();
+                    mSXRNode = mInteractiveObjectFinal.getDefinedItem().getSXRNode();
 
-                    if ( mSXRSceneObject.getName().isEmpty() ) {
-                        mSXRSceneObject = mSXRSceneObject.getParent();
+                    if ( mSXRNode.getName().isEmpty() ) {
+                        mSXRNode = mSXRNode.getParent();
                     }
                     if (mSensorType == Sensor.Type.PLANE) {
 
-                        mSXRSceneObject = root
-                                .getSceneObjectByName((mSXRSceneObject.getName() + x3dObject.TRANSFORM_TRANSLATION_));
+                        mSXRNode = root
+                                .getNodeByName((mSXRNode.getName() + x3dObject.TRANSFORM_TRANSLATION_));
 
-                        if (mSXRSceneObject != null) {
+                        if (mSXRNode != null) {
                             if (StringFieldMatch(mInteractiveObjectFinal.getDefinedItemToField(), "translation")) {
                                 toField = "translation";
-                                initPlaneTranslation[0] = mSXRSceneObject.getTransform().getPositionX();
-                                initPlaneTranslation[1] = mSXRSceneObject.getTransform().getPositionY();
-                                initPlaneTranslation[2] = mSXRSceneObject.getTransform().getPositionZ();
+                                initPlaneTranslation[0] = mSXRNode.getTransform().getPositionX();
+                                initPlaneTranslation[1] = mSXRNode.getTransform().getPositionY();
+                                initPlaneTranslation[2] = mSXRNode.getTransform().getPositionZ();
                             } else {
                                 Log.e(TAG, "Plane Sensor: not supported 'to field': " + mInteractiveObjectFinal.getDefinedItemToField());
                             }
@@ -1288,19 +1288,19 @@ public class AnimationInteractivityManager {
                     }  //  end if PLANESensor
                     else if (mSensorType == Sensor.Type.CYLINDER) {
 
-                        SXRSceneObject gvrSceneObjectTranslation = root
-                                .getSceneObjectByName((mSXRSceneObject.getName() + x3dObject.TRANSFORM_TRANSLATION_));
-                        initPlaneTranslation[0] = gvrSceneObjectTranslation.getTransform().getPositionX();
-                        initPlaneTranslation[1] = gvrSceneObjectTranslation.getTransform().getPositionY();
-                        initPlaneTranslation[2] = gvrSceneObjectTranslation.getTransform().getPositionZ();
+                        SXRNode gvrNodeTranslation = root
+                                .getNodeByName((mSXRNode.getName() + x3dObject.TRANSFORM_TRANSLATION_));
+                        initPlaneTranslation[0] = gvrNodeTranslation.getTransform().getPositionX();
+                        initPlaneTranslation[1] = gvrNodeTranslation.getTransform().getPositionY();
+                        initPlaneTranslation[2] = gvrNodeTranslation.getTransform().getPositionZ();
 
-                        mSXRSceneObject = root
-                                .getSceneObjectByName((mSXRSceneObject.getName() + x3dObject.TRANSFORM_ROTATION_));
+                        mSXRNode = root
+                                .getNodeByName((mSXRNode.getName() + x3dObject.TRANSFORM_ROTATION_));
 
-                        if (mSXRSceneObject != null) {
+                        if (mSXRNode != null) {
                             if (StringFieldMatch(mInteractiveObjectFinal.getDefinedItemToField(), "rotation")) {
                                 toField = "rotation";
-                                SXRTransform transform = mSXRSceneObject.getTransform();
+                                SXRTransform transform = mSXRNode.getTransform();
                                 Quaternionf quat = new Quaternionf(transform.getRotationX(),
                                         transform.getRotationY(), transform.getRotationZ(), transform.getRotationW() );
                                 initQuat = new Quaternionf(transform.getRotationX(),
@@ -1323,19 +1323,19 @@ public class AnimationInteractivityManager {
                     }   //  end if CylinderSensor
                     else if (mSensorType == Sensor.Type.SPHERE) {
 
-                        SXRSceneObject gvrSceneObjectTranslation = root
-                                .getSceneObjectByName((mSXRSceneObject.getName() + x3dObject.TRANSFORM_TRANSLATION_));
-                        initPlaneTranslation[0] = gvrSceneObjectTranslation.getTransform().getPositionX();
-                        initPlaneTranslation[1] = gvrSceneObjectTranslation.getTransform().getPositionY();
-                        initPlaneTranslation[2] = gvrSceneObjectTranslation.getTransform().getPositionZ();
+                        SXRNode gvrNodeTranslation = root
+                                .getNodeByName((mSXRNode.getName() + x3dObject.TRANSFORM_TRANSLATION_));
+                        initPlaneTranslation[0] = gvrNodeTranslation.getTransform().getPositionX();
+                        initPlaneTranslation[1] = gvrNodeTranslation.getTransform().getPositionY();
+                        initPlaneTranslation[2] = gvrNodeTranslation.getTransform().getPositionZ();
 
-                        mSXRSceneObject = root
-                                .getSceneObjectByName( mSXRSceneObject.getName() + x3dObject.TRANSFORM_ROTATION_ );
+                        mSXRNode = root
+                                .getNodeByName( mSXRNode.getName() + x3dObject.TRANSFORM_ROTATION_ );
 
-                        if (mSXRSceneObject != null) {
+                        if (mSXRNode != null) {
                             if (StringFieldMatch(mInteractiveObjectFinal.getDefinedItemToField(), "rotation")) {
                                 toField = "rotation";
-                                SXRTransform transform = mSXRSceneObject.getTransform();
+                                SXRTransform transform = mSXRNode.getTransform();
                                 Quaternionf quat = new Quaternionf(transform.getRotationX(),
                                         transform.getRotationY(), transform.getRotationZ(), transform.getRotationW() );
                                 AxisAngle4f axisAngle = new AxisAngle4f();
@@ -1365,7 +1365,7 @@ public class AnimationInteractivityManager {
             mSensorOnDrawFrame = null;
             mInteractiveObjectFinal = null;
             mSXRPickedObject = null;
-            mSXRSceneObject = null;
+            mSXRNode = null;
             fromField = "";
             toField = "";
             run = false;
@@ -1377,7 +1377,7 @@ public class AnimationInteractivityManager {
 
         final void onSensorActiveDrawFrame(float frameTime) {
             if (mSensorType == Sensor.Type.PLANE) {
-                if (mSXRSceneObject != null && mSXRPickedObject != null) {
+                if (mSXRNode != null && mSXRPickedObject != null) {
                     float[] lookAt = gvrCameraRig.getLookAt();
                     Vector3f cameraDir = new Vector3f(lookAt[0], lookAt[1], lookAt[2]);
                     cameraDir.sub(initCameraDir);
@@ -1385,23 +1385,23 @@ public class AnimationInteractivityManager {
                     float y = initPlaneTranslation[1] + cameraDir.y * initHitDistance;
                     if (mCheckXpos) {
                         if ((x >= mMinPosition.getX()) && (x <= mMaxPosition.getX())) {
-                            mSXRSceneObject.getTransform().setPositionX(x);
+                            mSXRNode.getTransform().setPositionX(x);
                         }
-                    } else mSXRSceneObject.getTransform().setPositionX(x);
+                    } else mSXRNode.getTransform().setPositionX(x);
                     if (mCheckYpos) {
                         if ((y >= mMinPosition.getY()) && (y <= mMaxPosition.getY())) {
-                            mSXRSceneObject.getTransform().setPositionY(y);
+                            mSXRNode.getTransform().setPositionY(y);
                         }
-                    } else mSXRSceneObject.getTransform().setPositionY(y);
+                    } else mSXRNode.getTransform().setPositionY(y);
 
                     if (fromField.equalsIgnoreCase("trackPoint") && toField.equalsIgnoreCase("translation")) {
                         // trackPoint to translation
-                        mSXRSceneObject.getTransform().setPositionZ(initHitLocation[2]);
+                        mSXRNode.getTransform().setPositionZ(initHitLocation[2]);
                     }
                 }
             }  //  end if PlaneSensor
             else if ( mSensorType == Sensor.Type.CYLINDER ) {
-                if (mSXRSceneObject != null && mSXRPickedObject != null) {
+                if (mSXRNode != null && mSXRPickedObject != null) {
                     float[] lookAt = gvrCameraRig.getLookAt();
                     Vector3f cameraDir = new Vector3f(lookAt[0], lookAt[1], lookAt[2]);
                     cameraDir.sub(initCameraDir);
@@ -1415,11 +1415,11 @@ public class AnimationInteractivityManager {
                     Quaternionf quat = new Quaternionf();
                     quat.set( axisAngle );
 
-                    mSXRSceneObject.getTransform().setRotation(quat.w, quat.x, quat.y, quat.z);
+                    mSXRNode.getTransform().setRotation(quat.w, quat.x, quat.y, quat.z);
                 }
             } // end if CyinderSensor
             else if ( mSensorType == Sensor.Type.SPHERE ) {
-                if (mSXRSceneObject != null && mSXRPickedObject != null) {
+                if (mSXRNode != null && mSXRPickedObject != null) {
                     float[] lookAt = gvrCameraRig.getLookAt();
                     Vector3f cameraDir = new Vector3f(lookAt[0], lookAt[1], lookAt[2]);
                     cameraDir.sub(initCameraDir);
@@ -1437,13 +1437,13 @@ public class AnimationInteractivityManager {
 
                         quatX.mul(quatY);
                         quatX.mul(initQuat);
-                        mSXRSceneObject.getTransform().setRotation(quatX.w, quatX.x, quatX.y, quatX.z);
+                        mSXRNode.getTransform().setRotation(quatX.w, quatX.x, quatX.y, quatX.z);
                     } else if (StringFieldMatch(mInteractiveObjectFinal.getSensorFromField(), "trackPoint")) {
                         float xLoc = (cameraDir.x * initHitDistance) ;
                         float yLoc = (cameraDir.y * initHitDistance) ;
-                        mSXRSceneObject.getTransform().setPositionX(xLoc);
-                        mSXRSceneObject.getTransform().setPositionY(yLoc);
-                        mSXRSceneObject.getTransform().setPositionZ(1.0f - (xLoc*xLoc + yLoc*yLoc));
+                        mSXRNode.getTransform().setPositionX(xLoc);
+                        mSXRNode.getTransform().setPositionY(yLoc);
+                        mSXRNode.getTransform().setPositionZ(1.0f - (xLoc*xLoc + yLoc*yLoc));
                     } else {
                         Log.e(TAG, "Sphere Sensor: not supported 'from field': " + mInteractiveObjectFinal.getSensorFromField() );
                     }
@@ -1586,8 +1586,8 @@ public class AnimationInteractivityManager {
 
                 if (fieldType.equalsIgnoreCase("SFBool")) {
                     if (definedItem != null) {
-                        if (definedItem.getSXRSceneObject() != null) {
-                            SXRComponent gvrComponent = definedItem.getSXRSceneObject().getComponent(
+                        if (definedItem.getSXRNode() != null) {
+                            SXRComponent gvrComponent = definedItem.getSXRNode().getComponent(
                                     SXRLight.getComponentType());
                             if (gvrComponent != null) {
                                 scriptParameters.add(gvrComponent.isEnabled());
@@ -1661,9 +1661,9 @@ public class AnimationInteractivityManager {
                                     color[i] = specularColor[i]; // only get the first 3 values, not the alpha value
                                 }
                             }
-                        } else if (definedItem.getSXRSceneObject() != null) {
+                        } else if (definedItem.getSXRNode() != null) {
                             // likely a light object so get its properties
-                            SXRComponent gvrComponent = definedItem.getSXRSceneObject().getComponent(
+                            SXRComponent gvrComponent = definedItem.getSXRNode().getComponent(
                                     SXRLight.getComponentType());
                             if (gvrComponent != null) {
                                 float[] lightColor = {0, 0, 0, 0};
@@ -1690,7 +1690,7 @@ public class AnimationInteractivityManager {
 
                     else if (fieldType.equalsIgnoreCase("SFRotation")) {
                         if ( StringFieldMatch( scriptObject.getFromDefinedItemField(field), "rotation") ) {
-                            if (definedItem.getSXRSceneObject() != null) {
+                            if (definedItem.getSXRNode() != null) {
                                 // Likely the rotation in a Transform / SXRTransform
                                 // GearVRf saves rotations as quaternions, but X3D scripting uses AxisAngle
                                 // So, these values were saved as AxisAngle in the DefinedItem object
@@ -1716,8 +1716,8 @@ public class AnimationInteractivityManager {
                         }  // orientation parameter
                     }  // end if SFRotation
                     else if (fieldType.equalsIgnoreCase("SFVec3f")) {
-                        if (definedItem.getSXRSceneObject() != null) {
-                            SXRComponent gvrComponent = definedItem.getSXRSceneObject().getComponent(
+                        if (definedItem.getSXRNode() != null) {
+                            SXRComponent gvrComponent = definedItem.getSXRNode().getComponent(
                                     SXRLight.getComponentType());
                             if (gvrComponent != null) {
                                 // it's a light
@@ -1729,9 +1729,9 @@ public class AnimationInteractivityManager {
                                         parameter[1] = gvrSpotLightBase.getAttenuationLinear();
                                         parameter[2] = gvrSpotLightBase.getAttenuationQuadratic();
                                     } else if ( StringFieldMatch( scriptObject.getFromDefinedItemField(field), "location") ) {
-                                        parameter[0] = definedItem.getSXRSceneObject().getTransform().getPositionX();
-                                        parameter[1] = definedItem.getSXRSceneObject().getTransform().getPositionY();
-                                        parameter[2] = definedItem.getSXRSceneObject().getTransform().getPositionZ();
+                                        parameter[0] = definedItem.getSXRNode().getTransform().getPositionX();
+                                        parameter[1] = definedItem.getSXRNode().getTransform().getPositionY();
+                                        parameter[2] = definedItem.getSXRNode().getTransform().getPositionZ();
                                     } else if ( StringFieldMatch( scriptObject.getFromDefinedItemField(field), "direction") ) {
                                         parameter[0] = definedItem.getDirection().x;
                                         parameter[1] = definedItem.getDirection().y;
@@ -1744,9 +1744,9 @@ public class AnimationInteractivityManager {
                                         parameter[1] = gvrPointLightBase.getAttenuationLinear();
                                         parameter[2] = gvrPointLightBase.getAttenuationQuadratic();
                                     } else if ( StringFieldMatch( scriptObject.getFromDefinedItemField(field), "location") ) {
-                                        parameter[0] = definedItem.getSXRSceneObject().getTransform().getPositionX();
-                                        parameter[1] = definedItem.getSXRSceneObject().getTransform().getPositionY();
-                                        parameter[2] = definedItem.getSXRSceneObject().getTransform().getPositionZ();
+                                        parameter[0] = definedItem.getSXRNode().getTransform().getPositionX();
+                                        parameter[1] = definedItem.getSXRNode().getTransform().getPositionY();
+                                        parameter[2] = definedItem.getSXRNode().getTransform().getPositionZ();
                                     }
                                 } else if (gvrComponent instanceof SXRDirectLight) {
                                     SXRDirectLight gvrDirectLightBase = (SXRDirectLight) gvrComponent;
@@ -1762,23 +1762,23 @@ public class AnimationInteractivityManager {
                                 }
                             }  //  end gvrComponent != null. it's a light
                             else {
-                                if (definedItem.getSXRSceneObject() != null) {
+                                if (definedItem.getSXRNode() != null) {
                                     if ( StringFieldMatch( scriptObject.getFromDefinedItemField(field), "translation") ) {
-                                        SXRSceneObject gvrSceneObjectTranslation = root
-                                                .getSceneObjectByName((definedItem.getSXRSceneObject().getName() + x3dObject.TRANSFORM_TRANSLATION_));
-                                        scriptParameters.add(gvrSceneObjectTranslation.getTransform().getPositionX());
-                                        scriptParameters.add(gvrSceneObjectTranslation.getTransform().getPositionY());
-                                        scriptParameters.add(gvrSceneObjectTranslation.getTransform().getPositionZ());
+                                        SXRNode gvrNodeTranslation = root
+                                                .getNodeByName((definedItem.getSXRNode().getName() + x3dObject.TRANSFORM_TRANSLATION_));
+                                        scriptParameters.add(gvrNodeTranslation.getTransform().getPositionX());
+                                        scriptParameters.add(gvrNodeTranslation.getTransform().getPositionY());
+                                        scriptParameters.add(gvrNodeTranslation.getTransform().getPositionZ());
                                     } else if ( StringFieldMatch( scriptObject.getFromDefinedItemField(field), "scale") ) {
-                                        SXRSceneObject gvrSceneObjectScale = root
-                                                .getSceneObjectByName((definedItem.getSXRSceneObject().getName() + x3dObject.TRANSFORM_SCALE_));
-                                        scriptParameters.add(gvrSceneObjectScale.getTransform().getScaleX());
-                                        scriptParameters.add(gvrSceneObjectScale.getTransform().getScaleY());
-                                        scriptParameters.add(gvrSceneObjectScale.getTransform().getScaleZ());
+                                        SXRNode gvrNodeScale = root
+                                                .getNodeByName((definedItem.getSXRNode().getName() + x3dObject.TRANSFORM_SCALE_));
+                                        scriptParameters.add(gvrNodeScale.getTransform().getScaleX());
+                                        scriptParameters.add(gvrNodeScale.getTransform().getScaleY());
+                                        scriptParameters.add(gvrNodeScale.getTransform().getScaleZ());
                                     }
                                 }
                             }
-                        }  // end SFVec3f SXRSceneObject
+                        }  // end SFVec3f SXRNode
                     }  // end if SFVec3f
 
                     else if (fieldType.equalsIgnoreCase("SFVec2f")) {
@@ -1818,9 +1818,9 @@ public class AnimationInteractivityManager {
                                 scriptParameters.add(definedItem.getTextureRotation().getValue());
                             }
 
-                        } else if (definedItem.getSXRSceneObject() != null) {
+                        } else if (definedItem.getSXRNode() != null) {
                             // checking if it's a light
-                            SXRComponent gvrComponent = definedItem.getSXRSceneObject().getComponent(
+                            SXRComponent gvrComponent = definedItem.getSXRNode().getComponent(
                                     SXRLight.getComponentType());
                             if (gvrComponent != null) {
                                 float parameter = 0;
@@ -1841,61 +1841,61 @@ public class AnimationInteractivityManager {
                                 scriptParameters.add(parameter);
                             }
                         }
-                        else if (definedItem.getSXRVideoSceneObject() != null) {
-                            SXRVideoSceneObjectPlayer gvrVideoSceneObjectPlayer = definedItem.getSXRVideoSceneObject().getMediaPlayer();
+                        else if (definedItem.getSXRVideoNode() != null) {
+                            SXRVideoNodePlayer gvrVideoNodePlayer = definedItem.getSXRVideoNode().getMediaPlayer();
                             if ( StringFieldMatch( scriptObject.getFromDefinedItemField(field),"speed") ) {
-                                if ( gvrVideoSceneObjectPlayer == null) {
+                                if ( gvrVideoNodePlayer == null) {
                                     // special case upon initialization of the movie texture, so the speed is init to 1
                                     scriptParameters.add( 1 );
                                 }
-                                else if ( gvrVideoSceneObjectPlayer.getPlayer() == null) {
+                                else if ( gvrVideoNodePlayer.getPlayer() == null) {
                                     ; // could occur prior to movie engine is setup
                                 }
                                 else {
-                                    ExoPlayer exoPlayer = (ExoPlayer) gvrVideoSceneObjectPlayer.getPlayer();
+                                    ExoPlayer exoPlayer = (ExoPlayer) gvrVideoNodePlayer.getPlayer();
                                     PlaybackParameters currPlaybackParamters = exoPlayer.getPlaybackParameters();
                                     scriptParameters.add( currPlaybackParamters.speed );
                                 }
                             } // end check for speed
-                        }  // end if SFFloat SXRVideoSceneObject
+                        }  // end if SFFloat SXRVideoNode
                     }  // end if SFFloat
                     else if (fieldType.equalsIgnoreCase("SFTime")) {
-                        if (definedItem.getSXRVideoSceneObject() != null) {
-                            SXRVideoSceneObjectPlayer gvrVideoSceneObjectPlayer = definedItem.getSXRVideoSceneObject().getMediaPlayer();
+                        if (definedItem.getSXRVideoNode() != null) {
+                            SXRVideoNodePlayer gvrVideoNodePlayer = definedItem.getSXRVideoNode().getMediaPlayer();
                             if ( StringFieldMatch( scriptObject.getFromDefinedItemField(field),"duration") ) {
-                                if ( gvrVideoSceneObjectPlayer == null) {
+                                if ( gvrVideoNodePlayer == null) {
                                     // special case upon initialization of the movie texture, so the speed is init to 1
                                     scriptParameters.add( 1 );
                                 }
-                                else if ( gvrVideoSceneObjectPlayer.getPlayer() == null) {
+                                else if ( gvrVideoNodePlayer.getPlayer() == null) {
                                     ; // could occur prior to movie engine is setup
                                 }
                                 else {
-                                    ExoPlayer exoPlayer = (ExoPlayer) gvrVideoSceneObjectPlayer.getPlayer();
+                                    ExoPlayer exoPlayer = (ExoPlayer) gvrVideoNodePlayer.getPlayer();
                                     scriptParameters.add( exoPlayer.getDuration() );
                                 }
                             } // end check for duration
                             else if ( StringFieldMatch( scriptObject.getFromDefinedItemField(field),"elapsedTime") ) {
-                                if ( gvrVideoSceneObjectPlayer == null) {
+                                if ( gvrVideoNodePlayer == null) {
                                     // special case upon initialization of the movie texture, so the elapsedTime is init to 0
                                     scriptParameters.add( 0 );
                                 }
-                                else if ( gvrVideoSceneObjectPlayer.getPlayer() == null) {
+                                else if ( gvrVideoNodePlayer.getPlayer() == null) {
                                     ; // could occur prior to movie engine is setup
                                 }
                                 else {
-                                    ExoPlayer exoPlayer = (ExoPlayer) gvrVideoSceneObjectPlayer.getPlayer();
+                                    ExoPlayer exoPlayer = (ExoPlayer) gvrVideoNodePlayer.getPlayer();
                                     // getContentPosition is for possible advertisements, and returns the same
                                     // value as getCurrentPosition if no ads.
                                     scriptParameters.add( exoPlayer.getContentPosition() );
                                 }
                             } // end check for elapsedTime
-                        }  // end if SFTime SXRVideoSceneObject
+                        }  // end if SFTime SXRVideoNode
                     } // end if SFTime
                     else if (fieldType.equalsIgnoreCase("SFInt32")) {
                         int parameter = 0;
-                        if (definedItem.getSXRSceneObject() != null) {
-                            SXRComponent gvrComponent = definedItem.getSXRSceneObject().getComponent(SXRSwitch.getComponentType());
+                        if (definedItem.getSXRNode() != null) {
+                            SXRComponent gvrComponent = definedItem.getSXRNode().getComponent(SXRSwitch.getComponentType());
                             if (gvrComponent != null) {
                                 if (gvrComponent instanceof SXRSwitch) {
                                     // We have a Switch node
@@ -1907,18 +1907,18 @@ public class AnimationInteractivityManager {
                         scriptParameters.add(parameter);
                     }
                     else if (fieldType.equalsIgnoreCase("SFString")) {
-                        if ( definedItem.getSXRTextViewSceneObject() != null) {
+                        if ( definedItem.getSXRTextViewNode() != null) {
                             if (scriptObject.getFromDefinedItemField(field).equalsIgnoreCase("style")) {
-                                SXRTextViewSceneObject.fontStyleTypes styleType =
-                                        definedItem.getSXRTextViewSceneObject().getStyleType();
+                                SXRTextViewNode.fontStyleTypes styleType =
+                                        definedItem.getSXRTextViewNode().getStyleType();
                                 String fontStyle = "";
-                                if (styleType == SXRTextViewSceneObject.fontStyleTypes.PLAIN)
+                                if (styleType == SXRTextViewNode.fontStyleTypes.PLAIN)
                                     fontStyle = "PLAIN";
-                                else if (styleType == SXRTextViewSceneObject.fontStyleTypes.BOLD)
+                                else if (styleType == SXRTextViewNode.fontStyleTypes.BOLD)
                                     fontStyle = "BOLD";
-                                else if (styleType == SXRTextViewSceneObject.fontStyleTypes.BOLDITALIC)
+                                else if (styleType == SXRTextViewNode.fontStyleTypes.BOLDITALIC)
                                     fontStyle = "BOLDITALIC";
-                                else if (styleType == SXRTextViewSceneObject.fontStyleTypes.ITALIC)
+                                else if (styleType == SXRTextViewNode.fontStyleTypes.ITALIC)
                                     fontStyle = "ITALIC";
                                 if (fontStyle != "") scriptParameters.add("\'" + fontStyle + "\'");
                                 else Log.e(TAG, "style in ROUTE not recognized.");
@@ -2272,13 +2272,13 @@ public class AnimationInteractivityManager {
                         if (fieldType.equalsIgnoreCase("SFBool")) {
                             SFBool sfBool = (SFBool) returnedJavaScriptValue;
                             if ( scriptObjectToDefinedItem != null) {
-                                if (scriptObjectToDefinedItem.getSXRSceneObject() != null) {
-                                    SXRComponent gvrComponent = scriptObjectToDefinedItem.getSXRSceneObject().getComponent(
+                                if (scriptObjectToDefinedItem.getSXRNode() != null) {
+                                    SXRComponent gvrComponent = scriptObjectToDefinedItem.getSXRNode().getComponent(
                                             SXRLight.getComponentType());
                                     if (gvrComponent != null) {
                                         gvrComponent.setEnable(sfBool.getValue());
                                     }
-                                }  //  end if the SceneObject has a light component attached
+                                }  //  end if the Node has a light component attached
                             }  //  end scriptObjectToDefinedItem != null
                             else if ( scriptObjectToEventUtility != null) {
                                 scriptObjectToEventUtility.setToggle(sfBool.getValue());
@@ -2323,8 +2323,8 @@ public class AnimationInteractivityManager {
                                 else {
                                     Log.e(TAG, "Error: Not setting SFFloat to Material '" + scriptObject.getFieldName(fieldNode) + "' value from SCRIPT '" + scriptObject.getName() + "'." );
                                 }
-                            } else if (scriptObjectToDefinedItem.getSXRSceneObject() != null) {
-                                SXRComponent gvrComponent = scriptObjectToDefinedItem.getSXRSceneObject().getComponent(
+                            } else if (scriptObjectToDefinedItem.getSXRNode() != null) {
+                                SXRComponent gvrComponent = scriptObjectToDefinedItem.getSXRNode().getComponent(
                                         SXRLight.getComponentType());
                                 if (gvrComponent != null) {
                                     if (gvrComponent instanceof SXRSpotLight) {
@@ -2353,11 +2353,11 @@ public class AnimationInteractivityManager {
                                     }
                                 }  //  end presumed to be a light
                             }  //  end SXRScriptObject ! null
-                            else if ( scriptObjectToDefinedItem.getSXRVideoSceneObject() != null) {
+                            else if ( scriptObjectToDefinedItem.getSXRVideoNode() != null) {
                                 if ( StringFieldMatch( scriptObject.getToDefinedItemField(fieldNode), "speed") ||
                                         StringFieldMatch( scriptObject.getToDefinedItemField(fieldNode), "pitch") ) {
-                                    SXRVideoSceneObjectPlayer gvrVideoSceneObjectPlayer = scriptObjectToDefinedItem.getSXRVideoSceneObject().getMediaPlayer();
-                                    ExoPlayer exoPlayer = (ExoPlayer) gvrVideoSceneObjectPlayer.getPlayer();
+                                    SXRVideoNodePlayer gvrVideoNodePlayer = scriptObjectToDefinedItem.getSXRVideoNode().getMediaPlayer();
+                                    ExoPlayer exoPlayer = (ExoPlayer) gvrVideoNodePlayer.getPlayer();
 
                                     PlaybackParameters currPlaybackParamters = exoPlayer.getPlaybackParameters();
                                     PlaybackParameters playbackParamters = new PlaybackParameters(sfFloat.getValue(), sfFloat.getValue());
@@ -2386,9 +2386,9 @@ public class AnimationInteractivityManager {
                             }
                             else if ( scriptObject.getToDefinedItemField( fieldNode ) != null) {
                                 DefinedItem definedItem = scriptObject.getToDefinedItem(fieldNode);
-                                if ( definedItem.getSXRVideoSceneObject() != null ) {
-                                    SXRVideoSceneObjectPlayer gvrVideoSceneObjectPlayer = scriptObjectToDefinedItem.getSXRVideoSceneObject().getMediaPlayer();
-                                    ExoPlayer exoPlayer = (ExoPlayer) gvrVideoSceneObjectPlayer.getPlayer();
+                                if ( definedItem.getSXRVideoNode() != null ) {
+                                    SXRVideoNodePlayer gvrVideoNodePlayer = scriptObjectToDefinedItem.getSXRVideoNode().getMediaPlayer();
+                                    ExoPlayer exoPlayer = (ExoPlayer) gvrVideoNodePlayer.getPlayer();
                                     if (StringFieldMatch(scriptObject.getToDefinedItemField(fieldNode), "startTime")) {
                                         exoPlayer.seekTo( (long)sfTime.getValue() );
                                     }
@@ -2413,13 +2413,13 @@ public class AnimationInteractivityManager {
                                     scriptObjectToDefinedItem.getSXRMaterial().setVec4("emissive_color", sfColor.getRed(), sfColor.getGreen(), sfColor.getBlue(), 1.0f);
                                 }
                             }  //  end SFColor change to a SXRMaterial
-                            else if (scriptObjectToDefinedItem.getSXRSceneObject() != null) {
-                                // SXRSceneObject
-                                SXRSceneObject gvrSceneObject = scriptObjectToDefinedItem.getSXRSceneObject();
-                                SXRComponent gvrComponent = gvrSceneObject.getComponent(SXRLight.getComponentType());
+                            else if (scriptObjectToDefinedItem.getSXRNode() != null) {
+                                // SXRNode
+                                SXRNode gvrNode = scriptObjectToDefinedItem.getSXRNode();
+                                SXRComponent gvrComponent = gvrNode.getComponent(SXRLight.getComponentType());
                                 if (gvrComponent != null) {
                                     if ( StringFieldMatch( scriptObject.getToDefinedItemField(fieldNode), "color") ) {
-                                        // SFColor change to a SXRSceneObject (likely a Light Component)
+                                        // SFColor change to a SXRNode (likely a Light Component)
                                         if (gvrComponent instanceof SXRSpotLight) {
                                             SXRSpotLight gvrSpotLightBase = (SXRSpotLight) gvrComponent;
                                             gvrSpotLightBase.setDiffuseIntensity(sfColor.getRed(), sfColor.getGreen(), sfColor.getBlue(), 1);
@@ -2432,35 +2432,35 @@ public class AnimationInteractivityManager {
                                         }
                                     }
                                 }
-                            }  //  SFColor change to a SXRSceneObject (likely a Light)
+                            }  //  SFColor change to a SXRNode (likely a Light)
                             else {
                                 Log.e(TAG, "Error: Not setting SFColor '" + scriptObject.getFieldName(fieldNode) + "' value from SCRIPT '" + scriptObject.getName() + "'." );
                             }
                         }  //  end SFColor (to a light or Material)
                         else if (fieldType.equalsIgnoreCase("SFVec3f")) {
                             SFVec3f sfVec3f = (SFVec3f) returnedJavaScriptValue;
-                            if (scriptObjectToDefinedItem.getSXRSceneObject() != null) {
-                                //  SFVec3f change to a SXRSceneObject
-                                SXRSceneObject gvrSceneObject = scriptObjectToDefinedItem.getSXRSceneObject();
+                            if (scriptObjectToDefinedItem.getSXRNode() != null) {
+                                //  SFVec3f change to a SXRNode
+                                SXRNode gvrNode = scriptObjectToDefinedItem.getSXRNode();
                                 if ( StringFieldMatch( scriptObject.getToDefinedItemField(fieldNode), "translation")  ||
                                         StringFieldMatch( scriptObject.getToDefinedItemField(fieldNode), "location") ) {
                                     // location applies to point light and spot light
-                                    SXRSceneObject gvrSceneObjectTranslation = root
-                                            .getSceneObjectByName((scriptObjectToDefinedItem.getSXRSceneObject().getName() + x3dObject.TRANSFORM_TRANSLATION_));
-                                    if (gvrSceneObjectTranslation != null)
-                                        gvrSceneObjectTranslation.getTransform().setPosition(sfVec3f.x, sfVec3f.y, sfVec3f.z);
+                                    SXRNode gvrNodeTranslation = root
+                                            .getNodeByName((scriptObjectToDefinedItem.getSXRNode().getName() + x3dObject.TRANSFORM_TRANSLATION_));
+                                    if (gvrNodeTranslation != null)
+                                        gvrNodeTranslation.getTransform().setPosition(sfVec3f.x, sfVec3f.y, sfVec3f.z);
                                     else
-                                        gvrSceneObject.getTransform().setPosition(sfVec3f.x, sfVec3f.y, sfVec3f.z);
+                                        gvrNode.getTransform().setPosition(sfVec3f.x, sfVec3f.y, sfVec3f.z);
                                 } else if ( StringFieldMatch( scriptObject.getToDefinedItemField(fieldNode), "scale") ) {
-                                    SXRSceneObject gvrSceneObjectScale = root
-                                            .getSceneObjectByName((scriptObjectToDefinedItem.getSXRSceneObject().getName() + x3dObject.TRANSFORM_SCALE_));
-                                    if (gvrSceneObjectScale != null)
-                                        gvrSceneObjectScale.getTransform().setScale(sfVec3f.x, sfVec3f.y, sfVec3f.z);
+                                    SXRNode gvrNodeScale = root
+                                            .getNodeByName((scriptObjectToDefinedItem.getSXRNode().getName() + x3dObject.TRANSFORM_SCALE_));
+                                    if (gvrNodeScale != null)
+                                        gvrNodeScale.getTransform().setScale(sfVec3f.x, sfVec3f.y, sfVec3f.z);
                                     else
-                                        gvrSceneObject.getTransform().setScale(sfVec3f.x, sfVec3f.y, sfVec3f.z);
+                                        gvrNode.getTransform().setScale(sfVec3f.x, sfVec3f.y, sfVec3f.z);
                                 } else {
                                     // could be parameters for a light
-                                    SXRComponent gvrComponent = gvrSceneObject.getComponent(
+                                    SXRComponent gvrComponent = gvrNode.getComponent(
                                             SXRLight.getComponentType());
                                     if (gvrComponent != null) {
                                         if (gvrComponent instanceof SXRSpotLight) {
@@ -2493,7 +2493,7 @@ public class AnimationInteractivityManager {
                                         }
                                     }
                                 }  // end it could be a light
-                            }  // end SXRSceneObject with SFVec3f
+                            }  // end SXRNode with SFVec3f
                             else {
                                 Log.e(TAG, "Error: Not setting SFVec3f '" + scriptObject.getFieldName(fieldNode) + "' value from SCRIPT '" + scriptObject.getName() + "'." );
                             }
@@ -2535,21 +2535,21 @@ public class AnimationInteractivityManager {
                         } // end SFVec2f
                         else if (fieldType.equalsIgnoreCase("SFRotation")) {
                             SFRotation sfRotation = (SFRotation) returnedJavaScriptValue;
-                            if (scriptObjectToDefinedItem.getSXRSceneObject() != null) {
-                                //  SFRotation change to a SXRSceneObject
+                            if (scriptObjectToDefinedItem.getSXRNode() != null) {
+                                //  SFRotation change to a SXRNode
                                 if ( StringFieldMatch( scriptObject.getToDefinedItemField(fieldNode), "rotation") ) {
                                     scriptObjectToDefinedItem.setAxisAngle(sfRotation.angle, sfRotation.x, sfRotation.y, sfRotation.z);
 
-                                    SXRSceneObject gvrSceneObjectRotation = root
-                                            .getSceneObjectByName((scriptObjectToDefinedItem.getSXRSceneObject().getName() + x3dObject.TRANSFORM_ROTATION_));
+                                    SXRNode gvrNodeRotation = root
+                                            .getNodeByName((scriptObjectToDefinedItem.getSXRNode().getName() + x3dObject.TRANSFORM_ROTATION_));
                                     float angleDegrees = (float) Math.toDegrees(sfRotation.angle);  // convert radians to degrees
-                                    if (gvrSceneObjectRotation != null) {
-                                        gvrSceneObjectRotation.getTransform().setRotationByAxis(angleDegrees, sfRotation.x, sfRotation.y, sfRotation.z);
+                                    if (gvrNodeRotation != null) {
+                                        gvrNodeRotation.getTransform().setRotationByAxis(angleDegrees, sfRotation.x, sfRotation.y, sfRotation.z);
                                     } else {
-                                        scriptObjectToDefinedItem.getSXRSceneObject().getTransform().setRotationByAxis(sfRotation.angle, sfRotation.x, sfRotation.y, sfRotation.z);
+                                        scriptObjectToDefinedItem.getSXRNode().getTransform().setRotationByAxis(sfRotation.angle, sfRotation.x, sfRotation.y, sfRotation.z);
                                     }
                                 }  //  definedItem != null
-                            }  // end SXRSceneObject with SFRotation
+                            }  // end SXRNode with SFRotation
                             else {
                                 Log.e(TAG, "Error: Not setting SFRotation '" + scriptObject.getFieldName(fieldNode) + "' value from SCRIPT '" + scriptObject.getName() + "'." );
                             }
@@ -2557,24 +2557,24 @@ public class AnimationInteractivityManager {
                         else if (fieldType.equalsIgnoreCase("SFInt32")) {
                             try {
                                 SFInt32 sfInt32 = new SFInt32(new Integer(returnedJavaScriptValue.toString()).intValue() );
-                                if (scriptObjectToDefinedItem.getSXRSceneObject() != null) {
+                                if (scriptObjectToDefinedItem.getSXRNode() != null) {
                                     // Check if the field is 'whichChoice', meaning it's a Switch node
                                     if ( StringFieldMatch(scriptObject.getToDefinedItemField(fieldNode), "whichChoice") ) {
-                                        SXRSceneObject gvrSwitchSceneObject = scriptObject.getToDefinedItem(fieldNode).getSXRSceneObject();
-                                        SXRComponent gvrComponent = gvrSwitchSceneObject.getComponent(SXRSwitch.getComponentType());
+                                        SXRNode gvrSwitchNode = scriptObject.getToDefinedItem(fieldNode).getSXRNode();
+                                        SXRComponent gvrComponent = gvrSwitchNode.getComponent(SXRSwitch.getComponentType());
                                         if (gvrComponent instanceof SXRSwitch) {
                                             // Set the value inside the Switch node
                                             SXRSwitch gvrSwitch = (SXRSwitch) gvrComponent;
                                             // Check if we are to switch to a value out of range (i.e. no mesh exists)
                                             // and thus set to not show any object.
-                                            if ( (gvrSwitchSceneObject.getChildrenCount() <= sfInt32.getValue()) ||
+                                            if ( (gvrSwitchNode.getChildrenCount() <= sfInt32.getValue()) ||
                                                     (sfInt32.getValue() < 0) ) {
-                                                sfInt32.setValue( gvrSwitchSceneObject.getChildrenCount() );
+                                                sfInt32.setValue( gvrSwitchNode.getChildrenCount() );
                                             }
                                             gvrSwitch.setSwitchIndex( sfInt32.getValue() );
                                         }
                                     }
-                                }  // end SXRSceneObject with SFInt32
+                                }  // end SXRNode with SFInt32
                                 else {
                                     Log.e(TAG, "Error: Not setting SFInt32 '" + scriptObject.getFieldName(fieldNode) + "' value from SCRIPT '" + scriptObject.getName() + "'.");
                                 }
@@ -2586,18 +2586,18 @@ public class AnimationInteractivityManager {
                         }  //  end SFInt32
                         else if (fieldType.equalsIgnoreCase("SFString")) {
                             SFString sfString = (SFString) returnedJavaScriptValue;
-                            if (scriptObjectToDefinedItem.getSXRTextViewSceneObject() != null) {
-                                SXRTextViewSceneObject gvrTextViewSceneObject = scriptObjectToDefinedItem.getSXRTextViewSceneObject();
+                            if (scriptObjectToDefinedItem.getSXRTextViewNode() != null) {
+                                SXRTextViewNode gvrTextViewNode = scriptObjectToDefinedItem.getSXRTextViewNode();
                                 if (scriptObject.getToDefinedItemField(fieldNode).endsWith("style")) {
                                     String value = sfString.getValue().toUpperCase();
-                                    SXRTextViewSceneObject.fontStyleTypes fontStyle = null;
-                                    if ( value.equals("BOLD")) fontStyle = SXRTextViewSceneObject.fontStyleTypes.BOLD;
-                                    else if ( value.equals("ITALIC")) fontStyle = SXRTextViewSceneObject.fontStyleTypes.ITALIC;
-                                    else if ( value.equals("BOLDITALIC")) fontStyle = SXRTextViewSceneObject.fontStyleTypes.BOLDITALIC;
-                                    else if ( value.equals("PLAIN")) fontStyle = SXRTextViewSceneObject.fontStyleTypes.PLAIN;
+                                    SXRTextViewNode.fontStyleTypes fontStyle = null;
+                                    if ( value.equals("BOLD")) fontStyle = SXRTextViewNode.fontStyleTypes.BOLD;
+                                    else if ( value.equals("ITALIC")) fontStyle = SXRTextViewNode.fontStyleTypes.ITALIC;
+                                    else if ( value.equals("BOLDITALIC")) fontStyle = SXRTextViewNode.fontStyleTypes.BOLDITALIC;
+                                    else if ( value.equals("PLAIN")) fontStyle = SXRTextViewNode.fontStyleTypes.PLAIN;
                                     if ( fontStyle != null ) {
-                                        gvrTextViewSceneObject.setTypeface(gvrContext,
-                                                gvrTextViewSceneObject.getFontFamily(), fontStyle);
+                                        gvrTextViewNode.setTypeface(gvrContext,
+                                                gvrTextViewNode.getFontFamily(), fontStyle);
                                     }
                                     else {
                                         Log.e(TAG, "Error: " + value + " + not recognized X3D FontStyle style in SCRIPT '" + scriptObject.getName() + "'." );
@@ -2634,12 +2634,12 @@ public class AnimationInteractivityManager {
                                 }
                             }  // end SXRTexture != null
 
-                            else if (scriptObjectToDefinedItem.getSXRVideoSceneObject() != null) {
-                                //  MFString change to a SXRVideoSceneObject object
+                            else if (scriptObjectToDefinedItem.getSXRVideoNode() != null) {
+                                //  MFString change to a SXRVideoNode object
                                 if (StringFieldMatch(scriptObject.getToDefinedItemField(fieldNode), "url")) {
                                     try {
-                                        SXRVideoSceneObjectPlayer gvrVideoSceneObjectPlayer = scriptObjectToDefinedItem.getSXRVideoSceneObject().getMediaPlayer();
-                                        ExoPlayer exoPlayer = (ExoPlayer) gvrVideoSceneObjectPlayer.getPlayer();
+                                        SXRVideoNodePlayer gvrVideoNodePlayer = scriptObjectToDefinedItem.getSXRVideoNode().getMediaPlayer();
+                                        ExoPlayer exoPlayer = (ExoPlayer) gvrVideoNodePlayer.getPlayer();
                                         exoPlayer.stop();
 
                                         final DataSource.Factory dataSourceFactory = new DataSource.Factory() {
@@ -2653,7 +2653,7 @@ public class AnimationInteractivityManager {
                                                 new DefaultExtractorsFactory(), null, null);
                                         exoPlayer.prepare(mediaSource);
                                         Log.e(TAG, "Load movie " + mfString.get1Value(0) + ".");
-                                        gvrVideoSceneObjectPlayer.start();
+                                        gvrVideoNodePlayer.start();
                                     } catch (Exception e) {
                                         Log.e(TAG, "X3D MovieTexture Asset " + mfString.get1Value(0) + " not loaded." + e);
                                         e.printStackTrace();
@@ -2663,12 +2663,12 @@ public class AnimationInteractivityManager {
                                 else {
                                     Log.e(TAG, "Error: No MovieTexure url associated with MFString '" + scriptObject.getFieldName(fieldNode) + "' value from SCRIPT '" + scriptObject.getName() + "'." );
                                 }
-                            }  // end SXRVideoSceneObject != null
+                            }  // end SXRVideoNode != null
 
-                            if (scriptObjectToDefinedItem.getSXRTextViewSceneObject() != null) {
-                                SXRTextViewSceneObject gvrTextViewSceneObject = scriptObjectToDefinedItem.getSXRTextViewSceneObject();
+                            if (scriptObjectToDefinedItem.getSXRTextViewNode() != null) {
+                                SXRTextViewNode gvrTextViewNode = scriptObjectToDefinedItem.getSXRTextViewNode();
                                 if (scriptObject.getToDefinedItemField(fieldNode).equalsIgnoreCase("string")) {
-                                    gvrTextViewSceneObject.setText(mfString.get1Value(0));
+                                    gvrTextViewNode.setText(mfString.get1Value(0));
                                 }
                                 else Log.e(TAG, "Error: Setting not MFString string '" + scriptObject.getFieldName(fieldNode) + "' value from SCRIPT '" + scriptObject.getName() + "'." );
                             }

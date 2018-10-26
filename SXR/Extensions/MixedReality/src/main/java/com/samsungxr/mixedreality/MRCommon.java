@@ -19,7 +19,7 @@ import android.graphics.Bitmap;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRPicker;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 import java.util.ArrayList;
 
@@ -43,7 +43,7 @@ public abstract class MRCommon implements IMRCommon {
     }
 
     @Override
-    public SXRSceneObject getPassThroughObject() {
+    public SXRNode getPassThroughObject() {
         return onGetPassThroughObject();
     }
 
@@ -73,7 +73,7 @@ public abstract class MRCommon implements IMRCommon {
     }
 
     @Override
-    public SXRAnchor createAnchor(float[] pose, SXRSceneObject sceneObject) {
+    public SXRAnchor createAnchor(float[] pose, SXRNode sceneObject) {
         return onCreateAnchor(pose, sceneObject);
     }
 
@@ -103,7 +103,7 @@ public abstract class MRCommon implements IMRCommon {
     }
 
     @Override
-    public SXRHitResult hitTest(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) {
+    public SXRHitResult hitTest(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) {
         return onHitTest(sceneObj, collision);
     }
 
@@ -131,7 +131,7 @@ public abstract class MRCommon implements IMRCommon {
 
     protected abstract void onPause();
 
-    protected abstract SXRSceneObject onGetPassThroughObject();
+    protected abstract SXRNode onGetPassThroughObject();
 
     protected abstract void onRegisterPlaneListener(IPlaneEventsListener listener);
 
@@ -141,7 +141,7 @@ public abstract class MRCommon implements IMRCommon {
 
     protected abstract ArrayList<SXRPlane> onGetAllPlanes();
 
-    protected abstract SXRAnchor onCreateAnchor(float[] pose, SXRSceneObject sceneObject);
+    protected abstract SXRAnchor onCreateAnchor(float[] pose, SXRNode sceneObject);
 
     protected abstract void onUpdateAnchorPose(SXRAnchor anchor, float[] pose);
 
@@ -153,7 +153,7 @@ public abstract class MRCommon implements IMRCommon {
 
     protected abstract void onSetEnableCloudAnchor(boolean enableCloudAnchor);
 
-    protected abstract SXRHitResult onHitTest(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision);
+    protected abstract SXRHitResult onHitTest(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
 
     protected abstract SXRLightEstimate onGetLightEstimate();
 

@@ -22,7 +22,7 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventListeners;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.IActivityEvents;
 import com.samsungxr.mixedreality.arcore.ARCoreSession;
 
@@ -107,7 +107,7 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
     }
 
     @Override
-    public SXRSceneObject getPassThroughObject() {
+    public SXRNode getPassThroughObject() {
         if (mState == SessionState.ON_PAUSE) {
             throw new UnsupportedOperationException("Session is not resumed");
         }
@@ -147,7 +147,7 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
     }
 
     @Override
-    public SXRAnchor createAnchor(float[] pose, SXRSceneObject sceneObject) {
+    public SXRAnchor createAnchor(float[] pose, SXRNode sceneObject) {
         if (mState == SessionState.ON_PAUSE) {
             throw new UnsupportedOperationException("Session is not resumed");
         }
@@ -186,7 +186,7 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
     }
 
     @Override
-    public SXRHitResult hitTest(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) {
+    public SXRHitResult hitTest(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) {
         if (mState == SessionState.ON_PAUSE) {
             throw new UnsupportedOperationException("Session is not resumed");
         }

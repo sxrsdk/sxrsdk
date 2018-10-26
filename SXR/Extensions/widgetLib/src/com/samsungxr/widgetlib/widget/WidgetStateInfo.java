@@ -28,7 +28,7 @@ import static com.samsungxr.widgetlib.widget.properties.JSONHelpers.getJSONColor
  */
 class WidgetStateInfo {
     public enum Properties {
-        scene_object, material, animation, id
+        node, material, animation, id
     }
 
     WidgetStateInfo(Widget parent, JSONObject info)
@@ -45,7 +45,7 @@ class WidgetStateInfo {
             final JSONObject typeInfo = info.optJSONObject(type);
             try {
             switch (Properties.valueOf(type)) {
-                case scene_object:
+                case node:
                     levelWidget = getWidget(parent, typeInfo);
                     break;
                 case material:

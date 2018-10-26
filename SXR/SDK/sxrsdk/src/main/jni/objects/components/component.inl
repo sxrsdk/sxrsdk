@@ -25,13 +25,13 @@ inline Component::Component(long long type) :
         HybridObject(), type_(type), owner_object_(0), enabled_(true) {
 }
 
-inline Component::Component(SceneObject* owner_object) :
+inline Component::Component(Node* owner_object) :
     type_(0),
     enabled_(true),
     owner_object_(owner_object) {
 }
 
-inline Component::Component(long long type, SceneObject* owner_object) :
+inline Component::Component(long long type, Node* owner_object) :
         type_(type),
          enabled_(true),
         owner_object_(owner_object) {
@@ -42,12 +42,12 @@ inline Component::~Component()
     owner_object_ = nullptr;
 }
 
-inline SceneObject *Component::owner_object() const
+inline Node *Component::owner_object() const
 {
     return owner_object_;
 }
 
-inline void Component::set_owner_object(SceneObject *owner_object)
+inline void Component::set_owner_object(Node *owner_object)
 {
     if (owner_object_)
     {

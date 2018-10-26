@@ -17,7 +17,7 @@ package com.samsungxr;
 
 import com.samsungxr.utility.Log;
 
-class SplashScreen extends SXRSceneObject {
+class SplashScreen extends SXRNode {
 
     private static final String TAG = Log.tag(SplashScreen.class);
 

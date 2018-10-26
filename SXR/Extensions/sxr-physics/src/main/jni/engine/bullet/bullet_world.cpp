@@ -95,7 +95,7 @@ void BulletWorld::removeConstraint(PhysicsConstraint *constraint) {
     mPhysicsWorld->removeConstraint(reinterpret_cast<btTypedConstraint*>(constraint->getUnderlying()));
 }
 
-void BulletWorld::startDrag(SceneObject *pivot_obj, PhysicsRigidBody *target,
+void BulletWorld::startDrag(Node *pivot_obj, PhysicsRigidBody *target,
                             float relx, float rely, float relz) {
     btRigidBody *rb = reinterpret_cast<BulletRigidBody*>(target)->getRigidBody();
     mActivationState = rb->getActivationState();

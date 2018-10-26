@@ -22,17 +22,17 @@ import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRComponentGroup;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventReceiver;
-import com.samsungxr.SXRSceneObject;
-import com.samsungxr.SXRSceneObject.ComponentVisitor;
+import com.samsungxr.SXRNode;
+import com.samsungxr.SXRNode.ComponentVisitor;
 import com.samsungxr.SXRTransform;
 import com.samsungxr.IEventReceiver;
 import com.samsungxr.IEvents;
-import com.samsungxr.ISceneObjectEvents;
+import com.samsungxr.INodeEvents;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
- * Represents a physics world where all {@link SXRSceneObject} with {@link SXRRigidBody} component
+ * Represents a physics world where all {@link SXRNode} with {@link SXRRigidBody} component
  * attached to are simulated.
  * <p>
  * {@link SXRWorld} is a component that must be attached to the scene's root object.
@@ -187,7 +187,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
      * @param hitZ rel position in z-axis.
      * @return true if success, otherwise returns false.
      */
-    public boolean startDrag(final SXRSceneObject sceneObject,
+    public boolean startDrag(final SXRNode sceneObject,
                              final float hitX, final float hitY, final float hitZ) {
         final SXRRigidBody dragMe = (SXRRigidBody)sceneObject.getComponent(SXRRigidBody.getComponentType());
         if (dragMe == null || dragMe.getSimulationType() != SXRRigidBody.DYNAMIC || !contains(dragMe))
@@ -199,7 +199,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         relPos.mul(t.getScaleX(), t.getScaleY(), t.getScaleZ());
         relPos.rotate(new Quaternionf(t.getRotationX(), t.getRotationY(), t.getRotationZ(), t.getRotationW()));
 
-        final SXRSceneObject pivotObject = mPhysicsDragger.startDrag(sceneObject,
+        final SXRNode pivotObject = mPhysicsDragger.startDrag(sceneObject,
                 relPos.x, relPos.y, relPos.z);
         if (pivotObject == null)
             return false;
@@ -316,8 +316,8 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     }
 
     private void sendCollisionEvent(SXRCollisionInfo info, String eventName) {
-        SXRSceneObject bodyA = mPhysicsObject.get(info.bodyA).getOwnerObject();
-        SXRSceneObject bodyB = mPhysicsObject.get(info.bodyB).getOwnerObject();
+        SXRNode bodyA = mPhysicsObject.get(info.bodyA).getOwnerObject();
+        SXRNode bodyB = mPhysicsObject.get(info.bodyB).getOwnerObject();
 
         getSXRContext().getEventManager().sendEvent(bodyA, ICollisionEvents.class, eventName,
                 bodyA, bodyB, info.normal, info.distance);
@@ -326,23 +326,23 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
                 bodyB, bodyA, info.normal, info.distance);
     }
 
-    private void doPhysicsAttach(SXRSceneObject rootSceneObject) {
-        rootSceneObject.forAllComponents(mRigidBodiesVisitor, SXRRigidBody.getComponentType());
-        rootSceneObject.forAllComponents(mConstraintsVisitor, SXRConstraint.getComponentType());
+    private void doPhysicsAttach(SXRNode rootNode) {
+        rootNode.forAllComponents(mRigidBodiesVisitor, SXRRigidBody.getComponentType());
+        rootNode.forAllComponents(mConstraintsVisitor, SXRConstraint.getComponentType());
 
         if (!mInitialized) {
-            rootSceneObject.getEventReceiver().addListener(mSceneEventsHandler);
+            rootNode.getEventReceiver().addListener(mSceneEventsHandler);
         } else if (isEnabled()){
             startSimulation();
         }
     }
 
-    private void doPhysicsDetach(SXRSceneObject rootSceneObject) {
-        rootSceneObject.forAllComponents(mConstraintsVisitor, SXRConstraint.getComponentType());
-        rootSceneObject.forAllComponents(mRigidBodiesVisitor, SXRRigidBody.getComponentType());
+    private void doPhysicsDetach(SXRNode rootNode) {
+        rootNode.forAllComponents(mConstraintsVisitor, SXRConstraint.getComponentType());
+        rootNode.forAllComponents(mRigidBodiesVisitor, SXRRigidBody.getComponentType());
 
         if (!mInitialized) {
-            rootSceneObject.getEventReceiver().removeListener(mSceneEventsHandler);
+            rootNode.getEventReceiver().removeListener(mSceneEventsHandler);
         }
         if (isEnabled()) {
             stopSimulation();
@@ -350,7 +350,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     }
 
     @Override
-    public void onAttach(SXRSceneObject newOwner) {
+    public void onAttach(SXRNode newOwner) {
         super.onAttach(newOwner);
 
         //FIXME: Implement a way to check if already exists a SXRWold attached to the scene
@@ -362,7 +362,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     }
 
     @Override
-    public void onDetach(SXRSceneObject oldOwner) {
+    public void onDetach(SXRNode oldOwner) {
         super.onDetach(oldOwner);
 
         doPhysicsDetach(oldOwner);
@@ -475,10 +475,10 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         }
     }
 
-    private ISceneObjectEvents mSceneEventsHandler = new ISceneObjectEvents() {
+    private INodeEvents mSceneEventsHandler = new INodeEvents() {
 
         @Override
-        public void onInit(SXRContext gvrContext, SXRSceneObject sceneObject) {
+        public void onInit(SXRContext gvrContext, SXRNode sceneObject) {
             if (mInitialized)
                 return;
 

@@ -26,7 +26,7 @@ import com.samsungxr.io.SXRCursorController;
  * that owns it. Clients can add a listener to the event receiver of that
  * scene object to handle the sensor events.
  * @see ISensorEvents
- * @see SXRSceneObject#getEventReceiver()
+ * @see SXRNode#getEventReceiver()
  * @see SXREventReceiver#addListener(IEvents)
  */
 public class SensorEvent {
@@ -73,12 +73,12 @@ public class SensorEvent {
     }
 
     /**
-     * Set the picking information for the {@link SXRSceneObject} that
+     * Set the picking information for the {@link SXRNode} that
      * triggered this {@link SensorEvent} containing the {@link SXRCollider}
      * that was hit.
      * 
      * @param pickedObject
-     *            The picking information of the affected {@link SXRSceneObject}.
+     *            The picking information of the affected {@link SXRNode}.
      */
     void setPickedObject(SXRPicker.SXRPickedObject pickedObject) {
         this.pickedObject = pickedObject;
@@ -96,11 +96,11 @@ public class SensorEvent {
     }
 
     /**
-     * Retrieves the picking information of the affected {@link SXRSceneObject},
+     * Retrieves the picking information of the affected {@link SXRNode},
      * including the {@link SXRCollider} that was hit, the hit point and
      * the distance from the origin.
      * 
-     * @return The {@link SXRPicker.SXRPickedObject} corresponding to the {@link SXRSceneObject}
+     * @return The {@link SXRPicker.SXRPickedObject} corresponding to the {@link SXRNode}
      *         that caused this {@link SensorEvent} to be triggered.
      */
     public SXRPicker.SXRPickedObject getPickedObject() {
@@ -108,10 +108,10 @@ public class SensorEvent {
     }
 
     /**
-     * Use this flag to detect if the input "is over" the {@link SXRSceneObject}
+     * Use this flag to detect if the input "is over" the {@link SXRNode}
      * 
      * @return <code>true</code> if the input is over the corresponding
-     *         {@link SXRSceneObject}. The {@link ISensorEvents} delivers
+     *         {@link SXRNode}. The {@link ISensorEvents} delivers
      *         multiple sensor events when this state is <code>true</code> and
      *         only one event when this state is <code>false</code>.
      * 

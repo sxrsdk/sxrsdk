@@ -23,7 +23,7 @@ import com.samsungxr.SXRHybridObject;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.ZipLoader;
 import com.samsungxr.animation.SXRAnimation;
@@ -75,12 +75,12 @@ class AnimatedCursorAsset extends MeshCursorAsset {
         int key = cursor.getId();
         SXRImageFrameAnimation animation = animations.get(key);
         if (animation == null) {
-            SXRSceneObject assetSceneObject = sceneObjectArray.get(key);
-            if (assetSceneObject == null) {
+            SXRNode assetNode = sceneObjectArray.get(key);
+            if (assetNode == null) {
                 Log.e(TAG, "Render data not found, should not happen");
                 return;
             }
-            SXRRenderData renderData = assetSceneObject.getRenderData();
+            SXRRenderData renderData = assetNode.getRenderData();
             SXRMaterial loadingMaterial = renderData.getMaterial();
             loadingMaterial.setMainTexture(loaderTextures.get(0));
             animation = new SXRImageFrameAnimation(loadingMaterial,

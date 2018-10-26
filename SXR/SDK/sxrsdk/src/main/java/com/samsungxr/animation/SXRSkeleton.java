@@ -20,13 +20,13 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 import com.samsungxr.SXRVertexBuffer;
 import com.samsungxr.PrettyPrint;
 import com.samsungxr.animation.keyframe.BVHImporter;
-import com.samsungxr.scene_objects.SXRCylinderSceneObject;
-import com.samsungxr.scene_objects.SXRSphereSceneObject;
+import com.samsungxr.nodes.SXRCylinderNode;
+import com.samsungxr.nodes.SXRSphereNode;
 import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -113,14 +113,14 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     public static final int BONE_PHYSICS = 2;
 
     private static final String TAG = Log.tag(SXRSkeleton.class);
-    protected SXRSceneObject[] mBones;
+    protected SXRNode[] mBones;
     protected int[] mParentBones;
     protected int[] mBoneOptions;
     final private Quaternionf mTempQuatA = new Quaternionf();
     final private Quaternionf mTempQuatB = new Quaternionf();
     final private Matrix4f mTempMtx = new Matrix4f();
     private static int[] sTempBoneParents;
-    private SXRSceneObject sTempRoot;
+    private SXRNode sTempRoot;
 
     protected String[] mBoneNames;
     protected Vector3f mRootOffset;     // offset for root bone animations
@@ -157,13 +157,13 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         mRootOffset = new Vector3f(0, 0, 0);
         mBoneOptions = new int[parentBones.length];
         mBoneNames = new String[parentBones.length];
-        mBones = new SXRSceneObject[parentBones.length];
+        mBones = new SXRNode[parentBones.length];
         mPose = new SXRPose(this);
         mBindPose = new SXRPose(this);
         mPoseMatrices =  new float[parentBones.length * 16];
     }
 
-    public SXRSkeleton(SXRSceneObject root, List<String> boneNames)
+    public SXRSkeleton(SXRNode root, List<String> boneNames)
     {
         super(root.getSXRContext(), 0);
         setNative(NativeSkeleton.ctor(makeParentBoneIds(root, boneNames)));
@@ -174,7 +174,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         mRootOffset = new Vector3f(0, 0, 0);
         mBoneOptions = new int[numBones];
         mBoneNames = new String[numBones];
-        mBones = new SXRSceneObject[numBones];
+        mBones = new SXRNode[numBones];
         mPoseMatrices =  new float[numBones * 16];
         mPose = new SXRPose(this);
         mBindPose = new SXRPose(this);
@@ -189,7 +189,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         }
     }
 
-    protected int[] makeParentBoneIds(SXRSceneObject root, List<String> boneNames)
+    protected int[] makeParentBoneIds(SXRNode root, List<String> boneNames)
     {
         int numBones = boneNames.size();
         int[] parentBones = new int[numBones];
@@ -199,14 +199,14 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         for (int boneId = 0; boneId < numBones; ++boneId)
         {
             String boneName = boneNames.get(boneId);
-            SXRSceneObject obj = root.getSceneObjectByName(boneName);
+            SXRNode obj = root.getNodeByName(boneName);
 
             if (obj == null)
             {
                 Log.e("BONE", "bone %s not found in scene", boneName);
                 continue;
             }
-            SXRSceneObject parent = obj.getParent();
+            SXRNode parent = obj.getParent();
             int parBoneId = -1;
 
             if (parent != null)
@@ -614,11 +614,11 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     /**
      * Get the bone index for the given scene object.
      *
-     * @param bone SXRSceneObject bone to search for
+     * @param bone SXRNode bone to search for
      * @return bone index or -1 for root bone.
      * @see #getParentBoneIndex
      */
-    public int getBoneIndex(SXRSceneObject bone)
+    public int getBoneIndex(SXRNode bone)
     {
         for (int i = 0; i < getNumBones(); ++i)
             if (mBones[i] == bone)
@@ -724,14 +724,14 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
      * Get the scene object driven by the given bone.
      *
      * @param boneindex index of bone to get.
-     * @return SXRSceneObject whose transform represents the bone.
+     * @return SXRNode whose transform represents the bone.
      */
-    public SXRSceneObject getBone(int boneindex)
+    public SXRNode getBone(int boneindex)
     {
         return mBones[boneindex];
     }
 
-    public void setBone(int boneindex, SXRSceneObject bone)
+    public void setBone(int boneindex, SXRNode bone)
     {
         mBones[boneindex] = bone;
     }
@@ -777,7 +777,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         return (mBoneOptions[boneindex] & BONE_LOCK_ROTATION) != 0;
     }
 
-    public void onAttach(SXRSceneObject root)
+    public void onAttach(SXRNode root)
     {
         super.onAttach(root);
         if (mInverseBindPose == null)
@@ -796,7 +796,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         }
     }
 
-    public void onDetach(SXRSceneObject root)
+    public void onDetach(SXRNode root)
     {
         super.onDetach(root);
         for (int i = 0; i < mBones.length; ++i)
@@ -815,16 +815,16 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
      */
     public void attachBones(final SXRPose savepose)
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
 
         if (owner == null)
         {
             return;
         }
-        SXRSceneObject.SceneVisitor visitor = new SXRSceneObject.SceneVisitor()
+        SXRNode.SceneVisitor visitor = new SXRNode.SceneVisitor()
         {
             @Override
-            public boolean visit(SXRSceneObject newbone)
+            public boolean visit(SXRNode newbone)
             {
                 String bonename = newbone.getName();
 
@@ -855,7 +855,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     {
         for (int i = 0; i < getNumBones(); ++i)
         {
-            SXRSceneObject bone = mBones[i];
+            SXRNode bone = mBones[i];
             if (bone == null)
             {
                 continue;
@@ -883,7 +883,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     {
         for (int i = 0; i < getNumBones(); ++i)
         {
-            SXRSceneObject bone = mBones[i];
+            SXRNode bone = mBones[i];
             if ((bone != null) && (mBoneOptions[i] & boneOptions) != 0)
             {
                 SXRTransform trans = bone.getTransform();
@@ -909,7 +909,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         mPose.sync();
         for (int i = 0; i < getNumBones(); ++i)
         {
-            SXRSceneObject bone = mBones[i];
+            SXRNode bone = mBones[i];
             if ((bone != null) &&
                ((mBoneOptions[i] & BONE_LOCK_ROTATION) == 0))
             {
@@ -1077,7 +1077,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         updateBonePose();
     }
 
-    public SXRSceneObject createSkeletonGeometry(SXRSceneObject parent)
+    public SXRNode createSkeletonGeometry(SXRNode parent)
     {
         GeometryHelper helper = new GeometryHelper(this);
         return helper.createSkeletonGeometry(parent);
@@ -1103,8 +1103,8 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
 
     private static class GeometryHelper
     {
-        private SXRSceneObject mSphereProto;
-        private SXRSceneObject mCylProto;
+        private SXRNode mSphereProto;
+        private SXRNode mCylProto;
         private final SXRSkeleton mSkeleton;
 
         public GeometryHelper(SXRSkeleton skel)
@@ -1112,7 +1112,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             mSkeleton = skel;
         }
 
-        public SXRSceneObject createSkeletonGeometry(SXRSceneObject root)
+        public SXRNode createSkeletonGeometry(SXRNode root)
         {
             SXRContext ctx = mSkeleton.getSXRContext();
             SXRMaterial flatMaterialSphr = new SXRMaterial(ctx);
@@ -1120,10 +1120,10 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
 
             flatMaterialSphr.setColor(1f, 1f, 0f);
             flatMaterialCyl.setColor(1f, 0f, 0f);
-            mCylProto =  new SXRCylinderSceneObject(ctx, 0.2f, 0.2f, 1f, 2, 8, true);
-            mSphereProto =  new SXRSphereSceneObject(ctx, true, flatMaterialSphr, 0.5f);
+            mCylProto =  new SXRCylinderNode(ctx, 0.2f, 0.2f, 1f, 2, 8, true);
+            mSphereProto =  new SXRSphereNode(ctx, true, flatMaterialSphr, 0.5f);
             mCylProto.getRenderData().setMaterial(flatMaterialCyl);
-            SXRSceneObject rootGeo = makeSpheres();
+            SXRNode rootGeo = makeSpheres();
 
             if (rootGeo.getParent() == null)
             {
@@ -1133,7 +1133,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             return root;
         }
 
-        private SXRSceneObject makeSpheres()
+        private SXRNode makeSpheres()
         {
             SXRContext ctx = mSkeleton.getSXRContext();
             SXRPose bindPose = mSkeleton.getBindPose();
@@ -1141,13 +1141,13 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
 
             for (int j = 0; j < mSkeleton.getNumBones(); j++)
             {
-                SXRSceneObject boneGeo = mSkeleton.getBone(j);
+                SXRNode boneGeo = mSkeleton.getBone(j);
                 int parentIndex = mSkeleton.getParentBoneIndex(j);
                 String boneName = mSkeleton.getBoneName(j);
 
                 if (boneGeo == null)
                 {
-                    boneGeo = new SXRSceneObject(ctx, mSphereProto.getRenderData().getMesh(),
+                    boneGeo = new SXRNode(ctx, mSphereProto.getRenderData().getMesh(),
                                                 mSphereProto.getRenderData().getMaterial());
                     mSkeleton.setBone(j, boneGeo);
                     boneGeo.setName(boneName);
@@ -1165,14 +1165,14 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
                 }
                 if (parentIndex >= 0)
                 {
-                    SXRSceneObject parent = mSkeleton.getBone(parentIndex);
+                    SXRNode parent = mSkeleton.getBone(parentIndex);
                     if (parent != null)
                     {
                         parent.addChildObject(boneGeo);
                         float height = calcCylHeight(j);
                         bindPose.getLocalPosition(j, childDir);
 
-                        SXRSceneObject cyl = createBoneGeo(childDir, height);
+                        SXRNode cyl = createBoneGeo(childDir, height);
                         cyl.setName(mSkeleton.getBoneName(parentIndex) + "_" + boneName);
                         parent.addChildObject(cyl);
                     }
@@ -1189,7 +1189,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             return (float) p.length();
         }
 
-        private SXRSceneObject createBoneGeo(Vector3f boneDir, float height)
+        private SXRNode createBoneGeo(Vector3f boneDir, float height)
         {
             SXRContext ctx = mCylProto.getSXRContext();
             Vector3f downNormal = new Vector3f(0,-1,0);
@@ -1212,7 +1212,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             newMesh.setIndexBuffer(oldMesh.getIndexBuffer());
             newMesh.setNormals(oldMesh.getNormals());
             newMesh.setVertices(verts);
-            return new SXRSceneObject(mCylProto.getSXRContext(), newMesh, mCylProto.getRenderData().getMaterial());
+            return new SXRNode(mCylProto.getSXRContext(), newMesh, mCylProto.getRenderData().getMaterial());
         }
     }
 }

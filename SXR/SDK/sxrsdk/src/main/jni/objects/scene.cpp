@@ -101,15 +101,15 @@ void Scene::makeDepthShaders(jobject jscene)
     }
 }
 
-void Scene::addSceneObject(SceneObject* scene_object) {
-    scene_root_->addChildObject(scene_root_, scene_object);
+void Scene::addNode(Node* node) {
+    scene_root_->addChildObject(scene_root_, node);
 }
 
-void Scene::removeSceneObject(SceneObject* scene_object) {
-    scene_root_->removeChildObject(scene_object);
+void Scene::removeNode(Node* node) {
+    scene_root_->removeChildObject(node);
 }
 
-void Scene::removeAllSceneObjects() {
+void Scene::removeAllNodes() {
     scene_root_->clear();
     clearAllColliders();
 }
@@ -122,7 +122,7 @@ void Scene::clearAllColliders() {
     unlockColliders();
 }
 
-void Scene::pick(SceneObject* sceneobj) {
+void Scene::pick(Node* sceneobj) {
     if (pick_visible_) {
          Collider* collider = static_cast<Collider*>(sceneobj->getComponent(Collider::getComponentType()));
         if (collider) {
@@ -158,10 +158,10 @@ void Scene::set_main_scene(Scene* scene) {
 }
 
 
-std::vector<SceneObject*> Scene::getWholeSceneObjects() {
-    std::vector<SceneObject*> scene_objects;
-    scene_root_->getDescendants(scene_objects);
-    return scene_objects;
+std::vector<Node*> Scene::getWholeNodes() {
+    std::vector<Node*> nodes;
+    scene_root_->getDescendants(nodes);
+    return nodes;
 }
 
 void Scene::exportToFile(std::string filepath) {
@@ -183,7 +183,7 @@ void Scene::clearLights()
     lights_.clear();
 }
 
-void Scene::setSceneRoot(SceneObject* sceneRoot) {
+void Scene::setSceneRoot(Node* sceneRoot) {
     scene_root_ = sceneRoot;
 }
 

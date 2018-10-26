@@ -230,8 +230,8 @@ public:
         return model_matrix_.isValid();
     }
 
-    virtual void onAttach(SceneObject* owner_object);
-    virtual void onDetach(SceneObject* owner_object);
+    virtual void onAttach(Node* owner_object);
+    virtual void onDetach(Node* owner_object);
 
     void invalidate();
     void invalidate(bool rotationUpdated);

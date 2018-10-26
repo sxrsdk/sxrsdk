@@ -11,9 +11,9 @@ import com.samsungxr.widgetlib.widget.Widget;
 import com.samsungxr.widgetlib.widget.layout.LayoutHelpers;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
-import com.samsungxr.scene_objects.SXRTextViewSceneObject;
-import com.samsungxr.scene_objects.SXRTextViewSceneObject.IntervalFrequency;
+import com.samsungxr.SXRNode;
+import com.samsungxr.nodes.SXRTextViewNode;
+import com.samsungxr.nodes.SXRTextViewNode.IntervalFrequency;
 import org.json.JSONObject;
 
 import static com.samsungxr.widgetlib.widget.properties.JSONHelpers.copy;
@@ -22,8 +22,8 @@ import static com.samsungxr.widgetlib.widget.properties.JSONHelpers.optString;
 import static com.samsungxr.widgetlib.widget.properties.JSONHelpers.put;
 
 /**
- * A user interface element that displays text to the user. {@link SXRTextViewSceneObject} is used
- * to represent the text. {@link SXRTextViewSceneObject} is actually using standard Android
+ * A user interface element that displays text to the user. {@link SXRTextViewNode} is used
+ * to represent the text. {@link SXRTextViewNode} is actually using standard Android
  * {@link TextView} for text UI.
  *
  */
@@ -31,37 +31,37 @@ import static com.samsungxr.widgetlib.widget.properties.JSONHelpers.put;
 public class TextWidget extends Widget implements TextContainer {
 
     /**
-     * Construct a wrapper for an existing {@link SXRSceneObject}.
+     * Construct a wrapper for an existing {@link SXRNode}.
      *
      * @param context
      *            The current {@link SXRContext}.
      * @param sceneObject
-     *            The {@link SXRSceneObject} to wrap.
+     *            The {@link SXRNode} to wrap.
      */
-    public TextWidget(final SXRContext context, final SXRSceneObject sceneObject) {
+    public TextWidget(final SXRContext context, final SXRNode sceneObject) {
         super(context, sceneObject);
-        mTextViewSceneObject = maybeWrap(getSceneObject());
+        mTextViewNode = maybeWrap(getNode());
         init();
     }
 
     /**
-     * A constructor for wrapping existing {@link SXRSceneObject} instances.
+     * A constructor for wrapping existing {@link SXRNode} instances.
      * Deriving classes should override and do whatever processing is
      * appropriate.
      *
      * @param context
      *            The current {@link SXRContext}
      * @param sceneObject
-     *            The {@link SXRSceneObject} to wrap.
+     *            The {@link SXRNode} to wrap.
      * @param attributes
      *            A set of class-specific attributes.
      * @throws InstantiationException
      */
     @Deprecated
-    public TextWidget(SXRContext context, SXRSceneObject sceneObject,
+    public TextWidget(SXRContext context, SXRNode sceneObject,
             NodeEntry attributes) throws InstantiationException {
         super(context, sceneObject, attributes);
-        mTextViewSceneObject = maybeWrap(sceneObject);
+        mTextViewNode = maybeWrap(sceneObject);
         init();
     }
 
@@ -74,7 +74,7 @@ public class TextWidget extends Widget implements TextContainer {
      */
     public TextWidget(SXRContext context, JSONObject properties) {
         super(context, createPackagedTextView(context, properties));
-        mTextViewSceneObject = (SXRTextViewSceneObject) getSceneObject();
+        mTextViewNode = (SXRTextViewNode) getNode();
         init();
     }
 
@@ -120,8 +120,8 @@ public class TextWidget extends Widget implements TextContainer {
      */
     public TextWidget(SXRContext context, float width, float height,
             CharSequence text) {
-        super(context, new SXRTextViewSceneObject(context, width, height, text));
-        mTextViewSceneObject = (SXRTextViewSceneObject) getSceneObject();
+        super(context, new SXRTextViewNode(context, width, height, text));
+        mTextViewNode = (SXRTextViewNode) getNode();
     }
 
     /**
@@ -144,7 +144,7 @@ public class TextWidget extends Widget implements TextContainer {
 
     @Override
     public Drawable getBackGround() {
-        return mTextViewSceneObject.getBackGround();
+        return mTextViewNode.getBackGround();
     }
 
     @Override
@@ -154,17 +154,17 @@ public class TextWidget extends Widget implements TextContainer {
 
     @Override
     public int getGravity() {
-        return mTextViewSceneObject.getGravity();
+        return mTextViewNode.getGravity();
     }
 
     @Override
     public IntervalFrequency getRefreshFrequency() {
-        return mTextViewSceneObject.getRefreshFrequency();
+        return mTextViewNode.getRefreshFrequency();
     }
 
     @Override
     public CharSequence getText() {
-        return mTextViewSceneObject.getText();
+        return mTextViewNode.getText();
     }
 
     @Override
@@ -174,47 +174,47 @@ public class TextWidget extends Widget implements TextContainer {
 
     @Override
     public float getTextSize() {
-        return mTextViewSceneObject.getTextSize();
+        return mTextViewNode.getTextSize();
     }
 
     @Override
     public String getTextString() {
-        return mTextViewSceneObject.getTextString();
+        return mTextViewNode.getTextString();
     }
 
     @Override
     public void setBackGround(Drawable drawable) {
-        mTextViewSceneObject.setBackGround(drawable);
+        mTextViewNode.setBackGround(drawable);
     }
 
     @Override
     public void setBackgroundColor(int color) {
-        mTextViewSceneObject.setBackgroundColor(color);
+        mTextViewNode.setBackgroundColor(color);
     }
 
     @Override
     public void setGravity(int gravity) {
-        mTextViewSceneObject.setGravity(gravity);
+        mTextViewNode.setGravity(gravity);
     }
 
     @Override
     public void setRefreshFrequency(IntervalFrequency frequency) {
-        mTextViewSceneObject.setRefreshFrequency(frequency);
+        mTextViewNode.setRefreshFrequency(frequency);
     }
 
     @Override
     public void setText(CharSequence text) {
-        mTextViewSceneObject.setText(text);
+        mTextViewNode.setText(text);
     }
 
     @Override
     public void setTextColor(int color) {
-        mTextViewSceneObject.setTextColor(color);
+        mTextViewNode.setTextColor(color);
     }
 
     @Override
     public void setTextSize(float size) {
-        mTextViewSceneObject.setTextSize(size);
+        mTextViewNode.setTextSize(size);
     }
 
     @Override
@@ -240,26 +240,26 @@ public class TextWidget extends Widget implements TextContainer {
         properties = copy(properties);
         PointF size = optPointF(properties, Widget.Properties.size, new PointF(0, 0));
         String text = optString(properties, TextContainer.Properties.text);
-        SXRTextViewSceneObject textViewSceneObject =
-                new SXRTextViewSceneObject(context, size.x, size.y, text);
-        put(properties, Widget.Properties.scene_object, textViewSceneObject);
+        SXRTextViewNode textViewNode =
+                new SXRTextViewNode(context, size.x, size.y, text);
+        put(properties, Widget.Properties.node, textViewNode);
         return properties;
     }
 
-    private SXRTextViewSceneObject maybeWrap(SXRSceneObject sceneObject) {
-        if (sceneObject instanceof SXRTextViewSceneObject) {
-            return (SXRTextViewSceneObject) sceneObject;
+    private SXRTextViewNode maybeWrap(SXRNode sceneObject) {
+        if (sceneObject instanceof SXRTextViewNode) {
+            return (SXRTextViewNode) sceneObject;
         } else {
             final float sizes[] = LayoutHelpers
                     .calculateGeometricDimensions(sceneObject);
-            final SXRSceneObject temp = new SXRTextViewSceneObject(
+            final SXRNode temp = new SXRTextViewNode(
                     sceneObject.getSXRContext(), sizes[0], sizes[1], "");
             sceneObject.addChildObject(temp);
-            return (SXRTextViewSceneObject) temp;
+            return (SXRTextViewNode) temp;
         }
     }
 
-    private final SXRTextViewSceneObject mTextViewSceneObject;
+    private final SXRTextViewNode mTextViewNode;
     private int mBackgroundColor;
     private int mTextColor;
 

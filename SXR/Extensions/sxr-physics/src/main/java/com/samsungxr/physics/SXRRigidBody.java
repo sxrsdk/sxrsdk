@@ -18,7 +18,7 @@ package com.samsungxr.physics;
 import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 /**
  * Represents a rigid body that can be static or dynamic. You can set a mass and apply some
@@ -27,7 +27,7 @@ import com.samsungxr.SXRSceneObject;
  * By default it is a static body with infinity mass, value 0, and does not move under simulation.
  * A dynamic body with a mass defined is fully simulated.
  * <p>
- * Every {@linkplain com.samsungxr.SXRSceneObject scene object} can represent a rigid body since
+ * Every {@linkplain com.samsungxr.SXRNode scene object} can represent a rigid body since
  * it has a {@link SXRRigidBody} component attached to.
  *
  * You must setup the values of owner's {@link com.samsungxr.SXRTransform}, like initial position,
@@ -109,7 +109,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param owner Owner of the {@link SXRRigidBody}
      * @return Returns the {@link SXRWorld} of the scene.
      */
-    private static SXRWorld getWorld(SXRSceneObject owner) {
+    private static SXRWorld getWorld(SXRNode owner) {
         return getWorldFromAscendant(owner);
     }
 
@@ -119,7 +119,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param worldOwner Scene object to search for a physics world in the scene.
      * @return Physics world from the scene.
      */
-    private static SXRWorld getWorldFromAscendant(SXRSceneObject worldOwner) {
+    private static SXRWorld getWorldFromAscendant(SXRNode worldOwner) {
         SXRComponent world = null;
 
         while (worldOwner != null && world == null) {
@@ -498,7 +498,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
     }
 
     @Override
-    public void onAttach(SXRSceneObject newOwner) {
+    public void onAttach(SXRNode newOwner) {
         if (!mLoaded && newOwner.getCollider() == null) {
             throw new UnsupportedOperationException("You must have a collider attached to the scene object before attaching the rigid body");
         }

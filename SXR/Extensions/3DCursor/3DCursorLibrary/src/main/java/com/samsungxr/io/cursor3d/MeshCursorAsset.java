@@ -24,7 +24,7 @@ import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMaterial.SXRShaderType.Texture;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRSwitch;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.utility.Log;
@@ -42,7 +42,7 @@ class MeshCursorAsset extends CursorAsset {
     private SXRMesh mesh;
     private float x;
     private float y;
-    protected SparseArray<SXRSceneObject> sceneObjectArray;
+    protected SparseArray<SXRNode> sceneObjectArray;
 
     MeshCursorAsset(SXRContext context, CursorType type, Action action, String texName) {
         this(context, type, action, null, texName);
@@ -52,7 +52,7 @@ class MeshCursorAsset extends CursorAsset {
             texName)
     {
         super(context, type, action);
-        sceneObjectArray = new SparseArray<SXRSceneObject>();
+        sceneObjectArray = new SparseArray<SXRNode>();
 
         if (meshName != null)
         {
@@ -91,14 +91,14 @@ class MeshCursorAsset extends CursorAsset {
     void load(Cursor cursor)
     {
         Integer key = cursor.getId();
-        SXRSceneObject assetSceneObject = sceneObjectArray.get(key);
+        SXRNode assetNode = sceneObjectArray.get(key);
         SXRRenderData renderData = null;
 
-        if (assetSceneObject == null)
+        if (assetNode == null)
         {
-            assetSceneObject = new SXRSceneObject(context);
-            assetSceneObject.setName( getAction().toString() + key.toString());
-            assetSceneObject.setEnable(false);
+            assetNode = new SXRNode(context);
+            assetNode.setName( getAction().toString() + key.toString());
+            assetNode.setEnable(false);
             renderData = new SXRRenderData(context);
             renderData.setMaterial(new SXRMaterial(context, Texture.ID));
 
@@ -107,10 +107,10 @@ class MeshCursorAsset extends CursorAsset {
                 renderData.setDepthTest(false);
                 renderData.setRenderingOrder(OVERLAY_RENDER_ORDER);
             }
-            assetSceneObject.attachRenderData(renderData);
-            sceneObjectArray.append(key, assetSceneObject);
+            assetNode.attachRenderData(renderData);
+            sceneObjectArray.append(key, assetNode);
         }
-        renderData = assetSceneObject.getRenderData();
+        renderData = assetNode.getRenderData();
         if (mesh != null)
         {
             renderData.setMesh(mesh);
@@ -119,7 +119,7 @@ class MeshCursorAsset extends CursorAsset {
         {
             renderData.getMaterial().setMainTexture(texture);
         }
-        cursor.addChildObject(assetSceneObject);
+        cursor.addChildObject(assetNode);
     }
 
     @Override
@@ -127,8 +127,8 @@ class MeshCursorAsset extends CursorAsset {
     {
         int key = cursor.getId();
 
-        SXRSceneObject assetSceneObject = sceneObjectArray.get(key);
-        cursor.removeChildObject(assetSceneObject);
+        SXRNode assetNode = sceneObjectArray.get(key);
+        cursor.removeChildObject(assetNode);
         sceneObjectArray.remove(key);
         // check if there are cursors still using the texture
         if (sceneObjectArray.size() == 0)
@@ -140,26 +140,26 @@ class MeshCursorAsset extends CursorAsset {
     void set(Cursor cursor)
     {
         super.set(cursor);
-        final SXRSceneObject assetSceneObject = sceneObjectArray.get(cursor.getId());
-        if (assetSceneObject == null)
+        final SXRNode assetNode = sceneObjectArray.get(cursor.getId());
+        if (assetNode == null)
         {
             Log.e(TAG, "Render data not found, should not happen");
             return;
         }
-        assetSceneObject.setEnable(true);
+        assetNode.setEnable(true);
     }
 
     /**
-     * Use the reset method to remove this asset from the given {@link SXRSceneObject}.
+     * Use the reset method to remove this asset from the given {@link SXRNode}.
      *
-     * @param cursor the {@link SXRSceneObject}  for the behavior to be removed
+     * @param cursor the {@link SXRNode}  for the behavior to be removed
      */
 
     void reset(Cursor cursor)
     {
         super.reset(cursor);
-        SXRSceneObject assetSceneObject = sceneObjectArray.get(cursor.getId());
-        assetSceneObject.setEnable(false);
+        SXRNode assetNode = sceneObjectArray.get(cursor.getId());
+        assetNode.setEnable(false);
     }
 
     float getX() {

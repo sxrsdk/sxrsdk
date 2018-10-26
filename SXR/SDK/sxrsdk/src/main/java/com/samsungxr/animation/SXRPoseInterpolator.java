@@ -16,7 +16,7 @@
 package com.samsungxr.animation;
 
 import com.samsungxr.SXRHybridObject;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.animation.keyframe.SXRFloatAnimation;
 import com.samsungxr.animation.keyframe.SXRQuatAnimation;
 import org.joml.Matrix4f;
@@ -69,7 +69,7 @@ public class SXRPoseInterpolator extends SXRAnimation
     private int offset;
     private Matrix4f mat;
 
-    public SXRPoseInterpolator(SXRSceneObject target, float duration, SXRPose poseOne, SXRPose poseTwo, SXRSkeleton skeleton)
+    public SXRPoseInterpolator(SXRNode target, float duration, SXRPose poseOne, SXRPose poseTwo, SXRSkeleton skeleton)
     {
         super(target, duration);
 

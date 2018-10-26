@@ -21,7 +21,7 @@
 
 #include "glm/gtc/type_ptr.hpp"
 
-#include "objects/scene_object.h"
+#include "objects/node.h"
 #include <math.h>
 #include <glm/gtx/matrix_decompose.hpp>
 
@@ -50,7 +50,7 @@ void Transform::invalidate()
 
 void Transform::invalidate(bool rotationUpdated)
 {
-    SceneObject* owner = owner_object();
+    Node* owner = owner_object();
 
     invalidate();
     if (rotationUpdated)
@@ -85,7 +85,7 @@ glm::mat4 Transform::getModelMatrix(bool forceRecalculate) {
         mutex_.unlock();
 
         glm::mat4 trs_matrix = translation_matrix * rotation_matrix * scale_matrix;
-        SceneObject* owner = owner_object();
+        Node* owner = owner_object();
         if (nullptr != owner && nullptr != owner->parent()) {
             Transform *const t = owner->parent()->transform();
             if (nullptr != t) {
@@ -192,12 +192,12 @@ void Transform::rotateWithPivot(float w, float x, float y, float z,
     invalidate(true);
 }
 
-void Transform::onAttach(SceneObject *owner_object) {
+void Transform::onAttach(Node *owner_object) {
     owner_object->onTransformChanged();
 //    owner_object->dirtyHierarchicalBoundingVolume();
 }
 
-void Transform::onDetach(SceneObject *owner_object) {
+void Transform::onDetach(Node *owner_object) {
     owner_object->onTransformChanged();
 //    owner_object->dirtyHierarchicalBoundingVolume();
 }

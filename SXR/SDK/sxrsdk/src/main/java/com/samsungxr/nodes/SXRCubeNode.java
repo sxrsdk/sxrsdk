@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.samsungxr.scene_objects;
+package com.samsungxr.nodes;
 
 import java.util.ArrayList;
 import java.util.concurrent.Future;
@@ -21,7 +21,7 @@ import java.util.concurrent.Future;
 import com.samsungxr.FutureWrapper;
 import com.samsungxr.SXRIndexBuffer;
 import com.samsungxr.SXRMaterial;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMesh;
@@ -30,7 +30,7 @@ import com.samsungxr.SXRTexture;
 import com.samsungxr.SXRVertexBuffer;
 import org.joml.Vector3f;
 
-public class SXRCubeSceneObject extends SXRSceneObject {
+public class SXRCubeNode extends SXRNode {
 
     private static final float SIZE = 0.5f;
 
@@ -198,7 +198,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
      * @param gvrContext
      *            current {@link SXRContext}
      */
-    public SXRCubeSceneObject(SXRContext gvrContext) {
+    public SXRCubeNode(SXRContext gvrContext) {
         super(gvrContext);
 
         createSimpleCube(gvrContext, true, new SXRMaterial(gvrContext), null);
@@ -217,7 +217,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
      *            whether the triangles and normals should be facing in or
      *            facing out.
      */
-    public SXRCubeSceneObject(SXRContext gvrContext, boolean facingOut) {
+    public SXRCubeNode(SXRContext gvrContext, boolean facingOut) {
         super(gvrContext);
 
         createSimpleCube(gvrContext, facingOut, new SXRMaterial(gvrContext), null);
@@ -237,7 +237,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
      * @param dimensions
      *            Vector3f containing X, Y, Z dimensions
      */
-    public SXRCubeSceneObject(SXRContext gvrContext, boolean facingOut, Vector3f dimensions) {
+    public SXRCubeNode(SXRContext gvrContext, boolean facingOut, Vector3f dimensions) {
         super(gvrContext);
 
         createSimpleCube(gvrContext, facingOut, new SXRMaterial(gvrContext), dimensions);
@@ -265,7 +265,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
      * @param shaderId
      *            Shader ID of material to use for this scene object.
      */
-    public SXRCubeSceneObject(SXRContext gvrContext, boolean facingOut, String vertexDesc, SXRShaderId shaderId) {
+    public SXRCubeNode(SXRContext gvrContext, boolean facingOut, String vertexDesc, SXRShaderId shaderId) {
         super(gvrContext);
         SXRMesh mesh = createCube(gvrContext, vertexDesc, facingOut, null);
         SXRRenderData renderData = new SXRRenderData(gvrContext, new SXRMaterial(gvrContext, shaderId));
@@ -296,7 +296,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
      * @param dimensions
      *            Vector3f containing X, Y, Z dimensions
      */
-    public SXRCubeSceneObject(SXRContext gvrContext, boolean facingOut, String vertexDesc, SXRMaterial mtl, Vector3f dimensions) {
+    public SXRCubeNode(SXRContext gvrContext, boolean facingOut, String vertexDesc, SXRMaterial mtl, Vector3f dimensions) {
         super(gvrContext);
         SXRMesh mesh = createCube(gvrContext, vertexDesc, facingOut, dimensions);
         SXRRenderData renderData = new SXRRenderData(gvrContext, mtl);
@@ -321,7 +321,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
      * @param texture
      *            the texture for six faces.
      */
-    public SXRCubeSceneObject(SXRContext gvrContext, boolean facingOut,
+    public SXRCubeNode(SXRContext gvrContext, boolean facingOut,
             SXRTexture texture) {
         super(gvrContext);
 
@@ -353,7 +353,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
      * @param material
      *            the material for six faces.
      */
-    public SXRCubeSceneObject(SXRContext gvrContext, boolean facingOut,
+    public SXRCubeNode(SXRContext gvrContext, boolean facingOut,
             SXRMaterial material) {
         super(gvrContext);
 
@@ -386,7 +386,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
      * @param dimensions
      *            Vector3f containing X, Y, Z dimensions
      */
-    public SXRCubeSceneObject(SXRContext gvrContext, boolean facingOut,
+    public SXRCubeNode(SXRContext gvrContext, boolean facingOut,
             SXRMaterial material, Vector3f dimensions) {
         super(gvrContext);
 
@@ -412,7 +412,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
      *            loading the texture. The six textures are for front, right,
      *            back, left, top, and bottom faces respectively.
      */
-    public SXRCubeSceneObject(SXRContext gvrContext, boolean facingOut,
+    public SXRCubeNode(SXRContext gvrContext, boolean facingOut,
             ArrayList<SXRTexture> textureList) {
         super(gvrContext);
 
@@ -449,7 +449,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
      *            the segment number along each axis. 
      *            
      */
-    public SXRCubeSceneObject(SXRContext gvrContext, boolean facingOut,
+    public SXRCubeNode(SXRContext gvrContext, boolean facingOut,
             ArrayList<SXRTexture> textureList, int segmentNumber) {
         super(gvrContext);
 
@@ -553,7 +553,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
     private void createSimpleCubeSixMeshes(SXRContext gvrContext,
             boolean facingOut, String vertexDesc, ArrayList<SXRTexture> textureList)
     {
-        SXRSceneObject[] children = new SXRSceneObject[6];
+        SXRNode[] children = new SXRNode[6];
         SXRMesh[] meshes = new SXRMesh[6];
         SXRVertexBuffer vbuf = new SXRVertexBuffer(gvrContext, vertexDesc, SIMPLE_VERTICES.length / 3);
 
@@ -584,7 +584,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
 
         for (int i = 0; i < 6; i++)
         {
-            children[i] = new SXRSceneObject(gvrContext, meshes[i], textureList.get(i));
+            children[i] = new SXRNode(gvrContext, meshes[i], textureList.get(i));
             addChildObject(children[i]);
         }
 
@@ -603,14 +603,14 @@ public class SXRCubeSceneObject extends SXRSceneObject {
     private void createComplexCube(SXRContext gvrContext,
             boolean facingOut, ArrayList<SXRTexture> textureList, int segmentNumber) {
 
-        SXRSceneObject[] children = new SXRSceneObject[6];
+        SXRNode[] children = new SXRNode[6];
         for (int i = 0; i < 6; i++) {
-            children[i] = new SXRSceneObject(gvrContext);
+            children[i] = new SXRNode(gvrContext);
             addChildObject(children[i]);
         }
         
         int numPerFace = segmentNumber*segmentNumber;
-        SXRSceneObject[] grandchildren = new SXRSceneObject[numPerFace];
+        SXRNode[] grandchildren = new SXRNode[numPerFace];
         SXRMesh[] subMeshes = new SXRMesh[numPerFace];
         
         // 4 vertices (2 triangles) per mesh
@@ -695,7 +695,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
                 subMeshes[index].setNormals(normals);
                 subMeshes[index].setTexCoords(texCoords);
                 subMeshes[index].setIndices(indices);
-                grandchildren[index] = new SXRSceneObject(gvrContext,
+                grandchildren[index] = new SXRNode(gvrContext,
                         subMeshes[index],
                         textureList.get(0));
                 children[0].addChildObject(grandchildren[index]);
@@ -757,7 +757,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
                 subMeshes[index].setNormals(normals);
                 subMeshes[index].setTexCoords(texCoords);
                 subMeshes[index].setIndices(indices);
-                grandchildren[index] = new SXRSceneObject(gvrContext,
+                grandchildren[index] = new SXRNode(gvrContext,
                         subMeshes[index],
                         textureList.get(1));
                 children[1].addChildObject(grandchildren[index]);
@@ -819,7 +819,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
                 subMeshes[index].setNormals(normals);
                 subMeshes[index].setTexCoords(texCoords);
                 subMeshes[index].setIndices(indices);
-                grandchildren[index] = new SXRSceneObject(gvrContext,
+                grandchildren[index] = new SXRNode(gvrContext,
                         subMeshes[index],
                         textureList.get(2));
                 children[2].addChildObject(grandchildren[index]);
@@ -881,7 +881,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
                 subMeshes[index].setNormals(normals);
                 subMeshes[index].setTexCoords(texCoords);
                 subMeshes[index].setIndices(indices);
-                grandchildren[index] = new SXRSceneObject(gvrContext,
+                grandchildren[index] = new SXRNode(gvrContext,
                         subMeshes[index],
                         textureList.get(3));
                 children[3].addChildObject(grandchildren[index]);
@@ -938,7 +938,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
                 subMeshes[index].setNormals(normals);
                 subMeshes[index].setTexCoords(texCoords);
                 subMeshes[index].setIndices(indices);
-                grandchildren[index] = new SXRSceneObject(gvrContext,
+                grandchildren[index] = new SXRNode(gvrContext,
                         subMeshes[index],
                         textureList.get(4));
                 children[4].addChildObject(grandchildren[index]);
@@ -995,7 +995,7 @@ public class SXRCubeSceneObject extends SXRSceneObject {
                 subMeshes[index].setNormals(normals);
                 subMeshes[index].setTexCoords(texCoords);
                 subMeshes[index].setIndices(indices);
-                grandchildren[index] = new SXRSceneObject(gvrContext,
+                grandchildren[index] = new SXRNode(gvrContext,
                         subMeshes[index],
                         textureList.get(5));
                 children[5].addChildObject(grandchildren[index]);

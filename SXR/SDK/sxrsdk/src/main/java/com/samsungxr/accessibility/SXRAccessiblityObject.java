@@ -16,10 +16,10 @@ import com.samsungxr.SXRAndroidResource;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRShaderId;
 import com.samsungxr.SXRMesh;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 
-public class SXRAccessiblityObject extends SXRSceneObject {
+public class SXRAccessiblityObject extends SXRNode {
 
     private SXRAccessibilityTalkBack mTalkBack;
 

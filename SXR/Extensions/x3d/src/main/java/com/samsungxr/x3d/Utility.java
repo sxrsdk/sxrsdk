@@ -34,7 +34,7 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXRImportSettings;
 import com.samsungxr.SXRIndexBuffer;
 import com.samsungxr.SXRVertexBuffer;
-import com.samsungxr.scene_objects.SXRVideoSceneObjectPlayer;
+import com.samsungxr.nodes.SXRVideoNodePlayer;
 import com.samsungxr.utility.Log;
 import org.joml.Vector3f;
 
@@ -916,9 +916,9 @@ public class Utility
 
 
 
-    protected SXRVideoSceneObjectPlayer<ExoPlayer> makeExoPlayer(String movieFileName ) {
+    protected SXRVideoNodePlayer<ExoPlayer> makeExoPlayer(String movieFileName ) {
 
-        SXRVideoSceneObjectPlayer<ExoPlayer> gvrVideoSceneObjectPlayer = null;
+        SXRVideoNodePlayer<ExoPlayer> gvrVideoNodePlayer = null;
 
         try {
             //final Context context = activityContext;
@@ -941,7 +941,7 @@ public class Utility
             player.prepare(mediaSource);
             Log.e(TAG, "Load movie " + movieFileNameFinal + ".");
 
-            gvrVideoSceneObjectPlayer = new SXRVideoSceneObjectPlayer<ExoPlayer>() {
+            gvrVideoNodePlayer = new SXRVideoNodePlayer<ExoPlayer>() {
                 @Override
                 public ExoPlayer getPlayer() {
                     return player;
@@ -1000,7 +1000,7 @@ public class Utility
         catch (Exception e) {
             Log.e(TAG, "Exception makeExoPlayer: " + e);
         }
-        return gvrVideoSceneObjectPlayer;
+        return gvrVideoNodePlayer;
     }  //  end makeExoPlayer
 
 

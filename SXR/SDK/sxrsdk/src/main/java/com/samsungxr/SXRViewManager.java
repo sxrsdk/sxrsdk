@@ -235,7 +235,7 @@ abstract class SXRViewManager extends SXRContext {
                 } finally {
                     mMainSceneLock.unlock();
                 }
-                mMainScene.addSceneObject(mSplashScreen);
+                mMainScene.addNode(mSplashScreen);
             }
         } else {
             mSplashScreen = null;
@@ -756,7 +756,7 @@ abstract class SXRViewManager extends SXRContext {
         SXRPerspectiveCamera centerCamera = new SXRPerspectiveCamera(this);
         centerCamera.setFovY(90.0f);
         centerCamera.setRenderMask(SXRRenderData.SXRRenderMaskBit.Left | SXRRenderData.SXRRenderMaskBit.Right);
-        SXRSceneObject centerCameraObject = new SXRSceneObject(this);
+        SXRNode centerCameraObject = new SXRNode(this);
 
         centerCameraObject.attachCamera(centerCamera);
         centerCamera.addPostEffect(new SXRMaterial(this, SXRMaterial.SXRShaderType.VerticalFlip.ID));
@@ -849,8 +849,8 @@ abstract class SXRViewManager extends SXRContext {
     protected int mReadbackBufferWidth;
     protected int mReadbackBufferHeight;
 
-    protected native void makeShadowMaps(long scene, SXRScene javaSceneObject, long shader_manager, int width, int height);
-    protected native void cullAndRender(long render_target, long scene, SXRScene javaSceneObject, long shader_manager, long postEffectRenderTextureA, long postEffectRenderTextureB);
+    protected native void makeShadowMaps(long scene, SXRScene javaNode, long shader_manager, int width, int height);
+    protected native void cullAndRender(long render_target, long scene, SXRScene javaNode, long shader_manager, long postEffectRenderTextureA, long postEffectRenderTextureB);
     private native static void readRenderResultNative(Object readbackBuffer, long renderTarget, int eye, boolean useMultiview);
 
     private static final String TAG = "SXRViewManager";

@@ -21,7 +21,7 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtc/matrix_inverse.hpp"
 #include "objects/scene.h"
-#include "objects/scene_object.h"
+#include "objects/node.h"
 
 namespace sxr
 {

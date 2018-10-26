@@ -22,13 +22,13 @@ import static com.samsungxr.utility.Assert.checkStringNotNullOrEmpty;
 
 /** Holds the SXRCameras. */
 public class SXRCameraRig extends SXRComponent implements PrettyPrint {
-    private SXRSceneObject headTransformObject;
+    private SXRNode headTransformObject;
 
     private SXRCamera leftCamera, rightCamera;
     private SXRPerspectiveCamera centerCamera;
 
-    private SXRSceneObject leftCameraObject, rightCameraObject;
-    private SXRSceneObject centerCameraObject;
+    private SXRNode leftCameraObject, rightCameraObject;
+    private SXRNode centerCameraObject;
 
     /** Ways to use the rotation sensor data. */
     public abstract static class SXRCameraRigType {
@@ -102,15 +102,15 @@ public class SXRCameraRig extends SXRComponent implements PrettyPrint {
          *    CameraRig.getTransform()
          * 2. head transform object: used internally to do sensor-based rotation
          */
-        setOwnerObject(new SXRSceneObject(gvrContext));
+        setOwnerObject(new SXRNode(gvrContext));
         getOwnerObject().attachCameraRig(this);
 
-        headTransformObject = new SXRSceneObject(gvrContext);
+        headTransformObject = new SXRNode(gvrContext);
         addHeadTransformObject();
 
-        leftCameraObject = new SXRSceneObject(gvrContext);
-        rightCameraObject = new SXRSceneObject(gvrContext);
-        centerCameraObject = new SXRSceneObject(gvrContext);
+        leftCameraObject = new SXRNode(gvrContext);
+        rightCameraObject = new SXRNode(gvrContext);
+        centerCameraObject = new SXRNode(gvrContext);
 
         headTransformObject.addChildObject(leftCameraObject);
         headTransformObject.addChildObject(rightCameraObject);
@@ -121,7 +121,7 @@ public class SXRCameraRig extends SXRComponent implements PrettyPrint {
         getOwnerObject().addChildObject(getHeadTransformObject());
     }
 
-    public final SXRSceneObject getHeadTransformObject() {
+    public final SXRNode getHeadTransformObject() {
         return headTransformObject;
     }
 
@@ -355,11 +355,11 @@ public class SXRCameraRig extends SXRComponent implements PrettyPrint {
         NativeCameraRig.attachCenterCamera(getNative(), camera.getNative());
     }
 
-    public void attachToParent(SXRSceneObject parentObject) {
+    public void attachToParent(SXRNode parentObject) {
         parentObject.addChildObject(getOwnerObject());
     }
 
-    public void detachFromParent(SXRSceneObject parentObject) {
+    public void detachFromParent(SXRNode parentObject) {
        parentObject.removeChildObject(getOwnerObject());
     }
 
@@ -480,10 +480,10 @@ public class SXRCameraRig extends SXRComponent implements PrettyPrint {
      * Add {@code child} as a child of this camera rig owner object.
      * 
      * @param child
-     *            {@link SXRSceneObject Object} to add as a child of this camera
+     *            {@link SXRNode Object} to add as a child of this camera
      *            rig owner object.
      */
-    public void addChildObject(SXRSceneObject child) {
+    public void addChildObject(SXRNode child) {
         headTransformObject.addChildObject(child);
     }
 
@@ -491,10 +491,10 @@ public class SXRCameraRig extends SXRComponent implements PrettyPrint {
      * Remove {@code child} as a child of this camera rig owner object.
      * 
      * @param child
-     *            {@link SXRSceneObject Object} to remove as a child of this
+     *            {@link SXRNode Object} to remove as a child of this
      *            camera rig owner object.
      */
-    public void removeChildObject(SXRSceneObject child) {
+    public void removeChildObject(SXRNode child) {
         headTransformObject.removeChildObject(child);
     }
 
@@ -502,7 +502,7 @@ public class SXRCameraRig extends SXRComponent implements PrettyPrint {
      * Get the number of child objects that belongs to owner object of this
      * camera rig.
      * 
-     * @return Number of {@link SXRSceneObject objects} added as children of
+     * @return Number of {@link SXRNode objects} added as children of
      *         this camera rig owner object.
      */
     public int getChildrenCount() {
@@ -514,7 +514,7 @@ public class SXRCameraRig extends SXRComponent implements PrettyPrint {
      * camera objects.
      */
     public void removeAllChildren() {
-        for (final SXRSceneObject so : headTransformObject.getChildren()) {
+        for (final SXRNode so : headTransformObject.getChildren()) {
             final boolean notCamera = (so != leftCameraObject && so != rightCameraObject && so != centerCameraObject);
             if (notCamera) {
                 headTransformObject.removeChildObject(so);

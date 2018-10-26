@@ -9,7 +9,7 @@ import com.samsungxr.SXRImportSettings;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRResourceVolume;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.IAssetEvents;
 import com.samsungxr.IEventReceiver;
@@ -17,8 +17,8 @@ import com.samsungxr.IEvents;
 import com.samsungxr.animation.keyframe.BVHImporter;
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.animation.keyframe.TRSImporter;
-import com.samsungxr.scene_objects.SXRCylinderSceneObject;
-import com.samsungxr.scene_objects.SXRSphereSceneObject;
+import com.samsungxr.nodes.SXRCylinderNode;
+import com.samsungxr.nodes.SXRSphereNode;
 import com.samsungxr.utility.Log;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -49,7 +49,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     static private long TYPE_AVATAR = newComponentType(SXRAvatar.class);
     protected final List<SXRAnimator> mAnimations;
     protected SXRSkeleton mSkeleton;
-    protected final SXRSceneObject mAvatarRoot;
+    protected final SXRNode mAvatarRoot;
     protected boolean mIsRunning;
     protected SXREventReceiver mReceiver;
     protected final List<SXRAnimator> mAnimQueue = new ArrayList<SXRAnimator>();
@@ -67,7 +67,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         super(ctx);
         mReceiver = new SXREventReceiver(this);
         mType = getComponentType();
-        mAvatarRoot = new SXRSceneObject(ctx);
+        mAvatarRoot = new SXRNode(ctx);
         mAvatarRoot.setName(name);
         mAnimations = new CopyOnWriteArrayList<>();
     }
@@ -107,7 +107,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * bones and the meshes for the avatar.
      * @return root of the avatar model hierarchy
      */
-    public SXRSceneObject getModel() { return mAvatarRoot; }
+    public SXRNode getModel() { return mAvatarRoot; }
 
     /**
      * Determine if this avatar is currently animating.
@@ -183,7 +183,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         EnumSet<SXRImportSettings> settings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_ANIMATION));
         SXRContext ctx = mAvatarRoot.getSXRContext();
         SXRResourceVolume volume = new SXRResourceVolume(ctx, avatarResource);
-        SXRSceneObject modelRoot = new SXRSceneObject(ctx);
+        SXRNode modelRoot = new SXRNode(ctx);
 
         mAvatarRoot.addChildObject(modelRoot);
         ctx.getAssetLoader().loadModel(volume, modelRoot, settings, false, mLoadModelHandler);
@@ -199,8 +199,8 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         EnumSet<SXRImportSettings> settings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_ANIMATION));
         SXRContext ctx = mAvatarRoot.getSXRContext();
         SXRResourceVolume volume = new SXRResourceVolume(ctx, avatarResource);
-        SXRSceneObject modelRoot = new SXRSceneObject(ctx);
-        SXRSceneObject boneObject;
+        SXRNode modelRoot = new SXRNode(ctx);
+        SXRNode boneObject;
         int boneIndex;
 
         if (mSkeleton == null)
@@ -224,7 +224,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
 
     public void clearAvatar()
     {
-        SXRSceneObject previousAvatar = (mAvatarRoot.getChildrenCount() > 0) ?
+        SXRNode previousAvatar = (mAvatarRoot.getChildrenCount() > 0) ?
             mAvatarRoot.getChildByIndex(0) : null;
 
         if (previousAvatar != null)
@@ -292,7 +292,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         {
             EnumSet<SXRImportSettings> settings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_TEXTURING));
 
-            SXRSceneObject animRoot = new SXRSceneObject(ctx);
+            SXRNode animRoot = new SXRNode(ctx);
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
         }
     }
@@ -479,15 +479,15 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         }
     }
 
-    public void centerModel(SXRSceneObject model)
+    public void centerModel(SXRNode model)
     {
-        SXRSceneObject.BoundingVolume bv = model.getBoundingVolume();
+        SXRNode.BoundingVolume bv = model.getBoundingVolume();
         model.getTransform().setPosition(-bv.center.x, -bv.center.y, -bv.center.z - 1.5f * bv.radius);
     }
 
     protected IAssetEvents mLoadModelHandler = new IAssetEvents()
     {
-        public void onAssetLoaded(SXRContext context, SXRSceneObject modelRoot, String filePath, String errors)
+        public void onAssetLoaded(SXRContext context, SXRNode modelRoot, String filePath, String errors)
         {
             List<SXRComponent> components = modelRoot.getAllComponents(SXRSkeleton.getComponentType());
             String eventName = "onModelLoaded";
@@ -518,7 +518,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             context.getEventManager().sendEvent(SXRAvatar.this, IAvatarEvents.class, eventName, modelRoot, filePath, errors);
         }
 
-        public void onModelLoaded(SXRContext context, SXRSceneObject model, String filePath) { }
+        public void onModelLoaded(SXRContext context, SXRNode model, String filePath) { }
         public void onTextureLoaded(SXRContext context, SXRTexture texture, String filePath) { }
         public void onModelError(SXRContext context, String error, String filePath) { }
         public void onTextureError(SXRContext context, String error, String filePath) { }
@@ -526,8 +526,8 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
 
     public interface IAvatarEvents extends IEvents
     {
-        public void onAvatarLoaded(SXRSceneObject avatarRoot, String filePath, String errors);
-        public void onModelLoaded(SXRSceneObject avatarRoot, String filePath, String errors);
+        public void onAvatarLoaded(SXRNode avatarRoot, String filePath, String errors);
+        public void onModelLoaded(SXRNode avatarRoot, String filePath, String errors);
         public void onAnimationLoaded(SXRAnimator animator, String filePath, String errors);
         public void onAnimationStarted(SXRAnimator animator);
         public void onAnimationFinished(SXRAnimator animator, SXRAnimation animation);
@@ -535,7 +535,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
 
     protected IAssetEvents mLoadAnimHandler = new IAssetEvents()
     {
-        public void onAssetLoaded(SXRContext context, SXRSceneObject animRoot, String filePath, String errors)
+        public void onAssetLoaded(SXRContext context, SXRNode animRoot, String filePath, String errors)
         {
             SXRAnimator animator = (SXRAnimator) animRoot.getComponent(SXRAnimator.getComponentType());
             if (animator == null)
@@ -560,7 +560,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             context.getEventManager().sendEvent(SXRAvatar.this, IAvatarEvents.class, "onAnimationLoaded", animator, filePath, errors);
         }
 
-        public void onModelLoaded(SXRContext context, SXRSceneObject model, String filePath)
+        public void onModelLoaded(SXRContext context, SXRNode model, String filePath)
         {
             centerModel(model);
         }

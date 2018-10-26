@@ -69,16 +69,16 @@ class  SXRJassimpAdapter
     private static final int MAX_VERTEX_COLORS = JassimpConfig.MAX_NUMBER_COLORSETS;
 
     /*
-     * Maps the name of the SXRSceneObject / AiNode to the SXRBone
-     * attached to the SXRSceneObject
+     * Maps the name of the SXRNode / AiNode to the SXRBone
+     * attached to the SXRNode
      */
     private Hashtable<String, AiBone> mBoneMap = new Hashtable<>();
 
     /*
-     * Maps SXRSceneObject created for each Assimp node to the Assimp
+     * Maps SXRNode created for each Assimp node to the Assimp
      * mesh ID (the index of the mesh in AiScene).
      */
-    private HashMap<SXRSceneObject, Integer> mNodeMap = new HashMap<>();
+    private HashMap<SXRNode, Integer> mNodeMap = new HashMap<>();
 
     /**
      * Maps the Assimp mesh ID to the corresponding SXRMesh
@@ -263,7 +263,7 @@ class  SXRJassimpAdapter
         return mesh;
     }
 
-    public void setMeshMorphComponent(SXRMesh mesh, SXRSceneObject sceneObject, AiMesh aiMesh)
+    public void setMeshMorphComponent(SXRMesh mesh, SXRNode sceneObject, AiMesh aiMesh)
     {
         int nAnimationMeshes = aiMesh.getAnimationMeshes().size();
         if (nAnimationMeshes == 0)
@@ -421,7 +421,7 @@ class  SXRJassimpAdapter
     }
 
 
-    private class BoneCollector implements SXRSceneObject.SceneVisitor
+    private class BoneCollector implements SXRNode.SceneVisitor
     {
         /**
          * List of node names in the order they are encountered
@@ -430,7 +430,7 @@ class  SXRJassimpAdapter
          * associated bones are in this list.
          */
         final List<String> mBoneNames = new ArrayList<>();
-        private SXRSceneObject mRoot = null;
+        private SXRNode mRoot = null;
 
         public BoneCollector()
         {
@@ -439,7 +439,7 @@ class  SXRJassimpAdapter
         public List<String> getBoneNames() { return mBoneNames; }
 
         @Override
-        public boolean visit(SXRSceneObject obj)
+        public boolean visit(SXRNode obj)
         {
             String nodeName = obj.getName();
 
@@ -454,7 +454,7 @@ class  SXRJassimpAdapter
                 }
                 if (aiBone == null)
                 {
-                    SXRSceneObject parent = obj.getParent();
+                    SXRNode parent = obj.getParent();
 
                     if (obj.getChildrenCount() == 0)
                     {
@@ -496,7 +496,7 @@ class  SXRJassimpAdapter
         }
     };
 
-    public void createAnimation(AiAnimation aiAnim, SXRSceneObject target, SXRAnimator animator)
+    public void createAnimation(AiAnimation aiAnim, SXRNode target, SXRAnimator animator)
     {
         Map<String, SXRAnimationChannel> animMap = new HashMap<>();
         float duration =  (float) (aiAnim.getDuration() / aiAnim.getTicksPerSecond());
@@ -530,7 +530,7 @@ class  SXRJassimpAdapter
             {
                 continue;
             }
-            SXRSceneObject obj = target.getSceneObjectByName(nodeName);
+            SXRNode obj = target.getNodeByName(nodeName);
             if (obj != null)
             {
                 SXRNodeAnimation nodeAnim = new SXRNodeAnimation(nodeName, obj, duration, channel);
@@ -547,7 +547,7 @@ class  SXRJassimpAdapter
      * the map and the scene nodes, attempting to connect bones
      * where there are gaps to produce a complete skeleton.
      */
-    private void makeSkeleton(SXRSceneObject root)
+    private void makeSkeleton(SXRNode root)
     {
         if (!mBoneMap.isEmpty())
         {
@@ -557,7 +557,7 @@ class  SXRJassimpAdapter
             mSkeleton = new SXRSkeleton(root, nodeProcessor.getBoneNames());
             SXRPose bindPose = new SXRPose(mSkeleton);
             Matrix4f bindPoseMtx = new Matrix4f();
-            SXRSceneObject skelRoot = mSkeleton.getOwnerObject().getParent();
+            SXRNode skelRoot = mSkeleton.getOwnerObject().getParent();
             Matrix4f rootMtx = skelRoot.getTransform().getModelMatrix4f();
 
             rootMtx.invert();
@@ -565,7 +565,7 @@ class  SXRJassimpAdapter
             {
                 String boneName = mSkeleton.getBoneName(boneId);
                 AiBone aiBone = mBoneMap.get(boneName);
-                SXRSceneObject bone = mSkeleton.getBone(boneId);
+                SXRNode bone = mSkeleton.getBone(boneId);
 
                 if (aiBone != null)
                 {
@@ -833,12 +833,12 @@ class  SXRJassimpAdapter
         }
     }
 
-    public void processScene(SXRAssetLoader.AssetRequest request, final SXRSceneObject model, AiScene scene)
+    public void processScene(SXRAssetLoader.AssetRequest request, final SXRNode model, AiScene scene)
     {
         Hashtable<String, SXRLight> lightList = new Hashtable<String, SXRLight>();
         EnumSet<SXRImportSettings> settings = request.getImportSettings();
         boolean doAnimation = !settings.contains(SXRImportSettings.NO_ANIMATION);
-        SXRSceneObject modelParent = model.getParent();
+        SXRNode modelParent = model.getParent();
 
         if (modelParent != null)
         {
@@ -850,7 +850,7 @@ class  SXRJassimpAdapter
         {
             return;
         }
-        SXRSceneObject camera = makeCamera();
+        SXRNode camera = makeCamera();
         if (camera != null)
         {
             model.addChildObject(camera);
@@ -868,9 +868,9 @@ class  SXRJassimpAdapter
         {
             processAnimations(model, scene, settings.contains(SXRImportSettings.START_ANIMATIONS));
         }
-        for (Map.Entry<SXRSceneObject, Integer> entry : mNodeMap.entrySet())
+        for (Map.Entry<SXRNode, Integer> entry : mNodeMap.entrySet())
         {
-            SXRSceneObject obj = entry.getKey();
+            SXRNode obj = entry.getKey();
             int meshId = entry.getValue();
 
             if (meshId >= 0)
@@ -884,7 +884,7 @@ class  SXRJassimpAdapter
         }
     }
 
-    private SXRAnimator processAnimations(SXRSceneObject model, AiScene scene, boolean startAnimations)
+    private SXRAnimator processAnimations(SXRNode model, AiScene scene, boolean startAnimations)
     {
         List<AiAnimation> animations = scene.getAnimations();
         if (animations.size() > 0)
@@ -900,14 +900,14 @@ class  SXRJassimpAdapter
         return null;
     }
 
-    private SXRSceneObject makeCamera()
+    private SXRNode makeCamera()
     {
         List<AiCamera> cameras = mScene.getCameras();
         if (cameras.size() == 0)
         {
             return null;
         }
-        SXRSceneObject mainCamera = new SXRSceneObject(mContext);
+        SXRNode mainCamera = new SXRNode(mContext);
         SXRCameraRig cameraRig = SXRCameraRig.makeInstance(mContext);
         AiCamera aiCam = cameras.get(0);
         float[] up = (float[]) aiCam.getUp(Jassimp.BUILTIN);
@@ -926,9 +926,9 @@ class  SXRJassimpAdapter
         return mainCamera;
     }
 
-    private void traverseGraph(SXRSceneObject parent, AiNode node, Hashtable<String, SXRLight> lightlist)
+    private void traverseGraph(SXRNode parent, AiNode node, Hashtable<String, SXRLight> lightlist)
     {
-        SXRSceneObject sceneObject = new SXRSceneObject(mContext);
+        SXRNode sceneObject = new SXRNode(mContext);
         final int[] nodeMeshes = node.getMeshes();
         String nodeName = node.getName();
         AiNode aiChild = null;
@@ -967,7 +967,7 @@ class  SXRJassimpAdapter
             for (Integer i = 0; i < node.getNumMeshes(); i++)
             {
                 int meshId = nodeMeshes[i];
-                SXRSceneObject child = new SXRSceneObject(mContext);
+                SXRNode child = new SXRNode(mContext);
                 child.setName(nodeName + "-" + meshId);
                 sceneObject.addChildObject(child);
                 mNodeMap.put(child, meshId);
@@ -985,7 +985,7 @@ class  SXRJassimpAdapter
         }
     }
 
-    private AiNode handleNoName(AiNode ainode, SXRSceneObject gvrnode)
+    private AiNode handleNoName(AiNode ainode, SXRNode gvrnode)
     {
         if (ainode.getNumChildren() > 1)
         {
@@ -1026,7 +1026,7 @@ class  SXRJassimpAdapter
         }
     }
 
-    private void attachLights(Hashtable<String, SXRLight> lightlist, SXRSceneObject sceneObject)
+    private void attachLights(Hashtable<String, SXRLight> lightlist, SXRNode sceneObject)
     {
         String name = sceneObject.getName();
         if ("".equals(name))
@@ -1045,20 +1045,20 @@ class  SXRJassimpAdapter
     }
 
     /**
-     * Helper method to create a new {@link SXRSceneObject} with a given mesh
+     * Helper method to create a new {@link SXRNode} with a given mesh
      *
      * @param assetRequest
      *            SXRAssetRequest containing the original request to load the model
      *
      * @param sceneObject
-     *            The SXRSceneObject to process
+     *            The SXRNode to process
      *
      * @param meshId
      *            The index of the assimp mesh in the AiScene mesh list
      */
     private void processMesh(
             SXRAssetLoader.AssetRequest assetRequest,
-            SXRSceneObject sceneObject,
+            SXRNode sceneObject,
             int meshId)
     {
         EnumSet<SXRImportSettings> settings = assetRequest.getImportSettings();

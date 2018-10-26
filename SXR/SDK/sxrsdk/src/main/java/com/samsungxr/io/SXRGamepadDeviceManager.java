@@ -24,7 +24,7 @@ import android.view.MotionEvent;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 
 import java.util.HashSet;
@@ -120,7 +120,7 @@ class SXRGamepadDeviceManager {
                                     SXRControllerType controllerType, String name, int vendorId,
                                     int productId, SXRGamepadDeviceManager deviceManager) {
             super(context, controllerType, name, vendorId, productId);
-            tempTrans = new SXRSceneObject(context).getTransform();
+            tempTrans = new SXRNode(context).getTransform();
             tempTrans.setPosition(0.0f, 0.0f, -1.0f);
             this.deviceManager = deviceManager;
         }

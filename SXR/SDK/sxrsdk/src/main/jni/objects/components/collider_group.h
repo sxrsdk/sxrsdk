@@ -38,8 +38,8 @@ namespace sxr {
 
         virtual void addChildComponent(Component* collider);
         virtual void removeChildComponent(Component* collider);
-        ColliderData isHit(SceneObject* owner, const glm::vec3& rayStart, const glm::vec3& rayDir);
-        ColliderData isHit(SceneObject* owner, const float sphere[]);
+        ColliderData isHit(Node* owner, const glm::vec3& rayStart, const glm::vec3& rayDir);
+        ColliderData isHit(Node* owner, const float sphere[]);
 
         const glm::vec3& hit() const {
             return hit_;

@@ -16,7 +16,7 @@
 package com.samsungxr.physics;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ import java.util.List;
  * {@linkplain SXRRigidBody rigid bodies}.
  * <p>
  * After created anf fully configured a constraint must be attached to a
- * {@linkplain com.samsungxr.SXRSceneObject scene object} containing a rigid body that will become
+ * {@linkplain com.samsungxr.SXRNode scene object} containing a rigid body that will become
  * the owner of this constraint (body A).
  */
 abstract class SXRConstraint extends SXRPhysicsWorldObject {
@@ -49,7 +49,7 @@ abstract class SXRConstraint extends SXRPhysicsWorldObject {
     }
 
     @Override
-    public void onAttach(SXRSceneObject newOwner) {
+    public void onAttach(SXRNode newOwner) {
         mBodyA = (SXRRigidBody)newOwner.getComponent(SXRRigidBody.getComponentType());
         if (mBodyA == null) {
             throw new UnsupportedOperationException("There is no rigid body attached to owner object.");

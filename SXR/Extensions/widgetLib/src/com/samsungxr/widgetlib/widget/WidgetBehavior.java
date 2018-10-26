@@ -2,7 +2,7 @@ package com.samsungxr.widgetlib.widget;
 
 import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 class WidgetBehavior extends SXRBehavior {
 
@@ -14,7 +14,7 @@ class WidgetBehavior extends SXRBehavior {
         mTarget = target;
     }
 
-    static Widget getTarget(SXRSceneObject sceneObject) {
+    static Widget getTarget(SXRNode sceneObject) {
         WidgetBehavior behavior = (WidgetBehavior) sceneObject.getComponent(getComponentType());
         if (behavior != null) {
             return behavior.mTarget;

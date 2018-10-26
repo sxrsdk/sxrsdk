@@ -17,7 +17,7 @@
  * Objects in a scene.
  ***************************************************************************/
 
-#include "scene_object.h"
+#include "node.h"
 
 #include "objects/components/camera.h"
 #include "objects/components/camera_rig.h"
@@ -28,7 +28,7 @@
 
 namespace sxr {
 
-SceneObject::SceneObject() :
+Node::Node() :
         HybridObject(), name_(""), children_(), visible_(true), transform_dirty_(false), in_frustum_(
                 false),  enabled_(true),query_currently_issued_(false), vis_count_(0),
                 cull_status_(false), bounding_volume_dirty_(true) {
@@ -38,24 +38,24 @@ SceneObject::SceneObject() :
     glGenQueries(1, queries_);
 }
 
-SceneObject::~SceneObject() {
+Node::~Node() {
     delete queries_;
 }
 
-bool SceneObject::attachComponent(Component* component) {
+bool Node::attachComponent(Component* component) {
     for (auto it = components_.begin(); it != components_.end(); ++it) {
         if ((*it)->getType() == component->getType())
             return false;
     }
     component->set_owner_object(this);
     components_.push_back(component);
-    SceneObject* par = parent();
+    Node* par = parent();
     if (par)
     {
         Scene* scene = Scene::main_scene();
         if (scene != NULL)
         {
-            SceneObject* root = scene->getRoot();
+            Node* root = scene->getRoot();
             while (par)
             {
                 if (par == root)
@@ -71,18 +71,18 @@ bool SceneObject::attachComponent(Component* component) {
 }
 
 
-Component* SceneObject::detachComponent(long long type)
+Component* Node::detachComponent(long long type)
 {
     for (auto it = components_.begin(); it != components_.end(); ++it)
     {
         if ((*it)->getType() == type)
         {
             Component* component = *it;
-            SceneObject* par = parent();
+            Node* par = parent();
             if (par)
             {
                 Scene* scene = Scene::main_scene();
-                SceneObject* root = scene->getRoot();
+                Node* root = scene->getRoot();
                 if (scene != NULL)
                 {
                     while (par)
@@ -104,7 +104,7 @@ Component* SceneObject::detachComponent(long long type)
     return (Component*) NULL;
 }
 
-Component* SceneObject::getComponent(long long type) const {
+Component* Node::getComponent(long long type) const {
     for (auto it = components_.begin(); it != components_.end(); ++it) {
         if ((*it)->getType() == type)
             return *it;
@@ -112,7 +112,7 @@ Component* SceneObject::getComponent(long long type) const {
     return (Component*) NULL;
 }
 
-void SceneObject::getAllComponents(std::vector<Component*>& components, long long componentType) {
+void Node::getAllComponents(std::vector<Component*>& components, long long componentType) {
     if (componentType) {
         Component* c = getComponent(componentType);
         if (c) {
@@ -125,12 +125,12 @@ void SceneObject::getAllComponents(std::vector<Component*>& components, long lon
         }
     }
     for (auto it2 = children_.begin(); it2 != children_.end(); ++it2) {
-        SceneObject* obj = *it2;
+        Node* obj = *it2;
         obj->getAllComponents(components, componentType);
     }
 }
 
-void SceneObject::addChildObject(SceneObject* self, SceneObject* child) {
+void Node::addChildObject(Node* self, Node* child) {
     Scene* scene = Scene::main_scene();
     if (scene != NULL)
     {
@@ -154,7 +154,7 @@ void SceneObject::addChildObject(SceneObject* self, SceneObject* child) {
 /**
  * Called when a scene object is added to the current scene.
  */
-void SceneObject::onAddedToScene(Scene* scene)
+void Node::onAddedToScene(Scene* scene)
 {
     for (auto it = components_.begin(); it != components_.end(); ++it)
     {
@@ -162,7 +162,7 @@ void SceneObject::onAddedToScene(Scene* scene)
     }
     for (auto it2 = children_.begin(); it2 != children_.end(); ++it2)
     {
-        SceneObject* obj = *it2;
+        Node* obj = *it2;
         obj->onAddedToScene(scene);
     }
 }
@@ -170,11 +170,11 @@ void SceneObject::onAddedToScene(Scene* scene)
 /**
  * Called when a scene object is attached to a parent.
  */
-bool SceneObject::onAddChild(SceneObject* addme, SceneObject* root)
+bool Node::onAddChild(Node* addme, Node* root)
 {
     if (addme == this)
     {
-        std::string error =  "SceneObject::addChildObject() : cycle of scene objects is not allowed.";
+        std::string error =  "Node::addChildObject() : cycle of scene objects is not allowed.";
         LOGE("%s", error.c_str());
         return false;
     }
@@ -193,7 +193,7 @@ bool SceneObject::onAddChild(SceneObject* addme, SceneObject* root)
 /**
  * Called when a child is detached from its parent
  */
-bool SceneObject::onRemoveChild(SceneObject* removeme, SceneObject* root)
+bool Node::onRemoveChild(Node* removeme, Node* root)
 {
     bounding_volume_dirty_ = true;
     if (this == root)
@@ -210,7 +210,7 @@ bool SceneObject::onRemoveChild(SceneObject* removeme, SceneObject* root)
 /**
  * Called when a scene object is removed from the current scene.
  */
-void SceneObject::onRemovedFromScene(Scene* scene)
+void Node::onRemovedFromScene(Scene* scene)
 {
     for (auto it = components_.begin(); it != components_.end(); ++it)
     {
@@ -218,12 +218,12 @@ void SceneObject::onRemovedFromScene(Scene* scene)
     }
     for (auto it2 = children_.begin(); it2 != children_.end(); ++it2)
     {
-        SceneObject* obj = *it2;
+        Node* obj = *it2;
         obj->onRemovedFromScene(scene);
     }
 }
 
-void SceneObject::removeChildObject(SceneObject* child)
+void Node::removeChildObject(Node* child)
 {
     Scene* scene = Scene::main_scene();
 
@@ -249,7 +249,7 @@ void SceneObject::removeChildObject(SceneObject* child)
     }
 }
 
-void SceneObject::onTransformChanged()
+void Node::onTransformChanged()
 {
     Transform* t = transform();
     if (t)
@@ -263,19 +263,19 @@ void SceneObject::onTransformChanged()
         std::lock_guard<std::mutex> lock(children_mutex_);
         for (auto it = children_.begin(); it != children_.end(); ++it)
         {
-            SceneObject* child = *it;
+            Node* child = *it;
             child->onTransformChanged();
         }
     }
 }
 
-void SceneObject::clear()
+void Node::clear()
 {
     Scene* scene = Scene::main_scene();
     std::lock_guard < std::mutex > lock(children_mutex_);
     for (auto it = children_.begin(); it != children_.end(); ++it)
     {
-        SceneObject* child = *it;
+        Node* child = *it;
         if (scene != NULL)
         {
             if (onRemoveChild(child, scene->getRoot()))
@@ -293,29 +293,29 @@ void SceneObject::clear()
     children_.clear();
 }
 
-int SceneObject::getChildrenCount() const {
+int Node::getChildrenCount() const {
     return children_.size();
 }
 
-SceneObject* SceneObject::getChildByIndex(int index) {
+Node* Node::getChildByIndex(int index) {
     if (index < children_.size()) {
         return children_[index];
     } else {
-        std::string error = "SceneObject::getChildByIndex() : Out of index.";
+        std::string error = "Node::getChildByIndex() : Out of index.";
         throw error;
     }
 }
 
-void SceneObject::getDescendants(std::vector<SceneObject*>& descendants) {
+void Node::getDescendants(std::vector<Node*>& descendants) {
     std::lock_guard < std::mutex > lock(children_mutex_);
     for (auto it = children_.begin(); it != children_.end(); ++it) {
-        SceneObject* obj = *it;
+        Node* obj = *it;
         descendants.push_back(obj);
         obj->getDescendants(descendants);
     }
 }
 
-void SceneObject::dirtyHierarchicalBoundingVolume() {
+void Node::dirtyHierarchicalBoundingVolume() {
     if (bounding_volume_dirty_) {
         return;
     }
@@ -327,7 +327,7 @@ void SceneObject::dirtyHierarchicalBoundingVolume() {
     }
 }
 
-void SceneObject::set_visible(bool visibility = true) {
+void Node::set_visible(bool visibility = true) {
 
     //HACK
     //If checked every frame, queries may return
@@ -350,7 +350,7 @@ void SceneObject::set_visible(bool visibility = true) {
     }
 }
 
-bool SceneObject::isColliding(SceneObject *scene_object) {
+bool Node::isColliding(Node *node) {
 
     //Get the transformed bounding boxes in world coordinates and check if they intersect
     //Transformation is done by the getTransformedBoundingBoxInfo method in the Mesh class
@@ -371,17 +371,17 @@ bool SceneObject::isColliding(SceneObject *scene_object) {
     this->render_data()->mesh()->getTransformedBoundingBoxInfo(
             &this_object_model_matrix, this_object_bounding_box);
 
-    if (nullptr == scene_object->render_data()->mesh()) {
+    if (nullptr == node->render_data()->mesh()) {
         LOGE("isColliding: no mesh for target scene object");
         return false;
     }
-    t = scene_object->render_data()->owner_object()->transform();
+    t = node->render_data()->owner_object()->transform();
     if (nullptr == t) {
         LOGE("isColliding: no transform for target scene object");
         return false;
     }
     glm::mat4 check_object_model_matrix = t->getModelMatrix();
-    scene_object->render_data()->mesh()->getTransformedBoundingBoxInfo(
+    node->render_data()->mesh()->getTransformedBoundingBoxInfo(
             &check_object_model_matrix, check_object_bounding_box);
 
     bool result = (this_object_bounding_box[3] > check_object_bounding_box[0]
@@ -404,7 +404,7 @@ bool SceneObject::isColliding(SceneObject *scene_object) {
  *
  * http://people.csail.mit.edu/amy/papers/box-jgt.pdf
  */
-bool SceneObject::intersectsBoundingVolume(float rox, float roy, float roz,
+bool Node::intersectsBoundingVolume(float rox, float roy, float roz,
         float rdx, float rdy, float rdz) {
     BoundingVolume bounding_volume_ = getBoundingVolume();
 
@@ -457,9 +457,9 @@ bool SceneObject::intersectsBoundingVolume(float rox, float roy, float roz,
 /**
  * Test this scene object's HBV against the HBV of the provided scene object.
  */
-bool SceneObject::intersectsBoundingVolume(SceneObject *scene_object) {
+bool Node::intersectsBoundingVolume(Node *node) {
     BoundingVolume this_bounding_volume_ = getBoundingVolume();
-    BoundingVolume that_bounding_volume = scene_object->getBoundingVolume();
+    BoundingVolume that_bounding_volume = node->getBoundingVolume();
 
     glm::vec3 this_min_corner = this_bounding_volume_.min_corner();
     glm::vec3 this_max_corner = this_bounding_volume_.max_corner();
@@ -476,7 +476,7 @@ bool SceneObject::intersectsBoundingVolume(SceneObject *scene_object) {
 }
 
 
-BoundingVolume& SceneObject::getBoundingVolume() {
+BoundingVolume& Node::getBoundingVolume() {
     if (!bounding_volume_dirty_) {
         return transformed_bounding_volume_;
     }
@@ -496,7 +496,7 @@ BoundingVolume& SceneObject::getBoundingVolume() {
         }
     }
     // 2. Aggregate with all its children's bounding volumes
-    std::vector<SceneObject*> childrenCopy = children();
+    std::vector<Node*> childrenCopy = children();
     for (auto it = childrenCopy.begin(); it != childrenCopy.end(); ++it) {
         BoundingVolume child_bounding_volume = (*it)->getBoundingVolume();
         if (child_bounding_volume.radius() > 0) {
@@ -517,7 +517,7 @@ float planeDistanceToPoint(float plane[4], glm::vec3 &compare_point) {
     return distance;
 }
 
-bool SceneObject::checkSphereVsFrustum(float frustum[6][4],
+bool Node::checkSphereVsFrustum(float frustum[6][4],
         BoundingVolume &sphere) {
     glm::vec3 center = sphere.center();
     float radius = sphere.radius();
@@ -541,7 +541,7 @@ enum AABB_STATE {
 // 1 when the HBV of the object is intersecting the frustum but the object itself is not: cull it out and continue culling test with its children
 // 2 when the HBV of the object is intersecting the frustum and the mesh BV of the object are intersecting (inside) the frustum: render itself and continue culling test with its children
 // 3 when the HBV of the object is completely inside the frustum: render itself and all its children without further culling test
-int SceneObject::frustumCull(glm::vec3 camera_position, const float frustum[6][4],
+int Node::frustumCull(glm::vec3 camera_position, const float frustum[6][4],
         int& planeMask) {
     if (!enabled_ || !visible_) {
         if (DEBUG_RENDERER) {
@@ -619,7 +619,7 @@ int SceneObject::frustumCull(glm::vec3 camera_position, const float frustum[6][4
 // If the AABB is completely outside any frustum plane, return 0 indicating the AABB is completely outside the whole frustum;
 // If the any vertex of the AABB is outside a frustum plane, return 1 indicating the AABB is intersecting the frustum;
 // If the AABB is completely inside all frustum planes, return 2 indicating the AABB is completely inside the frustum.
-int SceneObject::checkAABBVsFrustumOpt(const float frustum[6][4],
+int Node::checkAABBVsFrustumOpt(const float frustum[6][4],
         BoundingVolume &bounding_volume, int& planeMask) {
     glm::vec3 min_corner = bounding_volume.min_corner();
     glm::vec3 max_corner = bounding_volume.max_corner();
@@ -701,7 +701,7 @@ int SceneObject::checkAABBVsFrustumOpt(const float frustum[6][4],
     return isCompleteInside ? INSIDE : INTERSECT;
 }
 
-bool SceneObject::checkAABBVsFrustumBasic(const float frustum[6][4],
+bool Node::checkAABBVsFrustumBasic(const float frustum[6][4],
         BoundingVolume &bounding_volume) {
     glm::vec3 min_corner = bounding_volume.min_corner();
     glm::vec3 max_corner = bounding_volume.max_corner();

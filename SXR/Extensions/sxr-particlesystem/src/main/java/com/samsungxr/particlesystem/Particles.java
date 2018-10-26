@@ -19,7 +19,7 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRShaderId;
 import com.samsungxr.SXRTexture;
 import org.joml.Vector3f;
@@ -67,16 +67,16 @@ class Particles {
     }
 
     /**
-     * Creates and returns a SXRSceneObject with the specified mesh attributes.
+     * Creates and returns a SXRNode with the specified mesh attributes.
      *
      * @param vertices the vertex positions of that make up the mesh. (x1, y1, z1, x2, y2, z2, ...)
      * @param velocities the velocity attributes for each vertex. (vx1, vy1, vz1, vx2, vy2, vz2...)
      * @param particleTimeStamps the spawning times of each vertex. (t1, 0,  t2, 0,  t3, 0 ..)
      *
-     * @return The SXRSceneObject with this mesh.
+     * @return The SXRNode with this mesh.
      */
 
-    SXRSceneObject makeParticleMesh(float[] vertices, float[] velocities,
+    SXRNode makeParticleMesh(float[] vertices, float[] velocities,
                                            float[] particleTimeStamps )
     {
         mParticleMesh = new SXRMesh(mSXRContext);
@@ -104,7 +104,7 @@ class Particles {
         renderData.setMesh(mParticleMesh);
         material.setMainTexture(mTexture);
 
-        SXRSceneObject meshObject = new SXRSceneObject(mSXRContext);
+        SXRNode meshObject = new SXRNode(mSXRContext);
         meshObject.attachRenderData(renderData);
         meshObject.getRenderData().setMaterial(material);
 

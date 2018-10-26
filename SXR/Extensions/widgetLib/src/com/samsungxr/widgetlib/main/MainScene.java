@@ -15,7 +15,7 @@ import com.samsungxr.SXRCameraRig;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRPerspectiveCamera;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 import static com.samsungxr.utility.Log.tag;
 
@@ -28,7 +28,7 @@ import java.util.Set;
 
 /**
  * Encapsulates common operations on the main scene, the main camera rig, and
- * the left and right cameras. A {@link SXRSceneObject} instance is used as the
+ * the left and right cameras. A {@link SXRNode} instance is used as the
  * base of the scene graph; this allows the entire scene graph to be scaled
  * without requiring any support from other objects in the scene graph.
  */
@@ -56,8 +56,8 @@ public class MainScene {
      * be notified of {@linkplain MainScene#setScale(float) changes to the
      * scene's scale}. Generally speaking this is not necessary: scene objects
      * that have been added to either the
-     * {@linkplain MainScene#addSceneObject(SXRSceneObject) scene} or the
-     * {@linkplain MainScene#addChildObjectToCamera(SXRSceneObject) camera} will
+     * {@linkplain MainScene#addNode(SXRNode) scene} or the
+     * {@linkplain MainScene#addChildObjectToCamera(SXRNode) camera} will
      * already be scaled as needed.
      */
     public interface OnScaledListener {
@@ -100,10 +100,10 @@ public class MainScene {
      */
     public MainScene(final SXRContext gvrContext) {
         mContext = gvrContext;
-        mSceneRootObject = new SXRSceneObject(gvrContext);
-        mMainCameraRootObject = new SXRSceneObject(gvrContext);
-        mLeftCameraRootObject = new SXRSceneObject(gvrContext);
-        mRightCameraRootObject = new SXRSceneObject(gvrContext);
+        mSceneRootObject = new SXRNode(gvrContext);
+        mMainCameraRootObject = new SXRNode(gvrContext);
+        mLeftCameraRootObject = new SXRNode(gvrContext);
+        mRightCameraRootObject = new SXRNode(gvrContext);
 
         mSceneRootWidget = new RootWidget(mSceneRootObject);
         mSceneRootWidget.setName(TAG);
@@ -119,7 +119,7 @@ public class MainScene {
 
         mMainScene = mContext.getMainScene();
         mMainScene.setFrustumCulling(true);
-        mMainScene.addSceneObject(mSceneRootObject);
+        mMainScene.addNode(mSceneRootObject);
 
         getMainCameraRig().addChildObject(mMainCameraRootObject);
         getLeftCamera().addChildObject(mLeftCameraRootObject);
@@ -209,36 +209,36 @@ public class MainScene {
     /**
      * Add a scene object to the scene.
      *
-     * @param sceneObject The {@link SXRSceneObject} to add.
+     * @param sceneObject The {@link SXRNode} to add.
      */
-    public void addSceneObject(final SXRSceneObject sceneObject) {
+    public void addNode(final SXRNode sceneObject) {
         mSceneRootObject.addChildObject(sceneObject);
     }
 
     /**
      * Remove a scene object from the scene.
      *
-     * @param sceneObject The {@link SXRSceneObject} to remove.
+     * @param sceneObject The {@link SXRNode} to remove.
      */
-    public void removeSceneObject(final SXRSceneObject sceneObject) {
+    public void removeNode(final SXRNode sceneObject) {
         mSceneRootObject.removeChildObject(sceneObject);
     }
 
     /**
      * Add a scene object to the scene.
      *
-     * @param sceneObject The {@link SXRSceneObject} to add.
+     * @param sceneObject The {@link SXRNode} to add.
      */
-    public void addSceneObject(final Widget sceneObject) {
+    public void addNode(final Widget sceneObject) {
         mSceneRootWidget.addChild(sceneObject);
     }
 
     /**
      * Remove a scene object from the scene.
      *
-     * @param sceneObject The {@link SXRSceneObject} to remove.
+     * @param sceneObject The {@link SXRNode} to remove.
      */
-    public void removeSceneObject(final Widget sceneObject) {
+    public void removeNode(final Widget sceneObject) {
         mSceneRootWidget.removeChild(sceneObject);
     }
 
@@ -254,18 +254,18 @@ public class MainScene {
     }
 
     /**
-     * @return A recursive count of the {@link SXRSceneObject} children of the
+     * @return A recursive count of the {@link SXRNode} children of the
      * scene's root.
      */
-    public int getChildSceneObjectCount() {
-        return getSceneObjectChildCount(mSceneRootObject);
+    public int getChildNodeCount() {
+        return getNodeChildCount(mSceneRootObject);
     }
 
-    private int getSceneObjectChildCount(final SXRSceneObject root) {
+    private int getNodeChildCount(final SXRNode root) {
         int count = 0;
-        for (SXRSceneObject child : root.getChildren()) {
+        for (SXRNode child : root.getChildren()) {
             ++count;
-            count += getSceneObjectChildCount(child);
+            count += getNodeChildCount(child);
         }
         return count;
     }
@@ -294,21 +294,21 @@ public class MainScene {
      * Convenience method to add a scene object to both the left and right
      * cameras.
      *
-     * @param child The {@link SXRSceneObject} to add.
-     * @see #addChildObjectToCamera(SXRSceneObject, int)
+     * @param child The {@link SXRNode} to add.
+     * @see #addChildObjectToCamera(SXRNode, int)
      */
-    public void addChildObjectToCamera(final SXRSceneObject child) {
+    public void addChildObjectToCamera(final SXRNode child) {
         addChildObjectToCamera(child, BOTH_CAMERAS);
     }
 
     /**
      * Adds a scene object to one or both of the left and right cameras.
      *
-     * @param child  The {@link SXRSceneObject} to add.
+     * @param child  The {@link SXRNode} to add.
      * @param camera {@link #LEFT_CAMERA} or {@link #RIGHT_CAMERA}; these can be
      *               or'd together to add {@code child} to both cameras.
      */
-    public void addChildObjectToCamera(final SXRSceneObject child, int camera) {
+    public void addChildObjectToCamera(final SXRNode child, int camera) {
         switch (camera) {
             case LEFT_CAMERA:
                 mLeftCameraRootObject.addChildObject(child);
@@ -326,21 +326,21 @@ public class MainScene {
      * Convenience method to remove a scene object from both the left and right
      * cameras.
      *
-     * @param child The {@link SXRSceneObject} to remove.
-     * @see #removeChildObjectFromCamera(SXRSceneObject, int)
+     * @param child The {@link SXRNode} to remove.
+     * @see #removeChildObjectFromCamera(SXRNode, int)
      */
-    public void removeChildObjectFromCamera(final SXRSceneObject child) {
+    public void removeChildObjectFromCamera(final SXRNode child) {
         removeChildObjectFromCamera(child, BOTH_CAMERAS);
     }
 
     /**
      * Removes a scene object from one or both of the left and right cameras.
      *
-     * @param child  The {@link SXRSceneObject} to remove.
+     * @param child  The {@link SXRNode} to remove.
      * @param camera {@link #LEFT_CAMERA} or {@link #RIGHT_CAMERA}; these can be
      *               or'd together to remove {@code child} from both cameras.
      */
-    public void removeChildObjectFromCamera(final SXRSceneObject child,
+    public void removeChildObjectFromCamera(final SXRNode child,
                                             int camera) {
         switch (camera) {
             case LEFT_CAMERA:
@@ -598,7 +598,7 @@ public class MainScene {
         return mMainScene.getMainCameraRig();
     }
 
-    private void setScale(final SXRSceneObject sceneObject, final float scale) {
+    private void setScale(final SXRNode sceneObject, final float scale) {
         sceneObject.getTransform().setScale(scale, scale, scale);
     }
 
@@ -616,7 +616,7 @@ public class MainScene {
     private class RootWidget extends GroupWidget {
         private String TAG = tag(RootWidget.class);
 
-        public RootWidget(SXRSceneObject sceneObject) {
+        public RootWidget(SXRNode sceneObject) {
             super(sceneObject.getSXRContext(), sceneObject);
             applyLayout(new AbsoluteLayout());
         }
@@ -698,10 +698,10 @@ public class MainScene {
 
     private final SXRContext mContext;
     private final SXRScene mMainScene;
-    private final SXRSceneObject mSceneRootObject;
-    private final SXRSceneObject mMainCameraRootObject;
-    private final SXRSceneObject mLeftCameraRootObject;
-    private final SXRSceneObject mRightCameraRootObject;
+    private final SXRNode mSceneRootObject;
+    private final SXRNode mMainCameraRootObject;
+    private final SXRNode mLeftCameraRootObject;
+    private final SXRNode mRightCameraRootObject;
     private final RootWidget mSceneRootWidget;
     private final GroupWidget mMainCameraRootWidget;
     private final GroupWidget mLeftCameraRootWidget;

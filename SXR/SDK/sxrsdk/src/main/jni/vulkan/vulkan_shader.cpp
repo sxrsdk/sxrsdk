@@ -26,7 +26,7 @@
 #include "vulkan/vulkan_render_data.h"
 #include "vulkan/vk_render_to_texture.h"
 #include "objects/components/skin.h"
-#include "objects/scene_object.h"
+#include "objects/node.h"
 
 namespace sxr {
 

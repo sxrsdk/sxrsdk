@@ -152,8 +152,8 @@ class NativeRenderTarget
     static native long ctorMultiview(long texture, boolean isMultiview);
     static native void setCamera(long rendertarget, long camera);
     static native long ctor(long texture, long sourceRendertarget);
-    static native void cullFromCamera(long scene, SXRScene javaSceneObject, long renderTarget,long camera, long shader_manager );
-    static native void render(long renderTarget, long camera, long shader_manager, long posteffectrenderTextureA, long posteffectRenderTextureB, long scene, SXRScene javaSceneObject);
+    static native void cullFromCamera(long scene, SXRScene javaNode, long renderTarget,long camera, long shader_manager );
+    static native void render(long renderTarget, long camera, long shader_manager, long posteffectrenderTextureA, long posteffectRenderTextureB, long scene, SXRScene javaNode);
     static native void setTexture(long rendertarget, long texture);
     static native void attachRenderTarget(long renderTarget, long nextRenderTarget);
 }

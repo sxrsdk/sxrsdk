@@ -23,7 +23,7 @@
 #include "physics_common.h"
 #include "physics_rigidbody.h"
 #include "physics_constraint.h"
-#include "../objects/scene_object.h"
+#include "../objects/node.h"
 #include <list>
 
 namespace sxr {
@@ -50,7 +50,7 @@ public:
 
     virtual void removeConstraint(PhysicsConstraint *constraint) = 0;
 
-    virtual void startDrag(SceneObject *dragger, PhysicsRigidBody *target,
+    virtual void startDrag(Node *dragger, PhysicsRigidBody *target,
 		float relX, float relY, float relZ) = 0;
 
     virtual void stopDrag() = 0;

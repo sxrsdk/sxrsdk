@@ -6,7 +6,7 @@ import com.samsungxr.widgetlib.widget.Widget;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import org.json.JSONObject;
 
 /**
@@ -51,7 +51,7 @@ public class RadioButton extends CheckableButton {
      * @throws InstantiationException
      */
     @Deprecated
-    public RadioButton(SXRContext context, SXRSceneObject sceneObject, NodeEntry attributes)
+    public RadioButton(SXRContext context, SXRNode sceneObject, NodeEntry attributes)
             throws InstantiationException {
         super(context, sceneObject, attributes);
     }
@@ -63,7 +63,7 @@ public class RadioButton extends CheckableButton {
      * @param sceneObject
      * @throws InstantiationException
      */
-    public RadioButton(SXRContext context, SXRSceneObject sceneObject) {
+    public RadioButton(SXRContext context, SXRNode sceneObject) {
         super(context, sceneObject);
     }
 

@@ -34,7 +34,7 @@ import java.util.List;
  * Handles pausing and resuming sound and maintains
  * a list of {@link SXRAudioSource} objects which are attached
  * to scene objects. The position of each audio source is
- * obtained from the {@link SXRTransform} of the {@SXRSceneObject}
+ * obtained from the {@link SXRTransform} of the {@SXRNode}
  * the audio source is attached to. The audio manager also
  * tracks the head transform so the sound will be spatially
  * correct.

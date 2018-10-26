@@ -72,7 +72,7 @@ public class RelativeMotionAnimation extends TransformAnimation {
 
     private class Adapter extends SXRRelativeMotionAnimation implements Animation.AnimationAdapter{
         Adapter(Widget widget, float duration, float deltaX, float deltaY, float deltaZ) {
-            super(widget.getSceneObject(), duration, deltaX, deltaY, deltaZ);
+            super(widget.getNode(), duration, deltaX, deltaY, deltaZ);
         }
 
         @Override

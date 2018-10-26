@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-package com.samsungxr.scene_objects;
+package com.samsungxr.nodes;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRDrawFrameListener;
 import com.samsungxr.SXRExternalTexture;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMesh;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.SXRMaterial.SXRShaderType;
 
@@ -31,12 +31,12 @@ import android.view.Surface;
 import android.webkit.WebView;
 
 /**
- * {@linkplain SXRSceneObject Scene object} that shows a web page, using the
+ * {@linkplain SXRNode Scene object} that shows a web page, using the
  * Android {@link WebView}.
  */
 
 @Deprecated
-public class SXRWebViewSceneObject extends SXRSceneObject implements
+public class SXRWebViewNode extends SXRNode implements
         SXRDrawFrameListener {
     private static final int REFRESH_INTERVAL = 30; // frames
 
@@ -46,7 +46,7 @@ public class SXRWebViewSceneObject extends SXRSceneObject implements
     private int mCount = 0;
 
     /**
-     * Shows a web page on a {@linkplain SXRSceneObject scene object} with an
+     * Shows a web page on a {@linkplain SXRNode scene object} with an
      * arbitrarily complex geometry.
      * 
      * @param gvrContext
@@ -58,7 +58,7 @@ public class SXRWebViewSceneObject extends SXRSceneObject implements
      * @param webView
      *            an Android {@link WebView}
      */
-    public SXRWebViewSceneObject(SXRContext gvrContext, SXRMesh mesh,
+    public SXRWebViewNode(SXRContext gvrContext, SXRMesh mesh,
             WebView webView) {
         super(gvrContext, mesh);
         mWebView = webView;
@@ -75,7 +75,7 @@ public class SXRWebViewSceneObject extends SXRSceneObject implements
     }
 
     /**
-     * Shows a web page in a 2D, rectangular {@linkplain SXRSceneObject scene
+     * Shows a web page in a 2D, rectangular {@linkplain SXRNode scene
      * object.}
      * 
      * @param gvrContext
@@ -87,7 +87,7 @@ public class SXRWebViewSceneObject extends SXRSceneObject implements
      * @param webView
      *            a {@link WebView}
      */
-    public SXRWebViewSceneObject(SXRContext gvrContext, float width,
+    public SXRWebViewNode(SXRContext gvrContext, float width,
             float height, WebView webView) {
         this(gvrContext, gvrContext.createQuad(width, height), webView);
     }

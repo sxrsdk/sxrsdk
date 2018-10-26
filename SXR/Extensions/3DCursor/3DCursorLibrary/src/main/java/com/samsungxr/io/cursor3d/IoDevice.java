@@ -20,7 +20,7 @@ import android.view.MotionEvent;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.io.SXRCursorController;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.io.SXRControllerType;
 
 //TODO have this class extend SXRCursorController
@@ -271,7 +271,7 @@ public class IoDevice {
             return;
         }
 
-        SXRSceneObject sceneObject = gvrCursorController.getCursor();
+        SXRNode sceneObject = gvrCursorController.getCursor();
         if (sceneObject != null) {
             sceneObject.getTransform().setRotation(w, x, y, z);
         }
@@ -292,13 +292,13 @@ public class IoDevice {
      *              <code>false</code> turns off its visibility.
      */
     protected void setVisible(boolean visible) {
-        SXRSceneObject sceneObject = gvrCursorController.getCursor();
+        SXRNode sceneObject = gvrCursorController.getCursor();
         if (sceneObject != null && sceneObject.isEnabled() != visible) {
             sceneObject.setEnable(visible);
         }
     }
 
-    void resetSceneObject() {
+    void resetNode() {
         gvrCursorController.stopDrag();
         gvrCursorController.setCursor(null);
     }

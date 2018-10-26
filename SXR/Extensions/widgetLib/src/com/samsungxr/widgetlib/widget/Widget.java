@@ -37,7 +37,7 @@ import com.samsungxr.SXRMaterial.SXRShaderType;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRRenderData.SXRRenderingOrder;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.SXRTransform;
 
@@ -191,31 +191,31 @@ public class Widget implements Layout.WidgetContainer {
     }
 
     /**
-     * Construct a wrapper for an existing {@link SXRSceneObject}.
+     * Construct a wrapper for an existing {@link SXRNode}.
      *
      * @param context
      *            The current {@link SXRContext}.
      * @param sceneObject
-     *            The {@link SXRSceneObject} to wrap.
+     *            The {@link SXRNode} to wrap.
      */
-    protected Widget(final SXRContext context, final SXRSceneObject sceneObject) {
-        this(context, packageSceneObject(sceneObject), false);
+    protected Widget(final SXRContext context, final SXRNode sceneObject) {
+        this(context, packageNode(sceneObject), false);
     }
 
     /**
-     * A constructor for wrapping existing {@link SXRSceneObject} instances.
+     * A constructor for wrapping existing {@link SXRNode} instances.
      * Deriving classes should override and do whatever processing is
      * appropriate.
      *
      * @param context
      *            The current {@link SXRContext}
      * @param sceneObject
-     *            The {@link SXRSceneObject} to wrap.
+     *            The {@link SXRNode} to wrap.
      * @param attributes
      *            TODO
      */
-    public Widget(final SXRContext context, final SXRSceneObject sceneObject, NodeEntry attributes) {
-        this(context, packageSceneObjectWithAttributes(sceneObject, attributes), false);
+    public Widget(final SXRContext context, final SXRNode sceneObject, NodeEntry attributes) {
+        this(context, packageNodeWithAttributes(sceneObject, attributes), false);
     }
 
     /**
@@ -274,34 +274,34 @@ public class Widget implements Layout.WidgetContainer {
 
     /**
      * Determines whether this {@link Widget} is currently handling focus events
-     * for the specified {@link SXRSceneObject}. This will be true if either
+     * for the specified {@link SXRNode}. This will be true if either
      * <p>
      * <ul>
      * <li>
-     * The {@code SXRSceneObject} is wrapped by this {@code Widget} <em>and</em>
+     * The {@code SXRNode} is wrapped by this {@code Widget} <em>and</em>
      * this {@code Widget} is not following its parent's focus</li>
-     * <li>The {@code SXRSceneObject} is wrapped by a child of this
+     * <li>The {@code SXRNode} is wrapped by a child of this
      * {@code Widget} and the child <em>is</em> following this {@code Widget's}
      * focus</li>
      * </ul>
      *
      * @param sceneObject
-     *            The {@code SXRSceneObject} to check
+     *            The {@code SXRNode} to check
      * @return {@code True} if this {@code Widget} handles focus events for the
-     *         {@code SXRSceneObject}, {@code false} if it doesn't.
+     *         {@code SXRNode}, {@code false} if it doesn't.
      */
-    public boolean handlesFocusFor(final SXRSceneObject sceneObject) {
+    public boolean handlesFocusFor(final SXRNode sceneObject) {
         return handlesEventFor(sceneObject, mHandlesFocusEvent);
     }
 
     /**
-     * {@link Widget} version of {@link #handlesFocusFor(SXRSceneObject)}.
+     * {@link Widget} version of {@link #handlesFocusFor(SXRNode)}.
      *
      * @param widget
      *            The {@code Widget} to check
      */
     public boolean handlesFocusFor(final Widget widget) {
-        return handlesFocusFor(widget.getSceneObject());
+        return handlesFocusFor(widget.getNode());
     }
 
     /**
@@ -596,35 +596,35 @@ public class Widget implements Layout.WidgetContainer {
 
     /**
      * Determines whether this {@link Widget} is currently handling touch events
-     * for the specified {@link SXRSceneObject}. This will be true if either
+     * for the specified {@link SXRNode}. This will be true if either
      * <p>
      * <ul>
      * <li>
-     * The {@code SXRSceneObject} is wrapped by this {@code Widget} <em>and</em>
+     * The {@code SXRNode} is wrapped by this {@code Widget} <em>and</em>
      * this {@code Widget} is not following its parent's input</li>
-     * <li>The {@code SXRSceneObject} is wrapped by a child of this
+     * <li>The {@code SXRNode} is wrapped by a child of this
      * {@code Widget} and the child <em>is</em> following this {@code Widget's}
      * input</li>
      * </ul>
      *
      *
      * @param sceneObject
-     *            The {@code SXRSceneObject} to check
+     *            The {@code SXRNode} to check
      * @return {@code True} if this {@code Widget} handles focus events for the
-     *         {@code SXRSceneObject}, {@code false} if it doesn't.
+     *         {@code SXRNode}, {@code false} if it doesn't.
      */
-    public boolean handlesTouchFor(final SXRSceneObject sceneObject) {
+    public boolean handlesTouchFor(final SXRNode sceneObject) {
         return handlesEventFor(sceneObject, mHandlesTouchEvent);
     }
 
     /**
-     * {@link Widget} version of {@link #handlesTouchFor(SXRSceneObject)}.
+     * {@link Widget} version of {@link #handlesTouchFor(SXRNode)}.
      *
      * @param widget
      *            The {@code Widget} to check
      */
     public boolean handlesTouchFor(final Widget widget) {
-        return handlesTouchFor(widget.getSceneObject());
+        return handlesTouchFor(widget.getNode());
     }
 
     /**
@@ -840,8 +840,8 @@ public class Widget implements Layout.WidgetContainer {
      */
     public void setName(String name) {
         mName = name;
-        if (mSceneObject != null) {
-            mSceneObject.setName(name);
+        if (mNode != null) {
+            mNode.setName(name);
         }
     }
 
@@ -893,7 +893,7 @@ public class Widget implements Layout.WidgetContainer {
 
         SXRTexture texture = WidgetLib.getTextureHelper().getSolidColorTexture(Color.YELLOW);
 
-        SXRSceneObject clippingObj = new SXRSceneObject(mContext, getViewPortWidth(), getViewPortHeight(), texture);
+        SXRNode clippingObj = new SXRNode(mContext, getViewPortWidth(), getViewPortHeight(), texture);
         clippingObj.setName("clippingObj");
         clippingObj.getRenderData()
                 .setRenderingOrder(SXRRenderData.SXRRenderingOrder.STENCIL)
@@ -902,7 +902,7 @@ public class Widget implements Layout.WidgetContainer {
                 .setStencilOp(GLES30.GL_KEEP, GLES30.GL_KEEP, GLES30.GL_REPLACE)
                 .setStencilMask(0xFF);
 
-        mSceneObject.addChildObject(clippingObj);
+        mNode.addChildObject(clippingObj);
 
         for (Widget child : getChildren()) {
             setObjectClipped(child);
@@ -1033,8 +1033,8 @@ public class Widget implements Layout.WidgetContainer {
      * @return width
      */
     public float getBoundsWidth() {
-        if (mSceneObject != null) {
-            SXRSceneObject.BoundingVolume v = mSceneObject.getBoundingVolume();
+        if (mNode != null) {
+            SXRNode.BoundingVolume v = mNode.getBoundingVolume();
             return v.maxCorner.x - v.minCorner.x;
         }
         return 0f;
@@ -1045,8 +1045,8 @@ public class Widget implements Layout.WidgetContainer {
      * @return height
      */
     public float getBoundsHeight(){
-        if (mSceneObject != null) {
-            SXRSceneObject.BoundingVolume v = mSceneObject.getBoundingVolume();
+        if (mNode != null) {
+            SXRNode.BoundingVolume v = mNode.getBoundingVolume();
             return v.maxCorner.y - v.minCorner.y;
         }
         return 0f;
@@ -1057,8 +1057,8 @@ public class Widget implements Layout.WidgetContainer {
      * @return depth
      */
     public float getBoundsDepth() {
-        if (mSceneObject != null) {
-            SXRSceneObject.BoundingVolume v = mSceneObject.getBoundingVolume();
+        if (mNode != null) {
+            SXRNode.BoundingVolume v = mNode.getBoundingVolume();
             return v.maxCorner.z - v.minCorner.z;
         }
         return 0f;
@@ -1125,7 +1125,7 @@ public class Widget implements Layout.WidgetContainer {
      * Note: The {@code Widget}'s children are <em>not</em> explicitly included,
      * so the bounding box may or may not be big enough to include them. If you
      * want to make sure that the bounding box fully encompasses the
-     * {@code Widget}'s children, call SXRSceneObject.getBoundingVolume}.
+     * {@code Widget}'s children, call SXRNode.getBoundingVolume}.
      *
      * @return A {@link BoundingBox} that contains the {@code Widget}.
      */
@@ -1946,16 +1946,16 @@ public class Widget implements Layout.WidgetContainer {
     }
 
     /**
-     * Determine whether the specified {@link SXRSceneObject} is the object
+     * Determine whether the specified {@link SXRNode} is the object
      * wrapped by this {@link Widget}.
      *
      * @param sceneObject
-     *            The {@code SXRSceneObject} to test against.
+     *            The {@code SXRNode} to test against.
      * @return {@code true} if {@code sceneObject} is wrapped by this instance,
      *         {@code false} otherwise.
      */
-    public final boolean isSceneObject(SXRSceneObject sceneObject) {
-        return mSceneObject == sceneObject;
+    public final boolean isNode(SXRNode sceneObject) {
+        return mNode == sceneObject;
     }
 
     /**
@@ -1995,7 +1995,7 @@ public class Widget implements Layout.WidgetContainer {
      */
     public enum Properties {
         name, touchable, focusenabled, id, visibility, states, create_children, levels, level, model,
-        selected, scene_object, preapply_attribs, size, transform, viewport, mesh
+        selected, node, preapply_attribs, size, transform, viewport, mesh
     }
 
     /**
@@ -2307,14 +2307,14 @@ public class Widget implements Layout.WidgetContainer {
 
     private final class OnTouchImpl implements TouchManager.OnTouch {
         @Override
-        public boolean touch(SXRSceneObject sceneObject, final float[] coords) {
+        public boolean touch(SXRNode sceneObject, final float[] coords) {
             Log.d(Log.SUBSYSTEM.INPUT, TAG, "OnTouchImpl.touch(%s): for %s",
                     target().getName(), Helpers.getFullName(sceneObject));
             return doOnTouch(coords);
         }
 
         @Override
-        public boolean onBackKey(SXRSceneObject sceneObject, final float[] coords) {
+        public boolean onBackKey(SXRNode sceneObject, final float[] coords) {
             return doOnBackKey();
         }
 
@@ -2347,66 +2347,66 @@ public class Widget implements Layout.WidgetContainer {
         mContext = context;
         try {
             final JSONObject metadata = getObjectMetadata();
-            mSceneObject = getSceneObjectProperty(context, metadata);
+            mNode = getNodeProperty(context, metadata);
 
-            mSceneObject.attachComponent(new WidgetBehavior(context, this));
+            mNode.attachComponent(new WidgetBehavior(context, this));
             mTransformCache = new TransformCache(this);
-            mRenderDataCache = new RenderDataCache(mSceneObject);
+            mRenderDataCache = new RenderDataCache(mNode);
 
             Log.v(Log.SUBSYSTEM.WIDGET, TAG,
                     "Widget(context, properties): %s (%s) width = %f height = %f depth = %f",
-                    getName(), mSceneObject.getName(), getWidth(), getHeight(), getDepth());
+                    getName(), mNode.getName(), getWidth(), getHeight(), getDepth());
 
             Log.d(Log.SUBSYSTEM.WIDGET, TAG,
                     "Widget(context, properties): setting up metadata for %s: %s",
                     getName(), metadata);
             setupProperties(metadata);
-            createChildren(context, mSceneObject, metadata);
+            createChildren(context, mNode, metadata);
             setupStatesAndLevels(metadata);
 
-            mSceneObject.setName(mName != null ? mName : "");
+            mNode.setName(mName != null ? mName : "");
         } catch (Exception e) {
             Log.e(TAG, e, "Widget(): DANGER WILL ROBINSON DANGER");
             throw new RuntimeException(e.getLocalizedMessage(), e);
         }
     }
 
-    private SXRSceneObject getSceneObjectProperty(SXRContext context, final JSONObject properties) {
-        Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getSceneObjectProperty(%s): called ", getName());
-        SXRSceneObject sceneObject = opt(properties, Properties.scene_object, SXRSceneObject.class);
+    private SXRNode getNodeProperty(SXRContext context, final JSONObject properties) {
+        Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getNodeProperty(%s): called ", getName());
+        SXRNode sceneObject = opt(properties, Properties.node, SXRNode.class);
         if (sceneObject == null) {
             if (hasJSONObject(properties, Properties.model)) {
                 JSONObject modelSpec = optJSONObject(properties, Properties.model);
-                Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getSceneObjectProperty(%s): model specified: %s", getName(), modelSpec);
+                Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getNodeProperty(%s): model specified: %s", getName(), modelSpec);
                 String id = getString(modelSpec, Properties.id);
-                sceneObject = loadSceneObjectFromModel(context, id);
+                sceneObject = loadNodeFromModel(context, id);
             } else  if (hasJSONObject(properties, Properties.mesh)) {
                 JSONObject meshSpec = optJSONObject(properties, Properties.mesh);
-                Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getSceneObjectProperty(%s): mesh specified: %s", getName(), meshSpec);
+                Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getNodeProperty(%s): mesh specified: %s", getName(), meshSpec);
                 String meshRes = getString(meshSpec, Properties.id);
                 try {
                     SXRMesh mesh = context.getAssetLoader().
                             loadMesh(new SXRAndroidResource(context, meshRes));
-                    sceneObject = new SXRSceneObject(context, mesh);
+                    sceneObject = new SXRNode(context, mesh);
                 } catch (IOException ioe) {
                     throw new RuntimeException("Failed to load Widget mesh " + meshRes, ioe);
                 }
             } else if (hasFloat(properties, Properties.size)) {
                 float size = optFloat(properties, Properties.size);
-                Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getSceneObjectProperty(%s): specified only size: %f", getName(), size);
+                Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getNodeProperty(%s): specified only size: %f", getName(), size);
                 sceneObject = makeQuad(context, size, size);
             } else if (hasPoint(properties, Properties.size)) {
                 PointF size = optPointF(properties, Properties.size);
-                Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getSceneObjectProperty(%s): specified size: %s", getName(), size);
+                Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getNodeProperty(%s): specified size: %s", getName(), size);
                 sceneObject = makeQuad(context, size.x, size.y);
             } else {
-                Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getSceneObjectProperty(%s): empty object!", getName());
+                Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getNodeProperty(%s): empty object!", getName());
                 // TODO: Ideally, we wouldn't create a mesh here, but if we don't, things hang
-                sceneObject = new SXRSceneObject(context, 0, 0);
+                sceneObject = new SXRNode(context, 0, 0);
                 setupDefaultMaterial(context, sceneObject);
             }
         } else {
-            Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getSceneObjectProperty(%s): got a scene object: %s", getName(), sceneObject);
+            Log.d(Log.SUBSYSTEM.WIDGET, TAG, "getNodeProperty(%s): got a scene object: %s", getName(), sceneObject);
         }
 
         if (sceneObject != null  && mName != null) {
@@ -2554,7 +2554,7 @@ public class Widget implements Layout.WidgetContainer {
     }
 
     /* package */
-    boolean dispatchOnTouch(SXRSceneObject sceneObject, final float[] coords) {
+    boolean dispatchOnTouch(SXRNode sceneObject, final float[] coords) {
         return mTouchHandler.touch(sceneObject, coords);
     }
 
@@ -2584,7 +2584,7 @@ public class Widget implements Layout.WidgetContainer {
     }
 
     private void addChildInner(final Widget child) {
-        addChildInner(child, child.getSceneObject(), -1);
+        addChildInner(child, child.getNode(), -1);
     }
 
     /**
@@ -2666,14 +2666,14 @@ public class Widget implements Layout.WidgetContainer {
 
         boolean followsParentEvent(Widget widget);
 
-        boolean handlesEvent(Widget widget, SXRSceneObject sceneObject);
+        boolean handlesEvent(Widget widget, SXRNode sceneObject);
 
         String getName();
     }
 
-    private boolean handlesEventFor(final SXRSceneObject sceneObject,
+    private boolean handlesEventFor(final SXRNode sceneObject,
                                     final HandlesEvent handler) {
-        if (getSceneObject() == sceneObject) {
+        if (getNode() == sceneObject) {
             final boolean handlesEvent = !handler.followsParentEvent(this)
                     && !handler.isInFollowEventGroup();
             Log.d(Log.SUBSYSTEM.WIDGET, TAG, "handlesEventFor(%s): handles '%s' for scene object %s",
@@ -2684,7 +2684,7 @@ public class Widget implements Layout.WidgetContainer {
                     .getChildrenFollowEvent();
             for (Widget child : getChildren()) {
                 if ((childrenFollowEvent || handler.followsParentEvent(child))
-                        && (child.isSceneObject(sceneObject) || handler
+                        && (child.isNode(sceneObject) || handler
                         .handlesEvent(child, sceneObject))) {
                     Log.d(Log.SUBSYSTEM.WIDGET, TAG,
                             "handlesEventFor(%s): handles '%s' for child '%s'",
@@ -2771,38 +2771,38 @@ public class Widget implements Layout.WidgetContainer {
         if (mParent != null && hasRenderData && (mIsTouchable || mFocusEnabled)) {
             if (mIsTouchable) {
                 Log.d(Log.SUBSYSTEM.INPUT, TAG, "registerPickable(%s): making touchable", getName());
-                touchManager.makeTouchable(getSceneObject(), mTouchHandler);
+                touchManager.makeTouchable(getNode(), mTouchHandler);
             } else {
                 Log.d(Log.SUBSYSTEM.INPUT, TAG, "registerPickable(%s): making pickable", getName());
-                touchManager.makePickable(getSceneObject());
+                touchManager.makePickable(getNode());
             }
 
             if (mFocusEnabled) {
                 Log.d(Log.SUBSYSTEM.INPUT, TAG, "registerPickable(%s): registering focusable", getName());
-                focusManager.register(getSceneObject(), mFocusableImpl);
+                focusManager.register(getNode(), mFocusableImpl);
             } else {
                 Log.d(Log.SUBSYSTEM.INPUT, TAG, "registerPickable(%s): is not focus-enabled",
                         getName());
-                focusManager.unregister(getSceneObject(), needsOwnFocusable);
+                focusManager.unregister(getNode(), needsOwnFocusable);
             }
         } else {
-            touchManager.removeHandlerFor(getSceneObject());
+            touchManager.removeHandlerFor(getNode());
             Log.d(Log.SUBSYSTEM.INPUT, TAG,
                     "registerPickable(%s): unregistering; focus-enabled: %b",
                     getName(), mFocusEnabled);
-            focusManager.unregister(getSceneObject(), needsOwnFocusable);
+            focusManager.unregister(getNode(), needsOwnFocusable);
         }
 
         if (mParent != null && (mIsTouchable || mFocusEnabled)) {
             if (mIsTouchable) {
-                for (SXRSceneObject child : mMeshChildren) {
+                for (SXRNode child : mMeshChildren) {
                     Log.d(Log.SUBSYSTEM.INPUT, TAG,
                             "registerPickable(%s): making mesh child touchable: %s",
                             getName(), child.getName());
                     touchManager.makeTouchable(child, mTouchHandler);
                 }
             } else {
-                for (SXRSceneObject child : mMeshChildren) {
+                for (SXRNode child : mMeshChildren) {
                     Log.d(Log.SUBSYSTEM.INPUT, TAG,
                             "registerPickable(%s): making mesh child pickable: %s",
                             getName(), child.getName());
@@ -2811,14 +2811,14 @@ public class Widget implements Layout.WidgetContainer {
             }
 
             if (mFocusEnabled) {
-                for (SXRSceneObject child : mMeshChildren) {
+                for (SXRNode child : mMeshChildren) {
                     Log.d(Log.SUBSYSTEM.INPUT, TAG,
                             "registerPickable(%s): making mesh child focusable: %s",
                             getName(), child.getName());
                     focusManager.register(child, mFocusableImpl);
                 }
             } else {
-                for (SXRSceneObject child : mMeshChildren) {
+                for (SXRNode child : mMeshChildren) {
                     Log.d(Log.SUBSYSTEM.INPUT, TAG,
                             "registerPickable(%s): making mesh child NOT focusable: %s",
                             getName(), child.getName());
@@ -2826,7 +2826,7 @@ public class Widget implements Layout.WidgetContainer {
                 }
             }
         } else {
-            for (SXRSceneObject child : mMeshChildren) {
+            for (SXRNode child : mMeshChildren) {
                 Log.d(Log.SUBSYSTEM.INPUT, TAG,
                         "registerPickable(%s): unregistering mesh child: %s",
                         getName(), child.getName());
@@ -2917,68 +2917,68 @@ public class Widget implements Layout.WidgetContainer {
      *         {@code child} was previously added to this instance.
      */
     protected boolean addChild(Widget child, int index, boolean preventLayout) {
-        return addChild(child, child.getSceneObject(), index, preventLayout);
+        return addChild(child, child.getNode(), index, preventLayout);
     }
 
     /**
      * Add another {@link Widget} as a child of this one. Convenience method for
-     * {@link #addChild(Widget, SXRSceneObject, int, boolean) addChild(child, childRootSceneObject,
+     * {@link #addChild(Widget, SXRNode, int, boolean) addChild(child, childRootNode,
      * -1, false)}.
      *
      * @param child
      *            The {@code Widget} to add as a child.
-     * @param childRootSceneObject
-     *            The root {@link SXRSceneObject} of the child.
+     * @param childRootNode
+     *            The root {@link SXRNode} of the child.
      * @return {@code True} if {@code child} was added; {@code false} if
      *         {@code child} was previously added to this instance.
      */
     protected boolean addChild(final Widget child,
-                               final SXRSceneObject childRootSceneObject) {
-        return addChild(child, childRootSceneObject, -1, false);
+                               final SXRNode childRootNode) {
+        return addChild(child, childRootNode, -1, false);
     }
 
     /**
      * Add another {@link Widget} as a child of this one. Convenience method for
-     * {@link #addChild(Widget, SXRSceneObject, int, boolean) addChild(child, childRootSceneObject,
+     * {@link #addChild(Widget, SXRNode, int, boolean) addChild(child, childRootNode,
      * index, false)}.
      *
      * @param child
      *            The {@code Widget} to add as a child.
-     * @param childRootSceneObject
-     *            The root {@link SXRSceneObject} of the child.
+     * @param childRootNode
+     *            The root {@link SXRNode} of the child.
      * @param index
      *            Position at which to add the child. Pass -1 to add at end.
      * @return {@code True} if {@code child} was added; {@code false} if
      *         {@code child} was previously added to this instance.
      */
     protected boolean addChild(final Widget child,
-                               final SXRSceneObject childRootSceneObject, final int index) {
-        return addChild(child, childRootSceneObject, index, false);
+                               final SXRNode childRootNode, final int index) {
+        return addChild(child, childRootNode, index, false);
     }
 
     /**
      * Add another {@link Widget} as a child of this one. Convenience method for
-     * {@link #addChild(Widget, SXRSceneObject, int, boolean) addChild(child, childRootSceneObject,
+     * {@link #addChild(Widget, SXRNode, int, boolean) addChild(child, childRootNode,
      * -1, preventLayout)}.
      *
      * @param child
      *            The {@code Widget} to add as a child.
-     * @param childRootSceneObject
-     *            The root {@link SXRSceneObject} of the child.
+     * @param childRootNode
+     *            The root {@link SXRNode} of the child.
      * @param preventLayout
      *            The {@code Widget} whether to call layout().
      * @return {@code True} if {@code child} was added; {@code false} if
      *         {@code child} was previously added to this instance.
      */
     protected boolean addChild(final Widget child,
-                               final SXRSceneObject childRootSceneObject, boolean preventLayout) {
-        return addChild(child, childRootSceneObject, -1, preventLayout);
+                               final SXRNode childRootNode, boolean preventLayout) {
+        return addChild(child, childRootNode, -1, preventLayout);
     }
 
     /**
      * Add another {@link Widget} as a child of this one.
      * <p>
-     * A {@link SXRSceneObject} other than the one directly managed by the child
+     * A {@link SXRNode} other than the one directly managed by the child
      * {@code Widget} can be specified as the child's root. This is useful in
      * cases where the parent object needs to insert additional scene objects
      * between the child and its parent.
@@ -2989,8 +2989,8 @@ public class Widget implements Layout.WidgetContainer {
      *
      * @param child
      *            The {@code Widget} to add as a child.
-     * @param childRootSceneObject
-     *            The root {@link SXRSceneObject} of the child.
+     * @param childRootNode
+     *            The root {@link SXRNode} of the child.
      * @param index
      *            Position at which to add the child. Pass -1 to add at end.
      * @param preventLayout
@@ -2999,9 +2999,9 @@ public class Widget implements Layout.WidgetContainer {
      *         {@code child} was previously added to this instance.
      */
     protected boolean addChild(final Widget child,
-                               final SXRSceneObject childRootSceneObject, final int index,
+                               final SXRNode childRootNode, final int index,
                                boolean preventLayout) {
-        final boolean added = addChildInner(child, childRootSceneObject, index);
+        final boolean added = addChildInner(child, childRootNode, index);
         Log.d(Log.SUBSYSTEM.WIDGET, TAG, "addChild [%s] %b", child, added);
         if (added) {
             onTransformChanged();
@@ -3039,14 +3039,14 @@ public class Widget implements Layout.WidgetContainer {
      *         child of this instance.
      */
     protected boolean removeChild(Widget child, boolean preventLayout) {
-        return removeChild(child, child.getSceneObject(), preventLayout);
+        return removeChild(child, child.getNode(), preventLayout);
     }
 
     /**
      * Remove a {@link Widget} as a child of this instance.
      * <p>
      * <b>NOTE:</b> if an alternative root scene object was used to
-     * {@linkplain #addChild(Widget, SXRSceneObject) add} the child
+     * {@linkplain #addChild(Widget, SXRNode) add} the child
      * {@code Widget}, the caller must pass the alternative root to this method.
      * Otherwise there may be dangling scene objects. It is the responsibility
      * of the caller to keep track of the relationship between the child
@@ -3054,21 +3054,21 @@ public class Widget implements Layout.WidgetContainer {
      *
      * @param child
      *            The {@code Widget} to remove.
-     * @param childRootSceneObject The root {@link SXRSceneObject} of the child
+     * @param childRootNode The root {@link SXRNode} of the child
      * @return {@code True} if {@code child} was a child of this instance and
      *         was successfully removed; {@code false} if {@code child} is not a
      *         child of this instance.
      */
     protected boolean removeChild(final Widget child,
-                                  final SXRSceneObject childRootSceneObject) {
-        return removeChild(child, childRootSceneObject, false);
+                                  final SXRNode childRootNode) {
+        return removeChild(child, childRootNode, false);
     }
 
     /**
      * Remove a {@link Widget} as a child of this instance.
      * <p>
      * <b>NOTE:</b> if an alternative root scene object was used to
-     * {@linkplain #addChild(Widget, SXRSceneObject) add} the child
+     * {@linkplain #addChild(Widget, SXRNode) add} the child
      * {@code Widget}, the caller must pass the alternative root to this method.
      * Otherwise there may be dangling scene objects. It is the responsibility
      * of the caller to keep track of the relationship between the child
@@ -3076,7 +3076,7 @@ public class Widget implements Layout.WidgetContainer {
      *
      * @param child
      *            The {@code Widget} to remove.
-     * @param childRootSceneObject The root {@link SXRSceneObject} of the child
+     * @param childRootNode The root {@link SXRNode} of the child
      * @param preventLayout
      *            The {@code Widget} whether to call layout().
      * @return {@code True} if {@code child} was a child of this instance and
@@ -3084,18 +3084,18 @@ public class Widget implements Layout.WidgetContainer {
      *         child of this instance.
      */
     protected boolean removeChild(final Widget child,
-                                  final SXRSceneObject childRootSceneObject, boolean preventLayout) {
+                                  final SXRNode childRootNode, boolean preventLayout) {
         final boolean removed = mChildren.remove(child);
 
         Log.d(Log.SUBSYSTEM.WIDGET, TAG, "removeChild [%s] %b", child, removed);
         if (removed) {
             Log.d(Log.SUBSYSTEM.WIDGET, TAG, "removeChild(): '%s' removed", child.getName());
-            if (childRootSceneObject.getParent() != getSceneObject()) {
+            if (childRootNode.getParent() != getNode()) {
                 Log.e(Log.SUBSYSTEM.WIDGET, TAG,
-                        "removeChild(): '%s' is not a child of '%s' SXRSceneObject!",
+                        "removeChild(): '%s' is not a child of '%s' SXRNode!",
                         child.getName(), getName());
             }
-            getSceneObject().removeChildObject(childRootSceneObject);
+            getNode().removeChildObject(childRootNode);
             child.doOnDetached();
 
             final List<OnHierarchyChangedListener> listeners;
@@ -3119,7 +3119,7 @@ public class Widget implements Layout.WidgetContainer {
     }
 
     private SXRRenderData getRenderData() {
-        return (SXRRenderData) getSceneObject().getComponent(SXRRenderData.getComponentType());
+        return (SXRRenderData) getNode().getComponent(SXRRenderData.getComponentType());
     }
 
     /* package */
@@ -3127,12 +3127,12 @@ public class Widget implements Layout.WidgetContainer {
     // either working *against* Widget or Widget needs some extending.
     // TODO: temporary changed to public access to solve the access issue in Layout.java
 
-    public SXRSceneObject getSceneObject() {
-        return mSceneObject;
+    public SXRNode getNode() {
+        return mNode;
     }
 
     public SXRTransform getTransform() {
-        return mSceneObject.getTransform();
+        return mNode.getTransform();
     }
 
     /**
@@ -3172,8 +3172,8 @@ public class Widget implements Layout.WidgetContainer {
     }
 
     private boolean addChildInner(final Widget child,
-                                  final SXRSceneObject childRootSceneObject, int index) {
-        if (child == this || child.getSceneObject() == getSceneObject()) {
+                                  final SXRNode childRootNode, int index) {
+        if (child == this || child.getNode() == getNode()) {
             Log.e(TAG, "Attempted to add widget '%s' to itself!", getName());
             throw RuntimeAssertion("Attempted to add widget '%s' to itself!", getName());
         }
@@ -3181,7 +3181,7 @@ public class Widget implements Layout.WidgetContainer {
         if (added) {
             Widget parent = child.getParent();
             if (parent != null) {
-                parent.removeChild(child, child.getSceneObject(), true);
+                parent.removeChild(child, child.getNode(), true);
             }
             if (index == -1 || index > mChildren.size()) {
                 mChildren.add(child);
@@ -3190,12 +3190,12 @@ public class Widget implements Layout.WidgetContainer {
             }
             if (child.getVisibility() == Visibility.VISIBLE &&
                     child.getViewPortVisibility() != ViewPortVisibility.INVISIBLE) {
-                final SXRSceneObject childRootSceneObjectParent = childRootSceneObject.getParent();
-                if (childRootSceneObjectParent != getSceneObject()) {
-                    if (null != childRootSceneObjectParent) {
-                        childRootSceneObjectParent.removeChildObject(childRootSceneObject);
+                final SXRNode childRootNodeParent = childRootNode.getParent();
+                if (childRootNodeParent != getNode()) {
+                    if (null != childRootNodeParent) {
+                        childRootNodeParent.removeChildObject(childRootNode);
                     }
-                    getSceneObject().addChildObject(childRootSceneObject);
+                    getNode().addChildObject(childRootNode);
                 } else {
                     Log.v(Log.SUBSYSTEM.WIDGET, TAG,
                             "addChildInner(): child '%s' already attached to this Group ('%s')",
@@ -3232,20 +3232,20 @@ public class Widget implements Layout.WidgetContainer {
     }
 
     /* package */
-    Widget createChild(SXRContext context, SXRSceneObject sceneObjectChild)
+    Widget createChild(SXRContext context, SXRNode sceneObjectChild)
             throws InstantiationException {
         return WidgetFactory.createWidget(sceneObjectChild);
     }
 
     /* package */
     protected void createChildren(final SXRContext context,
-                                  final SXRSceneObject sceneObject,
+                                  final SXRNode sceneObject,
                                   JSONObject properties) throws InstantiationException {
         Log.d(Log.SUBSYSTEM.WIDGET, TAG, "createChildren(%s): creating children", getName());
-        List<SXRSceneObject> children = sceneObject.getChildren();
+        List<SXRNode> children = sceneObject.getChildren();
         Log.d(Log.SUBSYSTEM.WIDGET, TAG, "createChildren(%s): child count: %d", getName(), children.size());
         final boolean createChildren = optBoolean(properties, Properties.create_children, true);
-        for (SXRSceneObject sceneObjectChild : children) {
+        for (SXRNode sceneObjectChild : children) {
             if (createChildren) {
                 Log.d(TAG, "createChildren(%s): creating child '%s'",
                         getName(), sceneObjectChild.getName());
@@ -3260,7 +3260,7 @@ public class Widget implements Layout.WidgetContainer {
         }
     }
 
-    private void addMeshChild(SXRSceneObject sceneObject, String space) {
+    private void addMeshChild(SXRNode sceneObject, String space) {
         if (sceneObject.getRenderData() != null) {
             Log.d(TAG, "addMeshChild(%s): %s%s", getName(), space, sceneObject.getName());
             mMeshChildren.add(sceneObject);
@@ -3269,7 +3269,7 @@ public class Widget implements Layout.WidgetContainer {
             Log.w(TAG, "addMeshChild(%s): %s%s -- skipped, no render data", getName(),
                     space, sceneObject.getName());
         }
-        for (SXRSceneObject child : sceneObject.getChildren()) {
+        for (SXRNode child : sceneObject.getChildren()) {
             addMeshChild(child, space + " ");
         }
     }
@@ -3284,7 +3284,7 @@ public class Widget implements Layout.WidgetContainer {
 
     /**
      * Get the {@link SXRMaterial material} for the underlying
-     * {@link SXRSceneObject scene object}.
+     * {@link SXRNode scene object}.
      *
      * @return The scene object's material or {@code null}.
      */
@@ -3294,7 +3294,7 @@ public class Widget implements Layout.WidgetContainer {
 
     /**
      * Set the {@linkplain SXRMaterial material} for the underlying
-     * {@linkplain SXRSceneObject scene object}.
+     * {@linkplain SXRNode scene object}.
      *
      * @param material
      *            The new material.
@@ -3304,7 +3304,7 @@ public class Widget implements Layout.WidgetContainer {
     }
 
     /**
-     * Get the {@link SXRMesh mesh} for the underlying {@link SXRSceneObject
+     * Get the {@link SXRMesh mesh} for the underlying {@link SXRNode
      * scene object}.
      *
      * @return The scene object's mesh or {@code null}.
@@ -3315,7 +3315,7 @@ public class Widget implements Layout.WidgetContainer {
 
     /**
      * Set the {@linkplain SXRMesh mesh} for the underlying
-     * {@linkplain SXRSceneObject scene object}.
+     * {@linkplain SXRNode scene object}.
      *
      * @param mesh
      *            The new mesh.
@@ -3609,7 +3609,7 @@ public class Widget implements Layout.WidgetContainer {
     }
 
     protected Widget(final SXRContext context, final SXRMesh mesh) {
-        this(context, new SXRSceneObject(context, mesh, sDefaultTexture));
+        this(context, new SXRNode(context, mesh, sDefaultTexture));
     }
 
 
@@ -3736,14 +3736,14 @@ public class Widget implements Layout.WidgetContainer {
                 widget.mFocusableImpl == mFocusableImpl;
     }
 
-    private static final SXRSceneObject makeQuad(SXRContext context, final float width,
+    private static final SXRNode makeQuad(SXRContext context, final float width,
                                                  final float height) {
-        SXRSceneObject sceneObject = new SXRSceneObject(context, width, height);
+        SXRNode sceneObject = new SXRNode(context, width, height);
         setupDefaultMaterial(context, sceneObject);
         return sceneObject;
     }
 
-    private static void setupDefaultMaterial(SXRContext context, SXRSceneObject sceneObject) {
+    private static void setupDefaultMaterial(SXRContext context, SXRNode sceneObject) {
         SXRRenderData renderData = sceneObject.getRenderData();
         if (renderData != null) {
             SXRMaterial material = new SXRMaterial(context,
@@ -3753,7 +3753,7 @@ public class Widget implements Layout.WidgetContainer {
         }
     }
 
-    private static JSONObject packageSceneObjectWithAttributes(SXRSceneObject sceneObject,
+    private static JSONObject packageNodeWithAttributes(SXRNode sceneObject,
                                                                NodeEntry attributes) {
         final JSONObject json;
 
@@ -3765,7 +3765,7 @@ public class Widget implements Layout.WidgetContainer {
         }
 
         put(json, Properties.create_children, true);
-        put(json, Properties.scene_object, sceneObject);
+        put(json, Properties.node, sceneObject);
 
         return json;
     }
@@ -3780,19 +3780,19 @@ public class Widget implements Layout.WidgetContainer {
     // mIsTouchable, mFocusEnabled, mVisibility, mIsSelected);
     // }
 
-    private static SXRSceneObject loadSceneObjectFromModel(SXRContext context, String modelFile) {
+    private static SXRNode loadNodeFromModel(SXRContext context, String modelFile) {
         final SXRAssetLoader loader = context.getAssetLoader();
         final EnumSet<SXRImportSettings> settings = SXRImportSettings.getRecommendedSettings();
         try {
-            Log.d(Log.SUBSYSTEM.WIDGET, TAG, "loadSceneObjectFromModel(): attemping to load '%s'", modelFile);
+            Log.d(Log.SUBSYSTEM.WIDGET, TAG, "loadNodeFromModel(): attemping to load '%s'", modelFile);
             return loader.loadModel(modelFile, settings, true, null);
         } catch (IOException e) {
-            Log.e(TAG, e, "loadSceneObjectFromModel(): failed to load model for Widget: %s", modelFile);
+            Log.e(TAG, e, "loadNodeFromModel(): failed to load model for Widget: %s", modelFile);
             throw new RuntimeException("Failed to load Widget model from " + modelFile, e);
         }
     }
 
-    private static void getGvrfHierarchy(SXRSceneObject sceneObject, String space) {
+    private static void getGvrfHierarchy(SXRNode sceneObject, String space) {
         if (sceneObject == null) return;
 
         SXRRenderData rd = sceneObject.getRenderData();
@@ -3801,23 +3801,23 @@ public class Widget implements Layout.WidgetContainer {
         } else {
             Log.d("SXRFHierarchy", "%s'%s' <non-rendering>", space, sceneObject.getName());
         }
-        for (SXRSceneObject child : sceneObject.children()) {
+        for (SXRNode child : sceneObject.children()) {
             getGvrfHierarchy(child, space + "  ");
         }
     }
 
     public void printGvrfHierarchy() {
         Log.d("SXRFHierarchy", "========= SXRF Hierarchy for %s =========", getName());
-        getGvrfHierarchy(getSceneObject(), "");
+        getGvrfHierarchy(getNode(), "");
     }
 
-    private static JSONObject packageSceneObject(SXRSceneObject sceneObject) {
+    private static JSONObject packageNode(SXRNode sceneObject) {
         final JSONObject json = new JSONObject();
-        put(json, Properties.scene_object, sceneObject);
+        put(json, Properties.node, sceneObject);
         return json;
     }
 
-    private final SXRSceneObject mSceneObject;
+    private final SXRNode mNode;
     private final SXRContext mContext;
     private boolean mClippingEnabled;
     private Vector3Axis mViewPort;
@@ -3827,7 +3827,7 @@ public class Widget implements Layout.WidgetContainer {
 
     private JSONObject mMetadata;
     private final List<Widget> mChildren = new ArrayList<>();
-    private final List<SXRSceneObject> mMeshChildren = new ArrayList<>();
+    private final List<SXRNode> mMeshChildren = new ArrayList<>();
     private Widget mParent;
     private String mName;
 
@@ -3853,7 +3853,7 @@ public class Widget implements Layout.WidgetContainer {
         }
 
         @Override
-        public boolean handlesEvent(Widget widget, SXRSceneObject sceneObject) {
+        public boolean handlesEvent(Widget widget, SXRNode sceneObject) {
             return widget.handlesFocusFor(sceneObject);
         }
 
@@ -3901,7 +3901,7 @@ public class Widget implements Layout.WidgetContainer {
         }
 
         @Override
-        public boolean handlesEvent(Widget widget, SXRSceneObject sceneObject) {
+        public boolean handlesEvent(Widget widget, SXRNode sceneObject) {
             return widget.handlesTouchFor(sceneObject);
         }
 
@@ -3933,8 +3933,8 @@ public class Widget implements Layout.WidgetContainer {
     private static class UPDATE_VISIBILITY {
         static void buffer(Widget widget, Visibility currentVisibility, Visibility newVisibility,
                            ViewPortVisibility viewPortVisibility) {
-            Command.buffer(sExecutor, widget.getSceneObject(),
-                    widget.getParent().getSceneObject(),
+            Command.buffer(sExecutor, widget.getNode(),
+                    widget.getParent().getNode(),
                     currentVisibility,
                     newVisibility,
                     viewPortVisibility);
@@ -3943,32 +3943,32 @@ public class Widget implements Layout.WidgetContainer {
         private static final Command.Executor sExecutor = new Command.Executor() {
             @Override
             public void exec(Object... params) {
-                final SXRSceneObject mSceneObject = (SXRSceneObject) params[0];
-                final SXRSceneObject parentSceneObject = (SXRSceneObject) params[1];
+                final SXRNode mNode = (SXRNode) params[0];
+                final SXRNode parentNode = (SXRNode) params[1];
                 final Visibility currentVisibility = (Visibility) params[2];
                 final Visibility newVisibility = (Visibility) params[3];
                 final ViewPortVisibility viewPortVisibility = (ViewPortVisibility) params[4];
 
-                SXRContext gvrContext = mSceneObject.getSXRContext();
-                SXRSceneObject sceneObjectParent = mSceneObject.getParent();
+                SXRContext gvrContext = mNode.getSXRContext();
+                SXRNode sceneObjectParent = mNode.getParent();
                 switch (newVisibility) {
                     case VISIBLE:
-                        if (sceneObjectParent != parentSceneObject &&
+                        if (sceneObjectParent != parentNode &&
                                 viewPortVisibility != ViewPortVisibility.INVISIBLE) {
                             if (null != sceneObjectParent) {
-                                sceneObjectParent.removeChildObject(mSceneObject);
+                                sceneObjectParent.removeChildObject(mNode);
                             }
-                            parentSceneObject.addChildObject(mSceneObject);
+                            parentNode.addChildObject(mNode);
                         }
                         break;
                     case HIDDEN:
                     case GONE:
                         if (currentVisibility == Visibility.VISIBLE) {
-                            parentSceneObject.removeChildObject(mSceneObject);
+                            parentNode.removeChildObject(mNode);
                         }
                         break;
                     case PLACEHOLDER:
-                        mSceneObject.detachRenderData();
+                        mNode.detachRenderData();
                         break;
                 }
             }

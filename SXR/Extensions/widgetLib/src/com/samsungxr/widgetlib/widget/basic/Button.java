@@ -3,8 +3,8 @@ package com.samsungxr.widgetlib.widget.basic;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRRenderData.SXRRenderingOrder;
-import com.samsungxr.SXRSceneObject;
-import com.samsungxr.scene_objects.SXRTextViewSceneObject.IntervalFrequency;
+import com.samsungxr.SXRNode;
+import com.samsungxr.nodes.SXRTextViewNode.IntervalFrequency;
 import org.json.JSONObject;
 
 import android.graphics.PointF;
@@ -85,7 +85,7 @@ public class Button extends Widget implements TextContainer {
      * @throws InstantiationException
      */
     @Deprecated
-    public Button(SXRContext context, SXRSceneObject sceneObject,
+    public Button(SXRContext context, SXRNode sceneObject,
             NodeEntry attributes) throws InstantiationException {
         super(context, sceneObject, attributes);
         mTextContainer = init();
@@ -98,7 +98,7 @@ public class Button extends Widget implements TextContainer {
      * @param sceneObject SXRF scene object
      * @throws InstantiationException
      */
-    public Button(SXRContext context, SXRSceneObject sceneObject) {
+    public Button(SXRContext context, SXRNode sceneObject) {
         super(context, sceneObject);
         mTextContainer = init();
     }
@@ -181,7 +181,7 @@ public class Button extends Widget implements TextContainer {
                  * // If the text has been cleared, swap our TextWidget for the
                  * // TextParams so we don't hang on to the resources final
                  * LightTextWidget textWidget = (LightTextWidget) mTextContainer;
-                 * removeChild(textWidget, textWidget.getSceneObject(), false);
+                 * removeChild(textWidget, textWidget.getNode(), false);
                  * mTextContainer = textWidget.getTextParams();
                  */
                 ((Widget) mTextContainer).setVisibility(Visibility.HIDDEN);

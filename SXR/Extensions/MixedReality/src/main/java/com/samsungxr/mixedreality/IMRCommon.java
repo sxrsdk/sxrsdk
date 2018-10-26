@@ -19,7 +19,7 @@ package com.samsungxr.mixedreality;
 import android.graphics.Bitmap;
 
 import com.samsungxr.SXRPicker;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 import java.util.ArrayList;
 
@@ -41,7 +41,7 @@ public interface IMRCommon {
      *
      * @return The passthrough object
      */
-    SXRSceneObject getPassThroughObject();
+    SXRNode getPassThroughObject();
 
     /**
      * Register a listener to SXRPlane events.
@@ -86,7 +86,7 @@ public interface IMRCommon {
      * @param sceneObject
      * @return The anchor created
      */
-    SXRAnchor createAnchor(float[] pose, SXRSceneObject sceneObject);
+    SXRAnchor createAnchor(float[] pose, SXRNode sceneObject);
 
     /**
      * Update the pose of an anchor
@@ -131,7 +131,7 @@ public interface IMRCommon {
      * @param collision
      * @return
      */
-    SXRHitResult hitTest(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision);
+    SXRHitResult hitTest(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
 
     /**
      *

@@ -42,7 +42,7 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventListeners;
 import com.samsungxr.SXRMain;
 import com.samsungxr.SXRPicker;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.IActivityEvents;
 import com.samsungxr.IScriptEvents;
 import com.samsungxr.ITouchEvents;
@@ -498,18 +498,18 @@ public class SXRWidgetPlugin implements AndroidApplicationBase {
         private float mHitY = 0;
         private float mActionDownX = 0;
         private float mActionDownY = 0;
-        private SXRSceneObject mPicked = null;
-        private SXRSceneObject mTouched = null;
+        private SXRNode mPicked = null;
+        private SXRNode mTouched = null;
 
-        public void onEnter(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo)
+        public void onEnter(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo)
         {
-            if (sceneObject instanceof SXRWidgetSceneObject)
+            if (sceneObject instanceof SXRWidgetNode)
             {
                 mPicked = sceneObject;
             }
         }
 
-        public void onExit(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo)
+        public void onExit(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo)
         {
             if (sceneObject == mPicked)
             {
@@ -517,7 +517,7 @@ public class SXRWidgetPlugin implements AndroidApplicationBase {
             }
         }
 
-        public void onTouchStart(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo)
+        public void onTouchStart(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo)
         {
             final MotionEvent event = pickInfo.motionEvent;
 
@@ -543,7 +543,7 @@ public class SXRWidgetPlugin implements AndroidApplicationBase {
             }
         }
 
-        public void onInside(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo)
+        public void onInside(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo)
         {
             if (!pickInfo.isTouched())
             {
@@ -559,7 +559,7 @@ public class SXRWidgetPlugin implements AndroidApplicationBase {
             }
         }
 
-        public void onTouchEnd(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo)
+        public void onTouchEnd(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo)
         {
             Log.d("TOUCH", "onTouchEnd");
             if (mTouched != null)

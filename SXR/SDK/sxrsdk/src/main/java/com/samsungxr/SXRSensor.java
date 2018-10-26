@@ -21,7 +21,7 @@ import com.samsungxr.io.SXRCursorController;
 
 /**
  * Create an instance of this class to receive {@link SensorEvent}s whenever an
- * input device interacts with a {@link SXRSceneObject}.
+ * input device interacts with a {@link SXRNode}.
  * <p>
  * Sensor events are generated when the active picker is inside a collider
  * that is attached to a descendant of the sensor's owner. Thus, a single
@@ -32,8 +32,8 @@ import com.samsungxr.io.SXRCursorController;
  * attached.
  * <p>
  * To respond to sensor events from a scene object, attach an instance of {@link ISensorEvents}
- * as a listener to the {@link SXREventReceiver} of the {@link SXRSceneObject}) using
- * {@link SXRSceneObject#getEventReceiver()} to get the {@link SXREventReceiver}, and then
+ * as a listener to the {@link SXREventReceiver} of the {@link SXRNode}) using
+ * {@link SXRNode#getEventReceiver()} to get the {@link SXREventReceiver}, and then
  * calling {@link SXREventReceiver#addListener(IEvents)} to add the {@link ISensorEvents}.
  * @see IPickEvents
  * @see ISensorEvents
@@ -56,7 +56,7 @@ public class SXRSensor extends SXRBehavior
      */
     static final private ITouchEvents sPickHandler = new ITouchEvents ()
     {
-        public void onEnter(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision)
+        public void onEnter(SXRNode sceneObj, SXRPicker.SXRPickedObject collision)
         {
             SXRSensor sensor = findSensor(sceneObj);
             if (sensor != null)
@@ -65,7 +65,7 @@ public class SXRSensor extends SXRBehavior
             }
         }
 
-        public void onTouchStart(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision)
+        public void onTouchStart(SXRNode sceneObj, SXRPicker.SXRPickedObject collision)
         {
             SXRSensor sensor = findSensor(sceneObj);
             if (sensor != null)
@@ -74,7 +74,7 @@ public class SXRSensor extends SXRBehavior
             }
         }
 
-        public void onExit(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision)
+        public void onExit(SXRNode sceneObj, SXRPicker.SXRPickedObject collision)
         {
             SXRSensor sensor = findSensor(sceneObj);
             if (sensor != null)
@@ -83,7 +83,7 @@ public class SXRSensor extends SXRBehavior
             }
         }
 
-        public void onTouchEnd(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision)
+        public void onTouchEnd(SXRNode sceneObj, SXRPicker.SXRPickedObject collision)
         {
             SXRSensor sensor = findSensor(sceneObj);
             if (sensor != null)
@@ -92,7 +92,7 @@ public class SXRSensor extends SXRBehavior
             }
         }
 
-        public void onInside(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision)
+        public void onInside(SXRNode sceneObj, SXRPicker.SXRPickedObject collision)
         {
             SXRSensor sensor = findSensor(sceneObj);
             if (sensor != null)
@@ -107,7 +107,7 @@ public class SXRSensor extends SXRBehavior
          * Scan up the scene graph from the object hit
          * to find a parent with a sensor attached.
          */
-        public SXRSensor findSensor(SXRSceneObject obj)
+        public SXRSensor findSensor(SXRNode obj)
         {
             while (obj != null)
             {

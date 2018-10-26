@@ -16,7 +16,7 @@
 package com.samsungxr.x3d;
 
 import com.samsungxr.SXRSensor;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.ISensorEvents;
 import com.samsungxr.animation.keyframe.SXRNodeAnimation;
 import com.samsungxr.x3d.data_types.SFFloat;
@@ -60,12 +60,12 @@ public class Sensor extends SXRSensor
 
 
 
-  public Sensor(String name, Type sensorType, SXRSceneObject sensorSceneObject, boolean enabled)
+  public Sensor(String name, Type sensorType, SXRNode sensorNode, boolean enabled)
   {
-    super(sensorSceneObject.getSXRContext());
+    super(sensorNode.getSXRContext());
     this.name = name;
     this.sensorType = sensorType;
-    sensorSceneObject.attachComponent(this);
+    sensorNode.attachComponent(this);
     mEnabled = enabled;
   }
 

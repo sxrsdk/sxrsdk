@@ -37,10 +37,10 @@ namespace sxr {
 class Camera;
 class CameraRig;
 
-class SceneObject: public HybridObject {
+class Node: public HybridObject {
 public:
-    SceneObject();
-    virtual ~SceneObject();
+    Node();
+    virtual ~Node();
 
     std::string name() const {
         return name_;
@@ -100,7 +100,7 @@ public:
         return (CameraRig*) getComponent(CameraRig::getComponentType());
     }
 
-    SceneObject* parent() const {
+    Node* parent() const {
         return parent_;
     }
 
@@ -121,29 +121,29 @@ public:
     bool isCulled(){
     	return cull_status_;
     }
-    std::vector<SceneObject*> children() {
+    std::vector<Node*> children() {
         std::lock_guard < std::mutex > lock(children_mutex_);
-        return std::vector<SceneObject*>(children_);
+        return std::vector<Node*>(children_);
     }
 
-    void addChildObject(SceneObject* self, SceneObject* child);
-    void removeChildObject(SceneObject* child);
-    void getDescendants(std::vector<SceneObject*>& descendants);
+    void addChildObject(Node* self, Node* child);
+    void removeChildObject(Node* child);
+    void getDescendants(std::vector<Node*>& descendants);
     void clear();
     int getChildrenCount() const;
-    SceneObject* getChildByIndex(int index);
+    Node* getChildByIndex(int index);
     GLuint *get_occlusion_array() {
         return queries_;
     }
-    bool isColliding(SceneObject* scene_object);
+    bool isColliding(Node* node);
     bool intersectsBoundingVolume(float rox, float roy, float roz, float rdx,
             float rdy, float rdz);
-    bool intersectsBoundingVolume(SceneObject *scene_object);
+    bool intersectsBoundingVolume(Node *node);
     void dirtyHierarchicalBoundingVolume();
     BoundingVolume& getBoundingVolume();
     void onTransformChanged();
-    bool onAddChild(SceneObject* addme, SceneObject* root);
-    bool onRemoveChild(SceneObject* removeme, SceneObject* root);
+    bool onAddChild(Node* addme, Node* root);
+    bool onRemoveChild(Node* removeme, Node* root);
     void onAddedToScene(Scene* scene);
     void onRemovedFromScene(Scene* scene);
     int frustumCull(glm::vec3 camera_position, const float frustum[6][4], int& planeMask);
@@ -151,8 +151,8 @@ public:
 private:
     std::string name_;
     std::vector<Component*> components_;
-    SceneObject* parent_ = nullptr;
-    std::vector<SceneObject*> children_;
+    Node* parent_ = nullptr;
+    std::vector<Node*> children_;
     bool cull_status_;
     bool transform_dirty_;
     BoundingVolume transformed_bounding_volume_;
@@ -169,10 +169,10 @@ private:
     bool query_currently_issued_;
     GLuint *queries_ = nullptr;
 
-    SceneObject(const SceneObject& scene_object) = delete;
-    SceneObject(SceneObject&& scene_object) = delete;
-    SceneObject& operator=(const SceneObject& scene_object) = delete;
-    SceneObject& operator=(SceneObject&& scene_object) = delete;
+    Node(const Node& node) = delete;
+    Node(Node&& node) = delete;
+    Node& operator=(const Node& node) = delete;
+    Node& operator=(Node&& node) = delete;
 
     bool checkSphereVsFrustum(float frustum[6][4], BoundingVolume &sphere);
 

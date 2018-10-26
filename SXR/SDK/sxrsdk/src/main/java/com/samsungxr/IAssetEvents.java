@@ -28,11 +28,11 @@ public interface IAssetEvents extends IEvents
      * This event will not be raised until the model and all of
      * its textures are loaded.
      * @param context   SXRContext used to load the model
-     * @param model     SXRSceneObject root of the model scene graph, null if model did not load.
+     * @param model     SXRNode root of the model scene graph, null if model did not load.
      * @param filePath  File path or URL of the model.
      * @param errors    String with loading errors or null if successful.
      */
-    public void onAssetLoaded(SXRContext context, SXRSceneObject model, String filePath, String errors);
+    public void onAssetLoaded(SXRContext context, SXRNode model, String filePath, String errors);
     
     /**
      * Called when a model is successfully loaded.
@@ -42,7 +42,7 @@ public interface IAssetEvents extends IEvents
      * @param model root of the scene graph representing the model.
      * @param filePath  File path or URL of the model.
      */
-    public void onModelLoaded(SXRContext context, SXRSceneObject model, String filePath);
+    public void onModelLoaded(SXRContext context, SXRNode model, String filePath);
     
     /**
      * Called when a texture is successfully loaded.

@@ -125,7 +125,7 @@ public class WidgetState {
         final boolean isImplicitNormal = has(stateSpec,
                                              WidgetStateInfo.Properties.animation)
                 || has(stateSpec, WidgetStateInfo.Properties.material)
-                || has(stateSpec, WidgetStateInfo.Properties.scene_object);
+                || has(stateSpec, WidgetStateInfo.Properties.node);
 
         return (hasExplicitStates == isExplicit)
                 && (isImplicitNormal != isExplicit);

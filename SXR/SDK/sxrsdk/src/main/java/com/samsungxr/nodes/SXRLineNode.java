@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.samsungxr.scene_objects;
+package com.samsungxr.nodes;
 
 import android.opengl.GLES30;
 
@@ -20,22 +20,22 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRShaderId;
 import com.samsungxr.shaders.SXRVertexColorShader;
 import org.joml.Vector4f;
 
 /***
- * A {@link SXRSceneObject} representing a line or ray
+ * A {@link SXRNode} representing a line or ray
  */
-public class SXRLineSceneObject extends SXRSceneObject {
+public class SXRLineNode extends SXRNode {
 
     /**
      * The simple constructor; creates a line of length 1.
      *
      * @param gvrContext current {@link SXRContext}
      */
-    public SXRLineSceneObject(SXRContext gvrContext){
+    public SXRLineNode(SXRContext gvrContext){
         this(gvrContext, 1.0f);
     }
 
@@ -45,7 +45,7 @@ public class SXRLineSceneObject extends SXRSceneObject {
      * @param gvrContext    current {@link SXRContext}
      * @param length        length of the line/ray
      */
-    public SXRLineSceneObject(SXRContext gvrContext, float length)
+    public SXRLineNode(SXRContext gvrContext, float length)
     {
         super(gvrContext, generateLine(gvrContext, "float3 a_position", length));
         final SXRRenderData renderData = getRenderData().setDrawMode(GLES30.GL_LINES);
@@ -67,7 +67,7 @@ public class SXRLineSceneObject extends SXRSceneObject {
      * @param startColor    RGB color for starting point
      * @param endColor      RGB color for ending point
      */
-    public SXRLineSceneObject(SXRContext gvrContext, float length, Vector4f startColor, Vector4f endColor)
+    public SXRLineNode(SXRContext gvrContext, float length, Vector4f startColor, Vector4f endColor)
     {
         super(gvrContext, generateLine(gvrContext, "float3 a_position float4 a_color", length));
         final SXRRenderData renderData = getRenderData().setDrawMode(GLES30.GL_LINES);

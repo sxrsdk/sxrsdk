@@ -88,7 +88,7 @@ public final class SXRAssetLoader {
         protected final String            mFileName;
         protected final IAssetEvents      mUserHandler;
         protected final SXRResourceVolume mVolume;
-        protected SXRSceneObject          mModel = null;
+        protected SXRNode          mModel = null;
         protected String                  mErrors;
         protected Integer                 mNumTextures;
         protected boolean                 mReplaceScene = false;
@@ -98,13 +98,13 @@ public final class SXRAssetLoader {
 
         /**
          * Request to load an asset and add it to the scene.
-         * @param model SXRSceneObject to be the root of the loaded asset.
+         * @param model SXRNode to be the root of the loaded asset.
          * @param fileVolume SXRResourceVolume containing path to file
          * @param scene SXRScene to add the asset to.
          * @param userHandler user event handler to get asset events.
          * @param replaceScene true to replace entire scene with model, false to add model to scene
          */
-        public AssetRequest(SXRSceneObject model, SXRResourceVolume fileVolume, SXRScene scene, IAssetEvents userHandler, boolean replaceScene)
+        public AssetRequest(SXRNode model, SXRResourceVolume fileVolume, SXRScene scene, IAssetEvents userHandler, boolean replaceScene)
         {
             mScene = scene;
             mContext = model.getSXRContext();
@@ -254,7 +254,7 @@ public final class SXRAssetLoader {
          * @param model     root node of model hierarchy that was loaded
          * @param modelFile filename of model loaded
          */
-        public void onModelLoaded(SXRContext context, SXRSceneObject model, String modelFile)
+        public void onModelLoaded(SXRContext context, SXRNode model, String modelFile)
         {
             mModel = model;
             Log.d(TAG, "ASSET: successfully loaded model %s %d", modelFile, mNumTextures);
@@ -376,7 +376,7 @@ public final class SXRAssetLoader {
          * @param modelFile filename of model loaded
          */
         @Override
-        public void onAssetLoaded(SXRContext context, SXRSceneObject model, String modelFile, String errors)
+        public void onAssetLoaded(SXRContext context, SXRNode model, String modelFile, String errors)
         {
             if (mUserHandler != null)
             {
@@ -399,7 +399,7 @@ public final class SXRAssetLoader {
                 {
                     if (mReplaceScene)
                     {
-                        SXRSceneObject mainCam = mModel.getSceneObjectByName("MainCamera");
+                        SXRNode mainCam = mModel.getNodeByName("MainCamera");
                         SXRCameraRig modelCam = (mainCam != null) ? mainCam.getCameraRig() : null;
 
                         mScene.clear();
@@ -419,7 +419,7 @@ public final class SXRAssetLoader {
                     if (mModel.getParent() == null)
                     {
                         Log.d(TAG, "ASSET: asset %s added to scene", mFileName);
-                        mScene.addSceneObject(mModel);
+                        mScene.addNode(mModel);
                     }
                 }
                 /*
@@ -1041,13 +1041,13 @@ public final class SXRAssetLoader {
     };
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRSceneObject} from a 3D model.
+     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model.
      * The model is not added to the current scene.
      * IAssetEvents are emitted to the event listener attached to the context.
      * This function blocks the current thread while loading the model
      * but loads the textures asynchronously in the background.
      * <p>
-     * If you are loading large models, you can call {@link #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)}
+     * If you are loading large models, you can call {@link #loadModel(SXRNode, SXRResourceVolume, SXRScene)}
      * to load the model asychronously to avoid blocking the main thread.
      * @param filePath
      *            A filename, relative to the root of the volume.
@@ -1055,24 +1055,24 @@ public final class SXRAssetLoader {
      *            If the filename starts with "http:" or "https:" it is assumed to be a URL.
      *            Otherwise the file is assumed to be relative to the "assets" directory.
      *
-     * @return A {@link SXRSceneObject} that contains the meshes with textures and bones
+     * @return A {@link SXRNode} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException if model file cannot be opened
      *
      */
-    public SXRSceneObject loadModel(final String filePath) throws IOException
+    public SXRNode loadModel(final String filePath) throws IOException
     {
         return loadModel(filePath, (SXRScene) null);
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRSceneObject} from a 3D model
+     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model
      * and adds it to the specified scene.
      * IAssetEvents are emitted to event listener attached to the context.
      * This function blocks the current thread while loading the model
      * but loads the textures asynchronously in the background.
      * <p>
-     * If you are loading large models, you can call {@link #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)}
+     * If you are loading large models, you can call {@link #loadModel(SXRNode, SXRResourceVolume, SXRScene)}
      * to load the model asychronously to avoid blocking the main thread.
      * @param filePath
      *            A filename, relative to the root of the volume.
@@ -1084,14 +1084,14 @@ public final class SXRAssetLoader {
      *            If present, this asset loader will wait until all of the textures have been
      *            loaded and then it will add the model to the scene.
      *
-     * @return A {@link SXRSceneObject} that contains the meshes with textures and bones
+     * @return A {@link SXRNode} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException
      *
      */
-    public SXRSceneObject loadModel(final String filePath, final SXRScene scene) throws IOException
+    public SXRNode loadModel(final String filePath, final SXRScene scene) throws IOException
     {
-        SXRSceneObject model = new SXRSceneObject(mContext);
+        SXRNode model = new SXRNode(mContext);
         AssetRequest assetRequest = new AssetRequest(model, new SXRResourceVolume(mContext, filePath), scene, null, false);
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
@@ -1109,14 +1109,14 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRSceneObject} from a 3D model
+     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model
      * replaces the current scene with it.
      * <p>
      * This function blocks the current thread while loading the model
      * but loads the textures asynchronously in the background.
      * IAssetEvents are emitted to the event listener attached to the context.
      * <p>
-     * If you are loading large models, you can call {@link #loadScene(SXRSceneObject, SXRResourceVolume, SXRScene, IAssetEvents)}
+     * If you are loading large models, you can call {@link #loadScene(SXRNode, SXRResourceVolume, SXRScene, IAssetEvents)}
      * to load the model asychronously to avoid blocking the main thread.     *
      * @param filePath
      *            A filename, relative to the root of the volume.
@@ -1127,14 +1127,14 @@ public final class SXRAssetLoader {
      * @param scene
      *            Scene to be replaced with the model.
      *
-     * @return A {@link SXRSceneObject} that contains the meshes with textures and bones
+     * @return A {@link SXRNode} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException
      *
      */
-    public SXRSceneObject loadScene(final String filePath, final SXRScene scene) throws IOException
+    public SXRNode loadScene(final String filePath, final SXRScene scene) throws IOException
     {
-        SXRSceneObject model = new SXRSceneObject(mContext);
+        SXRNode model = new SXRNode(mContext);
         AssetRequest assetRequest = new AssetRequest(model, new SXRResourceVolume(mContext, filePath), scene, null, true);
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
@@ -1152,7 +1152,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRSceneObject} from a 3D model
+     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model
      * replaces the current scene with it.
      * <p>
      * This function loads the model and its textures asynchronously in the background
@@ -1171,9 +1171,9 @@ public final class SXRAssetLoader {
      *            Scene to be replaced with the model.
      * @param handler
      *            IAssetEvents handler to process asset loading events
-     * @see #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)
+     * @see #loadModel(SXRNode, SXRResourceVolume, SXRScene)
      */
-    public void loadScene(final SXRSceneObject model, final SXRResourceVolume volume, final SXRScene scene, final IAssetEvents handler)
+    public void loadScene(final SXRNode model, final SXRResourceVolume volume, final SXRScene scene, final IAssetEvents handler)
     {
         Threads.spawn(new Runnable()
         {
@@ -1205,7 +1205,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRSceneObject} from a 3D model
+     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model
      * replaces the current scene with it.
      * <p>
      * This function loads the model and its textures asynchronously in the background
@@ -1226,9 +1226,9 @@ public final class SXRAssetLoader {
      *            Scene to be replaced with the model.
      * @param handler
      *            IAssetEvents handler to process asset loading events
-     * @see #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)
+     * @see #loadModel(SXRNode, SXRResourceVolume, SXRScene)
      */
-    public void loadScene(final SXRSceneObject model, final SXRResourceVolume volume, final EnumSet<SXRImportSettings> settings, final SXRScene scene, final IAssetEvents handler)
+    public void loadScene(final SXRNode model, final SXRResourceVolume volume, final EnumSet<SXRImportSettings> settings, final SXRScene scene, final IAssetEvents handler)
     {
         Threads.spawn(new Runnable()
         {
@@ -1260,7 +1260,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRSceneObject} asymchronously from a 3D model
+     * Loads a hierarchy of scene objects {@link SXRNode} asymchronously from a 3D model
      * on the volume provided and adds it to the specified scene.
      * <p>
      * and will return before the model is loaded.
@@ -1270,7 +1270,7 @@ public final class SXRAssetLoader {
      * cannot load textures from the drawable directory.
      *
      * @param model
-     *            A SXRSceneObject to become the root of the loaded model.
+     *            A SXRNode to become the root of the loaded model.
      * @param volume
      *            A SXRResourceVolume based on the asset path to load.
      *            This volume will be used as the base for loading textures
@@ -1281,9 +1281,9 @@ public final class SXRAssetLoader {
      *            loaded and then it will add the model to the scene.
      *
      * @see #loadMesh(SXRAndroidResource.MeshCallback, SXRAndroidResource, int)
-     * @see #loadScene(SXRSceneObject, SXRResourceVolume, SXRScene, IAssetEvents)
+     * @see #loadScene(SXRNode, SXRResourceVolume, SXRScene, IAssetEvents)
      */
-    public void loadModel(final SXRSceneObject model, final SXRResourceVolume volume, final SXRScene scene)
+    public void loadModel(final SXRNode model, final SXRResourceVolume volume, final SXRScene scene)
     {
         Threads.spawn(new Runnable()
         {
@@ -1315,7 +1315,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRSceneObject} asymchronously from a 3D model
+     * Loads a hierarchy of scene objects {@link SXRNode} asymchronously from a 3D model
      * on the volume provided and adds it to the specified scene.
      * <p>
      * and will return before the model is loaded.
@@ -1325,7 +1325,7 @@ public final class SXRAssetLoader {
      * cannot load textures from the drawable directory.
      *
      * @param model
-     *            A SXRSceneObject to become the root of the loaded model.
+     *            A SXRNode to become the root of the loaded model.
      * @param volume
      *            A SXRResourceVolume based on the asset path to load.
      *            This volume will be used as the base for loading textures
@@ -1338,9 +1338,9 @@ public final class SXRAssetLoader {
      *            loaded and then it will add the model to the scene.
      *
      * @see #loadMesh(SXRAndroidResource.MeshCallback, SXRAndroidResource, int)
-     * @see #loadScene(SXRSceneObject, SXRResourceVolume, EnumSet, SXRScene, IAssetEvents)
+     * @see #loadScene(SXRNode, SXRResourceVolume, EnumSet, SXRScene, IAssetEvents)
      */
-    public void loadModel(final SXRSceneObject model, final SXRResourceVolume volume, final EnumSet<SXRImportSettings> settings, final SXRScene scene)
+    public void loadModel(final SXRNode model, final SXRResourceVolume volume, final EnumSet<SXRImportSettings> settings, final SXRScene scene)
     {
         Threads.spawn(new Runnable()
         {
@@ -1372,14 +1372,14 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRSceneObject} from a 3D model.
+     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model.
      * <p>
      * This function blocks the current thread while loading the model
      * but loads the textures asynchronously in the background.
      * IAssetEvents are emitted to the event handler supplied first and then to
      * the event listener attached to the context.
      * <p>
-     * If you are loading large models, you can call {@link #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)}
+     * If you are loading large models, you can call {@link #loadModel(SXRNode, SXRResourceVolume, SXRScene)}
      * to load the model asychronously to avoid blocking the main thread.
      * @param filePath
      *            A filename, relative to the root of the volume.
@@ -1391,15 +1391,15 @@ public final class SXRAssetLoader {
      * @param handler
      *            IAssetEvents handler to process asset loading events
      *
-     * @return A {@link SXRSceneObject} that contains the meshes with textures and bones
+     * @return A {@link SXRNode} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException
-     * @see #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)
+     * @see #loadModel(SXRNode, SXRResourceVolume, SXRScene)
      * @see #loadMesh(SXRAndroidResource.MeshCallback, SXRAndroidResource, int)
      */
-    public SXRSceneObject loadModel(String filePath, IAssetEvents handler) throws IOException
+    public SXRNode loadModel(String filePath, IAssetEvents handler) throws IOException
     {
-        SXRSceneObject model = new SXRSceneObject(mContext);
+        SXRNode model = new SXRNode(mContext);
         SXRResourceVolume   volume = new SXRResourceVolume(mContext, filePath);
         AssetRequest assetRequest = new AssetRequest(model, volume, null, handler, false);
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
@@ -1419,14 +1419,14 @@ public final class SXRAssetLoader {
 
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRSceneObject} from a 3D model.
+     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model.
      * <p>
      * This function blocks the current thread while loading the model
      * but loads the textures asynchronously in the background.
      * IAssetEvents are emitted to the event handler supplied first and then to
      * the event listener attached to the context.
      * <p>
-     * If you are loading large models, you can call {@link #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)}
+     * If you are loading large models, you can call {@link #loadModel(SXRNode, SXRResourceVolume, SXRScene)}
      * to load the model asychronously to avoid blocking the main thread.
      *
      * @param filePath
@@ -1446,19 +1446,19 @@ public final class SXRAssetLoader {
      *            If present, this asset loader will wait until all of the textures have been
      *            loaded and then adds the model to the scene.
      *
-     * @return A {@link SXRSceneObject} that contains the meshes with textures and bones
+     * @return A {@link SXRNode} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException
-     * @see #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)
+     * @see #loadModel(SXRNode, SXRResourceVolume, SXRScene)
      * @see #loadMesh(SXRAndroidResource.MeshCallback, SXRAndroidResource, int)
      */
-    public SXRSceneObject loadModel(String filePath,
+    public SXRNode loadModel(String filePath,
                                          EnumSet<SXRImportSettings> settings,
                                          boolean cacheEnabled,
                                          SXRScene scene) throws IOException
     {
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
-        SXRSceneObject model = new SXRSceneObject(mContext);
+        SXRNode model = new SXRNode(mContext);
         AssetRequest assetRequest = new AssetRequest(model, new SXRResourceVolume(mContext, filePath), scene, null, false);
         model.setName(assetRequest.getBaseName());
         assetRequest.setImportSettings(settings);
@@ -1475,7 +1475,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRSceneObject} from a 3D model
+     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model
      * inside an Android resource.
      * <p>
      * This function blocks the current thread while loading the model
@@ -1483,7 +1483,7 @@ public final class SXRAssetLoader {
      * IAssetEvents are emitted to the event handler supplied first and then to
      * the event listener attached to the context.
      * <p>
-     * If you are loading large models, you can call {@link #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)}
+     * If you are loading large models, you can call {@link #loadModel(SXRNode, SXRResourceVolume, SXRScene)}
      * to load the model asychronously to avoid blocking the main thread.
      * @param resource
      *            SXRAndroidResource describing the asset. If it is a resource ID,
@@ -1504,20 +1504,20 @@ public final class SXRAssetLoader {
      *            If present, this asset loader will wait until all of the textures have been
      *            loaded and then add the model to the scene.
      *
-     * @return A {@link SXRSceneObject} that contains the meshes with textures and bones
+     * @return A {@link SXRNode} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException
-     * @see #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)
+     * @see #loadModel(SXRNode, SXRResourceVolume, SXRScene)
      * @see #loadMesh(SXRAndroidResource.MeshCallback, SXRAndroidResource, int)
      */
-    public SXRSceneObject loadModel(SXRAndroidResource resource,
+    public SXRNode loadModel(SXRAndroidResource resource,
                                     EnumSet<SXRImportSettings> settings,
                                     boolean cacheEnabled,
                                     SXRScene scene) throws IOException
     {
         String filePath = resource.getResourceFilename();
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
-        SXRSceneObject model = new SXRSceneObject(mContext);
+        SXRNode model = new SXRNode(mContext);
         SXRResourceVolume volume = new SXRResourceVolume(mContext, resource);
         AssetRequest assetRequest = new AssetRequest(model, volume, scene, null, false);
 
@@ -1540,7 +1540,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a scene object {@link SXRSceneObject} asynchronously from
+     * Loads a scene object {@link SXRNode} asynchronously from
      * a 3D model and raises asset events to a handler.
      * <p>
      * This function is a good choice for loading assets because
@@ -1555,7 +1555,7 @@ public final class SXRAssetLoader {
      *            The volume will be used to load models referenced by this model.
      *
      * @param model
-     *            {@link SXRSceneObject} that is the root of the hierarchy generated
+     *            {@link SXRNode} that is the root of the hierarchy generated
      *            by loading the 3D model.
      *
      * @param settings
@@ -1569,7 +1569,7 @@ public final class SXRAssetLoader {
      * @see IAssetEvents #loadMesh(SXRAndroidResource.MeshCallback, SXRAndroidResource, int)
      */
     public void loadModel(final SXRResourceVolume fileVolume,
-                          final SXRSceneObject model,
+                          final SXRNode model,
                           final EnumSet<SXRImportSettings> settings,
                           final boolean cacheEnabled,
                           final IAssetEvents handler)
@@ -1640,9 +1640,9 @@ public final class SXRAssetLoader {
      * little as possible on the GL thread.
      * <p>
      * If you want to load a 3D model which has multiple meshes, the best choices are
-     * {@link #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)} which loads a
+     * {@link #loadModel(SXRNode, SXRResourceVolume, SXRScene)} which loads a
      * 3D model under the scene object you provide and adds it to the given scene or
-     * {@link #loadScene(SXRSceneObject, SXRResourceVolume, SXRScene, IAssetEvents)}
+     * {@link #loadScene(SXRNode, SXRResourceVolume, SXRScene, IAssetEvents)}
      * which replaces the current scene with the 3D model.
      * </p>
      * @param androidResource
@@ -1656,9 +1656,9 @@ public final class SXRAssetLoader {
      * @return The file as a GL mesh or null if mesh cannot be loaded.
      *
      * @since 3.3
-     * @see #loadScene(SXRSceneObject, SXRResourceVolume, SXRScene, IAssetEvents)
-     * @see #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)
-     * @see #findMesh(SXRSceneObject)
+     * @see #loadScene(SXRNode, SXRResourceVolume, SXRScene, IAssetEvents)
+     * @see #loadModel(SXRNode, SXRResourceVolume, SXRScene)
+     * @see #findMesh(SXRNode)
      */
     public SXRMesh loadMesh(SXRAndroidResource androidResource,
                             EnumSet<SXRImportSettings> settings)
@@ -1668,7 +1668,7 @@ public final class SXRAssetLoader {
         {
             try
             {
-                SXRSceneObject model = loadModel(androidResource, settings, true, null);
+                SXRNode model = loadModel(androidResource, settings, true, null);
                 mesh = findMesh(model);
                 if (mesh != null)
                 {
@@ -1696,9 +1696,9 @@ public final class SXRAssetLoader {
      * @return SXRMesh found or null if model does not contain meshes
      * @see #loadMesh(SXRAndroidResource.MeshCallback, SXRAndroidResource, int)
      */
-    public SXRMesh findMesh(SXRSceneObject model)
+    public SXRMesh findMesh(SXRNode model)
     {
-        class MeshFinder implements SXRSceneObject.ComponentVisitor
+        class MeshFinder implements SXRNode.ComponentVisitor
         {
             private SXRMesh meshFound = null;
             public SXRMesh getMesh() { return meshFound; }
@@ -1722,7 +1722,7 @@ public final class SXRAssetLoader {
      * It uses {@link #loadModel(SXRAndroidResource, EnumSet, boolean, SXRScene)}
      * internally to load the asset and then inspects the file to find the first mesh.
      * <p>
-     * To asynchronously load an entire 3D model, you should use {@link #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)}.
+     * To asynchronously load an entire 3D model, you should use {@link #loadModel(SXRNode, SXRResourceVolume, SXRScene)}.
      * It does not require a callback. Instead you pass it an existing scene object and it loads the model
      * under tha node.
      * <p>
@@ -1786,8 +1786,8 @@ public final class SXRAssetLoader {
      *             reloaded ... but the original descriptor will have been
      *             closed.
      * @since 3.3
-     * @see #loadModel(SXRSceneObject, SXRResourceVolume, SXRScene)
-     * @see #loadScene(SXRSceneObject, SXRResourceVolume, SXRScene, IAssetEvents)
+     * @see #loadModel(SXRNode, SXRResourceVolume, SXRScene)
+     * @see #loadScene(SXRNode, SXRResourceVolume, SXRScene, IAssetEvents)
      */
     public void loadMesh(SXRAndroidResource.MeshCallback callback,
                          SXRAndroidResource resource,
@@ -1798,18 +1798,18 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a scene object {@link SXRSceneObject} from a 3D model.
+     * Loads a scene object {@link SXRNode} from a 3D model.
      *
      * @param request
      *            AssetRequest with the filename, relative to the root of the volume.
      * @param model
-     *            SXRSceneObject that is the root of the loaded asset
-     * @return A {@link SXRSceneObject} that contains the meshes with textures and bones
+     *            SXRNode that is the root of the loaded asset
+     * @return A {@link SXRNode} that contains the meshes with textures and bones
      * and animations.
      * @throws IOException
      *
      */
-    private SXRSceneObject loadJassimpModel(AssetRequest request, final SXRSceneObject model) throws IOException
+    private SXRNode loadJassimpModel(AssetRequest request, final SXRNode model) throws IOException
     {
         Jassimp.setWrapperProvider(SXRJassimpAdapter.sWrapperProvider);
         com.samsungxr.jassimp.AiScene assimpScene = null;
@@ -1843,7 +1843,7 @@ public final class SXRAssetLoader {
                 // Inform the loaded object after it has been attached to the scene graph
                 mContext.getEventManager().sendEvent(
                         model,
-                        ISceneObjectEvents.class,
+                        INodeEvents.class,
                         "onLoaded");
             }
         });
@@ -1851,8 +1851,8 @@ public final class SXRAssetLoader {
     }
 
 
-    SXRSceneObject loadX3DModel(SXRAssetLoader.AssetRequest assetRequest,
-                                SXRSceneObject root) throws IOException
+    SXRNode loadX3DModel(SXRAssetLoader.AssetRequest assetRequest,
+                                SXRNode root) throws IOException
     {
         Method loadMethod = null;
         try
@@ -1860,7 +1860,7 @@ public final class SXRAssetLoader {
             final Class<?> loaderClass = Class.forName("com.samsungxr.x3d.X3DLoader");
             loadMethod = loaderClass.getDeclaredMethod("load", SXRContext.class,
                                                                     SXRAssetLoader.AssetRequest.class,
-                                                                    SXRSceneObject.class);
+                                                                    SXRNode.class);
         }
         catch (Exception e)
         {
@@ -1868,7 +1868,7 @@ public final class SXRAssetLoader {
         }
         try
         {
-            return (SXRSceneObject) loadMethod.invoke(null, mContext, assetRequest, root);
+            return (SXRNode) loadMethod.invoke(null, mContext, assetRequest, root);
         }
         catch (InvocationTargetException te)
         {

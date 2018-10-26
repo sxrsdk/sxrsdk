@@ -150,13 +150,13 @@ public class SXRSpotLight extends SXRPointLight
     /**
      * Enables or disabled shadow casting for a spot light.
      * Enabling shadows attaches a SXRShadowMap component to the
-     * SXRSceneObject which owns the light and provides the
+     * SXRNode which owns the light and provides the
      * component with an perspective camera for shadow casting.
      * @param enableFlag true to enable shadow casting, false to disable
      */
     public void setCastShadow(boolean enableFlag)
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -198,7 +198,7 @@ public class SXRSpotLight extends SXRPointLight
      */
     public void setShadowRange(float near, float far)
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
         SXRPerspectiveCamera shadowCam = null;
 
         if (owner == null)

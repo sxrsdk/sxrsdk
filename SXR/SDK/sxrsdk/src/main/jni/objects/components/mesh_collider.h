@@ -52,8 +52,8 @@ public:
         return pickCoordinates_;
     }
 
-    ColliderData isHit(SceneObject* owner, const float sphere[]);
-    ColliderData isHit(SceneObject* owner, const glm::vec3& rayStart, const glm::vec3& rayDir);
+    ColliderData isHit(Node* owner, const float sphere[]);
+    ColliderData isHit(Node* owner, const glm::vec3& rayStart, const glm::vec3& rayDir);
     static ColliderData isHit(const BoundingVolume& bounds, const glm::vec3& rayStart, const glm::vec3& rayDir);
     static ColliderData isHit(const BoundingVolume& bounds, const float sphere[]);
     static ColliderData isHit(const Mesh& mesh, const float sphere[]);

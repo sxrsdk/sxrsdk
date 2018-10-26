@@ -42,7 +42,7 @@ import org.joml.Vector3f;
  * each frame. It's origin is the camera position and it's direction is
  * the camera forward look vector (what the user is looking at).
  * <p/>
- * For a {@linkplain SXRSceneObject scene object} to be pickable, it must have a
+ * For a {@linkplain SXRNode scene object} to be pickable, it must have a
  * {@link SXRCollider} component attached to it that is enabled.
  * The picker "casts" a ray into the screen graph, and returns an array
  * containing all the collisions as instances of SXRPickedObject.
@@ -57,9 +57,9 @@ import org.joml.Vector3f;
  * which are sent the event receiver of the scene. These events can be
  * observed by listeners.
  * <ul>
- * <li>onEnter(SXRSceneObject)  called when the pick ray enters a scene object.</li>
- * <li>onExit(SXRSceneObject)   called when the pick ray exits a scene object.</li>
- * <li>onInside(SXRSceneObject) called while the pick ray penetrates a scene object.</li>
+ * <li>onEnter(SXRNode)  called when the pick ray enters a scene object.</li>
+ * <li>onExit(SXRNode)   called when the pick ray exits a scene object.</li>
+ * <li>onInside(SXRNode) called while the pick ray penetrates a scene object.</li>
  * <li>onPick(SXRPicker)        called every frame if something is picked.</li>
  * <li>onNoPick(SXRPicker)      called every frame if nothing is picked.</li>
  * </ul
@@ -67,7 +67,7 @@ import org.joml.Vector3f;
  * from that cursor. When a cursor is used, the pick events contain touch
  * information. You can register as a listener for pick events from a specific cursor.
  * @see IPickEvents
- * @see SXRSceneObject#attachCollider(SXRCollider)
+ * @see SXRNode#attachCollider(SXRCollider)
  * @see SXRCollider
  * @see SXRCollider#setEnable(boolean)
  * @see SXRPickedObject
@@ -162,7 +162,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * @see #setScene(SXRScene)
      * @see #setEventOptions(EnumSet)
      */
-    public SXRPicker(SXRSceneObject owner, SXRScene scene)
+    public SXRPicker(SXRNode owner, SXRScene scene)
     {
         this(scene, false);
         owner.attachComponent(this);
@@ -359,7 +359,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      */
     public final void getWorldPickRay(Vector3f origin, Vector3f direction)
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
 
         if (owner == null)              // should never come here, picker always
         {                               // owned by SXRGearCursorController pivot
@@ -511,7 +511,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      */
     protected void doPick()
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
         SXRTransform trans = (owner != null) ? owner.getTransform() : null;
         SXRPickedObject[] picked;
 
@@ -722,7 +722,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      */
     protected void propagateOnEnter(SXRPickedObject hit)
     {
-        SXRSceneObject hitObject = hit.getHitObject();
+        SXRNode hitObject = hit.getHitObject();
         SXREventManager eventManager = getSXRContext().getEventManager();
         if (mEventOptions.contains(EventOptions.SEND_TOUCH_EVENTS))
         {
@@ -765,7 +765,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
         if (mEventOptions.contains(EventOptions.SEND_TOUCH_EVENTS))
         {
             SXREventManager eventManager = getSXRContext().getEventManager();
-            SXRSceneObject hitObject = hit.getHitObject();
+            SXRNode hitObject = hit.getHitObject();
             if (mEventOptions.contains(EventOptions.SEND_TO_LISTENERS))
             {
                 eventManager.sendEvent(this, ITouchEvents.class, "onTouchStart", hitObject, hit);
@@ -790,7 +790,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
         if (mEventOptions.contains(EventOptions.SEND_TOUCH_EVENTS))
         {
             SXREventManager eventManager = getSXRContext().getEventManager();
-            SXRSceneObject hitObject = hit.getHitObject();
+            SXRNode hitObject = hit.getHitObject();
             if (mEventOptions.contains(EventOptions.SEND_TO_LISTENERS))
             {
                 eventManager.sendEvent(this, ITouchEvents.class, "onTouchEnd", hitObject, hit);
@@ -812,7 +812,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      */
     protected void propagateOnInside(SXRPickedObject hit)
     {
-        SXRSceneObject hitObject = hit.getHitObject();
+        SXRNode hitObject = hit.getHitObject();
         SXREventManager eventManager = getSXRContext().getEventManager();
         if (mEventOptions.contains(EventOptions.SEND_TOUCH_EVENTS))
         {
@@ -850,7 +850,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * Propagate onExit events to listeners
      * @param hitObject scene object
      */
-    protected void propagateOnExit(SXRSceneObject hitObject, SXRPickedObject hit)
+    protected void propagateOnExit(SXRNode hitObject, SXRPickedObject hit)
     {
         SXREventManager eventManager = getSXRContext().getEventManager();
         if (mEventOptions.contains(EventOptions.SEND_TOUCH_EVENTS))
@@ -908,10 +908,10 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
     }
 
     /**
-     * Tests the {@link SXRSceneObject} against the ray information passed to the function.
+     * Tests the {@link SXRNode} against the ray information passed to the function.
      *
      * @param sceneObject
-     *            The {@link SXRSceneObject} to be tested.
+     *            The {@link SXRNode} to be tested.
      *
      * @param ox
      *            The x coordinate of the ray origin (in world coords).
@@ -934,31 +934,31 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * @return  a {@link SXRPicker.SXRPickedObject} containing the picking information
      *
      */
-    public static final SXRPickedObject pickSceneObject(SXRSceneObject sceneObject, float ox, float oy, float oz, float dx,
+    public static final SXRPickedObject pickNode(SXRNode sceneObject, float ox, float oy, float oz, float dx,
                                                         float dy, float dz) {
-        return NativePicker.pickSceneObject(sceneObject.getNative(), ox, oy, oz, dx, dy, dz);
+        return NativePicker.pickNode(sceneObject.getNative(), ox, oy, oz, dx, dy, dz);
     }
 
     /**
-     * Tests the {@link SXRSceneObject} against the ray information passed to the function.
+     * Tests the {@link SXRNode} against the ray information passed to the function.
      *
      * @param sceneObject
-     *            The {@link SXRSceneObject} to be tested.
+     *            The {@link SXRNode} to be tested.
      *
      * @return  a {@link SXRPicker.SXRPickedObject} containing the picking information
      *
      */
-    public static final SXRPickedObject pickSceneObject(SXRSceneObject sceneObject) {
+    public static final SXRPickedObject pickNode(SXRNode sceneObject) {
         SXRCameraRig cam = sceneObject.getSXRContext().getMainScene().getMainCameraRig();
         SXRTransform t = cam.getHeadTransform();
         float[] lookat = cam.getLookAt();
-        return NativePicker.pickSceneObject(sceneObject.getNative(), t.getPositionX(), t.getPositionY(), t.getPositionZ(),
+        return NativePicker.pickNode(sceneObject.getNative(), t.getPositionX(), t.getPositionY(), t.getPositionZ(),
                 lookat[0], lookat[1], lookat[2]);
     }
 
     /**
      *
-     * Tests the {@link SXRSceneObject} against the specified ray.
+     * Tests the {@link SXRNode} against the specified ray.
      *
      * The ray is defined by its origin {@code [ox, oy, oz]} and its direction
      * {@code [dx, dy, dz]}.
@@ -969,7 +969,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * bottom to 1 at the top.
      *
      * @param sceneObject
-     *            The {@link SXRSceneObject} to be tested.
+     *            The {@link SXRNode} to be tested.
      *
      * @param ox
      *            The x coordinate of the ray origin.
@@ -999,12 +999,12 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      *
      * @return <code>true</code> on a successful hit, <code>false</code> otherwise.
      */
-    static final boolean pickSceneObjectAgainstBoundingBox(
-            SXRSceneObject sceneObject, float ox, float oy, float oz, float dx,
+    static final boolean pickNodeAgainstBoundingBox(
+            SXRNode sceneObject, float ox, float oy, float oz, float dx,
             float dy, float dz, ByteBuffer readbackBuffer) {
         sFindObjectsLock.lock();
         try {
-            return NativePicker.pickSceneObjectAgainstBoundingBox(
+            return NativePicker.pickNodeAgainstBoundingBox(
                     sceneObject.getNative(), ox, oy, oz, dx, dy, dz, readbackBuffer);
         } finally {
             sFindObjectsLock.unlock();
@@ -1256,7 +1256,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * @see SXRPicker#pickObjects(SXRScene, float, float, float, float, float, float)
      */
     public static final class SXRPickedObject {
-        public final SXRSceneObject hitObject;
+        public final SXRNode hitObject;
         public final SXRCollider hitCollider;
         public SXRPicker picker;
         public final float[] hitLocation;
@@ -1280,14 +1280,14 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
          *            The hit location, as an [x, y, z] array.
          * @param faceIndex
          *            The index of the face intersected if a {@link SXRMeshCollider} was attached
-         *            to the {@link SXRSceneObject}, -1 otherwise
+         *            to the {@link SXRNode}, -1 otherwise
          * @param barycentricCoords
          *            The barycentric coordinates of the hit location on the intersected face
-         *            if a {@link SXRMeshCollider} was attached to the {@link SXRSceneObject},
+         *            if a {@link SXRMeshCollider} was attached to the {@link SXRNode},
          *            [ -1.0f, -1.0f, -1.0f ] otherwise.
          * @param textureCoords
          *            The texture coordinates of the hit location on the intersected face
-         *            if a {@link SXRMeshCollider} was attached to the {@link SXRSceneObject},
+         *            if a {@link SXRMeshCollider} was attached to the {@link SXRNode},
          *            [ -1.0f, -1.0f ] otherwise.
          *
          * @see SXRPicker#pickObjects(SXRScene, float, float, float, float, float, float)
@@ -1322,7 +1322,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
             this.motionEvent = null;
         }
 
-        public SXRPickedObject(SXRSceneObject hitObject, float[] hitLocation) {
+        public SXRPickedObject(SXRNode hitObject, float[] hitLocation) {
             this.hitObject = hitObject;
             this.hitLocation = hitLocation;
             this.hitDistance = -1;
@@ -1337,14 +1337,14 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
         }
 
         /**
-         * The {@link SXRSceneObject} that the ray intersected.
+         * The {@link SXRNode} that the ray intersected.
          *
          * This is the owner of the collider hit.
          *
          * @return scene object hit
          * @see SXRComponent#getOwnerObject()
          */
-        public SXRSceneObject getHitObject() {
+        public SXRNode getHitObject() {
             return hitObject;
         }
 
@@ -1444,13 +1444,13 @@ final class NativePicker {
     static native SXRPicker.SXRPickedObject[] pickObjects(long scene, long transform, float ox, float oy, float oz,
                                                           float dx, float dy, float dz);
 
-    static native SXRPicker.SXRPickedObject[] pickBounds(long scene, List<SXRSceneObject> collidables);
+    static native SXRPicker.SXRPickedObject[] pickBounds(long scene, List<SXRNode> collidables);
 
-    static native SXRPicker.SXRPickedObject pickSceneObject(long sceneObject, float ox, float oy, float oz,
+    static native SXRPicker.SXRPickedObject pickNode(long sceneObject, float ox, float oy, float oz,
                                                             float dx, float dy, float dz);
 
     static native SXRPicker.SXRPickedObject[] pickVisible(long scene);
 
-    static native boolean pickSceneObjectAgainstBoundingBox(long sceneObject,
+    static native boolean pickNodeAgainstBoundingBox(long sceneObject,
                                                             float ox, float oy, float oz, float dx, float dy, float dz, ByteBuffer readbackBuffer);
 }

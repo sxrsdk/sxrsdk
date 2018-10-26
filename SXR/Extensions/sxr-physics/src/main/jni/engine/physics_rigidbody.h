@@ -20,7 +20,7 @@
 #ifndef PHYSICS_RIGIDBODY_H_
 #define PHYSICS_RIGIDBODY_H_
 
-#include "objects/scene_object.h"
+#include "objects/node.h"
 #include "objects/components/component.h"
 #include "objects/components/transform.h"
 

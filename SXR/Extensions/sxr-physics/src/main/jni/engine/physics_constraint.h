@@ -16,7 +16,7 @@
 #ifndef EXTENSIONS_PHYSICS_CONSTRAINT_H
 #define EXTENSIONS_PHYSICS_CONSTRAINT_H
 
-#include "../objects/scene_object.h"
+#include "../objects/node.h"
 
 namespace sxr {
 

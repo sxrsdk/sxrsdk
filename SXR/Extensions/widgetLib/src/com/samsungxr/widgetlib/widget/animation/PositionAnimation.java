@@ -68,7 +68,7 @@ public class PositionAnimation extends TransformAnimation {
     private class Adapter extends SXRPositionAnimation implements
             Animation.AnimationAdapter {
         public Adapter(Widget target, float duration, float x, float y, float z) {
-            super(target.getSceneObject(), duration, x, y, z);
+            super(target.getNode(), duration, x, y, z);
         }
         @Override
         public void animate(SXRHybridObject target, float ratio) {

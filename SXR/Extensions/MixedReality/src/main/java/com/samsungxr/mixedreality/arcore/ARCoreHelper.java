@@ -25,7 +25,7 @@ import com.google.ar.core.TrackingState;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRAugmentedImage;
 import com.samsungxr.mixedreality.SXRHitResult;
@@ -197,13 +197,13 @@ public class ARCoreHelper {
         return arCoreAugmentedImage;
     }
 
-    public SXRAnchor createAnchor(Anchor arAnchor, SXRSceneObject sceneObject) {
+    public SXRAnchor createAnchor(Anchor arAnchor, SXRNode sceneObject) {
         ARCoreAnchor arCoreAnchor = new ARCoreAnchor(mGvrContext);
         arCoreAnchor.setAnchorAR(arAnchor);
         mArAnchors.add(arCoreAnchor);
 
         if (sceneObject != null) {
-            arCoreAnchor.attachSceneObject(sceneObject);
+            arCoreAnchor.attachNode(sceneObject);
         }
 
         return arCoreAnchor;
@@ -219,7 +219,7 @@ public class ARCoreHelper {
     public void removeAnchor(ARCoreAnchor anchor) {
         anchor.getAnchorAR().detach();
         mArAnchors.remove(anchor);
-        mGvrScene.removeSceneObject(anchor);
+        mGvrScene.removeNode(anchor);
     }
 
     public SXRHitResult hitTest(List<HitResult> hitResult) {

@@ -24,7 +24,7 @@ import java.util.List;
  * one child of a scene object.
  * 
  * It can be used to select from among several versions of an object.
- * When the SXRSwitch component is attached to a SXRSceneObject
+ * When the SXRSwitch component is attached to a SXRNode
  * it sets all but one of the scene object's children to be invisible.
  * You can control which child is visible by setting the switch index.
  * 
@@ -73,7 +73,7 @@ public class SXRSwitch extends SXRBehavior
      * 
      * If it is out of range, none of the children will be shown.
      * @param index 0 based index into children of owner.
-     * @see SXRSceneObject#getChildByIndex(int)
+     * @see SXRNode#getChildByIndex(int)
      */
     public void setSwitchIndex(int index)
     {
@@ -89,17 +89,17 @@ public class SXRSwitch extends SXRBehavior
      * 
      * If it is out of range, none of the children will be shown.
      * @param childName name of child to select
-     * @see SXRSceneObject#getChildByIndex(int)
+     * @see SXRNode#getChildByIndex(int)
      */
     public void selectByName(String childName)
     {
         int i = 0;
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
         if (owner == null)
         {
             return;
         }
-        for (SXRSceneObject child : owner.children())
+        for (SXRNode child : owner.children())
         {
             if (child.getName().equals(childName))
             {
@@ -115,11 +115,11 @@ public class SXRSwitch extends SXRBehavior
      * on the switch index. If the switch index does
      * not reference a valid child, nothing is displayed.
      * It is not called if this behavior is not attached
-     * to a {@link SXRSceneObject}.
+     * to a {@link SXRNode}.
      */
     public void onDrawFrame(float frameTime)
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
         if (owner == null)
         {
             return;
@@ -129,8 +129,8 @@ public class SXRSwitch extends SXRBehavior
             return;
         }
         int i = 0;
-        List<SXRSceneObject> children = owner.rawGetChildren();
-        for (SXRSceneObject child : children)
+        List<SXRNode> children = owner.rawGetChildren();
+        for (SXRNode child : children)
         {
             child.setEnable(i++ == mSwitchIndex);
         }

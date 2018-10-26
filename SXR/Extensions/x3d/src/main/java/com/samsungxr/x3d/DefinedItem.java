@@ -19,7 +19,7 @@ import java.util.concurrent.Future;
 
 import com.samsungxr.SXRIndexBuffer;
 import com.samsungxr.SXRMaterial;
-import com.samsungxr.scene_objects.SXRTextViewSceneObject;
+import com.samsungxr.nodes.SXRTextViewNode;
 /*
  * Used in Array List for items DEFined in X3D (using the DEF="...." parameter).
  * Another item using the USE="...." parameter will search the array list for the 
@@ -28,10 +28,10 @@ import com.samsungxr.scene_objects.SXRTextViewSceneObject;
 
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.SXRVertexBuffer;
-import com.samsungxr.scene_objects.SXRVideoSceneObject;
+import com.samsungxr.nodes.SXRVideoNode;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 import org.joml.Vector2f;
@@ -59,13 +59,13 @@ public class DefinedItem {
     private SXRMesh gvrMesh = null;
     private SXRIndexBuffer gvrIndexBuffer = null;
     private SXRVertexBuffer gvrVertexBuffer = null;
-    private SXRSceneObject gvrSceneObject = null;
+    private SXRNode gvrNode = null;
     private SXRTexture gvrTexture = null;
     private SXRRenderData gvrRenderData = null;
     private SXRMaterial gvrMaterial = null;
-    private SXRVideoSceneObject gvrVideoSceneObject = null;
+    private SXRVideoNode gvrVideoNode = null;
     private Viewpoint viewpoint = null;
-    private SXRTextViewSceneObject gvrTextViewSceneObject = null;
+    private SXRTextViewNode gvrTextViewNode = null;
     /**
      * X3D Transforms use AxisAngle format for rotations,
      * and float3 for the SpotLight, DirectionalLight direction
@@ -160,12 +160,12 @@ public class DefinedItem {
     public SXRTexture getSXRTexture() {
         return this.gvrTexture;
     }
-    public void setSXRVideoSceneObject(SXRVideoSceneObject gvrVideoSceneObject) {
-        this.gvrVideoSceneObject = gvrVideoSceneObject;
+    public void setSXRVideoNode(SXRVideoNode gvrVideoNode) {
+        this.gvrVideoNode = gvrVideoNode;
     }
 
-    public SXRVideoSceneObject getSXRVideoSceneObject() {
-        return this.gvrVideoSceneObject;
+    public SXRVideoNode getSXRVideoNode() {
+        return this.gvrVideoNode;
     }
 
     public void setSXRMesh(SXRMesh gvrMesh) {
@@ -193,20 +193,20 @@ public class DefinedItem {
     }
 
 
-    public void setSXRTextViewSceneObject(SXRTextViewSceneObject gvrTextViewSceneObject) {
-        this.gvrTextViewSceneObject = gvrTextViewSceneObject;
+    public void setSXRTextViewNode(SXRTextViewNode gvrTextViewNode) {
+        this.gvrTextViewNode = gvrTextViewNode;
     }
 
-    public SXRTextViewSceneObject getSXRTextViewSceneObject() {
-        return this.gvrTextViewSceneObject;
+    public SXRTextViewNode getSXRTextViewNode() {
+        return this.gvrTextViewNode;
     }
 
-    public void setSXRSceneObject(SXRSceneObject gvrSceneObject) {
-        this.gvrSceneObject = gvrSceneObject;
+    public void setSXRNode(SXRNode gvrNode) {
+        this.gvrNode = gvrNode;
     }
 
-    public SXRSceneObject getSXRSceneObject() {
-        return this.gvrSceneObject;
+    public SXRNode getSXRNode() {
+        return this.gvrNode;
     }
 
 

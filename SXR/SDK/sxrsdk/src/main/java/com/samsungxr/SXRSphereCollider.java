@@ -38,8 +38,8 @@ package com.samsungxr;
  * @see SXRPicker
  * @see SXRSphereCollider
  * @see SXRMeshCollider
- * @see SXRSceneObject#addChildObject(SXRComponent)
- * @see SXRSceneObject#getBoundingVolume()
+ * @see SXRNode#addChildObject(SXRComponent)
+ * @see SXRNode#getBoundingVolume()
  */
 public class SXRSphereCollider extends SXRCollider
 {

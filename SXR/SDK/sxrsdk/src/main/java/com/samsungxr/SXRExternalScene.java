@@ -1,7 +1,7 @@
 package com.samsungxr;
 
 import com.samsungxr.SXRBehavior;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.animation.SXRAnimator;
 import com.samsungxr.utility.Log;
 import com.samsungxr.SXRContext;

@@ -30,7 +30,7 @@ import com.samsungxr.animation.SXROnFinish;
 import com.samsungxr.debug.DebugServer;
 import com.samsungxr.io.SXRInputManager;
 import com.samsungxr.periodic.SXRPeriodicEngine;
-import com.samsungxr.scene_objects.SXRTextViewSceneObject;
+import com.samsungxr.nodes.SXRTextViewNode;
 import com.samsungxr.script.IScriptManager;
 import com.samsungxr.utility.Log;
 import com.samsungxr.utility.Threads;
@@ -300,7 +300,7 @@ public abstract class SXRContext implements IEventReceiver {
 
     /**
      * Get the current {@link SXRScene}, which contains the scene graph (a
-     * hierarchy of {@linkplain SXRSceneObject scene objects}) and the
+     * hierarchy of {@linkplain SXRNode scene objects}) and the
      * {@linkplain SXRCameraRig camera rig}
      * 
      * @return A {@link SXRScene} instance, containing scene and camera
@@ -701,26 +701,26 @@ public abstract class SXRContext implements IEventReceiver {
      */
     public void showToast(final String message, float duration) {
         final float quadWidth = 1.2f;
-        final SXRTextViewSceneObject toastSceneObject = new SXRTextViewSceneObject(this, quadWidth, quadWidth / 5,
+        final SXRTextViewNode toastNode = new SXRTextViewNode(this, quadWidth, quadWidth / 5,
                 message);
 
-        toastSceneObject.setTextSize(6);
-        toastSceneObject.setTextColor(Color.WHITE);
-        toastSceneObject.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP);
-        toastSceneObject.setBackgroundColor(Color.DKGRAY);
-        toastSceneObject.setRefreshFrequency(SXRTextViewSceneObject.IntervalFrequency.REALTIME);
+        toastNode.setTextSize(6);
+        toastNode.setTextColor(Color.WHITE);
+        toastNode.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP);
+        toastNode.setBackgroundColor(Color.DKGRAY);
+        toastNode.setRefreshFrequency(SXRTextViewNode.IntervalFrequency.REALTIME);
 
-        final SXRTransform t = toastSceneObject.getTransform();
+        final SXRTransform t = toastNode.getTransform();
         t.setPositionZ(-1.5f);
 
-        final SXRRenderData rd = toastSceneObject.getRenderData();
+        final SXRRenderData rd = toastNode.getRenderData();
         final float finalOpacity = 0.7f;
         rd.getMaterial().setOpacity(0);
         rd.setRenderingOrder(2 * SXRRenderData.SXRRenderingOrder.OVERLAY);
         rd.setDepthTest(false);
 
         final SXRCameraRig rig = getMainScene().getMainCameraRig();
-        rig.addChildObject(toastSceneObject);
+        rig.addChildObject(toastNode);
 
         final SXRMaterialAnimation fadeOut = new SXRMaterialAnimation(rd.getMaterial(), duration / 4.0f) {
             @Override
@@ -732,7 +732,7 @@ public abstract class SXRContext implements IEventReceiver {
         fadeOut.setOnFinish(new SXROnFinish() {
             @Override
             public void finished(SXRAnimation animation) {
-                rig.removeChildObject(toastSceneObject);
+                rig.removeChildObject(toastNode);
             }
         });
 

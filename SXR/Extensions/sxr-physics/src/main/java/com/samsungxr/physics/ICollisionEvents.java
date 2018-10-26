@@ -15,7 +15,7 @@
 
 package com.samsungxr.physics;
 
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.IEvents;
 
 /**
@@ -27,20 +27,20 @@ public interface ICollisionEvents extends IEvents {
     /**
      * Called when a Collision starts to be processed on a scene object.
      *
-     * @param sceneObj0 {@link SXRSceneObject} with a {@link SXRRigidBody} in collision with sceneObj1
-     * @param sceneObj1 {@link SXRSceneObject} with a {@link SXRRigidBody} in collision with sceneObj0
+     * @param sceneObj0 {@link SXRNode} with a {@link SXRRigidBody} in collision with sceneObj1
+     * @param sceneObj1 {@link SXRNode} with a {@link SXRRigidBody} in collision with sceneObj0
      * @param normal a float vector with the normal between the two colliding objects
      * @param distance distance between the objects (usually zero)
      */
-    void onEnter(SXRSceneObject sceneObj0, SXRSceneObject sceneObj1, float normal[], float distance);
+    void onEnter(SXRNode sceneObj0, SXRNode sceneObj1, float normal[], float distance);
 
     /**
      * Called when a Collision sceases to happen on a scene object.
      *
-     * @param sceneObj0 {@link SXRSceneObject} with a {@link SXRRigidBody} in collision with sceneObj1
-     * @param sceneObj1 {@link SXRSceneObject} with a {@link SXRRigidBody} in collision with sceneObj0
+     * @param sceneObj0 {@link SXRNode} with a {@link SXRRigidBody} in collision with sceneObj1
+     * @param sceneObj1 {@link SXRNode} with a {@link SXRRigidBody} in collision with sceneObj0
      * @param normal a float vector with the normal between the two colliding objects
      * @param distance distance between the objects (usually zero)
      */
-    void onExit(SXRSceneObject sceneObj0, SXRSceneObject sceneObj1, float normal[], float distance);
+    void onExit(SXRNode sceneObj0, SXRNode sceneObj1, float normal[], float distance);
 }

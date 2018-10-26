@@ -17,7 +17,7 @@ package com.samsungxr;
 
 /**
  * Contains the information, in UV space, of offset and scale
- * necessary to map a 2D texture of a texture atlas to the SXRSceneObject.
+ * necessary to map a 2D texture of a texture atlas to the SXRNode.
  */
 public class SXRAtlasInformation {
     private String mName = null;

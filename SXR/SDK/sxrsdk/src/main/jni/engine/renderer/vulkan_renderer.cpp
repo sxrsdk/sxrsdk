@@ -154,7 +154,7 @@ bool VulkanRenderer::renderWithShader(RenderState& rstate, Shader* shader, Rende
                                       : "SXRDepthShader";
         shader = rstate.shader_manager->findShader(depthShaderName);
         if (shader == nullptr) {
-            rstate.scene->makeDepthShaders(rstate.javaSceneObject);
+            rstate.scene->makeDepthShaders(rstate.javaNode);
             shader = rstate.shader_manager->findShader(depthShaderName);
             if (shader == nullptr) {
                 LOGE("Renderer::renderMesh cannot find depth shader %s", depthShaderName);
@@ -259,7 +259,7 @@ void VulkanRenderer::renderRenderDataVector(RenderState& rstate,std::vector<Rend
         }
     }
 }
-void VulkanRenderer::renderRenderTarget(Scene* scene, jobject javaSceneObject, RenderTarget* renderTarget, ShaderManager* shader_manager,
+void VulkanRenderer::renderRenderTarget(Scene* scene, jobject javaNode, RenderTarget* renderTarget, ShaderManager* shader_manager,
                                         RenderTexture* post_effect_render_texture_a, RenderTexture* post_effect_render_texture_b){
     std::vector<RenderData*> render_data_list;
     Camera* camera = renderTarget->getCamera();
@@ -270,7 +270,7 @@ void VulkanRenderer::renderRenderTarget(Scene* scene, jobject javaSceneObject, R
     rstate.uniforms.u_view = camera->getViewMatrix();
     rstate.uniforms.u_proj = camera->getProjectionMatrix();
     rstate.uniforms.u_view_inv = glm::inverse(camera->getViewMatrix());
-    rstate.javaSceneObject = javaSceneObject;
+    rstate.javaNode = javaNode;
     rstate.shadow_map = nullptr;
     rstate.lightsChanged = false;
 
@@ -374,9 +374,9 @@ void VulkanRenderer::renderRenderTarget(Scene* scene, jobject javaSceneObject, R
      * special depth shader (SXRDepthShader) to create the shadow map.
      * @see Renderer::renderShadowMap Light::makeShadowMap
      */
-    void VulkanRenderer::makeShadowMaps(Scene* scene, jobject javaSceneObject, ShaderManager* shader_manager)
+    void VulkanRenderer::makeShadowMaps(Scene* scene, jobject javaNode, ShaderManager* shader_manager)
     {
-        scene->getLights().makeShadowMaps(scene, javaSceneObject, shader_manager);
+        scene->getLights().makeShadowMaps(scene, javaNode, shader_manager);
     }
 
 }

@@ -6,7 +6,7 @@ import android.view.MotionEvent;
 
 
 import com.samsungxr.SXRPicker;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.IPickEvents;
 import com.samsungxr.ITouchEvents;
 import com.samsungxr.io.SXRCursorController;
@@ -83,7 +83,7 @@ class WidgetPickHandler implements SXRInputManager.ICursorControllerSelectListen
 
     static private class PickEventsListener implements IPickEvents {
 
-        public void onEnter(final SXRSceneObject sceneObj, final SXRPicker.SXRPickedObject collision) {
+        public void onEnter(final SXRNode sceneObj, final SXRPicker.SXRPickedObject collision) {
             WidgetLib.getMainThread().runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
@@ -98,7 +98,7 @@ class WidgetPickHandler implements SXRInputManager.ICursorControllerSelectListen
             });
         }
 
-        public void onExit(final SXRSceneObject sceneObj) {
+        public void onExit(final SXRNode sceneObj) {
             WidgetLib.getMainThread().runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
@@ -159,13 +159,13 @@ class WidgetPickHandler implements SXRInputManager.ICursorControllerSelectListen
 
         private final Set<Widget> mSelected = new HashSet<>();
 
-        public void onInside(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) {
+        public void onInside(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) {
         }
     }
 
     static private class TouchEventsListener implements ITouchEvents {
 
-        public void onTouchStart(final SXRSceneObject sceneObj, final SXRPicker.SXRPickedObject collision) {
+        public void onTouchStart(final SXRNode sceneObj, final SXRPicker.SXRPickedObject collision) {
             WidgetLib.getMainThread().runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
@@ -181,7 +181,7 @@ class WidgetPickHandler implements SXRInputManager.ICursorControllerSelectListen
             });
         }
 
-        public void onTouchEnd(final SXRSceneObject sceneObj, final SXRPicker.SXRPickedObject collision) {
+        public void onTouchEnd(final SXRNode sceneObj, final SXRPicker.SXRPickedObject collision) {
             WidgetLib.getMainThread().runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
@@ -201,7 +201,7 @@ class WidgetPickHandler implements SXRInputManager.ICursorControllerSelectListen
             });
         }
 
-        public void onExit(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) {
+        public void onExit(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) {
         }
 
         public void onMotionOutside(final SXRPicker picker, final MotionEvent event) {
@@ -235,10 +235,10 @@ class WidgetPickHandler implements SXRInputManager.ICursorControllerSelectListen
 
         private final List<Widget> mTouched = new ArrayList<>();
         private FlingHandler mFlingHandler;
-        public void onEnter(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) {
+        public void onEnter(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) {
         }
 
-        public void onInside(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) {
+        public void onInside(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) {
         }
 
         private FlingHandler.FlingAction mFling;

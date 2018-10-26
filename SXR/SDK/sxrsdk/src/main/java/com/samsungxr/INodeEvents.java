@@ -16,21 +16,21 @@
 package com.samsungxr;
 
 /**
- * This interface defines events for SXRSceneObject. Please note that the SXRSceneObject
+ * This interface defines events for SXRNode. Please note that the SXRNode
  * class does not implement this interface. To handle events delivered to it, user can
- * add an object that implements this interface to a SXRSceneObject using
+ * add an object that implements this interface to a SXRNode using
  * {@link SXREventReceiver#addListener(IEvents)}. The SXREventReceiver can be obtained
- * using {@link SXRSceneObject#getEventReceiver()}.
+ * using {@link SXRNode#getEventReceiver()}.
  */
-public interface ISceneObjectEvents extends ILifeCycleEvents {
+public interface INodeEvents extends ILifeCycleEvents {
     /**
-     * Called when a {@link SXRSceneObject} is constructed.
+     * Called when a {@link SXRNode} is constructed.
      * @param gvrContext
      *         The SXRContext.
      * @param sceneObject
-     *         The SXRSceneObject itself.
+     *         The SXRNode itself.
      */
-    void onInit(SXRContext gvrContext, SXRSceneObject sceneObject);
+    void onInit(SXRContext gvrContext, SXRNode sceneObject);
 
     /**
      * Called after the object has been loaded from a model.

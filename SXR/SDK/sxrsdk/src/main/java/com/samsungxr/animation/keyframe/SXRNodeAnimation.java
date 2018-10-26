@@ -19,7 +19,7 @@ import java.util.List;
 
 import com.samsungxr.SXRBone;
 import com.samsungxr.SXRHybridObject;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 import com.samsungxr.PrettyPrint;
 import com.samsungxr.animation.SXRAnimation;
@@ -43,7 +43,7 @@ public class SXRNodeAnimation extends SXRTransformAnimation implements PrettyPri
      * @param target The target object it influences.
      * @param duration Duration of the animation in seconds.
      */
-    public SXRNodeAnimation(String name, SXRSceneObject target, float duration, SXRAnimationChannel channel)
+    public SXRNodeAnimation(String name, SXRNode target, float duration, SXRAnimationChannel channel)
     {
     	super(target.getTransform(), duration);
         mName = name;

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.samsungxr.scene_objects;
+package com.samsungxr.nodes;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -47,7 +47,7 @@ import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRMeshCollider;
 import com.samsungxr.SXRPicker;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.IKeyboardEvents;
 import com.samsungxr.ITouchEvents;
@@ -62,12 +62,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *  * A {@linkplain SXRSceneObject scene object} that renders a virtual {@link Keyboard}.
+ *  * A {@linkplain SXRNode scene object} that renders a virtual {@link Keyboard}.
  *  It handles rendering of keys and detecting touch movements.
  *
  * See: {@link Keyboard}
  */
-public class SXRKeyboardSceneObject extends SXRSceneObject {
+public class SXRKeyboardNode extends SXRNode {
     private final SXRApplication mApplication;
 
     private SXRMesh mKeyboardMesh;
@@ -86,20 +86,20 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
     private float mKeyMeshDepthPos;
 
     private final float mDefaultKeyAnimZOffset;
-    private SXRSceneObject mEditableSceneObject;
+    private SXRNode mEditableNode;
     private KeyEventsHandler mKeyEventsHandler;
     private SXRPicker mPicker;
     private EnableVisitor mEnabler = new EnableVisitor();
 
 
     /**
-     * Creates a {@linkplain SXRKeyboardSceneObject keyboard} from the given xml key layout file.
+     * Creates a {@linkplain SXRKeyboardNode keyboard} from the given xml key layout file.
      * Loads an XML description of a keyboard and stores the attributes of the keys.
      * A keyboard consists of rows of keys.
      *
      * @param gvrContext current {@link SXRContext}
      */
-    private SXRKeyboardSceneObject(SXRContext gvrContext, int keyboardResId, SXRMesh keyboardMesh,
+    private SXRKeyboardNode(SXRContext gvrContext, int keyboardResId, SXRMesh keyboardMesh,
                                   SXRMesh keyMesh, SXRTexture keyboardTexture,
                                    Drawable keyBackground, int textColor, boolean enableHoverAnim) {
         super(gvrContext);
@@ -121,7 +121,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
         mKeyMeshDepthSize = MeshUtils.getBoundingSize(mKeyMesh)[2];
         mKeyEventsHandler = new KeyEventsHandler(gvrContext.getActivity().getMainLooper(), this, mApplication);
         mSXRKeyboardCache = new HashMap<Integer, SXRKeyboard>();
-        mEditableSceneObject = null;
+        mEditableNode = null;
         mMiniKeyboard = null;
         mMainKeyboard = null;
         EnumSet<SXRPicker.EventOptions> eventOptions = EnumSet.of(
@@ -224,7 +224,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
         return gvrKeyboard;
     }
 
-    private SXRKeyboard createSXRKeyboard(Keyboard keyboard, int cacheId, SXRKeyboardSceneObject owner) {
+    private SXRKeyboard createSXRKeyboard(Keyboard keyboard, int cacheId, SXRKeyboardNode owner) {
         SXRContext gvrContext = getSXRContext();
         SXRKeyboard gvrKeyboard = new SXRKeyboard(owner, keyboard,
                 MeshUtils.clone(getSXRContext(), mKeyboardMesh), cacheId);
@@ -273,9 +273,9 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
         }
     };
 
-    public void startInput(SXRViewSceneObject sceneObject)
+    public void startInput(SXRViewNode sceneObject)
     {
-        mEditableSceneObject = sceneObject;
+        mEditableNode = sceneObject;
         mKeyEventsHandler.start();
         if (mViewKeyHandler == null)
         {
@@ -283,7 +283,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
             sceneObject.getEventReceiver().addListener(mViewKeyHandler);
         }
         mPicker.getEventReceiver().addListener(mKeyboardTouchManager);
-        onStartInput(mEditableSceneObject);
+        onStartInput(mEditableNode);
     }
 
     public void stopInput() {
@@ -291,22 +291,22 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
         mKeyEventsHandler.stop();
         onHideMiniKeyboard();
         onClose();
-        onStopInput(mEditableSceneObject);
-        mEditableSceneObject = null;
+        onStopInput(mEditableNode);
+        mEditableNode = null;
     }
 
-    private static class EnableVisitor implements SXRSceneObject.ComponentVisitor
+    private static class EnableVisitor implements SXRNode.ComponentVisitor
     {
         public boolean Enable;
         EnableVisitor() { }
 
-        public void enableAll(SXRSceneObject root, long componentType)
+        public void enableAll(SXRNode root, long componentType)
         {
             Enable = true;
             root.forAllComponents(this, componentType);
         }
 
-        public void disableAll(SXRSceneObject root, long componentType)
+        public void disableAll(SXRNode root, long componentType)
         {
             Enable = true;
             root.forAllComponents(this, componentType);
@@ -455,28 +455,28 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
         return true;
     }
 
-    protected void onStartInput(SXRSceneObject sceneObject) {
+    protected void onStartInput(SXRNode sceneObject) {
         getSXRContext().getEventManager().sendEvent(sceneObject, IKeyboardEvents.class,
                 "onStartInput", this);
     }
 
-    protected void onStopInput(SXRSceneObject sceneObject) {
+    protected void onStopInput(SXRNode sceneObject) {
         getSXRContext().getEventManager().sendEvent(sceneObject, IKeyboardEvents.class,
                 "onStopInput", this);
     }
 
     protected void onSendKey(SXRKey gvrKey) {
-        if (mEditableSceneObject == null)
+        if (mEditableNode == null)
             return;
 
         Keyboard.Key key = gvrKey.getKey();
 
-        getSXRContext().getEventManager().sendEvent(mEditableSceneObject, IKeyboardEvents.class,
+        getSXRContext().getEventManager().sendEvent(mEditableNode, IKeyboardEvents.class,
                 "onKey", this, key.codes[0], key.codes);
     }
 
-    private static class SXRKeyboard extends SXRSceneObject {
-        private final SXRKeyboardSceneObject mOwner;
+    private static class SXRKeyboard extends SXRNode {
+        private final SXRKeyboardNode mOwner;
         private final Keyboard mKeyboard;
         private final float mKeyboardSize;
         private final float mKeyboardWidth;
@@ -487,7 +487,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
         private List<SXRKey> mSXRkeys;
 
 
-        public SXRKeyboard(SXRKeyboardSceneObject owner, Keyboard keyboard, SXRMesh mesh, int resId) {
+        public SXRKeyboard(SXRKeyboardNode owner, Keyboard keyboard, SXRMesh mesh, int resId) {
             super(owner.getSXRContext(), mesh);
             mOwner = owner;
             mKeyboard = keyboard;
@@ -560,7 +560,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
         }
     }
 
-    private static class SXRKey extends SXRSceneObject {
+    private static class SXRKey extends SXRNode {
         private final Keyboard.Key mKey;
         private final Drawable mBackground;
         private final int mTextColor;
@@ -821,7 +821,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
         private static final int MSG_REPEAT = 4;
 
         private boolean mIsProcessing = false;
-        SXRKeyboardSceneObject mGvrKeyboard;
+        SXRKeyboardNode mGvrKeyboard;
         SXRApplication mApplication;
         SXRKey mSelectedKey;
         SXRKey mPressedKey;
@@ -874,7 +874,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
             }
         };
 
-        public KeyEventsHandler(Looper loop, SXRKeyboardSceneObject gvrKeyboard, SXRApplication activity) {
+        public KeyEventsHandler(Looper loop, SXRKeyboardNode gvrKeyboard, SXRApplication activity) {
             super(loop);
             mGvrKeyboard = gvrKeyboard;
             mApplication = activity;
@@ -916,26 +916,26 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
             }
         }
 
-        public void onEnter(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo) {
+        public void onEnter(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
             mOnEnterKey.HitKey = (SXRKey) pickInfo.hitObject;
             mApplication.getActivity().runOnUiThread(mOnEnterKey);
         }
 
-        public void onExit(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo) {
+        public void onExit(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
             mOnExitKey.HitKey = (SXRKey) pickInfo.hitObject;
             mApplication.getActivity().runOnUiThread(mOnExitKey);
        }
 
-        public void onTouchStart(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo) {
+        public void onTouchStart(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
             mApplication.getActivity().runOnUiThread(mOnTouchStartKey);
         }
 
-        public void onTouchEnd(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo) {
+        public void onTouchEnd(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
             mApplication.getActivity().runOnUiThread(mOnTouchEndKey);
         }
 
         @Override
-        public void onInside(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo)
+        public void onInside(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo)
         {
             MotionEvent event = pickInfo.motionEvent;
 
@@ -1068,7 +1068,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
     }
 
     /**
-     * Builder for the {@link SXRKeyboardSceneObject}.
+     * Builder for the {@link SXRKeyboardNode}.
      */
     public static class Builder {
         private SXRMesh keyboardMesh;
@@ -1079,7 +1079,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
         private int textColor;
 
         /**
-         * Creates a builder for the {@link SXRKeyboardSceneObject}.
+         * Creates a builder for the {@link SXRKeyboardNode}.
          */
         public Builder() {
             this.keyboardMesh = null;
@@ -1120,7 +1120,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
             return this;
         }
 
-        public SXRKeyboardSceneObject build(SXRContext gvrContext, int keyboardResId) {
+        public SXRKeyboardNode build(SXRContext gvrContext, int keyboardResId) {
             if (keyboardMesh == null) {
                 keyboardMesh = MeshUtils.createQuad(gvrContext, 1.0f, 1.0f);
             }
@@ -1136,7 +1136,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
                 throw new IllegalArgumentException("Key's texture should not be null.");
             }
 
-            return new SXRKeyboardSceneObject(gvrContext, keyboardResId, this.keyboardMesh,
+            return new SXRKeyboardNode(gvrContext, keyboardResId, this.keyboardMesh,
                     this.keyMesh, this.keyboardTexture, this.keyBackground,
                     this.textColor, keyHoveredAnimated);
         }
@@ -1146,8 +1146,8 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
     private static class InputMethodHandler implements IKeyboardEvents
     {
         final SXRApplication mApplication;
-        final SXRViewSceneObject.RootViewGroup mRootGroup;
-        SXRKeyboardSceneObject mGvrKeybaord;
+        final SXRViewNode.RootViewGroup mRootGroup;
+        SXRKeyboardNode mGvrKeybaord;
         final String mWordSeparators;
         InputConnection mInputConnection;
         EditorInfo mInputEditorInfo;
@@ -1156,7 +1156,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
         boolean mCapsLock;
         long mLastShiftTime;
 
-        public InputMethodHandler(SXRViewSceneObject view)
+        public InputMethodHandler(SXRViewNode view)
         {
             mApplication = view.getSXRContext().getApplication();
             mRootGroup = view.getRootView();
@@ -1227,7 +1227,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
         }
 
         @Override
-        public void onKey(SXRKeyboardSceneObject sceneObject, int primaryCode, int[] keyCodes)
+        public void onKey(SXRKeyboardNode sceneObject, int primaryCode, int[] keyCodes)
         {
             if (sceneObject != mGvrKeybaord || mInputConnection == null)
                 return;
@@ -1264,7 +1264,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
         }
 
         @Override
-        public void onStartInput(SXRKeyboardSceneObject sceneObject)
+        public void onStartInput(SXRKeyboardNode sceneObject)
         {
             // TODO: Finish previous input if exists or not finished before
             View view = mRootGroup.findFocus();
@@ -1281,7 +1281,7 @@ public class SXRKeyboardSceneObject extends SXRSceneObject {
         }
 
         @Override
-        public void onStopInput(SXRKeyboardSceneObject sceneObject)
+        public void onStopInput(SXRKeyboardNode sceneObject)
         {
             // TODO: Finish current input
             if (mGvrKeybaord == sceneObject)

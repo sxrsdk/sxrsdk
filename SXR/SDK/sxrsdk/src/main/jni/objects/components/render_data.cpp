@@ -18,7 +18,7 @@
 
 #include "util/jni_utils.h"
 #include "objects/scene.h"
-#include "objects/scene_object.h"
+#include "objects/node.h"
 #include "shaders/shader.h"
 #include "objects/components/skin.h"
 #include <glslang/Include/Common.h> //@todo remove; for to_string
@@ -82,7 +82,7 @@ void RenderData::set_mesh(Mesh* mesh)
     {
         mesh_ = mesh;
         markDirty();
-        SceneObject* owner = owner_object();
+        Node* owner = owner_object();
         if (owner)
         {
             owner->dirtyHierarchicalBoundingVolume();
@@ -146,9 +146,9 @@ void RenderData::setStencilTest(bool flag) {
 /**
  * Called when the shader for a RenderData needs to be generated on the Java side.
  */
-void RenderData::bindShader(JNIEnv* env, jobject localSceneObject, bool isMultiview)
+void RenderData::bindShader(JNIEnv* env, jobject localNode, bool isMultiview)
 {
-    env->CallVoidMethod(bindShaderObject_, bindShaderMethod_, localSceneObject, isMultiview);
+    env->CallVoidMethod(bindShaderObject_, bindShaderMethod_, localNode, isMultiview);
 }
 
 bool compareRenderDataByShader(RenderData *i, RenderData *j)
@@ -290,7 +290,7 @@ int RenderData::isValid(Renderer* renderer, const RenderState& rstate)
         JNIEnv* env = nullptr;
         int rc = rstate.scene->get_java_env(&env);
 
-        bindShader(env, rstate.javaSceneObject, rstate.is_multiview);
+        bindShader(env, rstate.javaNode, rstate.is_multiview);
         if (rc > 0)
         {
             rstate.scene->detach_java_env();

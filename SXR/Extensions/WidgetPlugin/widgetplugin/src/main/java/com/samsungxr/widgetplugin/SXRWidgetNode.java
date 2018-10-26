@@ -22,12 +22,12 @@ import com.samsungxr.SXRMaterial.SXRShaderType;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRMeshCollider;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRSharedTexture;
 
 
 /**
- * SXRWidgetSceneObject shows the SXRwidget widgets are created from LibGDX
+ * SXRWidgetNode shows the SXRwidget widgets are created from LibGDX
  * GlSurfaceView which is created by app as follows
  * <pre>
  *     <code>
@@ -44,7 +44,7 @@ import com.samsungxr.SXRSharedTexture;
  *     </code>
  * </pre>
  *  above is parent GLSurfaceView of width 600 pixel and height 500 pixel, which has to be broken
- *  up in 3 SXRWidgetSceneObjects as laid out. the first Scene object would display rectangle
+ *  up in 3 SXRWidgetNodes as laid out. the first Scene object would display rectangle
  *  created by 1 to 300 pixels horizontally and 1 to 500 pixels vertically the second scene
  *  object would display rectangle created by 301 to 600 pixels horizontally and 1 to 250 pixels
  *  vertically the third scene object would display rectangle created by 301 to 600 pixels
@@ -52,7 +52,7 @@ import com.samsungxr.SXRSharedTexture;
  *  this view by assigning appropriate texture coordinates.
  * 
  */
-public class SXRWidgetSceneObject extends SXRSceneObject
+public class SXRWidgetNode extends SXRNode
 {
 
     private int mWidth;
@@ -60,10 +60,10 @@ public class SXRWidgetSceneObject extends SXRSceneObject
 
     private static final char[] SIMPLE_INDICES = {0, 1, 2, 2, 1, 3};
 
-    private SXRWidgetSceneObjectMeshInfo mMeshInfo;
+    private SXRWidgetNodeMeshInfo mMeshInfo;
 
     /**
-     * Shows SXRF UI widgets (Libgdx scene2d) {@linkplain SXRWidgetSceneObject
+     * Shows SXRF UI widgets (Libgdx scene2d) {@linkplain SXRWidgetNode
      * scene object}
      *
      * @param gvrContext current {@link SXRContext}
@@ -72,7 +72,7 @@ public class SXRWidgetSceneObject extends SXRSceneObject
      *                   and {@link SXRContext#createQuad(float, float)}
      * @param texid        Libgdx Texture ID
      */
-    public SXRWidgetSceneObject(SXRContext gvrContext, SXRMesh mesh, int texid)
+    public SXRWidgetNode(SXRContext gvrContext, SXRMesh mesh, int texid)
     {
         super(gvrContext, mesh);
 
@@ -86,15 +86,15 @@ public class SXRWidgetSceneObject extends SXRSceneObject
     }
 
     /**
-     * Shows SXRF UI widgets (Libgdx scene2d) {@linkplain SXRWidgetSceneObject
+     * Shows SXRF UI widgets (Libgdx scene2d) {@linkplain SXRWidgetNode
      * scene object}
      *
      * @param gvrContext     current {@link SXRContext}
-     * @param mesh           a {@link SXRWidgetSceneObjectMeshInfo}
+     * @param mesh           a {@link SXRWidgetNodeMeshInfo}
      * @param viewWidth      Libgdx viewWidth
      * @param viewHeight     Libgdx viewHeight
      */
-    public SXRWidgetSceneObject(SXRContext gvrContext, int texid, SXRWidgetSceneObjectMeshInfo mesh, int viewWidth, int viewHeight)
+    public SXRWidgetNode(SXRContext gvrContext, int texid, SXRWidgetNodeMeshInfo mesh, int viewWidth, int viewHeight)
     {
         super(gvrContext);
         mMeshInfo = mesh;
@@ -105,13 +105,13 @@ public class SXRWidgetSceneObject extends SXRSceneObject
         {
             material.setMainTexture(new SXRSharedTexture(gvrContext, texid));
         }
-        createSceneObject(gvrContext, material);
+        createNode(gvrContext, material);
     }
 
     public float getWidth() { return mWidth; }
     public float getHeight() { return mHeight; }
 
-    private void createSceneObject(SXRContext gvrContext, SXRMaterial mat)
+    private void createNode(SXRContext gvrContext, SXRMaterial mat)
     {
         SXRMesh mesh = new SXRMesh(gvrContext, "float3 a_position float2 a_texcoord");
         float[] vertices = {mMeshInfo.mTopLeftX, mMeshInfo.mBottomRightY, mMeshInfo.mZ,
@@ -141,7 +141,7 @@ public class SXRWidgetSceneObject extends SXRSceneObject
         attachCollider(new SXRMeshCollider(gvrContext, null, true));
     }
 
-    public SXRWidgetSceneObjectMeshInfo getmeshInfo()
+    public SXRWidgetNodeMeshInfo getmeshInfo()
     {
         return mMeshInfo;
     }

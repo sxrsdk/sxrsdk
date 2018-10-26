@@ -19,7 +19,7 @@ package com.samsungxr.io.cursor3d;
 import android.util.SparseArray;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.animation.SXRAnimationEngine;
 import com.samsungxr.animation.SXRAnimator;
 import com.samsungxr.animation.SXRRepeatMode;
@@ -33,29 +33,29 @@ import java.io.IOException;
 class ObjectCursorAsset extends CursorAsset {
     private static final String TAG = ObjectCursorAsset.class.getSimpleName();
     private final String assetName;
-    private SparseArray<SXRSceneObject> objects;
+    private SparseArray<SXRNode> objects;
     private SXRAnimationEngine animationEngine;
     private int LOOP_REPEAT_COUNT = -1;
 
     ObjectCursorAsset(SXRContext context, CursorType type, Action action, String assetName) {
         super(context, type, action);
         this.assetName = assetName;
-        objects = new SparseArray<SXRSceneObject>();
+        objects = new SparseArray<SXRNode>();
         animationEngine = context.getAnimationEngine();
     }
 
     @Override
     void set(Cursor cursor) {
         super.set(cursor);
-        SXRSceneObject modelSceneObject = objects.get(cursor.getId());
+        SXRNode modelNode = objects.get(cursor.getId());
 
-        if (modelSceneObject == null) {
+        if (modelNode == null) {
             Log.e(TAG, "Model not found, should not happen");
             return;
         }
-        modelSceneObject.setEnable(true);
+        modelNode.setEnable(true);
 
-        SXRAnimator animator = (SXRAnimator) modelSceneObject.getComponent(SXRAnimator.getComponentType());
+        SXRAnimator animator = (SXRAnimator) modelNode.getComponent(SXRAnimator.getComponentType());
         if (animator != null)
         {
             animator.setRepeatMode(SXRRepeatMode.REPEATED);
@@ -64,25 +64,25 @@ class ObjectCursorAsset extends CursorAsset {
         }
     }
 
-    private SXRSceneObject loadModelSceneObject() {
-        SXRSceneObject modelSceneObject = null;
+    private SXRNode loadModelNode() {
+        SXRNode modelNode = null;
         try {
-            modelSceneObject = context.getAssetLoader().loadModel(assetName);
+            modelNode = context.getAssetLoader().loadModel(assetName);
         } catch (IOException e) {
             //should not happen
             Log.e(TAG, "Could not load model", e);
         }
-        return modelSceneObject;
+        return modelNode;
     }
 
     @Override
     void reset(Cursor cursor) {
         super.reset(cursor);
 
-        SXRSceneObject modelSceneObject = objects.get(cursor.getId());
+        SXRNode modelNode = objects.get(cursor.getId());
 
-        modelSceneObject.setEnable(false);
-        SXRAnimator animator = (SXRAnimator) modelSceneObject.getComponent(SXRAnimator.getComponentType());
+        modelNode.setEnable(false);
+        SXRAnimator animator = (SXRAnimator) modelNode.getComponent(SXRAnimator.getComponentType());
         if (animator != null)
         {
             animator.setRepeatMode(SXRRepeatMode.ONCE);
@@ -94,21 +94,21 @@ class ObjectCursorAsset extends CursorAsset {
     @Override
     void load(Cursor cursor) {
         Integer key = cursor.getId();
-        SXRSceneObject modelSceneObject = objects.get(key);
+        SXRNode modelNode = objects.get(key);
 
-        if (modelSceneObject == null) {
-            modelSceneObject = loadModelSceneObject();
-            modelSceneObject.setName( getAction().toString() + key.toString());
-            objects.put(key, modelSceneObject);
+        if (modelNode == null) {
+            modelNode = loadModelNode();
+            modelNode.setName( getAction().toString() + key.toString());
+            objects.put(key, modelNode);
         }
-        cursor.addChildObject(modelSceneObject);
-        modelSceneObject.setEnable(false);
+        cursor.addChildObject(modelNode);
+        modelNode.setEnable(false);
     }
 
     @Override
     void unload(Cursor cursor) {
-        SXRSceneObject assetSceneObject = objects.get(cursor.getId());
-        cursor.removeChildObject(assetSceneObject);
+        SXRNode assetNode = objects.get(cursor.getId());
+        cursor.removeChildObject(assetNode);
         objects.remove(cursor.getId());
     }
 }
