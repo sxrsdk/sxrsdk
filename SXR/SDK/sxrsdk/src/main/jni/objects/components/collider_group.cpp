@@ -20,7 +20,7 @@
 
 #include "collider_group.h"
 
-#include "objects/scene_object.h"
+#include "objects/node.h"
 #include "glm/gtc/matrix_inverse.hpp"
 
 
@@ -45,7 +45,7 @@ namespace sxr {
     }
 
 
-    ColliderData ColliderGroup::isHit(SceneObject* ownerObject, const glm::vec3& rayStart, const glm::vec3& rayDir)
+    ColliderData ColliderGroup::isHit(Node* ownerObject, const glm::vec3& rayStart, const glm::vec3& rayDir)
     {
         ColliderData finalHit(reinterpret_cast<Collider *>(this));
 
@@ -72,7 +72,7 @@ namespace sxr {
         return finalHit;
     }
 
-    ColliderData ColliderGroup::isHit(SceneObject* owner, const float sphere[])
+    ColliderData ColliderGroup::isHit(Node* owner, const float sphere[])
     {
         ColliderData finalHit(reinterpret_cast<Collider*>(this));
 

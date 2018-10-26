@@ -32,7 +32,7 @@ import org.joml.Vector4f;
  * direction of the scene object. The frustum will pick what a camera
  * attached to the scene object with that view frustum would see.
  *
- * For a {@linkplain SXRSceneObject scene object} to be pickable, it must have a
+ * For a {@linkplain SXRNode scene object} to be pickable, it must have a
  * {@link SXRCollider} component attached to it that is enabled.
  * The picker returns an array containing all the collisions as instances of SXRPickedObject.
  * The picked object contains the collider instance, the distance from the
@@ -44,14 +44,14 @@ import org.joml.Vector4f;
  * the picker generates one or more pick events (IPickEvents interface)
  * which are sent the event receiver of the scene. These events can be
  * observed by listeners.
- *  - onEnter(SXRSceneObject)  called when the scene object enters the frustum.
- *  - onExit(SXRSceneObject)   called when the scene object exits the frustum.
- *  - onInside(SXRSceneObject) called while the scene object is inside the frustum.
+ *  - onEnter(SXRNode)  called when the scene object enters the frustum.
+ *  - onExit(SXRNode)   called when the scene object exits the frustum.
+ *  - onInside(SXRNode) called while the scene object is inside the frustum.
  *  - onPick(SXRPicker)        called when the set of picked objects changes.
  *  - onNoPick(SXRPicker)      called once when nothing is picked.
  *
  * @see IPickEvents
- * @see SXRSceneObject#attachComponent(SXRComponent)
+ * @see SXRNode#attachComponent(SXRComponent)
  * @see SXRCollider
  * @see SXRComponent#setEnable(boolean)
  * @see com.samsungxr.SXRPicker.SXRPickedObject
@@ -171,7 +171,7 @@ public class SXRFrustumPicker extends SXRPicker {
      */
     public void doPick()
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
         SXRPickedObject[] picked = pickVisible(mScene);
 
         if (mProjection != null)
@@ -193,8 +193,8 @@ public class SXRFrustumPicker extends SXRPicker {
 
                 if (hit != null)
                 {
-                    SXRSceneObject sceneObj = hit.hitObject;
-                    SXRSceneObject.BoundingVolume bv = sceneObj.getBoundingVolume();
+                    SXRNode sceneObj = hit.hitObject;
+                    SXRNode.BoundingVolume bv = sceneObj.getBoundingVolume();
                     Vector4f center = new Vector4f(bv.center.x, bv.center.y, bv.center.z, 1);
                     Vector4f p = new Vector4f(bv.center.x, bv.center.y, bv.center.z + bv.radius, 1);
                     float radius;

@@ -27,7 +27,7 @@ import com.samsungxr.SXRActivity;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRScene;
 import com.samsungxr.IViewEvents;
-import com.samsungxr.scene_objects.SXRViewSceneObject;
+import com.samsungxr.nodes.SXRViewNode;
 
 abstract class BaseView {
     private static final String TAG = BaseView.class.getSimpleName();
@@ -37,7 +37,7 @@ abstract class BaseView {
     SXRScene scene;
     SXRContext context;
     Activity activity;
-    private SXRViewSceneObject layoutSceneObject;
+    private SXRViewNode layoutNode;
     int settingsCursorId;
 
     BaseView(SXRContext context, SXRScene scene, int settingsCursorId, int layoutID) {
@@ -51,44 +51,44 @@ abstract class BaseView {
         this.activity = context.getActivity();
         this.settingsCursorId = settingsCursorId;
 
-        layoutSceneObject = new SXRViewSceneObject(context, layoutID, new IViewEvents() {
+        layoutNode = new SXRViewNode(context, layoutID, new IViewEvents() {
             @Override
-            public void onInitView(SXRViewSceneObject gvrViewSceneObject, View view) {
+            public void onInitView(SXRViewNode gvrViewNode, View view) {
                 BaseView.this.onInitView(view);
             }
 
             @Override
-            public void onStartRendering(SXRViewSceneObject gvrViewSceneObject, View view) {
-                gvrViewSceneObject.getTransform().setScale(scale, scale, 1.0f);
+            public void onStartRendering(SXRViewNode gvrViewNode, View view) {
+                gvrViewNode.getTransform().setScale(scale, scale, 1.0f);
                 BaseView.this.onStartRendering();
             }
         });
 
-        layoutSceneObject.setTextureBufferSize(1024);
+        layoutNode.setTextureBufferSize(1024);
     }
 
     abstract protected void onInitView(View view);
     abstract protected void onStartRendering();
 
     void render(final float x, final float y, final float z) {
-        layoutSceneObject.getTransform().setPosition(x, y, z);
+        layoutNode.getTransform().setPosition(x, y, z);
         show();
     }
 
     void show() {
-        scene.addSceneObject(layoutSceneObject);
+        scene.addNode(layoutNode);
     }
 
     void hide() {
-        scene.removeSceneObject(layoutSceneObject);
+        scene.removeNode(layoutNode);
     }
 
     void disable() {
-        scene.removeSceneObject(layoutSceneObject);
+        scene.removeNode(layoutNode);
     }
 
     void enable() {
-        scene.addSceneObject(layoutSceneObject);
+        scene.addNode(layoutNode);
     }
 
     void setSettingsCursorId(int settingsCursorId) {
@@ -96,6 +96,6 @@ abstract class BaseView {
     }
 
     protected void setGestureDetector(GestureDetector detector) {
-        layoutSceneObject.setGestureDetector(detector);
+        layoutNode.setGestureDetector(detector);
     }
 }

@@ -19,7 +19,7 @@
 
 #include "exporter.h"
 
-#include "objects/scene_object.h"
+#include "objects/node.h"
 #include "util/sxr_log.h"
 #include "objects/components/render_data.h"
 
@@ -67,8 +67,8 @@ void glm2aiMatrix4x4(aiMatrix4x4 &p, glm::mat4 m) {
     p.d1 = m[0][3]; p.d2 = m[1][3]; p.d3 = m[2][3]; p.d4 = m[3][3];
 }
 
-/* Sets the transformations of SXRSceneObject to aiNode of i Mesh */
-void sxr2aiNode(SceneObject &sxrobj, aiNode &ainode, int i) {
+/* Sets the transformations of SXRNode to aiNode of i Mesh */
+void sxr2aiNode(Node &sxrobj, aiNode &ainode, int i) {
     ainode.mNumMeshes = 1;
     ainode.mMeshes = new unsigned int[ainode.mNumMeshes];
     ainode.mMeshes[0] = i;
@@ -114,7 +114,7 @@ void sxr2aiMesh(Mesh &sxrmesh, aiMesh &aimesh) {
 
 /* Converts the given SXRScene to aiScene */
 void sxr2aiScene(Scene &sxrscene, aiScene &aiscene) {
-    std::vector<SceneObject*> scene_objects(sxrscene.getWholeSceneObjects());
+    std::vector<Node*> nodes(sxrscene.getWholeNodes());
 
     aiscene.mRootNode = new aiNode();
 
@@ -122,7 +122,7 @@ void sxr2aiScene(Scene &sxrscene, aiScene &aiscene) {
     aiscene.mMaterials = new aiMaterial*[aiscene.mNumMaterials];
     aiscene.mMaterials[0] = new aiMaterial();
 
-    aiscene.mNumMeshes = scene_objects.size();
+    aiscene.mNumMeshes = nodes.size();
     aiscene.mMeshes = new aiMesh*[aiscene.mNumMeshes];
 
     aiscene.mRootNode->mMeshes = NULL;
@@ -131,7 +131,7 @@ void sxr2aiScene(Scene &sxrscene, aiScene &aiscene) {
 
     int i = 0;
 
-    for ( auto itr = scene_objects.begin(); itr != scene_objects.end(); ++itr ) {
+    for ( auto itr = nodes.begin(); itr != nodes.end(); ++itr ) {
 
         if ((*itr) == NULL || (*itr)->render_data() == NULL
                 || (*itr)->render_data()->mesh() == NULL) {

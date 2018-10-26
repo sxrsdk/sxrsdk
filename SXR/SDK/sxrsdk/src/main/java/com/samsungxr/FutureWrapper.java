@@ -7,7 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * This is a wrapper to convert T to Future<T> so that we do not need many
- * versions of constructor for {@link SXRSceneObject} for different combinations
+ * versions of constructor for {@link SXRNode} for different combinations
  * of {@link SXRMesh} or Future<{@link SXRMesh}>, {@link SXRTexture} or Future<
  * {@link SXRTexture}>.
  * 

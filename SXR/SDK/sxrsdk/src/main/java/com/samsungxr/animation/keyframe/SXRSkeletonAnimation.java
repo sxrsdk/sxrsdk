@@ -16,7 +16,7 @@
 package com.samsungxr.animation.keyframe;
 
 import com.samsungxr.SXRHybridObject;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.PrettyPrint;
 import com.samsungxr.animation.SXRAnimation;
 import com.samsungxr.animation.SXRPose;
@@ -66,7 +66,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
      * @param target The target hierachy containing scene objects for bones.
      * @param duration Duration of the animation in seconds.
      */
-    public SXRSkeletonAnimation(String name, SXRSceneObject target, float duration)
+    public SXRSkeletonAnimation(String name, SXRNode target, float duration)
     {
     	super(target, duration);
         mName = name;
@@ -127,9 +127,9 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
         return null;
     }
 
-    private SXRSceneObject findParent(SXRSceneObject child, List<String> boneNames)
+    private SXRNode findParent(SXRNode child, List<String> boneNames)
     {
-        SXRSceneObject parent = child.getParent();
+        SXRNode parent = child.getParent();
 
         if (parent == null)
         {
@@ -157,7 +157,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     public SXRSkeleton createSkeleton(List<String> boneNames)
     {
         int numBones = boneNames.size();
-        SXRSceneObject root = (SXRSceneObject) mTarget;
+        SXRNode root = (SXRNode) mTarget;
         mSkeleton = new SXRSkeleton(root, boneNames);
         for (int boneId = 0; boneId < numBones; ++boneId)
         {
@@ -195,7 +195,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
         }
     }
 
-    public void setTarget(SXRSceneObject target)
+    public void setTarget(SXRNode target)
     {
         mTarget = target;
         if ((mSkeleton != null) &&

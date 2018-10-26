@@ -48,7 +48,7 @@ public class OpacityAnimation extends MaterialAnimation {
             Animation.AnimationAdapter {
 
         public Adapter(Widget target, float duration, float opacity) {
-            super(target.getSceneObject(), duration, opacity);
+            super(target.getNode(), duration, opacity);
         }
 
         @Override

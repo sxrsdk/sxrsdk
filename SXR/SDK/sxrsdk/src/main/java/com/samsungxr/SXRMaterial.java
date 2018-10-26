@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
  * samplers to be used with the shader.
  * <p>
  * Visible scene objects must have render data
- * {@linkplain SXRSceneObject#attachRenderData(SXRRenderData)} attached. Each
+ * {@linkplain SXRNode#attachRenderData(SXRRenderData)} attached. Each
  * {@link SXRRenderData} has a {@link SXRMesh} that defines its
  * geometry, and a {@link SXRMaterial} that defines its surface.
  * <p>

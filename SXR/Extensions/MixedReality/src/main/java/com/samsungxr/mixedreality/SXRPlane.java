@@ -16,18 +16,18 @@
 package com.samsungxr.mixedreality;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 import java.nio.FloatBuffer;
 
 /**
  * Represents the  current best knowledge of a real-world planar surface.
  */
-public abstract class SXRPlane extends SXRSceneObject {
+public abstract class SXRPlane extends SXRNode {
     protected Type mType;
     protected SXRTrackingState mTrackingState;
     protected SXRPlane mParentPlane;
-    protected SXRSceneObject mSceneObject;
+    protected SXRNode mNode;
 
     protected SXRPlane(SXRContext gvrContext) {
         super(gvrContext);
@@ -38,17 +38,17 @@ public abstract class SXRPlane extends SXRSceneObject {
      *
      * @param obj
      */
-    public void setSceneObject(SXRSceneObject obj) {
-        mSceneObject = obj;
-        addChildObject(mSceneObject);
+    public void setNode(SXRNode obj) {
+        mNode = obj;
+        addChildObject(mNode);
     }
 
     /**
      *
      * @return The scene object that represents the plane
      */
-    public SXRSceneObject getSceneObject() {
-        return this.mSceneObject;
+    public SXRNode getNode() {
+        return this.mNode;
     }
 
     /**

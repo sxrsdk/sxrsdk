@@ -17,7 +17,7 @@ package com.samsungxr.animation;
 
 import com.samsungxr.SXRHybridObject;
 import com.samsungxr.SXRMaterial;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import org.joml.Vector4f;
 
 /** Animate the opacity. */
@@ -63,14 +63,14 @@ public class SXROpacityAnimation extends SXRMaterialAnimation {
      * Animate the {@link SXRMaterial#setOpacity(float) opacity} property.
      * 
      * @param target
-     *            {@link SXRSceneObject} containing a {@link SXRMaterial} to
+     *            {@link SXRNode} containing a {@link SXRMaterial} to
      *            animate.
      * @param duration
      *            The animation duration, in seconds.
      * @param opacity
      *            A value from 0 to 1
      */
-    public SXROpacityAnimation(SXRSceneObject target, float duration,
+    public SXROpacityAnimation(SXRNode target, float duration,
             float opacity) {
         this(getMaterial(target), duration, opacity);
     }

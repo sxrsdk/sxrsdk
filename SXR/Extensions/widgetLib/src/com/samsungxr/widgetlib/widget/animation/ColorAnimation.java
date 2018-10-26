@@ -54,7 +54,7 @@ public class ColorAnimation extends MaterialAnimation {
             Animation.AnimationAdapter {
 
         public Adapter(Widget target, float duration, float[] rgb) {
-            super(target.getSceneObject(), duration, rgb);
+            super(target.getNode(), duration, rgb);
         }
 
         @Override

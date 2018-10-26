@@ -61,7 +61,7 @@ btCollisionShape *convertMeshCollider2CollisionShape(MeshCollider *collider) {
     if (collider != NULL) {
         Mesh* mesh = collider->mesh();
         if (mesh == NULL) {
-            SceneObject* owner = collider->owner_object();
+            Node* owner = collider->owner_object();
             if (owner == NULL) {
                 return NULL;
             }

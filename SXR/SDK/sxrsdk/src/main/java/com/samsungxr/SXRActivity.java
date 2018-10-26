@@ -23,7 +23,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.samsungxr.io.SXRTouchPadGestureListener;
-import com.samsungxr.scene_objects.SXRViewSceneObject;
+import com.samsungxr.nodes.SXRViewNode;
 import com.samsungxr.script.IScriptable;
 import com.samsungxr.utility.VrAppSettings;
 
@@ -96,7 +96,7 @@ public class SXRActivity extends Activity implements IEventReceiver, IScriptable
     }
 
     /**
-     * Invalidating just the SXRView associated with the SXRViewSceneObject
+     * Invalidating just the SXRView associated with the SXRViewNode
      * incorrectly set the clip rectangle to just that view. To fix this,
      * we have to create a full screen android View and invalidate this
      * to restore the clip rectangle.
@@ -195,7 +195,7 @@ public class SXRActivity extends Activity implements IEventReceiver, IScriptable
      * view. UI thread will refresh the view when necessary.
      *
      * @param view Is a {@link View} that draw itself into some
-     *            {@link SXRViewSceneObject}.
+     *            {@link SXRViewNode}.
      */
     public final void registerView(final View view) {
         mApplication.registerView(view);

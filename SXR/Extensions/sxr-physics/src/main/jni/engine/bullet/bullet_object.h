@@ -17,7 +17,7 @@
 #ifndef BULLET_OBJECT_H
 #define BULLET_OBJECT_H
 
-class SceneObject;
+class Node;
 namespace sxr {
 
     class BulletObject {

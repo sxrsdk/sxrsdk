@@ -19,7 +19,7 @@ import com.samsungxr.SXRDrawFrameListener;
 import com.samsungxr.SXRHybridObject;
 import com.samsungxr.SXRMain;
 import com.samsungxr.SXRMaterial;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRShaderData;
 import com.samsungxr.SXRTransform;
 import com.samsungxr.utility.Log;
@@ -45,7 +45,7 @@ import android.graphics.Color;
  * for example, you can specify a color as an Android {@link Color} or as a
  * {@code float[3]} of GL-compatible 0 to 1 values. In addition, all the stock
  * animations that animate a type like, say, {@link SXRMaterial} 'know how' to
- * find the {@link SXRMaterial} inside a {@link SXRSceneObject}.
+ * find the {@link SXRMaterial} inside a {@link SXRNode}.
  * 
  * <p>
  * This means that most animations have two or four overloaded constructors.
@@ -145,7 +145,7 @@ public abstract class SXRAnimation {
      * Many animations can take multiple target types: for example,
      * {@link SXRMaterialAnimation material animations} can work directly with
      * {@link SXRMaterial} targets, but also 'know how' to get a
-     * {@link SXRMaterial} from a {@link SXRSceneObject}. They can, of course,
+     * {@link SXRMaterial} from a {@link SXRNode}. They can, of course,
      * just expose multiple constructors, but that makes for a combinatorial
      * explosion when the other parameters also 'want' to be overloaded. This
      * method allows them to just take a {@link SXRHybridObject} and throw an

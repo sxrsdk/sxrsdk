@@ -22,7 +22,7 @@
 
 #include "glm/gtc/quaternion.hpp"
 
-#include "objects/scene_object.h"
+#include "objects/node.h"
 #include "objects/components/camera.h"
 #include "objects/components/perspective_camera.h"
 #include "util/sxr_time.h"
@@ -62,7 +62,7 @@ void CameraRig::setPosition(const glm::vec3& transform_position) {
 }
 
 Transform* CameraRig::getHeadTransform() const {
-    SceneObject* sceneObject = owner_object();
+    Node* sceneObject = owner_object();
     if (nullptr != sceneObject) {
         sceneObject = sceneObject->getChildByIndex(0);
         return sceneObject->transform();

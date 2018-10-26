@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.samsungxr.scene_objects;
+package com.samsungxr.nodes;
 
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
@@ -27,18 +27,18 @@ import com.samsungxr.SXRExternalTexture;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMaterial.SXRShaderType;
 import com.samsungxr.SXRMesh;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRShaderId;
 
 /**
- * A {@linkplain SXRSceneObject scene object} that shows video, using the
+ * A {@linkplain SXRNode scene object} that shows video, using the
  * Android {@link MediaPlayer}.
  */
-public class SXRVideoSceneObject extends SXRSceneObject {
+public class SXRVideoNode extends SXRNode {
     private volatile SXRVideo mVideo;
-    private SXRVideoSceneObjectPlayer gvrVideoSceneObjectPlayer = null;
+    private SXRVideoNodePlayer gvrVideoNodePlayer = null;
 
-    /** Video type constants, for use with {@link SXRVideoSceneObject} */
+    /** Video type constants, for use with {@link SXRVideoNode} */
     public abstract class SXRVideoType {
         public static final int MONO = 0;
         public static final int HORIZONTAL_STEREO = 1;
@@ -47,9 +47,9 @@ public class SXRVideoSceneObject extends SXRSceneObject {
 
     private static class ActivityEventsListener extends SXREventListeners.ActivityEvents {
         private boolean wasPlaying;
-        private SXRVideoSceneObjectPlayer mPlayer;
+        private SXRVideoNodePlayer mPlayer;
 
-        private ActivityEventsListener(SXRVideoSceneObjectPlayer player) {
+        private ActivityEventsListener(SXRVideoNodePlayer player) {
             mPlayer = player;
         }
 
@@ -69,7 +69,7 @@ public class SXRVideoSceneObject extends SXRSceneObject {
     private ActivityEventsListener mActivityEventsListener;
 
     /**
-     * Play a video on a {@linkplain SXRSceneObject scene object} with an
+     * Play a video on a {@linkplain SXRNode scene object} with an
      * arbitrarily complex geometry, using the Android {@link MediaPlayer}
      *
      * @param gvrContext
@@ -87,14 +87,14 @@ public class SXRVideoSceneObject extends SXRSceneObject {
      * @throws IllegalArgumentException
      *             on an invalid {@code videoType} parameter
      */
-    public SXRVideoSceneObject(final SXRContext gvrContext, SXRMesh mesh,
+    public SXRVideoNode(final SXRContext gvrContext, SXRMesh mesh,
                                final MediaPlayer mediaPlayer, final SXRExternalTexture texture,
                                int videoType) {
         this(gvrContext, mesh, makePlayerInstance(mediaPlayer), texture, videoType);
     }
 
     /**
-     * Play a video on a {@linkplain SXRSceneObject scene object} with an
+     * Play a video on a {@linkplain SXRNode scene object} with an
      * arbitrarily complex geometry, using the Android {@link MediaPlayer}
      *
      * @param gvrContext
@@ -110,13 +110,13 @@ public class SXRVideoSceneObject extends SXRSceneObject {
      * @throws IllegalArgumentException
      *             on an invalid {@code videoType} parameter
      */
-    public SXRVideoSceneObject(final SXRContext gvrContext, SXRMesh mesh,
+    public SXRVideoNode(final SXRContext gvrContext, SXRMesh mesh,
                                final MediaPlayer mediaPlayer, int videoType) {
         this(gvrContext, mesh, makePlayerInstance(mediaPlayer), videoType);
     }
 
     /**
-     * Play a video on a 2D, rectangular {@linkplain SXRSceneObject scene
+     * Play a video on a 2D, rectangular {@linkplain SXRNode scene
      * object,} using the Android {@link MediaPlayer}
      *
      * @param gvrContext
@@ -132,13 +132,13 @@ public class SXRVideoSceneObject extends SXRSceneObject {
      * @throws IllegalArgumentException
      *             on an invalid {@code videoType} parameter
      */
-    public SXRVideoSceneObject(SXRContext gvrContext, float width,
+    public SXRVideoNode(SXRContext gvrContext, float width,
                                float height, MediaPlayer mediaPlayer, int videoType) {
         this(gvrContext, width, height, makePlayerInstance(mediaPlayer), videoType);
     }
 
     /**
-     * Play a video on a {@linkplain SXRSceneObject scene object} with an
+     * Play a video on a {@linkplain SXRNode scene object} with an
      * arbitrarily complex geometry, using the Android {@link MediaPlayer}
      * 
      * @param gvrContext
@@ -156,14 +156,14 @@ public class SXRVideoSceneObject extends SXRSceneObject {
      * @throws IllegalArgumentException
      *             on an invalid {@code videoType} parameter
      */
-    public SXRVideoSceneObject(final SXRContext gvrContext, SXRMesh mesh,
-                               final SXRVideoSceneObjectPlayer mediaPlayer, final SXRExternalTexture texture,
+    public SXRVideoNode(final SXRContext gvrContext, SXRMesh mesh,
+                               final SXRVideoNodePlayer mediaPlayer, final SXRExternalTexture texture,
                                int videoType) {
         super(gvrContext, mesh);
         SXRShaderId materialType;
 
-        gvrVideoSceneObjectPlayer = mediaPlayer;
-        mActivityEventsListener = new ActivityEventsListener(gvrVideoSceneObjectPlayer);
+        gvrVideoNodePlayer = mediaPlayer;
+        mActivityEventsListener = new ActivityEventsListener(gvrVideoNodePlayer);
         gvrContext.getApplication().getEventReceiver().addListener(mActivityEventsListener);
 
         switch (videoType) {
@@ -193,7 +193,7 @@ public class SXRVideoSceneObject extends SXRSceneObject {
     }
 
     /**
-     * Play a video on a {@linkplain SXRSceneObject scene object} with an
+     * Play a video on a {@linkplain SXRNode scene object} with an
      * arbitrarily complex geometry, using the Android {@link MediaPlayer}
      * 
      * @param gvrContext
@@ -209,13 +209,13 @@ public class SXRVideoSceneObject extends SXRSceneObject {
      * @throws IllegalArgumentException
      *             on an invalid {@code videoType} parameter
      */
-    public SXRVideoSceneObject(final SXRContext gvrContext, SXRMesh mesh,
-            final SXRVideoSceneObjectPlayer mediaPlayer, int videoType) {
+    public SXRVideoNode(final SXRContext gvrContext, SXRMesh mesh,
+            final SXRVideoNodePlayer mediaPlayer, int videoType) {
         this(gvrContext, mesh, mediaPlayer, new SXRExternalTexture(gvrContext), videoType);
     }
 
     /**
-     * Play a video on a 2D, rectangular {@linkplain SXRSceneObject scene
+     * Play a video on a 2D, rectangular {@linkplain SXRNode scene
      * object,} using the Android {@link MediaPlayer}
      * 
      * @param gvrContext
@@ -231,8 +231,8 @@ public class SXRVideoSceneObject extends SXRSceneObject {
      * @throws IllegalArgumentException
      *             on an invalid {@code videoType} parameter
      */
-    public SXRVideoSceneObject(SXRContext gvrContext, float width,
-            float height, SXRVideoSceneObjectPlayer mediaPlayer, int videoType) {
+    public SXRVideoNode(SXRContext gvrContext, float width,
+            float height, SXRVideoNodePlayer mediaPlayer, int videoType) {
         this(gvrContext, gvrContext.createQuad(width, height), mediaPlayer,
                 videoType);
     }
@@ -290,8 +290,8 @@ public class SXRVideoSceneObject extends SXRSceneObject {
      * 
      * @return current {@link MediaPlayer}
      */
-    public SXRVideoSceneObjectPlayer getMediaPlayer() {
-        return gvrVideoSceneObjectPlayer;
+    public SXRVideoNodePlayer getMediaPlayer() {
+        return gvrVideoNodePlayer;
     }
 
     /**
@@ -300,7 +300,7 @@ public class SXRVideoSceneObject extends SXRSceneObject {
      * @param mediaPlayer
      *            An Android {@link MediaPlayer}
      */
-    public void setMediaPlayer(final SXRVideoSceneObjectPlayer mediaPlayer) {
+    public void setMediaPlayer(final SXRVideoNodePlayer mediaPlayer) {
         if (mVideo == null) {
             getSXRContext().runOnGlThread(new Runnable() {
                 @Override
@@ -356,7 +356,7 @@ public class SXRVideoSceneObject extends SXRSceneObject {
 
         private final SXRContext mContext;
         private SurfaceTexture mSurfaceTexture = null;
-        private SXRVideoSceneObjectPlayer mMediaPlayer;
+        private SXRVideoNodePlayer mMediaPlayer;
         private boolean mActive = true;
 
         /**
@@ -370,7 +370,7 @@ public class SXRVideoSceneObject extends SXRSceneObject {
          *            the {@link SXRExternalTexture} type object to be used in
          *            the class
          */
-        public SXRVideo(SXRContext gvrContext, SXRVideoSceneObjectPlayer mediaPlayer, SXRExternalTexture texture) {
+        public SXRVideo(SXRContext gvrContext, SXRVideoNodePlayer mediaPlayer, SXRExternalTexture texture) {
             mContext = gvrContext;
             mSurfaceTexture = new SurfaceTexture(texture.getId());
             if (mediaPlayer != null) {
@@ -440,7 +440,7 @@ public class SXRVideoSceneObject extends SXRSceneObject {
          * 
          * @return the current {@link MediaPlayer}
          */
-        public SXRVideoSceneObjectPlayer getMediaPlayer() {
+        public SXRVideoNodePlayer getMediaPlayer() {
             return mMediaPlayer;
         }
 
@@ -450,7 +450,7 @@ public class SXRVideoSceneObject extends SXRSceneObject {
          * @param mediaPlayer
          *            An Android {@link MediaPlayer}
          */
-        public void setMediaPlayer(SXRVideoSceneObjectPlayer mediaPlayer) {
+        public void setMediaPlayer(SXRVideoNodePlayer mediaPlayer) {
             release(); // any current MediaPlayer
 
             mMediaPlayer = mediaPlayer;
@@ -488,8 +488,8 @@ public class SXRVideoSceneObject extends SXRSceneObject {
     /**
      * Creates a player wrapper for the Android MediaPlayer.
      */
-    public static SXRVideoSceneObjectPlayer<MediaPlayer> makePlayerInstance(final MediaPlayer mediaPlayer) {
-        return new SXRVideoSceneObjectPlayer<MediaPlayer>() {
+    public static SXRVideoNodePlayer<MediaPlayer> makePlayerInstance(final MediaPlayer mediaPlayer) {
+        return new SXRVideoNodePlayer<MediaPlayer>() {
             @Override
             public MediaPlayer getPlayer() {
                 return mediaPlayer;

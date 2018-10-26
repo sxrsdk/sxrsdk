@@ -37,7 +37,7 @@ public final class SXRBone extends SXRComponent implements PrettyPrint {
     }
 
 
-    public void onAttach(SXRSceneObject owner)
+    public void onAttach(SXRNode owner)
     {
         String name = getName();
 
@@ -60,7 +60,7 @@ public final class SXRBone extends SXRComponent implements PrettyPrint {
      */
     public String getName()
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
         String name = "";
 
         if (owner != null)

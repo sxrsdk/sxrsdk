@@ -75,7 +75,7 @@ public class SXRBillboard extends SXRBehavior
 
     private void faceObjectToCamera()
     {
-        SXRSceneObject ownerObject = getOwnerObject();
+        SXRNode ownerObject = getOwnerObject();
         SXRTransform ownerTrans = ownerObject.getTransform();
         float camX = mMainCameraRig.getTransform().getPositionX();
         float camY = mMainCameraRig.getTransform().getPositionY();
@@ -111,7 +111,7 @@ public class SXRBillboard extends SXRBehavior
 
     private void faceObjectToCameraWithCustomUp()
     {
-        SXRSceneObject ownerObject = getOwnerObject();
+        SXRNode ownerObject = getOwnerObject();
         SXRTransform ownerTrans = ownerObject.getTransform();
         float camX = mMainCameraRig.getTransform().getPositionX();
         float camY = mMainCameraRig.getTransform().getPositionY();

@@ -16,12 +16,12 @@
 package com.samsungxr.mixedreality;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 /**
  * Represents a fixed location and orientation in the real world.
  */
-public abstract class SXRAnchor extends SXRSceneObject {
+public abstract class SXRAnchor extends SXRNode {
     protected SXRTrackingState mTrackingState;
 
     protected SXRAnchor(SXRContext gvrContext) {
@@ -33,7 +33,7 @@ public abstract class SXRAnchor extends SXRSceneObject {
      *
      * @param obj
      */
-    public void attachSceneObject(SXRSceneObject obj) {
+    public void attachNode(SXRNode obj) {
         addChildObject(obj);
     }
 

@@ -48,7 +48,7 @@ public abstract class Animation {
 
     public void track(SimpleAnimationTracker tracker, final Widget target,
             final Runnable onStart, OnFinish onFinish) {
-        tracker.track(target.getSceneObject(), (SXRAnimation) getAnimation(),
+        tracker.track(target.getNode(), (SXRAnimation) getAnimation(),
                       onStart, new SXROnFinishProxy(onFinish));
     }
 
@@ -62,7 +62,7 @@ public abstract class Animation {
 
     public void track(SimpleAnimationTracker tracker, final Runnable onStart,
             OnFinish onFinish) {
-        tracker.track(mTarget.getSceneObject(), (SXRAnimation) getAnimation(),
+        tracker.track(mTarget.getNode(), (SXRAnimation) getAnimation(),
                       onStart, new SXROnFinishProxy(onFinish));
     }
 
@@ -245,7 +245,7 @@ public abstract class Animation {
     public boolean finish(SXRAnimationEngine engine) {
         if (mIsRunning) {
             stop(engine);
-            getAnimation().animate(mTarget.getSceneObject(), 1);
+            getAnimation().animate(mTarget.getNode(), 1);
             if (mOnFinish != null) {
                 mOnFinish.finished((SXRAnimation) getAnimation());
             }
@@ -338,7 +338,7 @@ public abstract class Animation {
     private class Adapter extends SXRAnimation implements AnimationAdapter {
 
         public Adapter(Widget target, float duration) {
-            super(target.getSceneObject(), duration);
+            super(target.getNode(), duration);
         }
 
         @Override

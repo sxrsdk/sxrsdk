@@ -18,7 +18,7 @@ package com.samsungxr.particlesystem;
 import android.util.Pair;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.SXRTransform;
 import org.joml.Vector3f;
@@ -41,7 +41,7 @@ import java.util.ArrayList;
  *
  */
 
-class SXREmitter extends SXRSceneObject {
+class SXREmitter extends SXRNode {
 
     private int MAX_EMIT_RATE = 500;
 
@@ -52,7 +52,7 @@ class SXREmitter extends SXRSceneObject {
 
     //list of active scene objects containing particle meshes,
     // and their corresponding spawn times.
-    protected ArrayList<Pair<SXRSceneObject, Float>> meshInfo = null;
+    protected ArrayList<Pair<SXRNode, Float>> meshInfo = null;
 
 
     //particle properties
@@ -87,7 +87,7 @@ class SXREmitter extends SXRSceneObject {
     {
         super(gvrContext);
         mSXRContext = gvrContext;
-        meshInfo = new ArrayList<Pair<SXRSceneObject, Float>>();
+        meshInfo = new ArrayList<Pair<SXRNode, Float>>();
         idxsToDelete = new ArrayList<Integer>();
         mEnvironmentAcceleration = new Vector3f(0.0f,0.0f,0.0f);
         mColor = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -111,7 +111,7 @@ class SXREmitter extends SXRSceneObject {
         {
             float currMeshSpawnTime = meshInfo.get(i).second;
             if (currTime - currMeshSpawnTime > mMaxAge + 1) {
-                SXRSceneObject toDelete = meshInfo.get(i).first;
+                SXRNode toDelete = meshInfo.get(i).first;
                 SXREmitter.this.removeChildObject(toDelete);
                 idxsToDelete.add(i);
             }
@@ -181,7 +181,7 @@ class SXREmitter extends SXRSceneObject {
                 mParticleTexture, mColor, mNoiseFactor);
 
 
-        SXRSceneObject particleObject = particleMesh.makeParticleMesh(allParticlePositions,
+        SXRNode particleObject = particleMesh.makeParticleMesh(allParticlePositions,
                 allParticleVelocities, allSpawnTimes);
 
         this.addChildObject(particleObject);
@@ -242,7 +242,7 @@ class SXREmitter extends SXRSceneObject {
 
         for (int i = 0; i < meshInfo.size(); i ++)
         {
-            SXRSceneObject obj = meshInfo.get(i).first;
+            SXRNode obj = meshInfo.get(i).first;
             obj.getRenderData().getMaterial().setFloat("u_time", time);
         }
     }

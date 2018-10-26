@@ -29,10 +29,10 @@
 namespace sxr {
 class Scene;
 class Collider;
-class SceneObject;
+class Node;
 class CameraRig;
 class Transform;
-class SceneObject;
+class Node;
 
 class Picker {
 private:
@@ -55,14 +55,14 @@ public:
     static void pickBounds(
             Scene* scene,
             std::vector<ColliderData>& picklist,
-            const std::vector<SceneObject*>& collidables);
-    static void pickSceneObject(
-            SceneObject* scene_object,
+            const std::vector<Node*>& collidables);
+    static void pickNode(
+            Node* node,
             float ox, float oy, float oz,
             float dx, float dy, float dz,
             ColliderData &colliderData);
-    static glm::vec3 pickSceneObjectAgainstBoundingBox(
-            SceneObject* scene_object, float ox, float oy, float oz,
+    static glm::vec3 pickNodeAgainstBoundingBox(
+            Node* node, float ox, float oy, float oz,
             float dx, float dy, float dz);
 };
 

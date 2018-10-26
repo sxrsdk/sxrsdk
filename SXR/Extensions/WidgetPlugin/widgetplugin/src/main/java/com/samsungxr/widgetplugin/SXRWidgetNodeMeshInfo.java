@@ -16,14 +16,14 @@
 package com.samsungxr.widgetplugin;
 
 /**
- * SXRWidgetSceneObjectMeshInfo provides way to create SXRWidgetSceneObject
+ * SXRWidgetNodeMeshInfo provides way to create SXRWidgetNode
  * meshes quickly.
  */
-public class SXRWidgetSceneObjectMeshInfo {
+public class SXRWidgetNodeMeshInfo {
 
     /**
      * Following four variables correspond to top left and bottom right X and Y
-     * world coordinates of SXRWidgetSceneObject, creating a rectangle
+     * world coordinates of SXRWidgetNode, creating a rectangle
      */
     public float mTopLeftX;
     public float mTopLeftY;
@@ -33,7 +33,7 @@ public class SXRWidgetSceneObjectMeshInfo {
     /**
      * Following two variables correspond to top left and bottom right X and Y
      * screen coordinates of parent libGDX GLSurfaceView which the app created
-     * from which our SXRWidgetSceneObjects are created, kindly refer @SXRWidgetSceneObject
+     * from which our SXRWidgetNodes are created, kindly refer @SXRWidgetNode
      * for more info on how these scene objects are created from the view
      */
 
@@ -48,7 +48,7 @@ public class SXRWidgetSceneObjectMeshInfo {
 
     public float mZ = 0.0f;
 
-    public SXRWidgetSceneObjectMeshInfo(float topLeftX, float topLeftY,
+    public SXRWidgetNodeMeshInfo(float topLeftX, float topLeftY,
             float bottomRightX, float bottomRightY, int[] topLeftViewCoords,
             int[] bottomRightViewCoords) {
         mTopLeftX = topLeftX;

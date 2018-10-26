@@ -17,7 +17,7 @@ package com.samsungxr.x3d;
 
 
 import com.samsungxr.SXRLODGroup;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 import static com.samsungxr.x3d.X3Dobject.TRANSFORM_ROTATION_;
 import static com.samsungxr.x3d.X3Dobject.TRANSFORM_SCALE_;
@@ -39,20 +39,20 @@ public class LODmanager {
   private int currentRange = -1;
   private boolean active = false;
 
-  private SXRSceneObject root = null;
+  private SXRNode root = null;
 
 
-  // If <Shape> a direct child of LOD, a new SXRSceneObject will be created
+  // If <Shape> a direct child of LOD, a new SXRNode will be created
   // nd the shape attached to it.  When we get ending </Shape> node
-  // we need to return to the parent of this inserted SXRSceneObject
-  protected SXRSceneObject shapeLODSceneObject = null;
-  // The SXRSceneObject was created to support LOD (level-of-detail) node,
+  // we need to return to the parent of this inserted SXRNode
+  protected SXRNode shapeLODNode = null;
+  // The SXRNode was created to support LOD (level-of-detail) node,
   // and have the LOD component attached to it.
   // When we have the ending </LOD> node, be sure to return to the
-  // parent of this inserted SXRSceneObject
-  protected SXRSceneObject transformLODSceneObject = null;
+  // parent of this inserted SXRNode
+  protected SXRNode transformLODNode = null;
 
-  public LODmanager (SXRSceneObject root) {
+  public LODmanager (SXRNode root) {
     this.root = root;
   }
 
@@ -105,41 +105,41 @@ public class LODmanager {
   }
 
 
-  // Add the currentSceneObject to an active Level-of-Detail
-  protected void AddLODSceneObject(SXRSceneObject currentSceneObject) {
-    if (this.transformLODSceneObject != null) {
-      SXRSceneObject levelOfDetailSceneObject = null;
-      if ( currentSceneObject.getParent() == this.transformLODSceneObject) {
-        levelOfDetailSceneObject = currentSceneObject;
+  // Add the currentNode to an active Level-of-Detail
+  protected void AddLODNode(SXRNode currentNode) {
+    if (this.transformLODNode != null) {
+      SXRNode levelOfDetailNode = null;
+      if ( currentNode.getParent() == this.transformLODNode) {
+        levelOfDetailNode = currentNode;
       }
       else {
-        SXRSceneObject lodSceneObj = root.getSceneObjectByName((currentSceneObject.getName() + TRANSFORM_TRANSLATION_));
+        SXRNode lodSceneObj = root.getNodeByName((currentNode.getName() + TRANSFORM_TRANSLATION_));
         if ( lodSceneObj != null ) {
-          if (lodSceneObj.getParent() == this.transformLODSceneObject) {
-            levelOfDetailSceneObject = lodSceneObj;
+          if (lodSceneObj.getParent() == this.transformLODNode) {
+            levelOfDetailNode = lodSceneObj;
           }
         }
-        if (levelOfDetailSceneObject == null) {
-          lodSceneObj = root.getSceneObjectByName((currentSceneObject.getName() + TRANSFORM_ROTATION_));
+        if (levelOfDetailNode == null) {
+          lodSceneObj = root.getNodeByName((currentNode.getName() + TRANSFORM_ROTATION_));
           if ( lodSceneObj != null ) {
-            if (lodSceneObj.getParent() == this.transformLODSceneObject) {
-              levelOfDetailSceneObject = lodSceneObj;
+            if (lodSceneObj.getParent() == this.transformLODNode) {
+              levelOfDetailNode = lodSceneObj;
             }
           }
         }
-        if (levelOfDetailSceneObject == null) {
-          lodSceneObj = root.getSceneObjectByName((currentSceneObject.getName() + TRANSFORM_SCALE_));
+        if (levelOfDetailNode == null) {
+          lodSceneObj = root.getNodeByName((currentNode.getName() + TRANSFORM_SCALE_));
           if ( lodSceneObj != null ) {
-            if (lodSceneObj.getParent() == this.transformLODSceneObject) {
-              levelOfDetailSceneObject = lodSceneObj;
+            if (lodSceneObj.getParent() == this.transformLODNode) {
+              levelOfDetailNode = lodSceneObj;
             }
           }
         }
 
       }
-      if ( levelOfDetailSceneObject != null) {
-        final SXRLODGroup lodGroup = (SXRLODGroup) this.transformLODSceneObject.getComponent(SXRLODGroup.getComponentType());
-        lodGroup.addRange(this.getMinRange(), levelOfDetailSceneObject);
+      if ( levelOfDetailNode != null) {
+        final SXRLODGroup lodGroup = (SXRLODGroup) this.transformLODNode.getComponent(SXRLODGroup.getComponentType());
+        lodGroup.addRange(this.getMinRange(), levelOfDetailNode);
         this.increment();
       }
     }

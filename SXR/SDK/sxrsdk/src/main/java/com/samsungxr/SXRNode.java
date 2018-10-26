@@ -35,12 +35,12 @@ import org.joml.Vector3f;
  * Every scene object has a {@linkplain #getTransform() location}, and can have
  * {@linkplain #children() children}. An invisible scene object can be used to
  * move a set of scene as a unit, preserving their relative geometry. Invisible
- * scene objects don't need any {@linkplain SXRSceneObject#getRenderData()
+ * scene objects don't need any {@linkplain SXRNode#getRenderData()
  * render data.}
  *
  * <p>
  * Visible scene objects must have render data
- * {@linkplain SXRSceneObject#attachRenderData(SXRRenderData) attached.} Each
+ * {@linkplain SXRNode#attachRenderData(SXRRenderData) attached.} Each
  * {@link SXRRenderData} has a {@link SXRMesh GL mesh} that defines its
  * geometry, and a {@link SXRMaterial} that defines its surface.
  * <p>
@@ -49,20 +49,20 @@ import org.joml.Vector3f;
  * other objects. Only one component of a particular type can be attached.
  * Components are retrieved based on their type.
  * <p>
- * {@link SXRSceneObject} receives events defined in {@link ISceneObjectEvents}. To add a listener
+ * {@link SXRNode} receives events defined in {@link INodeEvents}. To add a listener
  * to these events, use the following code:
  * <pre>
- *     ISceneObjectEvents myEventListener = new ISceneObjectEvents() {
+ *     INodeEvents myEventListener = new INodeEvents() {
  *         ...
  *     };
  *     getEventReceiver().addListener(myEventListener);
  * </pre>
  */
-public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScriptable, IEventReceiver {
+public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable, IEventReceiver {
     private final Map<Long, SXRComponent> mComponents = new HashMap<Long, SXRComponent>();
-    private SXRSceneObject mParent;
+    private SXRNode mParent;
     private Object mTag;
-    private final List<SXRSceneObject> mChildren = new CopyOnWriteArrayList<SXRSceneObject>();
+    private final List<SXRNode> mChildren = new CopyOnWriteArrayList<SXRNode>();
     private final SXREventReceiver mEventReceiver = new SXREventReceiver(this);
 
     /**
@@ -72,7 +72,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      * @param gvrContext
      *            current {@link SXRContext}
      */
-    public SXRSceneObject(SXRContext gvrContext) {
+    public SXRNode(SXRContext gvrContext) {
         this(gvrContext, null);
     }
 
@@ -86,7 +86,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *            {@link SXRAssetLoader#loadMesh(SXRAndroidResource)} methods, or
      *            {@link SXRContext#createQuad(float, float)}
      */
-    public SXRSceneObject(SXRContext gvrContext, SXRMesh mesh) {
+    public SXRNode(SXRContext gvrContext, SXRMesh mesh) {
         this(gvrContext, mesh, null, null);
     }
 
@@ -101,7 +101,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      * @param height
      *            the scene object's height
      */
-    public SXRSceneObject(SXRContext gvrContext, float width, float height) {
+    public SXRNode(SXRContext gvrContext, float width, float height) {
         this(gvrContext, gvrContext.createQuad(width, height));
     }
 
@@ -123,9 +123,9 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *            {@link SXRShaderManager}
      *
      */
-    public SXRSceneObject(SXRContext gvrContext, SXRMesh mesh,
+    public SXRNode(SXRContext gvrContext, SXRMesh mesh,
                           SXRTexture texture, SXRShaderId shaderId) {
-        super(gvrContext, NativeSceneObject.ctor());
+        super(gvrContext, NativeNode.ctor());
         attachComponent(new SXRTransform(getSXRContext()));
 
         if ((mesh == null) && (texture == null)) {
@@ -146,8 +146,8 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
         renderData.setMaterial(material);
     }
 
-    public SXRSceneObject(SXRContext gvrContext, SXRMesh mesh, SXRMaterial material) {
-        super(gvrContext, NativeSceneObject.ctor());
+    public SXRNode(SXRContext gvrContext, SXRMesh mesh, SXRMaterial material) {
+        super(gvrContext, NativeNode.ctor());
         attachComponent(new SXRTransform(getSXRContext()));
 
         SXRRenderData renderData = new SXRRenderData(gvrContext, material);
@@ -172,7 +172,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      * @param texture
      *            a {@link SXRTexture}
      */
-    public SXRSceneObject(SXRContext gvrContext, SXRMesh mesh,
+    public SXRNode(SXRContext gvrContext, SXRMesh mesh,
                           SXRTexture texture) {
         this(gvrContext, mesh, texture, STANDARD_SHADER);
     }
@@ -190,7 +190,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *
      * @since 1.6.7
      */
-    public SXRSceneObject(SXRContext gvrContext, SXRAndroidResource mesh,
+    public SXRNode(SXRContext gvrContext, SXRAndroidResource mesh,
                           SXRAndroidResource texture) {
         this(gvrContext, gvrContext.getAssetLoader().loadMesh(mesh), gvrContext
                 .getAssetLoader().loadTexture(texture));
@@ -211,7 +211,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      * @param shaderId
      *            a specific shader Id
      */
-    public SXRSceneObject(SXRContext gvrContext, float width, float height,
+    public SXRNode(SXRContext gvrContext, float width, float height,
                           SXRTexture texture, SXRShaderId shaderId) {
         this(gvrContext, SXRMesh.createQuad(gvrContext, "float3 a_position float2 a_texcoord float3 a_normal", width, height), texture, shaderId);
     }
@@ -231,7 +231,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      * @param material
      *            {@link SXRMaterial} with material properties
      */
-    public SXRSceneObject(SXRContext gvrContext, float width, float height,
+    public SXRNode(SXRContext gvrContext, float width, float height,
                           String meshDesc, SXRMaterial material)
     {
         this(gvrContext, SXRMesh.createQuad(gvrContext, meshDesc, width, height), material);
@@ -251,7 +251,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      * @param texture
      *            a {@link SXRTexture}
      */
-    public SXRSceneObject(SXRContext gvrContext, float width, float height,
+    public SXRNode(SXRContext gvrContext, float width, float height,
                           SXRTexture texture) {
         this(gvrContext, width, height, texture, STANDARD_SHADER);
     }
@@ -289,7 +289,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *         returned string will be empty.
      */
     public String getName() {
-        return NativeSceneObject.getName(getNative());
+        return NativeNode.getName(getNative());
     }
 
     /**
@@ -302,7 +302,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *            Name of the object.
      */
     public void setName(String name) {
-        NativeSceneObject.setName(getNative(), name);
+        NativeNode.setName(getNative(), name);
     }
 
     /**
@@ -340,12 +340,12 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *
      * @return true if component is attached, false if a component of that class is already attached.
      * @param component component to attach.
-     * @see SXRSceneObject#detachComponent(long)
-     * @see SXRSceneObject#getComponent(long)
+     * @see SXRNode#detachComponent(long)
+     * @see SXRNode#getComponent(long)
      */
     public boolean attachComponent(SXRComponent component) {
         if (component.getNative() != 0) {
-            NativeSceneObject.attachComponent(getNative(), component.getNative());
+            NativeNode.attachComponent(getNative(), component.getNative());
         }
         synchronized (mComponents) {
             long type = component.getType();
@@ -366,10 +366,10 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *
      * @return SXRComponent detached or null if component not found
      * @param type  type of component to detach
-     * @see SXRSceneObject#attachComponent(SXRComponent)
+     * @see SXRNode#attachComponent(SXRComponent)
      */
     public SXRComponent detachComponent(long type) {
-        NativeSceneObject.detachComponent(getNative(), type);
+        NativeNode.detachComponent(getNative(), type);
         synchronized (mComponents) {
             SXRComponent component = mComponents.remove(type);
             if (component != null) {
@@ -387,8 +387,8 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *
      * @return SXRComponent null if component of the given type not found
      * @param type type of component to find
-     * @see SXRSceneObject#attachComponent(SXRComponent)
-     * @see SXRSceneObject#detachComponent(long)
+     * @see SXRNode#attachComponent(SXRComponent)
+     * @see SXRNode#detachComponent(long)
      */
     public SXRComponent getComponent(long type) {
         return  mComponents.get(type);
@@ -460,11 +460,11 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
     }
 
     /**
-     * Checks if this {@link SXRSceneObject} has mesh. This method is not recursive.
+     * Checks if this {@link SXRNode} has mesh. This method is not recursive.
      * That is, if it doesn't have a mesh though its children have, it returns
      * {@code false}.
      *
-     * @return true if this {@link SXRSceneObject} contains mesh itself.
+     * @return true if this {@link SXRNode} contains mesh itself.
      */
     public boolean hasMesh() {
         SXRRenderData rdata = getRenderData();
@@ -572,7 +572,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
         SXRComponent component = getComponent(type);
         if (component != null)
             list.add((T) component);
-        for (SXRSceneObject child : mChildren) {
+        for (SXRNode child : mChildren) {
             ArrayList<T> temp = child.getAllComponents(type);
             list.addAll(temp);
         }
@@ -652,15 +652,15 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
     }
 
     /**
-     * Get the {@linkplain SXRSceneObject parent object.}
+     * Get the {@linkplain SXRNode parent object.}
      *
-     * If the object has been {@link #addChildObject(SXRSceneObject) added as a
-     * child} to another {@link SXRSceneObject}, returns that object. Otherwise,
+     * If the object has been {@link #addChildObject(SXRNode) added as a
+     * child} to another {@link SXRNode}, returns that object. Otherwise,
      * returns {@code null}.
      *
-     * @return The parent {@link SXRSceneObject} or {@code null}.
+     * @return The parent {@link SXRNode} or {@code null}.
      */
-    public SXRSceneObject getParent() {
+    public SXRNode getParent() {
         return mParent;
     }
 
@@ -668,20 +668,20 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      * Add {@code child} as a child of this object.
      *
      * @param child
-     *            {@link SXRSceneObject Object} to add as a child of this
+     *            {@link SXRNode Object} to add as a child of this
      *            object.
      * @return true if child was added, else false
      */
-    public boolean addChildObject(SXRSceneObject child) {
+    public boolean addChildObject(SXRNode child) {
         if (child.mParent == this) {
             return false;
         }
         if (child.mParent != null) {
-            throw new UnsupportedOperationException("SXRSceneObject cannot have multiple parents");
+            throw new UnsupportedOperationException("SXRNode cannot have multiple parents");
         }
         mChildren.add(child);
         child.mParent = this;
-        NativeSceneObject.addChildObject(getNative(), child.getNative());
+        NativeNode.addChildObject(getNative(), child.getNative());
         child.onNewParentObject(this);
         return true;
     }
@@ -690,12 +690,12 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      * Remove {@code child} as a child of this object.
      *
      * @param child
-     *            {@link SXRSceneObject Object} to remove as a child of this
+     *            {@link SXRNode Object} to remove as a child of this
      *            object.
      */
-    public void removeChildObject(SXRSceneObject child) {
+    public void removeChildObject(SXRNode child) {
         synchronized (mChildren) {
-            NativeSceneObject.removeChildObject(getNative(), child.getNative());
+            NativeNode.removeChildObject(getNative(), child.getNative());
 
             child.mParent = null;
             child.onRemoveParentObject(this);
@@ -707,7 +707,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
     protected int removeChildObjectsByNameImpl(final String name) {
         synchronized (mChildren) {
             int count = 0;
-            for (SXRSceneObject child : mChildren) {
+            for (SXRNode child : mChildren) {
                 if (child.getName().equals(name)) {
                     removeChildObject(child);
                     count++;
@@ -747,9 +747,9 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      */
     public boolean removeChildObjectByName(final String name) {
         if (null != name && !name.isEmpty()) {
-            SXRSceneObject found = null;
-            for (SXRSceneObject child : mChildren) {
-                SXRSceneObject object = child.getSceneObjectByName(name);
+            SXRNode found = null;
+            for (SXRNode child : mChildren) {
+                SXRNode object = child.getNodeByName(name);
                 if (object != null) {
                     found = object;
                     break;
@@ -768,7 +768,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *
      * @param parent New parent of this scene object.
      */
-    protected void onNewParentObject(SXRSceneObject parent) {
+    protected void onNewParentObject(SXRNode parent) {
         for (SXRComponent comp : mComponents.values()) {
             comp.onNewOwnersParent(parent);
         }
@@ -779,7 +779,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *
      * @param parent Old parent of this scene object.
      */
-    protected void onRemoveParentObject(SXRSceneObject parent) {
+    protected void onRemoveParentObject(SXRNode parent) {
         for (SXRComponent comp : mComponents.values()) {
             comp.onRemoveOwnersParent(parent);
         }
@@ -816,7 +816,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
     }
 
     public interface SceneVisitor {
-        public boolean visit(SXRSceneObject obj);
+        public boolean visit(SXRNode obj);
     }
 
     public interface ComponentVisitor {
@@ -843,7 +843,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
         {
             if (visitor.visit(this))
             {
-                for (SXRSceneObject child : mChildren)
+                for (SXRNode child : mChildren)
                 {
                     child.forAllDescendants(visitor);
                 }
@@ -882,7 +882,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
         {
             for (int i = 0; i < mChildren.size(); ++i)
             {
-                SXRSceneObject child = mChildren.get(i);
+                SXRNode child = mChildren.get(i);
                 child.forAllComponents(visitor, componentType);
             }
         }
@@ -921,7 +921,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
         {
             for (int i = 0; i < mChildren.size(); ++i)
             {
-                SXRSceneObject child = mChildren.get(i);
+                SXRNode child = mChildren.get(i);
                 child.forAllComponents(visitor);
             }
         }
@@ -933,14 +933,14 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      * @param name name of scene object to look for.
      * @return null if nothing was found or name was null/empty
      */
-    public SXRSceneObject[] getSceneObjectsByName(final String name) {
+    public SXRNode[] getNodesByName(final String name) {
         if (null == name || name.isEmpty()) {
             return null;
         }
 
-        final List<SXRSceneObject> matches = new ArrayList<SXRSceneObject>();
-        getSceneObjectsByName(name, matches);
-        return 0 != matches.size() ? matches.toArray(new SXRSceneObject[matches.size()]) : null;
+        final List<SXRNode> matches = new ArrayList<SXRNode>();
+        getNodesByName(name, matches);
+        return 0 != matches.size() ? matches.toArray(new SXRNode[matches.size()]) : null;
     }
 
     /**
@@ -948,17 +948,17 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *
      * @param name name of scene object to look for.
      * @return first match in the graph; null if nothing was found or name was null/empty;
-     * in case there might be multiple matches consider using getSceneObjectsByName
+     * in case there might be multiple matches consider using getNodesByName
      */
-    public SXRSceneObject getSceneObjectByName(final String name) {
+    public SXRNode getNodeByName(final String name) {
         if (null == name || name.isEmpty()) {
             return null;
         }
         if (getName().equals(name)) {
             return this;
         }
-        for (SXRSceneObject child : mChildren) {
-            SXRSceneObject found = child.getSceneObjectByName(name);
+        for (SXRNode child : mChildren) {
+            SXRNode found = child.getNodeByName(name);
             if (found != null) {
                 return found;
             }
@@ -966,12 +966,12 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
         return null;
     }
 
-    protected void getSceneObjectsByName(final String name, List<SXRSceneObject> list) {
+    protected void getNodesByName(final String name, List<SXRNode> list) {
         if (name.equals(getName())) {
             list.add(this);
         }
-        for (SXRSceneObject child : mChildren) {
-            child.getSceneObjectsByName(name, list);
+        for (SXRNode child : mChildren) {
+            child.getNodesByName(name, list);
         }
     }
 
@@ -979,12 +979,12 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      * Check if {@code otherObject} is colliding with this object.
      *
      * @param otherObject
-     *            {@link SXRSceneObject Object} to check for collision with this
+     *            {@link SXRNode Object} to check for collision with this
      *            object.
      * @return {@code true} if objects collide, {@code false} otherwise
      */
-    public boolean isColliding(SXRSceneObject otherObject) {
-        return NativeSceneObject.isColliding(getNative(),
+    public boolean isColliding(SXRNode otherObject) {
+        return NativeNode.isColliding(getNative(),
                 otherObject.getNative());
     }
 
@@ -998,7 +998,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      * @return true if scene object should be displayed, else false.
      */
     public boolean isEnabled() {
-        return NativeSceneObject.isEnabled(getNative());
+        return NativeNode.isEnabled(getNative());
     }
 
     /**
@@ -1009,11 +1009,11 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      * @param enable true the object will be displayed, if false it will not be.
      */
     public void setEnable(boolean enable) {
-        NativeSceneObject.setEnable(getNative(), enable);
+        NativeNode.setEnable(getNative(), enable);
     }
 
     /**
-     * Tests the {@link SXRSceneObject}s hierarchical bounding volume against
+     * Tests the {@link SXRNode}s hierarchical bounding volume against
      * the specified ray.
      *
      * The ray is defined by its origin {@code [ox, oy, oz]} and its direction
@@ -1043,33 +1043,33 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *            The z vector of the ray direction.
      *
      * @return <code>true</code> if the input ray intersects with the
-     *         {@link SXRSceneObject}s hierarchical bounding volume,
+     *         {@link SXRNode}s hierarchical bounding volume,
      *         <code>false</code> otherwise.
      */
     public boolean intersectsBoundingVolume(float ox, float oy, float oz, float dx,
                                             float dy, float dz) {
-        return NativeSceneObject.rayIntersectsBoundingVolume(getNative(), ox, oy,
+        return NativeNode.rayIntersectsBoundingVolume(getNative(), ox, oy,
                 oz, dx, dy, dz);
     }
 
     /**
-     * Tests this {@link SXRSceneObject}'s hierarchical bounding volume against
-     * the provided {@link SXRSceneObject}'s hierarchical bounding volume.
+     * Tests this {@link SXRNode}'s hierarchical bounding volume against
+     * the provided {@link SXRNode}'s hierarchical bounding volume.
      *
-     * @param otherObject the {@link SXRSceneObject} to check for intersection.
+     * @param otherObject the {@link SXRNode} to check for intersection.
      * @return <code>true</code> if the object intersects with the
-     * {@link SXRSceneObject}s hierarchical bounding volume,
+     * {@link SXRNode}s hierarchical bounding volume,
      * <code>false</code> otherwise.
      */
-    public boolean intersectsBoundingVolume(SXRSceneObject otherObject) {
-        return NativeSceneObject.objectIntersectsBoundingVolume(getNative(), otherObject.getNative
+    public boolean intersectsBoundingVolume(SXRNode otherObject) {
+        return NativeNode.objectIntersectsBoundingVolume(getNative(), otherObject.getNative
                 ());
     }
 
     /**
      * Get the number of child objects.
      *
-     * @return Number of {@link SXRSceneObject objects} added as children of
+     * @return Number of {@link SXRNode objects} added as children of
      *         this object.
      */
     public int getChildrenCount() {
@@ -1081,11 +1081,11 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *
      * @param index
      *            Position of the child to get.
-     * @return {@link SXRSceneObject Child object}.
+     * @return {@link SXRNode Child object}.
      *
      * @throws IndexOutOfBoundsException if there is no childat that position.
      */
-    public SXRSceneObject getChildByIndex(int index) {
+    public SXRNode getChildByIndex(int index) {
         return mChildren.get(index);
     }
 
@@ -1094,7 +1094,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      * calling {@link #getChildByIndex(int)}, you can
      *
      * <pre>
-     * for (SXRSceneObject child : parent.children()) {
+     * for (SXRNode child : parent.children()) {
      * }
      * </pre>
      *
@@ -1103,13 +1103,13 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *         support {@link Iterator#remove()}.
      *         <p>
      *         At some point, this might actually return a
-     *         {@code List<SXRSceneObject>}, but that would require either
+     *         {@code List<SXRNode>}, but that would require either
      *         creating an immutable copy or writing a lot of code to support
      *         methods like {@link List#addAll(java.util.Collection)} and
      *         {@link List#clear()} - for now, we just create a very
      *         light-weight class that only supports iteration.
      */
-    public Iterable<SXRSceneObject> children() {
+    public Iterable<SXRNode> children() {
         return new Children(this);
     }
 
@@ -1131,28 +1131,28 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      *
      * @since 2.0.0
      */
-    public List<SXRSceneObject> getChildren() {
+    public List<SXRNode> getChildren() {
         return Collections.unmodifiableList(mChildren);
     }
 
     /** The internal list - do not make any changes! */
-    List<SXRSceneObject> rawGetChildren() {
+    List<SXRNode> rawGetChildren() {
         return mChildren;
     }
 
-    private static class Children implements Iterable<SXRSceneObject>,
-            Iterator<SXRSceneObject> {
+    private static class Children implements Iterable<SXRNode>,
+            Iterator<SXRNode> {
 
-        private final SXRSceneObject object;
+        private final SXRNode object;
         private int index;
 
-        private Children(SXRSceneObject object) {
+        private Children(SXRNode object) {
             this.object = object;
             this.index = 0;
         }
 
         @Override
-        public Iterator<SXRSceneObject> iterator() {
+        public Iterator<SXRNode> iterator() {
             return this;
         }
 
@@ -1162,7 +1162,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
         }
 
         @Override
-        public SXRSceneObject next() {
+        public SXRNode next() {
             return object.getChildByIndex(index++);
         }
 
@@ -1202,7 +1202,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
         sb.append(System.lineSeparator());
 
         // dump its children
-        for (SXRSceneObject child : getChildren()) {
+        for (SXRNode child : getChildren()) {
             child.prettyPrint(sb, indent + 2);
         }
     }
@@ -1220,10 +1220,10 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
     }
 
     /**
-     * Describes the BoundingVolume of this SceneObject.
+     * Describes the BoundingVolume of this Node.
      *
-     * Describes the BoundingVolume of this SceneObject.  The bounding
-     * volume encompases this SXRSceneObject and all of its children.
+     * Describes the BoundingVolume of this Node.  The bounding
+     * volume encompases this SXRNode and all of its children.
      * The volume includes both the bounding sphere (described by the center and radius) and the bounding box (described by the minCorner and maxCorner).
      *
      */
@@ -1241,14 +1241,14 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
     }
 
     /**
-     * @return The BoundingVolume for this SXRSceneObject.
+     * @return The BoundingVolume for this SXRNode.
      */
     public final BoundingVolume getBoundingVolume() {
-        return new BoundingVolume(NativeSceneObject.getBoundingVolume(getNative()));
+        return new BoundingVolume(NativeNode.getBoundingVolume(getNative()));
     }
 
     float[] getBoundingVolumeRawValues() {
-        return NativeSceneObject.getBoundingVolume(getNative());
+        return NativeNode.getBoundingVolume(getNative());
     }
 
     /**
@@ -1260,7 +1260,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
      */
     public final BoundingVolume expandBoundingVolume(final float pointX, final float pointY, final float pointZ) {
         return new BoundingVolume(
-                NativeSceneObject.expandBoundingVolumeByPoint(
+                NativeNode.expandBoundingVolumeByPoint(
                         getNative(), pointX, pointY, pointZ));
     }
 
@@ -1284,7 +1284,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
     public final BoundingVolume expandBoundingVolume(
             final float centerX, final float centerY, final float centerZ, final float radius) {
         return new BoundingVolume(
-                NativeSceneObject.expandBoundingVolumeByCenterAndRadius(
+                NativeNode.expandBoundingVolumeByCenterAndRadius(
                         getNative(), centerX, centerY, centerZ, radius));
     }
 
@@ -1299,7 +1299,7 @@ public class SXRSceneObject extends SXRHybridObject implements PrettyPrint, IScr
     }
 }
 
-class NativeSceneObject {
+class NativeNode {
     static native long ctor();
 
     static native String getName(long sceneObject);

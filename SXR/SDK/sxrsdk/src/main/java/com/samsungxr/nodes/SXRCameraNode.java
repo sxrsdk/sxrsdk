@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.samsungxr.scene_objects;
+package com.samsungxr.nodes;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -27,18 +27,18 @@ import com.samsungxr.SXRExternalTexture;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMaterial.SXRShaderType;
 import com.samsungxr.SXRMesh;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.utility.Log;
 
 import java.io.IOException;
 
 /**
- * A {@linkplain SXRSceneObject scene object} that shows live video from one of
+ * A {@linkplain SXRNode scene object} that shows live video from one of
  * the device's cameras
  */
-public class SXRCameraSceneObject extends SXRSceneObject {
-    private static String TAG = SXRCameraSceneObject.class.getSimpleName();
+public class SXRCameraNode extends SXRNode {
+    private static String TAG = SXRCameraNode.class.getSimpleName();
     private final SurfaceTexture mSurfaceTexture;
     private boolean mPaused = false;
     private Camera camera;
@@ -49,7 +49,7 @@ public class SXRCameraSceneObject extends SXRSceneObject {
     private CameraActivityEvents cameraActivityEvents;
 
     /**
-     * Create a {@linkplain SXRSceneObject scene object} (with arbitrarily
+     * Create a {@linkplain SXRNode scene object} (with arbitrarily
      * complex geometry) that shows live video from one of the device's cameras
      *
      * @param gvrContext current {@link SXRContext}
@@ -61,10 +61,10 @@ public class SXRCameraSceneObject extends SXRSceneObject {
      *                   should be sure to call it before you call
      *                   {@link Camera#startPreview()}.
      * @deprecated This call does not ensure the activity lifecycle is correctly
-     * handled by the {@link SXRCameraSceneObject}. Use
-     * {@link #SXRCameraSceneObject(SXRContext, SXRMesh)} instead.
+     * handled by the {@link SXRCameraNode}. Use
+     * {@link #SXRCameraNode(SXRContext, SXRMesh)} instead.
      */
-    public SXRCameraSceneObject(SXRContext gvrContext, SXRMesh mesh,
+    public SXRCameraNode(SXRContext gvrContext, SXRMesh mesh,
                                 Camera camera) {
         super(gvrContext, mesh);
         SXRTexture texture = new SXRExternalTexture(gvrContext);
@@ -86,7 +86,7 @@ public class SXRCameraSceneObject extends SXRSceneObject {
 
             @Override
             public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                SXRCameraSceneObject.this.gvrContext.runOnGlThread(onFrameAvailableGLCallback);
+                SXRCameraNode.this.gvrContext.runOnGlThread(onFrameAvailableGLCallback);
             }
         });
 
@@ -98,7 +98,7 @@ public class SXRCameraSceneObject extends SXRSceneObject {
     }
 
     /**
-     * Create a {@linkplain SXRSceneObject scene object} (with arbitrarily
+     * Create a {@linkplain SXRNode scene object} (with arbitrarily
      * complex geometry) that shows live video from one of the device's cameras
      *
      * @param gvrContext current {@link SXRContext}
@@ -108,7 +108,7 @@ public class SXRCameraSceneObject extends SXRSceneObject {
      * @throws SXRCameraAccessException returns this exception when the camera cannot be
      *                                  initialized correctly.
      */
-    public SXRCameraSceneObject(SXRContext gvrContext, SXRMesh mesh) throws
+    public SXRCameraNode(SXRContext gvrContext, SXRMesh mesh) throws
             SXRCameraAccessException {
         super(gvrContext, mesh);
 
@@ -129,7 +129,7 @@ public class SXRCameraSceneObject extends SXRSceneObject {
 
             @Override
             public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                SXRCameraSceneObject.this.gvrContext.runOnGlThread(onFrameAvailableGLCallback);
+                SXRCameraNode.this.gvrContext.runOnGlThread(onFrameAvailableGLCallback);
             }
         });
 
@@ -143,7 +143,7 @@ public class SXRCameraSceneObject extends SXRSceneObject {
     }
 
     /**
-     * Create a 2D, rectangular {@linkplain SXRSceneObject scene object} that
+     * Create a 2D, rectangular {@linkplain SXRNode scene object} that
      * shows live video from one of the device's cameras
      *
      * @param gvrContext current {@link SXRContext}
@@ -154,16 +154,16 @@ public class SXRCameraSceneObject extends SXRSceneObject {
      *                   should be sure to call it before you call
      *                   {@link Camera#startPreview()}.
      * @deprecated This call does not ensure the activity lifecycle is correctly
-     * handled by the {@link SXRCameraSceneObject}. Use
-     * {@link #SXRCameraSceneObject(SXRContext, float, float)} instead.
+     * handled by the {@link SXRCameraNode}. Use
+     * {@link #SXRCameraNode(SXRContext, float, float)} instead.
      */
-    public SXRCameraSceneObject(SXRContext gvrContext, float width,
+    public SXRCameraNode(SXRContext gvrContext, float width,
                                 float height, Camera camera) {
         this(gvrContext, gvrContext.createQuad(width, height), camera);
     }
 
     /**
-     * Create a 2D, rectangular {@linkplain SXRSceneObject scene object} that
+     * Create a 2D, rectangular {@linkplain SXRNode scene object} that
      * shows live video from one of the device's cameras.
      *
      * @param gvrContext current {@link SXRContext}
@@ -172,7 +172,7 @@ public class SXRCameraSceneObject extends SXRSceneObject {
      *
      * @throws SXRCameraAccessException this exception is returned when the camera cannot be opened.
      */
-    public SXRCameraSceneObject(SXRContext gvrContext, float width,
+    public SXRCameraNode(SXRContext gvrContext, float width,
                                 float height) throws SXRCameraAccessException {
         this(gvrContext, gvrContext.createQuad(width, height));
     }
@@ -239,7 +239,7 @@ public class SXRCameraSceneObject extends SXRSceneObject {
      *
      * <p>
      * Note: {@link #pause()} and {@code resume()} only affect the polling that
-     * links the Android {@link Camera} to this {@linkplain SXRSceneObject SXRF
+     * links the Android {@link Camera} to this {@linkplain SXRNode SXRF
      * scene object:} they have <em>no affect</em> on the underlying
      * {@link Camera} object.
      */
@@ -252,7 +252,7 @@ public class SXRCameraSceneObject extends SXRSceneObject {
      *
      * <p>
      * Note: {@code pause()} and {@link #resume()} only affect the polling that
-     * links the Android {@link Camera} to this {@linkplain SXRSceneObject SXRF
+     * links the Android {@link Camera} to this {@linkplain SXRNode SXRF
      * scene object:} they have <em>no affect</em> on the underlying
      * {@link Camera} object.
      */
@@ -261,7 +261,7 @@ public class SXRCameraSceneObject extends SXRSceneObject {
     }
 
     /**
-     * Close the {@link SXRCameraSceneObject}.
+     * Close the {@link SXRCameraNode}.
      */
     public void close() {
         closeCamera();
@@ -348,7 +348,7 @@ public class SXRCameraSceneObject extends SXRSceneObject {
     }
 
     /**
-     * This Exception is returned when the {@link SXRCameraSceneObject} cannot be instantiated
+     * This Exception is returned when the {@link SXRCameraNode} cannot be instantiated
      * when the camera is not available.
      */
     public class SXRCameraAccessException extends Exception {

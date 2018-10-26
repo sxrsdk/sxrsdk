@@ -20,13 +20,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRDrawFrameListener;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 /**
  * This class runs {@linkplain SXRAnimation animations}.
  * 
  * You can animate changes in just about any property of a
- * {@linkplain SXRSceneObject scene object}.
+ * {@linkplain SXRNode scene object}.
  * 
  * <p>
  * The animation engine is an optional part of SXRF: to use it, you must call

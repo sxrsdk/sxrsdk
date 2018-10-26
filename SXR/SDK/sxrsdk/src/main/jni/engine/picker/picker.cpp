@@ -24,7 +24,7 @@
 #include "glm/gtc/matrix_inverse.hpp"
 
 #include "objects/scene.h"
-#include "objects/scene_object.h"
+#include "objects/node.h"
 #include "objects/components/camera_rig.h"
 #include "objects/components/perspective_camera.h"
 #include "objects/components/render_data.h"
@@ -48,7 +48,7 @@ void Picker::pickScene(Scene* scene, std::vector<ColliderData>& picklist, Transf
     for (auto it = colliders.begin(); it != colliders.end(); ++it)
     {
         Collider* collider = static_cast<Collider*>(*it);
-        SceneObject* owner = collider->owner_object();
+        Node* owner = collider->owner_object();
         if (collider->enabled() && (owner != NULL) && owner->enabled())
         {
             ColliderData data = collider->isHit(owner, ray_start, ray_dir);
@@ -85,7 +85,7 @@ void Picker::pickClosest(Scene* scene,
     for (auto it = colliders.begin(); it != colliders.end(); ++it)
     {
         Collider* collider = static_cast<Collider*>(*it);
-        SceneObject* owner = collider->owner_object();
+        Node* owner = collider->owner_object();
         if (collider->enabled() && (owner != NULL) && owner->enabled())
         {
             ColliderData data = collider->isHit(owner, ray_start, ray_dir);
@@ -110,7 +110,7 @@ void Picker::pickClosest(Scene* scene,
  */
 void Picker::pickBounds(Scene* scene,
                         std::vector<ColliderData>& picklist,
-                        const std::vector<SceneObject*>& collidables)
+                        const std::vector<Node*>& collidables)
 {
     const std::vector<Component*>& colliders = scene->lockColliders();
 
@@ -119,7 +119,7 @@ void Picker::pickBounds(Scene* scene,
         int cursorID = 0;
         for (auto it2 = collidables.begin(); it2 != collidables.end(); ++it2)
         {
-            SceneObject* collidable = *it2;
+            Node* collidable = *it2;
             if ((collidable == NULL) || !collidable->enabled())
             {
                 ++cursorID;
@@ -129,7 +129,7 @@ void Picker::pickBounds(Scene* scene,
             glm::vec3 center(bv.center());
             float bsphere[4] = { center.x, center.y, center.z, bv.radius()};
             Collider* collider = reinterpret_cast<Collider*>(*it);
-            SceneObject* owner = collider->owner_object();
+            Node* owner = collider->owner_object();
 
             if (collider->enabled() &&
                 (owner != NULL) &&
@@ -156,19 +156,19 @@ void Picker::pickBounds(Scene* scene,
  * texture coordinates and barycentric coordinates of the corresponding hit-point. Note that this will do nothing
  * if the scene object doesn't have a collider.
  */
-void Picker::pickSceneObject(SceneObject *scene_object, float ox, float oy, float oz, float dx, float dy, float dz, ColliderData &colliderData)
+void Picker::pickNode(Node *node, float ox, float oy, float oz, float dx, float dy, float dz, ColliderData &colliderData)
 {
-    Collider* collider = (Collider*) scene_object->getComponent(Collider::getComponentType());
+    Collider* collider = (Collider*) node->getComponent(Collider::getComponentType());
     if(collider == nullptr)
     {
         return;
     }
-    else if (collider->enabled() && scene_object->enabled())
+    else if (collider->enabled() && node->enabled())
     {
         glm::vec3 rayStart(ox, oy, oz);
         glm::vec3 rayDir(dx, dy, dz);
 
-        colliderData = collider->isHit(scene_object, rayStart, rayDir);
+        colliderData = collider->isHit(node, rayStart, rayDir);
     }
 }
 /*
@@ -179,15 +179,15 @@ void Picker::pickSceneObject(SceneObject *scene_object, float ox, float oy, floa
  * so we must apply the inverse of the model matrix from the scene object
  * to the ray to put it into mesh coordinates.
  */
-glm::vec3 Picker::pickSceneObjectAgainstBoundingBox(SceneObject* scene_object, float ox, float oy, float oz, float dx, float dy, float dz)
+glm::vec3 Picker::pickNodeAgainstBoundingBox(Node* node, float ox, float oy, float oz, float dx, float dy, float dz)
 {
-    RenderData* rd = scene_object->render_data();
+    RenderData* rd = node->render_data();
 
     if ((rd == NULL) || (rd->mesh() == NULL))
     {
         return glm::vec3(std::numeric_limits<float>::infinity());
     }
-    glm::mat4 model_inverse = glm::affineInverse(scene_object->transform()->getModelMatrix());
+    glm::mat4 model_inverse = glm::affineInverse(node->transform()->getModelMatrix());
     const BoundingVolume& bounds = rd->mesh()->getBoundingVolume();
     glm::vec3 rayStart(ox, oy, oz);
     glm::vec3 rayDir(dx, dy, dz);
@@ -215,7 +215,7 @@ void Picker::pickVisible(Scene* scene, Transform* t, std::vector<ColliderData>& 
     for (auto it = colliders.begin(); it != colliders.end(); ++it)
     {
         Collider* collider = static_cast<Collider*>(*it);
-        SceneObject* owner = collider->owner_object();
+        Node* owner = collider->owner_object();
         if (collider->enabled() && (owner != NULL) && owner->enabled())
         {
             ColliderData data(collider);

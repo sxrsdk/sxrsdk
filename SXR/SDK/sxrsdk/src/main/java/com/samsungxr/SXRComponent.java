@@ -21,15 +21,15 @@ import java.util.List;
  * Base class for defining components to extend the scene object.
  *
  * Components are used to add behaviours to scene objects.
- * A SXRSceneObject can have any number of components but only
+ * A SXRNode can have any number of components but only
  * one component of each type. Usually the component type loosely
  * corresponds to the base class of the component. For example,
  * SXRCamera and SXRCameraRig have different component types.
  * SXROrthographicCamera and SXRPerspectiveCamera both have the
  * same type. All of the light classes have the same type as well.
  * 
- * @see SXRSceneObject#attachComponent(SXRComponent)
- * @see SXRSceneObject#getComponent(long)
+ * @see SXRNode#attachComponent(SXRComponent)
+ * @see SXRNode#getComponent(long)
  */
 public class SXRComponent extends SXRHybridObject
 {
@@ -73,12 +73,12 @@ public class SXRComponent extends SXRHybridObject
         mIsEnabled = true;
     }
 
-    protected SXRSceneObject owner;
+    protected SXRNode owner;
 
     /**
-     * @return The {@link SXRSceneObject} this object is currently attached to, or null if not attached.
+     * @return The {@link SXRNode} this object is currently attached to, or null if not attached.
      */
-    public SXRSceneObject getOwnerObject() {
+    public SXRNode getOwnerObject() {
         return owner;
     }
 
@@ -86,7 +86,7 @@ public class SXRComponent extends SXRHybridObject
      * Attach this component to a scene object.
      * @param owner scene object to become new owner.
      */
-    public void setOwnerObject(SXRSceneObject owner) {
+    public void setOwnerObject(SXRNode owner) {
         if (owner != null)
         {
             if (getNative() != 0)
@@ -109,9 +109,9 @@ public class SXRComponent extends SXRHybridObject
     }
 
     /**
-     * Checks if the {@link SXRComponent} is attached to a {@link SXRSceneObject}.
+     * Checks if the {@link SXRComponent} is attached to a {@link SXRNode}.
      *
-     * @return true if a {@link SXRSceneObject} is attached, else false.
+     * @return true if a {@link SXRNode} is attached, else false.
      */
     public boolean hasOwnerObject() {
         return owner != null;
@@ -204,30 +204,30 @@ public class SXRComponent extends SXRHybridObject
     /**
      * Called when a component is attached to a scene object.
      * 
-     * @param newOwner  SXRSceneObject the component is attached to.
+     * @param newOwner  SXRNode the component is attached to.
      */
-    public void onAttach(SXRSceneObject newOwner) { }
+    public void onAttach(SXRNode newOwner) { }
 
     /**
      * Called when a component is detached from a scene object.
      * 
-     * @param oldOwner  SXRSceneObject the component was detached from.
+     * @param oldOwner  SXRNode the component was detached from.
      */
-    public void onDetach(SXRSceneObject oldOwner) { }
+    public void onDetach(SXRNode oldOwner) { }
 
     /**
      * Called when the component's owner gets a new parent.
      *
      * @param newOwnersParent New parent of the component's owner.
      */
-    public void onNewOwnersParent(SXRSceneObject newOwnersParent) { }
+    public void onNewOwnersParent(SXRNode newOwnersParent) { }
 
     /**
      * Called when the component's owner is detached from its parent.
      *
      * @param oldOwnersParent Old parent of the component's owner.
      */
-    public void onRemoveOwnersParent(SXRSceneObject oldOwnersParent) { }
+    public void onRemoveOwnersParent(SXRNode oldOwnersParent) { }
 
     /**
      * Called when a component is enabled.

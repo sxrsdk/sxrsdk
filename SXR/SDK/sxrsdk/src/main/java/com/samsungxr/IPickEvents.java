@@ -39,18 +39,18 @@ public interface IPickEvents extends IEvents {
      * @param sceneObj scene object picked
      * @param collision information about the collision
      */
-    void onEnter(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision);
+    void onEnter(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
     
     /**
      * Called when the pick ray first exits a scene object.
      * @param sceneObj scene object no longer picked.
      */    
-    void onExit(SXRSceneObject sceneObj);
+    void onExit(SXRNode sceneObj);
     
     /**
      * Called while the pick ray penetrates a scene object.
      * @param sceneObj scene object picked
      * @param collision information about the collision
      */    
-    void onInside(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision);
+    void onInside(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
 }

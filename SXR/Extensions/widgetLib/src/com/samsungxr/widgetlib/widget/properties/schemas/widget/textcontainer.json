@@ -21,7 +21,7 @@
       ]
     },
     "refresh_freq": {
-      "description": "Values from GVRTextViewSceneObject.IntervalFrequency",
+      "description": "Values from SXRTextViewNode.IntervalFrequency",
       "type": "string",
       "enum": [
         "REALTIME",

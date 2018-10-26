@@ -39,7 +39,7 @@ import static android.opengl.GLES30.GL_RGB32F;
  * a_tangent and a_bitangent vertex attributes).
  * <p>
  * The {@link SXRMeshMorph} component should be attached
- * to the {@link SXRSceneObject} which owns the base mesh.
+ * to the {@link SXRNode} which owns the base mesh.
  * The {@link SXRMaterial} used to render the mesh must
  * have a shader that supports morphing.
  * </p>
@@ -107,7 +107,7 @@ public class SXRMeshMorph extends SXRBehavior
      * @throws IllegalStateException if mesh is null
      * @throws IllegalStateException if material is null
      */
-    public void onAttach(SXRSceneObject sceneObj)
+    public void onAttach(SXRNode sceneObj)
     {
         super.onAttach(sceneObj);
         SXRComponent comp = getComponent(SXRRenderData.getComponentType());
@@ -134,7 +134,7 @@ public class SXRMeshMorph extends SXRBehavior
         mtl.setFloatArray("u_blendweights", mWeights);
     }
 
-    public void onDetach(SXRSceneObject sceneObj)
+    public void onDetach(SXRNode sceneObj)
     {
         mBlendShapeDiffs = null;
         mBaseBlendShape = null;
@@ -232,7 +232,7 @@ public class SXRMeshMorph extends SXRBehavior
         }
     }
 
-    public void setBlendShape(int index, SXRSceneObject obj)
+    public void setBlendShape(int index, SXRNode obj)
     {
         SXRRenderData rdata = obj.getRenderData();
         SXRMesh mesh;

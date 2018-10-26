@@ -1,6 +1,6 @@
 package com.samsungxr.widgetlib.widget.basic;
 
-import com.samsungxr.scene_objects.SXRTextViewSceneObject.IntervalFrequency;
+import com.samsungxr.nodes.SXRTextViewNode.IntervalFrequency;
 
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;

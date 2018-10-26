@@ -9,7 +9,7 @@ import com.samsungxr.widgetlib.widget.layout.OrientedLayout;
 import com.samsungxr.widgetlib.widget.layout.basic.LinearLayout;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -55,31 +55,31 @@ public class CheckableGroup extends GroupWidget {
     }
 
     /**
-     * Construct a wrapper for an existing {@link SXRSceneObject}.
+     * Construct a wrapper for an existing {@link SXRNode}.
      *
      * @param context
      *            The current {@link SXRContext}.
      * @param sceneObject
-     *            The {@link SXRSceneObject} to wrap.
+     *            The {@link SXRNode} to wrap.
      */
-    public CheckableGroup(SXRContext context, SXRSceneObject sceneObject) {
+    public CheckableGroup(SXRContext context, SXRNode sceneObject) {
         super(context, sceneObject);
         init();
     }
 
     /**
-     * A constructor for wrapping existing {@link SXRSceneObject} instances.
+     * A constructor for wrapping existing {@link SXRNode} instances.
      *
      * @param context
      *            The current {@link SXRContext}
      * @param sceneObject
-     *            The {@link SXRSceneObject} to wrap.
+     *            The {@link SXRNode} to wrap.
      * @param attributes
      *            TODO
      * @throws InstantiationException
      */
     @Deprecated
-    public CheckableGroup(SXRContext context, SXRSceneObject sceneObject, NodeEntry attributes)
+    public CheckableGroup(SXRContext context, SXRNode sceneObject, NodeEntry attributes)
             throws InstantiationException {
         super(context, sceneObject, attributes);
         init();

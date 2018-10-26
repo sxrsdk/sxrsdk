@@ -25,7 +25,7 @@
 #include "objects/components/custom_camera.h"
 #include "objects/components/perspective_camera.h"
 #include "objects/components/camera_rig.h"
-#include "objects/scene_object.h"
+#include "objects/node.h"
 
 class DaydreamRenderer {
 public:

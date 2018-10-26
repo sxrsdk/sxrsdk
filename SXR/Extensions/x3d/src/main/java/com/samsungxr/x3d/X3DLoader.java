@@ -21,7 +21,7 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXRImportSettings;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRResourceVolume;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.animation.SXRAnimator;
 import com.samsungxr.utility.Log;
 
@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 final class X3DLoader {
-    public static SXRSceneObject load(final SXRContext context, final SXRAssetLoader.AssetRequest assetRequest, final SXRSceneObject root) throws IOException {
+    public static SXRNode load(final SXRContext context, final SXRAssetLoader.AssetRequest assetRequest, final SXRNode root) throws IOException {
         final SXRResourceVolume volume = assetRequest.getVolume();
         final String fileName = assetRequest.getBaseName();
         final SXRAndroidResource resource = volume.openResource(fileName);

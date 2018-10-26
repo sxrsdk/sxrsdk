@@ -21,7 +21,7 @@ import android.content.res.AssetManager;
 import com.samsungxr.SXRAndroidResource;
 import com.samsungxr.SXRAssetLoader;
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.utility.Log;
 
 import java.io.IOException;

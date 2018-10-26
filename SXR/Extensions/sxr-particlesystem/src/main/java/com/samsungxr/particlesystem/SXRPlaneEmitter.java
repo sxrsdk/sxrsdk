@@ -17,7 +17,7 @@ package com.samsungxr.particlesystem;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRDrawFrameListener;
-import com.samsungxr.scene_objects.SXRTextViewSceneObject;
+import com.samsungxr.nodes.SXRTextViewNode;
 import com.samsungxr.utility.Log;
 import org.joml.Vector3f;
 

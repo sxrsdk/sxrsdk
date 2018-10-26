@@ -25,23 +25,23 @@
 #include "component_types.h"
 
 namespace sxr {
-class SceneObject;
+class Node;
 class Scene;
 
 class Component: public HybridObject {
 public:
     Component();
     explicit Component(long long type);
-    explicit Component(SceneObject* owner_object);
-    explicit Component(long long type, SceneObject* owner_object);
+    explicit Component(Node* owner_object);
+    explicit Component(long long type, Node* owner_object);
     virtual ~Component();
 
-    SceneObject* owner_object() const;
-    virtual void set_owner_object(SceneObject* owner_object);
+    Node* owner_object() const;
+    virtual void set_owner_object(Node* owner_object);
     virtual void onAddedToScene(Scene* scene) { }
     virtual void onRemovedFromScene(Scene* scene) { }
-    virtual void onAttach(SceneObject* owner) { }
-    virtual void onDetach(SceneObject* owner) { }
+    virtual void onAttach(Node* owner) { }
+    virtual void onDetach(Node* owner) { }
     virtual void addChildComponent(Component*) { }
     virtual void removeChildComponent(Component*) { }
     long long getType() const;
@@ -55,7 +55,7 @@ private:
     Component& operator=(Component&& component) = delete;
 
 protected:
-    SceneObject* owner_object_;
+    Node* owner_object_;
     bool         enabled_;
 
 private:

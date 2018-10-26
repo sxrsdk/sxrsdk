@@ -42,7 +42,7 @@ import com.samsung.mpl.gearwearlibrary.models.events.TouchStart;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.io.cursor3d.CustomKeyEvent;
 import com.samsungxr.io.cursor3d.IoDevice;
 import com.samsungxr.utility.Log;
@@ -97,7 +97,7 @@ public class GearWearableDevice extends IoDevice {
     private Context context;
     private EventReceiver eventReceiver;
     private boolean enabled;
-    private SXRSceneObject internalObject;
+    private SXRNode internalObject;
     private HandlerThread thread;
     private EventHandler handler;
     private final PositionData positionData;
@@ -157,7 +157,7 @@ public class GearWearableDevice extends IoDevice {
         this.gvrContext = gvrContext;
         this.context = gvrContext.getContext();
         this.eventReceiver = new EventReceiver();
-        internalObject = new SXRSceneObject(gvrContext);
+        internalObject = new SXRNode(gvrContext);
         positionData = new PositionData(0.0f, 0.0f, 0.0f);
         this.movementMode = movementMode;
         prevPositionData = new PositionData(0.0f, 0.0f, 0.0f);

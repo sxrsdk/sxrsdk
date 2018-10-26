@@ -16,7 +16,7 @@
 package com.samsungxr.physics;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 /**
  * Created by c.bozzetto on 19/05/2017.

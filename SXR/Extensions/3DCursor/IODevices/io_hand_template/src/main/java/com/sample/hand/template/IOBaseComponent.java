@@ -14,7 +14,7 @@
  */
 package com.sample.hand.template;
 
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -23,9 +23,9 @@ import org.joml.Vector3f;
  * type,  position and   rotation .
  */
 public abstract class IOBaseComponent {
-    public SXRSceneObject sceneObject;
+    public SXRNode sceneObject;
     private int type;
-    private SXRSceneObject handSceneObject;
+    private SXRNode handNode;
     private Vector3f componentPosition;
     private Quaternionf componentRotation;
 
@@ -33,11 +33,11 @@ public abstract class IOBaseComponent {
      * Create an {@link IOBaseComponent} of the provided type.
      *
      * @param type            the type of the {@link IOBaseComponent}.
-     * @param handSceneObject This is the root {@link SXRSceneObject} that represents the hand.
+     * @param handNode This is the root {@link SXRNode} that represents the hand.
      */
-    public IOBaseComponent(int type, SXRSceneObject handSceneObject) {
+    public IOBaseComponent(int type, SXRNode handNode) {
         this.type = type;
-        this.handSceneObject = handSceneObject;
+        this.handNode = handNode;
         componentPosition = new Vector3f();
         componentRotation = new Quaternionf();
     }
@@ -47,19 +47,19 @@ public abstract class IOBaseComponent {
      *
      * @return This call returns null if no scene object has been set
      */
-    public SXRSceneObject getSceneObject() {
+    public SXRNode getNode() {
         return sceneObject;
     }
 
     /**
-     * This call sets the {@link SXRSceneObject} that represents this {@link IOBaseComponent} and
+     * This call sets the {@link SXRNode} that represents this {@link IOBaseComponent} and
      * adds it to the root hand object.
      *
-     * @param boneSceneObject
+     * @param boneNode
      */
-    public void setSceneObject(SXRSceneObject boneSceneObject) {
-        this.sceneObject = boneSceneObject;
-        handSceneObject.addChildObject(boneSceneObject);
+    public void setNode(SXRNode boneNode) {
+        this.sceneObject = boneNode;
+        handNode.addChildObject(boneNode);
     }
 
     /**

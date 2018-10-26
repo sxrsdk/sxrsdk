@@ -45,11 +45,11 @@ import java.util.Properties;
  * 
  * The scene graph is a hierarchy with all the objects to display.
  * It has a single root and one main camera rig.
- * Each visible object, or node, in the scene graph is a {@link SXRSceneObject}
+ * Each visible object, or node, in the scene graph is a {@link SXRNode}
  * with a {@link SXRTransform} component that places and orients it in space
  * with respect to it's parent node. A node can have multiple children,
  * and a child inherits the concatenation of all of it's ancestors transformations.
- * @see SXRSceneObject
+ * @see SXRNode
  * @see SXRTransform
  * @see IEventReceiver
  * @see ISceneEvents
@@ -61,7 +61,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
     private SXRCameraRig mMainCameraRig;
     private StringBuilder mStatMessage = new StringBuilder();
     private SXREventReceiver mEventReceiver = new SXREventReceiver(this);
-    private SXRSceneObject mSceneRoot;
+    private SXRNode mSceneRoot;
     /**
      * Constructs a scene with a camera rig holding left & right cameras in it.
      * 
@@ -71,7 +71,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
     public SXRScene(SXRContext gvrContext) {
         super(gvrContext, NativeScene.ctor());
 
-        mSceneRoot = new SXRSceneObject(gvrContext);
+        mSceneRoot = new SXRNode(gvrContext);
         NativeScene.setSceneRoot(getNative(), mSceneRoot.getNative());
 
         NativeScene.setJava(getNative(), this);
@@ -98,7 +98,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
         cameraRig.attachRightCamera(rightCamera);
         cameraRig.attachCenterCamera(centerCamera);
 
-        addSceneObject(cameraRig.getOwnerObject());
+        addNode(cameraRig.getOwnerObject());
 
         setMainCameraRig(cameraRig);
         setFrustumCulling(true);      
@@ -106,63 +106,63 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
     }
 
     /**
-     * Add a {@linkplain SXRSceneObject scene object} as
+     * Add a {@linkplain SXRNode scene object} as
      * a child of the scene root.
      * 
      * @param sceneObject
-     *            The {@linkplain SXRSceneObject scene object} to add.
+     *            The {@linkplain SXRNode scene object} to add.
      */
-    public void addSceneObject(SXRSceneObject sceneObject) {
+    public void addNode(SXRNode sceneObject) {
         mSceneRoot.addChildObject(sceneObject);
     }
 
     /**
-     * Remove a {@linkplain SXRSceneObject scene object} from
+     * Remove a {@linkplain SXRNode scene object} from
      * the scene root.
      * 
      * @param sceneObject
-     *            The {@linkplain SXRSceneObject scene object} to remove.
+     *            The {@linkplain SXRNode scene object} to remove.
      */
-    public void removeSceneObject(SXRSceneObject sceneObject) {
+    public void removeNode(SXRNode sceneObject) {
         mSceneRoot.removeChildObject(sceneObject);
     }
 
     /**
-     * Removes from scene root the first {@linkplain SXRSceneObject scene object}
+     * Removes from scene root the first {@linkplain SXRNode scene object}
      * that has the given name.
      *
      * @param name name of scene object to be removed.
      *
      * @return true if child was removed, false if it was not found.
      *
-     * @see SXRSceneObject#removeChildObjectByName(String)
+     * @see SXRNode#removeChildObjectByName(String)
      */
-    public boolean removeSceneObjectByName(final String name) {
+    public boolean removeNodeByName(final String name) {
         return mSceneRoot.removeChildObjectByName(name);
     }
     
     /**
-     * Removes from scene root any {@linkplain SXRSceneObject scene object}
+     * Removes from scene root any {@linkplain SXRNode scene object}
      * that has the given name by performing case-sensitive search.
      *
      * @param name name of scene object to be removed.
      *
      * @return number of removed objects, 0 if none was found.
      */
-    public int removeSceneObjectsByName(final String name) {
+    public int removeNodesByName(final String name) {
         return mSceneRoot.removeChildObjectsByName(name);
     }
 
     /**
      * Remove all scene objects.
      */
-    public synchronized void removeAllSceneObjects() {
+    public synchronized void removeAllNodes() {
         final SXRCameraRig rig = getMainCameraRig();
-        final SXRSceneObject head = rig.getOwnerObject();
+        final SXRNode head = rig.getOwnerObject();
         rig.removeAllChildren();
 
-        NativeScene.removeAllSceneObjects(getNative());
-        for (final SXRSceneObject child : mSceneRoot.getChildren()) {
+        NativeScene.removeAllNodes(getNative());
+        for (final SXRNode child : mSceneRoot.getChildren()) {
             child.getParent().removeChildObject(child);
         }
 
@@ -189,7 +189,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
      * Currently, it only removes all scene objects.
      */
     public void clear() {
-        removeAllSceneObjects();
+        removeAllNodes();
     }
 
     /**
@@ -197,10 +197,10 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
      * This node is a common ancestor to all the objects
      * in the scene.
      * @return top level scene object.
-     * @see #addSceneObject(SXRSceneObject)
-     * @see #removeSceneObject(SXRSceneObject)
+     * @see #addNode(SXRNode)
+     * @see #removeNode(SXRNode)
      */
-    public SXRSceneObject getRoot() {
+    public SXRNode getRoot() {
         return mSceneRoot;
     }
     
@@ -211,10 +211,10 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
      *
      * @since 2.0.0
      * @see SXRScene#getRoot()
-     * @see SXRScene#addSceneObject(SXRSceneObject)
-     * @see SXRScene#removeSceneObject(SXRSceneObject) removeSceneObject
+     * @see SXRScene#addNode(SXRNode)
+     * @see SXRScene#removeNode(SXRNode) removeNode
      */
-    public List<SXRSceneObject> getSceneObjects() {
+    public List<SXRNode> getNodes() {
         return mSceneRoot.getChildren();
     }
 
@@ -244,20 +244,20 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
     }
 
     /**
-     * @return The flattened hierarchy of {@link SXRSceneObject objects} as an
+     * @return The flattened hierarchy of {@link SXRNode objects} as an
      *         array.
      * This function is inefficient if your hierarchy is large and should
      * not be called per frame (in onStep).
      */
-    public SXRSceneObject[] getWholeSceneObjects() {
-        List<SXRSceneObject> list = new ArrayList<SXRSceneObject>();
+    public SXRNode[] getWholeNodes() {
+        List<SXRNode> list = new ArrayList<SXRNode>();
         
         addChildren(list, mSceneRoot);
-        return list.toArray(new SXRSceneObject[list.size()]);
+        return list.toArray(new SXRNode[list.size()]);
     }
 
-    private void addChildren(List<SXRSceneObject> list, SXRSceneObject sceneObject) {
-        for (SXRSceneObject child : sceneObject.rawGetChildren()) {
+    private void addChildren(List<SXRNode> list, SXRNode sceneObject) {
+        for (SXRNode child : sceneObject.rawGetChildren()) {
             list.add(child);
             addChildren(list, child);
         }
@@ -269,11 +269,11 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
      * @param name
      * @return null if nothing was found or name was null/empty
      */
-    public SXRSceneObject[] getSceneObjectsByName(final String name) {
+    public SXRNode[] getNodesByName(final String name) {
         if (null == name || name.isEmpty()) {
             return null;
         }
-        return mSceneRoot.getSceneObjectsByName(name);
+        return mSceneRoot.getNodesByName(name);
     }
 
     /**
@@ -281,13 +281,13 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
      * 
      * @param name
      * @return first match in the graph; null if nothing was found or name was null/empty;
-     * in case there might be multiple matches consider using getSceneObjectsByName
+     * in case there might be multiple matches consider using getNodesByName
      */
-    public SXRSceneObject getSceneObjectByName(final String name) {
+    public SXRNode getNodeByName(final String name) {
         if (null == name || name.isEmpty()) {
             return null;
         }
-        return mSceneRoot.getSceneObjectByName(name);
+        return mSceneRoot.getNodeByName(name);
     }
 
     /**
@@ -491,7 +491,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
         List<SXRAtlasInformation> atlasInfoList = texture.getAtlasInformation();
 
         for (SXRAtlasInformation atlasInfo: atlasInfoList) {
-            SXRSceneObject sceneObject = getSceneObjectByName(atlasInfo.getName());
+            SXRNode sceneObject = getNodeByName(atlasInfo.getName());
 
             if (sceneObject == null || sceneObject.getRenderData() == null) {
                 Log.w(TAG, "Null render data or scene object " + atlasInfo.getName()
@@ -546,15 +546,15 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
         public void onInit(SXRContext gvrContext, SXRScene scene) {
             recursivelySendOnInit(mSceneRoot);
         }
-        private void recursivelySendOnInit(SXRSceneObject sceneObject) {
+        private void recursivelySendOnInit(SXRNode sceneObject) {
             getSXRContext().getEventManager().sendEvent(
-                    sceneObject, ISceneObjectEvents.class, "onInit", getSXRContext(), sceneObject);
+                    sceneObject, INodeEvents.class, "onInit", getSXRContext(), sceneObject);
             SXRScriptBehaviorBase script = (SXRScriptBehaviorBase) sceneObject.getComponent(SXRScriptBehaviorBase.getComponentType());
             if (script != null) {
                 getSXRContext().getEventManager().sendEvent(
                         script, ISceneEvents.class, "onInit", getSXRContext(), SXRScene.this);
             }
-            for (SXRSceneObject child : sceneObject.rawGetChildren()) {
+            for (SXRNode child : sceneObject.rawGetChildren()) {
                 recursivelySendOnInit(child);
             }
         }
@@ -564,11 +564,11 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
             recursivelySendSimpleEvent(mSceneRoot, "onAfterInit");
         }
 
-        private void recursivelySendSimpleEvent(SXRSceneObject sceneObject, String eventName) {
+        private void recursivelySendSimpleEvent(SXRNode sceneObject, String eventName) {
             getSXRContext().getEventManager().sendEvent(
-                    sceneObject, ISceneObjectEvents.class, eventName);
+                    sceneObject, INodeEvents.class, eventName);
 
-            for (SXRSceneObject child : sceneObject.getChildren()) {
+            for (SXRNode child : sceneObject.getChildren()) {
                 recursivelySendSimpleEvent(child, eventName);
             }
         }
@@ -629,7 +629,7 @@ class NativeScene {
 
     static native void setJava(long scene, SXRScene javaScene);
 
-    static native void removeAllSceneObjects(long scene);
+    static native void removeAllNodes(long scene);
 
     static native void deleteLightsAndDepthTextureOnRenderThread(long scene);
 

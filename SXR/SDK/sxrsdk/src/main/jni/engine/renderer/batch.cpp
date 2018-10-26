@@ -14,7 +14,7 @@
  */
 #include <contrib/glm/gtc/type_ptr.hpp>
 #include "batch.h"
-#include "objects/scene_object.h"
+#include "objects/node.h"
 #include "objects/components/camera.h"
 #include "objects/components/render_data.h"
 #include "objects/light.h"

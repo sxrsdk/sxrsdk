@@ -101,9 +101,9 @@ RenderTarget::RenderTarget()
     mRenderState.material_override = NULL;
 }
 
-void RenderTarget::cullFromCamera(Scene* scene, jobject javaSceneObject, Camera* camera, Renderer* renderer, ShaderManager* shader_manager){
+void RenderTarget::cullFromCamera(Scene* scene, jobject javaNode, Camera* camera, Renderer* renderer, ShaderManager* shader_manager){
 
-    renderer->cullFromCamera(scene, javaSceneObject, camera,shader_manager, mRenderDataVector.get(),mRenderState.is_multiview);
+    renderer->cullFromCamera(scene, javaNode, camera,shader_manager, mRenderDataVector.get(),mRenderState.is_multiview);
     scene->getLights().shadersRebuilt();
     renderer->state_sort(mRenderDataVector.get());
 }

@@ -8,7 +8,7 @@ import com.samsungxr.script.SXRScriptBehaviorBase;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRResourceVolume;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.IErrorEvents;
 import com.samsungxr.IPickEvents;
 import com.samsungxr.ISceneEvents;
@@ -27,11 +27,11 @@ import com.samsungxr.SensorEvent;
  *                              (this component is attached to a scene object and enabled)
  *      onStep()                called every frame if this component is enabled
  *                              and attached to a scene object
- *      onEnter(SXRSceneObject, SXRPicker.SXRPickedObject)
+ *      onEnter(SXRNode, SXRPicker.SXRPickedObject)
  *                              called when picking ray enters an object
- *      onExit(SXRSceneObject)
+ *      onExit(SXRNode)
  *                              called when picking ray exits an object
- *      onInside(SXRSceneObject, SXRPicker.SXRPickedObject)
+ *      onInside(SXRNode, SXRPicker.SXRPickedObject)
  *                              called when picking ray is inside an object
  *      onPick(SXRPicker)       called when picking selection changes
  *      onNoPick(SXRPicker)     called when nothing is picked
@@ -170,7 +170,7 @@ public class SXRScriptBehavior extends SXRScriptBehaviorBase implements IPickEve
 
     public void onStep() { }
 
-    public void onAttach(SXRSceneObject owner)
+    public void onAttach(SXRNode owner)
     {
         super.onAttach(owner);
         attachScript(owner);
@@ -182,7 +182,7 @@ public class SXRScriptBehavior extends SXRScriptBehaviorBase implements IPickEve
         attachScript(null);
     }
     
-    public void onDetach(SXRSceneObject owner)
+    public void onDetach(SXRNode owner)
     {
         detachScript();
         super.onDetach(owner);
@@ -193,7 +193,7 @@ public class SXRScriptBehavior extends SXRScriptBehaviorBase implements IPickEve
         invokeFunction("onStep", noargs);
     }
 
-    public void onEnter(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject hit)
+    public void onEnter(SXRNode sceneObj, SXRPicker.SXRPickedObject hit)
     {
          if ((sceneObj == getOwnerObject()) && !invokeFunction("onPickEnter", new Object[] { sceneObj, hit }))
          {
@@ -205,7 +205,7 @@ public class SXRScriptBehavior extends SXRScriptBehaviorBase implements IPickEve
          }
     }
 
-    public void onExit(SXRSceneObject sceneObj)
+    public void onExit(SXRNode sceneObj)
     {
         if ((sceneObj == getOwnerObject()) && !invokeFunction("onPickExit", new Object[] { sceneObj }))
         {
@@ -246,9 +246,9 @@ public class SXRScriptBehavior extends SXRScriptBehaviorBase implements IPickEve
         invokeFunction("onSensorEvent", new Object[] { event });
     }
 
-    public void onInside(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject hit) { }
+    public void onInside(SXRNode sceneObj, SXRPicker.SXRPickedObject hit) { }
 
-    protected void attachScript(SXRSceneObject owner)
+    protected void attachScript(SXRNode owner)
     {
         if (owner == null)
         {
@@ -291,7 +291,7 @@ public class SXRScriptBehavior extends SXRScriptBehaviorBase implements IPickEve
 
     protected void detachScript()
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
         
         if (mIsAttached && (owner != null))
         {

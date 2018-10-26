@@ -6,7 +6,7 @@
     "state_type": {
       "type": "object",
       "anyOf": [{
-        "scene_object": {
+        "node": {
           "type": "object",
           "properties": {
             "id": { "type": "string" }
@@ -150,7 +150,7 @@
       }]
     },
     "create_children": {
-      "description": "Specifies whether to create child Widgets for all sub-objects of the Widget's GVRSceneObject (true) or to handle sub-objects as being part of the same Widget (false).",
+      "description": "Specifies whether to create child Widgets for all sub-objects of the Widget's SXRNode (true) or to handle sub-objects as being part of the same Widget (false).",
       "type": "boolean",
       "default": true
     }

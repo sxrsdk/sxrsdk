@@ -194,13 +194,13 @@ public class SXRDirectLight extends SXRLight
     /**
      * Enables or disabled shadow casting for a direct light.
      * Enabling shadows attaches a SXRShadowMap component to the
-     * SXRSceneObject which owns the light and provides the
+     * SXRNode which owns the light and provides the
      * component with an orthographic camera for shadow casting.
      * @param enableFlag true to enable shadow casting, false to disable
      */
     public void setCastShadow(boolean enableFlag)
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
 
         if (owner != null)
         {
@@ -241,7 +241,7 @@ public class SXRDirectLight extends SXRLight
      */
     public void setShadowRange(float near, float far)
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
         SXROrthogonalCamera shadowCam = null;
 
         if (owner == null)
@@ -307,7 +307,7 @@ public class SXRDirectLight extends SXRLight
     private void computePosition()
     {
         SXRScene scene = getSXRContext().getMainScene();
-        SXRSceneObject.BoundingVolume bv = scene.getRoot().getBoundingVolume();
+        SXRNode.BoundingVolume bv = scene.getRoot().getBoundingVolume();
         float far = scene.getMainCameraRig().getFarClippingDistance();
 
         mNewPos.x = bv.center.x - far * mNewDir.x;

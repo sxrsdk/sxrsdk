@@ -16,7 +16,7 @@
 package com.samsungxr.animation;
 
 import com.samsungxr.SXRHybridObject;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 
 /** Animate an object's position. */
@@ -56,7 +56,7 @@ public class SXRRelativeMotionAnimation extends SXRTransformAnimation
      * Animate a move by delta x/y/z.
      * 
      * @param target
-     *            {@link SXRSceneObject} containing a {@link SXRTransform}
+     *            {@link SXRNode} containing a {@link SXRTransform}
      * @param duration
      *            The animation duration, in seconds.
      * @param deltaX
@@ -66,7 +66,7 @@ public class SXRRelativeMotionAnimation extends SXRTransformAnimation
      * @param deltaZ
      *            The value to add to z
      */
-    public SXRRelativeMotionAnimation(SXRSceneObject target, float duration,
+    public SXRRelativeMotionAnimation(SXRNode target, float duration,
             float deltaX, float deltaY, float deltaZ) {
         this(target.getTransform(), duration, deltaX, deltaY, deltaZ);
     }

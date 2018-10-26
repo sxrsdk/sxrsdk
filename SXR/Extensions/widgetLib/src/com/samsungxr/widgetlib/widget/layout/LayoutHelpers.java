@@ -4,7 +4,7 @@ import com.samsungxr.widgetlib.widget.Widget;
 
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 
 /**
@@ -70,10 +70,10 @@ public final class LayoutHelpers {
      * it. Rotations are not taken into account.
      *
      * @param item
-     *            The {@link SXRSceneObject} to calculate with width for.
+     *            The {@link SXRNode} to calculate with width for.
      * @return The dimensions of {@code item}.
      */
-    public static float[] calculateGeometricDimensions(final SXRSceneObject item) {
+    public static float[] calculateGeometricDimensions(final SXRNode item) {
         final SXRRenderData renderData = item.getRenderData();
         if (renderData != null) {
             final SXRMesh mesh = renderData.getMesh();

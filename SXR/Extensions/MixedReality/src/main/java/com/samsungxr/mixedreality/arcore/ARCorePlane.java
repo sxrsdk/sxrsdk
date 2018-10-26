@@ -114,8 +114,8 @@ class ARCorePlane extends SXRPlane {
 
         convertFromARtoVRSpace(viewmtx, gvrmatrix, scale);
 
-        if (mSceneObject != null) {
-            mSceneObject.getTransform().setScale(mARPlane.getExtentX() * 0.95f,
+        if (mNode != null) {
+            mNode.getTransform().setScale(mARPlane.getExtentX() * 0.95f,
                     mARPlane.getExtentZ() * 0.95f, 1.0f);
         }
     }

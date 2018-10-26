@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.R;
 
 import android.content.Context;
@@ -101,8 +101,8 @@ final class AccessibilityFeature {
      * find all accessibility object and set active true for enable talk back.
      */
     private void enableTalkBack() {
-        SXRSceneObject[] sceneObjects = mGvrContext.getMainScene().getWholeSceneObjects();
-        for (SXRSceneObject sceneObject : sceneObjects) {
+        SXRNode[] sceneObjects = mGvrContext.getMainScene().getWholeNodes();
+        for (SXRNode sceneObject : sceneObjects) {
             if (sceneObject instanceof SXRAccessiblityObject)
                 if (((SXRAccessiblityObject) sceneObject).getTalkBack() != null)
                     ((SXRAccessiblityObject) sceneObject).getTalkBack().setActive(true);
@@ -113,8 +113,8 @@ final class AccessibilityFeature {
      * find all accessibility object and set active false for enable talk back.
      */
     private void disableTalkBack() {
-        SXRSceneObject[] sceneObjects = mGvrContext.getMainScene().getWholeSceneObjects();
-        for (SXRSceneObject sceneObject : sceneObjects) {
+        SXRNode[] sceneObjects = mGvrContext.getMainScene().getWholeNodes();
+        for (SXRNode sceneObject : sceneObjects) {
             if (sceneObject instanceof SXRAccessiblityObject)
                 if (((SXRAccessiblityObject) sceneObject).getTalkBack() != null)
                     ((SXRAccessiblityObject) sceneObject).getTalkBack().setActive(false);

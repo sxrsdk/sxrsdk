@@ -37,7 +37,7 @@ namespace sxr
 
     ShadowMap* Light::getShadowMap()
     {
-        SceneObject* owner = owner_object();
+        Node* owner = owner_object();
         ShadowMap* shadowMap = nullptr;
 
         if (owner == nullptr)
@@ -54,7 +54,7 @@ namespace sxr
         return nullptr;
     }
 
-    bool Light::makeShadowMap(Scene* scene, jobject javaSceneObject, ShaderManager* shader_manager, int layerIndex)
+    bool Light::makeShadowMap(Scene* scene, jobject javaNode, ShaderManager* shader_manager, int layerIndex)
     {
         ShadowMap* shadowMap = getShadowMap();
         float shadow_map_index = -1;
@@ -80,9 +80,9 @@ namespace sxr
         Renderer* renderer = gRenderer->getInstance();
         shadowMap->setLayerIndex(layerIndex);
         shadowMap->setMainScene(scene);
-        shadowMap->cullFromCamera(scene, javaSceneObject, shadowMap->getCamera(),renderer, shader_manager);
+        shadowMap->cullFromCamera(scene, javaNode, shadowMap->getCamera(),renderer, shader_manager);
 
-        renderer->renderRenderTarget(scene, javaSceneObject, shadowMap,shader_manager, nullptr, nullptr);
+        renderer->renderRenderTarget(scene, javaNode, shadowMap,shader_manager, nullptr, nullptr);
 
         return true;
     }

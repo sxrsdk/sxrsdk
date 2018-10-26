@@ -18,7 +18,7 @@ package com.samsungxr.animation;
 
 import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.utility.Log;
 
 import java.util.ArrayList;
@@ -378,7 +378,7 @@ public class SXRAnimator extends SXRBehavior
     }
 
     @Override
-    public void onDetach(SXRSceneObject oldOwner) {
+    public void onDetach(SXRNode oldOwner) {
         super.onDetach(oldOwner);
         this.stop();
     }

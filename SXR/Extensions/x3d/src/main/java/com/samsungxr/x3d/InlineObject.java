@@ -15,7 +15,7 @@
 
 package com.samsungxr.x3d;
 
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 /**
  * 
@@ -27,13 +27,13 @@ import com.samsungxr.SXRSceneObject;
 
 public class InlineObject {
 
-  private SXRSceneObject inlineSXRSceneObject = null;
+  private SXRNode inlineSXRNode = null;
   private String[] url = {};
 
   public InlineObject() { }
 
-  public InlineObject(SXRSceneObject inlineSXRSceneObject, String[] url) {
-     this.inlineSXRSceneObject = inlineSXRSceneObject;
+  public InlineObject(SXRNode inlineSXRNode, String[] url) {
+     this.inlineSXRNode = inlineSXRNode;
      this.url = url;
   }
 
@@ -45,8 +45,8 @@ public class InlineObject {
      return url.length;
   }
 
-  public SXRSceneObject getInlineSXRSceneObject() {
-     return this.inlineSXRSceneObject;
+  public SXRNode getInlineSXRNode() {
+     return this.inlineSXRNode;
   }
 
 }

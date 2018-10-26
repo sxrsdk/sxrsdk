@@ -17,7 +17,7 @@ package com.samsungxr.animation;
 
 import com.samsungxr.SXRHybridObject;
 import com.samsungxr.SXRMaterial;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 /**
  * Animate a {@link SXRMaterial}.
@@ -28,7 +28,7 @@ import com.samsungxr.SXRSceneObject;
 public abstract class SXRMaterialAnimation extends SXRAnimation {
 
     private final static Class<?>[] SUPPORTED = { SXRMaterial.class,
-            SXRSceneObject.class };
+            SXRNode.class };
 
     protected final SXRMaterial mMaterial;
 
@@ -36,13 +36,13 @@ public abstract class SXRMaterialAnimation extends SXRAnimation {
      * Sets the {@code protected final SXRMaterial mMaterial} field.
      * 
      * @param target
-     *            May be a {@link SXRMaterial} or a {@link SXRSceneObject} -
+     *            May be a {@link SXRMaterial} or a {@link SXRNode} -
      *            does runtime checks.
      * @param duration
      *            The animation duration, in seconds.
      * @throws IllegalArgumentException
      *             If {@code target} is neither a {@link SXRMaterial} nor a
-     *             {@link SXRSceneObject}
+     *             {@link SXRNode}
      * @deprecated Using this overload reduces 'constructor fan-out' and thus
      *             makes your life a bit easier - but at the cost of replacing
      *             compile-time type checking with run-time type checking, which
@@ -55,7 +55,7 @@ public abstract class SXRMaterialAnimation extends SXRAnimation {
         if (type == SXRMaterial.class) {
             mMaterial = (SXRMaterial) target;
         } else {
-            SXRSceneObject sceneObject = (SXRSceneObject) target;
+            SXRNode sceneObject = (SXRNode) target;
             mMaterial = sceneObject.getRenderData().getMaterial();
         }
     }
@@ -65,7 +65,7 @@ public abstract class SXRMaterialAnimation extends SXRAnimation {
      * inline code, and protects you from any changes (however unlikely) in the
      * object hierarchy.
      */
-    protected static SXRMaterial getMaterial(SXRSceneObject sceneObject) {
+    protected static SXRMaterial getMaterial(SXRNode sceneObject) {
         return sceneObject.getRenderData().getMaterial();
     }
 
@@ -93,15 +93,15 @@ public abstract class SXRMaterialAnimation extends SXRAnimation {
      * set. Rather than replicate the final field setting code, the best pattern
      * is to write a 'master' constructor, and call it <i>via</i>
      * {@code this(getMaterial(target), duration), ...);} - see
-     * {@link SXROpacityAnimation#SXROpacityAnimation(SXRSceneObject, float, float)}
+     * {@link SXROpacityAnimation#SXROpacityAnimation(SXRNode, float, float)}
      * for an example.
      * 
      * @param target
-     *            {@link SXRSceneObject} containing a {@link SXRMaterial}
+     *            {@link SXRNode} containing a {@link SXRMaterial}
      * @param duration
      *            The animation duration, in seconds.
      */
-    protected SXRMaterialAnimation(SXRSceneObject target, float duration) {
+    protected SXRMaterialAnimation(SXRNode target, float duration) {
         super(target, duration);
         mMaterial = getMaterial(target);
     }

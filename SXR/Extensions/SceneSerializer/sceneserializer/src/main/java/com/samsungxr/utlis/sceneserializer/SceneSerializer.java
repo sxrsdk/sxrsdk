@@ -12,11 +12,11 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXRImportSettings;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.IAssetEvents;
-import com.samsungxr.scene_objects.SXRCubeSceneObject;
-import com.samsungxr.scene_objects.SXRSphereSceneObject;
+import com.samsungxr.nodes.SXRCubeNode;
+import com.samsungxr.nodes.SXRSphereNode;
 import com.samsungxr.utility.Log;
 
 import java.io.BufferedWriter;
@@ -40,8 +40,8 @@ public class SceneSerializer {
     private SceneLoaderListener sceneLoaderListener;
 
     public interface SceneLoaderListener {
-        void onEnvironmentLoaded(SXRSceneObject envSceneObject);
-        void onSceneObjectLoaded(SXRSceneObject sceneObject);
+        void onEnvironmentLoaded(SXRNode envNode);
+        void onNodeLoaded(SXRNode sceneObject);
     }
 
     public SceneSerializer() {
@@ -67,7 +67,7 @@ public class SceneSerializer {
             Log.d(TAG,"Could not load scene from file");
         }
         loadEnvironment(gvrContext, gvrScene);
-        loadSceneObjects(gvrContext, gvrScene);
+        loadNodes(gvrContext, gvrScene);
     }
 
     public void exportScene() throws IOException {
@@ -111,12 +111,12 @@ public class SceneSerializer {
         }
     }
 
-    public void addToSceneData(SXRSceneObject sceneObject, String source) {
+    public void addToSceneData(SXRNode sceneObject, String source) {
         initializeSceneData();
         sceneData.addToSceneData(sceneObject, source);
     }
 
-    public void removeFromSceneData(SXRSceneObject sceneObject) {
+    public void removeFromSceneData(SXRNode sceneObject) {
         initializeSceneData();
         sceneData.removeFromSceneData(sceneObject);
     }
@@ -145,37 +145,37 @@ public class SceneSerializer {
             targetScale = DEFAULT_ENVIRONMENT_SCALE;
             environmentData.setScale(targetScale);
         }
-        SXRSceneObject environmentSceneObject;
+        SXRNode environmentNode;
         if (environmentData.getSrc().endsWith(CUBEMAP_EXTENSION)) {
             SXRMaterial cubemapMaterial = new SXRMaterial(gvrContext,
                     SXRMaterial.SXRShaderType.Cubemap.ID);
-            environmentSceneObject = new SXRCubeSceneObject(gvrContext, false,
+            environmentNode = new SXRCubeNode(gvrContext, false,
                     cubemapMaterial);
-            environmentSceneObject.getTransform().setScale(targetScale, targetScale, targetScale);
+            environmentNode.getTransform().setScale(targetScale, targetScale, targetScale);
             SXRTexture futureCubeTexture = gvrContext.getAssetLoader().loadCubemapTexture
                     (resource);
-            environmentSceneObject.getRenderData().getMaterial().setMainTexture
+            environmentNode.getRenderData().getMaterial().setMainTexture
                     (futureCubeTexture);
-            gvrScene.addSceneObject(environmentSceneObject);
+            gvrScene.addNode(environmentNode);
         } else {
             SXRMaterial material = new SXRMaterial(gvrContext);
-            environmentSceneObject = new SXRSphereSceneObject(gvrContext, false,
+            environmentNode = new SXRSphereNode(gvrContext, false,
                     material);
-            environmentSceneObject.getTransform().setScale(targetScale, targetScale, targetScale);
+            environmentNode.getTransform().setScale(targetScale, targetScale, targetScale);
             SXRTexture futureSphereTexture = gvrContext.getAssetLoader().loadTexture(resource);
-            environmentSceneObject.getRenderData().getMaterial().setMainTexture(futureSphereTexture);
-            gvrScene.addSceneObject(environmentSceneObject);
+            environmentNode.getRenderData().getMaterial().setMainTexture(futureSphereTexture);
+            gvrScene.addNode(environmentNode);
         }
         if(sceneLoaderListener != null) {
-            sceneLoaderListener.onEnvironmentLoaded(environmentSceneObject);
+            sceneLoaderListener.onEnvironmentLoaded(environmentNode);
         }
     }
 
-    private void loadSceneObjects(SXRContext gvrContext, SXRScene gvrScene) {
+    private void loadNodes(SXRContext gvrContext, SXRScene gvrScene) {
         if(sceneData == null) {
             return;
         }
-        List<SceneObjectData> sceneObjectDataList = sceneData.getSceneObjectDataList();
+        List<NodeData> sceneObjectDataList = sceneData.getNodeDataList();
         if(sceneObjectDataList == null) {
             return;
         }
@@ -185,13 +185,13 @@ public class SceneSerializer {
     }
 
     private class AssetObserver implements IAssetEvents {
-        Collection<SceneObjectData> sceneObjectDatas;
+        Collection<NodeData> sceneObjectDatas;
         SXRContext context;
         SXRScene scene;
-        Iterator<SceneObjectData> iterator;
-        SceneObjectData currentSod;
+        Iterator<NodeData> iterator;
+        NodeData currentSod;
 
-        AssetObserver(Collection<SceneObjectData> sceneObjectDatas, SXRContext context, SXRScene
+        AssetObserver(Collection<NodeData> sceneObjectDatas, SXRContext context, SXRScene
                 scene) {
             this.sceneObjectDatas = sceneObjectDatas;
             this.scene = scene;
@@ -204,29 +204,29 @@ public class SceneSerializer {
         }
 
         @Override
-        public void onAssetLoaded(SXRContext context, SXRSceneObject model, String filePath,
+        public void onAssetLoaded(SXRContext context, SXRNode model, String filePath,
                                   String errors) {
             if (currentSod != null && currentSod.getSrc().endsWith(filePath)) {
                 model.getTransform().setModelMatrix(currentSod.getModelMatrix());
                 model.setName(currentSod.getName());
-                currentSod.setGvrSceneObject(model);
-                scene.addSceneObject(model);
+                currentSod.setGvrNode(model);
+                scene.addNode(model);
                 if(sceneLoaderListener != null) {
-                    sceneLoaderListener.onSceneObjectLoaded(model);
+                    sceneLoaderListener.onNodeLoaded(model);
                 }
                 loadNextAsset();
             }
         }
 
         @Override
-        public void onModelLoaded(SXRContext context, SXRSceneObject model, String filePath) {
+        public void onModelLoaded(SXRContext context, SXRNode model, String filePath) {
             if (currentSod != null && currentSod.getSrc().endsWith(filePath)) {
                 model.getTransform().setModelMatrix(currentSod.getModelMatrix());
                 model.setName(currentSod.getName());
-                currentSod.setGvrSceneObject(model);
-                scene.addSceneObject(model);
+                currentSod.setGvrNode(model);
+                scene.addNode(model);
                 if(sceneLoaderListener != null) {
-                    sceneLoaderListener.onSceneObjectLoaded(model);
+                    sceneLoaderListener.onNodeLoaded(model);
                 }
                 loadNextAsset();
             }

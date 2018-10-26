@@ -1,6 +1,6 @@
 package com.samsungxr.utlis.sceneserializer;
 
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.utility.Log;
 
 import java.io.File;
@@ -13,18 +13,18 @@ import java.util.Set;
 public class SceneData {
     private transient static final String TAG = SceneData.class.getSimpleName();
     private EnvironmentData environmentData;
-    private List<SceneObjectData> sceneObjectDataList;
+    private List<NodeData> sceneObjectDataList;
     private transient Set<String> sceneObjectNames;
     private transient int modelCounter;
 
     SceneData() {
     }
 
-    List<SceneObjectData> getSceneObjectDataList() {
+    List<NodeData> getNodeDataList() {
         return sceneObjectDataList;
     }
 
-    void setSceneObjectDataList(List<SceneObjectData> sceneObjectDataList) {
+    void setNodeDataList(List<NodeData> sceneObjectDataList) {
         this.sceneObjectDataList = sceneObjectDataList;
     }
 
@@ -36,13 +36,13 @@ public class SceneData {
         this.environmentData = environmentData;
     }
 
-    void addToSceneData(SXRSceneObject gvrSceneObject, String filePath) {
+    void addToSceneData(SXRNode gvrNode, String filePath) {
         if (sceneObjectDataList == null) {
-            sceneObjectDataList = new ArrayList<SceneObjectData>();
+            sceneObjectDataList = new ArrayList<NodeData>();
         }
         if(sceneObjectNames == null) {
             sceneObjectNames = new HashSet<String>();
-            for(SceneObjectData data: sceneObjectDataList) {
+            for(NodeData data: sceneObjectDataList) {
                 sceneObjectNames.add(data.getName());
             }
         }
@@ -54,17 +54,17 @@ public class SceneData {
         } while(sceneObjectNames.contains(name));
         sceneObjectNames.add(name);
         Log.d(TAG, "Setting model name to:%s", name);
-        gvrSceneObject.setName(name);
-        SceneObjectData sod = SceneObjectData.createSceneObjectData(gvrSceneObject, filePath);
+        gvrNode.setName(name);
+        NodeData sod = NodeData.createNodeData(gvrNode, filePath);
 
         sceneObjectDataList.add(sod);
     }
 
-    void removeFromSceneData(SXRSceneObject gvrSceneObject) {
-        Iterator<SceneObjectData> iterator = sceneObjectDataList.iterator();
+    void removeFromSceneData(SXRNode gvrNode) {
+        Iterator<NodeData> iterator = sceneObjectDataList.iterator();
         while (iterator.hasNext()) {
-            SceneObjectData sod = iterator.next();
-            if (sod.getGvrSceneObject() == gvrSceneObject) {
+            NodeData sod = iterator.next();
+            if (sod.getGvrNode() == gvrNode) {
                 iterator.remove();
                 return;
             }
@@ -75,11 +75,11 @@ public class SceneData {
         if(sceneObjectDataList == null) {
             return;
         }
-        for (SceneObjectData sod : sceneObjectDataList) {
-            SXRSceneObject so = sod.getGvrSceneObject();
+        for (NodeData sod : sceneObjectDataList) {
+            SXRNode so = sod.getGvrNode();
             if(so != null) {
                 sod.setModelMatrix(so.getTransform().getModelMatrix());
-                sod.setName(sod.getGvrSceneObject().getName());
+                sod.setName(sod.getGvrNode().getName());
             }
         }
     }

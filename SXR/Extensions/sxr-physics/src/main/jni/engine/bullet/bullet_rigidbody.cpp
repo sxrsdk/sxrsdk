@@ -15,7 +15,7 @@
 #include "bullet_world.h"
 #include "bullet_rigidbody.h"
 #include "bullet_sxr_utils.h"
-#include "objects/scene_object.h"
+#include "objects/node.h"
 #include "objects/components/sphere_collider.h"
 #include "util/sxr_log.h"
 
@@ -310,7 +310,7 @@ void  BulletRigidBody::set_scale(float x, float y, float z) {
 
 void  BulletRigidBody::updateColisionShapeLocalScaling() {
     btVector3 ownerScale;
-    SceneObject* owner = owner_object();
+    Node* owner = owner_object();
     if (owner) {
         Transform* trans = owner->transform();
         ownerScale.setValue(trans->scale_x(),

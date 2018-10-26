@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-package com.samsungxr.scene_objects;
+package com.samsungxr.nodes;
 
 import java.util.concurrent.Future;
 
 import com.samsungxr.SXRMaterial;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.utility.Log;
 
-public class SXRSphereSceneObject extends SXRSceneObject {
+public class SXRSphereNode extends SXRNode {
 
     @SuppressWarnings("unused")
-    private static final String TAG = Log.tag(SXRSphereSceneObject.class);
+    private static final String TAG = Log.tag(SXRSphereNode.class);
 
     private static final int STACK_NUMBER = 18;
     private static final int SLICE_NUMBER = 36;
@@ -53,7 +53,7 @@ public class SXRSphereSceneObject extends SXRSceneObject {
      * @param gvrContext
      *            current {@link SXRContext}
      */
-    public SXRSphereSceneObject(SXRContext gvrContext) {
+    public SXRSphereNode(SXRContext gvrContext) {
         super(gvrContext);
 
         generateSphereObject(gvrContext, STACK_NUMBER, SLICE_NUMBER, true,
@@ -74,7 +74,7 @@ public class SXRSphereSceneObject extends SXRSceneObject {
      *            whether the triangles and normals should be facing in or
      *            facing out.
      */
-    public SXRSphereSceneObject(SXRContext gvrContext, boolean facingOut) {
+    public SXRSphereNode(SXRContext gvrContext, boolean facingOut) {
         super(gvrContext);
 
         generateSphereObject(gvrContext, STACK_NUMBER, SLICE_NUMBER, facingOut,
@@ -98,7 +98,7 @@ public class SXRSphereSceneObject extends SXRSceneObject {
      *          sets the sphere with the radius parameter.  Radius must be > 0
      *          otherwise, set it to the default of 1
      */
-    public SXRSphereSceneObject(SXRContext gvrContext, boolean facingOut, float radius) {
+    public SXRSphereNode(SXRContext gvrContext, boolean facingOut, float radius) {
         super(gvrContext);
 
         if (radius < 0) radius = 1;
@@ -128,7 +128,7 @@ public class SXRSphereSceneObject extends SXRSceneObject {
      *            whether the triangles and normals should be facing in or
      *            facing out.
      */
-    public SXRSphereSceneObject(SXRContext gvrContext, int stackNumber, int sliceNumber, boolean facingOut) {
+    public SXRSphereNode(SXRContext gvrContext, int stackNumber, int sliceNumber, boolean facingOut) {
         super(gvrContext);
 
         generateSphereObject(gvrContext, stackNumber, sliceNumber, facingOut, new SXRMaterial(gvrContext), 1);
@@ -151,7 +151,7 @@ public class SXRSphereSceneObject extends SXRSceneObject {
      * @param texture
      *            the texture for the sphere.
      */
-    public SXRSphereSceneObject(SXRContext gvrContext, boolean facingOut,
+    public SXRSphereNode(SXRContext gvrContext, boolean facingOut,
                                 SXRTexture texture) {
         super(gvrContext);
 
@@ -186,7 +186,7 @@ public class SXRSphereSceneObject extends SXRSceneObject {
      * @param texture
      *            the texture for the sphere.
      */
-    public SXRSphereSceneObject(SXRContext gvrContext, int stackNumber, int sliceNumber, boolean facingOut, SXRTexture texture) {
+    public SXRSphereNode(SXRContext gvrContext, int stackNumber, int sliceNumber, boolean facingOut, SXRTexture texture) {
         super(gvrContext);
 
         SXRMaterial material = new SXRMaterial(gvrContext);
@@ -211,7 +211,7 @@ public class SXRSphereSceneObject extends SXRSceneObject {
      * @param material
      *            the material for the sphere.
      */
-    public SXRSphereSceneObject(SXRContext gvrContext, boolean facingOut,
+    public SXRSphereNode(SXRContext gvrContext, boolean facingOut,
                                 SXRMaterial material) {
         super(gvrContext);
 
@@ -239,7 +239,7 @@ public class SXRSphereSceneObject extends SXRSceneObject {
      *          sets the sphere with the radius parameter.  Radius must be > 0
      *          otherwise, set it to the default of 1
      */
-    public SXRSphereSceneObject(SXRContext gvrContext, boolean facingOut,
+    public SXRSphereNode(SXRContext gvrContext, boolean facingOut,
                                 SXRMaterial material, float radius)
     {
         super(gvrContext);
@@ -273,7 +273,7 @@ public class SXRSphereSceneObject extends SXRSceneObject {
      * @param material
      *            the material for the sphere.
      */
-    public SXRSphereSceneObject(SXRContext gvrContext, int stackNumber,
+    public SXRSphereNode(SXRContext gvrContext, int stackNumber,
                                 int sliceNumber, boolean facingOut, SXRMaterial material) {
         super(gvrContext);
 
@@ -329,7 +329,7 @@ public class SXRSphereSceneObject extends SXRSceneObject {
      *            Number of slices (i.e. sliceNumber) should be divisible by
      *            sliceSegmentNumber.
      */
-    public SXRSphereSceneObject(SXRContext gvrContext, int stackNumber,
+    public SXRSphereNode(SXRContext gvrContext, int stackNumber,
                                 int sliceNumber, boolean facingOut, SXRMaterial material,
                                 int stackSegmentNumber, int sliceSegmentNumber) {
         super(gvrContext);
@@ -825,7 +825,7 @@ public class SXRSphereSceneObject extends SXRSceneObject {
                 mesh.setNormals(normals);
                 mesh.setTexCoords(texCoords);
                 mesh.setIndices(indices);
-                SXRSceneObject childObject = new SXRSceneObject(gvrContext, mesh, material);
+                SXRNode childObject = new SXRNode(gvrContext, mesh, material);
                 addChildObject(childObject);
 
                 sliceCounter = 0;
@@ -1016,7 +1016,7 @@ public class SXRSphereSceneObject extends SXRSceneObject {
                 mesh.setNormals(normals);
                 mesh.setTexCoords(texCoords);
                 mesh.setIndices(indices);
-                SXRSceneObject childObject = new SXRSceneObject(gvrContext,
+                SXRNode childObject = new SXRNode(gvrContext,
                         mesh);
                 childObject.getRenderData().setMaterial(material);
                 addChildObject(childObject);

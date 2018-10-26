@@ -14,7 +14,7 @@
  */
 package com.sample.hand.template;
 
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -57,22 +57,22 @@ public class IOFinger extends IOBaseComponent {
      * @param type            the type of the
      *                        {@link IOFinger}. Use the {@link IOFinger#getString(int)} call to
      *                        know the readable type of the finger.
-     * @param handSceneObject This is the root {@link SXRSceneObject} that represents the hand.
+     * @param handNode This is the root {@link SXRNode} that represents the hand.
      */
-    public IOFinger(int type, SXRSceneObject handSceneObject) {
-        super(type, handSceneObject);
+    public IOFinger(int type, SXRNode handNode) {
+        super(type, handNode);
 
-        IOBone distal = new IOBone(IOBone.DISTAL, handSceneObject);
-        IOBone intermediate = new IOBone(IOBone.INTERMEDIATE, handSceneObject);
-        IOBone proximal = new IOBone(IOBone.PROXIMAL, handSceneObject);
+        IOBone distal = new IOBone(IOBone.DISTAL, handNode);
+        IOBone intermediate = new IOBone(IOBone.INTERMEDIATE, handNode);
+        IOBone proximal = new IOBone(IOBone.PROXIMAL, handNode);
 
         // Not required
-        //IOBone metacarpal = new IOBone(handSceneObject, IOBone.METACARPAL);
+        //IOBone metacarpal = new IOBone(handNode, IOBone.METACARPAL);
 
-        IOJoint jointTip = new IOJoint(IOJoint.TIP, handSceneObject);
-        IOJoint jointDip = new IOJoint(IOJoint.DIP, handSceneObject);
-        IOJoint jointPip = new IOJoint(IOJoint.PIP, handSceneObject);
-        IOJoint jointMcp = new IOJoint(IOJoint.MCP, handSceneObject);
+        IOJoint jointTip = new IOJoint(IOJoint.TIP, handNode);
+        IOJoint jointDip = new IOJoint(IOJoint.DIP, handNode);
+        IOJoint jointPip = new IOJoint(IOJoint.PIP, handNode);
+        IOJoint jointMcp = new IOJoint(IOJoint.MCP, handNode);
 
         boneMap = new HashMap<Integer, IOBone>(4);
         boneMap.put(IOBone.DISTAL, distal);

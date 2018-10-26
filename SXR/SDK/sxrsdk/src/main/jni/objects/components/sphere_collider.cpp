@@ -33,14 +33,14 @@
 namespace sxr {
 /*
  * Determine if the ray hits the collider.
- * @param owner       SceneObject which owns this collider.
+ * @param owner       Node which owns this collider.
  *                    If the collider is part of a group,
- *                    this will be the SceneObject which
+ *                    this will be the Node which
  *                    owns the collider group.
  * @param rayStart    origin of ray in world coordinates
  * @param rayDir      direction of ray in world coordinates
  */
-ColliderData SphereCollider::isHit(SceneObject* owner, const glm::vec3& rayStart, const glm::vec3& rayDir)
+ColliderData SphereCollider::isHit(Node* owner, const glm::vec3& rayStart, const glm::vec3& rayDir)
 {
     glm::vec3    sphCenter(0, 0, 0);
     float        radius = radius_;
@@ -84,14 +84,14 @@ ColliderData SphereCollider::isHit(SceneObject* owner, const glm::vec3& rayStart
 
 /*
  * Determine if the input sphere hits the sphere collider.
- * @param owner       SceneObject which owns this collider.
+ * @param owner       Node which owns this collider.
  *                    If the collider is part of a group,
- *                    this will be the SceneObject which
+ *                    this will be the Node which
  *                    owns the collider group
  * @param sphere  float array with center and radius of sphere
  *                in world coordinates.
  */
-ColliderData SphereCollider::isHit(SceneObject* owner, const float sphere[])
+ColliderData SphereCollider::isHit(Node* owner, const float sphere[])
 {
     ColliderData data;
     glm::vec3    colliderCenter(0, 0, 0);

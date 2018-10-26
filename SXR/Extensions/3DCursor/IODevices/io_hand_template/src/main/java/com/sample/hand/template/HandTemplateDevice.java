@@ -21,10 +21,10 @@ import com.samsungxr.SXRCameraRig;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.io.cursor3d.*;
-import com.samsungxr.scene_objects.SXRCubeSceneObject;
+import com.samsungxr.nodes.SXRCubeNode;
 import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -89,10 +89,10 @@ public class HandTemplateDevice {
             leftHand = new IOHand(context);
 
             // Uncomment the following lines to add scene objects to joints
-            //setJointSceneObject(rightHand, jointTexture);
-            //setJointSceneObject(leftHand, jointTexture);
-            setPalmSceneObject(rightHand, jointTexture);
-            setPalmSceneObject(leftHand, jointTexture);
+            //setJointNode(rightHand, jointTexture);
+            //setJointNode(leftHand, jointTexture);
+            setPalmNode(rightHand, jointTexture);
+            setPalmNode(leftHand, jointTexture);
         } catch (IOException e) {
             Log.e(TAG, "IO Exception", e);
         }
@@ -102,8 +102,8 @@ public class HandTemplateDevice {
                 "Left Hand");
 
         SXRCameraRig mainCameraRig = scene.getMainCameraRig();
-        mainCameraRig.addChildObject(leftHand.getSceneObject());
-        mainCameraRig.addChildObject(rightHand.getSceneObject());
+        mainCameraRig.addChildObject(leftHand.getNode());
+        mainCameraRig.addChildObject(rightHand.getNode());
 
         /**
          * It is important that we create a new thread so that the GL and the Main Android threads
@@ -119,27 +119,27 @@ public class HandTemplateDevice {
         thread.start();
     }
 
-    void setJointSceneObject(IOHand hand, Future<SXRTexture> jointTexture) {
+    void setJointNode(IOHand hand, Future<SXRTexture> jointTexture) {
         for (int i = 0; i < 5; i++) {
             IOFinger finger = hand.getIOFinger(i);
             for (int j = 1; j < 5; j++) {
                 // ignore index tip
                 if (!(i == IOFinger.INDEX && j == IOJoint.TIP)) {
                     IOJoint joint = finger.getIOJoint(j);
-                    joint.setSceneObject(new SXRCubeSceneObject(context, true, jointTexture));
+                    joint.setNode(new SXRCubeNode(context, true, jointTexture));
                     // Customize your joint scene object here
-                    //joint.setSceneObject();
+                    //joint.setNode();
                 }
             }
         }
     }
 
-    void setPalmSceneObject(IOHand hand, Future<SXRTexture> jointTexture) {
+    void setPalmNode(IOHand hand, Future<SXRTexture> jointTexture) {
         SXRMaterial gvrMaterial = new SXRMaterial(context);
         gvrMaterial.setMainTexture(jointTexture);
-        SXRCubeSceneObject palmSceneObject = new SXRCubeSceneObject(context, true, gvrMaterial,
+        SXRCubeNode palmNode = new SXRCubeNode(context, true, gvrMaterial,
                 new Vector3f(5, 3, 1.0f));
-        hand.addPalmSceneObject(palmSceneObject);
+        hand.addPalmNode(palmNode);
     }
 
     private Runnable threadRunnable = new Runnable() {
@@ -190,18 +190,18 @@ public class HandTemplateDevice {
                 ioHand = rightHand;
                 device = rightDevice;
                 rightHandProcessed = true;
-                SXRSceneObject right = rightHand.getSceneObject();
+                SXRNode right = rightHand.getNode();
                 if (!right.isEnabled()) {
-                    rightHand.getSceneObject().setEnable(true);
+                    rightHand.getNode().setEnable(true);
                     device.setVisible(true);
                 }
             } else {
                 ioHand = leftHand;
                 device = leftDevice;
                 leftHandProcessed = true;
-                SXRSceneObject left = leftHand.getSceneObject();
+                SXRNode left = leftHand.getNode();
                 if (!left.isEnabled()) {
-                    leftHand.getSceneObject().setEnable(true);
+                    leftHand.getNode().setEnable(true);
                     device.setVisible(true);
                 }
             }
@@ -250,7 +250,7 @@ public class HandTemplateDevice {
             }
 
             //get palm position
-            ioHand.getPalmSceneObject().getTransform().setPosition(readbackBuffer.get(count),
+            ioHand.getPalmNode().getTransform().setPosition(readbackBuffer.get(count),
                     readbackBuffer.get(count + 1), readbackBuffer.get(count + 2));
             count = count + 3;
             cursorRotation.identity();
@@ -259,16 +259,16 @@ public class HandTemplateDevice {
         }
 
         if (!rightHandProcessed) {
-            SXRSceneObject right = rightHand.getSceneObject();
+            SXRNode right = rightHand.getNode();
             if (right.isEnabled()) {
-                rightHand.getSceneObject().setEnable(false);
+                rightHand.getNode().setEnable(false);
             }
             rightDevice.setVisible(false);
         }
         if (!leftHandProcessed) {
-            SXRSceneObject left = leftHand.getSceneObject();
+            SXRNode left = leftHand.getNode();
             if (left.isEnabled()) {
-                leftHand.getSceneObject().setEnable(false);
+                leftHand.getNode().setEnable(false);
             }
             leftDevice.setVisible(false);
         }
@@ -283,10 +283,10 @@ public class HandTemplateDevice {
 
     public void processBones(IOFinger ioFinger, int bone, int prevBone, int nextBone) {
         IOBone ioBone = ioFinger.getIOBone(bone);
-        SXRSceneObject boneSceneObject = ioBone.sceneObject;
+        SXRNode boneNode = ioBone.sceneObject;
         Vector3f prev = ioFinger.getIOJoint(prevBone).getPosition();
         Vector3f next = ioFinger.getIOJoint(nextBone).getPosition();
-        if (boneSceneObject == null) {
+        if (boneNode == null) {
             float len = prev.distance(next);
             if (len == 0.0f) {
                 return;
@@ -296,9 +296,9 @@ public class HandTemplateDevice {
             material.setMainTexture(boneTexture);
             // Customize your bone scene object here
             // add a cube
-            boneSceneObject = new SXRCubeSceneObject(context, true, material, new Vector3f(1.0f,
+            boneNode = new SXRCubeNode(context, true, material, new Vector3f(1.0f,
                     len - 0.5f, 1.0f));
-            ioBone.setSceneObject(boneSceneObject);
+            ioBone.setNode(boneNode);
         }
 
         Utils.lookAt(prev, next, boneRotation);

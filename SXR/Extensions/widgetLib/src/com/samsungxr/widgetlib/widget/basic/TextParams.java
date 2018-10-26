@@ -8,7 +8,7 @@ import android.view.Gravity;
 
 import org.json.JSONObject;
 
-import com.samsungxr.scene_objects.SXRTextViewSceneObject;
+import com.samsungxr.nodes.SXRTextViewNode;
 
 import static com.samsungxr.widgetlib.main.Utility.getId;
 
@@ -111,12 +111,12 @@ public class TextParams implements TextContainer {
     }
 
     @Override
-    public SXRTextViewSceneObject.IntervalFrequency getRefreshFrequency() {
+    public SXRTextViewNode.IntervalFrequency getRefreshFrequency() {
         return mIntervalFreq;
     }
 
     @Override
-    public void setRefreshFrequency(SXRTextViewSceneObject.IntervalFrequency frequency) {
+    public void setRefreshFrequency(SXRTextViewNode.IntervalFrequency frequency) {
         mIntervalFreq = frequency;
     }
 
@@ -174,7 +174,7 @@ public class TextParams implements TextContainer {
     private Drawable mBackground;
     private int mBackgroundColor = Color.TRANSPARENT;
     private int mGravity = Gravity.CENTER;
-    private SXRTextViewSceneObject.IntervalFrequency mIntervalFreq = SXRTextViewSceneObject.IntervalFrequency.MEDIUM;
+    private SXRTextViewNode.IntervalFrequency mIntervalFreq = SXRTextViewNode.IntervalFrequency.MEDIUM;
     private CharSequence mText = "";
     private int mTextColor = Color.BLACK;
     private float mTextSize = 15; // Android's default text size

@@ -37,26 +37,26 @@ extern "C" {
     JNIEXPORT void JNICALL
             Java_com_samsungxr_NativeRenderTarget_attachRenderTarget(JNIEnv *env, jobject obj, jlong jrendertarget, jlong jnextrendertarget);
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeRenderTarget_cullFromCamera(JNIEnv *env, jobject obj, jlong jscene, jobject javaSceneObject, jlong ptr, jlong jcamera, jlong jshaderManager);
+    Java_com_samsungxr_NativeRenderTarget_cullFromCamera(JNIEnv *env, jobject obj, jlong jscene, jobject javaNode, jlong ptr, jlong jcamera, jlong jshaderManager);
     JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeRenderTarget_render(JNIEnv *env, jobject obj, jlong renderTarget, jlong camera,
                                                jlong shader_manager, jlong posteffectrenderTextureA, jlong posteffectRenderTextureB, jlong jscene,
-                                               jobject javaSceneObject);
+                                               jobject javaNode);
 };
 
 JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeRenderTarget_render(JNIEnv *env, jobject obj, jlong renderTarget,
                                            jlong camera,
                                            jlong shader_manager, jlong posteffectrenderTextureA,
-                                           jlong posteffectRenderTextureB, jlong jscene, jobject javaSceneObject) {
+                                           jlong posteffectRenderTextureB, jlong jscene, jobject javaNode) {
     RenderTarget* target = reinterpret_cast<RenderTarget*>(renderTarget);
     Scene* scene = reinterpret_cast<Scene*>(jscene);
     // Do not remote this: need it for screenshot capturer, center camera rendering
     target->setCamera(reinterpret_cast<Camera*>(camera));
-    javaSceneObject = env->NewLocalRef(javaSceneObject);
-    gRenderer->getInstance()->renderRenderTarget(scene, javaSceneObject, target, reinterpret_cast<ShaderManager*>(shader_manager),
+    javaNode = env->NewLocalRef(javaNode);
+    gRenderer->getInstance()->renderRenderTarget(scene, javaNode, target, reinterpret_cast<ShaderManager*>(shader_manager),
                                                  reinterpret_cast<RenderTexture*>(posteffectrenderTextureA), reinterpret_cast<RenderTexture*>(posteffectRenderTextureB));
-    env->DeleteLocalRef(javaSceneObject);
+    env->DeleteLocalRef(javaNode);
 }
 
 JNIEXPORT jlong JNICALL
@@ -109,15 +109,15 @@ Java_com_samsungxr_NativeRenderTarget_endRendering(JNIEnv *env, jobject obj, jlo
 
 
 JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeRenderTarget_cullFromCamera(JNIEnv *env, jobject obj, jlong jscene, jobject javaSceneObject, jlong ptr, jlong jcamera, jlong jshaderManager){
+Java_com_samsungxr_NativeRenderTarget_cullFromCamera(JNIEnv *env, jobject obj, jlong jscene, jobject javaNode, jlong ptr, jlong jcamera, jlong jshaderManager){
 
     RenderTarget* target = reinterpret_cast<RenderTarget*>(ptr);
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     Scene* scene = reinterpret_cast<Scene*>(jscene);
     ShaderManager* shaderManager = reinterpret_cast<ShaderManager*> (jshaderManager);
-    javaSceneObject = env->NewLocalRef(javaSceneObject);
-    target->cullFromCamera(scene, javaSceneObject, camera,gRenderer->getInstance(), shaderManager);
-    env->DeleteLocalRef(javaSceneObject);
+    javaNode = env->NewLocalRef(javaNode);
+    target->cullFromCamera(scene, javaNode, camera,gRenderer->getInstance(), shaderManager);
+    env->DeleteLocalRef(javaNode);
 }
 
 JNIEXPORT void JNICALL

@@ -16,7 +16,7 @@ package com.samsungxr.animation;
 
 import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 import com.samsungxr.PrettyPrint;
 import com.samsungxr.utility.Log;

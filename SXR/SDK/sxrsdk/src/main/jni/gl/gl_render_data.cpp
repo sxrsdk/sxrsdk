@@ -15,7 +15,7 @@
 
 #include "engine/renderer/gl_renderer.h"
 #include "gl/gl_render_data.h"
-#include "objects/scene_object.h"
+#include "objects/node.h"
 #include "objects/components/skeleton.h"
 #include "objects/components/skin.h"
 

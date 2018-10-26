@@ -30,11 +30,11 @@ extern "C" {
     Java_com_samsungxr_NativeScene_setJava(JNIEnv *env, jclass, jlong nativeScene, jobject javaScene);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeScene_removeSceneObject(JNIEnv * env,
-            jobject obj, jlong jscene, jlong jscene_object);
+    Java_com_samsungxr_NativeScene_removeNode(JNIEnv * env,
+            jobject obj, jlong jscene, jlong jnode);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeScene_removeAllSceneObjects(JNIEnv * env,
+    Java_com_samsungxr_NativeScene_removeAllNodes(JNIEnv * env,
             jobject obj, jlong jscene);
 
     JNIEXPORT void JNICALL
@@ -86,7 +86,7 @@ extern "C" {
     JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeScene_setSceneRoot(JNIEnv *env, jclass type, jlong scene, jlong sceneRoot) {
         Scene* aScene = reinterpret_cast<Scene*>(scene);
-        SceneObject* aSceneRoot = reinterpret_cast<SceneObject*>(sceneRoot);
+        Node* aSceneRoot = reinterpret_cast<Node*>(sceneRoot);
         aScene->setSceneRoot(aSceneRoot);
     }
 
@@ -106,18 +106,18 @@ Java_com_samsungxr_NativeScene_setJava(JNIEnv *env, jclass, jlong nativeScene, j
 }
 
 JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeScene_removeSceneObject(JNIEnv * env,
-        jobject obj, jlong jscene, jlong jscene_object) {
+Java_com_samsungxr_NativeScene_removeNode(JNIEnv * env,
+        jobject obj, jlong jscene, jlong jnode) {
     Scene* scene = reinterpret_cast<Scene*>(jscene);
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    scene->removeSceneObject(scene_object);
+    Node* node = reinterpret_cast<Node*>(jnode);
+    scene->removeNode(node);
 }
 
 JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeScene_removeAllSceneObjects(JNIEnv * env,
+Java_com_samsungxr_NativeScene_removeAllNodes(JNIEnv * env,
         jobject obj, jlong jscene) {
     Scene* scene = reinterpret_cast<Scene*>(jscene);
-    scene->removeAllSceneObjects();
+    scene->removeAllNodes();
 }
 
 JNIEXPORT void JNICALL

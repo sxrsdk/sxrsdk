@@ -17,29 +17,29 @@ package com.samsungxr;
 
 import android.view.View;
 
-import com.samsungxr.scene_objects.SXRViewSceneObject;
+import com.samsungxr.nodes.SXRViewNode;
 
 /**
  * This interface defines the callback interface of an Android {@code View}
- * that is inflated by a {@link SXRViewSceneObject}.
+ * that is inflated by a {@link SXRViewNode}.
  */
 public interface IViewEvents extends IEvents {
     /**
      * Called when the {@link View} is attached to the Android view hierarchy.
      * This is the recommended place to configure the view and set its listeners.
      *
-     * @param sceneObject {@link SXRViewSceneObject} whom the view is attached to.
-     * @param view Android view attached to {@link SXRViewSceneObject}
+     * @param sceneObject {@link SXRViewNode} whom the view is attached to.
+     * @param view Android view attached to {@link SXRViewNode}
      */
-    void onInitView(SXRViewSceneObject sceneObject, View view);
+    void onInitView(SXRViewNode sceneObject, View view);
 
     /**
-     * Called when the Android starts to draw the {@link View} attached to {@link SXRViewSceneObject}.
-     * This is the recommended place to attach the {@link SXRViewSceneObject} to the
+     * Called when the Android starts to draw the {@link View} attached to {@link SXRViewNode}.
+     * This is the recommended place to attach the {@link SXRViewNode} to the
      * scene, avoiding rendering of scene object with empty texture.
      *
-     * @param sceneObject {@link SXRViewSceneObject} whom the view is attached to.
-     * @param view Android view attached to {@link SXRViewSceneObject}
+     * @param sceneObject {@link SXRViewNode} whom the view is attached to.
+     * @param view Android view attached to {@link SXRViewNode}
      */
-    void onStartRendering(SXRViewSceneObject sceneObject, View view);
+    void onStartRendering(SXRViewNode sceneObject, View view);
 }

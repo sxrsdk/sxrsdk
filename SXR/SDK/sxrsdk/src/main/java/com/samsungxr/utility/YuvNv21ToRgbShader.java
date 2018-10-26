@@ -35,7 +35,7 @@ import com.samsungxr.utility.TextFile;
  * SXRTexture mUVBufferTexture = new SXRBitmapTexture(context, new SXRTextureParameters());
  *
  * SXRShaderId yuvShader = new SXRShaderId(context, YuvNv21ToRgbShader.class);
- * SXRSceneObject quad = new SXRSceneObject(context, 3f, 1.5f, null, yuvShader);
+ * SXRNode quad = new SXRNode(context, 3f, 1.5f, null, yuvShader);
  * SXRMaterial material = quad.getRenderData().getMaterial();
  * material.setTexture("y_texture", mYBufferTexture);
  * material.setTexture("uv_texture", mUVBufferTexture);

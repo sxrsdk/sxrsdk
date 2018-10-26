@@ -70,7 +70,7 @@ public class RotationByAxisAnimation extends TransformAnimation {
             Animation.AnimationAdapter {
         Adapter(Widget target, float duration, float angle, float x, float y,
                 float z) {
-            super(target.getSceneObject(), duration, angle, x, y, z);
+            super(target.getNode(), duration, angle, x, y, z);
         }
 
         @Override

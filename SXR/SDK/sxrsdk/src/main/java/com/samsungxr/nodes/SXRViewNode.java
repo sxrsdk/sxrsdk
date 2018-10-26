@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.samsungxr.scene_objects;
+package com.samsungxr.nodes;
 
 import android.app.Activity;
 import android.content.Context;
@@ -53,7 +53,7 @@ import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRMeshCollider;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRShaderId;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.ITouchEvents;
@@ -63,17 +63,17 @@ import com.samsungxr.shaders.SXROESConvolutionShader;
 import com.samsungxr.utility.Log;
 
 /**
- * This class represents a {@linkplain SXRSceneObject Scene object} that shows a {@link View}
+ * This class represents a {@linkplain SXRNode Scene object} that shows a {@link View}
  * into the scene with an arbitrarily complex geometry.
  */
-public class SXRViewSceneObject extends SXRSceneObject {
+public class SXRViewNode extends SXRNode {
     private View mView;
     private final RootViewGroup mRootViewGroup;
     private final IViewEvents mEventsListener;
     private GestureDetector mGestureDetector = null;
 
     /**
-     * Create a new {@link SXRViewSceneObject} instance with its corresponding {@link View}
+     * Create a new {@link SXRViewNode} instance with its corresponding {@link View}
      * inflated from specified xml resource.
      * Android {@link View} will be rendered as {@link SXRTexture} of a default
      * {@linkplain SXRMesh quad} created internally based on width and height of the {@link View}:
@@ -81,7 +81,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
      *                           getHeight() / Math.max(getWidth(), getHeight()));
      *
      * Android {@link View} must be inflated at UI thread so
-     * see {@link #SXRViewSceneObject(SXRContext, int, IViewEvents)} whether you want
+     * see {@link #SXRViewNode(SXRContext, int, IViewEvents)} whether you want
      * to be notified when the instance be ready.
      *
      * See {@link SXRMesh#createQuad(float, float)},
@@ -90,19 +90,19 @@ public class SXRViewSceneObject extends SXRSceneObject {
      * @param gvrContext current {@link SXRContext}.
      * @param viewId The resource ID to be inflated. See {@link LayoutInflater}.
      */
-    public SXRViewSceneObject(SXRContext gvrContext, int viewId) {
+    public SXRViewNode(SXRContext gvrContext, int viewId) {
         this(gvrContext, null, viewId, null, null);
     }
 
     /**
-     * Create a new {@link SXRViewSceneObject} instance with its corresponding {@link View}.
+     * Create a new {@link SXRViewNode} instance with its corresponding {@link View}.
      * Android {@link View} will be rendered as {@link SXRTexture} of a default
      * {@linkplain SXRMesh quad} created internally based on width and height of the {@link View}:
      *     SXRMesh.createQuad(getWidth() / Math.max(getWidth(), getHeight()),
      *                           getHeight() / Math.max(getWidth(), getHeight()));
      *
      * Android {@link View} must be handled at UI thread so
-     * see {@link #SXRViewSceneObject(SXRContext, int, IViewEvents)} whether you want
+     * see {@link #SXRViewNode(SXRContext, int, IViewEvents)} whether you want
      * to be notified when the instance be ready.
      *
      * See {@link SXRMesh#createQuad(float, float)}
@@ -111,12 +111,12 @@ public class SXRViewSceneObject extends SXRSceneObject {
      * @param gvrContext current {@link SXRContext}.
      * @param view The {@link View} to be shown.
      */
-    public SXRViewSceneObject(SXRContext gvrContext, View view) {
+    public SXRViewNode(SXRContext gvrContext, View view) {
         this(gvrContext, view, View.NO_ID, null, null);
     }
 
     /**
-     * Create a new {@link SXRViewSceneObject} instance with its corresponding {@link View}
+     * Create a new {@link SXRViewNode} instance with its corresponding {@link View}
      * inflated from specified xml resource.
      * Android {@link View} will be rendered as {@link SXRTexture} of an arbitrarily complex geometry.
      *
@@ -126,12 +126,12 @@ public class SXRViewSceneObject extends SXRSceneObject {
      *            {@link SXRContext#getAssetLoader()#loadMesh(com.samsungxr.SXRAndroidResource)} and
      *            {@link SXRMesh#createQuad(float, float)}
      */
-    public SXRViewSceneObject(SXRContext gvrContext, int viewId, SXRMesh mesh) {
+    public SXRViewNode(SXRContext gvrContext, int viewId, SXRMesh mesh) {
         this(gvrContext, null, viewId, null, mesh);
     }
 
     /**
-     * Create a new {@link SXRViewSceneObject} instance with its corresponding {@link View}
+     * Create a new {@link SXRViewNode} instance with its corresponding {@link View}
      * inflated from specified xml resource and notifies its listener when the instance
      * has been ready.
      *
@@ -139,12 +139,12 @@ public class SXRViewSceneObject extends SXRSceneObject {
      * @param viewId The resource ID to inflate. See {@link LayoutInflater}.
      * @param eventsListener Listener to be notified after the view has been inflated.
      */
-    public SXRViewSceneObject(SXRContext gvrContext, int viewId, IViewEvents eventsListener) {
+    public SXRViewNode(SXRContext gvrContext, int viewId, IViewEvents eventsListener) {
         this(gvrContext, null, viewId, eventsListener, null);
     }
 
     /**
-     * Create a new {@link SXRViewSceneObject} instance with its corresponding {@link View}
+     * Create a new {@link SXRViewNode} instance with its corresponding {@link View}
      * inflated from specified xml resource with an arbitrarily complex geometry and
      * notifies its listener when the instance has been ready.
      *
@@ -155,20 +155,20 @@ public class SXRViewSceneObject extends SXRSceneObject {
      *            {@link SXRContext#getAssetLoader()#loadMesh(com.samsungxr.SXRAndroidResource)} and
      *            {@link SXRContext#createQuad(float, float)}
      */
-    public SXRViewSceneObject(SXRContext gvrContext, int viewId,
+    public SXRViewNode(SXRContext gvrContext, int viewId,
                                    IViewEvents eventsListener, SXRMesh mesh) {
         this(gvrContext, null, viewId, eventsListener, mesh);
     }
 
     /**
-     * Shows {@link View} in a 2D, rectangular {@linkplain SXRViewSceneObject scene object.}
+     * Shows {@link View} in a 2D, rectangular {@linkplain SXRViewNode scene object.}
      *
      * @param gvrContext current {@link SXRContext}
      * @param view The {@link View} to be shown.
      * @param width the rectangle's width
      * @param height the rectangle's height
      */
-    public SXRViewSceneObject(SXRContext gvrContext, View view,
+    public SXRViewNode(SXRContext gvrContext, View view,
                               float width, float height) {
         this(gvrContext, view,
                 SXRMesh.createQuad(gvrContext, "float3 a_position float2 a_texcoord",
@@ -176,7 +176,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
     }
 
     /**
-     * Shows any {@link View} into the {@linkplain SXRViewSceneObject scene object} with an
+     * Shows any {@link View} into the {@linkplain SXRViewNode scene object} with an
      * arbitrarily complex geometry.
      * 
      * @param gvrContext current {@link SXRContext}
@@ -185,11 +185,11 @@ public class SXRViewSceneObject extends SXRSceneObject {
      *            {@link SXRContext#getAssetLoader()#loadMesh(com.samsungxr.SXRAndroidResource)} and
      *            {@link SXRContext#createQuad(float, float)}
      */
-    public SXRViewSceneObject(SXRContext gvrContext, View view, SXRMesh mesh) {
+    public SXRViewNode(SXRContext gvrContext, View view, SXRMesh mesh) {
         this(gvrContext, view, View.NO_ID, null, mesh);
     }
 
-    private SXRViewSceneObject(SXRContext gvrContext, final View view, final int viewId,
+    private SXRViewNode(SXRContext gvrContext, final View view, final int viewId,
                                IViewEvents eventsListener, final SXRMesh mesh) {
         super(gvrContext, mesh);
         final SXRApplication application = gvrContext.getApplication();
@@ -197,7 +197,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
         // FIXME: SXRTexture:getId() may cause deadlock at UI thread!
         if (Looper.getMainLooper() == Looper.myLooper()) {
             // Going to deadlock!
-            throw new UnsupportedOperationException("Creation of SXRViewSceneObject on UI Thread!");
+            throw new UnsupportedOperationException("Creation of SXRViewNode on UI Thread!");
         }
 
         mEventsListener = eventsListener;
@@ -287,14 +287,14 @@ public class SXRViewSceneObject extends SXRSceneObject {
     GestureDetector getGestureDetector() { return mGestureDetector; }
 
     @Override
-    protected void onNewParentObject(SXRSceneObject parent) {
+    protected void onNewParentObject(SXRNode parent) {
         super.onNewParentObject(parent);
 
         getSXRContext().getApplication().registerView(mRootViewGroup);
     }
 
     @Override
-    protected void onRemoveParentObject(SXRSceneObject parent) {
+    protected void onRemoveParentObject(SXRNode parent) {
         super.onRemoveParentObject(parent);
 
         getSXRContext().getApplication().unregisterView(mRootViewGroup);
@@ -378,7 +378,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
     }
 
     /**
-     * To set initial properties before start rendering {@link SXRViewSceneObject};
+     * To set initial properties before start rendering {@link SXRViewNode};
      * Called at Framework thread.
      */
     protected void onStartRendering() {
@@ -390,11 +390,11 @@ public class SXRViewSceneObject extends SXRSceneObject {
     private static class SoftInputController implements ActionMode.Callback,
             TextView.OnEditorActionListener, View.OnTouchListener {
         Activity mActivity;
-        SXRViewSceneObject mSceneObject;
+        SXRViewNode mNode;
 
-        public SoftInputController(Activity activity, SXRViewSceneObject sceneObject) {
+        public SoftInputController(Activity activity, SXRViewNode sceneObject) {
             mActivity = activity;
-            mSceneObject = sceneObject;
+            mNode = sceneObject;
         }
 
         public void startListener(View view) {
@@ -438,9 +438,9 @@ public class SXRViewSceneObject extends SXRSceneObject {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            if (mSceneObject.getGestureDetector() != null)
+            if (mNode.getGestureDetector() != null)
             {
-                mSceneObject.getGestureDetector().onTouchEvent(event);
+                mNode.getGestureDetector().onTouchEvent(event);
             }
             return false;
         }
@@ -455,7 +455,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
      */
     protected class RootViewGroup extends FrameLayout implements ITouchEvents {
         final SXRContext mSXRContext;
-        final SXRViewSceneObject mSceneObject;
+        final SXRViewNode mNode;
         Surface mSurface;
         SurfaceTexture mSurfaceTexture;
 
@@ -463,7 +463,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
         float mHitY;
         float mActionDownX;
         float mActionDownY;
-        SXRSceneObject mSelected = null;
+        SXRNode mSelected = null;
         SoftInputController mSoftInputController;
 
         public RootViewGroup(SXRApplication application) {
@@ -473,13 +473,13 @@ public class SXRViewSceneObject extends SXRSceneObject {
                     LayoutParams.WRAP_CONTENT));
 
             mSXRContext = application.getSXRContext();
-            mSceneObject = SXRViewSceneObject.this;
+            mNode = SXRViewNode.this;
 
             // To optimization
             setWillNotDraw(true);
 
             mSoftInputController = new SoftInputController(application.getActivity(),
-                    SXRViewSceneObject.this);
+                    SXRViewNode.this);
 
 
             // To block Android's popups
@@ -585,7 +585,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
         }
 
         public void setTextureBufferSize(float width, float height) {
-            final SXRMaterial material = mSceneObject.getRenderData().getMaterial();
+            final SXRMaterial material = mNode.getRenderData().getMaterial();
 
             mSurfaceTexture.setDefaultBufferSize((int)width, (int)height);
 
@@ -596,7 +596,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
         @Override
         // Android UI thread
         protected void dispatchDraw(Canvas canvas) {
-            // Canvas attached to SXRViewSceneObject to draw on
+            // Canvas attached to SXRViewNode to draw on
             Canvas attachedCanvas = mSurface.lockCanvas(null);
             // Clear the canvas
             attachedCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
@@ -630,7 +630,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
                 @Override
                 public void run() {
                     // Ready to configure the views
-                    mSceneObject.onInitView();
+                    mNode.onInitView();
 
                     notifyObjectIsReady();
                 }
@@ -642,7 +642,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
                 @Override
                 public void run() {
                     // Ready to be rendered
-                    mSceneObject.onStartRendering();
+                    mNode.onStartRendering();
                 }
             });
         }
@@ -677,7 +677,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
         }
 
         @Override
-        public void onEnter(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo) {
+        public void onEnter(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
             // If motionEvent is null, it is a hover action
             if (pickInfo.motionEvent == null) {
                 MotionEvent event = createMotionEvent(pickInfo, MotionEvent.ACTION_HOVER_ENTER);
@@ -686,7 +686,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
         }
 
         @Override
-        public void onExit(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo) {
+        public void onExit(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
             // If motionEvent is null, it is a hover action
             if (pickInfo.motionEvent == null) {
                 MotionEvent event = createMotionEvent(pickInfo, MotionEvent.ACTION_HOVER_EXIT);
@@ -698,7 +698,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
         }
 
         @Override
-        public void onTouchStart(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo) {
+        public void onTouchStart(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
             if ((mSelected == null) && (pickInfo.motionEvent != null)) {
                 final MotionEvent event = pickInfo.motionEvent;
                 final float[] texCoords = pickInfo.getTextureCoords();
@@ -713,7 +713,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
         }
 
         @Override
-        public void onInside(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo) {
+        public void onInside(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
             final MotionEvent event = pickInfo.motionEvent;
 
             // If motionEvent is null, it is a hover action
@@ -726,7 +726,7 @@ public class SXRViewSceneObject extends SXRSceneObject {
         }
 
         @Override
-        public void onTouchEnd(SXRSceneObject sceneObject, SXRPicker.SXRPickedObject pickInfo)
+        public void onTouchEnd(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo)
         {
             if (mSelected != null)
             {

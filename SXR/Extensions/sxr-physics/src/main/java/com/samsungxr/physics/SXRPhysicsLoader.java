@@ -26,7 +26,7 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMeshCollider;
 import com.samsungxr.SXRResourceVolume;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -80,13 +80,13 @@ public class SXRPhysicsLoader {
             throw new IOException("Fail to parse bullet file " + fileName);
         }
 
-        SXRSceneObject sceneRoot = scene.getRoot();
-        ArrayMap<Long, SXRSceneObject> rbObjects = new ArrayMap<>();
+        SXRNode sceneRoot = scene.getRoot();
+        ArrayMap<Long, SXRNode> rbObjects = new ArrayMap<>();
 
         long nativeRigidBody;
         while ((nativeRigidBody = NativePhysics3DLoader.getNextRigidBody(loader)) != 0) {
             String name = NativePhysics3DLoader.getRigidBodyName(loader, nativeRigidBody);
-            SXRSceneObject sceneObject = sceneRoot.getSceneObjectByName(name);
+            SXRNode sceneObject = sceneRoot.getNodeByName(name);
             if (sceneObject == null) {
                 Log.w(TAG, "Didn't find scene object for rigid body '" + name + "'");
                 continue;
@@ -117,8 +117,8 @@ public class SXRPhysicsLoader {
         while ((nativeConstraint = NativePhysics3DLoader.getNextConstraint(loader)) != 0) {
             nativeRigidBody = NativePhysics3DLoader.getConstraintBodyA(loader, nativeConstraint);
             nativeRigidBodyB = NativePhysics3DLoader.getConstraintBodyB(loader, nativeConstraint);
-            SXRSceneObject sceneObject = rbObjects.get(nativeRigidBody);
-            SXRSceneObject sceneObjectB = rbObjects.get(nativeRigidBodyB);
+            SXRNode sceneObject = rbObjects.get(nativeRigidBody);
+            SXRNode sceneObjectB = rbObjects.get(nativeRigidBodyB);
 
             if (sceneObject == null || sceneObjectB == null) {
                 // There is no scene object to own this constraint

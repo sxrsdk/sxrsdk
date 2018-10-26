@@ -30,7 +30,7 @@
 #include "components/camera_rig.h"
 #include "engine/renderer/renderer.h"
 #include "objects/lightlist.h"
-#include "objects/scene_object.h"
+#include "objects/node.h"
 
 
 namespace sxr {
@@ -44,10 +44,10 @@ public:
     Scene();
     virtual ~Scene();
     void set_java(JavaVM* javaVM, jobject javaScene);
-    SceneObject* getRoot() { return scene_root_; }
-    void addSceneObject(SceneObject* scene_object);
-    void removeSceneObject(SceneObject* scene_object);
-    void removeAllSceneObjects();
+    Node* getRoot() { return scene_root_; }
+    void addNode(Node* node);
+    void removeNode(Node* node);
+    void removeAllNodes();
 
     const CameraRig* main_camera_rig() {
         return main_camera_rig_;
@@ -55,7 +55,7 @@ public:
     void set_main_camera_rig(CameraRig* camera_rig) {
         main_camera_rig_ = camera_rig;
     }
-    std::vector<SceneObject*> getWholeSceneObjects();
+    std::vector<Node*> getWholeNodes();
 
     void set_frustum_culling( bool frustum_flag){ frustum_flag_ = frustum_flag; }
     bool get_frustum_culling(){ return frustum_flag_; }
@@ -157,7 +157,7 @@ public:
      * Called during culling to add a scene object's
      * collider to the visible collider list.
      */
-    void pick(SceneObject* sceneobj);
+    void pick(Node* sceneobj);
 
     /*
      * Get the current collider list and lock it.
@@ -192,7 +192,7 @@ public:
         javaVM_->DetachCurrentThread();
     }
 
-    void setSceneRoot(SceneObject *sceneRoot);
+    void setSceneRoot(Node *sceneRoot);
 
 private:
     Scene(const Scene& scene) = delete;
@@ -206,7 +206,7 @@ private:
     static Scene* main_scene_;
     JavaVM* javaVM_;
     jmethodID makeDepthShadersMethod_;
-    SceneObject* scene_root_ = nullptr;
+    Node* scene_root_ = nullptr;
     CameraRig* main_camera_rig_;
     int dirtyFlag_;
     bool frustum_flag_;

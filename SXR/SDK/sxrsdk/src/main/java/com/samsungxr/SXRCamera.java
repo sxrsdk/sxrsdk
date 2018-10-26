@@ -52,7 +52,7 @@ public abstract class SXRCamera extends SXRComponent implements PrettyPrint {
         super(gvrContext, ptr);
     }
 
-    protected SXRCamera(SXRContext gvrContext, long ptr, SXRSceneObject owner) {
+    protected SXRCamera(SXRContext gvrContext, long ptr, SXRNode owner) {
         super(gvrContext, ptr);
         setOwnerObject(owner);
     }
@@ -295,10 +295,10 @@ public abstract class SXRCamera extends SXRComponent implements PrettyPrint {
      * Add {@code child} as a child of this camera owner object.
      *
      * @param child
-     *            {@link SXRSceneObject Object} to add as a child of this camera
+     *            {@link SXRNode Object} to add as a child of this camera
      *            owner object.
      */
-    public void addChildObject(SXRSceneObject child) {
+    public void addChildObject(SXRNode child) {
         if (getOwnerObject() != null) {
             getOwnerObject().addChildObject(child);
         }
@@ -308,10 +308,10 @@ public abstract class SXRCamera extends SXRComponent implements PrettyPrint {
      * Remove {@code child} as a child of this camera owner object.
      *
      * @param child
-     *            {@link SXRSceneObject Object} to remove as a child of this
+     *            {@link SXRNode Object} to remove as a child of this
      *            camera owner object.
      */
-    public void removeChildObject(SXRSceneObject child) {
+    public void removeChildObject(SXRNode child) {
         if (getOwnerObject() != null) {
             getOwnerObject().removeChildObject(child);
         }
@@ -321,7 +321,7 @@ public abstract class SXRCamera extends SXRComponent implements PrettyPrint {
      * Get the number of child objects that belongs to owner object of this
      * camera.
      *
-     * @return Number of {@link SXRSceneObject objects} added as children of
+     * @return Number of {@link SXRNode objects} added as children of
      *         this camera owner object.
      */
     public int getChildrenCount() {
@@ -335,7 +335,7 @@ public abstract class SXRCamera extends SXRComponent implements PrettyPrint {
      * Sets the view matrix of the Camera.
      * The view matrix is the inverse of the camera model matrix.
      * Normally it is computed automatically from the SXRTransform
-     * attached to the SXRSceneObject which owns the camera.
+     * attached to the SXRNode which owns the camera.
      * If the camera is NOT attached to a scene object,
      * you can use this call to set the view matrix so the
      * camera can be used with a SXRRenderTarget.

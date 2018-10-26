@@ -24,11 +24,11 @@ import java.util.LinkedList;
 /**
  * Example:
  * <pre>
- * root = new SXRSceneObject(..);
+ * root = new SXRNode(..);
  *
- * sphereHighDensity = new SXRSceneObject(..);
- * sphereMediumDensity = new SXRSceneObject(..);
- * sphereLowDensity = new SXRSceneObject(..);
+ * sphereHighDensity = new SXRNode(..);
+ * sphereMediumDensity = new SXRNode(..);
+ * sphereLowDensity = new SXRNode(..);
  *
  * SXRLODGroup lodGroup = new SXRLODGroup(gvrContext);
  * lodGroup.addRange(0, sphereHighDensity);
@@ -61,7 +61,7 @@ public final class SXRLODGroup extends SXRBehavior {
      * @param sceneObject scene object that should be rendered when in this range
      * @throws IllegalArgumentException if range is negative or sceneObject null
      */
-    public synchronized void addRange(final float range, final SXRSceneObject sceneObject)
+    public synchronized void addRange(final float range, final SXRNode sceneObject)
     {
         if (null == sceneObject) {
             throw new IllegalArgumentException("sceneObject must be specified!");
@@ -87,7 +87,7 @@ public final class SXRLODGroup extends SXRBehavior {
             mRanges.add(newElement);
         }
 
-        final SXRSceneObject owner = getOwnerObject();
+        final SXRNode owner = getOwnerObject();
         if (null != owner) {
             owner.addChildObject(sceneObject);
         }
@@ -98,7 +98,7 @@ public final class SXRLODGroup extends SXRBehavior {
      * @deprecated
      */
     public void onDrawFrame(float frameTime) {
-        final SXRSceneObject owner = getOwnerObject();
+        final SXRNode owner = getOwnerObject();
         if (owner == null) {
             return;
         }
@@ -107,12 +107,12 @@ public final class SXRLODGroup extends SXRBehavior {
         final SXRTransform t = getSXRContext().getMainScene().getMainCameraRig().getCenterCamera().getTransform();
 
         for (final Object[] range : mRanges) {
-            ((SXRSceneObject)range[1]).setEnable(false);
+            ((SXRNode)range[1]).setEnable(false);
         }
 
         for (int i = size - 1; i >= 0; --i) {
             final Object[] range = mRanges.get(i);
-            final SXRSceneObject child = (SXRSceneObject) range[1];
+            final SXRNode child = (SXRNode) range[1];
             if (child.getParent() != owner) {
                 Log.w(TAG, "the scene object for distance greater than " + range[0] + " is not a child of the owner; skipping it");
                 continue;
@@ -135,20 +135,20 @@ public final class SXRLODGroup extends SXRBehavior {
     }
 
     @Override
-    public synchronized void onAttach(SXRSceneObject newOwner) {
+    public synchronized void onAttach(SXRNode newOwner) {
         super.onAttach(newOwner);
 
         for (final Object[] el : mRanges) {
-            newOwner.addChildObject((SXRSceneObject)el[1]);
+            newOwner.addChildObject((SXRNode)el[1]);
         }
     }
 
     @Override
-    public synchronized void onDetach(SXRSceneObject oldOwner) {
+    public synchronized void onDetach(SXRNode oldOwner) {
         super.onDetach(oldOwner);
 
         for (final Object[] el : mRanges) {
-            oldOwner.removeChildObject((SXRSceneObject)el[1]);
+            oldOwner.removeChildObject((SXRNode)el[1]);
         }
     }
 

@@ -16,7 +16,7 @@
 package com.samsungxr.animation;
 
 import com.samsungxr.SXRHybridObject;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 
 /** Size animation. */
@@ -86,7 +86,7 @@ public class SXRScaleAnimation extends SXRTransformAnimation
      * will <em>shrink</em> the object, not grow it.
      * 
      * @param target
-     *            {@link SXRSceneObject} containing a {@link SXRTransform}
+     *            {@link SXRNode} containing a {@link SXRTransform}
      * @param duration
      *            The animation duration, in seconds.
      * @param scaleX
@@ -96,7 +96,7 @@ public class SXRScaleAnimation extends SXRTransformAnimation
      * @param scaleZ
      *            Target z scale
      */
-    public SXRScaleAnimation(SXRSceneObject target, float duration,
+    public SXRScaleAnimation(SXRNode target, float duration,
             float scaleX, float scaleY, float scaleZ)
     {
         this(target.getTransform(), duration, scaleX, scaleY, scaleZ);
@@ -111,13 +111,13 @@ public class SXRScaleAnimation extends SXRTransformAnimation
      * will <em>shrink</em> the object, not grow it.
      * 
      * @param target
-     *            {@link SXRSceneObject} containing a {@link SXRTransform}
+     *            {@link SXRNode} containing a {@link SXRTransform}
      * @param duration
      *            The animation duration, in seconds.
      * @param scale
      *            Target scale
      */
-    public SXRScaleAnimation(SXRSceneObject target, float duration, float scale)
+    public SXRScaleAnimation(SXRNode target, float duration, float scale)
     {
         this(target, duration, scale, scale, scale);
     }

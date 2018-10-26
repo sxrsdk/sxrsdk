@@ -22,7 +22,7 @@
 
 #include "glm/gtc/matrix_inverse.hpp"
 
-#include "objects/scene_object.h"
+#include "objects/node.h"
 #include "util/sxr_log.h"
 
 namespace sxr {

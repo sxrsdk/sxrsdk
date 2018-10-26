@@ -19,7 +19,7 @@ import com.google.vr.sdk.audio.GvrAudioEngine;
 
 import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 import com.samsungxr.utility.Log;
 
@@ -127,7 +127,7 @@ public class SXRAudioSource extends SXRBehavior
     }
 
     @Override
-    public void onDetach(SXRSceneObject owner)
+    public void onDetach(SXRNode owner)
     {
         super.onDetach(owner);
         if (mAudioListener != null)

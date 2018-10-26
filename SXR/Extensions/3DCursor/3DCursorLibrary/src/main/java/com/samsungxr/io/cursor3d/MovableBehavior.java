@@ -4,15 +4,15 @@ import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRComponent;
 import com.samsungxr.io.SXRCursorController;
 import com.samsungxr.SXRPicker;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
- * This class defines a {@link SelectableBehavior} that can be attached to a {@link SXRSceneObject}.
+ * This class defines a {@link SelectableBehavior} that can be attached to a {@link SXRNode}.
  * In addition to all the functionality of a {@link SelectableBehavior} this makes the associated
- * {@link SXRSceneObject} movable with a {@link Cursor}.
+ * {@link SXRNode} movable with a {@link Cursor}.
  */
 public class MovableBehavior extends SelectableBehavior {
     public static final String TAG = MovableBehavior.class.getSimpleName();
@@ -21,15 +21,15 @@ public class MovableBehavior extends SelectableBehavior {
     private Quaternionf mRotation;
     private Vector3f mTempCross;
 
-    private SXRSceneObject mSelected;
+    private SXRNode mSelected;
     private Cursor mCurrentCursor;
-    private SXRSceneObject mOwnerParent;
+    private SXRNode mOwnerParent;
     private static final Matrix4f mTempParentMatrix = new Matrix4f();
     private static final Matrix4f mTempSelectedMatrix = new Matrix4f();
 
     /**
-     * Creates a {@link MovableBehavior} to be attached to any {@link SXRSceneObject}. The
-     * instance thus created will not change the appearance of the linked {@link SXRSceneObject}
+     * Creates a {@link MovableBehavior} to be attached to any {@link SXRNode}. The
+     * instance thus created will not change the appearance of the linked {@link SXRNode}
      * according to the {@link ObjectState}.
      *
      * @param cursorManager the {@link CursorManager} instance
@@ -39,19 +39,19 @@ public class MovableBehavior extends SelectableBehavior {
     }
 
     /**
-     * Creates a {@link MovableBehavior} which is to be attached to a {@link SXRSceneObject}
-     * with a specific hierarchy where, the {@link SXRSceneObject} to be attached has a root node at
+     * Creates a {@link MovableBehavior} which is to be attached to a {@link SXRNode}
+     * with a specific hierarchy where, the {@link SXRNode} to be attached has a root node at
      * the top and a child for each of the states of the {@link MovableBehavior}.
      * The order of the child nodes has to follow {@link ObjectState#DEFAULT},
      * {@link ObjectState#BEHIND}, {@link ObjectState#COLLIDING}, and {@link ObjectState#CLICKED}
      * from left to right.The {@link MovableBehavior} handles all the {@link ICursorEvents} on the
-     * linked {@link SXRSceneObject} and maintains the {@link ObjectState} as well as moving the
-     * {@link SXRSceneObject} with the movement of a {@link Cursor}. It also makes the correct child
-     * {@link SXRSceneObject} visible according to the {@link ObjectState}. It is recommended that
+     * linked {@link SXRNode} and maintains the {@link ObjectState} as well as moving the
+     * {@link SXRNode} with the movement of a {@link Cursor}. It also makes the correct child
+     * {@link SXRNode} visible according to the {@link ObjectState}. It is recommended that
      * the different nodes representing different {@link ObjectState} share a common set of vertices
      * if possible. Not having the needed hierarchy will result in an
      * {@link IllegalArgumentException} when calling
-     * {@link SXRSceneObject#attachComponent(SXRComponent)}
+     * {@link SXRNode#attachComponent(SXRComponent)}
      *
      * @param cursorManager       the {@link CursorManager} instance
      * @param initializeAllStates flag to indicate whether to initialize all
@@ -60,7 +60,7 @@ public class MovableBehavior extends SelectableBehavior {
      *                            {@link ObjectState#BEHIND}, {@link ObjectState#COLLIDING}, and
      *                            {@link ObjectState#CLICKED}. <code>false</code> initializes only
      *                            the {@link ObjectState#DEFAULT} state. Which does not require the
-     *                            attached  {@link SXRSceneObject} to have a hierarchy.
+     *                            attached  {@link SXRNode} to have a hierarchy.
      */
     public MovableBehavior(CursorManager cursorManager, boolean initializeAllStates) {
         super(cursorManager, initializeAllStates);
@@ -68,26 +68,26 @@ public class MovableBehavior extends SelectableBehavior {
     }
 
     /**
-     * Creates a {@link MovableBehavior} which is to be attached to a {@link SXRSceneObject}
-     * with a specific hierarchy where, the {@link SXRSceneObject} to be attached has a root node at
+     * Creates a {@link MovableBehavior} which is to be attached to a {@link SXRNode}
+     * with a specific hierarchy where, the {@link SXRNode} to be attached has a root node at
      * the top and a child for each of the states of the {@link MovableBehavior}.
      * The {@link MovableBehavior} handles all the {@link ICursorEvents} on the linked
-     * {@link SXRSceneObject} and maintains the {@link ObjectState} as well as moves the associated
-     * {@link SXRSceneObject} with the {@link Cursor}. It also makes the correct child
-     * {@link SXRSceneObject} visible according to the {@link ObjectState}. It is recommended to
+     * {@link SXRNode} and maintains the {@link ObjectState} as well as moves the associated
+     * {@link SXRNode} with the {@link Cursor}. It also makes the correct child
+     * {@link SXRNode} visible according to the {@link ObjectState}. It is recommended to
      * have a child for each {@link ObjectState} value, however it is possible to have lesser
      * children as long as the mapping is correctly specified in {@param objectStates}. If the
-     * {@param objectStates} does not match the {@link SXRSceneObject} hierarchy it will result in
+     * {@param objectStates} does not match the {@link SXRNode} hierarchy it will result in
      * an {@link IllegalArgumentException} when calling
-     * {@link SXRSceneObject#attachComponent(SXRComponent)}. To save on memory it is suggested that
-     * the children of the {@link SXRSceneObject} representing different {@link ObjectState}s share
+     * {@link SXRNode#attachComponent(SXRComponent)}. To save on memory it is suggested that
+     * the children of the {@link SXRNode} representing different {@link ObjectState}s share
      * a common set of vertices if possible.
      *
      * @param cursorManager the {@link CursorManager} instance
      * @param objectStates  array of {@link ObjectState}s that maps each child of the attached
-     *                      {@link SXRSceneObject} with an {@link ObjectState}. Where the first
+     *                      {@link SXRNode} with an {@link ObjectState}. Where the first
      *                      element of the array maps to the left most/first child of the attached
-     *                      {@link SXRSceneObject}. This array should contain
+     *                      {@link SXRNode}. This array should contain
      *                      {@link ObjectState#DEFAULT} as one of its elements else it will result
      *                      in an {@link IllegalArgumentException}.
      */
@@ -197,8 +197,8 @@ public class MovableBehavior extends SelectableBehavior {
     /**
      * Returns a unique long value associated with the {@link MovableBehavior} class. Each
      * subclass of  {@link SXRBehavior} needs a unique component type value. Use this value to
-     * get the instance of {@link MovableBehavior} attached to any {@link SXRSceneObject}
-     * using {@link SXRSceneObject#getComponent(long)}
+     * get the instance of {@link MovableBehavior} attached to any {@link SXRNode}
+     * using {@link SXRNode#getComponent(long)}
      *
      * @return the component type value.
      */

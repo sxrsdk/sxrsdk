@@ -28,7 +28,7 @@ import java.util.List;
  * @see IPickEvents
  * @see SXRSphereCollider
  * @see SXRMeshCollider
- * @see SXRSceneObject#attachComponent(SXRComponent)
+ * @see SXRNode#attachComponent(SXRComponent)
  */
 public class SXRCollider extends SXRComponent {
     private float mPickDistance = 0;
@@ -128,7 +128,7 @@ public class SXRCollider extends SXRComponent {
         mPickDistance = dist;
     }
 
-    public void setOwnerObject(SXRSceneObject owner)
+    public void setOwnerObject(SXRNode owner)
     {
         SXRPicker.sFindObjectsLock.lock();
         try

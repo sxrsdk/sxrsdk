@@ -57,7 +57,7 @@ Java_com_samsungxr_NativeComponent_setOwnerObject(JNIEnv * env,
         jobject obj, jlong jcomponent, jlong jowner)
 {
     Component* component = reinterpret_cast<Component*>(jcomponent);
-    SceneObject* owner = reinterpret_cast<SceneObject*>(jowner);
+    Node* owner = reinterpret_cast<Node*>(jowner);
     component->set_owner_object(owner);
 }
 

@@ -27,12 +27,12 @@ import java.util.List;
  * adding their meshes (or, more cheaply if less precisely, their
  * {@linkplain SXRMesh#getBoundingBox() bounding box}) to a
  * {@link SXRCollider};
- * {@linkplain SXRSceneObject#attachCollider(SXRCollider)}
- * attaching that collider to a {@linkplain SXRSceneObject scene object}; and
+ * {@linkplain SXRNode#attachCollider(SXRCollider)}
+ * attaching that collider to a {@linkplain SXRNode scene object}; and
  * setting the collider's {@linkplain #setEnable(boolean) enabled flag.}
  *
  * One can use this class to specify multiple colliders for a
- * single {@link SXRSceneObject}.
+ * single {@link SXRNode}.
  */
 public class SXRColliderGroup extends SXRCollider implements IComponentGroup<SXRCollider>
 {

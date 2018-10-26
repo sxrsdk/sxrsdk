@@ -1,9 +1,9 @@
 package com.samsungxr.widgetlib.widget;
 
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 public final class Helpers {
-    public static String getFullName(SXRSceneObject sceneObject) {
+    public static String getFullName(SXRNode sceneObject) {
         if (sceneObject != null) {
             StringBuilder builder = new StringBuilder();
             getFullNameHelper(builder, sceneObject);
@@ -12,9 +12,9 @@ public final class Helpers {
         return "<null>";
     }
 
-    static private void getFullNameHelper(StringBuilder builder, SXRSceneObject sceneObject) {
+    static private void getFullNameHelper(StringBuilder builder, SXRNode sceneObject) {
         if (sceneObject != null) {
-            SXRSceneObject parent = sceneObject.getParent();
+            SXRNode parent = sceneObject.getParent();
             if (parent != null) {
                 getFullNameHelper(builder, parent);
             }

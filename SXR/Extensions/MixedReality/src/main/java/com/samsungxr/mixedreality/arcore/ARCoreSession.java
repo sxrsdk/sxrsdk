@@ -47,7 +47,7 @@ import com.samsungxr.SXRMeshCollider;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRAugmentedImage;
@@ -83,7 +83,7 @@ public class ARCoreSession extends MRCommon {
     private Config mConfig;
 
     private SXRScene mVRScene;
-    private SXRSceneObject mARPassThroughObject;
+    private SXRNode mARPassThroughObject;
     private Frame mLastARFrame;
     private Frame arFrame;
     private ARCoreHandler mARCoreHandler;
@@ -237,7 +237,7 @@ public class ARCoreSession extends MRCommon {
                 (int)mDisplayGeometry.x, (int)mDisplayGeometry.y);
 
         /* To render texture from phone's camera */
-        mARPassThroughObject = new SXRSceneObject(gvrContext, mDisplayGeometry.x, mDisplayGeometry.y,
+        mARPassThroughObject = new SXRNode(gvrContext, mDisplayGeometry.x, mDisplayGeometry.y,
                 passThroughTexture, SXRMaterial.SXRShaderType.OES.ID);
 
         mARPassThroughObject.getRenderData().setRenderingOrder(SXRRenderData.SXRRenderingOrder.BACKGROUND);
@@ -245,7 +245,7 @@ public class ARCoreSession extends MRCommon {
         mARPassThroughObject.getTransform().setPosition(0, 0, mDisplayGeometry.z);
         mARPassThroughObject.attachComponent(new SXRMeshCollider(gvrContext, true));
 
-        mVRScene.addSceneObject(mARPassThroughObject);
+        mVRScene.addNode(mARPassThroughObject);
 
         /* AR main loop */
         mARCoreHandler = new ARCoreHandler();
@@ -311,7 +311,7 @@ public class ARCoreSession extends MRCommon {
         mSXRCamMatrix = cameraRig.getHeadTransform().getModelMatrix();
     }
 
-    private void updatePassThroughObject(SXRSceneObject object) {
+    private void updatePassThroughObject(SXRNode object) {
         Matrix.setIdentityM(mModelViewMatrix, 0);
         Matrix.translateM(mModelViewMatrix, 0, 0, 0, mDisplayGeometry.z);
 
@@ -345,7 +345,7 @@ public class ARCoreSession extends MRCommon {
     }
 
     @Override
-    protected SXRSceneObject onGetPassThroughObject() {
+    protected SXRNode onGetPassThroughObject() {
         return mARPassThroughObject;
     }
 
@@ -370,7 +370,7 @@ public class ARCoreSession extends MRCommon {
     }
 
     @Override
-    protected SXRAnchor onCreateAnchor(float[] pose, SXRSceneObject sceneObject) {
+    protected SXRAnchor onCreateAnchor(float[] pose, SXRNode sceneObject) {
         float[] translation = new float[3];
         float[] rotation = new float[4];
 
@@ -450,7 +450,7 @@ public class ARCoreSession extends MRCommon {
     }
 
     @Override
-    protected SXRHitResult onHitTest(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) {
+    protected SXRHitResult onHitTest(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) {
         if (sceneObj != mARPassThroughObject)
             return null;
 

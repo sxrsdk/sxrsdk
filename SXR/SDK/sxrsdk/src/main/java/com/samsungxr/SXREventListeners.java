@@ -108,9 +108,9 @@ public class SXREventListeners {
     }
 
     /**
-     * Null implementation of {@link ISceneObjectEvents}.
+     * Null implementation of {@link INodeEvents}.
      */
-    public static class SceneObjectEvents implements ISceneObjectEvents {
+    public static class NodeEvents implements INodeEvents {
         @Override
         public void onAfterInit() {
         }
@@ -120,7 +120,7 @@ public class SXREventListeners {
         }
 
         @Override
-        public void onInit(SXRContext gvrContext, SXRSceneObject sceneObject) {
+        public void onInit(SXRContext gvrContext, SXRNode sceneObject) {
         }
 
         @Override
@@ -138,11 +138,11 @@ public class SXREventListeners {
         @Override
         public void onNoPick(SXRPicker picker) { }
         @Override
-        public void onEnter(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) { }
+        public void onEnter(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) { }
         @Override
-        public void onExit(SXRSceneObject sceneObj) { }
+        public void onExit(SXRNode sceneObj) { }
         @Override
-        public void onInside(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) { }
+        public void onInside(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) { }
 }
 
     /**
@@ -151,15 +151,15 @@ public class SXREventListeners {
     public static class TouchEvents implements ITouchEvents
     {
         @Override
-        public void onEnter(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) { }
+        public void onEnter(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) { }
         @Override
-        public void onExit(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) { }
+        public void onExit(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) { }
         @Override
-        public void onInside(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) { }
+        public void onInside(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) { }
         @Override
-        public void onTouchStart(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) { }
+        public void onTouchStart(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) { }
         @Override
-        public void onTouchEnd(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision) { }
+        public void onTouchEnd(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) { }
         @Override
         public void onMotionOutside(SXRPicker picker, MotionEvent event) { }
     }
@@ -170,10 +170,10 @@ public class SXREventListeners {
     public static class AssetEvents implements IAssetEvents
     {
         @Override
-        public void onAssetLoaded(SXRContext context, SXRSceneObject model, String filePath, String errors) { }
+        public void onAssetLoaded(SXRContext context, SXRNode model, String filePath, String errors) { }
 
         @Override
-        public void onModelLoaded(SXRContext context, SXRSceneObject model, String filePath) { }
+        public void onModelLoaded(SXRContext context, SXRNode model, String filePath) { }
 
         @Override
         public void onTextureLoaded(SXRContext context, SXRTexture texture, String filePath) { }

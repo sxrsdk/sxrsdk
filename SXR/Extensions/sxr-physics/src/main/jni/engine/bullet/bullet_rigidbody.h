@@ -23,7 +23,7 @@
 #include <LinearMath/btMotionState.h>
 
 namespace sxr {
-class SceneObject;
+class Node;
 
 class BulletRigidBody : public PhysicsRigidBody,
                                BulletObject,

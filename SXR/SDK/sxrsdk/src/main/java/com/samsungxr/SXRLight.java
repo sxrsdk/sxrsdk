@@ -119,7 +119,7 @@ public class SXRLight extends SXRJavaComponent implements SXRDrawFrameListener
         return mCastShadow;
     }
 
-    public void setOwnerObject(SXRSceneObject newOwner)
+    public void setOwnerObject(SXRNode newOwner)
     {
         if (owner == newOwner)
             return;
@@ -578,7 +578,7 @@ public class SXRLight extends SXRJavaComponent implements SXRDrawFrameListener
         }
         float[] odir = getVec3("world_direction");
         float[] opos = getVec3("world_position");
-        SXRSceneObject parent = owner;
+        SXRNode parent = owner;
         Matrix4f worldmtx = parent.getTransform().getModelMatrix4f();
 
         mOldDir.x = odir[0];

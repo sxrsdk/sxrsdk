@@ -30,7 +30,7 @@ import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRMain;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.IEventReceiver;
 import com.samsungxr.IEvents;
 import com.samsungxr.R;
@@ -737,7 +737,7 @@ public class SXRInputManager implements IEventReceiver
         private ArrayList<SXRControllerType> mControllerTypes;
         private int mCurrentControllerPriority = -1;
         private SXRCursorController mCursorController = null;
-        private SXRSceneObject mCursor = null;
+        private SXRNode mCursor = null;
 
         public SingleControllerSelector(SXRContext ctx, ArrayList<SXRControllerType> desiredTypes)
         {
@@ -775,16 +775,16 @@ public class SXRInputManager implements IEventReceiver
             return mCursorController;
         }
 
-        public SXRSceneObject getCursor() { return mCursor; }
+        public SXRNode getCursor() { return mCursor; }
 
-        public void setCursor(SXRSceneObject cursor)
+        public void setCursor(SXRNode cursor)
         {
             mCursor = cursor;
         }
 
-        private SXRSceneObject makeDefaultCursor(SXRContext ctx)
+        private SXRNode makeDefaultCursor(SXRContext ctx)
         {
-            SXRSceneObject cursor = new SXRSceneObject(ctx, 1, 1,
+            SXRNode cursor = new SXRNode(ctx, 1, 1,
                                                        ctx.getAssetLoader().loadTexture(
                                                                new SXRAndroidResource(ctx, R.drawable.cursor)));
             SXRRenderData rdata = cursor.getRenderData();

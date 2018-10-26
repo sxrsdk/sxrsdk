@@ -30,16 +30,16 @@ import com.samsungxr.SXRExternalScene;
 import com.samsungxr.SXRMeshCollider;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.ISensorEvents;
 import com.samsungxr.SensorEvent;
 import com.samsungxr.io.SXRControllerType;
 import com.samsungxr.io.SXRCursorController;
 import com.samsungxr.io.SXRInputManager;
-import com.samsungxr.scene_objects.SXRCubeSceneObject;
-import com.samsungxr.scene_objects.SXRSphereSceneObject;
-import com.samsungxr.scene_objects.SXRTextViewSceneObject;
-import com.samsungxr.scene_objects.SXRViewSceneObject;
+import com.samsungxr.nodes.SXRCubeNode;
+import com.samsungxr.nodes.SXRSphereNode;
+import com.samsungxr.nodes.SXRTextViewNode;
+import com.samsungxr.nodes.SXRViewNode;
 import com.samsungxr.utility.Log;
 import com.samsungxr.utility.Threads;
 import org.joml.Vector3f;
@@ -77,12 +77,12 @@ public class AnchorImplementation {
     private static final String Is_ACTIVE = "isActive";
 
     private SXRContext gvrContext = null;
-    private SXRSceneObject root = null;
+    private SXRNode root = null;
     private Vector<Viewpoint> viewpoints = new Vector<Viewpoint>();
 
     private PerFrameWebViewControl perFrameWebViewControl = new PerFrameWebViewControl();
 
-    private SXRSphereSceneObject gvrScaleObject = null;
+    private SXRSphereNode gvrScaleObject = null;
     private final float[] scaleControlInitPosition = {-2, 1.5f, 0};
 
     private Vector3f translationObjectTranslationLocal = new Vector3f();
@@ -94,10 +94,10 @@ public class AnchorImplementation {
     private final Vector3f cubeUISize = new Vector3f(webViewDimensions[0], .5f, .2f);
     private final float[] cubeUIPosition = {0, (webViewDimensions[1] + cubeUISize.y)/2.0f, -cubeUISize.z/2.0f}; // center, above the web page
 
-    private SXRTextViewSceneObject gvrTextExitObject = null;
-    private SXRTextViewSceneObject gvrTextTranslationObject = null;
-    private SXRTextViewSceneObject gvrTextScaleObject = null;
-    private SXRTextViewSceneObject gvrTextRotateObject = null;
+    private SXRTextViewNode gvrTextExitObject = null;
+    private SXRTextViewNode gvrTextTranslationObject = null;
+    private SXRTextViewNode gvrTextScaleObject = null;
+    private SXRTextViewNode gvrTextRotateObject = null;
     private final float[] textExitPosition = {1.5f, 0, .125f};
     private final float[] textScalePosition = {-1.5f, 0, .125f};
     private final float[] textTranslatePosition = {-.5f, 0, .125f};
@@ -113,7 +113,7 @@ public class AnchorImplementation {
     private float[] initialHitPoint = new float[3];
 
 
-    private SXRSceneObject webPagePlusUISceneObject = null;
+    private SXRNode webPagePlusUINode = null;
 
     private final int textColorDefault = Color.BLACK;
     private final int textColorIsOver   = Color.LTGRAY;
@@ -139,7 +139,7 @@ public class AnchorImplementation {
     private boolean webPageClosed = false;
 
 
-    public AnchorImplementation(SXRContext gvrContext, SXRSceneObject root, Vector<Viewpoint> viewpoints ) {
+    public AnchorImplementation(SXRContext gvrContext, SXRNode root, Vector<Viewpoint> viewpoints ) {
         this.gvrContext = gvrContext;
         this.root = root;
         this.viewpoints = viewpoints;
@@ -157,9 +157,9 @@ public class AnchorImplementation {
         final InteractiveObject interactiveObjectFinal = interactiveObject;
 
         interactiveObject.getSensor().getOwnerObject().forAllDescendants(
-                new SXRSceneObject.SceneVisitor()
+                new SXRNode.SceneVisitor()
                 {
-                    public boolean visit (SXRSceneObject obj)
+                    public boolean visit (SXRNode obj)
                     {
                         obj.attachCollider(new SXRMeshCollider(gvrContext, true));
                         return true;
@@ -192,8 +192,8 @@ public class AnchorImplementation {
                                 // Go to another X3D scene
                                 newSceneLoaded = true;
                                 SXRExternalScene gvrExternalScene = new SXRExternalScene(gvrContext, url, true);
-                                SXRSceneObject gvrSceneObjectAnchor = new SXRSceneObject(gvrContext);
-                                gvrSceneObjectAnchor.attachComponent( gvrExternalScene );
+                                SXRNode gvrNodeAnchor = new SXRNode(gvrContext);
+                                gvrNodeAnchor.attachComponent( gvrExternalScene );
                                 boolean load = gvrExternalScene.load(gvrContext.getMainScene());
                                 if (!load) Log.e(TAG, "Error loading new X3D scene " + url);
                                 else {
@@ -280,9 +280,9 @@ public class AnchorImplementation {
                     webPageClosed = false;
                 }
                 else if (event.isOver()) {
-                    SXRSceneObject sensorObj = interactiveObjectFinal.getSensor().getOwnerObject();
+                    SXRNode sensorObj = interactiveObjectFinal.getSensor().getOwnerObject();
                     if (sensorObj != null) {
-                        SXRSceneObject sensorObj2 = sensorObj.getChildByIndex(0);
+                        SXRNode sensorObj2 = sensorObj.getChildByIndex(0);
                         if (sensorObj2 != null) {
                             SXRCameraRig mainCameraRig = gvrContext.getMainScene().getMainCameraRig();
                             float[] cameraPosition = new float[3];
@@ -292,9 +292,9 @@ public class AnchorImplementation {
                         }
                     }
                 } else {
-                    SXRSceneObject sensorObj = interactiveObjectFinal.getSensor().getOwnerObject();
+                    SXRNode sensorObj = interactiveObjectFinal.getSensor().getOwnerObject();
                     if (sensorObj != null) {
-                        SXRSceneObject sensorObj2 = sensorObj.getChildByIndex(0);
+                        SXRNode sensorObj2 = sensorObj.getChildByIndex(0);
                         if (sensorObj2 != null) {
                             SXRCameraRig mainCameraRig = gvrContext.getMainScene().getMainCameraRig();
                             float[] cameraPosition = new float[3];
@@ -350,9 +350,9 @@ public class AnchorImplementation {
 
 
     private void LaunchWebPage(InteractiveObject interactiveObjectFinal, String url) {
-        if (webPagePlusUISceneObject == null) {
+        if (webPagePlusUINode == null) {
             final String urlFinal = url;
-            final SXRSceneObject gvrSceneObjectAnchor = interactiveObjectFinal.getSensor().getOwnerObject();
+            final SXRNode gvrNodeAnchor = interactiveObjectFinal.getSensor().getOwnerObject();
             gvrContext.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -383,43 +383,43 @@ public class AnchorImplementation {
 
                     if (gvrWebView != null) {
 
-                        SXRViewSceneObject gvrWebViewSceneObject = new SXRViewSceneObject(gvrContext,
+                        SXRViewNode gvrWebViewNode = new SXRViewNode(gvrContext,
                                 gvrWebView, webViewDimensions[0], webViewDimensions[1]);
-                        gvrWebViewSceneObject.setName("Web View");
+                        gvrWebViewNode.setName("Web View");
 
-                        gvrWebViewSceneObject.getRenderData().getMaterial().setOpacity(1.0f);
-                        gvrWebViewSceneObject.getTransform().setPosition(0.0f, 0.0f, 0.0f);
-                        gvrWebViewSceneObject.getRenderData().setRenderMask(0);
-                        gvrWebViewSceneObject.getRenderData().setRenderMask(
+                        gvrWebViewNode.getRenderData().getMaterial().setOpacity(1.0f);
+                        gvrWebViewNode.getTransform().setPosition(0.0f, 0.0f, 0.0f);
+                        gvrWebViewNode.getRenderData().setRenderMask(0);
+                        gvrWebViewNode.getRenderData().setRenderMask(
                                 SXRRenderData.SXRRenderMaskBit.Left
                                         | SXRRenderData.SXRRenderMaskBit.Right);
 
-                        if (useWebPageTranformControls) WebPageTranformControls( gvrWebViewSceneObject, gvrSceneObjectAnchor, urlFinal);
-                        else WebPageCloseOnClick( gvrWebViewSceneObject, gvrSceneObjectAnchor, urlFinal);
+                        if (useWebPageTranformControls) WebPageTranformControls( gvrWebViewNode, gvrNodeAnchor, urlFinal);
+                        else WebPageCloseOnClick( gvrWebViewNode, gvrNodeAnchor, urlFinal);
 
                     }
                 }  // end run
             });
-        }  // end if webPagePlusUISceneObject == null
+        }  // end if webPagePlusUINode == null
     }  //  end LaunchWebPage
 
 
     // Display web page, but no user interface - close
-    private void WebPageCloseOnClick(SXRViewSceneObject gvrWebViewSceneObject, SXRSceneObject gvrSceneObjectAnchor, String url) {
+    private void WebPageCloseOnClick(SXRViewNode gvrWebViewNode, SXRNode gvrNodeAnchor, String url) {
         final String urlFinal = url;
 
-        webPagePlusUISceneObject = new SXRSceneObject(gvrContext);
-        webPagePlusUISceneObject.getTransform().setPosition(webPagePlusUIPosition[0], webPagePlusUIPosition[1], webPagePlusUIPosition[2]);
+        webPagePlusUINode = new SXRNode(gvrContext);
+        webPagePlusUINode.getTransform().setPosition(webPagePlusUIPosition[0], webPagePlusUIPosition[1], webPagePlusUIPosition[2]);
 
         SXRScene mainScene = gvrContext.getMainScene();
 
-        Sensor webPageSensor = new Sensor(urlFinal, Sensor.Type.TOUCH, gvrWebViewSceneObject, true);
-        final SXRSceneObject gvrSceneObjectAnchorFinal = gvrSceneObjectAnchor;
-        final SXRSceneObject gvrWebViewSceneObjectFinal = gvrWebViewSceneObject;
-        final SXRSceneObject webPagePlusUISceneObjectFinal = webPagePlusUISceneObject;
+        Sensor webPageSensor = new Sensor(urlFinal, Sensor.Type.TOUCH, gvrWebViewNode, true);
+        final SXRNode gvrNodeAnchorFinal = gvrNodeAnchor;
+        final SXRNode gvrWebViewNodeFinal = gvrWebViewNode;
+        final SXRNode webPagePlusUINodeFinal = webPagePlusUINode;
 
-        webPagePlusUISceneObjectFinal.addChildObject(gvrWebViewSceneObjectFinal);
-        gvrSceneObjectAnchorFinal.addChildObject(webPagePlusUISceneObjectFinal);
+        webPagePlusUINodeFinal.addChildObject(gvrWebViewNodeFinal);
+        gvrNodeAnchorFinal.addChildObject(webPagePlusUINodeFinal);
 
 
         webPageSensor.addISensorEvents(new ISensorEvents() {
@@ -432,9 +432,9 @@ public class AnchorImplementation {
                     clickDown = !clickDown;
                     if (clickDown) {
                         // Delete the WebView page
-                        gvrSceneObjectAnchorFinal.removeChildObject(webPagePlusUISceneObjectFinal);
+                        gvrNodeAnchorFinal.removeChildObject(webPagePlusUINodeFinal);
                         webPageActive = false;
-                        webPagePlusUISceneObject = null;
+                        webPagePlusUINode = null;
                         webPageClosed = true;  // Make sure click up doesn't open web page behind it
                     }
                 }
@@ -444,55 +444,55 @@ public class AnchorImplementation {
 
 
     // When we implement controls for dragging, scaling, closing, etc. a WebView
-    private void WebPageTranformControls(SXRViewSceneObject gvrWebViewSceneObject, SXRSceneObject gvrSceneObjectAnchor, String url) {
+    private void WebPageTranformControls(SXRViewNode gvrWebViewNode, SXRNode gvrNodeAnchor, String url) {
         final String urlFinal = url;
-        SXRCubeSceneObject gvrUICubeSceneObject = new SXRCubeSceneObject(gvrContext, true, cubeUISize);
-        gvrUICubeSceneObject.getTransform().setPosition(cubeUIPosition[0], cubeUIPosition[1], cubeUIPosition[2]);
-        gvrUICubeSceneObject.getRenderData().getMaterial().setDiffuseColor(.3f, .5f, .7f, 1);
+        SXRCubeNode gvrUICubeNode = new SXRCubeNode(gvrContext, true, cubeUISize);
+        gvrUICubeNode.getTransform().setPosition(cubeUIPosition[0], cubeUIPosition[1], cubeUIPosition[2]);
+        gvrUICubeNode.getRenderData().getMaterial().setDiffuseColor(.3f, .5f, .7f, 1);
 
         // Add the icons to close, scale, translate and rotate
-        gvrTextExitObject = new SXRTextViewSceneObject(gvrContext, 0.5f, 0.45f, " x ");
+        gvrTextExitObject = new SXRTextViewNode(gvrContext, 0.5f, 0.45f, " x ");
         gvrTextExitObject.setName(TEXT_EXIT_NAME);
         gvrTextExitObject.setTextColor(textColorDefault);
         gvrTextExitObject.setBackgroundColor(textColorBackground);
         gvrTextExitObject.getTransform().setPosition(textExitPosition[0], textExitPosition[1], textExitPosition[2]);
-        gvrUICubeSceneObject.addChildObject(gvrTextExitObject);
-        gvrTextTranslationObject = new SXRTextViewSceneObject(gvrContext, 0.5f, 0.45f, " t ");
+        gvrUICubeNode.addChildObject(gvrTextExitObject);
+        gvrTextTranslationObject = new SXRTextViewNode(gvrContext, 0.5f, 0.45f, " t ");
         gvrTextTranslationObject.setName(TEXT_TRANSLATE_NAME);
         gvrTextTranslationObject.setTextColor(textColorDefault);
         gvrTextTranslationObject.setBackgroundColor(textColorBackground);
         gvrTextTranslationObject.getTransform().setPosition(textTranslatePosition[0], textTranslatePosition[1], textTranslatePosition[2]);
-        gvrUICubeSceneObject.addChildObject(gvrTextTranslationObject);
+        gvrUICubeNode.addChildObject(gvrTextTranslationObject);
 
-        gvrTextRotateObject = new SXRTextViewSceneObject(gvrContext, 0.5f, 0.45f, " r ");
+        gvrTextRotateObject = new SXRTextViewNode(gvrContext, 0.5f, 0.45f, " r ");
         gvrTextRotateObject.setName(TEXT_ROTATE_NAME);
         gvrTextRotateObject.setTextColor(textColorDefault);
         gvrTextRotateObject.setBackgroundColor(textColorBackground);
         gvrTextRotateObject.getTransform().setPosition(textRotatePosition[0], textRotatePosition[1], textRotatePosition[2]);
-        gvrUICubeSceneObject.addChildObject(gvrTextRotateObject);
+        gvrUICubeNode.addChildObject(gvrTextRotateObject);
 
-        gvrTextScaleObject = new SXRTextViewSceneObject(gvrContext, 0.5f, 0.45f, " s ");
+        gvrTextScaleObject = new SXRTextViewNode(gvrContext, 0.5f, 0.45f, " s ");
         gvrTextScaleObject.setName(TEXT_SCALE_NAME);
         gvrTextScaleObject.setTextColor(textColorDefault);
         gvrTextScaleObject.setBackgroundColor(textColorBackground);
         gvrTextScaleObject.getTransform().setPosition(textScalePosition[0], textScalePosition[1], textScalePosition[2]);
-        gvrUICubeSceneObject.addChildObject(gvrTextScaleObject);
+        gvrUICubeNode.addChildObject(gvrTextScaleObject);
 
         // Currently req to show an object dynamically added
-        webPagePlusUISceneObject = new SXRSceneObject(gvrContext);
-        webPagePlusUISceneObject.getTransform().setPosition(webPagePlusUIPosition[0], webPagePlusUIPosition[1], webPagePlusUIPosition[2]);
+        webPagePlusUINode = new SXRNode(gvrContext);
+        webPagePlusUINode.getTransform().setPosition(webPagePlusUIPosition[0], webPagePlusUIPosition[1], webPagePlusUIPosition[2]);
 
         // Set up sensor for the U.I.
-        Sensor uibObjectSensor = new Sensor(urlFinal, Sensor.Type.TOUCH, gvrUICubeSceneObject, true);
-        final SXRSceneObject gvrWebViewSceneObjectFinal = gvrWebViewSceneObject;
-        final SXRSceneObject gvrUICubeSceneObjectFinal = gvrUICubeSceneObject;
-        final SXRSceneObject webPagePlusUISceneObjectFinal = webPagePlusUISceneObject;
+        Sensor uibObjectSensor = new Sensor(urlFinal, Sensor.Type.TOUCH, gvrUICubeNode, true);
+        final SXRNode gvrWebViewNodeFinal = gvrWebViewNode;
+        final SXRNode gvrUICubeNodeFinal = gvrUICubeNode;
+        final SXRNode webPagePlusUINodeFinal = webPagePlusUINode;
 
-        final SXRSceneObject gvrSceneObjectAnchorFinal = gvrSceneObjectAnchor;
+        final SXRNode gvrNodeAnchorFinal = gvrNodeAnchor;
 
-        webPagePlusUISceneObjectFinal.addChildObject(gvrWebViewSceneObjectFinal);
-        webPagePlusUISceneObjectFinal.addChildObject(gvrUICubeSceneObjectFinal);
-        gvrSceneObjectAnchorFinal.addChildObject(webPagePlusUISceneObjectFinal);
+        webPagePlusUINodeFinal.addChildObject(gvrWebViewNodeFinal);
+        webPagePlusUINodeFinal.addChildObject(gvrUICubeNodeFinal);
+        gvrNodeAnchorFinal.addChildObject(webPagePlusUINodeFinal);
 
         uibObjectSensor.addISensorEvents(new ISensorEvents() {
             boolean uiObjectIsActive = false;
@@ -512,35 +512,35 @@ public class AnchorImplementation {
                                 // Delete the WebView page, control currently far right of web page
                                 gvrContext.unregisterDrawFrameListener(mOnDrawFrame);
                                 if (gvrTextScaleObject != null) {
-                                    gvrWebViewSceneObjectFinal.removeChildObject(gvrTextScaleObject);
+                                    gvrWebViewNodeFinal.removeChildObject(gvrTextScaleObject);
                                 }
                                 if (gvrTextRotateObject != null) {
-                                    gvrWebViewSceneObjectFinal.removeChildObject(gvrTextRotateObject);
+                                    gvrWebViewNodeFinal.removeChildObject(gvrTextRotateObject);
                                 }
                                 if (gvrTextTranslationObject != null) {
-                                    gvrWebViewSceneObjectFinal.removeChildObject(gvrTextTranslationObject);
+                                    gvrWebViewNodeFinal.removeChildObject(gvrTextTranslationObject);
                                 }
                                 gvrTextExitObject = null;
                                 gvrTextScaleObject = null;
                                 gvrTextRotateObject = null;
                                 gvrTextTranslationObject = null;
-                                gvrSceneObjectAnchorFinal.removeChildObject(webPagePlusUISceneObjectFinal);
+                                gvrNodeAnchorFinal.removeChildObject(webPagePlusUINodeFinal);
                                 webViewTranslation = false;
                                 webViewScale = false;
                                 gvrWebView = null;
-                                webPagePlusUISceneObject = null;
+                                webPagePlusUINode = null;
                                 webPageActive = false;
                             } else if (hitX > 0) {
                                 // TODO: Rotate the web view, control currently right side of control bar
                                 webViewTranslation = false;
                             } else if (hitX > -cubeUISize.x / 4.0f) {
                                 // Translate the web view, control currently left side of control bar
-                                TranslationControl(gvrWebViewSceneObjectFinal);
+                                TranslationControl(gvrWebViewNodeFinal);
                             }   // end transltion web window, hit between 0 and .25,
                             else {
                                 // Scale the web view, control currently in upper right corner
                                 webViewTranslation = false;
-                                ScaleControl(gvrWebViewSceneObjectFinal, gvrSceneObjectAnchorFinal, urlFinal);
+                                ScaleControl(gvrWebViewNodeFinal, gvrNodeAnchorFinal, urlFinal);
                             }  // end scaling web window, hit between -2 and -1,
                         } else {  // uiObjectIsActive is false
                             if (mOnDrawFrame != null)
@@ -614,13 +614,13 @@ public class AnchorImplementation {
         });
     }  //  end WebPageTranformControls
 
-    private void TranslationControl(SXRSceneObject gvrWebViewSceneObjectFinal) {
+    private void TranslationControl(SXRNode gvrWebViewNodeFinal) {
         SXRScene mainScene = gvrContext.getMainScene();
         SXRCameraRig gvrCameraRig = mainScene.getMainCameraRig();
         initialCameralookAt = gvrCameraRig.getLookAt();
 
-        gvrWebViewSceneObjectFinal.getTransform().getModelMatrix4f().getTranslation(translationObjectTranslationGlobal);
-        gvrWebViewSceneObjectFinal.getTransform().getLocalModelMatrix4f().getTranslation(translationObjectTranslationLocal);
+        gvrWebViewNodeFinal.getTransform().getModelMatrix4f().getTranslation(translationObjectTranslationGlobal);
+        gvrWebViewNodeFinal.getTransform().getLocalModelMatrix4f().getTranslation(translationObjectTranslationLocal);
 
         if (gvrTextTranslationObject != null) {
             gvrTextTranslationObject.setTextColor(textColorIsActive);
@@ -639,13 +639,13 @@ public class AnchorImplementation {
 
 
 
-    private void ScaleControl(SXRSceneObject gvrWebViewSceneObjectFinal, SXRSceneObject  gvrSceneObjectAnchorFinal, String urlFinal) {
+    private void ScaleControl(SXRNode gvrWebViewNodeFinal, SXRNode  gvrNodeAnchorFinal, String urlFinal) {
         SXRScene mainScene = gvrContext.getMainScene();
         SXRCameraRig gvrCameraRig = mainScene.getMainCameraRig();
         initialCameralookAt = gvrCameraRig.getLookAt();
 
-        gvrWebViewSceneObjectFinal.getTransform().getModelMatrix4f().getTranslation(translationObjectTranslationGlobal);
-        gvrWebViewSceneObjectFinal.getTransform().getLocalModelMatrix4f().getTranslation(translationObjectTranslationLocal);
+        gvrWebViewNodeFinal.getTransform().getModelMatrix4f().getTranslation(translationObjectTranslationGlobal);
+        gvrWebViewNodeFinal.getTransform().getLocalModelMatrix4f().getTranslation(translationObjectTranslationLocal);
 
         if (gvrTextScaleObject != null) {
             gvrTextScaleObject.setTextColor(textColorIsActive);
@@ -683,7 +683,7 @@ public class AnchorImplementation {
                 else {
                     webPagePlusUIScale[0] = ((webPagePlusUIScale[0] - 1) / 2.0f) + 1;
                 }
-                if (webPagePlusUISceneObject != null) webPagePlusUISceneObject.getTransform().setScale(webPagePlusUIScale[0], webPagePlusUIScale[0], 1);
+                if (webPagePlusUINode != null) webPagePlusUINode.getTransform().setScale(webPagePlusUIScale[0], webPagePlusUIScale[0], 1);
 
             }  // end if scale
             else if ( webViewTranslation ) {
@@ -694,7 +694,7 @@ public class AnchorImplementation {
                 for (int i = 0; i < 3; i++) {
                     transitionClickPt[i] -= diffWebPageUIClick[i];
                 }
-                if (webPagePlusUISceneObject != null) webPagePlusUISceneObject.getTransform().setPosition( transitionClickPt[0], transitionClickPt[1], transitionClickPt[2]);
+                if (webPagePlusUINode != null) webPagePlusUINode.getTransform().setPosition( transitionClickPt[0], transitionClickPt[1], transitionClickPt[2]);
             }
         }  //  end onDrawFrame
     }  //  end private class PerFrameScripting

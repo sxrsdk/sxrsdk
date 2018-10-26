@@ -16,7 +16,7 @@
 package com.samsungxr.animation;
 
 import com.samsungxr.SXRHybridObject;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 
 /** Size animation. */
@@ -56,7 +56,7 @@ public class SXRPositionAnimation extends SXRTransformAnimation
      * Position the transform, by potentially different amounts in each direction.
      * 
      * @param target
-     *            {@link SXRSceneObject} containing a {@link SXRTransform}
+     *            {@link SXRNode} containing a {@link SXRTransform}
      * @param duration
      *            The animation duration, in seconds.
      * @param positionX
@@ -66,7 +66,7 @@ public class SXRPositionAnimation extends SXRTransformAnimation
      * @param positionZ
      *            Target z position
      */
-    public SXRPositionAnimation(SXRSceneObject target, float duration,
+    public SXRPositionAnimation(SXRNode target, float duration,
             float positionX, float positionY, float positionZ)
     {
         this(target.getTransform(), duration, positionX, positionY, positionZ);

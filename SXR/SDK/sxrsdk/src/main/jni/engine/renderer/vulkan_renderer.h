@@ -41,7 +41,7 @@ namespace sxr {
 
 class Camera;
 class Scene;
-class SceneObject;
+class Node;
 class ShaderData;
 class RenderData;
 class RenderTexture;
@@ -105,7 +105,7 @@ public:
                         ShaderManager* shader_manager, PostEffectShaderManager* post_effect_shader_manager,
                         RenderTexture* post_effect_render_texture_a,
                         RenderTexture* post_effect_render_texture_b) {};
-    void makeShadowMaps(Scene* scene, jobject javaSceneObject, ShaderManager* shader_manager);
+    void makeShadowMaps(Scene* scene, jobject javaNode, ShaderManager* shader_manager);
     void set_face_culling(int cull_face){}
     virtual ShaderData* createMaterial(const char* uniform_desc, const char* texture_desc);
     virtual RenderData* createRenderData();
@@ -128,7 +128,7 @@ public:
                                  const char* uniformDescriptor, const char* textureDescriptor,
                                  const char* vertexDescriptor, const char* vertexShader,
                                  const char* fragmentShader);
-    virtual void renderRenderTarget(Scene*, jobject javaSceneObject, RenderTarget* renderTarget, ShaderManager* shader_manager,
+    virtual void renderRenderTarget(Scene*, jobject javaNode, RenderTarget* renderTarget, ShaderManager* shader_manager,
                                     RenderTexture* post_effect_render_texture_a, RenderTexture* post_effect_render_texture_b);
 
     virtual Light* createLight(const char* uniformDescriptor, const char* textureDescriptor);
@@ -140,8 +140,8 @@ private:
     VulkanCore* vulkanCore_;
     void renderMesh(RenderState& rstate, RenderData* render_data){}
     void renderMaterialShader(RenderState& rstate, RenderData* render_data, ShaderData *material, Shader*){}
-    virtual void occlusion_cull(RenderState& rstate, std::vector<SceneObject*>& scene_objects, std::vector<RenderData*>* render_data_vector) {
-        occlusion_cull_init(rstate, scene_objects, render_data_vector);
+    virtual void occlusion_cull(RenderState& rstate, std::vector<Node*>& nodes, std::vector<RenderData*>* render_data_vector) {
+        occlusion_cull_init(rstate, nodes, render_data_vector);
 
     }
 

@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 
-/** Specialized {@linkplain com.samsungxr.SXRSceneObject scene objects}  */
-package com.samsungxr.scene_objects;
+/** Specialized {@linkplain com.samsungxr.SXRNode scene objects}  */
+package com.samsungxr.nodes;
 

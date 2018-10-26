@@ -17,7 +17,7 @@
 #include <iostream>
 #include <shaderc/shaderc.hpp>
 #include "objects/scene.h"
-#include "objects/scene_object.h"
+#include "objects/node.h"
 #include "objects/components/skin.h"
 #include "sxr_time.h"
 #include "vulkan_render_data.h"

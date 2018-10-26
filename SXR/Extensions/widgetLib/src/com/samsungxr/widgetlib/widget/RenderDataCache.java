@@ -7,7 +7,7 @@ import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRRenderPass;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 
 // TODO: Replace mExternalData references with posting opcodes to command buffer
@@ -17,7 +17,7 @@ import com.samsungxr.SXRTexture;
 // from pool and configuring them should be low, and it would be a much tidier approach than doing
 // "if (mRenderDataCache != null)" everywhere.
 class RenderDataCache {
-    RenderDataCache(SXRSceneObject sceneObject) {
+    RenderDataCache(SXRNode sceneObject) {
         mExternalRenderData = sceneObject.getRenderData();
         if (mExternalRenderData != null) {
             mRenderData = new SXRRenderData(sceneObject.getSXRContext());

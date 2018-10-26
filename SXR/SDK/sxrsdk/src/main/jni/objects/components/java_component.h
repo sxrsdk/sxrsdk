@@ -25,7 +25,7 @@
 #include "util/sxr_log.h"
 
 namespace sxr {
-    class SceneObject;
+    class Node;
 
     class Scene;
 

@@ -19,7 +19,7 @@ package com.samsungxr;
  * Finds the scene objects that intersect the scene object the
  * picker is attached to.
  *
- * For a {@linkplain SXRSceneObject scene object} to be pickable, it must have a
+ * For a {@linkplain SXRNode scene object} to be pickable, it must have a
  * {@link SXRCollider} component attached to it that is enabled.
  * The picker returns an array containing all the collisions as instances of SXRPickedObject.
  * The picked object contains the collider instance, the distance between
@@ -32,14 +32,14 @@ package com.samsungxr;
  * the picker generates one or more pick events (IPickEvents interface)
  * which are sent the event receiver of the scene. These events can be
  * observed by listeners.
- *  - onEnter(SXRSceneObject)  called when the scene object enters the frustum.
- *  - onExit(SXRSceneObject)   called when the scene object exits the frustum.
- *  - onInside(SXRSceneObject) called while the scene object is inside the frustum.
+ *  - onEnter(SXRNode)  called when the scene object enters the frustum.
+ *  - onExit(SXRNode)   called when the scene object exits the frustum.
+ *  - onInside(SXRNode) called while the scene object is inside the frustum.
  *  - onPick(SXRPicker)        called when the set of picked objects changes.
  *  - onNoPick(SXRPicker)      called once when nothing is picked.
  *
  * @see IPickEvents
- * @see SXRSceneObject#attachComponent(SXRComponent)
+ * @see SXRNode#attachComponent(SXRComponent)
  * @see SXRCollider
  * @see SXRComponent#setEnable(boolean)
  * @see com.samsungxr.SXRPicker.SXRPickedObject
@@ -81,7 +81,7 @@ public class SXRObjectPicker extends SXRPicker
      */
     protected void doPick()
     {
-        SXRSceneObject owner = getOwnerObject();
+        SXRNode owner = getOwnerObject();
         SXRPickedObject[] picked = SXRFrustumPicker.pickVisible(mScene);
 
         if (owner != null)
@@ -92,7 +92,7 @@ public class SXRObjectPicker extends SXRPicker
 
                 if (hit != null)
                 {
-                    SXRSceneObject sceneObj = hit.hitObject;
+                    SXRNode sceneObj = hit.hitObject;
                     if (!owner.intersectsBoundingVolume(sceneObj))
                     {
                         picked[i] = null;
@@ -110,7 +110,7 @@ public class SXRObjectPicker extends SXRPicker
      * @param bv2 second bounding volume to test.
      * @return true if the boxes intersect, false if not.
      */
-    protected boolean intersect(SXRSceneObject.BoundingVolume bv1, SXRSceneObject.BoundingVolume bv2)
+    protected boolean intersect(SXRNode.BoundingVolume bv1, SXRNode.BoundingVolume bv2)
     {
         return  (bv1.maxCorner.x >= bv2.minCorner.x) &&
                 (bv1.maxCorner.y >= bv2.minCorner.y) &&

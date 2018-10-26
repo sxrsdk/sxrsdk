@@ -2,11 +2,11 @@ package com.samsungxr.widgetlib.widget.basic;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.SXRTextureParameters;
-import com.samsungxr.scene_objects.SXRTextViewSceneObject;
-import com.samsungxr.scene_objects.SXRTextViewSceneObject.IntervalFrequency;
+import com.samsungxr.nodes.SXRTextViewNode;
+import com.samsungxr.nodes.SXRTextViewNode.IntervalFrequency;
 import org.json.JSONObject;
 
 import android.graphics.Bitmap;
@@ -27,7 +27,7 @@ import com.samsungxr.widgetlib.widget.NodeEntry;
 
 /**
  * Lightweight version of TextWidget.
- * Standard {@link TextWidget} uses {@link SXRTextViewSceneObject} to display the text, making
+ * Standard {@link TextWidget} uses {@link SXRTextViewNode} to display the text, making
  * TextWidget a quite heavy object. Using many of them in the same scene might affect UI performance.
  * LightTextWidget implementation uses canvas.drawText to display the text.
  */
@@ -36,12 +36,12 @@ import com.samsungxr.widgetlib.widget.NodeEntry;
 public class LightTextWidget extends Widget implements TextContainer {
     private static final String ELLIPSIS = "\u2026";
     /**
-     * Construct LightTextWidget wrapper for an existing {@link SXRSceneObject}.
+     * Construct LightTextWidget wrapper for an existing {@link SXRNode}.
      *
      * @param context     The current {@link SXRContext}.
-     * @param sceneObject The {@link SXRSceneObject} to wrap.
+     * @param sceneObject The {@link SXRNode} to wrap.
      */
-    public LightTextWidget(final SXRContext context, final SXRSceneObject sceneObject) {
+    public LightTextWidget(final SXRContext context, final SXRNode sceneObject) {
         super(context, sceneObject);
         init((CharSequence) null);
     }
@@ -59,15 +59,15 @@ public class LightTextWidget extends Widget implements TextContainer {
     }
 
     /**
-     * A constructor for wrapping existing {@link SXRSceneObject} instances parsed from a model.
+     * A constructor for wrapping existing {@link SXRNode} instances parsed from a model.
      *
      * @param context     The current {@link SXRContext}
-     * @param sceneObject The {@link SXRSceneObject} to wrap.
+     * @param sceneObject The {@link SXRNode} to wrap.
      * @param attributes  A set of class-specific attributes.
      * @throws InstantiationException
      */
     @Deprecated
-    public LightTextWidget(SXRContext context, SXRSceneObject sceneObject,
+    public LightTextWidget(SXRContext context, SXRNode sceneObject,
                            NodeEntry attributes) throws InstantiationException {
         super(context, sceneObject, attributes);
         init((CharSequence) null);
@@ -102,13 +102,13 @@ public class LightTextWidget extends Widget implements TextContainer {
     }
 
     /**
-     * Construct LightTextWidget wrapper for an existing {@link SXRSceneObject}.
+     * Construct LightTextWidget wrapper for an existing {@link SXRNode}.
      *
      * @param context     The current {@link SXRContext}.
-     * @param sceneObject The {@link SXRSceneObject} to wrap.
+     * @param sceneObject The {@link SXRNode} to wrap.
      * @param text
      */
-    public LightTextWidget(SXRContext context, SXRSceneObject sceneObject, CharSequence text) {
+    public LightTextWidget(SXRContext context, SXRNode sceneObject, CharSequence text) {
         super(context, sceneObject);
         init(text);
     }

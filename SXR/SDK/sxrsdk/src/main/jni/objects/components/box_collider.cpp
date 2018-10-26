@@ -7,17 +7,17 @@
 
 #include "box_collider.h"
 #include "render_data.h"
-#include "objects/scene_object.h"
+#include "objects/node.h"
 
 namespace sxr {
 /*
  * Determine if the ray hits the collider.
- * @param owner         SceneObject that owns this collider or
+ * @param owner         Node that owns this collider or
  *                      the group it is part of.
  * @param rayStart      origin of ray in world coordinates
  * @param rayDir        direction of ray in world coordinates
  */
-    ColliderData BoxCollider::isHit(SceneObject* owner, const glm::vec3& rayStart, const glm::vec3& rayDir)
+    ColliderData BoxCollider::isHit(Node* owner, const glm::vec3& rayStart, const glm::vec3& rayDir)
     {
         glm::vec3    halfExtent(this->half_extents_);
         glm::mat4    model_matrix;
@@ -67,11 +67,11 @@ namespace sxr {
 
     /*
      * Determine if the sphere hits the collider.
-     * @param owner         SceneObject that owns this collider or
+     * @param owner         Node that owns this collider or
      *                      the group it is part of.
      * @param sphere array with sphere center and radius
      */
-    ColliderData BoxCollider::isHit(SceneObject* owner, const float sphere[])
+    ColliderData BoxCollider::isHit(Node* owner, const float sphere[])
     {
         BoundingVolume& bounds = owner->getBoundingVolume();
         ColliderData data = BoxCollider::isHit(bounds.center(), half_extents_, sphere);

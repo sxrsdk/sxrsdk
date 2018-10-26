@@ -93,12 +93,12 @@ public class ScaleAnimation extends TransformAnimation {
     private class Adapter extends SXRScaleAnimation implements
             Animation.AnimationAdapter {
         Adapter(Widget widget, float duration, float scale) {
-            super(widget.getSceneObject(), duration, scale);
+            super(widget.getNode(), duration, scale);
         }
 
         Adapter(Widget widget, float duration, float scaleX, float scaleY,
                 float scaleZ) {
-            super(widget.getSceneObject(), duration, scaleX, scaleY, scaleZ);
+            super(widget.getNode(), duration, scaleX, scaleY, scaleZ);
         }
 
         @Override

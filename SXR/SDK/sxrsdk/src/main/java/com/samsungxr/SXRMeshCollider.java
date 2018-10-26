@@ -20,13 +20,13 @@ package com.samsungxr;
  *
  * A {@link SXRCollider} is something that is being pointed at by a picking
  * ray. {@linkplain SXRCollider Colliders} are attached to
- * {@link SXRSceneObject scene objects.} The {@link SXRPicker} will return an
+ * {@link SXRNode scene objects.} The {@link SXRPicker} will return an
  * array of SXRColliders: you use {@link SXRCollider#getOwnerObject()} to retrieve the scene object.
  *
  * <p>
  * A MeshCollider holds the {@link SXRMesh} that the picking ray will be
  * tested against. If no mesh is specified, it will use the mesh
- * attached to the SXRSceneObject that owns it.
+ * attached to the SXRNode that owns it.
  *
  * You do not need to wait for the mesh to load before attaching the collider.
  * If the scene object that owns the mesh collider does not have a mesh and

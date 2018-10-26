@@ -93,7 +93,7 @@ public final class SXRComponentGroup<T extends SXRComponent> extends SXRComponen
     }
 
      @Override
-    public void onAttach(SXRSceneObject newOwner) {
+    public void onAttach(SXRNode newOwner) {
          synchronized (mComponents) {
              for (T t : mComponents) {
                  t.onAttach(newOwner);
@@ -102,7 +102,7 @@ public final class SXRComponentGroup<T extends SXRComponent> extends SXRComponen
     }
 
     @Override
-    public void onDetach(SXRSceneObject oldOwner) {
+    public void onDetach(SXRNode oldOwner) {
         synchronized (mComponents) {
             for (T t : mComponents) {
                 t.onDetach(oldOwner);
@@ -111,7 +111,7 @@ public final class SXRComponentGroup<T extends SXRComponent> extends SXRComponen
     }
 
     @Override
-    public void onNewOwnersParent(SXRSceneObject newOwnersParent) {
+    public void onNewOwnersParent(SXRNode newOwnersParent) {
         synchronized (mComponents) {
             for (T t : mComponents) {
                 t.onNewOwnersParent(newOwnersParent);
@@ -120,7 +120,7 @@ public final class SXRComponentGroup<T extends SXRComponent> extends SXRComponen
     }
 
     @Override
-    public void onRemoveOwnersParent(SXRSceneObject oldOwnersParent) {
+    public void onRemoveOwnersParent(SXRNode oldOwnersParent) {
         synchronized (mComponents) {
             for (T t : mComponents) {
                 t.onRemoveOwnersParent(oldOwnersParent);

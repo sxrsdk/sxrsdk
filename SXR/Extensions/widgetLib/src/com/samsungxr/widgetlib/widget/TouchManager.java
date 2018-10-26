@@ -7,7 +7,7 @@ import com.samsungxr.SXRCollider;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMeshCollider;
 import com.samsungxr.SXRPicker.SXRPickedObject;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 import java.lang.ref.WeakReference;
 import java.util.LinkedHashSet;
@@ -33,7 +33,7 @@ public class TouchManager {
          * needed. False, when event was intercepted and may need future
          * processing
          */
-        boolean touch(SXRSceneObject sceneObject, final float[] coords);
+        boolean touch(SXRNode sceneObject, final float[] coords);
 
         /**
          * To determine if a sceneObject is processing back key.
@@ -44,7 +44,7 @@ public class TouchManager {
          * needed. False, when event was intercepted and may need future
          * processing
          */
-        boolean onBackKey(SXRSceneObject sceneObject, final float[] coords);
+        boolean onBackKey(SXRNode sceneObject, final float[] coords);
     }
 
     /**
@@ -69,7 +69,7 @@ public class TouchManager {
      * @param sceneObject
      * @param handler
      */
-    public void makeTouchable(SXRSceneObject sceneObject, OnTouch handler) {
+    public void makeTouchable(SXRNode sceneObject, OnTouch handler) {
         if (handler != null) {
             if (sceneObject.getRenderData() != null) {
                 if (!touchHandlers.containsKey(sceneObject)) {
@@ -77,7 +77,7 @@ public class TouchManager {
                     touchHandlers.put(sceneObject, new WeakReference<>(handler));
                 }
             } else if (sceneObject.getChildrenCount() > 0) {
-                for (SXRSceneObject child : sceneObject.getChildren()) {
+                for (SXRNode child : sceneObject.getChildren()) {
                     makeTouchable(child, handler);
                 }
             }
@@ -89,7 +89,7 @@ public class TouchManager {
      * @param sceneObject
      * @return true if the handler has been successfully removed
      */
-    public boolean removeHandlerFor(final SXRSceneObject sceneObject) {
+    public boolean removeHandlerFor(final SXRNode sceneObject) {
         sceneObject.detachComponent(SXRCollider.getComponentType());
         return null != touchHandlers.remove(sceneObject);
     }
@@ -100,7 +100,7 @@ public class TouchManager {
      *
      * @param sceneObject
      */
-    public void makePickable(SXRSceneObject sceneObject) {
+    public void makePickable(SXRNode sceneObject) {
         try {
             SXRMeshCollider collider = new SXRMeshCollider(sceneObject.getSXRContext(), false);
             sceneObject.attachComponent(collider);
@@ -116,7 +116,7 @@ public class TouchManager {
      * @param sceneObject
      * @return true if the object is touchable, false otherwise
      */
-    public boolean isTouchable(SXRSceneObject sceneObject) {
+    public boolean isTouchable(SXRNode sceneObject) {
         return touchHandlers.containsKey(sceneObject);
     }
 
@@ -130,7 +130,7 @@ public class TouchManager {
      * Touch Filter specifies the objects interested in processing the touch.
      * {@link Selector#select} defines the selection
      */
-    public interface TouchManagerFilter extends Selector<SXRSceneObject> {
+    public interface TouchManagerFilter extends Selector<SXRNode> {
     }
 
     /**
@@ -193,7 +193,7 @@ public class TouchManager {
                 Log.w(Log.SUBSYSTEM.INPUT, TAG, "handleClick(): got a null reference in the pickedObject");
                 continue;
             }
-            SXRSceneObject sceneObject = pickedObject.getHitObject();
+            SXRNode sceneObject = pickedObject.getHitObject();
             if (sceneObject == null) {
                 Log.w(Log.SUBSYSTEM.INPUT, TAG, "handleClick(): got a null reference in the pickedObject.getHitObject()");
                 continue;
@@ -328,8 +328,8 @@ public class TouchManager {
     }
 
     /**
-     * Add a interceptor for {@linkplain OnTouch#touch(SXRSceneObject, float[])}
-     * and {@linkplain OnTouch#onBackKey(SXRSceneObject, float[])}} to handle the touch event
+     * Add a interceptor for {@linkplain OnTouch#touch(SXRNode, float[])}
+     * and {@linkplain OnTouch#onBackKey(SXRNode, float[])}} to handle the touch event
      * before it will be passed to other scene objects
      *
      * @param interceptor
@@ -363,7 +363,7 @@ public class TouchManager {
         return mPickHandler.getFlingHandler();
     }
 
-    private final Map<SXRSceneObject, WeakReference<OnTouch>> touchHandlers = new WeakHashMap<SXRSceneObject, WeakReference<OnTouch>>();
+    private final Map<SXRNode, WeakReference<OnTouch>> touchHandlers = new WeakHashMap<SXRNode, WeakReference<OnTouch>>();
     private Runnable defaultLeftClickAction = null;
     private Runnable defaultRightClickAction = null;
     private Set<OnTouch> mOnTouchInterceptors = new LinkedHashSet<>();

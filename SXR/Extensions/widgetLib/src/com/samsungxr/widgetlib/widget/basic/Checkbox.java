@@ -6,7 +6,7 @@ import com.samsungxr.widgetlib.widget.layout.Layout;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMesh;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 
 /**
  * A checkbox is a specific type of two-state button that can be either checked or unchecked.
@@ -31,7 +31,7 @@ public class Checkbox extends CheckableButton {
      * @throws InstantiationException
      */
     @Deprecated
-    public Checkbox(SXRContext context, SXRSceneObject sceneObject,
+    public Checkbox(SXRContext context, SXRNode sceneObject,
             NodeEntry attributes) throws InstantiationException {
         super(context, sceneObject, attributes);
     }
@@ -42,7 +42,7 @@ public class Checkbox extends CheckableButton {
      * @param context
      * @param sceneObject
      */
-    public Checkbox(SXRContext context, SXRSceneObject sceneObject) {
+    public Checkbox(SXRContext context, SXRNode sceneObject) {
         super(context, sceneObject);
     }
 

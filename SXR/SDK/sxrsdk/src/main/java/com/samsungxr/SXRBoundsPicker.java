@@ -32,7 +32,7 @@ import com.samsungxr.utility.Log;
  * that generate events when other objects penetrate. Internally GearVRF
  * uses this picker for object cursor hit testing.
  * <p/>
- * For a {@linkplain SXRSceneObject scene object} to be pickable, it must have a
+ * For a {@linkplain SXRNode scene object} to be pickable, it must have a
  * {@link SXRCollider} component attached to it that is enabled.
  * The picker compares the bounds for set of scene objects against all these
  * colliders and returns an array with the collisions as instances of SXRPickedObject.
@@ -55,7 +55,7 @@ import com.samsungxr.utility.Log;
  * </ul>
  * @see IPickEvents
  * @see ITouchEvents
- * @see SXRSceneObject#attachCollider(SXRCollider)
+ * @see SXRNode#attachCollider(SXRCollider)
  * @see SXRCollider
  * @see SXRCollider#setEnable(boolean)
  * @see SXRPickedObject
@@ -63,7 +63,7 @@ import com.samsungxr.utility.Log;
  */
 public class SXRBoundsPicker extends SXRPicker
 {
-    final ArrayList<SXRSceneObject>   mCollidables = new ArrayList<SXRSceneObject>();
+    final ArrayList<SXRNode>   mCollidables = new ArrayList<SXRNode>();
     static private SXRPickedObject[] sEmptyList = new SXRPickedObject[0];
 
     protected SXRCursorController.IControllerEvent listener = new SXRCursorController.IControllerEvent()
@@ -110,7 +110,7 @@ public class SXRBoundsPicker extends SXRPicker
      * @param sceneObj new collidable
      * @return index of collidable added, this is the CursorID in the SXRPickedObject
      */
-    public int addCollidable(SXRSceneObject sceneObj)
+    public int addCollidable(SXRNode sceneObj)
     {
         synchronized (mCollidables)
         {
@@ -130,7 +130,7 @@ public class SXRBoundsPicker extends SXRPicker
      * for this picker.
      * @param sceneObj collidable scene object to remove
      */
-    public void removeCollidable(SXRSceneObject sceneObj)
+    public void removeCollidable(SXRNode sceneObj)
     {
         synchronized(mCollidables)
         {
@@ -142,9 +142,9 @@ public class SXRBoundsPicker extends SXRPicker
      * Get a collidabled based on its index (as returned
      * by #addCollidable).
      * @param index index of collidable to get
-     * @returns {@link SXRSceneObject} or null if not found
+     * @returns {@link SXRNode} or null if not found
      */
-    public SXRSceneObject getCollidable(int index)
+    public SXRNode getCollidable(int index)
     {
         synchronized (mCollidables)
         {
@@ -193,7 +193,7 @@ public class SXRBoundsPicker extends SXRPicker
      * the picker every frame.
      * @see IPickEvents
      * @see ITouchEvents
-     * @see #pickBounds(SXRScene, List<SXRSceneObject>)
+     * @see #pickBounds(SXRScene, List<SXRNode>)
      */
     @Override
     protected void doPick()
@@ -254,7 +254,7 @@ public class SXRBoundsPicker extends SXRPicker
      * @param scene
      *            The {@link SXRScene} with all the objects to be tested.
      * @param collidables
-     *            An array of {@link SXRSceneObject}s to collide against the scene.
+     *            An array of {@link SXRNode}s to collide against the scene.
      *
      * @return A list of {@link SXRPickedObject}, sorted by distance from the
      *         pick ray origin. Each {@link SXRPickedObject} contains the scene object
@@ -263,7 +263,7 @@ public class SXRBoundsPicker extends SXRPicker
      *
      * @since 1.6.6
      */
-    public static final SXRPickedObject[] pickBounds(SXRScene scene, List<SXRSceneObject> collidables)
+    public static final SXRPickedObject[] pickBounds(SXRScene scene, List<SXRNode> collidables)
     {
         sFindObjectsLock.lock();
         try

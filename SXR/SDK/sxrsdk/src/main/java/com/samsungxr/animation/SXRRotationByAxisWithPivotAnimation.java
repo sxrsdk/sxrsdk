@@ -16,7 +16,7 @@
 package com.samsungxr.animation;
 
 import com.samsungxr.SXRHybridObject;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -80,7 +80,7 @@ public class SXRRotationByAxisWithPivotAnimation extends SXRTransformAnimation {
      * to do an animated rotation about a specific axis with a specific pivot.
      *
      * @param target
-     *            {@link SXRSceneObject} containing a {@link SXRTransform}
+     *            {@link SXRNode} containing a {@link SXRTransform}
      * @param duration
      *            The animation duration, in seconds.
      * @param angle
@@ -98,7 +98,7 @@ public class SXRRotationByAxisWithPivotAnimation extends SXRTransformAnimation {
      * @param pivotZ
      *            The z-coordinate of the pivot point
      */
-    public SXRRotationByAxisWithPivotAnimation(SXRSceneObject target,
+    public SXRRotationByAxisWithPivotAnimation(SXRNode target,
                                                float duration, float angle, float axisX, float axisY, float axisZ,
                                                float pivotX, float pivotY, float pivotZ) {
         this(target.getTransform(), duration, angle, axisX, axisY, axisZ,

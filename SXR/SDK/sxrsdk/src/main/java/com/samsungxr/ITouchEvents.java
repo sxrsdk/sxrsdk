@@ -34,7 +34,7 @@ public interface ITouchEvents extends IEvents
      * @param sceneObj scene object picked
      * @param collision information about the collision
      */
-    void onEnter(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision);
+    void onEnter(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
     
     /**
      * Called when the pick ray first exits a scene object.
@@ -42,7 +42,7 @@ public interface ITouchEvents extends IEvents
      * @param collision information about the last collision before exit,
      *                  with previous hit location
      */
-    void onExit(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision);
+    void onExit(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
 
     /**
      * Called when the scene object's collider is touched
@@ -50,13 +50,13 @@ public interface ITouchEvents extends IEvents
      * @param sceneObj scene object touched
      * @param collision information about the collision
      */
-    void onTouchStart(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision);
+    void onTouchStart(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
 
     /**
      * Called when action button is up while the pick ray penetrates the scene object.
      * @param sceneObj scene object no longer picked.
      */
-    void onTouchEnd(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision);
+    void onTouchEnd(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
 
     /**
      * Called while the pick ray penetrates a scene object.
@@ -64,7 +64,7 @@ public interface ITouchEvents extends IEvents
      * @param sceneObj scene object picked
      * @param collision information about the collision
      */    
-    void onInside(SXRSceneObject sceneObj, SXRPicker.SXRPickedObject collision);
+    void onInside(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
 
     /**
      * Called when a notion event is received when an object is not picked

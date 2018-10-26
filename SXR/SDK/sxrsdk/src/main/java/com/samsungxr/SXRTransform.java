@@ -21,7 +21,7 @@ import org.joml.Matrix4f;
  * One of the key SXRF classes: Encapsulates a 4x4 matrix that controls how GL
  * draws a mesh.
  * 
- * Every {@link SXRSceneObject#getTransform() scene object} has a
+ * Every {@link SXRNode#getTransform() scene object} has a
  * {@code SXRTransform} which exposes more-or-less convenient methods to do
  * translation, rotation and scaling. Rotations can be made in either quaternion
  * or angle/axis terms; rotation values can be retrieved as either quaternion
@@ -35,7 +35,7 @@ public class SXRTransform extends SXRComponent {
         super(gvrContext, NativeTransform.ctor());
     }
 
-    SXRTransform(SXRContext gvrContext, SXRSceneObject owner) {
+    SXRTransform(SXRContext gvrContext, SXRNode owner) {
         super(gvrContext, NativeTransform.ctor());
         setOwnerObject(owner);
     }

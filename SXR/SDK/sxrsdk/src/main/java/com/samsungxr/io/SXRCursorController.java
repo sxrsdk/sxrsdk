@@ -26,7 +26,7 @@ import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRMeshCollider;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRSensor;
 import com.samsungxr.SXRTransform;
 import com.samsungxr.IEventReceiver;
@@ -56,9 +56,9 @@ import java.util.List;
  * {@link com.samsungxr.io.SXRInputManager.ICursorControllerSelectListener
  * }with the {@link SXREventReceiver} of this input manager.
  * <p>
- * Make use of the {@link SXRCursorController#setCursor(SXRSceneObject)} to
+ * Make use of the {@link SXRCursorController#setCursor(SXRNode)} to
  * add a Cursor for the controller in 3D space. The {@link SXRInputManager} will
- * manipulate the {@link SXRSceneObject} based on the input coming in to the
+ * manipulate the {@link SXRNode} based on the input coming in to the
  * {@link SXRCursorController}.
  * @see SXRInputManager
  * @see com.samsungxr.io.SXRGearCursorController
@@ -82,14 +82,14 @@ public abstract class SXRCursorController implements IEventReceiver
      */
     class Dragger implements Runnable
     {
-        private SXRSceneObject mDragMe;
-        private SXRSceneObject mDragParent;
+        private SXRNode mDragMe;
+        private SXRNode mDragParent;
         private boolean mDragging = false;
         private final Object mLock;
 
         public Dragger(Object lock) { mLock = lock; }
 
-        public boolean start(SXRSceneObject dragMe)
+        public boolean start(SXRNode dragMe)
         {
             synchronized (mLock)
             {
@@ -152,7 +152,7 @@ public abstract class SXRCursorController implements IEventReceiver
                     }
                     else
                     {
-                        scene.addSceneObject(mDragMe);
+                        scene.addNode(mDragMe);
                     }
                     mDragMe = null;
                     mDragParent = null;
@@ -178,7 +178,7 @@ public abstract class SXRCursorController implements IEventReceiver
     private SXREventReceiver listeners;
 
     protected Object eventLock = new Object();
-    protected SXRSceneObject mCursor = null;
+    protected SXRNode mCursor = null;
     protected boolean enable = false;
     protected Object mCursorLock = new Object();
     protected Dragger mDragger = new Dragger(mCursorLock);
@@ -189,8 +189,8 @@ public abstract class SXRCursorController implements IEventReceiver
     protected SXRPicker mPicker = null;
     protected CursorControl mCursorControl = CursorControl.PROJECT_CURSOR_ON_SURFACE;
     protected float mCursorDepth = 1.0f;
-    protected SXRSceneObject mCursorScale;
-    protected SXRSceneObject mDragRoot;
+    protected SXRNode mCursorScale;
+    protected SXRNode mDragRoot;
     protected SXRContext context;
     protected volatile boolean mConnected = false;
     protected int mTouchButtons = MotionEvent.BUTTON_SECONDARY | MotionEvent.BUTTON_PRIMARY;
@@ -252,9 +252,9 @@ public abstract class SXRCursorController implements IEventReceiver
             mPicker = new SXRPicker(this, false);
         }
         addPickEventListener(SXRSensor.getPickHandler());
-        mCursorScale = new SXRSceneObject(context);
+        mCursorScale = new SXRNode(context);
         mCursorScale.setName("CursorController_CursorScale");
-        mDragRoot = new SXRSceneObject(context);
+        mDragRoot = new SXRNode(context);
         mDragRoot.setName("CursorController_DragRoot");
         mDragRoot.addChildObject(mCursorScale);
     }
@@ -328,12 +328,12 @@ public abstract class SXRCursorController implements IEventReceiver
     public SXREventReceiver getEventReceiver() { return listeners; }
 
     /**
-     * Set a {@link SXRSceneObject} to be controlled by the
+     * Set a {@link SXRNode} to be controlled by the
      * {@link SXRCursorController}.
      *
-     * @param object the {@link SXRSceneObject} representing the cursor
+     * @param object the {@link SXRNode} representing the cursor
      */
-    public void setCursor(SXRSceneObject object)
+    public void setCursor(SXRNode object)
     {
         synchronized (mCursorLock)
         {
@@ -387,12 +387,12 @@ public abstract class SXRCursorController implements IEventReceiver
     }
 
     /**
-     * Return the {@link SXRSceneObject} representing the current cursor.
+     * Return the {@link SXRNode} representing the current cursor.
      *
      * @return the current cursor or null if none
-     * @see #setCursor(SXRSceneObject)
+     * @see #setCursor(SXRNode)
      */
-    public SXRSceneObject getCursor()
+    public SXRNode getCursor()
     {
         synchronized (mCursorLock)
         {
@@ -482,7 +482,7 @@ public abstract class SXRCursorController implements IEventReceiver
 
 
     /**
-     * Allows a single {@link SXRSceneObject} to be dragged by the controller.
+     * Allows a single {@link SXRNode} to be dragged by the controller.
      * <p>
      * The object is added as a child of the controller until dragging is stopped.
      * Because the cursor is moved independently in a separate thread,
@@ -497,7 +497,7 @@ public abstract class SXRCursorController implements IEventReceiver
      * @return true if object is dragging, false on error
      * @see #stopDrag()
      */
-    public boolean startDrag(SXRSceneObject dragMe)
+    public boolean startDrag(SXRNode dragMe)
     {
         return mDragger.start(dragMe);
     }
@@ -508,11 +508,11 @@ public abstract class SXRCursorController implements IEventReceiver
      * Because the cursor is moved independently in a separate thread,
      * this function is required to disconnect the dragged object in a thread-safe way,
      * </p>
-     * The {@link #startDrag(SXRSceneObject)} function starts dragging an object
+     * The {@link #startDrag(SXRNode)} function starts dragging an object
      * with the controller.
      * If an object is not being dragged, this function returns false and does nothing.
      * @return true if dragging is stopped, false if nothing dragged
-     * @see #startDrag(SXRSceneObject)
+     * @see #startDrag(SXRNode)
      */
     public boolean stopDrag()
     {
@@ -908,9 +908,9 @@ public abstract class SXRCursorController implements IEventReceiver
         }
     }
 
-    protected void attachCursor(SXRSceneObject cursor)
+    protected void attachCursor(SXRNode cursor)
     {
-        SXRSceneObject parent = cursor.getParent();
+        SXRNode parent = cursor.getParent();
         if (parent != null)
         {
             parent.removeChildObject(cursor);
@@ -941,7 +941,7 @@ public abstract class SXRCursorController implements IEventReceiver
                         pickDir.z * mCursorDepth);
                 return;
             }
-            SXRSceneObject parent = collision.hitObject.getParent();
+            SXRNode parent = collision.hitObject.getParent();
             float dist = collision.hitDistance;
             float scale = dist / mCursorDepth;
 
@@ -982,7 +982,7 @@ public abstract class SXRCursorController implements IEventReceiver
 
     protected boolean orientCursor(SXRPicker.SXRPickedObject collision)
     {
-        SXRSceneObject parent = mCursorScale.getParent();
+        SXRNode parent = mCursorScale.getParent();
         float[] baryCoords = collision.getBarycentricCoords();
         boolean coordinatesCalculated = (baryCoords != null) && !Arrays.equals(baryCoords, new float[] {-1f, -1f, -1f});
 

@@ -21,7 +21,7 @@ import android.view.MotionEvent;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRPicker;
-import com.samsungxr.SXRSceneObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.ITouchEvents;
 import com.samsungxr.io.cursor3d.CursorAsset.Action;
 
@@ -39,24 +39,24 @@ class ObjectCursor extends Cursor {
         Log.d(TAG, Integer.toHexString(hashCode()) + " constructed");
         mTouchListener = new ITouchEvents()
         {
-            public void onEnter(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
+            public void onEnter(SXRNode obj, SXRPicker.SXRPickedObject hit)
             {
                 checkAndSetAsset(Action.INTERSECT);
             }
 
-            public void onExit(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
+            public void onExit(SXRNode obj, SXRPicker.SXRPickedObject hit)
             {
                 checkAndSetAsset(Action.DEFAULT);
             }
 
-            public void onInside(SXRSceneObject obj, SXRPicker.SXRPickedObject hit) { }
+            public void onInside(SXRNode obj, SXRPicker.SXRPickedObject hit) { }
 
-            public void onTouchStart(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
+            public void onTouchStart(SXRNode obj, SXRPicker.SXRPickedObject hit)
             {
                 checkAndSetAsset(Action.CLICK);
             }
 
-            public void onTouchEnd(SXRSceneObject obj, SXRPicker.SXRPickedObject hit)
+            public void onTouchEnd(SXRNode obj, SXRPicker.SXRPickedObject hit)
             {
                 checkAndSetAsset(Action.DEFAULT);
             }

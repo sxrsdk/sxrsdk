@@ -33,7 +33,7 @@
 
 namespace sxr
 {
-    class SceneObject;
+    class Node;
 
     class Shader;
 
