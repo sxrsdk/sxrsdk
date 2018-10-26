@@ -23,6 +23,10 @@
 
 namespace gvr {
 extern "C" {
+
+    JNIEXPORT bool JNICALL
+    Java_org_gearvrf_NativeVulkanCore_setJavaVM(JNIEnv* env, jobject obj);
+
     JNIEXPORT jlong JNICALL
         Java_org_gearvrf_NativeVulkanCore_getInstance(JNIEnv* env, jobject obj, jobject surface, jint vulkanPropValue);
 
@@ -77,4 +81,14 @@ extern "C" {
     Java_org_gearvrf_NativeVulkanCore_isInstancePresent(JNIEnv* env, jobject obj){
         return VulkanCore::isInstancePresent();
     }
+
+    JNIEXPORT bool JNICALL
+    Java_org_gearvrf_NativeVulkanCore_setJavaVM(JNIEnv* env, jobject obj)
+    {
+        JavaVM* javavm;
+
+        env->GetJavaVM(&javavm);
+        Renderer::getInstance()->setJavaVM(javavm);
+    }
+
 }

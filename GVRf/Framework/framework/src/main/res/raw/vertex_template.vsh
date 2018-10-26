@@ -2,7 +2,6 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
-
 #ifdef HAS_MULTIVIEW
 #extension GL_OVR_multiview2 : enable
 layout(num_views = 2) in;
@@ -38,13 +37,15 @@ layout(location = 7) in ivec4 a_bone_indices;
 #ifdef HAS_a_tangent
 layout(location = 8) in vec3 a_tangent;
 layout(location = 9) in vec3 a_bitangent;
-layout(location = 7) out mat3 tangent_matrix;
+
+layout(location = 4) out mat3 tangent_matrix;
+#endif
 #endif
 #endif
 
-layout(location = 0) out vec3 view_direction;
-layout(location = 1) out vec3 viewspace_position;
-layout(location = 2) out vec3 viewspace_normal;
+layout(location = 1) out vec3 view_direction;
+layout(location = 2) out vec3 viewspace_position;
+layout(location = 3) out vec3 viewspace_normal;
 
 layout(location = 10) out vec2 diffuse_coord;
 layout(location = 11) out vec2 ambient_coord;
@@ -53,7 +54,6 @@ layout(location = 13) out vec2 emissive_coord;
 layout(location = 14) out vec2 lightmap_coord;
 layout(location = 15) out vec2 opacity_coord;
 layout(location = 16) out vec2 normal_coord;
-
 
 #ifdef HAS_blendshapeTexture
 layout (set = 0, binding = 17) uniform sampler2D blendshapeTexture;
@@ -105,16 +105,19 @@ void main() {
 #ifdef HAS_TEXCOORDS
 @TEXCOORDS
 #endif
-    viewspace_position = vertex.viewspace_position;
-    viewspace_normal = vertex.viewspace_normal;
-    view_direction = vertex.view_direction;
+    mat4 mvp = u_mvp;
+	viewspace_position = vertex.viewspace_position;
+	viewspace_normal = vertex.viewspace_normal;
+	view_direction = vertex.view_direction;
+
 #ifdef HAS_MULTIVIEW
     bool render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? true : false;
-    mat4 mvp = u_mvp_[gl_ViewID_OVR];
-    if (!render_mask)
-        mvp = mat4(0.0);  //  if render_mask is not set for particular eye, dont render that object
-    gl_Position = mvp  * vertex.local_position;
+    mvp[3][0] = mvp[3][0] - (u_proj_offset * float(gl_ViewID_OVR));
+    mvp = mvp * float(render_mask);
 #else
-	gl_Position = u_mvp * vertex.local_position;
-#endif	
+	//generate right eye mvp from left
+    mvp[3][0] = mvp[3][0] - (u_proj_offset * float(u_right));
+#endif
+    gl_Position = mvp * vertex.local_position;
+
 }

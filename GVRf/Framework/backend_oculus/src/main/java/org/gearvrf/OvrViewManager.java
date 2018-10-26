@@ -185,10 +185,10 @@ class OvrViewManager extends GVRViewManager {
                  GVRRenderTarget renderTarget = mRenderBundle.getRenderTarget(EYE.MULTIVIEW, swapChainIndex);
                  GVRCamera camera = mMainScene.getMainCameraRig().getCenterCamera();
                  GVRCamera left_camera = mMainScene.getMainCameraRig().getLeftCamera();
-                 renderTarget.cullFromCamera(mMainScene, camera,mRenderBundle.getShaderManager());
 
                 captureCenterEye(renderTarget, true);
                 capture3DScreenShot(renderTarget, true);
+                renderTarget.cullFromCamera(mMainScene, camera, mRenderBundle.getShaderManager());
 
                 renderTarget.render(mMainScene, left_camera, mRenderBundle.getShaderManager(),mRenderBundle.getPostEffectRenderTextureA(),
                         mRenderBundle.getPostEffectRenderTextureB());

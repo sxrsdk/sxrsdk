@@ -46,7 +46,7 @@ public class GVRPBRShader extends GVRShaderTemplate
     {
          super("float4 diffuse_color; float4 specular_color; float4 emissive_color; float metallic; float roughness; float specular_exponent; float lightmapStrength; float normalScale; float glossinessFactor; int u_numblendshapes; float u_blendweights[75];",
                 "sampler2D diffuseTexture; sampler2D metallicRoughnessTexture; sampler2D specularTexture; sampler2D lightmapTexture; sampler2D diffuseTexture1; sampler2D normalTexture; sampler2D emissiveTexture; sampler2D brdfLUTTexture; samplerCube diffuseEnvTex; samplerCube specularEnvTexture; sampler2D blendshapeTexture",
-                "float3 a_position float2 a_texcoord float2 a_texcoord1 float2 a_texcoord2 float2 a_texcoord3 float3 a_normal float4 a_bone_weights int4 a_bone_indices float3 a_tangent float3 a_bitangent",
+                "float3 a_position float2 a_texcoord float2 a_texcoord1 float2 a_texcoord2 float2 a_texcoord3 float4 a_normal float4 a_bone_weights int4 a_bone_indices float4 a_tangent float4 a_bitangent",
                 GLSLESVersion.VULKAN);
 
         if (fragTemplate == null)
@@ -62,7 +62,7 @@ public class GVRPBRShader extends GVRShaderTemplate
             morphShader = TextFile.readTextFile(context, R.raw.vertexmorph);
             addLight = TextFile.readTextFile(context, R.raw.pbr_addlight);
         }
-        String defines = "#define ambient_coord metallicRoughness_coord\n";
+        String defines = "#define metallicRoughness_coord ambient_coord\n";
         setSegment("FragmentTemplate", defines + fragTemplate);
         setSegment("VertexTemplate", defines + vtxTemplate);
         setSegment("FragmentSurface", surfaceShader);
@@ -96,6 +96,10 @@ public class GVRPBRShader extends GVRShaderTemplate
         material.setFloat("lightmapStrength", 1);
     }
 
-
+    @Override
+    public String getMatrixCalc(boolean usesLights)
+    {
+        return usesLights ? "left_mvp; right_mvp; model; (model~ * inverse_left_view)^; (model~ * inverse_right_view)^" : null;
+    }
 }
 

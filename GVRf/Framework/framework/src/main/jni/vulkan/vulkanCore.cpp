@@ -82,7 +82,7 @@ namespace gvr {
         imageMemoryBarrier.subresourceRange = subresourceRange;
 
         switch (oldImageLayout) {
-            case VK_IMAGE_LAYOUT_UNDEFINED:
+            default:
                 imageMemoryBarrier.srcAccessMask = 0;
                 break;
             case VK_IMAGE_LAYOUT_PREINITIALIZED:
@@ -94,12 +94,12 @@ namespace gvr {
             case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
                 imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
                 break;
-            default:
-                //other source layouts not yet handled
-                break;
         }
 
         switch (newImageLayout) {
+            default:
+                imageMemoryBarrier.dstAccessMask = 0;
+                break;
             case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
                 imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
                 break;
@@ -108,9 +108,6 @@ namespace gvr {
                 break;
             case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
                 imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-                break;
-            default:
-                //other source layouts not yet handled
                 break;
         }
 
@@ -1181,7 +1178,7 @@ void VulkanCore::InitPipelineForRenderData(const GVR_VK_Vertices* m_vertices, Vu
         beginCmdBuffer(cmdBuffer);
 
         if(renderTarget!= NULL)
-            renderTarget->beginRendering(Renderer::getInstance());
+            renderTarget->beginRendering();
         else {
             postEffectRenderTexture->setBackgroundColor(camera->background_color_r(), camera->background_color_g(),camera->background_color_b(), camera->background_color_a());
             postEffectRenderTexture->beginRendering(Renderer::getInstance());
@@ -1215,9 +1212,9 @@ void VulkanCore::InitPipelineForRenderData(const GVR_VK_Vertices* m_vertices, Vu
         }
 
         if(renderTarget!= NULL)
-            renderTarget->endRendering(Renderer::getInstance());
+            renderTarget->endRendering();
         else
-            postEffectRenderTexture->endRendering(Renderer::getInstance());
+            postEffectRenderTexture->endRendering(&(renderTarget->getRenderSorter()->getRenderer()));
 
         // By ending the command buffer, it is put out of record mode.
         err = vkEndCommandBuffer(cmdBuffer);
@@ -1382,7 +1379,7 @@ void VulkanCore::InitPipelineForRenderData(const GVR_VK_Vertices* m_vertices, Vu
 
         ShadowMap* shadowMap = NULL;
         if(lights != NULL)
-        shadowMap= lights->scanLights();
+        shadowMap= lights->getShadowMap();
 
         if(shadowMap && !vkShader->isDepthShader()){
 

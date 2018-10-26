@@ -82,7 +82,7 @@ class DaydreamViewManager extends GVRViewManager {
     }
     public GVRRenderTarget getRenderTarget(){
         if(null == mDaydreamRenderTarget){
-            mDaydreamRenderTarget = new GVRRenderTarget(mApplication.getGVRContext());
+            mDaydreamRenderTarget = new GVRRenderTarget(mApplication.getGVRContext(), true);
         }
         return mDaydreamRenderTarget;
     }

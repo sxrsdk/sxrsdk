@@ -59,14 +59,15 @@ project.ext.jomlVersion = "1.9.1-SNAPSHOT"
 
 dependencies {
     if (findProject(':framework')) {
-        compile project(':framework')
+        implementation project(':framework')
     } else {
-        compile(name: 'framework-release', ext: 'aar')
+        debugImplementation(name: 'framework-debug', ext: 'aar')
+        releaseImplementation(name: 'framework-release', ext: 'aar')
     }
 
-    compile 'com.android.support:support-v4:23.4.0'
-    compile "org.joml:joml-android:${jomlVersion}"
-    compile 'com.google.code.gson:gson:2.8.+'
+    implementation 'com.android.support:support-v4:23.4.0'
+    implementation "org.joml:joml-android:${jomlVersion}"
+    implementation 'com.google.code.gson:gson:2.8.+'
 }
 clean {}.doLast {
     def gearvrfLibs = project.rootDir.absolutePath + "/../gearvrf-libs"
