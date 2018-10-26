@@ -29,7 +29,7 @@ import javax.microedition.khronos.opengles.GL10;
 class DaydreamRenderer implements GLSurfaceView.Renderer {
     static {
         System.loadLibrary("gvr");
-        System.loadLibrary("gvrf-daydream");
+        System.loadLibrary("sxr-daydream");
     }
 
     private DaydreamViewManager mViewManager;
