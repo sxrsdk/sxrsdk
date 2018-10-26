@@ -69,7 +69,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public final class SXRApplication implements IEventReceiver, IScriptable {
 
     static {
-        System.loadLibrary("gvrf");
+        System.loadLibrary("sxrsdk");
     }
     protected static final String TAG = "SXRApplication";
 
@@ -115,7 +115,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
         if (null != Threads.getThreadPool()) {
             Threads.getThreadPool().shutdownNow();
         }
-        Threads.setThreadPool(new GrowBeforeQueueThreadPoolExecutor("gvrf"));
+        Threads.setThreadPool(new GrowBeforeQueueThreadPoolExecutor("sxrsdk"));
 
         /*
          * Removes the title bar and the status bar.
@@ -132,23 +132,23 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
     /**
      *
      * @param activity the current activity
-     * @param gvrMain SXRMain implementation to execute
+     * @param sxrMain SXRMain implementation to execute
      */
-    public SXRApplication(final Activity activity, SXRMain gvrMain) {
-        this(activity, gvrMain, "_gvr.xml");
+    public SXRApplication(final Activity activity, SXRMain sxrMain) {
+        this(activity, sxrMain, "_sxr.xml");
     }
 
     /**
      *
      * @param activity the current activity
-     * @param gvrMain SXRMain implementation to execute
-     * @param dataFileName alternate configuration file; see _gvr.xml that is part of the framework
+     * @param sxrMain SXRMain implementation to execute
+     * @param dataFileName alternate configuration file; see _sxr.xml that is part of the framework
      *                     for reference
      */
-    public SXRApplication(final Activity activity, SXRMain gvrMain, String dataFileName) {
+    public SXRApplication(final Activity activity, SXRMain sxrMain, String dataFileName) {
         this(activity);
 
-        setMain(gvrMain, dataFileName);
+        setMain(sxrMain, dataFileName);
     }
 
     private final SXRActivityDelegate tryBackend(final int backendId) {
@@ -625,11 +625,11 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
         return mActivity;
     }
 
-    public void setMain(SXRMain gvrMain, String dataFileName) {
-        this.mSXRMain = gvrMain;
+    public void setMain(SXRMain sxrMain, String dataFileName) {
+        this.mSXRMain = sxrMain;
         if (mActivity.getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
             onConfigure(dataFileName);
-            if (!mDelegate.setMain(gvrMain, dataFileName)) {
+            if (!mDelegate.setMain(sxrMain, dataFileName)) {
                 Log.w(TAG, "delegate's setMain failed");
                 return;
             }
@@ -647,7 +647,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
                     SEND_EVENT_MASK,
                     this,
                     IActivityEvents.class,
-                    "onSetMain", gvrMain);
+                    "onSetMain", sxrMain);
 
             final SXRConfigurationManager localConfigurationManager = mConfigurationManager;
             if (null != mDockEventReceiver && localConfigurationManager.isDockListenerRequired()) {
@@ -753,7 +753,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
         boolean onKeyUp(int keyCode, KeyEvent event);
         boolean onKeyLongPress(int keyCode, KeyEvent event);
 
-        boolean setMain(SXRMain gvrMain, String dataFileName);
+        boolean setMain(SXRMain sxrMain, String dataFileName);
         void setViewManager(SXRViewManager viewManager);
         void onInitAppSettings(VrAppSettings appSettings);
 
@@ -810,7 +810,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
         }
 
         @Override
-        public boolean setMain(SXRMain gvrMain, String dataFileName) {
+        public boolean setMain(SXRMain sxrMain, String dataFileName) {
             return true;
         }
 

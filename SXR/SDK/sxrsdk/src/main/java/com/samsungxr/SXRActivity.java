@@ -80,7 +80,7 @@ public class SXRActivity extends Activity implements IEventReceiver, IScriptable
     /**
      * Links {@linkplain SXRMain a script} to the activity; sets the version;
      *
-     * @param gvrMain
+     * @param sxrMain
      *            An instance of {@link SXRMain} to handle callbacks on the GL
      *            thread.
      * @param dataFileName
@@ -91,8 +91,8 @@ public class SXRActivity extends Activity implements IEventReceiver, IScriptable
      *            {@code assets} directory, and can specify a file in a
      *            directory under the application's {@code assets} directory.
      */
-    public void setMain(SXRMain gvrMain, String dataFileName) {
-        mApplication.setMain(gvrMain, dataFileName);
+    public void setMain(SXRMain sxrMain, String dataFileName) {
+        mApplication.setMain(sxrMain, dataFileName);
     }
 
     /**
@@ -118,8 +118,8 @@ public class SXRActivity extends Activity implements IEventReceiver, IScriptable
      * Uses the default configuration file that comes with the framework.
      * @see SXRActivity#setMain(SXRMain, String)
      */
-    public final void setMain(SXRMain gvrMain) {
-        setMain(gvrMain, "_gvr.xml");
+    public final void setMain(SXRMain sxrMain) {
+        setMain(sxrMain, "_sxr.xml");
     }
 
     @Override
