@@ -66,7 +66,7 @@ import com.samsungxr.utility.VrAppSettings;
 class MonoscopicViewManager extends SXRViewManager implements MonoscopicRotationSensorListener {
 
     static {
-        System.loadLibrary("gvrf-monoscopic");
+        System.loadLibrary("sxr-monoscopic");
     }
 
     private static final String TAG = Log.tag(MonoscopicViewManager.class);

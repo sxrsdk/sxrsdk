@@ -1,1 +1,1 @@
-org.gearvrf.DaydreamActivityDelegate
+com.samsungxr.DaydreamActivityDelegate

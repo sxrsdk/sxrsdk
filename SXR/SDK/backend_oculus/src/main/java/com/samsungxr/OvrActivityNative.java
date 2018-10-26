@@ -21,7 +21,7 @@ import com.samsungxr.utility.VrAppSettings;
 
 class OvrActivityNative implements IActivityNative {
     static {
-        System.loadLibrary("gvrf-oculus");
+        System.loadLibrary("sxr-oculus");
     }
 
     private final long mPtr;
