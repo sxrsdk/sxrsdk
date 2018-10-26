@@ -151,9 +151,9 @@ tasks.whenTaskAdded { task ->
     } else if (task.name == 'externalNativeBuildRelease') {
         task.dependsOn ":sxrsdk:externalNativeBuildRelease"
         task.dependsOn 'buildInfo'
-    } else if (task.name == 'bundleDebug') {
+    } else if (task.name == 'bundleDebugAar') {
         task.finalizedBy(copyJarToBin)
-    } else if (task.name == 'bundleRelease') {
+    } else if (task.name == 'bundleReleaseAar') {
         task.finalizedBy(copyJarToBin)
     }
 }
