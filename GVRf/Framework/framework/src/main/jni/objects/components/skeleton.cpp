@@ -13,6 +13,8 @@ namespace gvr {
         mSkinMatrices = new glm::mat4[numbones];
         mBoneMatrices = new glm::mat4[numbones];
         mBoneParents = new int[numbones];
+        mBoneNames.reserve(numbones);
+        mBoneNames.resize(numbones);
         memcpy(mBoneParents, boneparents, numbones * sizeof(int));
     }
 
@@ -22,6 +24,23 @@ namespace gvr {
         delete[] mBoneMatrices;
         delete[] mBoneParents;
     };
+
+    void Skeleton::setBoneName(int boneIndex, const char* boneName)
+    {
+        if ((boneIndex >= 0) && (boneIndex < getNumBones()))
+        {
+            mBoneNames[boneIndex] = boneName;
+        }
+    }
+
+    const char* Skeleton::getBoneName(int boneIndex)
+    {
+        if ((boneIndex < 0) || (boneIndex >= mBoneNames.size()))
+        {
+            return nullptr;
+        }
+        return mBoneNames[boneIndex].c_str();
+    }
 
     void Skeleton::setPose(const float* input)
     {

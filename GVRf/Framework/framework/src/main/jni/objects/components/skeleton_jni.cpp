@@ -21,6 +21,11 @@ extern "C" {
     JNIEXPORT jboolean JNICALL
     Java_org_gearvrf_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz,
                                             jlong jskel, jfloatArray jmatrices);
+
+    JNIEXPORT void JNICALL
+    Java_org_gearvrf_animation_NativeSkeleton_setBoneName(JNIEnv* env, jobject clz,
+                                                  jlong jskel, jint index, jstring name);
+
 } // extern "C"
 
 
@@ -74,6 +79,17 @@ Java_org_gearvrf_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz,
     skel->setSkinPose(inputMatrices);
     env->ReleaseFloatArrayElements(jmatrices, inputMatrices, JNI_ABORT);
     return true;
+}
+
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_animation_NativeSkeleton_setBoneName(JNIEnv* env, jobject clz,
+                                                      jlong jskel, jint index, jstring name)
+{
+    Skeleton* skel = reinterpret_cast<Skeleton*>(jskel);
+    const char* boneName = env->GetStringUTFChars(name, 0);
+    skel->setBoneName(index, boneName);
+    env->ReleaseStringUTFChars(name, boneName);
 }
 
 } // namespace gvr

@@ -266,8 +266,6 @@ public class GVRAvatar extends GVRBehavior implements IEventReceiver
                 else
                 {
                     skelAnim = importer.importAnimation(animResource, mSkeleton);
-                    GVRSkeleton skl = skelAnim.getSkeleton();
-
                     animator.addAnimation(skelAnim);
                 }
                 addAnimation(animator);

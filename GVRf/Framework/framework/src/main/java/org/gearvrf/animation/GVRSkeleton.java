@@ -683,6 +683,7 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
     public void setBoneName(int boneindex, String bonename)
     {
         mBoneNames[boneindex] = bonename;
+        NativeSkeleton.setBoneName(getNative(), boneindex, bonename);
     }
 
     /**
@@ -1223,4 +1224,5 @@ class NativeSkeleton
     static native long getComponentType();
     static native boolean setPose(long object, float[] matrices);
     static native boolean setSkinPose(long object, float[] matrices);
+    static native void setBoneName(long object, int index, String name);
 }
