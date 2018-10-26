@@ -30,25 +30,18 @@ bool Renderer::isVulkan_ = false;
 /***
     We are implementing Vulkan. Enable through system properties.
 ***/
-Renderer* Renderer::getInstance(std::string type)
-{
-    if (nullptr == instance)
-    {
+Renderer* Renderer::getInstance(std::string type){
+    if( nullptr == instance ) {
         int vulkanPropValue = getVulkanPropValue();
-        if (vulkanPropValue)
-        {
+        if(vulkanPropValue) {
             instance = new VulkanRenderer(vulkanPropValue);
-            if (static_cast<VulkanRenderer*>(instance)->getCore() != NULL)
-            {
+
+            if(static_cast<VulkanRenderer*>(instance)->getCore() != NULL)
                 isVulkan_ = true;
-            }
             else
-            {
                 LOGE("Vulkan is not supported on your device");
-            }
-        }
-        else
-        {
+
+        } else {
             instance = new GLRenderer();
         }
     }

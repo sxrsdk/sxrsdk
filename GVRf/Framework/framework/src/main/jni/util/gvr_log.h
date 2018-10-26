@@ -109,7 +109,6 @@ static void checkGLError(const char* name)
 #endif
 }
 
-/*
 static void checkEGLError(const char *name) {
 #ifdef STOP_ON_ERROR
     bool error = false;
@@ -131,7 +130,6 @@ static void checkEGLError(const char *name) {
     }
 #endif
 }
- */
 
 static const char* frameBufferStatusString(GLenum status) {
     switch (status) {

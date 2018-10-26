@@ -15,8 +15,7 @@ namespace gvr
     Java_org_gearvrf_NativeShadowMap_ctor(JNIEnv *env, jobject obj, jobject jmaterial)
     {
         ShaderData* material = reinterpret_cast<ShaderData*>(jmaterial);
-        Renderer* renderer = Renderer::getInstance();
-        return reinterpret_cast<jlong>(renderer->createShadowMap(material));
+        return reinterpret_cast<jlong>(new ShadowMap(material));
     }
 
 }

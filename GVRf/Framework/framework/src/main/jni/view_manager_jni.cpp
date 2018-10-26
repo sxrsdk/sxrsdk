@@ -56,12 +56,12 @@ extern "C" {
                 reinterpret_cast<RenderTexture *>(jpost_effect_render_texture_b);
 
         javaSceneObject = jni->NewLocalRef(javaSceneObject);
-        renderTarget->cullFromCamera(scene, javaSceneObject, renderTarget->getCamera(), shader_manager);
+        renderTarget->cullFromCamera(scene, javaSceneObject, renderTarget->getCamera(),gRenderer,shader_manager);
         if(!gRenderer->isVulkanInstance())
-            renderTarget->beginRendering();
+            renderTarget->beginRendering(gRenderer);
         gRenderer->renderRenderTarget(scene, javaSceneObject, renderTarget,shader_manager,post_effect_render_texture_a,post_effect_render_texture_b);
         if(!gRenderer->isVulkanInstance())
-            renderTarget->endRendering();
+            renderTarget->endRendering(gRenderer);
 
         jni->DeleteLocalRef(javaSceneObject);
     }

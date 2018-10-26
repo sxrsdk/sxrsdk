@@ -25,7 +25,6 @@
 
 #include "objects/scene.h"
 #include "objects/scene_object.h"
-#include "objects/mesh.h"
 #include "objects/components/camera_rig.h"
 #include "objects/components/perspective_camera.h"
 #include "objects/components/render_data.h"

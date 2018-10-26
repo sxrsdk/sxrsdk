@@ -18,22 +18,21 @@
  * JNI
  ***************************************************************************/
 
-#include <engine/renderer/renderer.h>
-#include "vulkan/vulkan_headers.h"
+#include "objects/textures/texture.h"
+#include "engine/renderer/renderer.h"
 
 namespace gvr {
 extern "C" {
-    JNIEXPORT void JNICALL
-        Java_org_gearvrf_NativeRenderer_initialize(JNIEnv* env, jobject obj);
-};
+JNIEXPORT jlong JNICALL
+Java_org_gearvrf_NativeExternalTexture_ctor(JNIEnv * env,
+        jobject obj);
+}
+;
 
-JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeRenderer_initialize(JNIEnv * env, jobject obj)
-{
-    Renderer* r = Renderer::getInstance();
-    JavaVM* jvm;
-    env->GetJavaVM(&jvm);
-    r->setJavaVM(jvm);
+JNIEXPORT jlong JNICALL
+Java_org_gearvrf_NativeExternalTexture_ctor(JNIEnv * env,
+        jobject obj) {
+    return reinterpret_cast<jlong>(Renderer::getInstance()->createTexture(Texture::TextureType::TEXTURE_EXTERNAL));
 }
 
 }

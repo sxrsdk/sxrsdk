@@ -308,7 +308,6 @@ class MonoscopicViewManager extends GVRViewManager implements MonoscopicRotation
      */
     void onSurfaceChanged(int width, int height) {
         Log.v(TAG, "onSurfaceChanged");
-        NativeVulkanCore.setJavaVM();
         mRotationSensor.onResume();
     }
 
@@ -346,7 +345,7 @@ class MonoscopicViewManager extends GVRViewManager implements MonoscopicRotation
                 mRenderBundle.addRenderTarget(mRenderTarget[2], GVRViewManager.EYE.LEFT, 2);
             }
             else{
-                mRenderTarget[0] = new GVRRenderTarget(mApplication.getGVRContext(), false);
+                mRenderTarget[0] = new GVRRenderTarget(mApplication.getGVRContext());
             }
         }
 
@@ -452,7 +451,6 @@ class MonoscopicViewManager extends GVRViewManager implements MonoscopicRotation
 
 
 class NativeVulkanCore {
-    static native void setJavaVM();
     static native long getInstance(Object surface, int vulkanPropValue);
     static native int getSwapChainIndexToRender();
     static native void resetTheInstance();

@@ -167,16 +167,19 @@ class  GVRJassimpAdapter
         if (doLighting && aiMesh.hasTangentsAndBitangents())
         {
 
+            vertexDescriptor += " float3 a_tangent float3 a_bitangent";
+
             FloatBuffer tangentBuffer = aiMesh.getTangentBuffer();
-            Vector3f tangent = new Vector3f();
-            Vector3f normal = new Vector3f();
-            Vector3f bitangent = new Vector3f();
 
             tangentsArray = new float[tangentBuffer.capacity()];
             tangentBuffer.get(tangentsArray, 0, tangentBuffer.capacity());
             bitangentsArray = new float[tangentsArray.length];
-            vertexDescriptor += " float3 a_tangent float3 a_bitangent";
-            for(int i = 0; i < tangentsArray.length; i += 3)
+
+            Vector3f tangent = new Vector3f();
+            Vector3f normal = new Vector3f();
+            Vector3f bitangent = new Vector3f();
+
+            for (int i = 0; i < tangentsArray.length; i += 3)
             {
                 tangent.set(tangentsArray[i], tangentsArray[i + 1], tangentsArray[i + 2]);
                 normal.set(normalsArray[i], normalsArray[i + 1], normalsArray[i + 2]);

@@ -72,8 +72,7 @@ GVRActivity::GVRActivity(JNIEnv &env, jobject activity, jobject vrAppSettings) :
             char const * msg = "Thread priority security exception. Make sure the APK is signed.";
             vrapi_ShowFatalError(&oculusJavaMainThread_, nullptr, msg, __FILE__, __LINE__);
         }
-        gRenderer = Renderer::getInstance();
-        gRenderer->setJavaVM(oculusJavaGlThread_.Vm);
+
         return vrapiInitResult;
     }
 
@@ -135,6 +134,7 @@ RenderTextureInfo *GVRActivity::getRenderTextureInfo(int eye, int index) {
     renderTextureInfo->viewport[1] = y;
     renderTextureInfo->viewport[2] = width;
     renderTextureInfo->viewport[3] = height;
+
     return renderTextureInfo;
 }
 
@@ -177,7 +177,6 @@ void GVRActivity::onSurfaceChanged(JNIEnv &env, jobject jsurface) {
 
         //@todo backend specific fix, generalize; ensures there is a renderer instance after pause/resume
         gRenderer = Renderer::getInstance();
-        gRenderer->setJavaVM(oculusJavaGlThread_.Vm);
 
         oculusMobile_ = vrapi_EnterVrMode(&parms);
         if (nullptr == oculusMobile_) {

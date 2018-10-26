@@ -14,7 +14,7 @@
  */
 
 #include "render_target.h"
-#include "engine/renderer/render_sorter.h"
+#include "component.inl"
 #include "objects/textures/render_texture.h"
 #include "objects/light.h" // for DEBUG_LIGHT
 #include "objects/scene.h"
@@ -34,66 +34,25 @@ namespace gvr {
  *
  * @param texture RenderTexture to render to
  */
-RenderTarget::RenderTarget(RenderTexture* tex, bool is_multiview, bool is_stereo)
-:   Component(RenderTarget::getComponentType()),
-    mNextRenderTarget(nullptr),
-    mRenderTexture(tex)
+RenderTarget::RenderTarget(RenderTexture* tex, bool is_multiview)
+: Component(RenderTarget::getComponentType()),mNextRenderTarget(nullptr),
+  mRenderTexture(tex),mRenderDataVector(std::make_shared< std::vector<RenderData*>>())
 {
     mRenderState.is_shadow = false;
     mRenderState.shadow_map = nullptr;
-    mRenderState.is_stereo = is_stereo;
+    mRenderState.material_override = NULL;
     mRenderState.is_multiview = is_multiview;
-    if (nullptr != mRenderTexture)
-    {
+    if (nullptr != mRenderTexture) {
         mRenderState.sampleCount = mRenderTexture->getSampleCount();
     }
 }
-
-RenderTarget::RenderTarget(Scene* scene, bool is_stereo)
-  :   Component(RenderTarget::getComponentType()),
-      mNextRenderTarget(nullptr),
-      mRenderTexture(nullptr)
-{
-    mRenderState.is_shadow = false;
-    mRenderState.shadow_map = nullptr;
-    mRenderState.is_multiview = false;
-    mRenderState.is_stereo = is_stereo;
-}
-
-RenderTarget::RenderTarget(RenderTexture* tex, const RenderTarget* source)
-    : Component(RenderTarget::getComponentType()),
-      mNextRenderTarget(nullptr),
-      mRenderTexture(tex)
-{
-    mRenderState.is_shadow = false;
-    mRenderState.shadow_map = nullptr;
-    mRenderState.is_stereo = source->mRenderState.is_stereo;
-    mRenderState.is_multiview = source->mRenderState.is_multiview;
-    mRenderState.sampleCount = mRenderTexture->getSampleCount();
-}
-
-void RenderTarget::cullFromCamera(Scene* scene, jobject javaSceneObject, Camera* camera, ShaderManager* shader_manager)
-{
-    checkGLError("RenderTarget::cullFromCamera");
-    mRenderState.camera = camera;
-    mRenderState.scene = scene;
-    mRenderState.javaSceneObject = javaSceneObject;
-    mRenderState.shader_manager = shader_manager;
-    // TODO: lock scene graph matrices around cull
-    mRenderSorter->cull(mRenderState);
-    // TODO: can unlock matrices here - they are copied
-    mRenderSorter->sort(mRenderState);
-    mRenderState.javaSceneObject = nullptr;
-}
-
-void RenderTarget::beginRendering()
-{
-    if (mRenderTexture == nullptr)
-    {
+void RenderTarget::beginRendering(Renderer *renderer) {
+    if(mRenderTexture == nullptr)
         return;
-    }
-    Renderer& renderer = mRenderSorter->getRenderer();
-    mRenderTexture->useStencil(renderer.useStencilBuffer());
+
+    mRenderTexture->useStencil(renderer->useStencilBuffer());
+    mRenderState.viewportWidth = mRenderTexture->width();
+    mRenderState.viewportHeight = mRenderTexture->height();
     mRenderState.sampleCount = mRenderTexture->getSampleCount();
     if (-1 != mRenderState.camera->background_color_r())
     {
@@ -101,27 +60,56 @@ void RenderTarget::beginRendering()
                                            mRenderState.camera->background_color_g(),
                                            mRenderState.camera->background_color_b(), mRenderState.camera->background_color_a());
     }
-    checkGLError("RenderTarget::beginRendering");
-    mRenderTexture->beginRendering(&renderer);
+    mRenderTexture->beginRendering(renderer);
+}
+void RenderTarget::endRendering(Renderer *renderer) {
+    if(mRenderTexture == nullptr)
+        return;
+    mRenderTexture->endRendering(renderer);
+}
+RenderTarget::RenderTarget(Scene* scene)
+: Component(RenderTarget::getComponentType()), mNextRenderTarget(nullptr), mRenderTexture(nullptr),mRenderDataVector(std::make_shared< std::vector<RenderData*>>()){
+    mRenderState.is_shadow = false;
+    mRenderState.shadow_map = nullptr;
+    mRenderState.material_override = NULL;
+    mRenderState.is_multiview = false;
+    mRenderState.scene = scene;
+
+}
+RenderTarget::RenderTarget(RenderTexture* tex, const RenderTarget* source)
+        : Component(RenderTarget::getComponentType()),mNextRenderTarget(nullptr),
+          mRenderTexture(tex), mRenderDataVector(source->mRenderDataVector)
+{
+    mRenderState.is_shadow = false;
+    mRenderState.shadow_map = nullptr;
+    mRenderState.material_override = NULL;
+    mRenderState.is_multiview = false;
+    mRenderState.sampleCount = mRenderTexture->getSampleCount();
+}
+/**
+ * Constructs an empty render target without a render texture.
+ * This component will not render anything until a RenderTexture
+ * is provided.
+ */
+RenderTarget::RenderTarget()
+:   Component(RenderTarget::getComponentType()),
+    mRenderTexture(nullptr),mNextRenderTarget(nullptr), mRenderDataVector(std::make_shared< std::vector<RenderData*>>())
+{
+    mRenderState.is_multiview = false;
+    mRenderState.shadow_map = nullptr;
+    mRenderState.is_shadow = false;
+    mRenderState.material_override = NULL;
 }
 
-void RenderTarget::endRendering()
-{
-    if (mRenderTexture)
-    {
-        mRenderTexture->endRendering(&(mRenderSorter->getRenderer()));
-        checkGLError("RenderTarget::endRendering");
-    }
+void RenderTarget::cullFromCamera(Scene* scene, jobject javaSceneObject, Camera* camera, Renderer* renderer, ShaderManager* shader_manager){
+
+    renderer->cullFromCamera(scene, javaSceneObject, camera,shader_manager, mRenderDataVector.get(),mRenderState.is_multiview);
+    scene->getLights().shadersRebuilt();
+    renderer->state_sort(mRenderDataVector.get());
 }
 
-void RenderTarget::render()
+RenderTarget::~RenderTarget()
 {
-    mRenderSorter->render(mRenderState);
-}
-
-void RenderTarget::setRenderSorter(RenderSorter* sorter)
-{
-    mRenderSorter = sorter;
 }
 
 /**

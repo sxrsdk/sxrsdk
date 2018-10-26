@@ -39,6 +39,10 @@ namespace gvr
             memset(mUniformData, 0, mTotalSize);
             mOwnData = true;
         }
+        else
+        {
+            LOGE("UniformBlock: ERROR: no uniform block allocated\n");
+        }
     }
 
     UniformBlock::UniformBlock(const char *descriptor, int bindingPoint, const char *blockName, int maxElems)
@@ -226,33 +230,6 @@ namespace gvr
         return false;
     }
 
-
-    bool UniformBlock::setFloatVec(const char* name, const float *val, int n)
-    {
-        int bytesize = n * sizeof(float);
-        char *data = getData(name, bytesize);
-        if (data != NULL)
-        {
-            memcpy(data, val, bytesize);
-            markDirty();
-            return true;
-        }
-        return false;
-    }
-
-    bool UniformBlock::setIntVec(const char* name, const int *val, int n)
-    {
-        int bytesize = n * sizeof(int);
-        char *data = getData(name, bytesize);
-        if (data != NULL)
-        {
-            memcpy(data, val, bytesize);
-            markDirty();
-            return true;
-        }
-        return false;
-    }
-
     bool UniformBlock::getMat4(const char* name, glm::mat4 &val) const
     {
         int bytesize = 16 * sizeof(float);
@@ -348,8 +325,7 @@ namespace gvr
         std::ostringstream os;
         for (int i = 0; i < mNumElems; ++i)
         {
-            int elemOffset = i * mElemSize;
-            forEachEntry([this, &os, i, elemOffset](const DataEntry& e) mutable
+            forEachEntry([this, &os, i](const DataEntry& e) mutable
             {
                 os << e.Name << ": ";
                 for (int j = 0; j < e.Size / sizeof(float); j++)
@@ -358,11 +334,13 @@ namespace gvr
                     os << " ";
                     if (e.IsInt)
                     {
-                        os << *(((int*) (d + elemOffset)) + j);
+                        int* ip = ((int*) d) + j;
+                        os << *ip;
                     }
                     else
                     {
-                        os << *(((float*) (d + elemOffset)) + j);
+                        float* fp = ((float*) d) + j;
+                        os << *fp;
                     }
                 }
                 os << ';' << std::endl;

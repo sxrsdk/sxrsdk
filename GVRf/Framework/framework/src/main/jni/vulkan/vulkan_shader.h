@@ -53,8 +53,7 @@ public:
             const char* textureDescriptor,
             const char* vertexDescriptor,
             const char* vertexShader,
-            const char* fragmentShader,
-            const char* matrixCalc);
+            const char* fragmentShader);
 
     virtual ~VulkanShader();
 

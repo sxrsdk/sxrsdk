@@ -19,17 +19,16 @@
 
 #include <jni_utils.h>
 #include "shader.h"
-#include "matrix_calc.h"
 
 namespace gvr {
+    
 Shader::Shader(int id,
                const char* signature,
                const char* uniformDescriptor,
                const char* textureDescriptor,
                const char* vertexDescriptor,
                const char* vertex_shader,
-               const char* fragment_shader,
-               const char* matrixCalc)
+               const char* fragment_shader)
     : mId(id), mSignature(signature),
       mUniformDesc(uniformDescriptor),
       mTextureDesc(textureDescriptor),
@@ -37,44 +36,47 @@ Shader::Shader(int id,
       mVertexShader(vertex_shader),
       mFragmentShader(fragment_shader),
       mUseMatrixUniforms(false),
-      mOutputBufferSize(0),
       mUseLights(false),
-      mUseShadowMaps(false),
       mUseHasBones(false),
-      mMatrixCalc(nullptr),
-      mUseMaterialGPUBuffer(false)
+      mUseMaterialGPUBuffer(false),
+      mJavaShaderClass(0), mJavaVM(nullptr), mCalcMatrixMethod(0)
 {
-    if (strstr(vertex_shader, "u_matrices") ||
-        strstr(fragment_shader, "u_matrices"))
+    if (strstr(vertex_shader, "Transform_ubo") ||
+        strstr(fragment_shader, "Transform_ubo"))
         mUseMatrixUniforms = true;
     if (strstr(vertex_shader, "Material_ubo") ||
         strstr(fragment_shader, "Material_ubo"))
         mUseMaterialGPUBuffer = true;
     if (strstr(signature, "$LIGHTSOURCES"))
         mUseLights = true;
-    if (strstr(signature, "$SHADOWS"))
-        mUseShadowMaps = true;
-    if (strstr(vertex_shader, "Bones_ubo"))
+
+    if(strstr(vertex_shader, "Bones_ubo"))
         mUseHasBones = true;
-    LOGD("SHADER: %s\n%s\n%s\n%s", signature, uniformDescriptor, textureDescriptor, vertexDescriptor);
-    if (matrixCalc)
+
+    LOGD("SHADER: %s\n    %s\n    %s\n    %s", signature, uniformDescriptor, textureDescriptor, vertexDescriptor);
+}
+
+void Shader::setJava(jclass shaderClass, JavaVM *javaVM)
+{
+    JNIEnv *env = getCurrentEnv(javaVM);
+    mJavaVM = javaVM;
+    if (env)
     {
-        mMatrixCalc = new MatrixCalc(matrixCalc);
-        mOutputBufferSize = mMatrixCalc->getNumOutputs();
+        mJavaShaderClass = shaderClass;
+        mCalcMatrixMethod = env->GetStaticMethodID(shaderClass, "calcMatrix",
+                                             "(Ljava/nio/FloatBuffer;Ljava/nio/FloatBuffer;)V");
     }
 }
 
-int Shader::calcMatrix(const glm::mat4* inputMatrices, glm::mat4* outputMatrices)
+void Shader::calcMatrix(float* inputMatrices, int inputSize, float* outputMatrices, int outputSize) const
 {
-    if (mMatrixCalc == nullptr)
+    if (mJavaVM && mJavaShaderClass && mCalcMatrixMethod)
     {
-        return 0;
+        JNIEnv *env = getCurrentEnv(mJavaVM);
+        jobject inputBuffer = env->NewDirectByteBuffer((void *) inputMatrices, inputSize);
+        jobject outputBuffer = env->NewDirectByteBuffer((void *) outputMatrices, outputSize);
+        env->CallStaticVoidMethod(mJavaShaderClass, mCalcMatrixMethod, inputBuffer, outputBuffer);
     }
-    if (mMatrixCalc->calculate(inputMatrices, outputMatrices))
-    {
-        return mMatrixCalc->getNumOutputs();
-    }
-    return -1;
 }
 
 int Shader::calcSize(const char* type)

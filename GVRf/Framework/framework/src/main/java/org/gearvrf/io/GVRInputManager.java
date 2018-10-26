@@ -792,7 +792,6 @@ public class GVRInputManager implements IEventReceiver
             rdata.disableLight();
             rdata.setRenderingOrder(GVRRenderData.GVRRenderingOrder.OVERLAY + 10);
             cursor.getTransform().setScale(0.2f, 0.2f, 1.0f);
-            cursor.setName("DefaultCursor");
             return cursor;
         }
 

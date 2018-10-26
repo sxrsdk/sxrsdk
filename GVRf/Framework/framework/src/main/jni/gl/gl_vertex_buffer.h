@@ -30,14 +30,7 @@ namespace gvr {
         virtual ~GLVertexBuffer();
 
         virtual bool    updateGPU(Renderer*, IndexBuffer*f, Shader*);
-
-        /**
-         * Bind this vertex buffer and the given index buffer to
-         * the given shader
-         * @param shader    Shader to bind vertex buffer to
-         * @param ibuf      Index buffer to bind
-         */
-        virtual void    bindToShader(Shader* shader, IndexBuffer* ibuf);
+        virtual void    bindToShader(Shader*, IndexBuffer*);
 
     protected:
         GLuint          mVBufferID;

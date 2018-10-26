@@ -41,9 +41,6 @@ extern "C" {
     JNIEXPORT void JNICALL
     Java_org_gearvrf_NativeTexture_setImage(JNIEnv * env, jobject obj,
                 jlong jtexture, jobject javaImage, jlong nativeImage);
-
-    JNIEXPORT jlong JNICALL
-    Java_org_gearvrf_NativeExternalTexture_constructor(JNIEnv * env, jobject obj);
 }
 ;
 
@@ -87,12 +84,5 @@ Java_org_gearvrf_NativeTexture_setImage(JNIEnv* env, jobject obj, jlong jtexture
     Texture* texture = reinterpret_cast<Texture*>(jtexture);
     Image* image = reinterpret_cast<Image*>(nativeImage);
     texture->setImage(env, javaImage, image);
-}
-
-JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeExternalTexture_constructor(JNIEnv * env, jobject obj)
-{
-    Texture* tex = Renderer::getInstance()->createTexture(Texture::TEXTURE_EXTERNAL);
-    return reinterpret_cast<jlong>(tex);
 }
 }
