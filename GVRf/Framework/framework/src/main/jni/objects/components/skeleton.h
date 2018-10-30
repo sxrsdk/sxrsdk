@@ -30,10 +30,13 @@ public:
 
     int getNumBones() const { return mNumBones; }
     void setBoneName(int boneIndex, const char* name);
-    const char* getBoneName(int boneIndex);
+    const char* getBoneName(int boneIndex) const;
     void setPose(const float* input);
+    void getPose(float* output);
     void setSkinPose(const float* input);
-    glm::mat4* getSkinMatrix(int boneId);
+    const glm::mat4* getSkinMatrix(int boneId) const;
+    const int*    getBoneParents() const;
+    int getBoneParent(int boneId) const;
     void getBoneMatrices(glm::mat4* matrixData);
 
     int getParentBoneID(int boneId) const

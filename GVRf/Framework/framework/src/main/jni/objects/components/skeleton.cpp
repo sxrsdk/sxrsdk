@@ -33,7 +33,7 @@ namespace gvr {
         }
     }
 
-    const char* Skeleton::getBoneName(int boneIndex)
+    const char* Skeleton::getBoneName(int boneIndex) const
     {
         if ((boneIndex < 0) || (boneIndex >= mBoneNames.size()))
         {
@@ -42,10 +42,30 @@ namespace gvr {
         return mBoneNames[boneIndex].c_str();
     }
 
+    const int* Skeleton::getBoneParents() const
+    {
+        return mBoneParents;
+    }
+
+    int Skeleton::getBoneParent(int boneIndex) const
+    {
+        if ((boneIndex < 0) || (boneIndex >= mBoneNames.size()))
+        {
+            return -1;
+        }
+        return mBoneParents[boneIndex];
+    }
+
     void Skeleton::setPose(const float* input)
     {
         std::lock_guard<std::mutex> lock(mLock);
         memcpy(mBoneMatrices, input, mNumBones * sizeof(glm::mat4));
+    }
+
+    void Skeleton::getPose(float* output)
+    {
+        std::lock_guard<std::mutex> lock(mLock);
+        memcpy(output, mBoneMatrices, mNumBones * sizeof(glm::mat4));
     }
 
     void Skeleton::setSkinPose(const float* input)
@@ -54,7 +74,7 @@ namespace gvr {
         memcpy(mSkinMatrices, input, mNumBones * sizeof(glm::mat4));
     }
 
-    glm::mat4* Skeleton::getSkinMatrix(int boneId)
+    const glm::mat4* Skeleton::getSkinMatrix(int boneId) const
     {
         if ((boneId < 0) || (boneId > getNumBones()))
         {
