@@ -38,19 +38,19 @@ repositories {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile "org.joml:joml-android:${jomlVersion}"
-    compile "com.google.code.gson:gson:$gsonVersion"
-    compile 'com.google.android.exoplayer:exoplayer:2.6.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "org.joml:joml-android:${jomlVersion}"
+    implementation "com.google.code.gson:gson:$gsonVersion"
+    implementation 'com.google.android.exoplayer:exoplayer:2.6.0'
     if (findProject(':sxrsdk')) {
-        compile project (':sxrsdk')
+        implementation project (':sxrsdk')
     } else {
-        compile(name: 'sxrsdk-debug', ext: 'aar')
+        implementation(name: 'sxrsdk-debug', ext: 'aar')
     }
     if (findProject(':script')) {
-        compile project (':script')
+        implementation project (':script')
     } else {
-        compile(name: 'script-debug', ext: 'aar')
+        implementation(name: 'script-debug', ext: 'aar')
     }
 }
 

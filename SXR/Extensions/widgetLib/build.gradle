@@ -23,7 +23,6 @@ repositories {
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '26.0.2'
 
     defaultConfig {
         minSdkVersion 23
@@ -59,14 +58,14 @@ project.ext.jomlVersion = "1.9.1-SNAPSHOT"
 
 dependencies {
     if (findProject(':sxrsdk')) {
-        compile project(':sxrsdk')
+        implementation project(':sxrsdk')
     } else {
-        compile(name: 'sxrsdk-release', ext: 'aar')
+        implementation(name: 'sxrsdk-release', ext: 'aar')
     }
 
-    compile 'com.android.support:support-v4:23.4.0'
-    compile "org.joml:joml-android:${jomlVersion}"
-    compile 'com.google.code.gson:gson:2.8.+'
+    implementation 'com.android.support:support-v4:23.4.0'
+    implementation "org.joml:joml-android:${jomlVersion}"
+    implementation 'com.google.code.gson:gson:2.8.+'
 }
 clean {}.doLast {
     def sxrLibs = project.rootDir.absolutePath + "/../sxr-libs"
