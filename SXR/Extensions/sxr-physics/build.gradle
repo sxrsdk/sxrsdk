@@ -58,11 +58,11 @@ android {
 project.ext.jomlVersion = "1.9.3-SNAPSHOT"
 
 dependencies {
-    compile "org.joml:joml-android:${jomlVersion}"
+    implementation "org.joml:joml-android:${jomlVersion}"
     if (findProject(':sxrsdk')) {
-        compile project (':sxrsdk')
+        implementation project (':sxrsdk')
     } else {
-        compile(name: 'sxrsdk-debug', ext: 'aar')
+        implementation(name: 'sxrsdk-debug', ext: 'aar')
     }
 }
 
