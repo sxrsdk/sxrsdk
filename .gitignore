@@ -9,6 +9,7 @@ ovr_sdk_mobile/
 .metadata/
 .recommenders/
 gearvrf-libs/
+sxr-libs/
 
 ////////////////////////
 // Ignored Extensions  /
