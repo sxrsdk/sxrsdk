@@ -39,7 +39,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
     public static final int KINEMATIC = 2;
 
     static {
-        System.loadLibrary("gvrf-physics");
+        System.loadLibrary("sxr-physics");
     }
 
     private final int mCollisionGroup;
