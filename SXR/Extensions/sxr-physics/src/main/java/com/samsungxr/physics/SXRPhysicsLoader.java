@@ -36,7 +36,7 @@ public class SXRPhysicsLoader {
     static private final String TAG = SXRPhysicsLoader.class.getSimpleName();
 
     static {
-        System.loadLibrary("gvrf-physics");
+        System.loadLibrary("sxr-physics");
     }
 
     /**
