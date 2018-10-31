@@ -12,35 +12,15 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 21
-
-        ndk {
-            moduleName "sxr-particlesystem"
-            abiFilter "armeabi-v7a"
-        }
-        externalNativeBuild {
-            cmake {
-                //difference in sign extension when reinterpret_cast-ing a pointer between
-                //gcc and clang hence overriding the default toolchain to match the one used
-                //by the other modules
-                arguments.add('-DANDROID_TOOLCHAIN=gcc')
-                if (rootProject.hasProperty("buildGvrfAndDemos")) {
-                    arguments.add('-DCMAKE_BUILD_TYPE=Debug')
-                }
-            }
-        }
     }
 
     buildTypes {
         debug {
             debuggable = true
-            jniDebuggable = true
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
-        }
-        debug {
-            jniDebuggable true
         }
     }
 
