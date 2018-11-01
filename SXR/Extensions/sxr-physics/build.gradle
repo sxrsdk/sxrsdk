@@ -15,10 +15,10 @@ android {
 
         ndk {
             moduleName "sxr-physics"
-            if (rootProject.hasProperty("ARM64")) {
-                abiFilters = ['arm64-v8a']
+            if (rootProject.hasProperty("SXRSDK_ABI_FILTER")) {
+                abiFilters rootProject.property("SXRSDK_ABI_FILTER")
             } else {
-                abiFilters = ['armeabi-v7a']
+                abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
             }
         }
         externalNativeBuild {

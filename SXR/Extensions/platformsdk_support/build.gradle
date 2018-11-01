@@ -17,7 +17,11 @@ android {
 
         ndk {
             moduleName "sxr-platformsdk"
-            abiFilter "armeabi-v7a"
+            if (rootProject.hasProperty("SXRSDK_ABI_FILTER")) {
+                abiFilters rootProject.property("SXRSDK_ABI_FILTER")
+            } else {
+                abiFilters "armeabi-v7a", "arm64-v8a"
+            }
         }
         externalNativeBuild {
             cmake {
