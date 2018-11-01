@@ -91,7 +91,7 @@ Java_org_gearvrf_animation_NativeSkeleton_getPose(JNIEnv* env, jobject clz,
     jfloat* inputMatrices = env->GetFloatArrayElements(jmatrices, JNI_FALSE);
 
     skel->getPose(inputMatrices);
-    env->ReleaseFloatArrayElements(jmatrices, inputMatrices, JNI_ABORT);
+    env->ReleaseFloatArrayElements(jmatrices, inputMatrices, 0);
     return true;
 }
 

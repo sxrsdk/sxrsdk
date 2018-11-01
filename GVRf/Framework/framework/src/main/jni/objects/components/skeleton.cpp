@@ -82,10 +82,4 @@ namespace gvr {
         }
         return &mSkinMatrices[boneId];
     }
-
-    void Skeleton::getBoneMatrices(glm::mat4* matrixData)
-    {
-        std::lock_guard<std::mutex> lock(mLock);
-        memcpy(matrixData, mBoneMatrices, sizeof(glm::mat4) * getNumBones());
-    }
 }

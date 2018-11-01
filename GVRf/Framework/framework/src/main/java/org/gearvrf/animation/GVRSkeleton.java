@@ -509,8 +509,8 @@ public class GVRSkeleton extends GVRComponent implements PrettyPrint
         NativeSkeleton.getPose(getNative(), poseMatrices);
         for (int i = 0; i < mParentBones.length; ++i)
         {
+            mTempMtx.set(poseMatrices, ofs);
             pose.setLocalMatrix(i, mTempMtx);
-            mTempMtx.get(poseMatrices, ofs);
             ofs += 16;
         }
         pose.sync();
