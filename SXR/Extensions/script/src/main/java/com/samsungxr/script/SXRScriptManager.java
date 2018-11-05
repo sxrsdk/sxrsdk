@@ -43,7 +43,7 @@ import javax.script.ScriptEngine;
  */
 public class SXRScriptManager implements IScriptManager {
     private static final String TAG = SXRScriptManager.class.getSimpleName();
-    public static final String VAR_NAME_SXRF = "gvrf";
+    public static final String VAR_NAME_SXRF = "sxr";
 
     protected SXRContext mGvrContext;
     protected Map<String, ScriptEngine> mEngines;
