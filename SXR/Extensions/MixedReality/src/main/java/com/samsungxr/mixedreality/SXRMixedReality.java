@@ -25,6 +25,7 @@ import com.samsungxr.SXRScene;
 import com.samsungxr.SXRNode;
 import com.samsungxr.IActivityEvents;
 import com.samsungxr.mixedreality.arcore.ARCoreSession;
+import com.samsungxr.mixedreality.CVLibrary.CVLibrarySession;
 
 import java.util.ArrayList;
 
@@ -33,7 +34,7 @@ import java.util.ArrayList;
  */
 public class SXRMixedReality extends SXRBehavior implements IMRCommon {
     private final IActivityEvents mActivityEventsHandler;
-    private final MRCommon mSession;
+    private MRCommon mSession = null;
     private SessionState mState;
 
     /**
@@ -41,8 +42,8 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
      *
      * @param gvrContext
      */
-    public SXRMixedReality(final SXRContext gvrContext) {
-        this(gvrContext, false, null);
+    public SXRMixedReality(final SXRContext gvrContext, int platform) {
+        this(gvrContext, false, null, platform);
     }
 
     /**
@@ -51,8 +52,8 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
      * @param gvrContext
      * @param enableCloudAnchor
      */
-    public SXRMixedReality(final SXRContext gvrContext, boolean enableCloudAnchor) {
-        this(gvrContext, enableCloudAnchor, null);
+    public SXRMixedReality(final SXRContext gvrContext, boolean enableCloudAnchor, int platform) {
+        this(gvrContext, enableCloudAnchor, null, platform);
     }
 
     /**
@@ -61,8 +62,8 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
      * @param gvrContext
      * @param scene
      */
-    public SXRMixedReality(final SXRContext gvrContext, SXRScene scene) {
-        this(gvrContext, false, scene);
+    public SXRMixedReality(final SXRContext gvrContext, SXRScene scene, int platform) {
+        this(gvrContext, false, scene, platform);
     }
 
     /**
@@ -73,7 +74,7 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
      * @param enableCloudAnchor
      * @param scene
      */
-    public SXRMixedReality(SXRContext gvrContext, boolean enableCloudAnchor, SXRScene scene) {
+    public SXRMixedReality(SXRContext gvrContext, boolean enableCloudAnchor, SXRScene scene, int platform) {
         super(gvrContext, 0);
 
 
@@ -82,10 +83,31 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
         }
 
         mActivityEventsHandler = new ActivityEventsHandler();
-        mSession = new ARCoreSession(gvrContext, enableCloudAnchor);
+        selectARPlatform(platform, enableCloudAnchor);
         mState = SessionState.ON_PAUSE;
 
         scene.getMainCameraRig().getOwnerObject().attachComponent(this);
+    }
+
+    public SXRMixedReality(SXRScene scene, int platform, boolean enableCloudAnchor) {
+        super(scene.getSXRContext(), 0);
+        mActivityEventsHandler = new ActivityEventsHandler();
+        selectARPlatform(platform, enableCloudAnchor);
+        mState = SessionState.ON_PAUSE;
+
+        scene.getMainCameraRig().getOwnerObject().attachComponent(this);
+    }
+
+    public void selectARPlatform(int platform, boolean enableCloudAnchor)
+    {
+        if (platform != 0)
+        {
+            mSession = new CVLibrarySession(getSXRContext(), enableCloudAnchor);
+        }
+        else
+        {
+            mSession = new ARCoreSession(getSXRContext(), enableCloudAnchor);
+        }
     }
 
     @Override
