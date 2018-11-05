@@ -146,11 +146,9 @@ class  SXRJassimpAdapter
 
         }
 
-        android.util.Log.d("sxrf taf", "checking for vertex colors");
         for (int c = 0; c < MAX_VERTEX_COLORS; c++)
         {
             FloatBuffer fbuf = aiMesh.getColorBuffer(c);
-            android.util.Log.d("sxrf taf", "153: color buffer = " + fbuf);
             if (fbuf != null)
             {
                 String name = "a_color";
@@ -160,7 +158,6 @@ class  SXRJassimpAdapter
                     name += c;
                 }
                 vertexDescriptor += " float4 " + name;
-            android.util.Log.d("sxrf taf", "adding float4 " + name);
             }
         }
 
@@ -1097,9 +1094,7 @@ class  SXRJassimpAdapter
 
         // XXX (tom flynn) this is a work-around to ensure models that use vertex colors get the correct material.  shouldn't have to do this.
         FloatBuffer fbuf = aiMesh.getColorBuffer(0);
-        android.util.Log.d("sxrf taf", "color buffer = " + fbuf);
         if(fbuf != null) {
-            android.util.Log.d("sxrf taf", "setting vertex color material");
             SXRMaterial vertexColorMtl = new SXRMaterial(mContext, new SXRShaderId(SXRVertexColorShader.class));
             renderData.setMaterial(vertexColorMtl);
         }

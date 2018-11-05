@@ -26,7 +26,6 @@ public class SXRVertexColorShader extends SXRShaderTemplate
         vtxTemplate = TextFile.readTextFile(context, R.raw.vcolor_vertex);
         setSegment("FragmentTemplate", fragTemplate);
         setSegment("VertexTemplate", vtxTemplate);
-        android.util.Log.d("sxrf taf", "SXRVertexColorShader was constructed");
   
     }
 }
