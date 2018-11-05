@@ -49,6 +49,7 @@ import com.samsungxr.jassimp.SXRNewWrapperProvider;
 import com.samsungxr.jassimp.Jassimp;
 import com.samsungxr.jassimp.JassimpConfig;
 import com.samsungxr.shaders.SXRPBRShader;
+import com.samsungxr.shaders.SXRVertexColorShader;
 import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -145,9 +146,11 @@ class  SXRJassimpAdapter
 
         }
 
+        android.util.Log.d("sxrf taf", "checking for vertex colors");
         for (int c = 0; c < MAX_VERTEX_COLORS; c++)
         {
             FloatBuffer fbuf = aiMesh.getColorBuffer(c);
+            android.util.Log.d("sxrf taf", "153: color buffer = " + fbuf);
             if (fbuf != null)
             {
                 String name = "a_color";
@@ -157,6 +160,7 @@ class  SXRJassimpAdapter
                     name += c;
                 }
                 vertexDescriptor += " float4 " + name;
+            android.util.Log.d("sxrf taf", "adding float4 " + name);
             }
         }
 
@@ -1091,6 +1095,15 @@ class  SXRJassimpAdapter
         }
         SXRRenderData renderData = new SXRRenderData(mContext, gvrMaterial);
 
+        // XXX (tom flynn) this is a work-around to ensure models that use vertex colors get the correct material.  shouldn't have to do this.
+        FloatBuffer fbuf = aiMesh.getColorBuffer(0);
+        android.util.Log.d("sxrf taf", "color buffer = " + fbuf);
+        if(fbuf != null) {
+            android.util.Log.d("sxrf taf", "setting vertex color material");
+            SXRMaterial vertexColorMtl = new SXRMaterial(mContext, new SXRShaderId(SXRVertexColorShader.class));
+            renderData.setMaterial(vertexColorMtl);
+        }
+
         renderData.setMesh(mesh);
         if (settings.contains(SXRImportSettings.NO_LIGHTING))
         {
@@ -1148,7 +1161,7 @@ class  SXRJassimpAdapter
             AiMesh aiMesh)
     {
         EnumSet<SXRImportSettings> settings = assetRequest.getImportSettings();
-        SXRMaterial gvrMaterial = createMaterial(aiMaterial, settings);
+        SXRMaterial gvrMaterial = createMaterial(aiMaterial, settings, aiMesh.hasVertexColors());
         AiColor diffuseColor = aiMaterial.getDiffuseColor(sWrapperProvider);
         float opacity = diffuseColor.getAlpha();
 
@@ -1208,7 +1221,7 @@ class  SXRJassimpAdapter
         return gvrMaterial;
     }
 
-    private SXRMaterial createMaterial(AiMaterial material, EnumSet<SXRImportSettings> settings)
+    private SXRMaterial createMaterial(AiMaterial material, EnumSet<SXRImportSettings> settings, boolean hasVertexColors)
     {
         boolean layered = false;
         SXRShaderId shaderType;
@@ -1265,10 +1278,18 @@ class  SXRJassimpAdapter
             {
                 shaderType = SXRMaterial.SXRShaderType.Phong.ID;
             }
-            if (layered)
+            if (hasVertexColors)
+            {
+                shaderType = SXRMaterial.SXRShaderType.Color.ID;
+            }
+            else if (layered)
             {
                 shaderType = SXRMaterial.SXRShaderType.PhongLayered.ID;
             }
+        }
+        else if (hasVertexColors)
+        {
+            shaderType = SXRMaterial.SXRShaderType.Color.ID;
         }
         else
         {
