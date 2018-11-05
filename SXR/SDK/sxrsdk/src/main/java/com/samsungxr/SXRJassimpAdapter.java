@@ -575,7 +575,7 @@ class  SXRJassimpAdapter
                     bindPoseMtx.invert();
                     bindPose.setWorldMatrix(boneId, bindPoseMtx);
                 }
-                else
+                else if (bone != null)
                 {
                     SXRTransform t = bone.getTransform();
                     Matrix4f mtx = t.getModelMatrix4f();
