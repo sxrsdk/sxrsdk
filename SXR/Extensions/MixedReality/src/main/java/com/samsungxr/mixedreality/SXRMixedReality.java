@@ -24,6 +24,7 @@ import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRScene;
 import com.samsungxr.SXRNode;
 import com.samsungxr.IActivityEvents;
+import com.samsungxr.SystemPropertyUtil;
 import com.samsungxr.mixedreality.arcore.ARCoreSession;
 import com.samsungxr.mixedreality.CVLibrary.CVLibrarySession;
 
@@ -136,7 +137,7 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
      */
     public void selectARPlatform(int platform, boolean enableCloudAnchor)
     {
-        String prop = System.getProperty("debug.samsungxr.hmt");
+        String prop = SystemPropertyUtil.getSystemPropertyString("debug.samsungxr.hmt");
         if(prop != null && prop.equals("AR-DROP-IN2")) {
             platform = 1;
         }
