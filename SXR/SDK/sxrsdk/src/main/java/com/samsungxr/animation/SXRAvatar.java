@@ -189,7 +189,6 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         SXRResourceVolume volume = new SXRResourceVolume(ctx, avatarResource);
         SXRNode modelRoot = new SXRNode(ctx);
 
-        mAvatarRoot.addChildObject(modelRoot);
         ctx.getAssetLoader().loadModel(volume, modelRoot, settings, false, mLoadModelHandler);
     }
 
@@ -514,6 +513,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 else
                 {
                     mSkeleton = skel;
+                    mAvatarRoot.addChildObject(modelRoot);
                     modelRoot = mAvatarRoot;
                     eventName = "onAvatarLoaded";
                 }
