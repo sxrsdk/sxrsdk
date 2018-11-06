@@ -70,10 +70,6 @@ extern "C" {
     Java_com_samsungxr_NativeScene_getLightList(JNIEnv* env, jobject obj, jlong scene);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeScene_addCollider(JNIEnv * env,
-            jobject obj, jlong jscene, jlong jcollider);
-
-    JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeScene_setMainScene(JNIEnv * env, jobject obj, jlong jscene);
 
     JNIEXPORT void JNICALL
@@ -205,13 +201,6 @@ Java_com_samsungxr_NativeScene_getLightList(JNIEnv* env, jobject obj, jlong jsce
     return jlights;
 }
 
-JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeScene_addCollider(JNIEnv * env,
-        jobject obj, jlong jscene, jlong jcollider) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    Collider* collider = reinterpret_cast<Collider*>(jcollider);
-    scene->addCollider(collider);
-}
 
 JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeScene_setMainScene(JNIEnv * env, jobject obj, jlong jscene) {

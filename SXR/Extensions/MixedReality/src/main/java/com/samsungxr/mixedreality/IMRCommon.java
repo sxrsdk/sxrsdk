@@ -108,7 +108,7 @@ public interface IMRCommon {
      *
      * @param anchor
      */
-    void hostAnchor(SXRAnchor anchor, ICloudAnchorListener listener);
+    void hostAnchor(SXRAnchor anchor, IMixedReality.CloudAnchorCallback listener);
 
     /**
      * Get an anchor previously hosted
@@ -116,7 +116,7 @@ public interface IMRCommon {
      * @param anchorId
      * @param listener
      */
-    void resolveCloudAnchor(String anchorId, ICloudAnchorListener listener);
+    void resolveCloudAnchor(String anchorId, IMixedReality.CloudAnchorCallback listener);
 
     /**
      * Set if cloud anchors will be available or not

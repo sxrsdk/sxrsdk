@@ -18,19 +18,27 @@ package com.samsungxr.mixedreality;
 import android.graphics.Bitmap;
 
 import com.samsungxr.SXRContext;
+import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRNode;
+import com.samsungxr.debug.cli.CLIException;
 
 import java.util.ArrayList;
 
-public abstract class MRCommon implements IMRCommon {
+public abstract class MRCommon implements IMixedReality
+{
     public static String TAG = MRCommon.class.getSimpleName();
 
-    protected final SXRContext mGvrContext;
+    protected final SXRContext mSXRContext;
+    protected SXREventReceiver mListeners;
 
-    public MRCommon(SXRContext gvrContext) {
-        mGvrContext = gvrContext;
+    public MRCommon(SXRContext SXRContext) {
+        mSXRContext = SXRContext;
+        mListeners = new SXREventReceiver(this);
     }
+
+    @Override
+    public SXREventReceiver getEventReceiver() { return mListeners; }
 
     @Override
     public void resume() {
@@ -48,33 +56,26 @@ public abstract class MRCommon implements IMRCommon {
     }
 
     @Override
-    public void registerPlaneListener(IPlaneEventsListener listener) {
-        onRegisterPlaneListener(listener);
-    }
-
-    @Override
-    public void registerAnchorListener(IAnchorEventsListener listener) {
-        onRegisterAnchorListener(listener);
-    }
-
-    @Override
-    public void registerAugmentedImageListener(IAugmentedImageEventsListener listener) {
-        onRegisterAugmentedImageListener(listener);
-    }
-
-    @Override
     public ArrayList<SXRPlane> getAllPlanes() {
         return onGetAllPlanes();
     }
 
     @Override
-    public SXRAnchor createAnchor(float[] pose) {
-        return onCreateAnchor(pose, null);
+    public SXRNode createAnchorNode(float[] pose)
+    {
+        SXRAnchor anchor = createAnchor(pose);
+        if (anchor != null)
+        {
+            SXRNode node = new SXRNode(anchor.getSXRContext());
+            node.attachComponent(anchor);
+            return node;
+        }
+        return null;
     }
 
     @Override
-    public SXRAnchor createAnchor(float[] pose, SXRNode sceneObject) {
-        return onCreateAnchor(pose, sceneObject);
+    public SXRAnchor createAnchor(float[] pose) {
+        return onCreateAnchor(pose);
     }
 
     @Override
@@ -88,13 +89,13 @@ public abstract class MRCommon implements IMRCommon {
     }
 
     @Override
-    public void hostAnchor(SXRAnchor anchor, ICloudAnchorListener listener) {
-        onHostAnchor(anchor, listener);
+    public void hostAnchor(SXRAnchor anchor, CloudAnchorCallback cb) {
+        onHostAnchor(anchor, cb);
     }
 
     @Override
-    public void resolveCloudAnchor(String anchorId, ICloudAnchorListener listener) {
-        onResolveCloudAnchor(anchorId, listener);
+    public void resolveCloudAnchor(String anchorId, CloudAnchorCallback cb) {
+        onResolveCloudAnchor(anchorId, cb);
     }
 
     @Override
@@ -103,8 +104,13 @@ public abstract class MRCommon implements IMRCommon {
     }
 
     @Override
-    public SXRHitResult hitTest(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) {
-        return onHitTest(sceneObj, collision);
+    public SXRHitResult hitTest(SXRPicker.SXRPickedObject collision) {
+        return onHitTest(collision);
+    }
+
+    @Override
+    public SXRHitResult hitTest(float x, float y) {
+        return onHitTest(x, y);
     }
 
     @Override
@@ -113,18 +119,23 @@ public abstract class MRCommon implements IMRCommon {
     }
 
     @Override
-    public void setAugmentedImage(Bitmap image) {
-        onSetAugmentedImage(image);
+    public void setMarker(Bitmap image) {
+        onSetMarker(image);
     }
 
     @Override
-    public void setAugmentedImages(ArrayList<Bitmap> imagesList) {
-        onSetAugmentedImages(imagesList);
+    public void setMarkers(ArrayList<Bitmap> imagesList) {
+        onSetMarkers(imagesList);
     }
 
     @Override
-    public ArrayList<SXRAugmentedImage> getAllAugmentedImages() {
-        return onGetAllAugmentedImages();
+    public ArrayList<SXRMarker> getAllMarkers() {
+        return onGetAllMarkers();
+    }
+
+    @Override
+    public float[] makeInterpolated(float[] poseA, float[] poseB, float t) {
+        return onMakeInterpolated(poseA, poseB, t);
     }
 
     protected abstract void onResume();
@@ -133,33 +144,31 @@ public abstract class MRCommon implements IMRCommon {
 
     protected abstract SXRNode onGetPassThroughObject();
 
-    protected abstract void onRegisterPlaneListener(IPlaneEventsListener listener);
-
-    protected abstract void onRegisterAnchorListener(IAnchorEventsListener listener);
-
-    protected abstract void onRegisterAugmentedImageListener(IAugmentedImageEventsListener listener);
-
     protected abstract ArrayList<SXRPlane> onGetAllPlanes();
 
-    protected abstract SXRAnchor onCreateAnchor(float[] pose, SXRNode sceneObject);
+    protected abstract SXRAnchor onCreateAnchor(float[] pose);
 
     protected abstract void onUpdateAnchorPose(SXRAnchor anchor, float[] pose);
 
     protected abstract void onRemoveAnchor(SXRAnchor anchor);
 
-    protected  abstract void onHostAnchor(SXRAnchor anchor, ICloudAnchorListener listener);
+    protected abstract void onHostAnchor(SXRAnchor anchor, CloudAnchorCallback cb);
 
-    protected abstract void onResolveCloudAnchor(String anchorId, ICloudAnchorListener listener);
+    protected abstract void onResolveCloudAnchor(String anchorId, CloudAnchorCallback cb);
 
     protected abstract void onSetEnableCloudAnchor(boolean enableCloudAnchor);
 
-    protected abstract SXRHitResult onHitTest(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
+    protected abstract SXRHitResult onHitTest(SXRPicker.SXRPickedObject collision);
+
+    protected abstract SXRHitResult onHitTest(float x, float y);
 
     protected abstract SXRLightEstimate onGetLightEstimate();
 
-    protected abstract void onSetAugmentedImage(Bitmap image);
+    protected abstract void onSetMarker(Bitmap image);
 
-    protected abstract void onSetAugmentedImages(ArrayList<Bitmap> imagesList);
+    protected abstract void onSetMarkers(ArrayList<Bitmap> imagesList);
 
-    protected abstract ArrayList<SXRAugmentedImage> onGetAllAugmentedImages();
+    protected abstract ArrayList<SXRMarker> onGetAllMarkers();
+
+    protected abstract float[] onMakeInterpolated(float[] poseA, float[] poseB, float t);
 }

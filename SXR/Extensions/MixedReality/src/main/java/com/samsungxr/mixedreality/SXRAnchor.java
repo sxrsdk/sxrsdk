@@ -15,27 +15,26 @@
 
 package com.samsungxr.mixedreality;
 
+import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRNode;
 
 /**
  * Represents a fixed location and orientation in the real world.
  */
-public abstract class SXRAnchor extends SXRNode {
+public abstract class SXRAnchor extends SXRBehavior
+{
+    static private long TYPE_ANCHOR = newComponentType(SXRAnchor.class);
+
     protected SXRTrackingState mTrackingState;
 
-    protected SXRAnchor(SXRContext gvrContext) {
-        super(gvrContext);
+    protected SXRAnchor(SXRContext SXRContext)
+    {
+        super(SXRContext);
+        mType = getComponentType();
     }
 
-    /**
-     * Attach a scene object to be displayed on this anchor position
-     *
-     * @param obj
-     */
-    public void attachNode(SXRNode obj) {
-        addChildObject(obj);
-    }
+    static public long getComponentType() { return TYPE_ANCHOR; }
 
     /**
      *
@@ -49,4 +48,6 @@ public abstract class SXRAnchor extends SXRNode {
      */
     public abstract String getCloudAnchorId();
 
+    public abstract float[] getPose();
+//    public abstract float[] makeTranslate(float x, float y, float z);
 }

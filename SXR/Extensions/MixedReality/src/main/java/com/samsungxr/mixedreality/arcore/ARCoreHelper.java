@@ -15,8 +15,11 @@
 
 package com.samsungxr.mixedreality.arcore;
 
+import android.opengl.Matrix;
+
 import com.google.ar.core.Anchor;
 import com.google.ar.core.AugmentedImage;
+import com.google.ar.core.Camera;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.LightEstimate;
 import com.google.ar.core.Plane;
@@ -24,17 +27,17 @@ import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRScene;
 import com.samsungxr.SXRNode;
 import com.samsungxr.mixedreality.SXRAnchor;
-import com.samsungxr.mixedreality.SXRAugmentedImage;
+import com.samsungxr.mixedreality.SXRMarker;
 import com.samsungxr.mixedreality.SXRHitResult;
 import com.samsungxr.mixedreality.SXRLightEstimate;
 import com.samsungxr.mixedreality.SXRPlane;
 import com.samsungxr.mixedreality.SXRTrackingState;
-import com.samsungxr.mixedreality.IAnchorEventsListener;
-import com.samsungxr.mixedreality.IAugmentedImageEventsListener;
-import com.samsungxr.mixedreality.IPlaneEventsListener;
+import com.samsungxr.mixedreality.IAnchorEvents;
+import com.samsungxr.mixedreality.IMarkerEvents;
+import com.samsungxr.mixedreality.IMixedReality;
+import com.samsungxr.mixedreality.IPlaneEvents;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,28 +45,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ARCoreHelper {
+public class ARCoreHelper
+{
     private SXRContext mGvrContext;
-    private SXRScene mGvrScene;
-
+    private IMixedReality mMixedReality;
     private Map<Plane, ARCorePlane> mArPlanes;
-    private Map<AugmentedImage, ARCoreAugmentedImage> mArAugmentedImages;
+    private Map<AugmentedImage, ARCoreMarker> mArAugmentedImages;
     private List<ARCoreAnchor> mArAnchors;
 
-    private ArrayList<IPlaneEventsListener> planeEventsListeners = new ArrayList<>();
-    private ArrayList<IAnchorEventsListener> anchorEventsListeners = new ArrayList<>();
-    private ArrayList<IAugmentedImageEventsListener> augmentedImageEventsListeners = new ArrayList<>();
+    private Camera mCamera;// ARCore camera
 
-    public ARCoreHelper(SXRContext gvrContext, SXRScene gvrScene) {
+    public ARCoreHelper(SXRContext gvrContext, IMixedReality mr) {
         mGvrContext = gvrContext;
-        mGvrScene = gvrScene;
+        mMixedReality = mr;
         mArPlanes = new HashMap<>();
         mArAugmentedImages = new HashMap<>();
         mArAnchors = new ArrayList<>();
     }
 
-    public void updatePlanes(Collection<Plane> allPlanes, float[] arViewMatrix,
-                             float[] vrCamMatrix, float scale) {
+
+    public void setCamera(Camera camera) {
+        this.mCamera = camera;
+    }
+
+    public Camera getCamera() {
+        return mCamera;
+    }
+
+    public void updatePlanes(Collection<Plane> allPlanes, float scale) {
+
+        // Don't update planes (or notify) when the plane listener is empty, i.e., there is
+        // no listener registered.
         ARCorePlane arCorePlane;
 
         for (Plane plane: allPlanes) {
@@ -74,7 +86,7 @@ public class ARCoreHelper {
 
             arCorePlane = createPlane(plane);
             // FIXME: New planes are updated two times
-            arCorePlane.update(arViewMatrix, vrCamMatrix, scale);
+            arCorePlane.update(scale);
             notifyPlaneDetectionListeners(arCorePlane);
         }
 
@@ -102,12 +114,12 @@ public class ARCoreHelper {
                 notifyMergedPlane(arCorePlane, arCorePlane.getParentPlane());
             }
 
-            arCorePlane.update(arViewMatrix, vrCamMatrix, scale);
+            arCorePlane.update(scale);
         }
     }
 
     public void updateAugmentedImages(Collection<AugmentedImage> allAugmentedImages){
-        ARCoreAugmentedImage arCoreAugmentedImage;
+        ARCoreMarker arCoreMarker;
 
         for (AugmentedImage augmentedImage: allAugmentedImages) {
             if (augmentedImage.getTrackingState() != TrackingState.TRACKING
@@ -115,34 +127,34 @@ public class ARCoreHelper {
                 continue;
             }
 
-            arCoreAugmentedImage = createAugmentedImage(augmentedImage);
-            notifyAugmentedImageDetectionListeners(arCoreAugmentedImage);
+            arCoreMarker = createMarker(augmentedImage);
+            notifyMarkerDetectionListeners(arCoreMarker);
 
-            mArAugmentedImages.put(augmentedImage, arCoreAugmentedImage);
+            mArAugmentedImages.put(augmentedImage, arCoreMarker);
         }
 
         for (AugmentedImage augmentedImage: mArAugmentedImages.keySet()) {
-            arCoreAugmentedImage = mArAugmentedImages.get(augmentedImage);
+            arCoreMarker = mArAugmentedImages.get(augmentedImage);
 
             if (augmentedImage.getTrackingState() == TrackingState.TRACKING &&
-                    arCoreAugmentedImage.getTrackingState() != SXRTrackingState.TRACKING) {
-                arCoreAugmentedImage.setTrackingState(SXRTrackingState.TRACKING);
-                notifyAugmentedImageStateChangeListeners(arCoreAugmentedImage, SXRTrackingState.TRACKING);
+                    arCoreMarker.getTrackingState() != SXRTrackingState.TRACKING) {
+                arCoreMarker.setTrackingState(SXRTrackingState.TRACKING);
+                notifyMarkerStateChangeListeners(arCoreMarker, SXRTrackingState.TRACKING);
             }
             else if (augmentedImage.getTrackingState() == TrackingState.PAUSED &&
-                    arCoreAugmentedImage.getTrackingState() != SXRTrackingState.PAUSED) {
-                arCoreAugmentedImage.setTrackingState(SXRTrackingState.PAUSED);
-                notifyAugmentedImageStateChangeListeners(arCoreAugmentedImage, SXRTrackingState.PAUSED);
+                    arCoreMarker.getTrackingState() != SXRTrackingState.PAUSED) {
+                arCoreMarker.setTrackingState(SXRTrackingState.PAUSED);
+                notifyMarkerStateChangeListeners(arCoreMarker, SXRTrackingState.PAUSED);
             }
             else if (augmentedImage.getTrackingState() == TrackingState.STOPPED &&
-                    arCoreAugmentedImage.getTrackingState() != SXRTrackingState.STOPPED) {
-                arCoreAugmentedImage.setTrackingState(SXRTrackingState.STOPPED);
-                notifyAugmentedImageStateChangeListeners(arCoreAugmentedImage, SXRTrackingState.STOPPED);
+                    arCoreMarker.getTrackingState() != SXRTrackingState.STOPPED) {
+                arCoreMarker.setTrackingState(SXRTrackingState.STOPPED);
+                notifyMarkerStateChangeListeners(arCoreMarker, SXRTrackingState.STOPPED);
             }
         }
     }
 
-    public void updateAnchors(float[] arViewMatrix, float[] vrCamMatrix, float scale) {
+    public void updateAnchors(float scale) {
         for (ARCoreAnchor anchor: mArAnchors) {
             Anchor arAnchor = anchor.getAnchorAR();
 
@@ -162,7 +174,7 @@ public class ARCoreHelper {
                 notifyAnchorStateChangeListeners(anchor, SXRTrackingState.STOPPED);
             }
 
-            anchor.update(arViewMatrix, vrCamMatrix, scale);
+            anchor.update(scale);
         }
     }
 
@@ -176,8 +188,8 @@ public class ARCoreHelper {
         return allPlanes;
     }
 
-    public ArrayList<SXRAugmentedImage> getAllAugmentedImages() {
-        ArrayList<SXRAugmentedImage> allAugmentedImages = new ArrayList<>();
+    public ArrayList<SXRMarker> getAllMarkers() {
+        ArrayList<SXRMarker> allAugmentedImages = new ArrayList<>();
 
         for (AugmentedImage augmentedImage: mArAugmentedImages.keySet()) {
             allAugmentedImages.add(mArAugmentedImages.get(augmentedImage));
@@ -192,20 +204,16 @@ public class ARCoreHelper {
         return arCorePlane;
     }
 
-    public ARCoreAugmentedImage createAugmentedImage(AugmentedImage augmentedImage) {
-        ARCoreAugmentedImage arCoreAugmentedImage = new ARCoreAugmentedImage(augmentedImage);
-        return arCoreAugmentedImage;
+    public ARCoreMarker createMarker(AugmentedImage augmentedImage) {
+        ARCoreMarker arCoreMarker = new ARCoreMarker(augmentedImage);
+        return arCoreMarker;
     }
 
-    public SXRAnchor createAnchor(Anchor arAnchor, SXRNode sceneObject) {
+    public SXRAnchor createAnchor(Anchor arAnchor, float scale) {
         ARCoreAnchor arCoreAnchor = new ARCoreAnchor(mGvrContext);
         arCoreAnchor.setAnchorAR(arAnchor);
         mArAnchors.add(arCoreAnchor);
-
-        if (sceneObject != null) {
-            arCoreAnchor.attachNode(sceneObject);
-        }
-
+        arCoreAnchor.update(scale);
         return arCoreAnchor;
     }
 
@@ -219,10 +227,12 @@ public class ARCoreHelper {
     public void removeAnchor(ARCoreAnchor anchor) {
         anchor.getAnchorAR().detach();
         mArAnchors.remove(anchor);
-        mGvrScene.removeNode(anchor);
+        SXRNode anchorNode = anchor.getOwnerObject();
+        SXRNode anchorParent = anchorNode.getParent();
+        anchorParent.removeChildObject(anchorNode);
     }
 
-    public SXRHitResult hitTest(List<HitResult> hitResult) {
+    public SXRHitResult hitTest(List<HitResult> hitResult, float scale) {
         for (HitResult hit : hitResult) {
             // Check if any plane was hit, and if it was hit inside the plane polygon
             Trackable trackable = hit.getTrackable();
@@ -234,7 +244,10 @@ public class ARCoreHelper {
                 float[] hitPose = new float[16];
 
                 hit.getHitPose().toMatrix(hitPose, 0);
+                // Convert the value from ARCore to SXRf and set the pose
+                ar2gvr(hitPose, scale);
                 gvrHitResult.setPose(hitPose);
+                // TODO: this distance is using ARCore values, change it to use SXRf instead
                 gvrHitResult.setDistance(hit.getDistance());
                 gvrHitResult.setPlane(mArPlanes.get(trackable));
 
@@ -243,6 +256,17 @@ public class ARCoreHelper {
         }
 
         return null;
+    }
+
+    /**
+     * Converts from AR world space to SXRf world space.
+     */
+    private void ar2gvr(float[] poseMatrix, float scale) {
+        // Real world scale
+        Matrix.scaleM(poseMatrix, 0, scale, scale, scale);
+        poseMatrix[12] = poseMatrix[12] * scale;
+        poseMatrix[13] = poseMatrix[13] * scale;
+        poseMatrix[14] = poseMatrix[14] * scale;
     }
 
     public SXRLightEstimate getLightEstimate(LightEstimate lightEstimate) {
@@ -258,51 +282,50 @@ public class ARCoreHelper {
         return arCoreLightEstimate;
     }
 
-    public void registerPlaneListener(IPlaneEventsListener listener) {
-        planeEventsListeners.add(listener);
-    }
-
-    public void registerAnchorListener(IAnchorEventsListener listener) {
-        anchorEventsListeners.add(listener);
-    }
-
-    public void registerAugmentedImageListener(IAugmentedImageEventsListener listener) {
-        augmentedImageEventsListeners.add(listener);
-    }
-
     private void notifyPlaneDetectionListeners(SXRPlane plane) {
-        for (IPlaneEventsListener listener: planeEventsListeners) {
-            listener.onPlaneDetection(plane);
-        }
+        mGvrContext.getEventManager().sendEvent(mMixedReality,
+                IPlaneEvents.class,
+                "onPlaneDetected",
+                plane);
     }
 
     private void notifyPlaneStateChangeListeners(SXRPlane plane, SXRTrackingState trackingState) {
-        for (IPlaneEventsListener listener: planeEventsListeners) {
-            listener.onPlaneStateChange(plane, trackingState);
-        }
+        mGvrContext.getEventManager().sendEvent(mMixedReality,
+                IPlaneEvents.class,
+                "onPlaneStateChange",
+                plane,
+                trackingState);
     }
 
     private void notifyMergedPlane(SXRPlane childPlane, SXRPlane parentPlane) {
-        for (IPlaneEventsListener listener: planeEventsListeners) {
-            listener.onPlaneMerging(childPlane, parentPlane);
-        }
+        mGvrContext.getEventManager().sendEvent(mMixedReality,
+                IPlaneEvents.class,
+                "onPlaneMerging",
+                childPlane,
+                parentPlane);
     }
 
     private void notifyAnchorStateChangeListeners(SXRAnchor anchor, SXRTrackingState trackingState) {
-        for (IAnchorEventsListener listener: anchorEventsListeners) {
-            listener.onAnchorStateChange(anchor, trackingState);
-        }
+        mGvrContext.getEventManager().sendEvent(mMixedReality,
+                IAnchorEvents.class,
+                "onAnchorStateChange",
+                anchor,
+                trackingState);
     }
 
-    private void notifyAugmentedImageDetectionListeners(SXRAugmentedImage image) {
-        for (IAugmentedImageEventsListener listener: augmentedImageEventsListeners) {
-            listener.onAugmentedImageDetection(image);
-        }
+    private void notifyMarkerDetectionListeners(SXRMarker image) {
+        mGvrContext.getEventManager().sendEvent(mMixedReality,
+                IMarkerEvents.class,
+                "onMarkerDetected",
+                image);
     }
 
-    private void notifyAugmentedImageStateChangeListeners(SXRAugmentedImage image, SXRTrackingState trackingState) {
-        for (IAugmentedImageEventsListener listener: augmentedImageEventsListeners) {
-            listener.onAugmentedImageStateChange(image, trackingState);
-        }
+    private void notifyMarkerStateChangeListeners(SXRMarker image, SXRTrackingState trackingState) {
+        mGvrContext.getEventManager().sendEvent(mMixedReality,
+                IMarkerEvents.class,
+                "onMarkerStateChange",
+                image,
+                trackingState);
     }
+
 }

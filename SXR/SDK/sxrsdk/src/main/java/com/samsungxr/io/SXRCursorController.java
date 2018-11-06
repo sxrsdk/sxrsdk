@@ -194,7 +194,6 @@ public abstract class SXRCursorController implements IEventReceiver
     protected SXRContext context;
     protected volatile boolean mConnected = false;
     protected int mTouchButtons = MotionEvent.BUTTON_SECONDARY | MotionEvent.BUTTON_PRIMARY;
-    protected Vector3f pickDir = new Vector3f(0, 0, -1);
 
     /**
      * Create an instance of {@link SXRCursorController} only using the
@@ -493,7 +492,7 @@ public abstract class SXRCursorController implements IEventReceiver
      * <p>
      * To stop dragging with the cursor, call {@link #stopDrag()}.
      * </p>
-     * @param dragMe scene object to drag with controller
+     * @param dragMe node to drag with controller
      * @return true if object is dragging, false on error
      * @see #stopDrag()
      */
@@ -627,30 +626,6 @@ public abstract class SXRCursorController implements IEventReceiver
 
 
     /**
-     * This call sets the position of the {@link SXRCursorController}.
-     *
-     * Use this call to also set an initial position for the Cursor when a new
-     * {@link SXRCursorController} is selected.
-     *
-     * @param x the x value of the position.
-     * @param y the y value of the position.
-     * @param z the z value of the position.
-     */
-    public void setPosition(float x, float y, float z)
-    {
-        if (isEnabled())
-        {
-            position.set(x, y, z);
-        }
-    }
-
-
-    public Vector3f getPosition(Vector3f pos) {
-        pos.set(position);
-        return pos;
-    }
-
-    /**
      * Register a {@link IControllerEvent} to receive a callback whenever
      * the {@link SXRCursorController} has been updated.
      *
@@ -735,7 +710,7 @@ public abstract class SXRCursorController implements IEventReceiver
         if (!flag)
         {
             // reset
-            position.zero();
+            position.set(0, 0, -1);
             if (previousActive) {
                 active = false;
             }
@@ -776,7 +751,8 @@ public abstract class SXRCursorController implements IEventReceiver
      * @param y Y position of the camera
      * @param z Z position of the camera
      */
-    public void setOrigin(float x, float y, float z){
+    protected void setOrigin(float x, float y, float z)
+    {
         origin.set(x,y,z);
     }
 
@@ -787,6 +763,39 @@ public abstract class SXRCursorController implements IEventReceiver
     public Vector3f getOrigin()
     {
         return origin;
+    }
+
+    /**
+     * This call sets the direction of the picking ray.
+     * <p>
+     * Use this call to set the picking direction
+     * based on mouse or screen coordinates.
+     *
+     * @param x x direction of the pick ray.
+     * @param y y direction of the pick ray.
+     * @param z z direction of the pick ray.
+     */
+    protected void setPosition(float x, float y, float z)
+    {
+        if (isEnabled())
+        {
+            position.set(x, y, z);
+            position.normalize();
+            mPicker.setPickRay(origin.x, origin.y, origin.z, position.x, position.y, position.z);
+        }
+    }
+
+    /**
+     * Get the direction of the picking ray for the
+     * {@link SXRPicker} associated with this controller.
+     * This ray is a unit vector.
+     * @param pos vector updated with the picking ray direction.
+     * @return input vector
+     */
+    public Vector3f getPosition(Vector3f pos)
+    {
+        pos.set(position);
+        return pos;
     }
 
     /**
@@ -936,9 +945,9 @@ public abstract class SXRCursorController implements IEventReceiver
             if ((mCursorControl == CursorControl.CURSOR_CONSTANT_DEPTH) ||
                 (mCursorControl == CursorControl.CURSOR_DEPTH_FROM_CONTROLLER))
             {
-                cursorTrans.setPosition(pickDir.x * mCursorDepth,
-                        pickDir.y * mCursorDepth,
-                        pickDir.z * mCursorDepth);
+                cursorTrans.setPosition(position.x * mCursorDepth,
+                        position.y * mCursorDepth,
+                        position.z * mCursorDepth);
                 return;
             }
             SXRNode parent = collision.hitObject.getParent();
@@ -958,9 +967,9 @@ public abstract class SXRCursorController implements IEventReceiver
                 }
                 parent = parent.getParent();
             }
-            float xcursor = pickDir.x * dist;   // vector to hit position
-            float ycursor = pickDir.y * dist;
-            float zcursor = pickDir.z * dist;
+            float xcursor = position.x * dist;   // vector to hit position
+            float ycursor = position.y * dist;
+            float zcursor = position.z * dist;
 
             cursorTrans.getTransform().setPosition(xcursor, ycursor, zcursor);
         }
@@ -974,7 +983,7 @@ public abstract class SXRCursorController implements IEventReceiver
             {
                 SXRTransform trans = mDragRoot.getTransform();
                 trans.setRotation(1, 0, 0, 0);
-                trans.setPosition(pickDir.x * mCursorDepth, pickDir.y * mCursorDepth, pickDir.z * mCursorDepth);
+                trans.setPosition(position.x * mCursorDepth, position.y * mCursorDepth, position.z * mCursorDepth);
                 mCursorScale.getTransform().setScale(1, 1, 1);
             }
         }
@@ -1070,14 +1079,7 @@ public abstract class SXRCursorController implements IEventReceiver
             mPicker = picker;
             mEvent = event;
             mActive = active;
-            if (!mPicker.isEnabled())
-            {
-                mDoPick = true;
-            }
-            else if (mEvent != null)
-            {
-                mDoPick = true;
-            }
+            mDoPick = (mEvent != null) || !mPicker.isEnabled();
         }
 
         public void run()
@@ -1086,10 +1088,6 @@ public abstract class SXRCursorController implements IEventReceiver
 
             if (mDoPick)
             {
-                if (position.length() > 0.00001f)
-                {
-                    mPicker.setPickRay(0, 0, 0, pickDir.x, pickDir.y, pickDir.z);
-                }
                 mPicker.processPick(mActive, mEvent);
             }
             if (mEvent != null)
