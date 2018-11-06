@@ -212,7 +212,7 @@ protected:
      * crash if one of the conditions is not met!
      *
      * @param pFile Path of the file to be imported.
-     * @param pScene The scene object to hold the imported data.
+     * @param pScene The node to hold the imported data.
      * NULL is not a valid parameter.
      * @param pIOHandler The IO handler to use for any file access.
      * NULL is not a valid parameter. */
@@ -310,9 +310,9 @@ public: // static utilities
 
     // -------------------------------------------------------------------
     /// @brief  Enum to define, if empty files are ok or not.
-    enum TextFileMode { 
+    enum TextFileMode {
         ALLOW_EMPTY,
-        FORBID_EMPTY 
+        FORBID_EMPTY
     };
 
     // -------------------------------------------------------------------

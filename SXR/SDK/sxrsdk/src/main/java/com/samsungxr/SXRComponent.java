@@ -18,9 +18,9 @@ package com.samsungxr;
 import java.util.List;
 
 /**
- * Base class for defining components to extend the scene object.
+ * Base class for defining components to extend the node.
  *
- * Components are used to add behaviours to scene objects.
+ * Components are used to add behaviours to nodes.
  * A SXRNode can have any number of components but only
  * one component of each type. Usually the component type loosely
  * corresponds to the base class of the component. For example,
@@ -37,7 +37,7 @@ public class SXRComponent extends SXRHybridObject
     protected long mType = 0;
 
     /**
-     * Constructor for a component that is not attached to a scene object.
+     * Constructor for a component that is not attached to a node.
      *
      * @param gvrContext    The current SXRF context
      * @param nativePointer Pointer to the native object, returned by the native constructor
@@ -83,8 +83,8 @@ public class SXRComponent extends SXRHybridObject
     }
 
     /***
-     * Attach this component to a scene object.
-     * @param owner scene object to become new owner.
+     * Attach this component to a node.
+     * @param owner node to become new owner.
      */
     public void setOwnerObject(SXRNode owner) {
         if (owner != null)
@@ -180,18 +180,18 @@ public class SXRComponent extends SXRHybridObject
     }
 
     /**
-     * Get the transform of the scene object this component is attached to.
+     * Get the transform of the node this component is attached to.
      * 
-     * @return SXRTransform of scene object
+     * @return SXRTransform of node
      */
     public SXRTransform getTransform() {
         return getOwnerObject().getTransform();
     }
     
     /**
-     * Get the component of the specified class attached to the owner scene object.
+     * Get the component of the specified class attached to the owner node.
      * 
-     * If the scene object that owns this component also has a component
+     * If the node that owns this component also has a component
      * of the given type, it will be returned.
      * @param type  type of component to find. This must be a value
      *              returned by getComponentType.
@@ -202,14 +202,14 @@ public class SXRComponent extends SXRHybridObject
     }
     
     /**
-     * Called when a component is attached to a scene object.
+     * Called when a component is attached to a node.
      * 
      * @param newOwner  SXRNode the component is attached to.
      */
     public void onAttach(SXRNode newOwner) { }
 
     /**
-     * Called when a component is detached from a scene object.
+     * Called when a component is detached from a node.
      * 
      * @param oldOwner  SXRNode the component was detached from.
      */

@@ -46,10 +46,10 @@ import java.util.List;
  * which can be used to animate a skinned character made up of multiple meshes.
  * <p>
  * You can set the bone names in the skeleton
- * to designate which scene objects in your hierarchy represent which bones.
- * If you attach the {@link SXRSkeleton} component to the root of a hierarchy of scene objects,
- * it will link the skeleton bones to the scene objects so that, when you change the
- * skeleton, the scene objects will reflect that change.
+ * to designate which nodes in your hierarchy represent which bones.
+ * If you attach the {@link SXRSkeleton} component to the root of a hierarchy of nodes,
+ * it will link the skeleton bones to the nodes so that, when you change the
+ * skeleton, the nodes will reflect that change.
  * <p>
  * The asset loader constructs the {@link SXRSkeleton} and attaches the bones when you export a rigged character.
  * It also makes a {@link com.samsungxr.animation.keyframe.SXRSkeletonAnimation} class
@@ -612,7 +612,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     }
 
     /**
-     * Get the bone index for the given scene object.
+     * Get the bone index for the given node.
      *
      * @param bone SXRNode bone to search for
      * @return bone index or -1 for root bone.
@@ -721,7 +721,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     }
 
     /**
-     * Get the scene object driven by the given bone.
+     * Get the node driven by the given bone.
      *
      * @param boneindex index of bone to get.
      * @return SXRNode whose transform represents the bone.
@@ -846,7 +846,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     }
 
     /**
-     * Applies the matrices computed from the scene object's
+     * Applies the matrices computed from the node's
      * linked to the skeleton bones to the current pose.
      * @see #applyPose(SXRPose, int)
      * @see #setPose(SXRPose)
@@ -872,7 +872,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     }
 
     /**
-     * Applies the matrices computed from the scene object's
+     * Applies the matrices computed from the node's
      * linked to the skeleton bones to the current pose.
      * @param boneOptions   Only update bones with the given options
      *                      (BONE_PHYSICS or BONE_ANIMATE)
@@ -896,7 +896,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
 
     /**
      * Applies the matrices from the skeleton's current pose
-     * to the scene objects associated with each bone.
+     * to the nodes associated with each bone.
      * <p>
      * The {@link com.samsungxr.animation.keyframe.SXRSkeletonAnimation} class
      * does this as a part of skeletal animation. It does not occur

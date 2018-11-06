@@ -14,7 +14,7 @@
  */
 
 /***************************************************************************
- * Picks scene object in a scene.
+ * Picks node in a scene.
  ***************************************************************************/
 
 #include "picker.h"
@@ -104,7 +104,7 @@ void Picker::pickClosest(Scene* scene,
 
 /*
  * Intersects all the colliders in the scene with the set of
- * input scene objects (collidables) and returns the list of collisions.
+ * input nodes (collidables) and returns the list of collisions.
  * The index of the collidable that hit is returned as the
  * CursorID field of the ColliderData resulting from the hit.
  */
@@ -152,9 +152,9 @@ void Picker::pickBounds(Scene* scene,
 }
 
 /**
- * Picks a single scene object from the scene. If the object has a mesh collider, the picker will calculate the
+ * Picks a single node from the scene. If the object has a mesh collider, the picker will calculate the
  * texture coordinates and barycentric coordinates of the corresponding hit-point. Note that this will do nothing
- * if the scene object doesn't have a collider.
+ * if the node doesn't have a collider.
  */
 void Picker::pickNode(Node *node, float ox, float oy, float oz, float dx, float dy, float dz, ColliderData &colliderData)
 {
@@ -176,7 +176,7 @@ void Picker::pickNode(Node *node, float ox, float oy, float oz, float dx, float 
  * The input ray is in world coordinates.
  * To pick against the bounding box, we create a bounding box mesh
  * from the original mesh. This new mesh is in mesh coordinates
- * so we must apply the inverse of the model matrix from the scene object
+ * so we must apply the inverse of the model matrix from the node
  * to the ray to put it into mesh coordinates.
  */
 glm::vec3 Picker::pickNodeAgainstBoundingBox(Node* node, float ox, float oy, float oz, float dx, float dy, float dz)

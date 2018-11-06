@@ -199,7 +199,7 @@ public class SXRTexture extends SXRHybridObject implements SXRAndroidResource.Te
 
     /**
      * Returns the list of atlas information necessary to map
-     * the texture atlas to each scene object.
+     * the texture atlas to each node.
      *
      * @return List of atlas information.
      */
@@ -217,7 +217,7 @@ public class SXRTexture extends SXRHybridObject implements SXRAndroidResource.Te
      * to each object of the scene.
      *
      * @param atlasInformation Atlas information to map the texture atlas to each
-     *        scene object.
+     *        node.
      */
     public void setAtlasInformation(List<SXRAtlasInformation> atlasInformation)
     {
@@ -230,7 +230,7 @@ public class SXRTexture extends SXRHybridObject implements SXRAndroidResource.Te
     /**
      * Inform if the texture is a large image containing "atlas" of sub-images
      * with a list of {@link SXRAtlasInformation} necessary to map it to the
-     * scene objects.
+     * nodes.
      *
      * @return True if the texture is a large image containing "atlas",
      *         otherwise it returns false.

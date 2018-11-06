@@ -32,20 +32,20 @@ import org.joml.Vector3f;
 /**
  * Describes a 3D object in the scene with a position and orientation.
  *
- * Every scene object has a {@linkplain #getTransform() location}, and can have
- * {@linkplain #children() children}. An invisible scene object can be used to
+ * Every node has a {@linkplain #getTransform() location}, and can have
+ * {@linkplain #children() children}. An invisible node can be used to
  * move a set of scene as a unit, preserving their relative geometry. Invisible
- * scene objects don't need any {@linkplain SXRNode#getRenderData()
+ * nodes don't need any {@linkplain SXRNode#getRenderData()
  * render data.}
  *
  * <p>
- * Visible scene objects must have render data
+ * Visible nodes must have render data
  * {@linkplain SXRNode#attachRenderData(SXRRenderData) attached.} Each
  * {@link SXRRenderData} has a {@link SXRMesh GL mesh} that defines its
  * geometry, and a {@link SXRMaterial} that defines its surface.
  * <p>
- * Components can be attached to a scene object to extend its functionality.
- * For example, you can attach a light component to make the scene object illuminate
+ * Components can be attached to a node to extend its functionality.
+ * For example, you can attach a light component to make the node illuminate
  * other objects. Only one component of a particular type can be attached.
  * Components are retrieved based on their type.
  * <p>
@@ -66,7 +66,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     private final SXREventReceiver mEventReceiver = new SXREventReceiver(this);
 
     /**
-     * Constructs an empty scene object with a default {@link SXRTransform
+     * Constructs an empty node with a default {@link SXRTransform
      * transform}.
      *
      * @param gvrContext
@@ -77,7 +77,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     }
 
     /**
-     * Constructs a scene object with an arbitrarily complex mesh.
+     * Constructs a node with an arbitrarily complex mesh.
      *
      * @param gvrContext
      *            current {@link SXRContext}
@@ -91,22 +91,22 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     }
 
     /**
-     * Constructs a rectangular scene object, whose geometry is completely
+     * Constructs a rectangular node, whose geometry is completely
      * specified by the width and height.
      *
      * @param gvrContext
      *            current {@link SXRContext}
      * @param width
-     *            the scene object's width
+     *            the node's width
      * @param height
-     *            the scene object's height
+     *            the node's height
      */
     public SXRNode(SXRContext gvrContext, float width, float height) {
         this(gvrContext, gvrContext.createQuad(width, height));
     }
 
     /**
-     * The base texture constructor: Constructs a scene object with
+     * The base texture constructor: Constructs a node with
      * {@linkplain SXRMesh an arbitrarily complex geometry} that uses a specific
      * shader to display a {@linkplain SXRTexture texture.}
      *
@@ -158,7 +158,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     private static final SXRShaderId STANDARD_SHADER = SXRShaderType.Texture.ID;
 
     /**
-     * Constructs a scene object with {@linkplain SXRMesh an arbitrarily complex
+     * Constructs a node with {@linkplain SXRMesh an arbitrarily complex
      * geometry} that uses the standard {@linkplain Texture 'texture shader'} to
      * display a {@linkplain SXRTexture texture.}
      *
@@ -238,7 +238,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     }
 
     /**
-     * Constructs a 2D, rectangular scene object that uses the standard
+     * Constructs a 2D, rectangular node that uses the standard
      * {@linkplain Texture 'texture shader'} to display a {@linkplain SXRTexture
      * texture.}
      *
@@ -306,12 +306,12 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     }
 
     /**
-     * Sets the tag associated with this scene object.
+     * Sets the tag associated with this node.
      *
-     * Tags can be used to store data within the scene object without
+     * Tags can be used to store data within the node without
      * resorting to another data structure.
      *
-     * @param tag an object to associate with this scene object
+     * @param tag an object to associate with this node
      *
      * @see #getTag()
      */
@@ -320,9 +320,9 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     }
 
     /**
-     * Returns this scene object's tag.
+     * Returns this node's tag.
      *
-     * @return the Object stored in this scene object as a tag,
+     * @return the Object stored in this node as a tag,
      *         or {@code null} if not set
      *
      * @see #setTag(Object)
@@ -332,9 +332,9 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     }
 
     /**
-     * Attach a component to this scene object.
+     * Attach a component to this node.
      *
-     * Each scene object has a list of components that may
+     * Each node has a list of components that may
      * be attached to it. Only one component of a particular type
      * can be attached. Components are retrieved based on their type.
      *
@@ -359,9 +359,9 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     }
 
     /**
-     * Detach the component of the specified type from this scene object.
+     * Detach the component of the specified type from this node.
      *
-     * Each scene object has a list of components. Only one component
+     * Each node has a list of components. Only one component
      * of a particular type can be attached. Components are detached based on their type.
      *
      * @return SXRComponent detached or null if component not found
@@ -380,9 +380,9 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     }
 
     /**
-     * Find the component of the specified class from this scene object.
+     * Find the component of the specified class from this node.
      *
-     * Each scene object has a list of components. Only one component
+     * Each node has a list of components. Only one component
      * of a particular type can be attached.
      *
      * @return SXRComponent null if component of the given type not found
@@ -417,7 +417,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
      *
      * A {@link SXRTransform} encapsulates a 4x4 matrix that specifies how to
      * render the {@linkplain SXRMesh GL mesh:} transform methods let you move,
-     * rotate, and scale your scene object.
+     * rotate, and scale your node.
      *
      * @return The current {@link SXRTransform transform}. If no transform is
      *         currently attached to the object, returns {@code null}.
@@ -532,8 +532,8 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
 
     /**
      * Get the attached light component. Any subclass of SXRLight may
-     * be attached to a scene object. The light's position and direction will be calculated
-     * from the transform attached to the scene object.
+     * be attached to a node. The light's position and direction will be calculated
+     * from the transform attached to the node.
      * @return The light attached to the object. If no light is currently attached, returns null.
      */
     public SXRLight getLight() {
@@ -544,7 +544,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
      * Attach a new light component.
      *
      * If another light is currently attached, it is replaced with the new
-     * one. The light's position and direction will follow the scene object's
+     * one. The light's position and direction will follow the node's
      * transform.
      *
      * @param light New light to attach.
@@ -562,7 +562,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
 
 
     /**
-     * Get all components of a specific class from this scene object and its descendants.
+     * Get all components of a specific class from this node and its descendants.
      * @param type  component type (as returned from getComponentType())
      * @return ArrayList of components with the specified class.
      */
@@ -618,13 +618,13 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
      * API} gives you a lot of control over eye picking, but it does involve an
      * awful lot of details. This method
      * (and {@link #getPickingEnabled()}) provides a simple boolean property.
-     * It attaches a SXRSphereCollider to the scene object. If you want more
+     * It attaches a SXRSphereCollider to the node. If you want more
      * accurate picking, you can use {@link #attachComponent(SXRComponent)} to attach a
      * mesh collider instead. The mesh collider is more accurate but also
      * costs more to compute.
      *
      * @param enabled
-     *            Should eye picking 'see' this scene object?
+     *            Should eye picking 'see' this node?
      *
      * @since 2.0.2
      * @see SXRSphereCollider
@@ -641,9 +641,9 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     }
 
     /**
-     * Is eye picking enabled for this scene object?
+     * Is eye picking enabled for this node?
      *
-     * @return Whether eye picking can 'see' this scene object?
+     * @return Whether eye picking can 'see' this node?
      *
      * @since 2.0.2
      */
@@ -723,7 +723,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
      * Removes any child object that has the given name by performing
      * case-sensitive search.
      *
-     * @param name name of scene object to be removed.
+     * @param name name of node to be removed.
      *
      * @return number of removed objects, 0 if none was found.
      */
@@ -741,7 +741,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
      * Performs case-sensitive depth-first search for a child object and then
      * removes it if found.
      *
-     * @param name name of scene object to be removed.
+     * @param name name of node to be removed.
      *
      * @return true if child was found (and removed), else false
      */
@@ -764,9 +764,9 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     }
 
     /**
-     * Called when the scene object gets a new parent.
+     * Called when the node gets a new parent.
      *
-     * @param parent New parent of this scene object.
+     * @param parent New parent of this node.
      */
     protected void onNewParentObject(SXRNode parent) {
         for (SXRComponent comp : mComponents.values()) {
@@ -775,9 +775,9 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     }
 
     /**
-     * Called when is removed the parent of the scene object.
+     * Called when is removed the parent of the node.
      *
-     * @param parent Old parent of this scene object.
+     * @param parent Old parent of this node.
      */
     protected void onRemoveParentObject(SXRNode parent) {
         for (SXRComponent comp : mComponents.values()) {
@@ -787,8 +787,8 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
 
     /**
      * Add the owner of {@code childComponent} as a child of this object. (owner object of the
-     * Adding a child will increase the {@link #getChildrenCount()} for this scene object.
-     * If the component is not attached to a scene object this function does nothing.
+     * Adding a child will increase the {@link #getChildrenCount()} for this node.
+     * If the component is not attached to a node this function does nothing.
      *
      * @param childComponent
      *            {@link SXRComponent Component} whose owner is added as a child of this
@@ -802,8 +802,8 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
 
     /**
      * Remove the owner of {@code childComponent} as a child of this object.
-     * Removing a child will decrease the {@link #getChildrenCount()} for this scene object.
-     * If the component is not attached to a scene object this function does nothing.
+     * Removing a child will decrease the {@link #getChildrenCount()} for this node.
+     * If the component is not attached to a node this function does nothing.
      *
      * @param childComponent
      *            {@link SXRComponent Component} whose owner is removeed as a child of this
@@ -824,7 +824,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     }
 
     /**
-     * Visits all the descendants of this scene object.
+     * Visits all the descendants of this node.
      * The SceneVisitor.visit function is called for every
      * descendant until it returns false. This allows you
      * to traverse the scene graph safely without copying it.
@@ -853,7 +853,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
 
     /**
      * Visits all the components of the specified type attached to
-     * the descendants of this scene object.
+     * the descendants of this node.
      * The ComponentVisitor.visit function is called for every
      * eligible component of each descendant until it returns false.
      * This allows you to traverse the scene graph safely without copying it.
@@ -890,7 +890,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
 
     /**
      * Visits all the components attached to
-     * the descendants of this scene object.
+     * the descendants of this node.
      * The ComponentVisitor.visit function is called for every
      * component of each descendant until it returns false.
      * This allows you to traverse the scene graph safely without copying it.
@@ -930,7 +930,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     /**
      * Performs case-sensitive search
      *
-     * @param name name of scene object to look for.
+     * @param name name of node to look for.
      * @return null if nothing was found or name was null/empty
      */
     public SXRNode[] getNodesByName(final String name) {
@@ -946,7 +946,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     /**
      * Performs case-sensitive depth-first search
      *
-     * @param name name of scene object to look for.
+     * @param name name of node to look for.
      * @return first match in the graph; null if nothing was found or name was null/empty;
      * in case there might be multiple matches consider using getNodesByName
      */
@@ -989,21 +989,21 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
     }
 
     /**
-     * Designates whether the scene object should be displayed or not.
-     * If a scene object is marked as not visible, none of its children
+     * Designates whether the node should be displayed or not.
+     * If a node is marked as not visible, none of its children
      * will be displayed either. This function only controls whether
      * your application wants to display the object and its children.
      * It does not tell you if GearVRf culled the object.
      *
-     * @return true if scene object should be displayed, else false.
+     * @return true if node should be displayed, else false.
      */
     public boolean isEnabled() {
         return NativeNode.isEnabled(getNative());
     }
 
     /**
-     * Designates whether the scene object should be displayed or not.
-     * If a scene object is not enabled, none of its children
+     * Designates whether the node should be displayed or not.
+     * If a node is not enabled, none of its children
      * will be displayed either.
      *
      * @param enable true the object will be displayed, if false it will not be.
@@ -1174,7 +1174,7 @@ public class SXRNode extends SXRHybridObject implements PrettyPrint, IScriptable
 
 
     /**
-     * Generate debug dump of the tree from the scene object.
+     * Generate debug dump of the tree from the node.
      * It should include a newline character at the end.
      *
      * @param sb the {@code StringBuffer} to dump the object.

@@ -47,7 +47,7 @@ ColliderData SphereCollider::isHit(Node* owner, const glm::vec3& rayStart, const
     glm::mat4    model_matrix;
 
     /*
-     * If we have a scene object with a mesh
+     * If we have a node with a mesh
      * get the sphere center and radius from that.
      */
     RenderData* rd = owner->render_data();
@@ -55,7 +55,7 @@ ColliderData SphereCollider::isHit(Node* owner, const glm::vec3& rayStart, const
 
     model_matrix = t->getModelMatrix();
      /*
-     * If there is a mesh attached to the scene object
+     * If there is a mesh attached to the node
      * use the bounding sphere of the mesh to compute
      * the sphere center and radius in mesh coordinates.
      */
@@ -99,7 +99,7 @@ ColliderData SphereCollider::isHit(Node* owner, const float sphere[])
     glm::mat4    model_matrix;
 
     /*
-     * If we have a scene object with a mesh
+     * If we have a node with a mesh
      * get the sphere center and radius from that.
      */
     RenderData* rd = owner->render_data();
@@ -109,7 +109,7 @@ ColliderData SphereCollider::isHit(Node* owner, const float sphere[])
 
     transformSphere(model_inverse, s);
     /*
-     * If there is a mesh attached to the scene object
+     * If there is a mesh attached to the node
      * use the bounding sphere of the mesh to compute
      * the sphere center and radius in mesh coordinates.
      */

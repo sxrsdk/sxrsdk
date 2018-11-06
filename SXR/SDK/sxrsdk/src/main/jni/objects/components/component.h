@@ -14,7 +14,7 @@
  */
 
 /***************************************************************************
- * Things which can be attached to a scene object.
+ * Things which can be attached to a node.
  ***************************************************************************/
 
 #ifndef COMPONENT_H_

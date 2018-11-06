@@ -28,7 +28,7 @@ import java.util.List;
  * {@linkplain SXRMesh#getBoundingBox() bounding box}) to a
  * {@link SXRCollider};
  * {@linkplain SXRNode#attachCollider(SXRCollider)}
- * attaching that collider to a {@linkplain SXRNode scene object}; and
+ * attaching that collider to a {@linkplain SXRNode node}; and
  * setting the collider's {@linkplain #setEnable(boolean) enabled flag.}
  *
  * One can use this class to specify multiple colliders for a

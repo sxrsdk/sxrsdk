@@ -21,9 +21,9 @@ import org.joml.Vector4f;
 
 /**
  * Causes a shadow map to be rendered from the viewpoint
- * of the scene object which owns the shadow map.
+ * of the node which owns the shadow map.
  * A shadow map is only rendered if a light is
- * attached to the owning scene object.
+ * attached to the owning node.
  * All of the shadow maps are kept in a single
  * texture array and they must all be the same size.
  * This array is created the first time a SXRShadowMap
