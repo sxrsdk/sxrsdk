@@ -101,5 +101,7 @@ public class SXRVersion {
 
     public static final String V_4_0_0 = "4.0.0";
 
-    public static final String CURRENT = V_4_0_0;
+    public static final String V_5_0_0 = "5.0.0";
+
+    public static final String CURRENT = V_5_0_0;
 }
