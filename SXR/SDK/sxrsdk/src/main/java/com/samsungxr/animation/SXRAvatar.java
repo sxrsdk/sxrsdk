@@ -1,27 +1,21 @@
 package com.samsungxr.animation;
 
+import com.samsungxr.IAssetEvents;
+import com.samsungxr.IEventReceiver;
+import com.samsungxr.IEvents;
 import com.samsungxr.SXRAndroidResource;
 import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRImportSettings;
-import com.samsungxr.SXRMaterial;
-import com.samsungxr.SXRMesh;
-import com.samsungxr.SXRResourceVolume;
 import com.samsungxr.SXRNode;
+import com.samsungxr.SXRResourceVolume;
 import com.samsungxr.SXRTexture;
-import com.samsungxr.IAssetEvents;
-import com.samsungxr.IEventReceiver;
-import com.samsungxr.IEvents;
 import com.samsungxr.animation.keyframe.BVHImporter;
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
-import com.samsungxr.animation.keyframe.TRSImporter;
-import com.samsungxr.nodes.SXRCylinderNode;
-import com.samsungxr.nodes.SXRSphereNode;
 import com.samsungxr.utility.Log;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -156,14 +150,24 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             {
                 case 2:
                 mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
-                        IAvatarEvents.class, "onAnimationFinished", animator, animation);
+                                                                        IAvatarEvents.class,
+                                                                        "onAnimationFinished",
+                                                                        SXRAvatar.this,
+                                                                        animator,
+                                                                        animation);
                 mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
-                        IAvatarEvents.class, "onAnimationStarted", animator);
+                                                                        IAvatarEvents.class,
+                                                                        "onAnimationStarted",
+                                                                        SXRAvatar.this,
+                                                                        animator);
                 break;
 
                 case 1:
                 mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
-                        IAvatarEvents.class, "onAnimationStarted", animator);
+                                                                        IAvatarEvents.class,
+                                                                        "onAnimationStarted",
+                                                                        SXRAvatar.this,
+                                                                        animator);
                 if (mRepeatMode == SXRRepeatMode.REPEATED)
                 {
                     startAll(mRepeatMode);
@@ -265,14 +269,13 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 else
                 {
                     skelAnim = importer.importAnimation(animResource, mSkeleton);
-                    SXRSkeleton skl = skelAnim.getSkeleton();
-
                     animator.addAnimation(skelAnim);
                 }
                 addAnimation(animator);
                 ctx.getEventManager().sendEvent(this,
                                                 IAvatarEvents.class,
                                                 "onAnimationLoaded",
+                                                SXRAvatar.this,
                                                 animator,
                                                 filePath,
                                                 null);
@@ -282,6 +285,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 ctx.getEventManager().sendEvent(this,
                                                 IAvatarEvents.class,
                                                 "onAnimationLoaded",
+                                                SXRAvatar.this,
                                                 null,
                                                 filePath,
                                                 ex.getMessage());
@@ -423,6 +427,11 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         animator.start(mOnFinish);
         mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this, IAvatarEvents.class,
                 "onAnimationStarted", animator);
+        mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
+                                                                IAvatarEvents.class,
+                                                                "onAnimationStarted",
+                                                                SXRAvatar.this,
+                                                                animator);
     }
 
     /**
@@ -515,7 +524,13 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             {
                 Log.e(TAG, "Avatar skeleton not found in asset file " + filePath);
             }
-            context.getEventManager().sendEvent(SXRAvatar.this, IAvatarEvents.class, eventName, modelRoot, filePath, errors);
+            context.getEventManager().sendEvent(SXRAvatar.this,
+                                                IAvatarEvents.class,
+                                                eventName,
+                                                SXRAvatar.this,
+                                                modelRoot,
+                                                filePath,
+                                                errors);
         }
 
         public void onModelLoaded(SXRContext context, SXRNode model, String filePath) { }
@@ -526,11 +541,11 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
 
     public interface IAvatarEvents extends IEvents
     {
-        public void onAvatarLoaded(SXRNode avatarRoot, String filePath, String errors);
-        public void onModelLoaded(SXRNode avatarRoot, String filePath, String errors);
-        public void onAnimationLoaded(SXRAnimator animator, String filePath, String errors);
-        public void onAnimationStarted(SXRAnimator animator);
-        public void onAnimationFinished(SXRAnimator animator, SXRAnimation animation);
+        public void onAvatarLoaded(SXRAvatar avatar, SXRNode avatarRoot, String filePath, String errors);
+        public void onModelLoaded(SXRAvatar avatar, SXRNode avatarRoot, String filePath, String errors);
+        public void onAnimationLoaded(SXRAvatar avatar, SXRAnimator animator, String filePath, String errors);
+        public void onAnimationStarted(SXRAvatar avatar, SXRAnimator animator);
+        public void onAnimationFinished(SXRAvatar avatar, SXRAnimator animator, SXRAnimation animation);
     }
 
     protected IAssetEvents mLoadAnimHandler = new IAssetEvents()
@@ -544,7 +559,13 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 {
                     errors = "No animations found in " + filePath;
                 }
-                context.getEventManager().sendEvent(SXRAvatar.this, IAvatarEvents.class, "onAnimationLoaded", null, filePath, errors);
+                context.getEventManager().sendEvent(SXRAvatar.this,
+                                                    IAvatarEvents.class,
+                                                    "onAnimationLoaded",
+                                                    SXRAvatar.this,
+                                                    null,
+                                                    filePath,
+                                                    errors);
                 return;
             }
 
@@ -557,7 +578,13 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 animator.addAnimation(poseMapper);
             }
             addAnimation(animator);
-            context.getEventManager().sendEvent(SXRAvatar.this, IAvatarEvents.class, "onAnimationLoaded", animator, filePath, errors);
+            context.getEventManager().sendEvent(SXRAvatar.this,
+                                                IAvatarEvents.class,
+                                                "onAnimationLoaded",
+                                                SXRAvatar.this,
+                                                animator,
+                                                filePath,
+                                                errors);
         }
 
         public void onModelLoaded(SXRContext context, SXRNode model, String filePath)

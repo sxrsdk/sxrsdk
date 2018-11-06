@@ -15,18 +15,17 @@
 
 package com.samsungxr.animation.keyframe;
 
+import com.samsungxr.PrettyPrint;
 import com.samsungxr.SXRHybridObject;
 import com.samsungxr.SXRNode;
-import com.samsungxr.PrettyPrint;
 import com.samsungxr.animation.SXRAnimation;
 import com.samsungxr.animation.SXRPose;
 import com.samsungxr.animation.SXRSkeleton;
 import com.samsungxr.utility.Log;
+
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -224,6 +223,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
         skel.updateBonePose();
         skel.updateSkinPose();
     }
+
     public SXRPose computePose(float timeInSec, SXRPose pose)
     {
         Matrix4f temp = new Matrix4f();
