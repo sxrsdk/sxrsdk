@@ -1148,7 +1148,7 @@ class  SXRJassimpAdapter
             AiMesh aiMesh)
     {
         EnumSet<SXRImportSettings> settings = assetRequest.getImportSettings();
-        SXRMaterial gvrMaterial = createMaterial(aiMaterial, settings);
+        SXRMaterial gvrMaterial = createMaterial(aiMaterial, settings, aiMesh.hasVertexColors());
         AiColor diffuseColor = aiMaterial.getDiffuseColor(sWrapperProvider);
         float opacity = diffuseColor.getAlpha();
 
@@ -1208,7 +1208,7 @@ class  SXRJassimpAdapter
         return gvrMaterial;
     }
 
-    private SXRMaterial createMaterial(AiMaterial material, EnumSet<SXRImportSettings> settings)
+    private SXRMaterial createMaterial(AiMaterial material, EnumSet<SXRImportSettings> settings, boolean hasVertexColors)
     {
         boolean layered = false;
         SXRShaderId shaderType;
@@ -1265,10 +1265,18 @@ class  SXRJassimpAdapter
             {
                 shaderType = SXRMaterial.SXRShaderType.Phong.ID;
             }
-            if (layered)
+            if (hasVertexColors)
+            {
+                shaderType = SXRMaterial.SXRShaderType.Color.ID;
+            }
+            else if (layered)
             {
                 shaderType = SXRMaterial.SXRShaderType.PhongLayered.ID;
             }
+        }
+        else if (hasVertexColors)
+        {
+            shaderType = SXRMaterial.SXRShaderType.Color.ID;
         }
         else
         {

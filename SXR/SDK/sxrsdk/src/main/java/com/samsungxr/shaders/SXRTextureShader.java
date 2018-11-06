@@ -14,20 +14,18 @@
  */
 package com.samsungxr.shaders;
 
-import java.util.HashMap;
-import java.util.List;
+import android.content.Context;
 
+import com.samsungxr.IRenderable;
+import com.samsungxr.R;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRScene;
 import com.samsungxr.SXRShaderData;
 import com.samsungxr.SXRShaderTemplate;
-import com.samsungxr.IRenderable;
 import com.samsungxr.utility.TextFile;
 
-import android.content.Context;
-
-import com.samsungxr.R;
+import java.util.HashMap;
 
 /**
  * Manages a set of variants on vertex and fragment shaders from the same source
