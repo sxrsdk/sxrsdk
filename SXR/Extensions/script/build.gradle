@@ -34,9 +34,9 @@ dependencies {
     implementation "com.google.code.gson:gson:$gsonVersion"
 
     if (findProject(':sxrsdk')) {
-        compile project (':sxrsdk')
+        implementation project (':sxrsdk')
     } else {
-        compile(name: 'sxrsdk-debug', ext: 'aar')
+        implementation(name: 'sxrsdk-debug', ext: 'aar')
     }
 }
 

@@ -48,7 +48,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     private long mNativeLoader;
 
     static {
-        System.loadLibrary("gvrf-physics");
+        System.loadLibrary("sxr-physics");
     }
 
     private final LongSparseArray<SXRPhysicsWorldObject> mPhysicsObject = new LongSparseArray<SXRPhysicsWorldObject>();

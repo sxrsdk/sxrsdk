@@ -25,9 +25,6 @@ project(':debugwebserver').projectDir = new File('DebugWebServer/debugwebserver'
 include ':sceneserializer'
 project(':sceneserializer').projectDir = new File('SceneSerializer/sceneserializer')
 
-include ':widgetplugin'
-project(':widgetplugin').projectDir = new File('WidgetPlugin/widgetplugin')
-
 include ':widgetLib'
 project(':widgetLib').projectDir = new File('widgetLib')
 

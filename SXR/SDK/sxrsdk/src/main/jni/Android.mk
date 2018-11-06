@@ -89,6 +89,7 @@ LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)
 FILE_LIST := $(wildcard $(LOCAL_PATH)/vulkan/*.cpp)
 LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)
 
+
 LOCAL_SHARED_LIBRARIES += assimp
 #to build shaderc:
 #cd ndk-bundle/sources/third_party/shaderc

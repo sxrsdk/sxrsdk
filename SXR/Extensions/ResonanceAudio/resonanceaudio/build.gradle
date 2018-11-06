@@ -15,7 +15,6 @@ repositories {
 
 android {
     compileSdkVersion 24
-    buildToolsVersion '26.0.2'
 
     defaultConfig {
         minSdkVersion 21
@@ -41,14 +40,14 @@ project.ext.jomlVersion = "1.9.3-SNAPSHOT"
 project.ext.daydreamVersion = "1.130.0"
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     if (findProject(':sxrsdk')) {
-        compile project (':sxrsdk')
+        implementation project (':sxrsdk')
     } else {
-        compile(name: 'sxrsdk-debug', ext: 'aar')
+        implementation(name: 'sxrsdk-debug', ext: 'aar')
     }
-    compile "org.joml:joml-android:${jomlVersion}"
-    compile "com.google.vr:sdk-audio:${daydreamVersion}"
+    implementation "org.joml:joml-android:${jomlVersion}"
+    implementation "com.google.vr:sdk-audio:${daydreamVersion}"
 }
 
 clean {}.doLast {
