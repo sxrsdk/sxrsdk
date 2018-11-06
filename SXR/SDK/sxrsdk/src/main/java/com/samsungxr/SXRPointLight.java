@@ -20,7 +20,7 @@ import com.samsungxr.utility.TextFile;
 /**
  * Illuminates object in the scene with a point light source.
  * 
- * The position of the light is the position of the scene object
+ * The position of the light is the position of the node
  * the light is attached to. Light is emitted in all directions
  * from that point.
  *
@@ -33,7 +33,7 @@ import com.samsungxr.utility.TextFile;
  * <table>
  * <tr><td>enabled</td><td>1 = light is enabled, 0 = light is disabled</td></tr>
  * <tr><td>world_position</td><td>position of spot light in world coordinates/td></tr>
- *  derived from scene object position</td></tr>
+ *  derived from node position</td></tr>
  * <tr><td>ambient_intensity</td><td>intensity of ambient light emitted/td></tr>
  * <tr><td>diffuse_intensity</td><td>intensity of diffuse light emitted/td></tr>
  * <tr><td>specular_intensity</td><td>intensity of specular light emitted</td></tr>

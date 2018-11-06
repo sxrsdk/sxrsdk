@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
  * float or int vectors. It also has key / value pairs for the texture
  * samplers to be used with the shader.
  * <p>
- * Visible scene objects must have render data
+ * Visible nodes must have render data
  * {@linkplain SXRNode#attachRenderData(SXRRenderData)} attached. Each
  * {@link SXRRenderData} has a {@link SXRMesh} that defines its
  * geometry, and a {@link SXRMaterial} that defines its surface.
@@ -537,7 +537,7 @@ public class SXRMaterial extends  SXRShaderData
      * from back to front. Rather, it sorts every object by
      * {@linkplain SXRRenderData#getRenderingOrder() render order,} then draws
      * the {@linkplain SXRScene scene graph} in traversal order. So, if you want
-     * to see a scene object through another scene object, you have to
+     * to see a node through another node, you have to
      * explicitly {@linkplain SXRRenderData#setRenderingOrder(int) set the
      * rendering order} so that the translucent object draws after the opaque
      * object. You can use any integer values you like, but SXRF supplies

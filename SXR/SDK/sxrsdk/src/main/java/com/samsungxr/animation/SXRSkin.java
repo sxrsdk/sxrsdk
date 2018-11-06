@@ -32,7 +32,7 @@ import org.joml.Vector3f;
  * The {@link SXRSkin} designates which bones of the skeleton animate a particular mesh.
  * Only these bones are sent to the GPU when the mesh is skinned.
  * Each mesh can use a different set of bones from the skeleton.
- * The skin should be attached to the scene object that owns the mesh.
+ * The skin should be attached to the node that owns the mesh.
  * <p>
  * When an asset containing a skinned mesh is loaded by the {@link com.samsungxr.SXRAssetLoader},
  * the {@link SXRSkeleton} and the {@link SXRSkin} components for each mesh

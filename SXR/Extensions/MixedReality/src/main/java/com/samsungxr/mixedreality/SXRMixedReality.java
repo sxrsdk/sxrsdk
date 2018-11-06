@@ -17,13 +17,13 @@ package com.samsungxr.mixedreality;
 
 import android.graphics.Bitmap;
 
-import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventListeners;
 import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRScene;
 import com.samsungxr.SXRNode;
+import com.samsungxr.SystemPropertyUtil;
 import com.samsungxr.mixedreality.arcore.ARCoreSession;
 import com.samsungxr.mixedreality.CVLibrary.CVLibrarySession;
 
@@ -34,9 +34,8 @@ import java.util.ArrayList;
 /**
  * Component to enable AR functionalities on SXRf.
  */
-public class SXRMixedReality extends SXRBehavior implements IMixedReality
+public class SXRMixedReality implements IMixedReality
 {
-    static private long TYPE_MIXEDREALITY = newComponentType(SXRMixedReality.class);
     private IMixedReality mSession;
     private SessionState mState;
     private Vector3f mTempVec1 = new Vector3f();
@@ -82,7 +81,7 @@ public class SXRMixedReality extends SXRBehavior implements IMixedReality
      */
     public SXRMixedReality(SXRScene scene, boolean enableCloudAnchor)
     {
-        this(scene, enableCloudAnchor, "arcore");
+        this(scene, enableCloudAnchor, null);
     }
 
     /**
@@ -92,26 +91,28 @@ public class SXRMixedReality extends SXRBehavior implements IMixedReality
      * @param scene scene containing the virtual objects
      * @param enableCloudAnchor true to enable cloud anchors, false to disable
      * @param arPlatform    string with name of underlying AR platform to use:
-     *                      "arcore" indicates to use Google AR Core.
+     *                      "arcore" will use Google AR Core.
+     *                      "ar-drop-in2" will use the SRA experimental headset
      */
     public SXRMixedReality(SXRScene scene, boolean enableCloudAnchor, String arPlatform)
     {
-        super(scene.getSXRContext());
-        mType = getComponentType();
+        String prop = SystemPropertyUtil.getSystemPropertyString("debug.samsungxr.hmt");
+        boolean hasCVLib = "AR-DROP-IN2".equals(prop);
+
+        if (arPlatform == null)
+        {
+            arPlatform = hasCVLib ? "ar-drop-in2" : "arcore";
+        }
         if (arPlatform.equals("arcore"))
         {
             mSession = new ARCoreSession(scene, enableCloudAnchor);
         }
-        else
+        else if (arPlatform.equals("ar-drop-in2"))
         {
             mSession = new CVLibrarySession(scene, enableCloudAnchor);
         }
         mState = SessionState.ON_PAUSE;
-        scene.getMainCameraRig().getOwnerObject().attachComponent(this);
     }
-
-
-    static public long getComponentType() { return TYPE_MIXEDREALITY; }
 
     @Override
     public float getARToVRScale() { return mSession.getARToVRScale(); }

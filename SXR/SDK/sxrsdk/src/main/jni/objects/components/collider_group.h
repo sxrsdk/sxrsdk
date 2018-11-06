@@ -15,7 +15,7 @@
 
 
 /***************************************************************************
- * Can hold a set of colliders attached to a scene object.
+ * Can hold a set of colliders attached to a node.
  ***************************************************************************/
 
 #ifndef COLLIDE_GROUP_H_

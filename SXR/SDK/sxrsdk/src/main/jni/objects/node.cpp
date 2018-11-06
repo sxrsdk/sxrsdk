@@ -152,7 +152,7 @@ void Node::addChildObject(Node* self, Node* child) {
 }
 
 /**
- * Called when a scene object is added to the current scene.
+ * Called when a node is added to the current scene.
  */
 void Node::onAddedToScene(Scene* scene)
 {
@@ -168,13 +168,13 @@ void Node::onAddedToScene(Scene* scene)
 }
 
 /**
- * Called when a scene object is attached to a parent.
+ * Called when a node is attached to a parent.
  */
 bool Node::onAddChild(Node* addme, Node* root)
 {
     if (addme == this)
     {
-        std::string error =  "Node::addChildObject() : cycle of scene objects is not allowed.";
+        std::string error =  "Node::addChildObject() : cycle of nodes is not allowed.";
         LOGE("%s", error.c_str());
         return false;
     }
@@ -208,7 +208,7 @@ bool Node::onRemoveChild(Node* removeme, Node* root)
 }
 
 /**
- * Called when a scene object is removed from the current scene.
+ * Called when a node is removed from the current scene.
  */
 void Node::onRemovedFromScene(Scene* scene)
 {
@@ -358,13 +358,13 @@ bool Node::isColliding(Node *node) {
     float this_object_bounding_box[6], check_object_bounding_box[6];
 
     if (nullptr == this->render_data()->mesh()) {
-        LOGE("isColliding: no mesh for this scene object");
+        LOGE("isColliding: no mesh for this node");
         return false;
     }
     Transform* t = this->render_data()->owner_object()->transform();
 
     if (nullptr == t) {
-        LOGE("isColliding: no transform for this scene object");
+        LOGE("isColliding: no transform for this node");
         return false;
     }
     glm::mat4 this_object_model_matrix = t->getModelMatrix();
@@ -372,12 +372,12 @@ bool Node::isColliding(Node *node) {
             &this_object_model_matrix, this_object_bounding_box);
 
     if (nullptr == node->render_data()->mesh()) {
-        LOGE("isColliding: no mesh for target scene object");
+        LOGE("isColliding: no mesh for target node");
         return false;
     }
     t = node->render_data()->owner_object()->transform();
     if (nullptr == t) {
-        LOGE("isColliding: no transform for target scene object");
+        LOGE("isColliding: no transform for target node");
         return false;
     }
     glm::mat4 check_object_model_matrix = t->getModelMatrix();
@@ -395,7 +395,7 @@ bool Node::isColliding(Node *node) {
 }
 
 /**
- * Test the input ray against the scene objects HBV.
+ * Test the input ray against the nodes HBV.
  *
  * This method uses the algorithm described in the paper:
  *
@@ -455,7 +455,7 @@ bool Node::intersectsBoundingVolume(float rox, float roy, float roz,
 }
 
 /**
- * Test this scene object's HBV against the HBV of the provided scene object.
+ * Test this node's HBV against the HBV of the provided node.
  */
 bool Node::intersectsBoundingVolume(Node *node) {
     BoundingVolume this_bounding_volume_ = getBoundingVolume();

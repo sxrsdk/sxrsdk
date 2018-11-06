@@ -46,7 +46,7 @@ public class SXRWebViewNode extends SXRNode implements
     private int mCount = 0;
 
     /**
-     * Shows a web page on a {@linkplain SXRNode scene object} with an
+     * Shows a web page on a {@linkplain SXRNode node} with an
      * arbitrarily complex geometry.
      * 
      * @param gvrContext

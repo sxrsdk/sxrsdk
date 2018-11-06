@@ -15,7 +15,7 @@
 
 
 /***************************************************************************
- * Can hold multiple colliders attached to a scene object.
+ * Can hold multiple colliders attached to a node.
  ***************************************************************************/
 #include "collider.h"
 #include "glm/gtc/type_ptr.hpp"

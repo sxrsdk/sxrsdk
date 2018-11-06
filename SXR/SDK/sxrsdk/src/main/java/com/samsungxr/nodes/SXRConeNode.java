@@ -31,7 +31,7 @@ public class SXRConeNode extends SXRCylinderNode {
     private static final float HEIGHT = 1.0f;
 
     /**
-     * Constructs a cone scene object with a height of 1, radius of 0.5, 10
+     * Constructs a cone node with a height of 1, radius of 0.5, 10
      * stacks, and 36 slices.
      * 
      * The cone's triangles and normals are facing out and the same texture will
@@ -46,7 +46,7 @@ public class SXRConeNode extends SXRCylinderNode {
     }
 
     /**
-     * Constructs a cone scene object with a height of 1, radius of 0.5, 10
+     * Constructs a cone node with a height of 1, radius of 0.5, 10
      * stacks, and 36 slices.
      * 
      * The cone's triangles and normals are facing either in or out and the same
@@ -65,7 +65,7 @@ public class SXRConeNode extends SXRCylinderNode {
     }
 
     /**
-     * Constructs a cone scene object with a height of 1, radius of 0.5, 10
+     * Constructs a cone node with a height of 1, radius of 0.5, 10
      * stacks, and 36 slices.
      * 
      * The cone's triangles and normals are facing either in or out and the same

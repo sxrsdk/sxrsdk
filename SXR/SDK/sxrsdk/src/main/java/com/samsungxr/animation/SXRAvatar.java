@@ -94,7 +94,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     public  SXRSkeleton getSkeleton() { return mSkeleton; }
 
     /**
-     * Get the root of the scene object hierarchy for the avatar.
+     * Get the root of the node hierarchy for the avatar.
      * <p>
      * The avatar model is constructed by the asset loader when the avatar
      * model is loaded. It contains the scene hierarchy with the skeleton

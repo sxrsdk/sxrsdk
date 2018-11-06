@@ -34,7 +34,7 @@ import com.samsungxr.utility.Log;
 import java.io.IOException;
 
 /**
- * A {@linkplain SXRNode scene object} that shows live video from one of
+ * A {@linkplain SXRNode node} that shows live video from one of
  * the device's cameras
  */
 public class SXRCameraNode extends SXRNode {
@@ -49,7 +49,7 @@ public class SXRCameraNode extends SXRNode {
     private CameraActivityEvents cameraActivityEvents;
 
     /**
-     * Create a {@linkplain SXRNode scene object} (with arbitrarily
+     * Create a {@linkplain SXRNode node} (with arbitrarily
      * complex geometry) that shows live video from one of the device's cameras
      *
      * @param gvrContext current {@link SXRContext}
@@ -98,7 +98,7 @@ public class SXRCameraNode extends SXRNode {
     }
 
     /**
-     * Create a {@linkplain SXRNode scene object} (with arbitrarily
+     * Create a {@linkplain SXRNode node} (with arbitrarily
      * complex geometry) that shows live video from one of the device's cameras
      *
      * @param gvrContext current {@link SXRContext}
@@ -143,7 +143,7 @@ public class SXRCameraNode extends SXRNode {
     }
 
     /**
-     * Create a 2D, rectangular {@linkplain SXRNode scene object} that
+     * Create a 2D, rectangular {@linkplain SXRNode node} that
      * shows live video from one of the device's cameras
      *
      * @param gvrContext current {@link SXRContext}
@@ -163,7 +163,7 @@ public class SXRCameraNode extends SXRNode {
     }
 
     /**
-     * Create a 2D, rectangular {@linkplain SXRNode scene object} that
+     * Create a 2D, rectangular {@linkplain SXRNode node} that
      * shows live video from one of the device's cameras.
      *
      * @param gvrContext current {@link SXRContext}
@@ -240,7 +240,7 @@ public class SXRCameraNode extends SXRNode {
      * <p>
      * Note: {@link #pause()} and {@code resume()} only affect the polling that
      * links the Android {@link Camera} to this {@linkplain SXRNode SXRF
-     * scene object:} they have <em>no affect</em> on the underlying
+     * node:} they have <em>no affect</em> on the underlying
      * {@link Camera} object.
      */
     public void resume() {
@@ -253,7 +253,7 @@ public class SXRCameraNode extends SXRNode {
      * <p>
      * Note: {@code pause()} and {@link #resume()} only affect the polling that
      * links the Android {@link Camera} to this {@linkplain SXRNode SXRF
-     * scene object:} they have <em>no affect</em> on the underlying
+     * node:} they have <em>no affect</em> on the underlying
      * {@link Camera} object.
      */
     public void pause() {

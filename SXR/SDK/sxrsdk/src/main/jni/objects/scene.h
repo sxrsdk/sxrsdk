@@ -15,7 +15,7 @@
 
 
 /***************************************************************************
- * Holds scene objects. Can be used by engines.
+ * Holds nodes. Can be used by engines.
  ***************************************************************************/
 
 #ifndef SCENE_H_
@@ -134,14 +134,14 @@ public:
      * This list is used to optimize picking by only
      * searching the pickable objects.
      * Colliders are added to this list when attached
-     * to a scene object.
+     * to a node.
      */
     void addCollider(Collider* collider);
 
     /*
      * Remove a collider from the internal collider list.
      * Colliders are removed from the list when detached
-     * from a scene object.
+     * from a node.
      */
     void removeCollider(Collider* collider);
 
@@ -154,7 +154,7 @@ public:
     void clearVisibleColliders() { visibleColliders.clear(); }
 
     /*
-     * Called during culling to add a scene object's
+     * Called during culling to add a node's
      * collider to the visible collider list.
      */
     void pick(Node* sceneobj);

@@ -20,19 +20,19 @@ import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
 /**
- * Finds the scene objects that are within a view frustum.
+ * Finds the nodes that are within a view frustum.
  *
  * The picker can function in two modes. One way is to simply call its
  * static functions to make a single scan through the scene to determine
  * what is within the view frustum.
  *
- * The other way is to add the picker as a component to a scene object
+ * The other way is to add the picker as a component to a node
  * and specify the view frustum dimensions. The viewpoint of the frustum
- * is the center of the scene object. The view direction is the forward
- * direction of the scene object. The frustum will pick what a camera
- * attached to the scene object with that view frustum would see.
+ * is the center of the node. The view direction is the forward
+ * direction of the node. The frustum will pick what a camera
+ * attached to the node with that view frustum would see.
  *
- * For a {@linkplain SXRNode scene object} to be pickable, it must have a
+ * For a {@linkplain SXRNode node} to be pickable, it must have a
  * {@link SXRCollider} component attached to it that is enabled.
  * The picker returns an array containing all the collisions as instances of SXRPickedObject.
  * The picked object contains the collider instance, the distance from the
@@ -44,9 +44,9 @@ import org.joml.Vector4f;
  * the picker generates one or more pick events (IPickEvents interface)
  * which are sent the event receiver of the scene. These events can be
  * observed by listeners.
- *  - onEnter(SXRNode)  called when the scene object enters the frustum.
- *  - onExit(SXRNode)   called when the scene object exits the frustum.
- *  - onInside(SXRNode) called while the scene object is inside the frustum.
+ *  - onEnter(SXRNode)  called when the node enters the frustum.
+ *  - onExit(SXRNode)   called when the node exits the frustum.
+ *  - onInside(SXRNode) called while the node is inside the frustum.
  *  - onPick(SXRPicker)        called when the set of picked objects changes.
  *  - onNoPick(SXRPicker)      called once when nothing is picked.
  *
@@ -64,7 +64,7 @@ public class SXRFrustumPicker extends SXRPicker {
     /**
      * Construct a picker which picks from a given scene.
      * @param context context that owns the scene
-     * @param scene scene containing the scene objects to pick from
+     * @param scene scene containing the nodes to pick from
      */
     public SXRFrustumPicker(SXRContext context, SXRScene scene)
     {
@@ -74,11 +74,11 @@ public class SXRFrustumPicker extends SXRPicker {
 
     /**
      * Set the view frustum to pick against from the minimum and maximum corners.
-     * The viewpoint of the frustum is the center of the scene object
+     * The viewpoint of the frustum is the center of the node
      * the picker is attached to. The view direction is the forward
-     * direction of that scene object. The frustum will pick what a camera
-     * attached to the scene object with that view frustum would see.
-     * If the frustum is not attached to a scene object, it defaults to
+     * direction of that node. The frustum will pick what a camera
+     * attached to the node with that view frustum would see.
+     * If the frustum is not attached to a node, it defaults to
      * the view frustum of the main camera of the scene.
      *
      * @param frustum array of 6 floats as follows:
@@ -99,11 +99,11 @@ public class SXRFrustumPicker extends SXRPicker {
     /**
      * Set the view frustum to pick against from the field of view, aspect
      * ratio and near, far clip planes. The viewpoint of the frustum
-     * is the center of the scene object the picker is attached to.
-     * The view direction is the forward direction of that scene object.
-     * The frustum will pick what a camera attached to the scene object
+     * is the center of the node the picker is attached to.
+     * The view direction is the forward direction of that node.
+     * The frustum will pick what a camera attached to the node
      * with that view frustum would see. If the frustum is not attached
-     * to a scene object, it defaults to the view frustum of the main camera of the scene.
+     * to a node, it defaults to the view frustum of the main camera of the scene.
      *
      * @param fovy  vertical field of view in degrees
      * @param aspect aspect ratio (width / height)
@@ -161,9 +161,9 @@ public class SXRFrustumPicker extends SXRPicker {
      * Scans the scene graph to collect picked items
      * and generates appropriate pick events.
      * This function is called automatically by
-     * the picker if it is attached to a scene object.
+     * the picker if it is attached to a node.
      * You can instantiate the picker and not attach
-     * it to a scene object. In this case you must
+     * it to a node. In this case you must
      * manually set the pick ray and call doPick()
      * to generate the pick events.
      * @see IPickEvents
@@ -215,7 +215,7 @@ public class SXRFrustumPicker extends SXRPicker {
     }
 
     /**
-     * Returns the list of colliders attached to scene objects that are
+     * Returns the list of colliders attached to nodes that are
      * visible from the viewpoint of the camera.
      *
      * <p>
@@ -225,13 +225,13 @@ public class SXRFrustumPicker extends SXRPicker {
      * can then examine the return list without worrying about another thread
      * corrupting your hit data.
      *
-     * The hit location returned is the world position of the scene object center.
+     * The hit location returned is the world position of the node center.
      *
      * @param scene
      *            The {@link SXRScene} with all the objects to be tested.
      *
      * @return A list of {@link com.samsungxr.SXRPicker.SXRPickedObject}, sorted by distance from the
-     *         camera rig. Each {@link com.samsungxr.SXRPicker.SXRPickedObject} contains the scene object
+     *         camera rig. Each {@link com.samsungxr.SXRPicker.SXRPickedObject} contains the node
      *         which owns the {@link SXRCollider} along with the hit
      *         location and distance from the camera.
      *

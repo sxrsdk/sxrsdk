@@ -15,7 +15,7 @@
 
 
 /***************************************************************************
- * Can hold multiple colliders attached to a scene object.
+ * Can hold multiple colliders attached to a node.
  ***************************************************************************/
 
 #include "collider_group.h"

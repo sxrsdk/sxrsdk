@@ -36,7 +36,7 @@ public interface IViewEvents extends IEvents {
     /**
      * Called when the Android starts to draw the {@link View} attached to {@link SXRViewNode}.
      * This is the recommended place to attach the {@link SXRViewNode} to the
-     * scene, avoiding rendering of scene object with empty texture.
+     * scene, avoiding rendering of node with empty texture.
      *
      * @param sceneObject {@link SXRViewNode} whom the view is attached to.
      * @param view Android view attached to {@link SXRViewNode}

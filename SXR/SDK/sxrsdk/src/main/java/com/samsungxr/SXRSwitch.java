@@ -21,11 +21,11 @@ import java.util.List;
 
 /**
  * A switch node is a component that will display only
- * one child of a scene object.
+ * one child of a node.
  * 
  * It can be used to select from among several versions of an object.
  * When the SXRSwitch component is attached to a SXRNode
- * it sets all but one of the scene object's children to be invisible.
+ * it sets all but one of the node's children to be invisible.
  * You can control which child is visible by setting the switch index.
  * 
  * @see SXRBehavior
@@ -56,7 +56,7 @@ public class SXRSwitch extends SXRBehavior
     
     /**
      * Gets the current switch index that selects what object to display.
-     * This value indexes the children of the scene object which owns
+     * This value indexes the children of the node which owns
      * this component.
      * 
      * @return 0 based switch index
@@ -82,7 +82,7 @@ public class SXRSwitch extends SXRBehavior
 
     /**
      * Sets the current switch index based on object name.
-     * This function finds the child of the scene object
+     * This function finds the child of the node
      * this component is attached to and sets the switch
      * index to reference it so this is the object that
      * will be displayed.

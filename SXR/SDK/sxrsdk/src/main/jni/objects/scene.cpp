@@ -14,7 +14,7 @@
  */
 
 /***************************************************************************
- * Holds scene objects. Can be used by engines.
+ * Holds nodes. Can be used by engines.
  ***************************************************************************/
 
 #include <gl/gl_render_data.h>

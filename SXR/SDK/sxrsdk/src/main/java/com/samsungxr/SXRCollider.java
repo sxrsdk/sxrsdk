@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A collider allows a scene object to be picked.
+ * A collider allows a node to be picked.
  * Instead of checking against all the vertices of the object's mesh,
  * a simpler collision geometry is provided to optimize picking.
  * 
@@ -15,12 +15,12 @@ import java.util.List;
  * you want picking to be. The SXRSphereCollider is the fastest but
  * least accurate - it picks against a sphere. You can use a SXRMeshCollider
  * to pick against a mesh which can be a simplified version of the
- * scene object's real mesh, such as the mesh bounding box.
+ * node's real mesh, such as the mesh bounding box.
  *
  * The SXRPicker class can cast a ray against the scene graph and
  * return a list of which collider were hit and where. The picker can
  * be attached to a scene graph node, such as the camera rig owner,
- * to automatically generate the ray from the scene object transform
+ * to automatically generate the ray from the node transform
  * and pick every frame. In this mode, the picker will generate
  * events indicating what was picked.
  *

@@ -23,9 +23,9 @@ namespace sxr {
 
 /**
  * Constructs a render target component which renders to a designated texture.
- * The scene will be rendered from the viewpoint of the scene object
+ * The scene will be rendered from the viewpoint of the node
  * the RenderTarget is attached to. Nothing will be rendered if
- * the render target is not attached to a scene object or
+ * the render target is not attached to a node or
  * if it does not have a texture.
  *
  * If a RenderTarget is actually a ShadowMap, it is rendered

@@ -27,7 +27,7 @@ import com.samsungxr.SXRNode;
  * By default it is a static body with infinity mass, value 0, and does not move under simulation.
  * A dynamic body with a mass defined is fully simulated.
  * <p>
- * Every {@linkplain com.samsungxr.SXRNode scene object} can represent a rigid body since
+ * Every {@linkplain com.samsungxr.SXRNode node} can represent a rigid body since
  * it has a {@link SXRRigidBody} component attached to.
  *
  * You must setup the values of owner's {@link com.samsungxr.SXRTransform}, like initial position,
@@ -500,11 +500,11 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
     @Override
     public void onAttach(SXRNode newOwner) {
         if (!mLoaded && newOwner.getCollider() == null) {
-            throw new UnsupportedOperationException("You must have a collider attached to the scene object before attaching the rigid body");
+            throw new UnsupportedOperationException("You must have a collider attached to the node before attaching the rigid body");
         }
         final SXRRenderData renderData = newOwner.getRenderData();
         if (renderData != null && renderData.getMesh() == null) {
-            throw new UnsupportedOperationException("You must have a mesh attached to the scene object before attaching the rigid body");
+            throw new UnsupportedOperationException("You must have a mesh attached to the node before attaching the rigid body");
         }
         super.onAttach(newOwner);
     }
