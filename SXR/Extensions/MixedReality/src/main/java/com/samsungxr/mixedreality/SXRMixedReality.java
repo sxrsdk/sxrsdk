@@ -24,8 +24,9 @@ import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRScene;
 import com.samsungxr.SXRNode;
-import com.samsungxr.IActivityEvents;
 import com.samsungxr.mixedreality.arcore.ARCoreSession;
+import com.samsungxr.mixedreality.CVLibrary.CVLibrarySession;
+
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ import java.util.ArrayList;
 public class SXRMixedReality extends SXRBehavior implements IMixedReality
 {
     static private long TYPE_MIXEDREALITY = newComponentType(SXRMixedReality.class);
-    private final IMixedReality mSession;
+    private IMixedReality mSession;
     private SessionState mState;
     private Vector3f mTempVec1 = new Vector3f();
     private Vector3f mTempVec2 = new Vector3f();
@@ -44,22 +45,22 @@ public class SXRMixedReality extends SXRBehavior implements IMixedReality
     /**
      * Create a instace of SXRMixedReality component.
      *
-     * @param SXRContext
+     * @param ctx     {@link SXRContext} to use
      */
-    public SXRMixedReality(final SXRContext SXRContext)
+    public SXRMixedReality(final SXRContext ctx)
     {
-        this(SXRContext, false);
+        this(ctx, false);
     }
 
     /**
      * Create a instace of SXRMixedReality component and specifies the use of cloud anchors.
      *
-     * @param SXRContext
-     * @param enableCloudAnchor
+     * @param ctx               {@link SXRContext} to use
+     * @param enableCloudAnchor true to enable cloud anchors
      */
-    public SXRMixedReality(final SXRContext SXRContext, boolean enableCloudAnchor)
+    public SXRMixedReality(final SXRContext ctx, boolean enableCloudAnchor)
     {
-        this(SXRContext.getMainScene(), enableCloudAnchor);
+        this(ctx.getMainScene(), enableCloudAnchor);
     }
 
     /**
@@ -77,6 +78,7 @@ public class SXRMixedReality extends SXRBehavior implements IMixedReality
      * the use of cloud anchors and add it to the specified scened.
      *
      * @param scene
+     * @param enableCloudAnchor true to enable cloud anchors
      */
     public SXRMixedReality(SXRScene scene, boolean enableCloudAnchor)
     {
@@ -100,10 +102,14 @@ public class SXRMixedReality extends SXRBehavior implements IMixedReality
         {
             mSession = new ARCoreSession(scene, enableCloudAnchor);
         }
-        else throw new IllegalArgumentException("ARCore is the only AR platform currently supported");
+        else
+        {
+            mSession = new CVLibrarySession(scene, enableCloudAnchor);
+        }
         mState = SessionState.ON_PAUSE;
         scene.getMainCameraRig().getOwnerObject().attachComponent(this);
     }
+
 
     static public long getComponentType() { return TYPE_MIXEDREALITY; }
 
