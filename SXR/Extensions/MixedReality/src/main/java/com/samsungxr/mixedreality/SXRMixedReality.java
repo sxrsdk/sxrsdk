@@ -137,7 +137,7 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
     public void selectARPlatform(int platform, boolean enableCloudAnchor)
     {
         String prop = System.getProperty("debug.samsungxr.hmt");
-        if(prop != null && prop.equals("AR-DROP-IN2") {
+        if(prop != null && prop.equals("AR-DROP-IN2")) {
             platform = 1;
         }
 
