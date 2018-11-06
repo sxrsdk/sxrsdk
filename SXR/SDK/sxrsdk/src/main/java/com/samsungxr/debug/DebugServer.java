@@ -50,8 +50,8 @@ public class DebugServer implements Runnable {
     public static final int NUM_CLIENTS = 2;
     public static final boolean SIMULATE_TELNET = true;
 
-    private static final String PROMPT = "gvrf";
-    private static final String APP_NAME = "GearVR Framework";
+    private static final String PROMPT = "sxr";
+    private static final String APP_NAME = "Samsung XR SDK";
 
     // Need a way to stop the program...
     private boolean shuttingDown;
