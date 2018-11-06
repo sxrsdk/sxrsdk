@@ -42,6 +42,16 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
      *
      * @param gvrContext
      */
+    public SXRMixedReality(final SXRContext gvrContext) {
+        this(gvrContext, false, null, 0);
+    }
+
+    /**
+     * Create a instace of SXRMixedReality component.
+     *
+     * @param gvrContext
+     * @param platform which cv library to use.  0 for arcore. non-zero for sxr
+     */
     public SXRMixedReality(final SXRContext gvrContext, int platform) {
         this(gvrContext, false, null, platform);
     }
@@ -62,6 +72,17 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
      * @param gvrContext
      * @param scene
      */
+    public SXRMixedReality(final SXRContext gvrContext, SXRScene scene) {
+        this(gvrContext, false, scene, 0);
+    }
+
+    /**
+     * Create a instance of SXRMixedReality component and add it to the specified scene.
+     *
+     * @param gvrContext
+     * @param scene
+     * @param platform which cv library to use.  0 for arcore. non-zero for sxr
+     */
     public SXRMixedReality(final SXRContext gvrContext, SXRScene scene, int platform) {
         this(gvrContext, false, scene, platform);
     }
@@ -73,6 +94,7 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
      * @param gvrContext
      * @param enableCloudAnchor
      * @param scene
+     * @param platform which cv library to use.  0 for arcore. non-zero for sxr
      */
     public SXRMixedReality(SXRContext gvrContext, boolean enableCloudAnchor, SXRScene scene, int platform) {
         super(gvrContext, 0);
@@ -89,6 +111,14 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
         scene.getMainCameraRig().getOwnerObject().attachComponent(this);
     }
 
+    /**
+     * Default SXRMixedReality constructor. Create a instace of SXRMixedReality component, set
+     * the use of cloud anchors and add it to the specified scened.
+     *
+     * @param scene
+     * @param platform which cv library to use.  0 for arcore. non-zero for sxr
+     * @param enableCloudAnchor
+     */
     public SXRMixedReality(SXRScene scene, int platform, boolean enableCloudAnchor) {
         super(scene.getSXRContext(), 0);
         mActivityEventsHandler = new ActivityEventsHandler();
@@ -98,6 +128,12 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
         scene.getMainCameraRig().getOwnerObject().attachComponent(this);
     }
 
+    /**
+     * selectARPlatform. select which AR platform to use.
+     *
+     * @param platform which cv library to use.  0 for arcore. non-zero for sxr
+     * @param enableCloudAnchor
+     */
     public void selectARPlatform(int platform, boolean enableCloudAnchor)
     {
         if (platform != 0)
