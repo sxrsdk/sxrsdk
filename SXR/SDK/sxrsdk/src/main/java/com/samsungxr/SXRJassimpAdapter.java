@@ -196,7 +196,6 @@ class  SXRJassimpAdapter
             FloatBuffer fbuf = aiMesh.getColorBuffer(c);
             if (fbuf != null)
             {
-                FloatBuffer coords = FloatBuffer.allocate(aiMesh.getNumVertices() * 4);
                 FloatBuffer source = aiMesh.getColorBuffer(c);
                 String name = "a_color";
 
@@ -204,8 +203,7 @@ class  SXRJassimpAdapter
                 {
                     name += c;
                 }
-                coords.put(source);
-                mesh.setFloatVec(name, coords);
+                mesh.setFloatVec(name, source);
             }
         }
 
@@ -1148,7 +1146,7 @@ class  SXRJassimpAdapter
             AiMesh aiMesh)
     {
         EnumSet<SXRImportSettings> settings = assetRequest.getImportSettings();
-        SXRMaterial gvrMaterial = createMaterial(aiMaterial, settings, aiMesh.hasVertexColors());
+        SXRMaterial gvrMaterial = createMaterial(aiMaterial, settings);
         AiColor diffuseColor = aiMaterial.getDiffuseColor(sWrapperProvider);
         float opacity = diffuseColor.getAlpha();
 
@@ -1208,7 +1206,7 @@ class  SXRJassimpAdapter
         return gvrMaterial;
     }
 
-    private SXRMaterial createMaterial(AiMaterial material, EnumSet<SXRImportSettings> settings, boolean hasVertexColors)
+    private SXRMaterial createMaterial(AiMaterial material, EnumSet<SXRImportSettings> settings)
     {
         boolean layered = false;
         SXRShaderId shaderType;
@@ -1265,18 +1263,10 @@ class  SXRJassimpAdapter
             {
                 shaderType = SXRMaterial.SXRShaderType.Phong.ID;
             }
-            if (hasVertexColors)
-            {
-                shaderType = SXRMaterial.SXRShaderType.Color.ID;
-            }
-            else if (layered)
+            if (layered)
             {
                 shaderType = SXRMaterial.SXRShaderType.PhongLayered.ID;
             }
-        }
-        else if (hasVertexColors)
-        {
-            shaderType = SXRMaterial.SXRShaderType.Color.ID;
         }
         else
         {

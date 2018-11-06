@@ -43,7 +43,7 @@ public class SXRTextureShader extends SXRShaderTemplate
     {
         super("float4 ambient_color; float4 diffuse_color; float4 specular_color; float4 emissive_color; float3 u_color; float u_opacity; float specular_exponent; float line_width",
               "sampler2D u_texture; sampler2D diffuseTexture",
-              "float3 a_position; float2 a_texcoord; float3 a_normal", GLSLESVersion.VULKAN);
+              "float3 a_position; float2 a_texcoord; float3 a_normal; float4 a_color", GLSLESVersion.VULKAN);
         if (fragTemplate == null) {
             Context context = gvrcontext.getContext();
             fragTemplate = TextFile.readTextFile(context, R.raw.fragment_template);
