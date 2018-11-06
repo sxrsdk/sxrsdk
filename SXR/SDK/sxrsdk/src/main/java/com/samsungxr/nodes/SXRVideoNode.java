@@ -31,7 +31,7 @@ import com.samsungxr.SXRNode;
 import com.samsungxr.SXRShaderId;
 
 /**
- * A {@linkplain SXRNode scene object} that shows video, using the
+ * A {@linkplain SXRNode node} that shows video, using the
  * Android {@link MediaPlayer}.
  */
 public class SXRVideoNode extends SXRNode {
@@ -69,7 +69,7 @@ public class SXRVideoNode extends SXRNode {
     private ActivityEventsListener mActivityEventsListener;
 
     /**
-     * Play a video on a {@linkplain SXRNode scene object} with an
+     * Play a video on a {@linkplain SXRNode node} with an
      * arbitrarily complex geometry, using the Android {@link MediaPlayer}
      *
      * @param gvrContext
@@ -94,7 +94,7 @@ public class SXRVideoNode extends SXRNode {
     }
 
     /**
-     * Play a video on a {@linkplain SXRNode scene object} with an
+     * Play a video on a {@linkplain SXRNode node} with an
      * arbitrarily complex geometry, using the Android {@link MediaPlayer}
      *
      * @param gvrContext
@@ -138,7 +138,7 @@ public class SXRVideoNode extends SXRNode {
     }
 
     /**
-     * Play a video on a {@linkplain SXRNode scene object} with an
+     * Play a video on a {@linkplain SXRNode node} with an
      * arbitrarily complex geometry, using the Android {@link MediaPlayer}
      * 
      * @param gvrContext
@@ -193,7 +193,7 @@ public class SXRVideoNode extends SXRNode {
     }
 
     /**
-     * Play a video on a {@linkplain SXRNode scene object} with an
+     * Play a video on a {@linkplain SXRNode node} with an
      * arbitrarily complex geometry, using the Android {@link MediaPlayer}
      * 
      * @param gvrContext

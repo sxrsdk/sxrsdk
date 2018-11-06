@@ -17,23 +17,23 @@ package com.samsungxr;
 
 
 /**
- * A sphere collider allows a scene object to be picked
+ * A sphere collider allows a node to be picked
  * when a ray penetrates its bounding sphere.
  * 
  * This is the fastest but least accurate method of picking.
  * It performs a ray-sphere intersection and works best
- * on scene objects which do not vary a lot in their
+ * on nodes which do not vary a lot in their
  * X, Y and Z dimensions.
  * 
  * The center of the collision sphere is the center of
- * the scene object it is attached to. If no radius is
+ * the node it is attached to. If no radius is
  * provided, the radius is obtained from the bounding
- * volume of the scene object.
+ * volume of the node.
  *
- * You can use a sphere collider on a scene object without
+ * You can use a sphere collider on a node without
  * a mesh if you specify the radius by calling setRadius.
- * This radius is transformed by the world matrix on the scene object
- * so it will scale as the scene object does.
+ * This radius is transformed by the world matrix on the node
+ * so it will scale as the node does.
  *
  * @see SXRPicker
  * @see SXRSphereCollider
@@ -52,12 +52,12 @@ public class SXRSphereCollider extends SXRCollider
      * Set the radius of the collision sphere.
      * 
      * This radius is transformed by the world matrix
-     * associated with the scene object that owns
+     * associated with the node that owns
      * the sphere collider. If a non-zero radius
      * is specified, it overrides the bounding
-     * volume of the scene object. Otherwise the
+     * volume of the node. Otherwise the
      * radius is computed from the bounds of the
-     * mesh attached to the scene object.
+     * mesh attached to the node.
      * 
      * @param radius radius of collision sphere
      * @see SXRSphereCollider#getRadius()
@@ -75,7 +75,7 @@ public class SXRSphereCollider extends SXRCollider
      * This radius is the one provided by setRadius
      * or 0 if the radius has not been set.
      * It is NOT the radius of the bounding volume
-     * on the scene object.
+     * on the node.
      * 
      * @return radius set for collision sphe4re
      * @see SXRSphereCollider#setRadius(float)

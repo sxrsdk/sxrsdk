@@ -22,9 +22,9 @@ import com.samsungxr.io.SXRCursorController;
  * a {@link SXRSensor}.
  * <p>
  * A sensor recieves all the pick events from the colliders attached to its
- * descendants and emits corresponding sensor events from the scene object
+ * descendants and emits corresponding sensor events from the node
  * that owns it. Clients can add a listener to the event receiver of that
- * scene object to handle the sensor events.
+ * node to handle the sensor events.
  * @see ISensorEvents
  * @see SXRNode#getEventReceiver()
  * @see SXREventReceiver#addListener(IEvents)

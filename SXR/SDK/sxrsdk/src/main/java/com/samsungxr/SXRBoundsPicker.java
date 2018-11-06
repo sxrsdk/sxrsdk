@@ -22,7 +22,7 @@ import com.samsungxr.io.SXRCursorController;
 import com.samsungxr.utility.Log;
 
 /**
- * Finds the scene objects in a scene which collide with the bounding volumes
+ * Finds the nodes in a scene which collide with the bounding volumes
  * of a set of specific objects (called collidables).
  * <p>
  * This picker provides a simple form of bounds-based collision detection
@@ -32,9 +32,9 @@ import com.samsungxr.utility.Log;
  * that generate events when other objects penetrate. Internally GearVRF
  * uses this picker for object cursor hit testing.
  * <p/>
- * For a {@linkplain SXRNode scene object} to be pickable, it must have a
+ * For a {@linkplain SXRNode node} to be pickable, it must have a
  * {@link SXRCollider} component attached to it that is enabled.
- * The picker compares the bounds for set of scene objects against all these
+ * The picker compares the bounds for set of nodes against all these
  * colliders and returns an array with the collisions as instances of SXRPickedObject.
  * The picked object contains the collider instance hit, the distance from the
  * center of the object it collided with and the hit position.
@@ -45,9 +45,9 @@ import com.samsungxr.utility.Log;
  * sent to the event receiver of the scene and the picker. These events can be
  * observed by listeners.
  * <ul>
- * <li>onEnter          called when a collidable scene object penetrates a collider.</li>
- * <li>onExit           called when a collidable scene object leaves a collider.</li>
- * <li>onInside         called when a collidable scene object is inside a collider.</li>
+ * <li>onEnter          called when a collidable node penetrates a collider.</li>
+ * <li>onExit           called when a collidable node leaves a collider.</li>
+ * <li>onInside         called when a collidable node is inside a collider.</li>
  * <li>onTouchStart     called when the action button is pressed during a collision.</li>
  * <li>onTouchEnd       called when the action button is released during a collision.</li>
  * <li>onPick           called every frame if a collision occured.</li>
@@ -79,7 +79,7 @@ public class SXRBoundsPicker extends SXRPicker
      * Construct a picker which picks from a given scene
      * using a set of spheres in world coordinates.
      *
-     * @param scene scene containing the scene objects to pick from
+     * @param scene scene containing the nodes to pick from
      * @param enable true to start in the enabled state (listening for events)
      */
     public SXRBoundsPicker(SXRScene scene, boolean enable)
@@ -103,7 +103,7 @@ public class SXRBoundsPicker extends SXRPicker
     }
 
     /**
-     * Adds another scene object to pick against.
+     * Adds another node to pick against.
      * Each frame all the colliders in the scene will be compared
      * against the bounding volumes of all the collidables associated
      * with this picker.
@@ -125,10 +125,10 @@ public class SXRBoundsPicker extends SXRPicker
     }
 
     /**
-     * Remove a scene object from the list of collidables.
+     * Remove a node from the list of collidables.
      * This object will no longer participate in collisions
      * for this picker.
-     * @param sceneObj collidable scene object to remove
+     * @param sceneObj collidable node to remove
      */
     public void removeCollidable(SXRNode sceneObj)
     {
@@ -175,7 +175,7 @@ public class SXRBoundsPicker extends SXRPicker
     }
 
     /**
-     * Cleara all the collidable scene objects.
+     * Cleara all the collidable nodes.
      * No collisions will be reported.
      */
     public void clearCollidables()
@@ -232,7 +232,7 @@ public class SXRBoundsPicker extends SXRPicker
     }
 
     /**
-     * Tests the bounding volumes of a set of scene objects against
+     * Tests the bounding volumes of a set of nodes against
      * all the colliders the scene and returns a list of collisions.
      * <p/>
      * This function is not meant for general collision detection
@@ -248,7 +248,7 @@ public class SXRBoundsPicker extends SXRPicker
      * Unlike ray based picking, the hit location for sphere picking is very
      * inexact. Currently the hit location reported is on the surface of the collider.
      * Mesh colliders are not supported and the mesh is not examined
-     * during collision detection. Instead the bounding volume of the scene object
+     * during collision detection. Instead the bounding volume of the node
      * is used, not it's mesh collider.
      *
      * @param scene
@@ -257,7 +257,7 @@ public class SXRBoundsPicker extends SXRPicker
      *            An array of {@link SXRNode}s to collide against the scene.
      *
      * @return A list of {@link SXRPickedObject}, sorted by distance from the
-     *         pick ray origin. Each {@link SXRPickedObject} contains the scene object
+     *         pick ray origin. Each {@link SXRPickedObject} contains the node
      *         which owns the {@link SXRCollider} along with the hit
      *         location and distance.
      *

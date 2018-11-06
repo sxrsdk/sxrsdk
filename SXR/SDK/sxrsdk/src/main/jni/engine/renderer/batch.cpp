@@ -87,7 +87,7 @@ void Batch::updateMesh(Mesh* render_mesh){
 }
 
 /*
- * Add renderdata of scene object into mesh, add vertices, texcoords, normals, model matrices
+ * Add renderdata of node into mesh, add vertices, texcoords, normals, model matrices
  */
 bool Batch::add(RenderData *render_data) {
     material_ = render_data->pass(0)->material();

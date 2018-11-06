@@ -18,9 +18,9 @@ package com.samsungxr;
 import java.util.List;
 
 /**
- * Base class for defining Java components to extend the scene object.
+ * Base class for defining Java components to extend the node.
  *
- * Java components are used to add Java behaviours to scene objects
+ * Java components are used to add Java behaviours to nodes
  * that can be initiated by the rendering thread.
  * A SXRJavaComponent keeps a reference to the Java object in the
  * C++ layer so that functions on the object can be invoked
@@ -29,7 +29,7 @@ import java.util.List;
  */
 class SXRJavaComponent extends SXRComponent {
     /**
-     * Constructor for a component that is not attached to a scene object.
+     * Constructor for a component that is not attached to a node.
      *
      * @param gvrContext    The current SXRF context
      * @param nativePointer Pointer to the native object, returned by the native constructor

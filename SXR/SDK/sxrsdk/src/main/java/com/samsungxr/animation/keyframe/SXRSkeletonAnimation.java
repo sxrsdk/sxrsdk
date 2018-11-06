@@ -42,7 +42,7 @@ import java.util.List;
  * Each frame the skeleton animation asks the animation channels
  * associated with each bone to compute the matrix for animating
  * that bone. This matrix is used to update the current pose
- * of the skeleton and the scene objects associated with the bone.
+ * of the skeleton and the nodes associated with the bone.
  * After all channels have been evaluated, the skinning pose is
  * computed to drive skinned meshes.
  * @see SXRSkeleton
@@ -63,7 +63,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
      * Create a skeleton animation with bones from the given hierarchy.
      *
      * @param name The name of the animation.
-     * @param target The target hierachy containing scene objects for bones.
+     * @param target The target hierachy containing nodes for bones.
      * @param duration Duration of the animation in seconds.
      */
     public SXRSkeletonAnimation(String name, SXRNode target, float duration)

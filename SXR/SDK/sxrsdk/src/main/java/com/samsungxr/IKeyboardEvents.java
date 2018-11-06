@@ -24,7 +24,7 @@ import com.samsungxr.nodes.SXRKeyboardNode;
 public interface IKeyboardEvents extends IEvents {
     /**
      * Send a key press to the listener.
-     * @param sceneObject {@linkplain SXRKeyboardNode view scene object}
+     * @param sceneObject {@linkplain SXRKeyboardNode view node}
      * @param primaryCode this is the key that was pressed
      * @param keyCodes the codes for all the possible alternative keys
      * with the primary code being the first. If the primary key code is

@@ -190,7 +190,7 @@ public class SXRCubeNode extends SXRNode {
     };
 
     /**
-     * Constructs a cube scene object with each side of length 1.
+     * Constructs a cube node with each side of length 1.
      * 
      * The cube's triangles and normals are facing out and the same texture will
      * be applied to each side of the cube.
@@ -205,7 +205,7 @@ public class SXRCubeNode extends SXRNode {
     }
 
     /**
-     * Constructs a cube scene object with each side of length 1.
+     * Constructs a cube node with each side of length 1.
      * 
      * The cube's triangles and normals are facing either in or out and the same
      * texture will be applied to each side of the cube.
@@ -224,7 +224,7 @@ public class SXRCubeNode extends SXRNode {
     }
 
     /**
-     * Constructs a cube scene object with the sides matching the dimentions.
+     * Constructs a cube node with the sides matching the dimentions.
      *
      * The cube's triangles and normals are facing either in or out and the same
      * texture will be applied to each side of the cube.
@@ -245,7 +245,7 @@ public class SXRCubeNode extends SXRNode {
 
 
     /**
-     * Constructs a cube scene object with each side of length 1.
+     * Constructs a cube node with each side of length 1.
      * <p>
      * The cube's triangles and normals are facing either in or out and the same
      * texture will be applied to each side of the cube.
@@ -263,7 +263,7 @@ public class SXRCubeNode extends SXRNode {
      * @param vertexDesc
      *            String descriptor used to construct mesh tailored to a specific shader.
      * @param shaderId
-     *            Shader ID of material to use for this scene object.
+     *            Shader ID of material to use for this node.
      */
     public SXRCubeNode(SXRContext gvrContext, boolean facingOut, String vertexDesc, SXRShaderId shaderId) {
         super(gvrContext);
@@ -274,7 +274,7 @@ public class SXRCubeNode extends SXRNode {
     }
 
     /**
-     * Constructs a cube scene object with each side of length 1.
+     * Constructs a cube node with each side of length 1.
      * <p>
      * The cube's triangles and normals are facing either in or out and the same
      * texture will be applied to each side of the cube.
@@ -292,7 +292,7 @@ public class SXRCubeNode extends SXRNode {
      * @param vertexDesc
      *            String descriptor used to construct mesh tailored to a specific shader.
      * @param mtl
-     *            material to use for this scene object.
+     *            material to use for this node.
      * @param dimensions
      *            Vector3f containing X, Y, Z dimensions
      */
@@ -305,7 +305,7 @@ public class SXRCubeNode extends SXRNode {
     }
 
     /**
-     * Constructs a cube scene object with each side of length 1.
+     * Constructs a cube node with each side of length 1.
      * 
      * The cube's triangles and normals are facing either in or out and the same
      * texture will be applied to each side of the cube. All six faces share the
@@ -331,7 +331,7 @@ public class SXRCubeNode extends SXRNode {
     }
 
     /**
-     * Constructs a cube scene object with each side of length 1.
+     * Constructs a cube node with each side of length 1.
      * 
      * The cube's triangles and normals are facing either in or out and the material
      * is applied to the cube.
@@ -361,7 +361,7 @@ public class SXRCubeNode extends SXRNode {
     }
 
     /**
-     * Constructs a box scene object with given dimensions.
+     * Constructs a box node with given dimensions.
      * 
      * The triangles and normals are facing either in or out and the material
      * is applied to the cube.
@@ -394,7 +394,7 @@ public class SXRCubeNode extends SXRNode {
     }
     
     /**
-     * Constructs a cube scene object with each side of length 1.
+     * Constructs a cube node with each side of length 1.
      * 
      * The cube's triangles and normals are facing either in or out. Each face
      * has its own texture.
@@ -426,7 +426,7 @@ public class SXRCubeNode extends SXRNode {
     }
 
     /**
-     * Constructs a cube scene object with each side of length 1.
+     * Constructs a cube node with each side of length 1.
      * 
      * Each face is subdivided into NxN quads, where N = segmentNumber is given by user.  
      * 

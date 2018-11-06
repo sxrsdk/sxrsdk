@@ -54,11 +54,11 @@ public final class SXRLODGroup extends SXRBehavior {
     private final LinkedList<Object[]> mRanges = new LinkedList<>();
 
     /**
-     * Add a range to this LOD group. Specify the scene object that should be displayed in this
-     * range. Add the LOG group as a component to the parent scene object. The scene objects
+     * Add a range to this LOD group. Specify the node that should be displayed in this
+     * range. Add the LOG group as a component to the parent node. The nodes
      * associated with each range will automatically be added as children to the parent.
-     * @param range show the scene object if the camera distance is greater than this value
-     * @param sceneObject scene object that should be rendered when in this range
+     * @param range show the node if the camera distance is greater than this value
+     * @param sceneObject node that should be rendered when in this range
      * @throws IllegalArgumentException if range is negative or sceneObject null
      */
     public synchronized void addRange(final float range, final SXRNode sceneObject)
@@ -114,7 +114,7 @@ public final class SXRLODGroup extends SXRBehavior {
             final Object[] range = mRanges.get(i);
             final SXRNode child = (SXRNode) range[1];
             if (child.getParent() != owner) {
-                Log.w(TAG, "the scene object for distance greater than " + range[0] + " is not a child of the owner; skipping it");
+                Log.w(TAG, "the node for distance greater than " + range[0] + " is not a child of the owner; skipping it");
                 continue;
             }
 

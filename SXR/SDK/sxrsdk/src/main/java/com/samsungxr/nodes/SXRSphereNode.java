@@ -44,7 +44,7 @@ public class SXRSphereNode extends SXRNode {
     private char triangleCount = 0;
 
     /**
-     * Constructs a sphere scene object with a radius of 1 and 18 stacks, and 36
+     * Constructs a sphere node with a radius of 1 and 18 stacks, and 36
      * slices.
      *
      * The sphere's triangles and normals are facing out and the same texture
@@ -61,7 +61,7 @@ public class SXRSphereNode extends SXRNode {
     }
 
     /**
-     * Constructs a sphere scene object with a radius of 1 and 18 stacks, and 36
+     * Constructs a sphere node with a radius of 1 and 18 stacks, and 36
      * slices.
      *
      * The sphere's triangles and normals are facing either in or out and the
@@ -82,7 +82,7 @@ public class SXRSphereNode extends SXRNode {
     }
 
     /**
-     * Constructs a sphere scene object 18 stacks, and 36
+     * Constructs a sphere node 18 stacks, and 36
      * slices.
      *
      * The sphere's triangles and normals are facing either in or out and the
@@ -107,7 +107,7 @@ public class SXRSphereNode extends SXRNode {
     }
 
     /**
-     * Constructs a sphere scene object with a radius of 1 and 18 stacks, and 36
+     * Constructs a sphere node with a radius of 1 and 18 stacks, and 36
      * slices.
      *
      * The sphere's triangles and normals are facing either in or out and the
@@ -135,7 +135,7 @@ public class SXRSphereNode extends SXRNode {
     }
 
     /**
-     * Constructs a sphere scene object with a radius of 1 and 18 stacks, and 36
+     * Constructs a sphere node with a radius of 1 and 18 stacks, and 36
      * slices.
      *
      * The sphere's triangles and normals are facing either in or out and the
@@ -162,7 +162,7 @@ public class SXRSphereNode extends SXRNode {
     }
 
     /**
-     * Constructs a sphere scene object with a radius of 1 and 18 stacks, and 36
+     * Constructs a sphere node with a radius of 1 and 18 stacks, and 36
      * slices.
      *
      * The sphere's triangles and normals are facing either in or out and the
@@ -195,7 +195,7 @@ public class SXRSphereNode extends SXRNode {
     }
 
     /**
-     * Constructs a sphere scene object with a radius of 1 and 18 stacks, and 36
+     * Constructs a sphere node with a radius of 1 and 18 stacks, and 36
      * slices.
      *
      * The sphere's triangles and normals are facing either in or out and the
@@ -220,7 +220,7 @@ public class SXRSphereNode extends SXRNode {
     }
 
     /**
-     * Constructs a sphere scene object with a radius of 1 and 18 stacks, and 36
+     * Constructs a sphere node with a radius of 1 and 18 stacks, and 36
      * slices.
      *
      * The sphere's triangles and normals are facing either in or out and the
@@ -249,7 +249,7 @@ public class SXRSphereNode extends SXRNode {
     }
 
     /**
-     * Constructs a sphere scene object with a radius of 1 and user specified
+     * Constructs a sphere node with a radius of 1 and user specified
      * stack and slice numbers.
      *
      * The sphere's triangles and normals are facing either in or out and the
@@ -294,7 +294,7 @@ public class SXRSphereNode extends SXRNode {
     }
 
     /**
-     * Constructs a sphere scene object with a radius of 1 and user specified
+     * Constructs a sphere node with a radius of 1 and user specified
      * stack and slice numbers. The sphere is subdivided into MxN meshes, where M=sliceSegmengNumber and N=(stackSegmentNumber+2) are specified by user.
      *
      * The sphere's triangles and normals are facing either in or out and the

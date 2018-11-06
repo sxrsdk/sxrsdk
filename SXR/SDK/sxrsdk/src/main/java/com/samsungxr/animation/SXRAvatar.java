@@ -100,7 +100,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     public  SXRSkeleton getSkeleton() { return mSkeleton; }
 
     /**
-     * Get the root of the scene object hierarchy for the avatar.
+     * Get the root of the node hierarchy for the avatar.
      * <p>
      * The avatar model is constructed by the asset loader when the avatar
      * model is loaded. It contains the scene hierarchy with the skeleton
@@ -185,7 +185,6 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         SXRResourceVolume volume = new SXRResourceVolume(ctx, avatarResource);
         SXRNode modelRoot = new SXRNode(ctx);
 
-        mAvatarRoot.addChildObject(modelRoot);
         ctx.getAssetLoader().loadModel(volume, modelRoot, settings, false, mLoadModelHandler);
     }
 
@@ -505,6 +504,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 else
                 {
                     mSkeleton = skel;
+                    mAvatarRoot.addChildObject(modelRoot);
                     modelRoot = mAvatarRoot;
                     eventName = "onAvatarLoaded";
                 }

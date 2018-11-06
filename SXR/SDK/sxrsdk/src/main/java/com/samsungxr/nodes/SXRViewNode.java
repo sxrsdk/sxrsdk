@@ -161,7 +161,7 @@ public class SXRViewNode extends SXRNode {
     }
 
     /**
-     * Shows {@link View} in a 2D, rectangular {@linkplain SXRViewNode scene object.}
+     * Shows {@link View} in a 2D, rectangular {@linkplain SXRViewNode node.}
      *
      * @param gvrContext current {@link SXRContext}
      * @param view The {@link View} to be shown.
@@ -176,7 +176,7 @@ public class SXRViewNode extends SXRNode {
     }
 
     /**
-     * Shows any {@link View} into the {@linkplain SXRViewNode scene object} with an
+     * Shows any {@link View} into the {@linkplain SXRViewNode node} with an
      * arbitrarily complex geometry.
      * 
      * @param gvrContext current {@link SXRContext}
@@ -448,10 +448,10 @@ public class SXRViewNode extends SXRNode {
 
     /**
      * Internal class to draw the Android view into canvas at UI thread and
-     * update the GL texture of the scene object at GL thread.
+     * update the GL texture of the node at GL thread.
      *
      * This is the root view to overwrite the default canvas of the view by the
-     * canvas of the texture attached to the scene object.
+     * canvas of the texture attached to the node.
      */
     protected class RootViewGroup extends FrameLayout implements ITouchEvents {
         final SXRContext mSXRContext;

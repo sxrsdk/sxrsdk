@@ -19,7 +19,7 @@ package com.samsungxr;
 import java.util.concurrent.ExecutionException;
 
 /**
- * A RenderPass let one render the same scene object multiple times with different settings. This is useful to
+ * A RenderPass let one render the same node multiple times with different settings. This is useful to
  * achieve effects like outline in cartoon-ish rendering or computing addictive lights for instance.
  *
  * The benefit of using a render pass over duplicating the object and rendering twice is that like culling, transform and

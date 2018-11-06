@@ -111,7 +111,7 @@ void BatchManager::renderBatches(RenderState& rstate) {
             continue;
 
 
-        // checks whether one of the scene object is diabled, if it is, remove it from the batch
+        // checks whether one of the node is diabled, if it is, remove it from the batch
         if(!batch->setupMesh(batch->isBatchDirty()))
             continue;
 

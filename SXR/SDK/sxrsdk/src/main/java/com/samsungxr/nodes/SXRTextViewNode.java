@@ -116,7 +116,7 @@ public class SXRTextViewNode extends SXRNode {
     private final SXRDrawFrameListenerImpl mFrameListener;
 
     /**
-     * Shows a {@link TextView} on a {@linkplain SXRNode scene object}
+     * Shows a {@link TextView} on a {@linkplain SXRNode node}
      * with view's default height and width.
      *
      * @param gvrContext
@@ -177,7 +177,7 @@ public class SXRTextViewNode extends SXRNode {
     }
 
     /**
-     * Shows a {@link TextView} on a {@linkplain SXRNode scene object}
+     * Shows a {@link TextView} on a {@linkplain SXRNode node}
      * with both view's default height and width and quad's default height and
      * width.
      *
@@ -191,7 +191,7 @@ public class SXRTextViewNode extends SXRNode {
     }
 
     /**
-     * Shows a {@link TextView} on a {@linkplain SXRNode scene object}
+     * Shows a {@link TextView} on a {@linkplain SXRNode node}
      * with both view's default height and width and quad's default height and
      * width. The initial text will be the private {@code DEFAULT_TEXT}
      * constant, or {@code ""}.
@@ -584,7 +584,7 @@ public class SXRTextViewNode extends SXRNode {
     }
 
     /**
-     * Set the refresh frequency of this scene object.
+     * Set the refresh frequency of this node.
      * Use NONE for improved performance when the text is set initially and never
      * changed.
      *
@@ -619,7 +619,7 @@ public class SXRTextViewNode extends SXRNode {
     }
 
     /**
-     * Get the refresh frequency of this scene object.
+     * Get the refresh frequency of this node.
      *
      * @return The refresh frequency of this TextViewNode.
      */

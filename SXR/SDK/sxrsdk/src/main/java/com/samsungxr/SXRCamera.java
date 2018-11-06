@@ -336,7 +336,7 @@ public abstract class SXRCamera extends SXRComponent implements PrettyPrint {
      * The view matrix is the inverse of the camera model matrix.
      * Normally it is computed automatically from the SXRTransform
      * attached to the SXRNode which owns the camera.
-     * If the camera is NOT attached to a scene object,
+     * If the camera is NOT attached to a node,
      * you can use this call to set the view matrix so the
      * camera can be used with a SXRRenderTarget.
      *

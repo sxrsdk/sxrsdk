@@ -35,21 +35,21 @@ public interface IPickEvents extends IEvents {
     void onNoPick(SXRPicker picker);
     
     /**
-     * Called when the pick ray first enters a scene object.
-     * @param sceneObj scene object picked
+     * Called when the pick ray first enters a node.
+     * @param sceneObj node picked
      * @param collision information about the collision
      */
     void onEnter(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
     
     /**
-     * Called when the pick ray first exits a scene object.
-     * @param sceneObj scene object no longer picked.
+     * Called when the pick ray first exits a node.
+     * @param sceneObj node no longer picked.
      */    
     void onExit(SXRNode sceneObj);
     
     /**
-     * Called while the pick ray penetrates a scene object.
-     * @param sceneObj scene object picked
+     * Called while the pick ray penetrates a node.
+     * @param sceneObj node picked
      * @param collision information about the collision
      */    
     void onInside(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);

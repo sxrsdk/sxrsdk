@@ -67,7 +67,7 @@ public class SXRCameraRig extends SXRComponent implements PrettyPrint {
     }
 
     /**
-     * Constructs a camera rig with cameras attached. An owner scene object is automatically
+     * Constructs a camera rig with cameras attached. An owner node is automatically
      * created for the camera rig.
      *
      * Do not try to change the owner object of the camera rig - not supported currently and will
