@@ -57,7 +57,8 @@ public class TouchManager {
         sxrContext.getInputManager().selectController(mPickHandler);
     }
 
-    public void clear() {
+    public void onPause() {
+        Log.d(Log.SUBSYSTEM.INPUT, TAG, "onPause(): clearing controllers");
         mSXRContext.getInputManager().clear();
     }
 
