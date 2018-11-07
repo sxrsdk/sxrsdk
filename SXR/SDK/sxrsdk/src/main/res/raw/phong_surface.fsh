@@ -74,7 +74,7 @@ struct Surface
 
 Surface @ShaderName()
 {
-	vec4 diffuse = diffuse_color;
+	vec4 diffuse = diffuse_color * vertex_color;
 	vec4 emission = emissive_color;
 	vec4 specular = specular_color;
 	vec4 ambient = ambient_color;
