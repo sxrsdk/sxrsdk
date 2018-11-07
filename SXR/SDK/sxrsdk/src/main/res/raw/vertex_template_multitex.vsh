@@ -23,11 +23,14 @@ layout(location = 1) in vec2 a_texcoord;
 layout(location = 5) in vec3 a_normal;
 #endif
 
+#ifdef HAS_a_color
+layout(location = 6) in vec4 a_color;
+#endif
 
 #ifdef HAS_VertexSkinShader
 #ifdef HAS_a_bone_weights
-layout(location = 6) in vec4 a_bone_weights;
-layout(location = 7) in ivec4 a_bone_indices;
+layout(location = 7) in vec4 a_bone_weights;
+layout(location = 8) in ivec4 a_bone_indices;
 
 @BONES_UNIFORMS
 
@@ -45,6 +48,7 @@ layout(location = 7) out mat3 tangent_matrix;
 layout(location = 0) out vec3 view_direction;
 layout(location = 1) out vec3 viewspace_position;
 layout(location = 2) out vec3 viewspace_normal;
+layout(location = 3) out vec4 vertex_color;
 
 layout(location = 10) out vec2 diffuse_coord;
 layout(location = 11) out vec2 ambient_coord;
@@ -91,6 +95,7 @@ struct Vertex
 	vec3 local_tangent;
 	vec3 local_bitangent;
 	vec3 view_direction;
+	vec4 vertex_color;
 };
 
 #ifdef HAS_LIGHTSOURCES
@@ -111,6 +116,11 @@ void main() {
 #ifdef HAS_a_tangent
     vertex.local_tangent = a_tangent;
     vertex.local_bitangent = a_bitangent;
+#endif
+#ifdef HAS_a_color
+    vertex.vertex_color = a_color;
+#else
+    vertex.vertex_color = vec4(1, 1, 1, 1);
 #endif
 #ifdef HAS_VertexMorphShader
 @VertexMorphShader
@@ -146,6 +156,7 @@ void main() {
 	viewspace_position = vertex.viewspace_position;
 	viewspace_normal = vertex.viewspace_normal;
 	view_direction = vertex.view_direction;
+	vertex_color = vertex.vertex_color;
 #ifdef HAS_MULTIVIEW
 	 bool render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? true : false;
      mat4 mvp = u_mvp_[gl_ViewID_OVR];
