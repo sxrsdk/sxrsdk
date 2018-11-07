@@ -25,7 +25,7 @@ import com.samsungxr.IEvents;
 public interface ICollisionEvents extends IEvents {
 
     /**
-     * Called when a Collision starts to be processed on a scene object.
+     * Called when a Collision starts to be processed on a node.
      *
      * @param sceneObj0 {@link SXRNode} with a {@link SXRRigidBody} in collision with sceneObj1
      * @param sceneObj1 {@link SXRNode} with a {@link SXRRigidBody} in collision with sceneObj0
@@ -35,7 +35,7 @@ public interface ICollisionEvents extends IEvents {
     void onEnter(SXRNode sceneObj0, SXRNode sceneObj1, float normal[], float distance);
 
     /**
-     * Called when a Collision sceases to happen on a scene object.
+     * Called when a Collision sceases to happen on a node.
      *
      * @param sceneObj0 {@link SXRNode} with a {@link SXRRigidBody} in collision with sceneObj1
      * @param sceneObj1 {@link SXRNode} with a {@link SXRRigidBody} in collision with sceneObj0

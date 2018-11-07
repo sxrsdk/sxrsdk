@@ -16,14 +16,14 @@
 package com.samsungxr;
 
 /**
- * Finds the scene objects that intersect the scene object the
+ * Finds the nodes that intersect the node the
  * picker is attached to.
  *
- * For a {@linkplain SXRNode scene object} to be pickable, it must have a
+ * For a {@linkplain SXRNode node} to be pickable, it must have a
  * {@link SXRCollider} component attached to it that is enabled.
  * The picker returns an array containing all the collisions as instances of SXRPickedObject.
  * The picked object contains the collider instance, the distance between
- * the colliding and the scene object and the center of the scene object hit
+ * the colliding and the node and the center of the node hit
  * in world coordinates.
  *
  * The picker maintains the list of currently
@@ -32,9 +32,9 @@ package com.samsungxr;
  * the picker generates one or more pick events (IPickEvents interface)
  * which are sent the event receiver of the scene. These events can be
  * observed by listeners.
- *  - onEnter(SXRNode)  called when the scene object enters the frustum.
- *  - onExit(SXRNode)   called when the scene object exits the frustum.
- *  - onInside(SXRNode) called while the scene object is inside the frustum.
+ *  - onEnter(SXRNode)  called when the node enters the frustum.
+ *  - onExit(SXRNode)   called when the node exits the frustum.
+ *  - onInside(SXRNode) called while the node is inside the frustum.
  *  - onPick(SXRPicker)        called when the set of picked objects changes.
  *  - onNoPick(SXRPicker)      called once when nothing is picked.
  *
@@ -51,7 +51,7 @@ public class SXRObjectPicker extends SXRPicker
     /**
      * Construct a picker which picks from a given scene.
      * @param context context that owns the scene
-     * @param scene scene containing the scene objects to pick from
+     * @param scene scene containing the nodes to pick from
      */
     public SXRObjectPicker(SXRContext context, SXRScene scene)
     {
@@ -70,9 +70,9 @@ public class SXRObjectPicker extends SXRPicker
      * Scans the scene graph to collect picked items
      * and generates appropriate pick events.
      * This function is called automatically by
-     * the picker if it is attached to a scene object.
+     * the picker if it is attached to a node.
      * You can instantiate the picker and not attach
-     * it to a scene object. In this case you must
+     * it to a node. In this case you must
      * manually set the pick ray and call processPick()
      * to generate the pick events.
      *

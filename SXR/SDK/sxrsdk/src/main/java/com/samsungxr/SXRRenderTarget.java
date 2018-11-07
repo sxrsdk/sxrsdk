@@ -17,7 +17,7 @@ package com.samsungxr;
 
 /**
  * A render target is a component which allows the scene to be rendered
- * into a texture from the viewpoint of a particular scene object.
+ * into a texture from the viewpoint of a particular node.
  * SXRRenderTarget can initiate a DrawFrameListener which causes
  * the scene to be rendered into the texture every frame.
  * To initiate rendering you must call @{link #startListening()}.
@@ -39,9 +39,9 @@ public class SXRRenderTarget extends SXRBehavior
     }
     /**
      * Constructs a render target component which renders the given scene to a designated texture.
-     * The objects in the scene are rendered from the viewpoint of the scene object
+     * The objects in the scene are rendered from the viewpoint of the node
      * the SXRRenderTarget is attached to. Nothing is rendered if
-     * the render target is not attached to a scene object.
+     * the render target is not attached to a node.
      * You must call @{link #setEnable(true)} to initiate rendering.
      *
      * @param texture   SXRRenderTexture to render to.

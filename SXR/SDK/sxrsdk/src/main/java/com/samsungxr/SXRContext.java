@@ -300,7 +300,7 @@ public abstract class SXRContext implements IEventReceiver {
 
     /**
      * Get the current {@link SXRScene}, which contains the scene graph (a
-     * hierarchy of {@linkplain SXRNode scene objects}) and the
+     * hierarchy of {@linkplain SXRNode nodes}) and the
      * {@linkplain SXRCameraRig camera rig}
      * 
      * @return A {@link SXRScene} instance, containing scene and camera
@@ -463,7 +463,7 @@ public abstract class SXRContext implements IEventReceiver {
      * singleton.
      * 
      * Use the shader manager to define custom GL object shaders, which are used
-     * to render a scene object's surface.
+     * to render a node's surface.
      * 
      * @return The {@linkplain SXRShaderManager shader manager}
      *         singleton.

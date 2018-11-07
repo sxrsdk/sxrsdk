@@ -16,11 +16,15 @@
 package com.samsungxr.mixedreality.CVLibrary;
 
 //import com.google.ar.core.Plane;
+import android.support.annotation.NonNull;
+
 import com.samsungxr.SXRContext;
 import com.samsungxr.mixedreality.SXRPlane;
 import com.samsungxr.mixedreality.SXRTrackingState;
 
+import java.lang.reflect.Array;
 import java.nio.FloatBuffer;
+import java.util.Arrays;
 
 
 class CVLibraryPlane extends SXRPlane {
@@ -30,8 +34,7 @@ class CVLibraryPlane extends SXRPlane {
     protected CVLibraryPlane(SXRContext gvrContext) {
         super(gvrContext);
         mPose = new CVLibraryPose();
-        //mARPlane = plane;
-        mType = Type.HORIZONTAL_UPWARD_FACING;
+        mPlaneType = Type.HORIZONTAL_UPWARD_FACING;
 
 //        if (mARPlane.getType() == Plane.Type.HORIZONTAL_DOWNWARD_FACING) {
 //            mType = Type.HORIZONTAL_DOWNWARD_FACING;
@@ -42,6 +45,11 @@ class CVLibraryPlane extends SXRPlane {
 //        else {
 //            mType = Type.VERTICAL;
 //        }
+    }
+
+    public void getCenterPose(@NonNull float[] poseOut)
+    {
+        System.arraycopy(mPose.getPoseMatrix(), 0, poseOut, 0, 16);
     }
 
     /**
@@ -68,16 +76,8 @@ class CVLibraryPlane extends SXRPlane {
     }
 
     @Override
-    public float[] getCenterPose() {
-        //float[] centerPose = new float[16];
-        //mARPlane.getCenterPose().toMatrix(centerPose, 0);
-        float[] centerPose = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-        return centerPose;
-    }
-
-    @Override
     public Type getPlaneType() {
-        return mType;
+        return mPlaneType;
     }
 
     @Override
@@ -127,7 +127,12 @@ class CVLibraryPlane extends SXRPlane {
 //        }
         return;
     }
-    
+
+    public boolean isPoseInPolygon(float[] pose)
+    {
+        return false;
+    }
+
     /**
      * Converts from ARCore world space to SXRf's world space.
      *

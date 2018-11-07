@@ -14,7 +14,7 @@ import java.util.List;
  * normal rendering is in progress.
  *
  * A {@code SXRTextureCapturer} object can be set into a {@code SXRRenderData}, which
- * is passed to the corresponding shader that renders a scene object. The shader's native
+ * is passed to the corresponding shader that renders a node. The shader's native
  * class can check if capturing is requested, and perform a capture while rendering to
  * screen.
  *

@@ -3,7 +3,7 @@ import org.joml.Vector3f;
 
 /**
  *  A billboard is a component that can be attached to a
- *  scene object to make it always face the camera. Note that
+ *  node to make it always face the camera. Note that
  *  the up-vector of the sceneobject does not change with the
  *  camera orientation.
  */
@@ -35,7 +35,7 @@ public class SXRBillboard extends SXRBehavior
     /**
      * Constructor
      * @param gvrContext
-     * @param up:       the up vector about which the scene object is constrained to rotate
+     * @param up:       the up vector about which the node is constrained to rotate
      */
     public SXRBillboard(SXRContext gvrContext, Vector3f up )
     {

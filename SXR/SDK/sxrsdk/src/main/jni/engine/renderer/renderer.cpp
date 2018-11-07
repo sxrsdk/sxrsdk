@@ -48,8 +48,8 @@ Renderer::Renderer() : numberDrawCalls(0),
         batch_manager = new BatchManager(BATCH_SIZE, MAX_INDICES);
     }
 }
-void Renderer::frustum_cull(glm::vec3 camera_position, Node *object,
-        float frustum[6][4], std::vector<Node*>& nodes,
+void Renderer::frustum_cull(glm::vec3 camera_position, Scene* scene, Node* object,
+        float frustum[6][4], std::vector<Node*>& scene_objects,
         bool need_cull, int planeMask) {
 
     // frustumCull() return 3 possible values:
@@ -91,7 +91,7 @@ void Renderer::frustum_cull(glm::vec3 camera_position, Node *object,
 
         if (cullVal >= 2) {
             object->setCullStatus(false);
-            nodes.push_back(object);
+            scene_objects.push_back(object);
         }
 
         if (cullVal == 3) {
@@ -100,12 +100,12 @@ void Renderer::frustum_cull(glm::vec3 camera_position, Node *object,
         }
     } else {
         object->setCullStatus(false);
-        nodes.push_back(object);
+        scene_objects.push_back(object);
     }
-
+    scene->pick(object);
     const std::vector<Node*> children = object->children();
     for (auto it = children.begin(); it != children.end(); ++it) {
-        frustum_cull(camera_position, *it, frustum, nodes, need_cull, planeMask);
+        frustum_cull(camera_position, scene, *it, frustum, scene_objects, need_cull, planeMask);
     }
 }
 
@@ -159,12 +159,12 @@ bool isRenderPassEqual(RenderData* rdata1, RenderData* rdata2){
 void Renderer::cullFromCamera(Scene *scene, jobject javaNode, Camera* camera,
         ShaderManager* shader_manager, std::vector<RenderData*>* render_data_vector, bool is_multiview)
 {
-    std::vector<Node*> nodes;
+    std::vector<Node*> scene_objects;
     LightList& lights = scene->getLights();
     RenderState rstate;
 
     render_data_vector->clear();
-    nodes.clear();
+    scene_objects.clear();
     rstate.is_multiview = is_multiview;
     rstate.material_override = NULL;
     rstate.shader_manager = shader_manager;
@@ -189,13 +189,17 @@ void Renderer::cullFromCamera(Scene *scene, jobject javaNode, Camera* camera,
     if (DEBUG_RENDERER) {
         LOGD("FRUSTUM: start frustum culling for root %s\n", object->name().c_str());
     }
-    //    frustum_cull(camera->owner_object()->transform()->position(), object, frustum, nodes, scene->get_frustum_culling(), 0);
-    frustum_cull(campos, object, frustum, nodes, scene->get_frustum_culling(), 0);
+    //    frustum_cull(camera->owner_object()->transform()->position(), object, frustum, scene_objects, scene->get_frustum_culling(), 0);
+    rstate.scene->lockColliders();
+    rstate.scene->clearVisibleColliders();
+    frustum_cull(campos, scene, object, frustum, scene_objects, scene->get_frustum_culling(), 0);
+    rstate.scene->unlockColliders();
     if (DEBUG_RENDERER) {
         LOGD("FRUSTUM: end frustum culling for root %s\n", object->name().c_str());
     }
     // 3. do occlusion culling, if enabled
-    occlusion_cull(rstate, nodes, render_data_vector);
+    occlusion_cull(rstate, scene_objects, render_data_vector);
+
 }
 
 
@@ -207,19 +211,15 @@ void Renderer::addRenderData(RenderData *render_data, RenderState& rstate, std::
     }
 }
 
-bool Renderer::occlusion_cull_init(RenderState& renderState, std::vector<Node*>& nodes,  std::vector<RenderData*>* render_data_vector){
+bool Renderer::occlusion_cull_init(RenderState& renderState, std::vector<Node*>& scene_objects,  std::vector<RenderData*>* render_data_vector){
 
-    renderState.scene->lockColliders();
-    renderState.scene->clearVisibleColliders();
     bool do_culling = renderState.scene->get_occlusion_culling();
     if (!do_culling) {
-        for (auto it = nodes.begin(); it != nodes.end(); ++it) {
-            Node *node = (*it);
-            RenderData* render_data = node->render_data();
+        for (auto it = scene_objects.begin(); it != scene_objects.end(); ++it) {
+            Node *scene_object = (*it);
+            RenderData* render_data = scene_object->render_data();
             addRenderData(render_data, renderState, *render_data_vector);
-            renderState.scene->pick(node);
         }
-        renderState.scene->unlockColliders();
         return false;
     }
     return true;

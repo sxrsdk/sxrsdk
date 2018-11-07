@@ -24,7 +24,7 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.utility.Log;
 
 /**
- * Manages GearVRF shaders for rendering scene objects.
+ * Manages GearVRF shaders for rendering nodes.
  *
  * Get the singleton from {@link SXRContext#getMaterialShaderManager()}.
  */

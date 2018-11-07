@@ -59,7 +59,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * {@link SXRGearCursorController} like below:
  *
  * <code>
- * GearController controller = (GearController) gvrCursorController;
+ * GearController controller = (GearController) SXRCursorController;
  * </code>
  *
  * You can add a listener for {@link IControllerEvent} to receive
@@ -237,7 +237,7 @@ public final class SXRGearCursorController extends SXRCursorController
     /**
      * Show or hide the controller model and picking ray.
      * <p>
-     * The scene objects remain in the scene but they are not rendered.
+     * The nodes remain in the scene but they are not rendered.
      *
      * @param flag true to show the model and ray, false to hide it.
      */
@@ -337,9 +337,7 @@ public final class SXRGearCursorController extends SXRCursorController
     @Override
     public void setPosition(float x, float y, float z)
     {
-        position.set(x, y, z);
-        pickDir.set(x, y, z);
-        pickDir.normalize();
+        super.setPosition(x, y, z);
         invalidate();
     }
 

@@ -14,7 +14,7 @@
  */
 
 /***************************************************************************
- * Things which can be attached to a scene object.
+ * Things which can be attached to a node.
  ***************************************************************************/
 
 #ifndef JAVA_COMPONENT_H_

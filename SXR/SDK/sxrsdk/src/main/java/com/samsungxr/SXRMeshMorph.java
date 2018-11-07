@@ -79,7 +79,7 @@ public class SXRMeshMorph extends SXRBehavior
     protected SXRVertexBuffer mbaseShape;
 
     /**
-     * Construct a morph to a scene object with a base mesh.
+     * Construct a morph to a node with a base mesh.
      * @param ctx  The current SXRF context.
      * @param numBlendShapes number of blend shapes to be set.
      */
@@ -101,7 +101,7 @@ public class SXRMeshMorph extends SXRBehavior
     static public long getComponentType() { return TYPE_MESHMORPH; }
 
     /**
-     * Attaches a morph to scene object with a base mesh
+     * Attaches a morph to node with a base mesh
      * @param sceneObj is the base mesh.
      * @throws IllegalStateException if component is null
      * @throws IllegalStateException if mesh is null
@@ -114,13 +114,13 @@ public class SXRMeshMorph extends SXRBehavior
 
         if (comp == null)
         {
-            throw new IllegalStateException("Cannot attach a morph to a scene object without a base mesh");
+            throw new IllegalStateException("Cannot attach a morph to a node without a base mesh");
         }
 
         SXRMesh mesh = ((SXRRenderData) comp).getMesh();
         if (mesh == null)
         {
-            throw new IllegalStateException("Cannot attach a morph to a scene object without a base mesh");
+            throw new IllegalStateException("Cannot attach a morph to a node without a base mesh");
         }
         SXRShaderData mtl = getMaterial();
 
@@ -196,7 +196,7 @@ public class SXRMeshMorph extends SXRBehavior
     {
         if (mBaseBlendShape == null)
         {
-            throw new IllegalStateException("Must be attached to a scene object to set blend shapes");
+            throw new IllegalStateException("Must be attached to a node to set blend shapes");
         }
         if (mNumVerts != vec3data.length / 3)
         {

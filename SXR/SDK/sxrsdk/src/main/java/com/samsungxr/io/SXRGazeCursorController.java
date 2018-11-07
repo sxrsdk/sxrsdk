@@ -15,15 +15,14 @@
 
 package com.samsungxr.io;
 
-import android.os.Handler;
-import android.os.Handler.Callback;
-import android.os.HandlerThread;
-import android.os.Message;
+import android.app.Activity;
+import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-
 import com.samsungxr.SXRContext;
+import com.samsungxr.SXRPerspectiveCamera;
 import com.samsungxr.SXRScene;
+import com.samsungxr.utility.Log;
 import org.joml.Vector3f;
 
 import java.util.concurrent.CountDownLatch;
@@ -35,6 +34,9 @@ final public class SXRGazeCursorController extends SXRCursorController
     private float actionDownZ;
     private final KeyEvent BUTTON_GAZE_DOWN = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BUTTON_1);
     private final KeyEvent BUTTON_GAZE_UP = new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BUTTON_1);
+    private float mDisplayWidth = 0;
+    private float mDisplayHeight = 0;
+    private float mDisplayDepth;
 
     SXRGazeCursorController(SXRContext context,
                             SXRControllerType controllerType,
@@ -42,6 +44,40 @@ final public class SXRGazeCursorController extends SXRCursorController
     {
         super(context, controllerType, name, vendorId, productId);
         mConnected = true;
+    }
+
+    /**
+     * Use this to enable the user interaction by touch screen on mobile applications.
+     *
+     * @param depth Z depth of the touch screen (distance from camera).
+     *              If zero, touch screen interaction is not enabled.
+     */
+    public void setTouchScreenDepth(float depth)
+    {
+        depth = Math.abs(depth);
+        if (depth != 0)
+        {
+            final Activity activity = getSXRContext().getActivity();
+            final DisplayMetrics metrics = new DisplayMetrics();
+            activity.getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
+            mDisplayWidth = metrics.widthPixels;
+            mDisplayHeight = metrics.heightPixels;
+            mDisplayDepth = depth;
+            mPicker.setEnable(false);   // only pick based on touch
+        }
+        else
+        {
+            mPicker.setEnable(true);    // pick based on gaze direction
+            mDisplayWidth = mDisplayHeight = mDisplayDepth = 0;
+        }
+    }
+
+    /**
+     *
+     * @return True if the touch screen is enabled, otherwise returns false.
+     */
+    public boolean isTouchScreenEnabled() {
+        return mDisplayDepth > 0;
     }
 
     @Override
@@ -67,8 +103,9 @@ final public class SXRGazeCursorController extends SXRCursorController
 
     private void handleMotionEvent(MotionEvent event)
     {
-        float eventX = event.getX();
-        int action = event.getAction();
+        final float eventX = event.getX();
+        final float eventY = event.getY();
+        final int action = event.getAction();
         float deltaX;
         int button = event.getButtonState();
 
@@ -113,6 +150,14 @@ final public class SXRGazeCursorController extends SXRCursorController
             default:
                 event.recycle();
                 return;
+        }
+
+        if (isTouchScreenEnabled())
+        {
+            float x = eventX - mDisplayWidth / 2;
+            float y =  mDisplayHeight / 2 - eventY;
+            float z = -mDisplayDepth;
+            setPosition(x, y, z);
         }
         setMotionEvent(event);
         invalidate();

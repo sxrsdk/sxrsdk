@@ -30,38 +30,38 @@ import com.samsungxr.io.SXRCursorController;
 public interface ITouchEvents extends IEvents
 {
     /**
-     * Called when the pick ray first enters a scene object.
-     * @param sceneObj scene object picked
+     * Called when the pick ray first enters a node.
+     * @param sceneObj node picked
      * @param collision information about the collision
      */
     void onEnter(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
     
     /**
-     * Called when the pick ray first exits a scene object.
-     * @param sceneObj scene object no longer picked.
+     * Called when the pick ray first exits a node.
+     * @param sceneObj node no longer picked.
      * @param collision information about the last collision before exit,
      *                  with previous hit location
      */
     void onExit(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
 
     /**
-     * Called when the scene object's collider is touched
+     * Called when the node's collider is touched
      * (the pick ray penetrates and the action button is down).
-     * @param sceneObj scene object touched
+     * @param sceneObj node touched
      * @param collision information about the collision
      */
     void onTouchStart(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
 
     /**
-     * Called when action button is up while the pick ray penetrates the scene object.
-     * @param sceneObj scene object no longer picked.
+     * Called when action button is up while the pick ray penetrates the node.
+     * @param sceneObj node no longer picked.
      */
     void onTouchEnd(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);
 
     /**
-     * Called while the pick ray penetrates a scene object.
+     * Called while the pick ray penetrates a node.
      * The collision has the touch flag settings.
-     * @param sceneObj scene object picked
+     * @param sceneObj node picked
      * @param collision information about the collision
      */    
     void onInside(SXRNode sceneObj, SXRPicker.SXRPickedObject collision);

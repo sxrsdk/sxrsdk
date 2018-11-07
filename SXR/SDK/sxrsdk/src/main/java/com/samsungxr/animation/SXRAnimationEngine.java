@@ -26,7 +26,7 @@ import com.samsungxr.SXRNode;
  * This class runs {@linkplain SXRAnimation animations}.
  * 
  * You can animate changes in just about any property of a
- * {@linkplain SXRNode scene object}.
+ * {@linkplain SXRNode node}.
  * 
  * <p>
  * The animation engine is an optional part of SXRF: to use it, you must call

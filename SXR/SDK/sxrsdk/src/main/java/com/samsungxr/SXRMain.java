@@ -123,7 +123,7 @@ public abstract class SXRMain implements IScriptEvents, IScriptable, IEventRecei
      * Called every frame.
      *
      * This is where you start animations, and where you add or change
-     * {@linkplain SXRNode scene objects.} Keep this method as short as
+     * {@linkplain SXRNode nodes.} Keep this method as short as
      * possible, to avoid dropping any frames.
      *
      * <p>

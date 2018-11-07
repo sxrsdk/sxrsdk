@@ -61,7 +61,7 @@ public abstract class SXRMaterialAnimation extends SXRAnimation {
     }
 
     /**
-     * 'Knows how' to get a material from a scene object - a bit smaller than
+     * 'Knows how' to get a material from a node - a bit smaller than
      * inline code, and protects you from any changes (however unlikely) in the
      * object hierarchy.
      */

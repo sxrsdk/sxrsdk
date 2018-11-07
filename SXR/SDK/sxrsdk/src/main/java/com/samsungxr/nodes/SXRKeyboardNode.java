@@ -62,7 +62,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *  * A {@linkplain SXRNode scene object} that renders a virtual {@link Keyboard}.
+ *  * A {@linkplain SXRNode node} that renders a virtual {@link Keyboard}.
  *  It handles rendering of keys and detecting touch movements.
  *
  * See: {@link Keyboard}
@@ -809,7 +809,7 @@ public class SXRKeyboardNode extends SXRNode {
     /**
      * Handles key press input events from Android as well as touch events
      * on the key objects themselves. The ITouchEvents handler is attached to
-     * each key. The Handler is attached to the keyboard scene object.
+     * each key. The Handler is attached to the keyboard node.
      */
     private static class KeyEventsHandler extends Handler implements ITouchEvents
     {

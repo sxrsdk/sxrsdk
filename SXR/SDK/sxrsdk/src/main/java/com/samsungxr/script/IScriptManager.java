@@ -97,7 +97,7 @@ public interface IScriptManager {
 
     /**
      * Load a script bundle file. It defines bindings between scripts and SXRf objects
-     * (e.g., scene objects and the {@link SXRMain} object).
+     * (e.g., nodes and the {@link SXRMain} object).
      *
      * @param filePath
      *        The path and filename of the script bundle.

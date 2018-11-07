@@ -88,7 +88,7 @@ public class SXRPhysicsLoader {
             String name = NativePhysics3DLoader.getRigidBodyName(loader, nativeRigidBody);
             SXRNode sceneObject = sceneRoot.getNodeByName(name);
             if (sceneObject == null) {
-                Log.w(TAG, "Didn't find scene object for rigid body '" + name + "'");
+                Log.w(TAG, "Didn't find node for rigid body '" + name + "'");
                 continue;
             }
 
@@ -121,7 +121,7 @@ public class SXRPhysicsLoader {
             SXRNode sceneObjectB = rbObjects.get(nativeRigidBodyB);
 
             if (sceneObject == null || sceneObjectB == null) {
-                // There is no scene object to own this constraint
+                // There is no node to own this constraint
                 Log.w(TAG, "Ignoring constraint with missing rigid body.");
                 continue;
             }
