@@ -203,7 +203,7 @@ namespace sxr
     }
 
 
-    void GLRenderer::renderRenderTarget(Scene* scene, jobject javaNode, RenderTarget* renderTarget,
+    void GLRenderer::renderRenderTarget(Scene* scene, jobject javaSceneObject, RenderTarget* renderTarget,
                             ShaderManager* shader_manager,
                             RenderTexture* post_effect_render_texture_a,
                             RenderTexture* post_effect_render_texture_b)
@@ -223,7 +223,7 @@ namespace sxr
         RenderData* post_effects = camera->post_effect_data();
         RenderState& rstate = renderTarget->getRenderState();
         //@todo makes it clear this is a hack
-        rstate.javaNode = javaNode;
+        rstate.javaNode = javaSceneObject;
         rstate.scene = scene;
         rstate.shader_manager = shader_manager;
         rstate.uniforms.u_view = camera->getViewMatrix();
@@ -432,17 +432,17 @@ namespace sxr
     /**
      * Generate shadow maps for all the lights that cast shadows.
      * The scene is rendered from the viewpoint of the light using a
-     * special depth shader (SXRDepthShader) to create the shadow map.
+     * special depth shader (GVRDepthShader) to create the shadow map.
      * @see Renderer::renderShadowMap Light::makeShadowMap
      */
-    void GLRenderer::makeShadowMaps(Scene* scene, jobject javaNode, ShaderManager* shader_manager)
+    void GLRenderer::makeShadowMaps(Scene* scene, jobject javaSceneObject, ShaderManager* shader_manager)
     {
         checkGLError("makeShadowMaps");
         GLint drawFB, readFB;
 
         glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFB);
         glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFB);
-        scene->getLights().makeShadowMaps(scene, javaNode, shader_manager);
+        scene->getLights().makeShadowMaps(scene, javaSceneObject, shader_manager);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, readFB);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawFB);
     }
@@ -465,16 +465,16 @@ namespace sxr
         }
     }
 
-    void GLRenderer::occlusion_cull(RenderState &rstate, std::vector<Node *> &nodes, std::vector<RenderData*>* render_data_vector)
+    void GLRenderer::occlusion_cull(RenderState &rstate, std::vector<Node*> &scene_objects, std::vector<RenderData*>* render_data_vector)
     {
-
-        if (!occlusion_cull_init(rstate, nodes, render_data_vector))
+        if (!occlusion_cull_init(rstate, scene_objects, render_data_vector))
             return;
 
-        for (auto it = nodes.begin(); it != nodes.end(); ++it)
+        for (auto it = scene_objects.begin(); it != scene_objects.end(); ++it)
         {
-            Node *node = (*it);
-            RenderData *render_data = node->render_data();
+            Node* scene_object = (*it);
+            RenderData* render_data = scene_object->render_data();
+
             if (render_data == 0 || render_data->material(0) == 0)
             {
                 continue;
@@ -482,7 +482,7 @@ namespace sxr
 
             //If a query was issued on an earlier or same frame and if results are
             //available, then update the same. If results are unavailable, do nothing
-            if (!node->is_query_issued())
+            if (!scene_object->is_query_issued())
             {
                 continue;
             }
@@ -491,7 +491,7 @@ namespace sxr
             //This avoids overloading the GPU with too many queries
             //Queries may span multiple frames
 
-            bool is_query_issued = node->is_query_issued();
+            bool is_query_issued = scene_object->is_query_issued();
             if (!is_query_issued)
             {
                 //Setup basic bounding box and material
@@ -500,20 +500,20 @@ namespace sxr
                 ShaderData *bbox_material = new GLMaterial("", "");
                 RenderPass *pass = Renderer::getInstance()->createRenderPass();
                 GLShader *bboxShader = static_cast<GLShader *>(rstate.shader_manager
-                        ->findShader("SXRBoundingBoxShader"));
+                        ->findShader("GVRBoundingBoxShader"));
                 pass->set_shader(bboxShader->getProgramId(), false);
                 pass->set_material(bbox_material);
                 bounding_box_render_data->set_mesh(bounding_box_mesh);
                 bounding_box_render_data->add_pass(pass);
                 if (bounding_box_render_data->isValid(this, rstate) >= 0)
                 {
-                    GLuint* query = node->get_occlusion_array();
+                    GLuint* query = scene_object->get_occlusion_array();
 
                     glDepthFunc(GL_LEQUAL);
                     glEnable(GL_DEPTH_TEST);
                     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
-                    rstate.uniforms.u_model = node->transform()->getModelMatrix();
+                    rstate.uniforms.u_model = scene_object->transform()->getModelMatrix();
                     rstate.uniforms.u_mv = rstate.uniforms.u_view * rstate.uniforms.u_model;
                     rstate.uniforms.u_mv_it = glm::inverseTranspose(rstate.uniforms.u_mv);
                     rstate.uniforms.u_mvp = rstate.uniforms.u_proj * rstate.uniforms.u_mv;
@@ -523,7 +523,7 @@ namespace sxr
                     renderWithShader(rstate, bboxShader, bounding_box_render_data,
                                      bounding_box_render_data->material(0), 0);
                     glEndQuery(GL_ANY_SAMPLES_PASSED);
-                    node->set_query_issued(true);
+                    scene_object->set_query_issued(true);
 
                     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
@@ -548,7 +548,6 @@ namespace sxr
                 (*it)->set_visible(visibility);
                 (*it)->set_query_issued(false);
                 addRenderData((*it)->render_data(), rstate, *render_data_vector);
-                rstate.scene->pick(node);
             }
         }
         rstate.scene->unlockColliders();
@@ -569,7 +568,7 @@ namespace sxr
         if (rstate.is_shadow && curr_material)
         {
             const char* depthShaderName = render_data->owner_object()->getComponent(Skin::getComponentType()) ?
-                                          "SXRDepthShader$a_bone_weights$a_bone_indices" : "SXRDepthShader";
+                                          "GVRDepthShader$a_bone_weights$a_bone_indices" : "GVRDepthShader";
             shader = rstate.shader_manager->findShader(depthShaderName);
 
             if (shader == nullptr)
@@ -624,7 +623,7 @@ namespace sxr
         {
             LOGE("Error detected in Renderer::renderRenderData; name : %s, error : %s",
                  render_data->owner_object()->name().c_str(), error.c_str());
-            shader = rstate.shader_manager->findShader("SXRErrorShader");
+            shader = rstate.shader_manager->findShader("GVRErrorShader");
             shader->useShader(rstate.is_multiview);
         }
         if ((drawMode == GL_LINE_STRIP) ||

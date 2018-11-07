@@ -56,7 +56,7 @@ namespace sxr
  *
  * The ray is converted into mesh coordinates by transforming it
  * with the concatenation of the view_matrix and the model matrix
- * of the scene object which owns the collider.
+ * of the node which owns the collider.
  * The hit point computed is in local coordinates (same coordinate
  * space as the mesh vertices).
  *
@@ -81,7 +81,7 @@ namespace sxr
 
         /*
          * Compute the model view matrix by concatenating the
-         * scene object"s model matrix with the input view matrix.
+         * node"s model matrix with the input view matrix.
          */
         transformRay(model_inverse, O, D);
         if ((mesh == NULL) && (rd != NULL))
@@ -119,7 +119,7 @@ namespace sxr
  *
  * The sphere is converted into mesh coordinates by transforming it
  * with the concatenation of the view_matrix and the model matrix
- * of the scene object which owns the collider.
+ * of the node which owns the collider.
  * The hit point computed is in local coordinates (same coordinate
  * space as the mesh vertices).
  *

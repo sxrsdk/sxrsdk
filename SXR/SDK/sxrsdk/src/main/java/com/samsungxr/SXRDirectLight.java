@@ -22,7 +22,7 @@ import org.joml.Matrix4f;
 /**
  * Illuminates object in the scene with a directional light source.
  * 
- * The direction of the light is the forward orientation of the scene object
+ * The direction of the light is the forward orientation of the node
  * the light is attached to. Light is emitted in that direction
  * from infinitely far away.
  *
@@ -33,7 +33,7 @@ import org.joml.Matrix4f;
  * <table>
  * <tr><td>enabled</td><td>1 = light is enabled, 0 = light is disabled/td></tr>
  * <tr><td>world_direction</td><td>direction of spot light in world coordinates</td></tr>
- *  derived from scene object orientation<td></tr>
+ *  derived from node orientation<td></tr>
  * <tr><td>ambient_intensity</td><td>intensity of ambient light emitted</td></tr>
  * <tr><td>diffuse_intensity</td><td>intensity of diffuse light emitted</td></tr>
  * <tr><td>specular_intensity</td><td>intensity of specular light emitted</td></tr>
@@ -270,7 +270,7 @@ public class SXRDirectLight extends SXRLight
 
     /**
      * Updates the position, direction and shadow matrix
-     * of this light from the transform of scene object that owns it.
+     * of this light from the transform of node that owns it.
      * The shadow matrix is the model/view/projection matrix
      * from the point of view of the light.
      */

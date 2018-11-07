@@ -19,7 +19,7 @@ import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
 
 /**
- * Base class for adding javascript related behaviors to a scene object.
+ * Base class for adding javascript related behaviors to a node.
  */
 public abstract class SXRScriptBehaviorBase extends SXRBehavior {
 

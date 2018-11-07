@@ -179,7 +179,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     }
 
     /**
-     * Start the drag operation of a scene object with a rigid body.
+     * Start the drag operation of a node with a rigid body.
      *
      * @param sceneObject Scene object with a rigid body attached to it.
      * @param hitX rel position in x-axis.

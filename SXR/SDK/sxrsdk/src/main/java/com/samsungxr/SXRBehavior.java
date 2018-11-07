@@ -18,14 +18,14 @@ package com.samsungxr;
 import java.lang.reflect.Method;
 
 /**
- * Base class for adding user-defined behaviors to a scene object.
+ * Base class for adding user-defined behaviors to a node.
  * You can override callbacks for initialization and per-frame updates.
  * 
- * This class listens for draw frame events when it is attached to a scene object.
+ * This class listens for draw frame events when it is attached to a node.
  * You can override these callbacks to implement custom components.
  * - onDrawFrame(float frametime) called once every frame before rendering.
- * - onAttach(SXRNode) called when this behavior is attached to a scene object.
- * - onDetach(SXRNode) called when this behavior is detached from a scene object.
+ * - onAttach(SXRNode) called when this behavior is attached to a node.
+ * - onDetach(SXRNode) called when this behavior is detached from a node.
  * 
  * @see SXRComponent
  * @see SXRNode#attachComponent(SXRComponent)
@@ -85,9 +85,9 @@ public class SXRBehavior extends SXRComponent implements SXRDrawFrameListener
     }
     
     /**
-     * Called when this behavior is attached to a scene object.
+     * Called when this behavior is attached to a node.
      * 
-     * Attaching a behavior to a scene object will cause it
+     * Attaching a behavior to a node will cause it
      * to start listening to scene events.
      * 
      * @param newOwner  SXRNode the behavior is attached to.
@@ -99,9 +99,9 @@ public class SXRBehavior extends SXRComponent implements SXRDrawFrameListener
     }
     
     /**
-     * Called when this behavior is detached from a scene object.
+     * Called when this behavior is detached from a node.
      * 
-     * Detaching a behavior from a scene object will cause it
+     * Detaching a behavior from a node will cause it
      * to stop listening to scene events (onStep won't be called).
      *
      * @param oldOwner  SXRNode the behavior was detached from.

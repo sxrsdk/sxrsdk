@@ -30,19 +30,19 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 /**
- * Finds the scene objects that are hit by a ray or sphere.
+ * Finds the nodes that are hit by a ray or sphere.
  *
  * The picker can function in two modes. One way is to simply call its
  * static functions to make a single scan through the scene to determine
  * what is hit by the picking ray.
  * <p/>
- * The other way is to add the picker as a component to a scene object.
- * Usually, the scene object is the camera. In this case,
+ * The other way is to add the picker as a component to a node.
+ * Usually, the node is the camera. In this case,
  * the picking ray is generated from the camera viewpoint
  * each frame. It's origin is the camera position and it's direction is
  * the camera forward look vector (what the user is looking at).
  * <p/>
- * For a {@linkplain SXRNode scene object} to be pickable, it must have a
+ * For a {@linkplain SXRNode node} to be pickable, it must have a
  * {@link SXRCollider} component attached to it that is enabled.
  * The picker "casts" a ray into the screen graph, and returns an array
  * containing all the collisions as instances of SXRPickedObject.
@@ -52,14 +52,14 @@ import org.joml.Vector3f;
  * The picker maintains the list of currently picked objects
  * (which can be obtained with getPicked()) and continually updates it each frame.
  * <p/>
- * In this mode, when the ray from the scene object hits a pickable object,
+ * In this mode, when the ray from the node hits a pickable object,
  * the picker generates one or more pick events (IPickEvents interface)
  * which are sent the event receiver of the scene. These events can be
  * observed by listeners.
  * <ul>
- * <li>onEnter(SXRNode)  called when the pick ray enters a scene object.</li>
- * <li>onExit(SXRNode)   called when the pick ray exits a scene object.</li>
- * <li>onInside(SXRNode) called while the pick ray penetrates a scene object.</li>
+ * <li>onEnter(SXRNode)  called when the pick ray enters a node.</li>
+ * <li>onExit(SXRNode)   called when the pick ray exits a node.</li>
+ * <li>onInside(SXRNode) called while the pick ray penetrates a node.</li>
  * <li>onPick(SXRPicker)        called every frame if something is picked.</li>
  * <li>onNoPick(SXRPicker)      called every frame if nothing is picked.</li>
  * </ul
@@ -136,7 +136,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * This constructor enables the SEND_PICK_EVENTS, SEND_TO_LISTENERS
      * and SEND_TO_SCENE event options.
      * @param context context that owns the scene
-     * @param scene scene containing the scene objects to pick from
+     * @param scene scene containing the nodes to pick from
      * @see #getScene()
      * @see #setScene(SXRScene)
      * @see #setEventOptions(EnumSet)
@@ -148,16 +148,16 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
 
     /**
      * Construct a picker which picks from a given scene
-     * using a ray emanating from the specified scene object.
-     * The picker will be attached to the scene object and
+     * using a ray emanating from the specified node.
+     * The picker will be attached to the node and
      * will scan the scene every frame and generate pick events.
      * <p>
      * This constructor is useful when you want to pick from the
-     * viewpoint of a scene object. It enables the SEND_PICK_EVENTS,
+     * viewpoint of a node. It enables the SEND_PICK_EVENTS,
      * SEND_TO_LISTENERS and SEND_TO_SCENE event options.
      *
-     * @param owner scene object to own the picker
-     * @param scene scene containing the scene objects to pick from
+     * @param owner node to own the picker
+     * @param scene scene containing the nodes to pick from
      * @see #getScene()
      * @see #setScene(SXRScene)
      * @see #setEventOptions(EnumSet)
@@ -208,7 +208,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      *<p>
      * This constructor enables the SEND_PICK_EVENTS
      * and SEND_TO_LISTENERS event options.
-     * @param scene scene containing the scene objects to pick from
+     * @param scene scene containing the nodes to pick from
      * @param enable true to start in the enabled state (listening for events)
      * @see #setEventOptions(EnumSet)
      */
@@ -291,7 +291,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
     /**
      * Set the scene to pick against.
      * <p>
-     * The picker will only pick scene objects that are in
+     * The picker will only pick nodes that are in
      * this scene. You can change the scene at any time but
      * this may give confusing event streams if done
      * while the application is in the middle of picking.
@@ -314,13 +314,13 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
     /**
      * Get the current ray to use for picking.
      * <p/>
-     * If the picker is attached to a scene object,
-     * this ray is derived from the scene object's transform.
+     * If the picker is attached to a node,
+     * this ray is derived from the node's transform.
      * The origin of the ray is the translation component
      * of the total model matrix and the ray direction
      * is the forward look vector.
      * <p/>
-     * If not attached to a scene object, the origin of the
+     * If not attached to a node, the origin of the
      * ray is the position of the viewer and its direction
      * is where the viewer is looking.
      * <p>
@@ -349,7 +349,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * root of the scene graph before any camera viewing transformation
      * is applied.
      * <p>
-     * You can get the pick ray relative to the scene object that
+     * You can get the pick ray relative to the node that
      * owns the picker (or the camera if no owner) by calling
      * {@link #getPickRay()}
      * @param origin    world coordinate origin of the pick ray
@@ -377,7 +377,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * Gets the current pick list.
      * <p/>
      * Each collision with an object is described as a
-     * SXRPickedObject which contains the scene object
+     * SXRPickedObject which contains the node
      * and collider hit, the distance from the camera
      * and the hit position in the coordinate system
      * of the collision geometry. The objects in the pick
@@ -404,9 +404,9 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * @param dz    Z coordinate of ray direction.
      *
      * The coordinate system of the ray depends on the whether the
-     * picker is attached to a scene object or not. When attached
-     * to a scene object, the ray is in the coordinate system of
-     * that object where (0, 0, 0) is the center of the scene object
+     * picker is attached to a node or not. When attached
+     * to a node, the ray is in the coordinate system of
+     * that object where (0, 0, 0) is the center of the node
      * and (0, 0, 1) is it's positive Z axis. If not attached to an
      * object, the ray is in the coordinate system of the scene's
      * main camera with (0, 0, 0) at the viewer and (0, 0, -1)
@@ -621,7 +621,6 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
             {
                 propagateOnInside(collision);
                 if (prevHit.touched && !mTouched)
-
                 {
                     mPickListChanged = true;
                     propagateOnNoTouch(collision);
@@ -848,7 +847,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
 
     /**
      * Propagate onExit events to listeners
-     * @param hitObject scene object
+     * @param hitObject node
      */
     protected void propagateOnExit(SXRNode hitObject, SXRPickedObject hit)
     {
@@ -910,7 +909,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
     /**
      * Tests the {@link SXRNode} against the ray information passed to the function.
      *
-     * @param sceneObject
+     * @param node
      *            The {@link SXRNode} to be tested.
      *
      * @param ox
@@ -934,25 +933,25 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * @return  a {@link SXRPicker.SXRPickedObject} containing the picking information
      *
      */
-    public static final SXRPickedObject pickNode(SXRNode sceneObject, float ox, float oy, float oz, float dx,
+    public static final SXRPickedObject pickNode(SXRNode node, float ox, float oy, float oz, float dx,
                                                         float dy, float dz) {
-        return NativePicker.pickNode(sceneObject.getNative(), ox, oy, oz, dx, dy, dz);
+        return NativePicker.pickNode(node.getNative(), ox, oy, oz, dx, dy, dz);
     }
 
     /**
      * Tests the {@link SXRNode} against the ray information passed to the function.
      *
-     * @param sceneObject
+     * @param node
      *            The {@link SXRNode} to be tested.
      *
      * @return  a {@link SXRPicker.SXRPickedObject} containing the picking information
      *
      */
-    public static final SXRPickedObject pickNode(SXRNode sceneObject) {
-        SXRCameraRig cam = sceneObject.getSXRContext().getMainScene().getMainCameraRig();
+    public static final SXRPickedObject pickNode(SXRNode node) {
+        SXRCameraRig cam = node.getSXRContext().getMainScene().getMainCameraRig();
         SXRTransform t = cam.getHeadTransform();
         float[] lookat = cam.getLookAt();
-        return NativePicker.pickNode(sceneObject.getNative(), t.getPositionX(), t.getPositionY(), t.getPositionZ(),
+        return NativePicker.pickNode(node.getNative(), t.getPositionX(), t.getPositionY(), t.getPositionZ(),
                 lookat[0], lookat[1], lookat[2]);
     }
 
@@ -968,7 +967,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * normalized from -1 to 1: Note that the y direction runs from -1 at the
      * bottom to 1 at the top.
      *
-     * @param sceneObject
+     * @param node
      *            The {@link SXRNode} to be tested.
      *
      * @param ox
@@ -1000,12 +999,12 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * @return <code>true</code> on a successful hit, <code>false</code> otherwise.
      */
     static final boolean pickNodeAgainstBoundingBox(
-            SXRNode sceneObject, float ox, float oy, float oz, float dx,
+            SXRNode node, float ox, float oy, float oz, float dx,
             float dy, float dz, ByteBuffer readbackBuffer) {
         sFindObjectsLock.lock();
         try {
             return NativePicker.pickNodeAgainstBoundingBox(
-                    sceneObject.getNative(), ox, oy, oz, dx, dy, dz, readbackBuffer);
+                    node.getNative(), ox, oy, oz, dx, dy, dz, readbackBuffer);
         } finally {
             sFindObjectsLock.unlock();
         }
@@ -1032,7 +1031,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * corrupting your hit data.
      * <p>
      * Depending on the type of collider, that the hit location may not be exactly
-     * where the ray would intersect the scene object itself. Rather, it is
+     * where the ray would intersect the node itself. Rather, it is
      * where the ray intersects the collision geometry associated with the collider.
      *
      * @param scene
@@ -1056,7 +1055,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * @param dz
      *            The z vector of the ray direction.
      * @return A list of {@link SXRPickedObject}, sorted by distance from the
-     *         camera rig. Each {@link SXRPickedObject} contains the scene object
+     *         camera rig. Each {@link SXRPickedObject} contains the node
      *         which owns the {@link SXRCollider} along with the hit
      *         location and distance from the camera.
      *
@@ -1079,14 +1078,14 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * <p/>
      * The ray is defined by its origin {@code [ox, oy, oz]} and its direction
      * {@code [dx, dy, dz]}. The ray is in the coordinate system of the
-     * input transform, allowing it to be with respect to a scene object.
+     * input transform, allowing it to be with respect to a node.
      *
      * <p>
      * The ray origin may be [0, 0, 0] and the direction components should be
      * normalized from -1 to 1: Note that the y direction runs from -1 at the
      * bottom to 1 at the top. To construct a picking ray originating at the
-     * center of a scene object and pointing where that scene object looks,
-     * attach the SXRPicker to the scene object and  pass (0, 0, 0) as
+     * center of a node and pointing where that node looks,
+     * attach the SXRPicker to the node and  pass (0, 0, 0) as
      * the ray origin and (0, 0, -1) for the direction.
      *
      * <p>
@@ -1097,7 +1096,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * corrupting your hit data.
      * <p/>
      * Depending on the type of collider, that the hit location may not be exactly
-     * where the ray would intersect the scene object itself. Rather, it is
+     * where the ray would intersect the node itself. Rather, it is
      * where the ray intersects the collision geometry associated with the collider.
      *
      * @param scene
@@ -1122,7 +1121,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * @param dz
      *            The z vector of the ray direction.
      * @return The {@link SXRPickedObject} closest to the ray origin or null if nothing picked.
-     *         Each {@link SXRPickedObject} contains the scene object
+     *         Each {@link SXRPickedObject} contains the node
      *         which owns the {@link SXRCollider} along with the hit
      *         location and distance.
      *
@@ -1150,14 +1149,14 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * <p/>
      * The ray is defined by its origin {@code [ox, oy, oz]} and its direction
      * {@code [dx, dy, dz]}. The ray is in the coordinate system of the
-     * input transform, allowing it to be with respect to a scene object.
+     * input transform, allowing it to be with respect to a node.
      *
      * <p>
      * The ray origin may be [0, 0, 0] and the direction components should be
      * normalized from -1 to 1: Note that the y direction runs from -1 at the
      * bottom to 1 at the top. To construct a picking ray originating at the
-     * center of a scene object and pointing where that scene object looks,
-     * attach the SXRPicker to the scene object and  pass (0, 0, 0) as
+     * center of a node and pointing where that node looks,
+     * attach the SXRPicker to the node and  pass (0, 0, 0) as
      * the ray origin and (0, 0, -1) for the direction.
      *
      * <p>
@@ -1168,7 +1167,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * corrupting your hit data.
      * <p/>
      * Depending on the type of collider, that the hit location may not be exactly
-     * where the ray would intersect the scene object itself. Rather, it is
+     * where the ray would intersect the node itself. Rather, it is
      * where the ray intersects the collision geometry associated with the collider.
      *
      * @param scene
@@ -1193,7 +1192,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
      * @param dz
      *            The z vector of the ray direction.
      * @return A list of {@link SXRPickedObject}, sorted by distance from the
-     *         pick ray origin. Each {@link SXRPickedObject} contains the scene object
+     *         pick ray origin. Each {@link SXRPickedObject} contains the node
      *         which owns the {@link SXRCollider} along with the hit
      *         location and distance.
      *
@@ -1341,7 +1340,7 @@ public class SXRPicker extends SXRBehavior implements IEventReceiver {
          *
          * This is the owner of the collider hit.
          *
-         * @return scene object hit
+         * @return node hit
          * @see SXRComponent#getOwnerObject()
          */
         public SXRNode getHitObject() {
@@ -1446,11 +1445,13 @@ final class NativePicker {
 
     static native SXRPicker.SXRPickedObject[] pickBounds(long scene, List<SXRNode> collidables);
 
-    static native SXRPicker.SXRPickedObject pickNode(long sceneObject, float ox, float oy, float oz,
+    static native SXRPicker.SXRPickedObject pickNode(long node, float ox, float oy, float oz,
                                                             float dx, float dy, float dz);
 
     static native SXRPicker.SXRPickedObject[] pickVisible(long scene);
 
-    static native boolean pickNodeAgainstBoundingBox(long sceneObject,
-                                                            float ox, float oy, float oz, float dx, float dy, float dz, ByteBuffer readbackBuffer);
+    static native boolean pickNodeAgainstBoundingBox(long node,
+                                                     float ox, float oy, float oz,
+                                                     float dx, float dy, float dz,
+                                                     ByteBuffer readbackBuffer);
 }

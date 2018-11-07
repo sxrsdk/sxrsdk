@@ -15,7 +15,7 @@
 
 
 /***************************************************************************
- * Holds scene objects. Can be used by engines.
+ * Holds nodes. Can be used by engines.
  ***************************************************************************/
 
 #include "engine/renderer/renderer.h"

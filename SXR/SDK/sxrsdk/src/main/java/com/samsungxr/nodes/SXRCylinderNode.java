@@ -60,7 +60,7 @@ public class SXRCylinderNode extends SXRNode {
     private int triangleCount = 0;
 
     /**
-     * Constructs a cylinder scene object based on a set of parameters.
+     * Constructs a cylinder node based on a set of parameters.
      *  Height          height of cylinder (default 1).
      *  TopRadius       radius of cylinder top (default 0.5).
      *  BottomRadius    radius of cylinder bottom (default 0.5).
@@ -81,7 +81,7 @@ public class SXRCylinderNode extends SXRNode {
     }
     
     /**
-     * Constructs a cylinder scene object with a height of 1, radius of 0.5, 10
+     * Constructs a cylinder node with a height of 1, radius of 0.5, 10
      * stacks, and 36 slices.
      * 
      * The cylinder's triangles and normals are facing out and the same texture
@@ -98,7 +98,7 @@ public class SXRCylinderNode extends SXRNode {
     }
 
     /**
-     * Constructs a cylinder scene object with a height of 1, radius of 0.5, 10
+     * Constructs a cylinder node with a height of 1, radius of 0.5, 10
      * stacks, and 36 slices.
      * 
      * The cylinder's triangles and normals are facing either in or out and the
@@ -120,7 +120,7 @@ public class SXRCylinderNode extends SXRNode {
     }
 
     /**
-     * Constructs a cylinder scene object with a height of 1, radius of 0.5, 10
+     * Constructs a cylinder node with a height of 1, radius of 0.5, 10
      * stacks, and 36 slices.
      * 
      * The cylinder's triangles and normals are facing either in or out and the
@@ -148,7 +148,7 @@ public class SXRCylinderNode extends SXRNode {
     }
 
     /**
-     * Constructs a cylinder scene object with a height of 1, radius of 0.5, 10
+     * Constructs a cylinder node with a height of 1, radius of 0.5, 10
      * stacks, and 36 slices.
      * 
      * The cylinder's triangles and normals are facing either in or out and the
@@ -174,7 +174,7 @@ public class SXRCylinderNode extends SXRNode {
     }
 
     /**
-     * Constructs a cylinder scene object with a height of 1, radius of 0.5, 10
+     * Constructs a cylinder node with a height of 1, radius of 0.5, 10
      * stacks, and 36 slices.
      * 
      * The cylinder's triangles and normals are facing either in or out. The top, bottom, and side of the cylinder each has its own texture.
@@ -204,7 +204,7 @@ public class SXRCylinderNode extends SXRNode {
     }
 
     /**
-     * Constructs a cylinder scene object with user-specified height, top-radius, bottom-radius, 
+     * Constructs a cylinder node with user-specified height, top-radius, bottom-radius,
      * stacks, slices.
      * 
      * The cylinder's triangles and normals are facing either in or out and the
@@ -260,7 +260,7 @@ public class SXRCylinderNode extends SXRNode {
     }
 
     /**
-     * Constructs a cylinder scene object with user-specified height, top-radius, bottom-radius, 
+     * Constructs a cylinder node with user-specified height, top-radius, bottom-radius,
      * stacks, slices.
      * 
      * The cylinder's triangles and normals are facing either in or out and the
@@ -320,7 +320,7 @@ public class SXRCylinderNode extends SXRNode {
     }
 
     /**
-     * Constructs a cylinder scene object with user-specified height, top-radius, bottom-radius, 
+     * Constructs a cylinder node with user-specified height, top-radius, bottom-radius,
      * stacks, slices.
      * 
      * The cylinder's triangles and normals are facing either in or out. The top, bottom, and side of the cylinder each has its own texture.
@@ -385,7 +385,7 @@ public class SXRCylinderNode extends SXRNode {
     }
 
     /**
-     * Constructs a cylinder scene object with user-specified height, top-radius, bottom-radius, 
+     * Constructs a cylinder node with user-specified height, top-radius, bottom-radius,
      * stacks, slices. The sphere is subdivided into MxN meshes, where M=sliceSegmengNumber and N=(stackSegmentNumber+2) are specified by user.
      * 
      * The cylinder's triangles and normals are facing either in or out. The top, bottom, and side of the cylinder each has its own texture.
@@ -474,7 +474,7 @@ public class SXRCylinderNode extends SXRNode {
     }
 
     /**
-     * Constructs a cylinder scene object with user-specified height, top-radius, bottom-radius, 
+     * Constructs a cylinder node with user-specified height, top-radius, bottom-radius,
      * stacks, slices. The sphere is subdivided into MxN meshes, where M=sliceSegmengNumber and N=(stackSegmentNumber+2) are specified by user.
      * 
      * The cylinder's triangles and normals are facing either in or out and the

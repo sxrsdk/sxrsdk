@@ -31,7 +31,7 @@ import com.samsungxr.io.SXRCursorController;
  * sure that the sensor is enabled and a valid {@link ISensorEvents} is
  * attached.
  * <p>
- * To respond to sensor events from a scene object, attach an instance of {@link ISensorEvents}
+ * To respond to sensor events from a node, attach an instance of {@link ISensorEvents}
  * as a listener to the {@link SXREventReceiver} of the {@link SXRNode}) using
  * {@link SXRNode#getEventReceiver()} to get the {@link SXREventReceiver}, and then
  * calling {@link SXREventReceiver#addListener(IEvents)} to add the {@link ISensorEvents}.
@@ -47,7 +47,7 @@ public class SXRSensor extends SXRBehavior
     private SXRPicker.SXRPickedObject mHit = null;
 
     /*
-     * Listens for pick events from all scene objects.
+     * Listens for pick events from all nodes.
      * If the owner of a hit object or one of its ancestors
      * has a sensor, a sensor event is emitted to the
      * owner of that sensor. This propagates collisions
@@ -126,7 +126,7 @@ public class SXRSensor extends SXRBehavior
 
     /**
      * Constructor a sensor which emits {@link ISensorEvents} to
-     * the owning scene object based on {@link ITouchEvents}.
+     * the owning node based on {@link ITouchEvents}.
      * @param gvrContext the {@link SXRContext} associated with the application.
      */
     public SXRSensor(SXRContext gvrContext)
@@ -138,10 +138,10 @@ public class SXRSensor extends SXRBehavior
 
     /**
      * Constructor a sensor which emits {@link ISensorEvents} to
-     * the owning scene object based on {@link ITouchEvents}.
-     * The touch events may optionally be routed to the scene object.
+     * the owning node based on {@link ITouchEvents}.
+     * The touch events may optionally be routed to the node.
      * @param gvrContext the {@link SXRContext} associated with the application.
-     * @param sendTouchEvents true to send the touch events to the owning scene object
+     * @param sendTouchEvents true to send the touch events to the owning node
      */
     public SXRSensor(SXRContext gvrContext, boolean sendTouchEvents)
     {

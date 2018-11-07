@@ -106,32 +106,32 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
     }
 
     /**
-     * Add a {@linkplain SXRNode scene object} as
+     * Add a {@linkplain SXRNode node} as
      * a child of the scene root.
      * 
      * @param sceneObject
-     *            The {@linkplain SXRNode scene object} to add.
+     *            The {@linkplain SXRNode node} to add.
      */
     public void addNode(SXRNode sceneObject) {
         mSceneRoot.addChildObject(sceneObject);
     }
 
     /**
-     * Remove a {@linkplain SXRNode scene object} from
+     * Remove a {@linkplain SXRNode node} from
      * the scene root.
      * 
      * @param sceneObject
-     *            The {@linkplain SXRNode scene object} to remove.
+     *            The {@linkplain SXRNode node} to remove.
      */
     public void removeNode(SXRNode sceneObject) {
         mSceneRoot.removeChildObject(sceneObject);
     }
 
     /**
-     * Removes from scene root the first {@linkplain SXRNode scene object}
+     * Removes from scene root the first {@linkplain SXRNode node}
      * that has the given name.
      *
-     * @param name name of scene object to be removed.
+     * @param name name of node to be removed.
      *
      * @return true if child was removed, false if it was not found.
      *
@@ -142,10 +142,10 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
     }
     
     /**
-     * Removes from scene root any {@linkplain SXRNode scene object}
+     * Removes from scene root any {@linkplain SXRNode node}
      * that has the given name by performing case-sensitive search.
      *
-     * @param name name of scene object to be removed.
+     * @param name name of node to be removed.
      *
      * @return number of removed objects, 0 if none was found.
      */
@@ -154,7 +154,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
     }
 
     /**
-     * Remove all scene objects.
+     * Remove all nodes.
      */
     public synchronized void removeAllNodes() {
         final SXRCameraRig rig = getMainCameraRig();
@@ -186,7 +186,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
 
     /**
      * Clears the scene and resets the scene to initial state.
-     * Currently, it only removes all scene objects.
+     * Currently, it only removes all nodes.
      */
     public void clear() {
         removeAllNodes();
@@ -196,7 +196,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
      * Get the root of the scene hierarchy.
      * This node is a common ancestor to all the objects
      * in the scene.
-     * @return top level scene object.
+     * @return top level node.
      * @see #addNode(SXRNode)
      * @see #removeNode(SXRNode)
      */
@@ -205,7 +205,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
     }
     
     /**
-     * The top-level scene objects (children of the root node).
+     * The top-level nodes (children of the root node).
      * 
      * @return A read-only list containing all direct children of the root node.
      *
@@ -428,7 +428,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
      * Get the list of lights used by this scene.
      * 
      * This list is maintained by GearVRF by gathering the
-     * lights attached to the scene objects in the scene.
+     * lights attached to the nodes in the scene.
      * 
      * @return array of lights or null if no lights in scene.
      */
@@ -462,7 +462,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
             mMainCameraRig.prettyPrint(sb, indent + 4);
         }
 
-        // Show all scene objects
+        // Show all nodes
         mSceneRoot.prettyPrint(sb, indent + 2);
     }
 
@@ -494,7 +494,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
             SXRNode sceneObject = getNodeByName(atlasInfo.getName());
 
             if (sceneObject == null || sceneObject.getRenderData() == null) {
-                Log.w(TAG, "Null render data or scene object " + atlasInfo.getName()
+                Log.w(TAG, "Null render data or node " + atlasInfo.getName()
                         + " not found to apply texture atlas.");
                 continue;
             }

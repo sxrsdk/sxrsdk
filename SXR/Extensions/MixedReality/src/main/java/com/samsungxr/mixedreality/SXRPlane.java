@@ -15,41 +15,30 @@
 
 package com.samsungxr.mixedreality;
 
+import android.support.annotation.NonNull;
+
+import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRNode;
 
 import java.nio.FloatBuffer;
 
 /**
  * Represents the  current best knowledge of a real-world planar surface.
  */
-public abstract class SXRPlane extends SXRNode {
-    protected Type mType;
+public abstract class SXRPlane extends SXRBehavior
+{
+    static private long TYPE_PLANE = newComponentType(SXRPlane.class);
     protected SXRTrackingState mTrackingState;
     protected SXRPlane mParentPlane;
-    protected SXRNode mNode;
+    protected Type mPlaneType;
 
-    protected SXRPlane(SXRContext gvrContext) {
-        super(gvrContext);
+    protected SXRPlane(SXRContext SXRContext)
+    {
+        super(SXRContext);
+        mType = getComponentType();
     }
 
-    /**
-     * Set a scene object to represent the plane
-     *
-     * @param obj
-     */
-    public void setNode(SXRNode obj) {
-        mNode = obj;
-        addChildObject(mNode);
-    }
-
-    /**
-     *
-     * @return The scene object that represents the plane
-     */
-    public SXRNode getNode() {
-        return this.mNode;
-    }
+    static public long getComponentType() { return TYPE_PLANE; }
 
     /**
      *
@@ -58,45 +47,53 @@ public abstract class SXRPlane extends SXRNode {
     public abstract SXRTrackingState getTrackingState();
 
     /**
+     * Gets the center pose.
      *
-     * @return The plane center pose
+     * @param poseOut Array to export the pose to.
      */
-    public abstract float[] getCenterPose();
+    public abstract void getCenterPose(@NonNull float[] poseOut);
+
+    public Type getPlaneType()
+    {
+        return mPlaneType;
+    }
 
     /**
-     *
-     * @return The plane type
-     */
-    public abstract Type getPlaneType();
-
-    /**
-     *
      * @return The plane width
      */
     public abstract float getWidth();
 
     /**
-     *
      * @return The plane height
      */
     public abstract float getHeight();
 
     /**
-     *
      * @return The polygon that best represents the plane
      */
     public abstract FloatBuffer getPolygon();
 
     /**
-     *
      * @return The parent plane
      */
-    public abstract SXRPlane getParentPlane();
+    public SXRPlane getParentPlane()
+    {
+        return mParentPlane;
+    }
+
+    /**
+     * Check if the given pose is in the plane's polygon.
+     *
+     * @param pose the pose matrix to check
+     * @return whether the pose is in the plane's polygon or not.
+     */
+    public abstract boolean isPoseInPolygon(float[] pose);
 
     /**
      * Describes the possible types of planes
      */
-    public enum Type {
+    public enum Type
+    {
         HORIZONTAL_DOWNWARD_FACING,
         HORIZONTAL_UPWARD_FACING,
         VERTICAL

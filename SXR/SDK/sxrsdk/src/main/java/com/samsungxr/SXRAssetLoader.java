@@ -873,7 +873,7 @@ public final class SXRAssetLoader {
      *             If you 'abuse' request consolidation by passing the same
      *             {@link SXRAndroidResource} descriptor to multiple load calls.
      *             <p>
-     *             It's fairly common for multiple scene objects to use the same
+     *             It's fairly common for multiple nodes to use the same
      *             texture or the same mesh. Thus, if you try to load, say,
      *             {@code R.raw.whatever} while you already have a pending
      *             request for {@code R.raw.whatever}, it will only be loaded
@@ -1041,7 +1041,7 @@ public final class SXRAssetLoader {
     };
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model.
+     * Loads a hierarchy of nodes {@link SXRNode} from a 3D model.
      * The model is not added to the current scene.
      * IAssetEvents are emitted to the event listener attached to the context.
      * This function blocks the current thread while loading the model
@@ -1066,7 +1066,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model
+     * Loads a hierarchy of nodes {@link SXRNode} from a 3D model
      * and adds it to the specified scene.
      * IAssetEvents are emitted to event listener attached to the context.
      * This function blocks the current thread while loading the model
@@ -1109,7 +1109,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model
+     * Loads a hierarchy of nodes {@link SXRNode} from a 3D model
      * replaces the current scene with it.
      * <p>
      * This function blocks the current thread while loading the model
@@ -1152,7 +1152,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model
+     * Loads a hierarchy of nodes {@link SXRNode} from a 3D model
      * replaces the current scene with it.
      * <p>
      * This function loads the model and its textures asynchronously in the background
@@ -1161,7 +1161,7 @@ public final class SXRAssetLoader {
      *
      * @param model
      *          Scene object to become the root of the loaded model.
-     *          This scene object will be named with the base filename of the loaded asset.
+     *          This node will be named with the base filename of the loaded asset.
      * @param volume
      *            A SXRResourceVolume based on the asset path to load.
      *            This volume will be used as the base for loading textures
@@ -1205,7 +1205,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model
+     * Loads a hierarchy of nodes {@link SXRNode} from a 3D model
      * replaces the current scene with it.
      * <p>
      * This function loads the model and its textures asynchronously in the background
@@ -1214,7 +1214,7 @@ public final class SXRAssetLoader {
      *
      * @param model
      *          Scene object to become the root of the loaded model.
-     *          This scene object will be named with the base filename of the loaded asset.
+     *          This node will be named with the base filename of the loaded asset.
      * @param volume
      *            A SXRResourceVolume based on the asset path to load.
      *            This volume will be used as the base for loading textures
@@ -1260,7 +1260,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRNode} asymchronously from a 3D model
+     * Loads a hierarchy of nodes {@link SXRNode} asymchronously from a 3D model
      * on the volume provided and adds it to the specified scene.
      * <p>
      * and will return before the model is loaded.
@@ -1315,7 +1315,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRNode} asymchronously from a 3D model
+     * Loads a hierarchy of nodes {@link SXRNode} asymchronously from a 3D model
      * on the volume provided and adds it to the specified scene.
      * <p>
      * and will return before the model is loaded.
@@ -1372,7 +1372,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model.
+     * Loads a hierarchy of nodes {@link SXRNode} from a 3D model.
      * <p>
      * This function blocks the current thread while loading the model
      * but loads the textures asynchronously in the background.
@@ -1419,7 +1419,7 @@ public final class SXRAssetLoader {
 
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model.
+     * Loads a hierarchy of nodes {@link SXRNode} from a 3D model.
      * <p>
      * This function blocks the current thread while loading the model
      * but loads the textures asynchronously in the background.
@@ -1475,7 +1475,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a hierarchy of scene objects {@link SXRNode} from a 3D model
+     * Loads a hierarchy of nodes {@link SXRNode} from a 3D model
      * inside an Android resource.
      * <p>
      * This function blocks the current thread while loading the model
@@ -1540,7 +1540,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a scene object {@link SXRNode} asynchronously from
+     * Loads a node {@link SXRNode} asynchronously from
      * a 3D model and raises asset events to a handler.
      * <p>
      * This function is a good choice for loading assets because
@@ -1641,7 +1641,7 @@ public final class SXRAssetLoader {
      * <p>
      * If you want to load a 3D model which has multiple meshes, the best choices are
      * {@link #loadModel(SXRNode, SXRResourceVolume, SXRScene)} which loads a
-     * 3D model under the scene object you provide and adds it to the given scene or
+     * 3D model under the node you provide and adds it to the given scene or
      * {@link #loadScene(SXRNode, SXRResourceVolume, SXRScene, IAssetEvents)}
      * which replaces the current scene with the 3D model.
      * </p>
@@ -1723,7 +1723,7 @@ public final class SXRAssetLoader {
      * internally to load the asset and then inspects the file to find the first mesh.
      * <p>
      * To asynchronously load an entire 3D model, you should use {@link #loadModel(SXRNode, SXRResourceVolume, SXRScene)}.
-     * It does not require a callback. Instead you pass it an existing scene object and it loads the model
+     * It does not require a callback. Instead you pass it an existing node and it loads the model
      * under tha node.
      * <p>
      * Model and mesh loading can take
@@ -1772,7 +1772,7 @@ public final class SXRAssetLoader {
      *             you 'abuse' request consolidation by passing the same
      *             {@link SXRAndroidResource} descriptor to multiple load calls.
      *             <p>
-     *             It's fairly common for multiple scene objects to use the same
+     *             It's fairly common for multiple nodes to use the same
      *             texture or the same mesh. Thus, if you try to load, say,
      *             {@code R.raw.whatever} while you already have a pending
      *             request for {@code R.raw.whatever}, it will only be loaded
@@ -1798,7 +1798,7 @@ public final class SXRAssetLoader {
     }
 
     /**
-     * Loads a scene object {@link SXRNode} from a 3D model.
+     * Loads a node {@link SXRNode} from a 3D model.
      *
      * @param request
      *            AssetRequest with the filename, relative to the root of the volume.

@@ -17,99 +17,59 @@ package com.samsungxr.mixedreality;
 
 import android.graphics.Bitmap;
 
-import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventListeners;
+import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRScene;
 import com.samsungxr.SXRNode;
-import com.samsungxr.IActivityEvents;
 import com.samsungxr.SystemPropertyUtil;
 import com.samsungxr.mixedreality.arcore.ARCoreSession;
 import com.samsungxr.mixedreality.CVLibrary.CVLibrarySession;
+
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 
 /**
  * Component to enable AR functionalities on SXRf.
  */
-public class SXRMixedReality extends SXRBehavior implements IMRCommon {
-    private final IActivityEvents mActivityEventsHandler;
-    private MRCommon mSession = null;
+public class SXRMixedReality implements IMixedReality
+{
+    private IMixedReality mSession;
     private SessionState mState;
+    private Vector3f mTempVec1 = new Vector3f();
+    private Vector3f mTempVec2 = new Vector3f();
 
     /**
      * Create a instace of SXRMixedReality component.
      *
-     * @param gvrContext
+     * @param ctx     {@link SXRContext} to use
      */
-    public SXRMixedReality(final SXRContext gvrContext) {
-        this(gvrContext, false, null, 0);
-    }
-
-    /**
-     * Create a instace of SXRMixedReality component.
-     *
-     * @param gvrContext
-     * @param platform which cv library to use.  0 for arcore. non-zero for sxr
-     */
-    public SXRMixedReality(final SXRContext gvrContext, int platform) {
-        this(gvrContext, false, null, platform);
+    public SXRMixedReality(final SXRContext ctx)
+    {
+        this(ctx, false);
     }
 
     /**
      * Create a instace of SXRMixedReality component and specifies the use of cloud anchors.
      *
-     * @param gvrContext
-     * @param enableCloudAnchor
+     * @param ctx               {@link SXRContext} to use
+     * @param enableCloudAnchor true to enable cloud anchors
      */
-    public SXRMixedReality(final SXRContext gvrContext, boolean enableCloudAnchor, int platform) {
-        this(gvrContext, enableCloudAnchor, null, platform);
+    public SXRMixedReality(final SXRContext ctx, boolean enableCloudAnchor)
+    {
+        this(ctx.getMainScene(), enableCloudAnchor);
     }
 
     /**
      * Create a instance of SXRMixedReality component and add it to the specified scene.
      *
-     * @param gvrContext
      * @param scene
      */
-    public SXRMixedReality(final SXRContext gvrContext, SXRScene scene) {
-        this(gvrContext, false, scene, 0);
-    }
-
-    /**
-     * Create a instance of SXRMixedReality component and add it to the specified scene.
-     *
-     * @param gvrContext
-     * @param scene
-     * @param platform which cv library to use.  0 for arcore. non-zero for sxr
-     */
-    public SXRMixedReality(final SXRContext gvrContext, SXRScene scene, int platform) {
-        this(gvrContext, false, scene, platform);
-    }
-
-    /**
-     * Default SXRMixedReality constructor. Create a instace of SXRMixedReality component, set
-     * the use of cloud anchors and add it to the specified scened.
-     *
-     * @param gvrContext
-     * @param enableCloudAnchor
-     * @param scene
-     * @param platform which cv library to use.  0 for arcore. non-zero for sxr
-     */
-    public SXRMixedReality(SXRContext gvrContext, boolean enableCloudAnchor, SXRScene scene, int platform) {
-        super(gvrContext, 0);
-
-
-        if (scene == null) {
-            scene = gvrContext.getMainScene();
-        }
-
-        mActivityEventsHandler = new ActivityEventsHandler();
-        selectARPlatform(platform, enableCloudAnchor);
-        mState = SessionState.ON_PAUSE;
-
-        scene.getMainCameraRig().getOwnerObject().attachComponent(this);
+    public SXRMixedReality(SXRScene scene)
+    {
+        this(scene, false);
     }
 
     /**
@@ -117,40 +77,51 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
      * the use of cloud anchors and add it to the specified scened.
      *
      * @param scene
-     * @param platform which cv library to use.  0 for arcore. non-zero for sxr
-     * @param enableCloudAnchor
+     * @param enableCloudAnchor true to enable cloud anchors
      */
-    public SXRMixedReality(SXRScene scene, int platform, boolean enableCloudAnchor) {
-        super(scene.getSXRContext(), 0);
-        mActivityEventsHandler = new ActivityEventsHandler();
-        selectARPlatform(platform, enableCloudAnchor);
-        mState = SessionState.ON_PAUSE;
-
-        scene.getMainCameraRig().getOwnerObject().attachComponent(this);
+    public SXRMixedReality(SXRScene scene, boolean enableCloudAnchor)
+    {
+        this(scene, enableCloudAnchor, null);
     }
 
     /**
-     * selectARPlatform. select which AR platform to use.
+     * Default SXRMixedReality constructor. Create a instace of SXRMixedReality component, set
+     * the use of cloud anchors and add it to the specified scened.
      *
-     * @param platform which cv library to use.  0 for arcore. non-zero for sxr
-     * @param enableCloudAnchor
+     * @param scene scene containing the virtual objects
+     * @param enableCloudAnchor true to enable cloud anchors, false to disable
+     * @param arPlatform    string with name of underlying AR platform to use:
+     *                      "arcore" will use Google AR Core.
+     *                      "ar-drop-in2" will use the SRA experimental headset
      */
-    public void selectARPlatform(int platform, boolean enableCloudAnchor)
+    public SXRMixedReality(SXRScene scene, boolean enableCloudAnchor, String arPlatform)
     {
         String prop = SystemPropertyUtil.getSystemPropertyString("debug.samsungxr.hmt");
-        if(prop != null && prop.equals("AR-DROP-IN2")) {
-            platform = 1;
-        }
+        boolean hasCVLib = "AR-DROP-IN2".equals(prop);
 
-        if (platform != 0)
+        if (arPlatform == null)
         {
-            mSession = new CVLibrarySession(getSXRContext(), enableCloudAnchor);
+            arPlatform = hasCVLib ? "ar-drop-in2" : "arcore";
         }
-        else
+        if (arPlatform.equals("arcore"))
         {
-            mSession = new ARCoreSession(getSXRContext(), enableCloudAnchor);
+            mSession = new ARCoreSession(scene, enableCloudAnchor);
         }
+        else if (arPlatform.equals("ar-drop-in2"))
+        {
+            mSession = new CVLibrarySession(scene, enableCloudAnchor);
+        }
+        mState = SessionState.ON_PAUSE;
     }
+
+    @Override
+    public float getARToVRScale() { return mSession.getARToVRScale(); }
+
+    @Override
+    public float getScreenDepth() { return mSession.getScreenDepth(); }
+
+    @Override
+    public SXREventReceiver getEventReceiver() { return mSession.getEventReceiver(); }
 
     @Override
     public void resume() {
@@ -179,28 +150,12 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
     }
 
     @Override
-    public void registerPlaneListener(IPlaneEventsListener listener) {
-        mSession.registerPlaneListener(listener);
-    }
-
-    @Override
-    public void registerAnchorListener(IAnchorEventsListener listener) {
-        mSession.registerAnchorListener(listener);
-    }
-
-    @Override
-    public void registerAugmentedImageListener(IAugmentedImageEventsListener listener) {
-        mSession.registerAugmentedImageListener(listener);
-    }
-
-    @Override
     public ArrayList<SXRPlane> getAllPlanes() {
         if (mState == SessionState.ON_PAUSE) {
             throw new UnsupportedOperationException("Session is not resumed");
         }
         return mSession.getAllPlanes();
     }
-
 
     @Override
     public SXRAnchor createAnchor(float[] pose) {
@@ -211,11 +166,16 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
     }
 
     @Override
-    public SXRAnchor createAnchor(float[] pose, SXRNode sceneObject) {
-        if (mState == SessionState.ON_PAUSE) {
-            throw new UnsupportedOperationException("Session is not resumed");
+    public SXRNode createAnchorNode(float[] pose)
+    {
+        SXRAnchor anchor = createAnchor(pose);
+        if (anchor != null)
+        {
+            SXRNode node = new SXRNode(anchor.getSXRContext());
+            node.attachComponent(anchor);
+            return node;
         }
-        return mSession.createAnchor(pose, sceneObject);
+        return null;
     }
 
     @Override
@@ -235,13 +195,13 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
     }
 
     @Override
-    public void hostAnchor(SXRAnchor anchor, ICloudAnchorListener listener) {
-        mSession.hostAnchor(anchor, listener);
+    public void hostAnchor(SXRAnchor anchor, CloudAnchorCallback cb) {
+        mSession.hostAnchor(anchor, cb);
     }
 
     @Override
-    public void resolveCloudAnchor(String anchorId, ICloudAnchorListener listener) {
-        mSession.resolveCloudAnchor(anchorId, listener);
+    public void resolveCloudAnchor(String anchorId, CloudAnchorCallback cb) {
+        mSession.resolveCloudAnchor(anchorId, cb);
     }
 
     @Override
@@ -250,11 +210,34 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
     }
 
     @Override
-    public SXRHitResult hitTest(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) {
+    public SXRHitResult hitTest(SXRPicker.SXRPickedObject collision)
+    {
+        if (mState == SessionState.ON_PAUSE)
+        {
+            throw new UnsupportedOperationException("Session is not resumed");
+        }
+        collision.picker.getWorldPickRay(mTempVec1, mTempVec2);
+        if (collision.hitObject != getPassThroughObject())
+        {
+            mTempVec2.set(collision.hitLocation[0],
+                          collision.hitLocation[1],
+                          collision.hitLocation[2]);
+        }
+        SXRPicker.SXRPickedObject hit = SXRPicker.pickNode(getPassThroughObject(), mTempVec1.x, mTempVec1.y, mTempVec1.z,
+                                                           mTempVec2.x, mTempVec2.y, mTempVec2.z);
+        if (hit == null)
+        {
+            return null;
+        }
+        return mSession.hitTest(hit);
+    }
+
+    @Override
+    public SXRHitResult hitTest(float x, float y) {
         if (mState == SessionState.ON_PAUSE) {
             throw new UnsupportedOperationException("Session is not resumed");
         }
-        return mSession.hitTest(sceneObj, collision);
+        return mSession.hitTest(x, y);
     }
 
     @Override
@@ -266,18 +249,23 @@ public class SXRMixedReality extends SXRBehavior implements IMRCommon {
     }
 
     @Override
-    public void setAugmentedImage(Bitmap image) {
-        mSession.setAugmentedImage(image);
+    public void setMarker(Bitmap image) {
+        mSession.setMarker(image);
     }
 
     @Override
-    public void setAugmentedImages(ArrayList<Bitmap> imagesList) {
-        mSession.setAugmentedImages(imagesList);
+    public void setMarkers(ArrayList<Bitmap> imagesList) {
+        mSession.setMarkers(imagesList);
     }
 
     @Override
-    public ArrayList<SXRAugmentedImage> getAllAugmentedImages() {
-        return mSession.getAllAugmentedImages();
+    public ArrayList<SXRMarker> getAllMarkers() {
+        return mSession.getAllMarkers();
+    }
+
+    @Override
+    public float[] makeInterpolated(float[] poseA, float[] poseB, float t) {
+        return mSession.makeInterpolated(poseA, poseB, t);
     }
 
     private class ActivityEventsHandler extends SXREventListeners.ActivityEvents {

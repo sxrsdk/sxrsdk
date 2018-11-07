@@ -225,7 +225,7 @@ Java_com_samsungxr_NativePicker_pickBounds(JNIEnv * env, jobject obj,
         }
         else
         {
-            LOGE("PICKER: ERROR: no collidable scene object index = %d", i);
+            LOGE("PICKER: ERROR: no collidable node index = %d", i);
             collidables.push_back(0L);
         }
     }

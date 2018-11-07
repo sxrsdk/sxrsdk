@@ -25,7 +25,7 @@ import java.util.List;
  * {@linkplain SXRRigidBody rigid bodies}.
  * <p>
  * After created anf fully configured a constraint must be attached to a
- * {@linkplain com.samsungxr.SXRNode scene object} containing a rigid body that will become
+ * {@linkplain com.samsungxr.SXRNode node} containing a rigid body that will become
  * the owner of this constraint (body A).
  */
 abstract class SXRConstraint extends SXRPhysicsWorldObject {

@@ -17,6 +17,7 @@ package com.samsungxr.mixedreality.CVLibrary;
 
 //import com.google.ar.core.Anchor;
 import com.samsungxr.SXRContext;
+import com.samsungxr.SXRNode;
 import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRTrackingState;
 import com.samsungxr.mixedreality.arcore.ARCorePose;
@@ -26,12 +27,9 @@ import com.samsungxr.mixedreality.arcore.ARCorePose;
  *
  */
 public class CVLibraryAnchor extends SXRAnchor {
-    //private Anchor mAnchor;
-    private ARCorePose mPose;
-
-    protected CVLibraryAnchor(SXRContext gvrContext) {
-        super(gvrContext);
-        mPose = new ARCorePose();
+    protected CVLibraryAnchor(SXRContext ctx)
+    {
+        super(ctx);
     }
 
     /**
@@ -80,13 +78,19 @@ public class CVLibraryAnchor extends SXRAnchor {
      * @param gvrmatrix
      * @param scale
      */
-    protected void update(float[] viewmtx, float[] gvrmatrix, float scale) {
-        // Updates only when the plane is in the scene
-        if (getParent() == null || !isEnabled()) {
-            return;
-        }
+    protected void update(float[] viewmtx, float[] gvrmatrix, float scale)
+    {
+        SXRNode owner = getOwnerObject();
 
-        convertFromARtoVRSpace(viewmtx, gvrmatrix, scale);
+        if (owner != null && isEnabled())
+        {
+            convertFromARtoVRSpace(viewmtx, gvrmatrix, scale);
+        }
+    }
+
+    public float[] getPose()
+    {
+        return new float[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
     }
 
     /**
