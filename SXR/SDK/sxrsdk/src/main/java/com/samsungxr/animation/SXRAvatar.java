@@ -425,8 +425,6 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         }
         mIsRunning = true;
         animator.start(mOnFinish);
-        mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this, IAvatarEvents.class,
-                "onAnimationStarted", animator);
         mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
                                                                 IAvatarEvents.class,
                                                                 "onAnimationStarted",
