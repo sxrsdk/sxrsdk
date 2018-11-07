@@ -751,7 +751,7 @@ public abstract class SXRCursorController implements IEventReceiver
      * @param y Y position of the camera
      * @param z Z position of the camera
      */
-    protected void setOrigin(float x, float y, float z)
+    public void setOrigin(float x, float y, float z)
     {
         origin.set(x,y,z);
     }
