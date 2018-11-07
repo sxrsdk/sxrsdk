@@ -139,7 +139,7 @@ public class SXRTextViewNode extends SXRNode {
         if (canvasWidth > canvasHeight && canvasWidth > MAX_IMAGE_SIZE) {
             canvasWidth = MAX_IMAGE_SIZE;
             canvasHeight = (int)(MAX_IMAGE_SIZE/factor);
-        } else if (canvasHeight > canvasWidth && canvasHeight > MAX_IMAGE_SIZE) {
+        } else if (canvasHeight >= canvasWidth && canvasHeight > MAX_IMAGE_SIZE) {
             canvasWidth = (int)(MAX_IMAGE_SIZE*factor);
             canvasHeight = MAX_IMAGE_SIZE;
         }
