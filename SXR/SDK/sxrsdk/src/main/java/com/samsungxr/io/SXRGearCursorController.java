@@ -335,7 +335,7 @@ public final class SXRGearCursorController extends SXRCursorController
      * @param z the z value of the position.
      */
     @Override
-    protected void setPosition(float x, float y, float z)
+    public void setPosition(float x, float y, float z)
     {
         super.setPosition(x, y, z);
         invalidate();

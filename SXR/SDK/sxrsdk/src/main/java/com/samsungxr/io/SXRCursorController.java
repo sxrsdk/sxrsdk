@@ -775,7 +775,7 @@ public abstract class SXRCursorController implements IEventReceiver
      * @param y y direction of the pick ray.
      * @param z z direction of the pick ray.
      */
-    protected void setPosition(float x, float y, float z)
+    public void setPosition(float x, float y, float z)
     {
         if (isEnabled())
         {

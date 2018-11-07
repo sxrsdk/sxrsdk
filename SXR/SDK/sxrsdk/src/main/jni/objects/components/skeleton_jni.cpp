@@ -115,7 +115,7 @@ Java_com_samsungxr_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_animation_NativeSkeleton_setBoneName(JNIEnv* env, jobject clz,
+Java_com_samsungxr_animation_NativeSkeleton_setBoneName(JNIEnv* env, jobject clz,
                                                       jlong jskel, jint index, jstring name)
 {
     Skeleton* skel = reinterpret_cast<Skeleton*>(jskel);
@@ -125,7 +125,7 @@ Java_org_gearvrf_animation_NativeSkeleton_setBoneName(JNIEnv* env, jobject clz,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_animation_NativeSkeleton_getBoneParents(JNIEnv* env, jobject clz,
+Java_com_samsungxr_animation_NativeSkeleton_getBoneParents(JNIEnv* env, jobject clz,
                                                          jlong jskel, jintArray jparentIds)
 {
     Skeleton* skel = reinterpret_cast<Skeleton*>(jskel);
@@ -142,14 +142,14 @@ Java_org_gearvrf_animation_NativeSkeleton_getBoneParents(JNIEnv* env, jobject cl
 }
 
 JNIEXPORT jint JNICALL
-Java_org_gearvrf_animation_NativeSkeleton_getNumBones(JNIEnv* env, jobject clz, jlong jskel)
+Java_com_samsungxr_animation_NativeSkeleton_getNumBones(JNIEnv* env, jobject clz, jlong jskel)
 {
     Skeleton* skel = reinterpret_cast<Skeleton*>(jskel);
     return skel->getNumBones();
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_animation_NativeSkeleton_getBoneName(JNIEnv* env, jobject clz,
+Java_com_samsungxr_animation_NativeSkeleton_getBoneName(JNIEnv* env, jobject clz,
                                                       jlong jskel, jint index)
 {
     Skeleton* skel = reinterpret_cast<Skeleton*>(jskel);
