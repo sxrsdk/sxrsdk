@@ -47,8 +47,12 @@ RenderTarget::RenderTarget(RenderTexture* tex, bool is_multiview)
     }
 }
 void RenderTarget::beginRendering(Renderer *renderer) {
-    if(mRenderTexture == nullptr)
+    if(mRenderTexture == nullptr) {
+        //if there is no render texture as in case of monoscopic backend, we are using default fbo
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0,0,mRenderState.viewportWidth,mRenderState.viewportHeight);
         return;
+    }
 
     mRenderTexture->useStencil(renderer->useStencilBuffer());
     mRenderState.viewportWidth = mRenderTexture->width();
@@ -76,6 +80,18 @@ RenderTarget::RenderTarget(Scene* scene)
     mRenderState.scene = scene;
 
 }
+
+RenderTarget::RenderTarget(Scene* scene, int defaultViewportW, int defaultViewportH)
+        : Component(RenderTarget::getComponentType()), mNextRenderTarget(nullptr), mRenderTexture(nullptr),mRenderDataVector(std::make_shared< std::vector<RenderData*>>()){
+    mRenderState.is_shadow = false;
+    mRenderState.shadow_map = nullptr;
+    mRenderState.material_override = NULL;
+    mRenderState.is_multiview = false;
+    mRenderState.scene = scene;
+    mRenderState.viewportWidth = defaultViewportW;
+    mRenderState.viewportHeight = defaultViewportH;
+}
+
 RenderTarget::RenderTarget(RenderTexture* tex, const RenderTarget* source)
         : Component(RenderTarget::getComponentType()),mNextRenderTarget(nullptr),
           mRenderTexture(tex), mRenderDataVector(source->mRenderDataVector)

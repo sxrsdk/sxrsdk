@@ -55,6 +55,9 @@ namespace sxr
     RenderTarget* GLRenderer::createRenderTarget(Scene* scene) {
         return new GLRenderTarget(scene);
     }
+    RenderTarget* GLRenderer::createRenderTarget(Scene* scene, int defaultViewportW, int defaultViewportH) {
+        return new GLRenderTarget(scene, defaultViewportW, defaultViewportH);
+    }
     RenderTarget* GLRenderer::createRenderTarget(RenderTexture* renderTexture, bool isMultiview){
         return new GLRenderTarget(renderTexture, isMultiview);
     }

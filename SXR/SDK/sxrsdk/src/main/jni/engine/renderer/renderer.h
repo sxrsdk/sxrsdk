@@ -160,6 +160,7 @@ public:
 
     virtual void renderRenderData(RenderState& rstate, RenderData* render_data);
     virtual RenderTarget* createRenderTarget(Scene*) = 0;
+    virtual RenderTarget* createRenderTarget(Scene*, int defaultViewportW, int defaultViewportH) = 0;
     virtual RenderTarget* createRenderTarget(RenderTexture*, bool) = 0;
     virtual RenderTarget* createRenderTarget(RenderTexture*, const RenderTarget*) = 0;
 
