@@ -27,6 +27,7 @@ class VkRenderTarget: public  RenderTarget
 public:
     explicit VkRenderTarget(RenderTexture* renderTexture, bool is_multiview);
     explicit VkRenderTarget(Scene* scene);
+    explicit VkRenderTarget(Scene* scene,int defaultViewportW, int defaultViewportH);
     explicit VkRenderTarget(RenderTexture* renderTexture, const RenderTarget* source);
     explicit  VkRenderTarget(){}
     virtual ~VkRenderTarget(){}
