@@ -29,7 +29,7 @@ public final class SimpleAnimationTracker {
     /**
      * Creates SimpleAnimationTracker
      */
-    public SimpleAnimationTracker(SXRContext gvrContext) {
+    public SimpleAnimationTracker(SXRContext sxrContext) {
         tracker = new ConcurrentHashMap<SXRNode, Pair<SXRAnimation, SXROnFinish>>();
         requestQueue = new LinkedBlockingQueue<AnimationRequest>();
         // start animation request worker thread

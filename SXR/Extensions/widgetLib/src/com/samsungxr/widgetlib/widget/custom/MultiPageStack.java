@@ -156,9 +156,9 @@ public class MultiPageStack extends MultiPageWidget {
                 Color.GRAY,
         };
 
-        PageAdapter(SXRContext gvrContext, int pageCount, float pageWidth,
+        PageAdapter(SXRContext sxrContext, int pageCount, float pageWidth,
                     float pageHeight) {
-            mGvrContext = gvrContext;
+            mGvrContext = sxrContext;
             mPageCount = pageCount;
             mPageWidth = pageWidth;
             mPageHeight = pageHeight;

@@ -38,7 +38,7 @@ public class WidgetLib {
      * Initialize an instance of Widget Lib. It has to be done before any usage of library.
      * The application needs to hold onto the returned WidgetLib reference for as long as the
      * library is going to be used.
-     * @param gvrContext A valid {@link SXRContext} instance
+     * @param sxrContext A valid {@link SXRContext} instance
      * @param customPropertiesAsset An optional asset JSON file containing custom and overridden
      *                              properties for the application
      * @return Instance of Widget library
@@ -46,11 +46,11 @@ public class WidgetLib {
      * @throws JSONException
      * @throws NoSuchMethodException
      */
-    public static WidgetLib init(SXRContext gvrContext, String customPropertiesAsset)
+    public static WidgetLib init(SXRContext sxrContext, String customPropertiesAsset)
             throws InterruptedException, JSONException, NoSuchMethodException {
         if (mInstance == null) {
             // Constructor sets mInstance to ensure the initialization order
-            new WidgetLib(gvrContext, customPropertiesAsset);
+            new WidgetLib(sxrContext, customPropertiesAsset);
         }
         return mInstance.get();
     }
@@ -157,25 +157,25 @@ public class WidgetLib {
         return get().mCommandBuffer;
     }
 
-    private WidgetLib(SXRContext gvrContext, String customPropertiesAsset)
+    private WidgetLib(SXRContext sxrContext, String customPropertiesAsset)
             throws InterruptedException, JSONException, NoSuchMethodException {
         mInstance = new WeakReference<>(this);
 
-        mSXRContext = gvrContext;
-        mTextureHelper = new TextureFutureHelper(gvrContext);
-        mMainThread = new MainThread(gvrContext);
-        mTypefaceManager = new TypefaceManager(gvrContext);
-        mSimpleAnimationTracker = new SimpleAnimationTracker(gvrContext);
-        mPropertyManager = new PropertyManager(gvrContext.getContext(), "default_metadata.json",
+        mSXRContext = sxrContext;
+        mTextureHelper = new TextureFutureHelper(sxrContext);
+        mMainThread = new MainThread(sxrContext);
+        mTypefaceManager = new TypefaceManager(sxrContext);
+        mSimpleAnimationTracker = new SimpleAnimationTracker(sxrContext);
+        mPropertyManager = new PropertyManager(sxrContext.getContext(), "default_metadata.json",
                 customPropertiesAsset);
-        mCommandBuffer = new CommandBuffer(gvrContext);
+        mCommandBuffer = new CommandBuffer(sxrContext);
 
-        mFocusManager = new FocusManager(gvrContext);
-        mTouchManager = new TouchManager(gvrContext);
-        mContentSceneController = new ContentSceneController(gvrContext);
-        mMainScene = new MainScene(gvrContext);
+        mFocusManager = new FocusManager(sxrContext);
+        mTouchManager = new TouchManager(sxrContext);
+        mContentSceneController = new ContentSceneController(sxrContext);
+        mMainScene = new MainScene(sxrContext);
 
-        Widget.init(gvrContext);
+        Widget.init(sxrContext);
     }
 
     private static WidgetLib get() {

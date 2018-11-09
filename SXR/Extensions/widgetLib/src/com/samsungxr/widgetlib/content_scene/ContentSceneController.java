@@ -95,10 +95,10 @@ public class ContentSceneController {
 
     /**
      * Creates ContentSceneController
-     * @param gvrContext
+     * @param sxrContext
      */
-    public ContentSceneController(SXRContext gvrContext) {
-        mGvrContext = gvrContext;
+    public ContentSceneController(SXRContext sxrContext) {
+        mGvrContext = sxrContext;
     }
 
     /**

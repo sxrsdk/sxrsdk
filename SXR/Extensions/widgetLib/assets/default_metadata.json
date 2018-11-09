@@ -1,11 +1,11 @@
 {
   "objects": {
-    "org.gearvrf.widgetlib.widget.ListWidget": {
+    "com.samsungxr.widgetlib.widget.ListWidget": {
       "transition_animation": {
         "easing": "SINE_IN_OUT"
       }
     },
-    "org.gearvrf.widgetlib.widget.basic.Button.Graphic": {
+    "com.samsungxr.widgetlib.widget.basic.Button.Graphic": {
       "states": {
         "normal": {
           "material": {
@@ -21,7 +21,7 @@
         }
       }
     },
-    "org.gearvrf.widgetlib.widget.basic.Checkbox.Graphic": {
+    "com.samsungxr.widgetlib.widget.basic.Checkbox.Graphic": {
       "states": {
         "normal": {
           "material": {
@@ -61,7 +61,7 @@
         }
       }
     },
-    "org.gearvrf.widgetlib.widget.basic.RadioButton.Graphic": {
+    "com.samsungxr.widgetlib.widget.basic.RadioButton.Graphic": {
       "states": {
         "normal": {
           "material": {
@@ -101,7 +101,7 @@
         }
       }
     },
-	 "org.gearvrf.widgetlib.widget.custom.PageIndicatorWidget": {
+	 "com.samsungxr.widgetlib.widget.custom.PageIndicatorWidget": {
       "buttons": {
         "size": {
           "x": 0.4,
@@ -111,7 +111,7 @@
         "touch_enabled": true
       }
     },
-    "org.gearvrf.widgetlib.widget.custom.PageIndicatorWidget.PageIndicatorButton.Graphic": {
+    "com.samsungxr.widgetlib.widget.custom.PageIndicatorWidget.PageIndicatorButton.Graphic": {
       "states": {
         "normal": {
           "material": {
@@ -151,7 +151,7 @@
         }
       }
     },
-    "org.gearvrf.widgetlib.widget.custom.PickerWidget": {
+    "com.samsungxr.widgetlib.widget.custom.PickerWidget": {
       "focus_animation": {
         "type": "scale",
         "duration": 0.2,
