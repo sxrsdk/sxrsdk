@@ -112,12 +112,12 @@ public class FocusManager {
     /**
      * Creates FocusManager
      */
-    public FocusManager(SXRContext gvrContext) {
+    public FocusManager(SXRContext sxrContext) {
         final JSONObject properties = WidgetLib.getPropertyManager().getInstanceProperties(getClass(), TAG);
         Log.d(TAG, "FocusManager(): properties: %s", properties);
         mEnabled = JSONHelpers.optBoolean(properties, Properties.enabled, false);
         Log.d(TAG, "FocusManager(): mEnabled: %b", mEnabled);
-        init(gvrContext);
+        init(sxrContext);
     }
 
     /**

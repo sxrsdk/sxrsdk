@@ -22,16 +22,16 @@ import com.samsungxr.widgetlib.log.Log;
  */
 public final class TextureFutureHelper {
     private static final String TAG = tag(TextureFutureHelper.class);
-    TextureFutureHelper(SXRContext gvrContext) {
-        mContext = gvrContext;
+    TextureFutureHelper(SXRContext sxrContext) {
+        mContext = sxrContext;
     }
 
     private final SparseArray<SXRBitmapTexture> mColorTextureCache = new SparseArray<>();
     private final SXRContext mContext;
 
     private static class ImmutableBitmapTexture extends SXRBitmapTexture {
-        ImmutableBitmapTexture(SXRContext gvrContext, Bitmap bitmap) {
-            super(gvrContext, bitmap);
+        ImmutableBitmapTexture(SXRContext sxrContext, Bitmap bitmap) {
+            super(sxrContext, bitmap);
         }
 
         @Override
