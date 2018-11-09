@@ -140,37 +140,19 @@ void GLRenderTexture::initialize()
 }
 
 void GLRenderTexture::generateRenderTextureNoMultiSampling(int jdepth_format,
-        GLenum depth_format, int width, int height, int jcolor_format)
+        GLenum depth_format, int width, int height)
 {
-    GLenum color_format;
-    switch (jcolor_format) {
-    case ColorFormat::COLOR_565:
-        color_format = GL_RGB565;
-        break;
-    case ColorFormat::COLOR_5551:
-        color_format = GL_RGB5_A1;
-        break;
-    case ColorFormat::COLOR_4444:
-        color_format = GL_RGBA4;
-        break;
-    default:
-        color_format = GL_RGBA8;
-        break;
-    }
-    if (jdepth_format != DepthFormat::DEPTH_0) {
+    if (jdepth_format != DepthFormat::DEPTH_0)
+    {
         delete renderTexture_gl_render_buffer_;
         renderTexture_gl_render_buffer_ = new GLRenderBuffer();
         glBindRenderbuffer(GL_RENDERBUFFER, renderTexture_gl_render_buffer_->id());
         glRenderbufferStorage(GL_RENDERBUFFER, depth_format, width, height);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
     }
-    delete renderTexture_gl_color_buffer_;
-    renderTexture_gl_color_buffer_ = new GLRenderBuffer();
-    glBindRenderbuffer(GL_RENDERBUFFER, renderTexture_gl_color_buffer_->id());
-    glRenderbufferStorage(GL_RENDERBUFFER, color_format, width, height);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    GLRenderImage* image = static_cast<GLRenderImage*>(getImage());
     glBindFramebuffer(GL_FRAMEBUFFER, renderTexture_gl_frame_buffer_->id());
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-            GL_RENDERBUFFER, renderTexture_gl_color_buffer_->id());
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, image->getTarget(), image->getId(), 0);
 }
 
  bool GLNonMultiviewRenderTexture::isReady()
@@ -458,7 +440,7 @@ GLNonMultiviewRenderTexture::GLNonMultiviewRenderTexture(int width, int height, 
     if (sample_count <= 1)
     {
         generateRenderTextureNoMultiSampling(jdepth_format, depth_format,
-                                             width, height, jcolor_format);
+                                             width, height);
     }
     else if (resolve_depth)
     {
