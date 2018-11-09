@@ -70,6 +70,10 @@ RenderTarget* VulkanRenderer::createRenderTarget(Scene* scene) {
     return new VkRenderTarget(scene);
 }
 
+RenderTarget* VulkanRenderer::createRenderTarget(Scene* scene, int defaultViewportW, int defaultViewPortH) {
+    return new VkRenderTarget(scene);
+}
+
 RenderTarget* VulkanRenderer::createRenderTarget(RenderTexture* renderTexture, bool isMultiview)
 {
     return new VkRenderTarget(renderTexture, isMultiview);

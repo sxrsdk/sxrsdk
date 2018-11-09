@@ -43,6 +43,7 @@ class RenderTarget : public Component
 public:
     explicit RenderTarget(RenderTexture*, bool is_multiview);
     explicit RenderTarget(Scene*);
+    explicit RenderTarget(Scene*, int defaultViewportW, int defaultViewportH);
     explicit RenderTarget(RenderTexture*, const RenderTarget* source);
     RenderTarget();
     virtual ~RenderTarget();

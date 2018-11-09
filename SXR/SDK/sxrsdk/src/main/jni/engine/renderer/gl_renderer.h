@@ -88,6 +88,7 @@ public:
     virtual Image* createImage(int type, int format);
     virtual Texture* createTexture(int target = GL_TEXTURE_2D);
     virtual RenderTarget* createRenderTarget(Scene*) ;
+    virtual RenderTarget* createRenderTarget(Scene*, int defaultViewportW, int defaultViewportH) ;
     virtual RenderTarget* createRenderTarget(RenderTexture*, bool);
     virtual RenderTarget* createRenderTarget(RenderTexture*, const RenderTarget*);
     virtual RenderTexture* createRenderTexture(const RenderTextureInfo&);
