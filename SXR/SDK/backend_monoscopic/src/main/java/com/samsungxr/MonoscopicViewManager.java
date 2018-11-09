@@ -345,7 +345,8 @@ class MonoscopicViewManager extends SXRViewManager implements MonoscopicRotation
                 mRenderBundle.addRenderTarget(mRenderTarget[2], SXRViewManager.EYE.LEFT, 2);
             }
             else{
-                mRenderTarget[0] = new SXRRenderTarget(mApplication.getSXRContext());
+                mRenderTarget[0] = new SXRRenderTarget(mApplication.getSXRContext(), mViewportWidth,
+                                                        mViewportHeight);
             }
         }
 

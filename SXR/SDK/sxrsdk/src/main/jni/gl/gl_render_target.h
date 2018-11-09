@@ -16,12 +16,17 @@ class Renderer;
 class GLRenderTarget : public RenderTarget
 {
 public:
-    explicit GLRenderTarget(RenderTexture* renderTexture, bool is_multiview): RenderTarget(renderTexture, is_multiview){
+    explicit GLRenderTarget(RenderTexture* renderTexture, bool is_multiview):
+            RenderTarget(renderTexture, is_multiview){}
 
-    }
-    explicit GLRenderTarget(Scene* scene): RenderTarget(scene){
-    }
-    explicit GLRenderTarget(RenderTexture* renderTexture, const RenderTarget* source): RenderTarget(renderTexture, source){}
+    explicit GLRenderTarget(Scene* scene): RenderTarget(scene){}
+
+    explicit GLRenderTarget(Scene* scene, int defaultViewportW, int defaultViewportH):
+            RenderTarget(scene, defaultViewportW, defaultViewportH){}
+
+    explicit GLRenderTarget(RenderTexture* renderTexture, const RenderTarget* source):
+            RenderTarget(renderTexture, source){}
+
     GLRenderTarget(){}
     virtual void beginRendering(Renderer *renderer);
 };

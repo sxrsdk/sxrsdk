@@ -33,7 +33,11 @@ extern "C" {
     Java_com_samsungxr_NativeRenderTarget_endRendering(JNIEnv *env, jobject obj, jlong ptr);
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_NativeRenderTarget_defaultCtr(JNIEnv *env, jobject obj, jlong jscene);
+    Java_com_samsungxr_NativeRenderTarget_defaultCtor(JNIEnv *env, jobject obj, jlong jscene);
+
+    JNIEXPORT jlong JNICALL
+    Java_com_samsungxr_NativeRenderTarget_ctorViewport(JNIEnv *env, jobject obj, jlong jscene,
+                                                     jint defaultViewportW, jint defaultViewportH);
     JNIEXPORT void JNICALL
             Java_com_samsungxr_NativeRenderTarget_attachRenderTarget(JNIEnv *env, jobject obj, jlong jrendertarget, jlong jnextrendertarget);
     JNIEXPORT void JNICALL
@@ -60,11 +64,20 @@ Java_com_samsungxr_NativeRenderTarget_render(JNIEnv *env, jobject obj, jlong ren
 }
 
 JNIEXPORT jlong JNICALL
-Java_com_samsungxr_NativeRenderTarget_defaultCtr(JNIEnv *env, jobject obj, jlong jscene){
+Java_com_samsungxr_NativeRenderTarget_defaultCtor(JNIEnv *env, jobject obj, jlong jscene){
     Scene* scene = reinterpret_cast<Scene*>(jscene);
     return reinterpret_cast<jlong>(Renderer::getInstance()->createRenderTarget(scene));
 
 }
+
+JNIEXPORT jlong JNICALL
+Java_com_samsungxr_NativeRenderTarget_ctorViewport(JNIEnv *env, jobject obj, jlong jscene,
+                                                 jint defaultViewportW, jint defaultViewportH){
+    Scene* scene = reinterpret_cast<Scene*>(jscene);
+    return reinterpret_cast<jlong>(Renderer::getInstance()->createRenderTarget(scene, defaultViewportW,
+                                                                               defaultViewportH));
+}
+
 JNIEXPORT jlong JNICALL
 Java_com_samsungxr_NativeRenderTarget_ctorMultiview(JNIEnv *env, jobject obj, jlong jtexture, jboolean isMultiview)
 {
