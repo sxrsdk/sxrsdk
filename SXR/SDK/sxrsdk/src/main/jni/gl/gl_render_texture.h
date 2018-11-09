@@ -79,7 +79,7 @@ protected:
     int layer_index_;
     int viewport_[4];
     void initialize();
-    void generateRenderTextureNoMultiSampling(int jdepth_format,GLenum depth_format, int width, int height, int jcolor_format);
+    void generateRenderTextureNoMultiSampling(int jdepth_format,GLenum depth_format, int width, int height);
     void generateRenderTextureEXT(int sample_count,int jdepth_format,GLenum depth_format, int width, int height);
     void generateRenderTexture(int sample_count, int jdepth_format, GLenum depth_format, int width,
                                int height, int jcolor_format);
