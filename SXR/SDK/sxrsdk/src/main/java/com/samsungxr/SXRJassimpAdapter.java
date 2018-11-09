@@ -196,7 +196,6 @@ class  SXRJassimpAdapter
             FloatBuffer fbuf = aiMesh.getColorBuffer(c);
             if (fbuf != null)
             {
-                FloatBuffer coords = FloatBuffer.allocate(aiMesh.getNumVertices() * 4);
                 FloatBuffer source = aiMesh.getColorBuffer(c);
                 String name = "a_color";
 
@@ -204,8 +203,7 @@ class  SXRJassimpAdapter
                 {
                     name += c;
                 }
-                coords.put(source);
-                mesh.setFloatVec(name, coords);
+                mesh.setFloatVec(name, source);
             }
         }
 
