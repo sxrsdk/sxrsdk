@@ -8,8 +8,8 @@ class WidgetBehavior extends SXRBehavior {
 
     static public long getComponentType() { return TYPE_WIDGET; }
 
-    WidgetBehavior(SXRContext gvrContext, Widget target) {
-        super(gvrContext);
+    WidgetBehavior(SXRContext sxrContext, Widget target) {
+        super(sxrContext);
         mType = WidgetBehavior.TYPE_WIDGET;
         mTarget = target;
     }

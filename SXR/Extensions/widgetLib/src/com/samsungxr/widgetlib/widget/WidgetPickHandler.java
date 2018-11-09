@@ -65,20 +65,20 @@ class WidgetPickHandler implements SXRInputManager.ICursorControllerSelectListen
     }
 
     @Override
-    public void onCursorControllerAdded(SXRCursorController gvrCursorController) {
+    public void onCursorControllerAdded(SXRCursorController sxrCursorController) {
         Log.d(Log.SUBSYSTEM.INPUT, TAG,"onCursorControllerAdded: %s",
-                gvrCursorController.getClass().getSimpleName());
+                sxrCursorController.getClass().getSimpleName());
 
     }
 
     @Override
-    public void onCursorControllerRemoved(SXRCursorController gvrCursorController) {
+    public void onCursorControllerRemoved(SXRCursorController sxrCursorController) {
         Log.d(Log.SUBSYSTEM.INPUT, TAG,"onCursorControllerRemoved: %s",
-                gvrCursorController.getClass().getSimpleName());
+                sxrCursorController.getClass().getSimpleName());
 
-        gvrCursorController.removePickEventListener(mPickEventListener);
-        gvrCursorController.removePickEventListener(mTouchEventsListener);
-        gvrCursorController.removeControllerEventListener(mControllerEvent);
+        sxrCursorController.removePickEventListener(mPickEventListener);
+        sxrCursorController.removePickEventListener(mTouchEventsListener);
+        sxrCursorController.removeControllerEventListener(mControllerEvent);
     }
 
     static private class PickEventsListener implements IPickEvents {

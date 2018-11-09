@@ -30,7 +30,7 @@ import static com.samsungxr.utility.Threads.spawn;
  *
  * <pre>
  * {@code
- *  new ExecutionChain(gvrContext)
+ *  new ExecutionChain(sxrContext)
  *      .runOnBackgroundThread(bitmapLoadingTask)
  *      .runOnGLThread(bitmapTextureTask)
  *      .runOnMainThread(quadSetupTask)
@@ -229,11 +229,11 @@ public class ExecutionChain {
     /**
      * Construct a new ExecutionChain.
      *
-     * @param gvrContext
+     * @param sxrContext
      *            A valid SXRContext.
      */
-    public ExecutionChain(SXRContext gvrContext) {
-        this.gvrContext = gvrContext;
+    public ExecutionChain(SXRContext sxrContext) {
+        this.sxrContext = sxrContext;
     }
 
     /**
@@ -538,14 +538,14 @@ public class ExecutionChain {
 
                 switch (currentContext.type) {
                     case UI:
-                        ((Activity) gvrContext.getContext())
+                        ((Activity) sxrContext.getContext())
                                 .runOnUiThread(this);
                         break;
                     case MAIN:
                         WidgetLib.getMainThread().runOnMainThread(this);
                         break;
                     case GL:
-                        gvrContext.runOnGlThread(this);
+                        sxrContext.runOnGlThread(this);
 
                         break;
                     case BACKGROUND:
@@ -576,7 +576,7 @@ public class ExecutionChain {
         }
     }
 
-    private final SXRContext gvrContext;
+    private final SXRContext sxrContext;
     private final List<Context<?, ?>> tasks = new ArrayList<Context<?, ?>>();
     private final AtomicReference<State> state = new AtomicReference<State>(
             State.STOPPED);

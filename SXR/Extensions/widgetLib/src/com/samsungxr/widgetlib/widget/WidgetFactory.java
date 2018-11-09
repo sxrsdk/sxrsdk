@@ -139,7 +139,7 @@ public class WidgetFactory {
      * Create an {@link AbsoluteLayout} to wrap the root {@link SXRNode}
      * of the scene graph loaded from a file.
      *
-     * @param gvrContext
+     * @param sxrContext
      *            The {@link SXRContext} to load the model into.
      * @param modelFile
      *            The asset file to load the model from.
@@ -150,9 +150,9 @@ public class WidgetFactory {
      *             If the model file can't be read.
      */
     @SuppressWarnings("unused")
-    public static Widget createWidgetFromModel(final SXRContext gvrContext,
+    public static Widget createWidgetFromModel(final SXRContext sxrContext,
             final String modelFile) throws InstantiationException, IOException {
-        GroupWidget widget = (GroupWidget) createWidgetFromModel(gvrContext, modelFile,
+        GroupWidget widget = (GroupWidget) createWidgetFromModel(sxrContext, modelFile,
                                      GroupWidget.class);
         widget.applyLayout(new AbsoluteLayout());
         return widget;
@@ -162,7 +162,7 @@ public class WidgetFactory {
      * Create a {@link Widget} of the specified {@code widgetClass} to wrap the
      * root {@link SXRNode} of the scene graph loaded from a file.
      *
-     * @param gvrContext
+     * @param sxrContext
      *            The {@link SXRContext} to load the model into.
      * @param modelFile
      *            The asset file to load the model from.
@@ -176,10 +176,10 @@ public class WidgetFactory {
      *             If the model file can't be read.
      */
     @SuppressWarnings("WeakerAccess")
-    public static Widget createWidgetFromModel(final SXRContext gvrContext,
+    public static Widget createWidgetFromModel(final SXRContext sxrContext,
             final String modelFile, Class<? extends Widget> widgetClass)
             throws InstantiationException, IOException {
-        SXRNode rootNode = loadModel(gvrContext, modelFile);
+        SXRNode rootNode = loadModel(sxrContext, modelFile);
         return createWidget(rootNode, widgetClass);
     }
 
@@ -188,7 +188,7 @@ public class WidgetFactory {
      * {@link SXRNode} that is a child of the {@code root}
      * {@code SXRNode} of the scene graph loaded from a file.
      *
-     * @param gvrContext
+     * @param sxrContext
      *            The {@link SXRContext} to load the model into.
      * @param modelFile
      *            The asset file to load the model from.
@@ -202,10 +202,10 @@ public class WidgetFactory {
      *             If the model file can't be read.
      */
     @SuppressWarnings("unused")
-    public static Widget createWidgetFromModel(final SXRContext gvrContext,
+    public static Widget createWidgetFromModel(final SXRContext sxrContext,
             final String modelFile, final String nodeName)
             throws InstantiationException, IOException {
-        GroupWidget widget = (GroupWidget)createWidgetFromModel(gvrContext, modelFile, nodeName,
+        GroupWidget widget = (GroupWidget)createWidgetFromModel(sxrContext, modelFile, nodeName,
                                      GroupWidget.class);
         widget.applyLayout(new AbsoluteLayout());
         return widget;
@@ -216,7 +216,7 @@ public class WidgetFactory {
      * {@link SXRNode} that is a child of the {@code root}
      * {@code SXRNode} of the scene graph loaded from a file.
      *
-     * @param gvrContext
+     * @param sxrContext
      *            The {@link SXRContext} to load the model into.
      * @param modelFile
      *            The asset file to load the model from.
@@ -232,11 +232,11 @@ public class WidgetFactory {
      * @throws IOException
      *             If the model file can't be read.
      */
-    public static Widget createWidgetFromModel(final SXRContext gvrContext,
+    public static Widget createWidgetFromModel(final SXRContext sxrContext,
             final String modelFile, final String nodeName,
             Class<? extends Widget> widgetClass) throws InstantiationException,
             IOException {
-        SXRNode rootNode = loadModel(gvrContext, modelFile,
+        SXRNode rootNode = loadModel(sxrContext, modelFile,
                                                     nodeName);
         return createWidget(rootNode, widgetClass);
     }
@@ -246,41 +246,41 @@ public class WidgetFactory {
     /**
      * Load model from file
      *
-     * @param gvrContext Valid {@link SXRContext} instance
+     * @param sxrContext Valid {@link SXRContext} instance
      * @param modelFile Path to the model's file, relative to the {@code assets} directory
      * @return root object The root {@link SXRNode} of the model
      * @throws IOException If reading the model file fails
      */
-    public static SXRNode loadModel(final SXRContext gvrContext,
+    public static SXRNode loadModel(final SXRContext sxrContext,
                                            final String modelFile) throws IOException {
-        return loadModel(gvrContext, modelFile, new HashMap<String, Integer>());
+        return loadModel(sxrContext, modelFile, new HashMap<String, Integer>());
     }
 
     /**
      * Load model from file starting from the specific node name
-     * @param gvrContext Valid {@link SXRContext} instance
+     * @param sxrContext Valid {@link SXRContext} instance
      * @param modelFile Path to the model's file, relative to the {@code assets} directory
      * @param nodeName name of the starting node
      * @return root object
      * @throws IOException If reading the model file fails
      */
-    public static SXRNode loadModel(final SXRContext gvrContext,
+    public static SXRNode loadModel(final SXRContext sxrContext,
                                            final String modelFile, final String nodeName)
             throws IOException {
-        return loadModel(gvrContext, modelFile, nodeName, new HashMap<String, Integer>());
+        return loadModel(sxrContext, modelFile, nodeName, new HashMap<String, Integer>());
     }
 
-    private static SXRNode loadModel(final SXRContext gvrContext,
+    private static SXRNode loadModel(final SXRContext sxrContext,
                                            final String modelFile,
                                             final HashMap<String, Integer> duplicates)
             throws IOException {
-        return loadModel(gvrContext, modelFile, null, duplicates);
+        return loadModel(sxrContext, modelFile, null, duplicates);
     }
 
     private static SXRNode loadModel(
-            final SXRContext gvrContext, final String modelFile,
+            final SXRContext sxrContext, final String modelFile,
             String nodeName, final HashMap<String, Integer> duplicates) throws IOException {
-        SXRNode assimpScene = gvrContext.getAssetLoader().loadModel(modelFile,
+        SXRNode assimpScene = sxrContext.getAssetLoader().loadModel(modelFile,
                 com.samsungxr.SXRImportSettings.getRecommendedSettings(), true, null);
 //        printOutScene(assimpScene, 0);
         SXRNode root = getRootNode(assimpScene);

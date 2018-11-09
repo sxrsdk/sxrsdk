@@ -227,28 +227,28 @@ public class ListWidget extends GroupWidget implements ScrollableList {
     /**
      * Construct a new {@code ListWidget} instance with defined properties. Adapter is not setup
      *
-     * @param gvrContext
+     * @param sxrContext
      *            The active {@link SXRContext}.
      * @param properties A structured set of properties for the {@code ListWidget} instance. See
      *                       {@code widget.json} for schema.
      */
-    public ListWidget(final SXRContext gvrContext, final JSONObject properties) {
-        super(gvrContext, properties);
-        init(gvrContext, null);
+    public ListWidget(final SXRContext sxrContext, final JSONObject properties) {
+        super(sxrContext, properties);
+        init(sxrContext, null);
     }
 
     /**
      * Construct a new {@code ListWidget} instance with  LinearLayout applied by default
      *
-     * @param gvrContext
+     * @param sxrContext
      *            The active {@link SXRContext}.
      * @param adapter  {@link Adapter} associated with this layout.
      * @param width
      * @param height
      */
-    public ListWidget(final SXRContext gvrContext, final Adapter adapter, float width, float height) {
-        super(gvrContext, width, height);
-        init(gvrContext, adapter);
+    public ListWidget(final SXRContext sxrContext, final Adapter adapter, float width, float height) {
+        super(sxrContext, width, height);
+        init(sxrContext, adapter);
     }
 
     /**
@@ -1026,11 +1026,11 @@ public class ListWidget extends GroupWidget implements ScrollableList {
 
     /**
      * Create blank host view
-     * @param gvrContext
+     * @param sxrContext
      * @return host view
      */
-    protected ListItemHostWidget makeHost(SXRContext gvrContext) {
-        ListItemHostWidget host = new ListItemHostWidget(gvrContext);
+    protected ListItemHostWidget makeHost(SXRContext sxrContext) {
+        ListItemHostWidget host = new ListItemHostWidget(sxrContext);
         return host;
     }
 
@@ -1042,8 +1042,8 @@ public class ListWidget extends GroupWidget implements ScrollableList {
      * no affecting the guest transformation.
      */
     protected class ListItemHostWidget extends GroupWidget {
-        public ListItemHostWidget(SXRContext gvrContext) {
-            super(gvrContext, 0, 0);
+        public ListItemHostWidget(SXRContext sxrContext) {
+            super(sxrContext, 0, 0);
             recycle();
         }
 
@@ -1287,8 +1287,8 @@ public class ListWidget extends GroupWidget implements ScrollableList {
 
     private class ContentWidget extends GroupWidget {
 
-        ContentWidget(SXRContext gvrContext) {
-            super(gvrContext, 0, 0);
+        ContentWidget(SXRContext sxrContext) {
+            super(sxrContext, 0, 0);
         }
         @Override
         protected boolean measureLayout(Layout layout) {
@@ -1467,7 +1467,7 @@ public class ListWidget extends GroupWidget implements ScrollableList {
         return mContent.inViewPort(dataIndex);
     }
 
-    private void init(final SXRContext gvrContext, final Adapter adapter) {
+    private void init(final SXRContext sxrContext, final Adapter adapter) {
         JSONObject properties = getObjectMetadata();
         JSONObject transitionAnimationProperties = optJSONObject(properties,
                 Properties.transition_animation, true);
@@ -1476,7 +1476,7 @@ public class ListWidget extends GroupWidget implements ScrollableList {
         mAnimationEasing = optEnum(transitionAnimationProperties, Properties.easing, Easing.LINEAR);
         Log.d(TAG, "init(%s): easing: %s", getName(), mAnimationEasing);
 
-        mContent = new ContentWidget(gvrContext);
+        mContent = new ContentWidget(sxrContext);
         mContent.setName("Content<" + getName() + ">");
         mContent.addOnHierarchyChangedListener(mOnListItemsUpdatedListener);
         addChild(mContent);

@@ -49,12 +49,12 @@ public class TouchManager {
 
     /**
      * Creates TouchManager
-     * @param gvrContext
+     * @param sxrContext
      */
-    public TouchManager(SXRContext gvrContext) {
-        mSXRContext = gvrContext;
+    public TouchManager(SXRContext sxrContext) {
+        mSXRContext = sxrContext;
         mPickHandler = new WidgetPickHandler();
-        gvrContext.getInputManager().selectController(mPickHandler);
+        sxrContext.getInputManager().selectController(mPickHandler);
     }
 
     public void clear() {

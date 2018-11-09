@@ -96,24 +96,24 @@ public class MainScene {
      * {@link SXRContext#getMainScene()} and frustum culling is
      * {@linkplain SXRScene#setFrustumCulling(boolean) enabled}.
      *
-     * @param gvrContext A valid SXRContext instance.
+     * @param sxrContext A valid SXRContext instance.
      */
-    public MainScene(final SXRContext gvrContext) {
-        mContext = gvrContext;
-        mSceneRootObject = new SXRNode(gvrContext);
-        mMainCameraRootObject = new SXRNode(gvrContext);
-        mLeftCameraRootObject = new SXRNode(gvrContext);
-        mRightCameraRootObject = new SXRNode(gvrContext);
+    public MainScene(final SXRContext sxrContext) {
+        mContext = sxrContext;
+        mSceneRootObject = new SXRNode(sxrContext);
+        mMainCameraRootObject = new SXRNode(sxrContext);
+        mLeftCameraRootObject = new SXRNode(sxrContext);
+        mRightCameraRootObject = new SXRNode(sxrContext);
 
         mSceneRootWidget = new RootWidget(mSceneRootObject);
         mSceneRootWidget.setName(TAG);
-        mMainCameraRootWidget = new GroupWidget(gvrContext,
+        mMainCameraRootWidget = new GroupWidget(sxrContext,
                 mMainCameraRootObject);
         mMainCameraRootWidget.applyLayout(new AbsoluteLayout());
-        mLeftCameraRootWidget = new GroupWidget(gvrContext,
+        mLeftCameraRootWidget = new GroupWidget(sxrContext,
                 mLeftCameraRootObject);
         mLeftCameraRootWidget.applyLayout(new AbsoluteLayout());
-        mRightCameraRootWidget = new GroupWidget(gvrContext,
+        mRightCameraRootWidget = new GroupWidget(sxrContext,
                 mRightCameraRootObject);
         mRightCameraRootWidget.applyLayout(new AbsoluteLayout());
 
