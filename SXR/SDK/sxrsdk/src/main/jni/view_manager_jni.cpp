@@ -57,11 +57,12 @@ extern "C" {
 
         javaNode = jni->NewLocalRef(javaNode);
         renderTarget->cullFromCamera(scene, javaNode, renderTarget->getCamera(),gRenderer,shader_manager);
-        if(!gRenderer->isVulkanInstance())
-            renderTarget->beginRendering(gRenderer);
+
         gRenderer->renderRenderTarget(scene, javaNode, renderTarget,shader_manager,post_effect_render_texture_a,post_effect_render_texture_b);
-        if(!gRenderer->isVulkanInstance())
-            renderTarget->endRendering(gRenderer);
+
+        //unbind the fbo on which the drawing was done
+        if(renderTarget->getTexture())
+            renderTarget->getTexture()->unbind();
 
         jni->DeleteLocalRef(javaNode);
     }

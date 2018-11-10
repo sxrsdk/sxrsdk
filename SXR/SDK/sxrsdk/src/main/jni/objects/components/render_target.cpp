@@ -48,8 +48,6 @@ RenderTarget::RenderTarget(RenderTexture* tex, bool is_multiview)
 }
 void RenderTarget::beginRendering(Renderer *renderer) {
     if(mRenderTexture == nullptr) {
-        //if there is no render texture as in case of monoscopic backend, we are using default fbo
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0,0,mRenderState.viewportWidth,mRenderState.viewportHeight);
         return;
     }
