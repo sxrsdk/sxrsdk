@@ -50,6 +50,10 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, renderTexture_gl_frame_buffer_->id());
     }
 
+    virtual void unbind() {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
     virtual void beginRendering(Renderer*);
     virtual void endRendering(Renderer*);
     virtual bool isReady();
