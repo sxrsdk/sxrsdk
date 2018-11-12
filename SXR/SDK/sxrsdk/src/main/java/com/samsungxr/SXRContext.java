@@ -757,17 +757,17 @@ public abstract class SXRContext implements IEventReceiver {
      * Our {@linkplain SXRReference references} are placed on this queue, once
      * they've been finalized
      */
-    private ReferenceQueue<SXRHybridObject> mReferenceQueue = new ReferenceQueue<SXRHybridObject>();
+    private final ReferenceQueue<SXRHybridObject> mReferenceQueue = new ReferenceQueue<SXRHybridObject>();
     /**
      * We need hard references to {@linkplain SXRReference our references} -
      * otherwise, the references get garbage collected (usually before their
      * objects) and never get enqueued.
      */
-    private Set<SXRReference> mReferenceSet = new HashSet<SXRReference>();
+    private final Set<SXRReference> mReferenceSet = new HashSet<SXRReference>();
 
     protected final void finalizeUnreachableObjects() {
         SXRReference reference;
-        while (null != (reference = (SXRReference)mReferenceQueue.poll())) {
+        while (null != (reference = (SXRReference) mReferenceQueue.poll())) {
             reference.close(mReferenceSet);
         }
     }
@@ -816,9 +816,6 @@ public abstract class SXRContext implements IEventReceiver {
 
         final String threadName = "Undertaker-" + Integer.toHexString(hashCode());
         new UndertakerThread(mReferenceQueue, mReferenceSet, threadName).start();
-
-        mReferenceQueue = null;
-        mReferenceSet = null;
     }
 
     static final class SXRReference extends PhantomReference<SXRHybridObject> {

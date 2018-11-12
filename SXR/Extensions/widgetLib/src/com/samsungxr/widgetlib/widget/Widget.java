@@ -66,7 +66,7 @@ public class Widget implements Layout.WidgetContainer {
      * to load metadata for {@code Widgets}, as well as animation and material
      * specs.
      *
-     * @param gvrContext
+     * @param sxrContext
      *            A valid {@link SXRContext}.
      * @throws JSONException
      *             if the {@code objects.json} file is invalid JSON
@@ -74,19 +74,19 @@ public class Widget implements Layout.WidgetContainer {
      *             if a constructor can't be found for an animation type
      *             specified in {@code objects.json}.
      */
-    static public void init(SXRContext gvrContext) throws JSONException,
+    static public void init(SXRContext sxrContext) throws JSONException,
             NoSuchMethodException {
-        loadAnimations(gvrContext.getContext());
+        loadAnimations(sxrContext.getContext());
 
-        gvrContext.runOnGlThread(new Runnable() {
+        sxrContext.runOnGlThread(new Runnable() {
             @Override
             public void run() {
                 sGLThread = new WeakReference<>(Thread.currentThread());
             }
         });
-        SXRAssetLoader assetLoader = new SXRAssetLoader(gvrContext);
+        SXRAssetLoader assetLoader = new SXRAssetLoader(sxrContext);
         sDefaultTexture = assetLoader.loadTexture(new SXRAndroidResource(
-                gvrContext, R.raw.default_bkgd));
+                sxrContext, R.raw.default_bkgd));
         Log.d(TAG, "onInit(): default texture: %s", sDefaultTexture);
     }
 
@@ -3792,7 +3792,7 @@ public class Widget implements Layout.WidgetContainer {
         }
     }
 
-    private static void getGvrfHierarchy(SXRNode sceneObject, String space) {
+    private static void getSxrfHierarchy(SXRNode sceneObject, String space) {
         if (sceneObject == null) return;
 
         SXRRenderData rd = sceneObject.getRenderData();
@@ -3802,13 +3802,13 @@ public class Widget implements Layout.WidgetContainer {
             Log.d("SXRFHierarchy", "%s'%s' <non-rendering>", space, sceneObject.getName());
         }
         for (SXRNode child : sceneObject.children()) {
-            getGvrfHierarchy(child, space + "  ");
+            getSxrfHierarchy(child, space + "  ");
         }
     }
 
-    public void printGvrfHierarchy() {
+    public void printSxrfHierarchy() {
         Log.d("SXRFHierarchy", "========= SXRF Hierarchy for %s =========", getName());
-        getGvrfHierarchy(getNode(), "");
+        getSxrfHierarchy(getNode(), "");
     }
 
     private static JSONObject packageNode(SXRNode sceneObject) {
@@ -3949,7 +3949,7 @@ public class Widget implements Layout.WidgetContainer {
                 final Visibility newVisibility = (Visibility) params[3];
                 final ViewPortVisibility viewPortVisibility = (ViewPortVisibility) params[4];
 
-                SXRContext gvrContext = mNode.getSXRContext();
+                SXRContext sxrContext = mNode.getSXRContext();
                 SXRNode sceneObjectParent = mNode.getParent();
                 switch (newVisibility) {
                     case VISIBLE:

@@ -124,8 +124,8 @@ class WidgetStateInfo {
 
     private SXRMaterial getMaterial(Widget widget, JSONObject materialSpec)
             throws JSONException, IOException {
-        final SXRContext gvrContext = widget.getSXRContext();
-        return getMaterial(gvrContext, materialSpec);
+        final SXRContext sxrContext = widget.getSXRContext();
+        return getMaterial(sxrContext, materialSpec);
     }
 
     static private SXRShaderId getShaderId(JSONObject materialSpec) throws JSONException, IOException {
@@ -150,11 +150,11 @@ class WidgetStateInfo {
     }
 
     // TODO: MaterialFactory
-    static private SXRMaterial getMaterial(final SXRContext gvrContext,
+    static private SXRMaterial getMaterial(final SXRContext sxrContext,
             JSONObject materialSpec) throws JSONException, IOException {
 
         SXRShaderId shaderId = getShaderId(materialSpec);
-        SXRMaterial material = new SXRMaterial(gvrContext, shaderId);
+        SXRMaterial material = new SXRMaterial(sxrContext, shaderId);
 
         final Iterator<String> iter = materialSpec.keys();
         while (iter.hasNext()) {

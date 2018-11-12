@@ -137,10 +137,12 @@ class MonoscopicViewManager extends SXRViewManager implements MonoscopicRotation
         int width = eyeBufferParams.getResolutionWidth();
         if (-1 == width) {
             width = metrics.widthPixels;
+            eyeBufferParams.setResolutionWidth(width);
         }
         int height = eyeBufferParams.getResolutionHeight();
         if (-1 == height) {
             height = metrics.heightPixels;
+            eyeBufferParams.setResolutionHeight(height);
         }
 
         mView = new MonoscopicSurfaceView(application.getActivity(), this, width, height);
@@ -345,7 +347,8 @@ class MonoscopicViewManager extends SXRViewManager implements MonoscopicRotation
                 mRenderBundle.addRenderTarget(mRenderTarget[2], SXRViewManager.EYE.LEFT, 2);
             }
             else{
-                mRenderTarget[0] = new SXRRenderTarget(mApplication.getSXRContext());
+                mRenderTarget[0] = new SXRRenderTarget(mApplication.getSXRContext(), mViewportWidth,
+                                                        mViewportHeight);
             }
         }
 

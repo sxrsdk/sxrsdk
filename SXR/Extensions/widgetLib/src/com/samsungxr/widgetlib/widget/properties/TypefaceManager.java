@@ -21,8 +21,8 @@ public class TypefaceManager {
     /**
      * Creates TypefaceManager
      */
-    public TypefaceManager(SXRContext gvrContext) {
-        mGvrContext = gvrContext;
+    public TypefaceManager(SXRContext sxrContext) {
+        mGvrContext = sxrContext;
     }
 
     private enum Attributes {

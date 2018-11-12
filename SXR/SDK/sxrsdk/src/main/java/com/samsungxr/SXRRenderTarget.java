@@ -54,7 +54,14 @@ public class SXRRenderTarget extends SXRBehavior
     }
     public SXRRenderTarget(SXRContext gvrContext)
     {
-        super(gvrContext,NativeRenderTarget.defaultCtr(gvrContext.getMainScene().getNative()));
+        super(gvrContext,NativeRenderTarget.defaultCtor(gvrContext.getMainScene().getNative()));
+        mScene = gvrContext.getMainScene();
+    }
+
+    public SXRRenderTarget(SXRContext gvrContext, int defaultViewportW, int defaultViewportH)
+    {
+        super(gvrContext,NativeRenderTarget.ctorViewport(gvrContext.getMainScene().getNative(),
+                defaultViewportW, defaultViewportH));
         mScene = gvrContext.getMainScene();
     }
 
@@ -144,7 +151,8 @@ public class SXRRenderTarget extends SXRBehavior
 
 class NativeRenderTarget
 {
-    static native long defaultCtr(long scene);
+    static native long defaultCtor(long scene);
+    static native long ctorViewport(long scene, int defaultViewportW, int defaultViewportH);
     static native long getComponentType();
     static native void setMainScene(long rendertarget, long scene);
     static native void beginRendering(long rendertarget, long camera);

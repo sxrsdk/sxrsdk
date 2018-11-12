@@ -305,8 +305,6 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
         float quadHeight = quadDistance * tanfov * 2;
         float quadWidth = quadHeight * centerCamera.getAspectRatio();
 
-        cameraRig.getHeadTransform().setRotation(1, 0, 0, 0);
-        cameraRig.setCameraRigType(SXRCameraRig.SXRCameraRigType.Freeze.ID);
         mScreenToCamera.x = quadWidth / mScreenToCamera.x;    // map [0, ScreenSize] to [-Display, +Display]
         mScreenToCamera.y = quadHeight / mScreenToCamera.y;
         mScreenDepth = quadHeight / tanfov;

@@ -16,13 +16,14 @@
 package com.samsungxr.mixedreality.CVLibrary;
 
 //import com.google.ar.core.AugmentedImage;
-import com.samsungxr.mixedreality.SXRAugmentedImage;
+import com.samsungxr.mixedreality.SXRMarker;
 import com.samsungxr.mixedreality.SXRTrackingState;
 
 /**
  * Represents an ARCore Augmented Image
  */
-public class CVLibraryAugmentedImage extends SXRAugmentedImage {
+public class CVLibraryAugmentedImage extends SXRMarker
+{
     //private AugmentedImage mAugmentedImage;
 
     protected CVLibraryAugmentedImage() {
