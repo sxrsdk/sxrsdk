@@ -24,7 +24,7 @@ public final class MainThread {
      * @throws InterruptedException
      *             if the thread wasn't successfully started.
      */
-    public MainThread(SXRContext gvrContext) throws InterruptedException {
+    public MainThread(SXRContext sxrContext) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         mainThread = new Thread("MainThread") {
             public void run() {

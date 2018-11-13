@@ -12,26 +12,26 @@ import java.util.concurrent.Future;
 
 public class SXRBitmapTexture extends SXRTexture {
 
-    public SXRBitmapTexture(SXRContext gvrContext, Bitmap bitmap) {
-        this(gvrContext, new SXRBitmapImage(gvrContext, bitmap));
+    public SXRBitmapTexture(SXRContext sxrContext, Bitmap bitmap) {
+        this(sxrContext, new SXRBitmapImage(sxrContext, bitmap));
     }
 
-    public SXRBitmapTexture(SXRContext gvrContext, SXRBitmapImage image) {
-        super(gvrContext);
+    public SXRBitmapTexture(SXRContext sxrContext, SXRBitmapImage image) {
+        super(sxrContext);
         setImage(image);
     }
 
-    public SXRBitmapTexture(SXRContext gvrContext, int width, int height,
+    public SXRBitmapTexture(SXRContext sxrContext, int width, int height,
                             byte[] grayscaleData) throws IllegalArgumentException {
-        this(gvrContext, width, height, grayscaleData,
-                gvrContext.DEFAULT_TEXTURE_PARAMETERS);
+        this(sxrContext, width, height, grayscaleData,
+                sxrContext.DEFAULT_TEXTURE_PARAMETERS);
     }
 
-    public SXRBitmapTexture(SXRContext gvrContext, int width, int height,
+    public SXRBitmapTexture(SXRContext sxrContext, int width, int height,
                             byte[] grayscaleData, SXRTextureParameters textureParameters)
             throws IllegalArgumentException {
-        super(gvrContext);
-        setImage(new SXRBitmapImage(gvrContext, width, height, grayscaleData));
+        super(sxrContext);
+        setImage(new SXRBitmapImage(sxrContext, width, height, grayscaleData));
     }
 
     public void update(int width, int height, byte[] grayscaleData) {
