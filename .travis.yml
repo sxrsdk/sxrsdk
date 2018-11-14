@@ -32,7 +32,12 @@ before_script:
     - cd $PROJECT_DIR/SXR/SDK
     - echo "only_monoscopic=true" >> gradle.properties
     - echo "useLocalDependencies=true" >> gradle.properties
+    - cd $PROJECT_DIR/SXR/Extensions
+    - echo "only_monoscopic=true" >> gradle.properties
+    - echo "useLocalDependencies=true" >> gradle.properties
       
 script:
     - cd $PROJECT_DIR/SXR/SDK
+    - ./gradlew assembleDebug
+    - cd $PROJECT_DIR/SXR/Extensions
     - ./gradlew assembleDebug
