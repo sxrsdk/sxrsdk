@@ -5,7 +5,7 @@ dist: trusty
 
 env:
   global:
-    - PROJECT_NAME=sxrsdk-demos
+    - PROJECT_NAME=sxrsdk
     - PROJECT_DIR=${TRAVIS_BUILD_DIR} # Project direct
     
 before_install:   
