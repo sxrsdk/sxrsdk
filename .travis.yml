@@ -33,5 +33,5 @@ before_script:
     - echo "useLocalDependencies=true" >> gradle.properties
       
 script:
-    - cd $PROJECT_DIR/sxrsdk/SXR/SDK
+    - cd $PROJECT_DIR/SXR/SDK
     - ./gradlew assembleDebug
