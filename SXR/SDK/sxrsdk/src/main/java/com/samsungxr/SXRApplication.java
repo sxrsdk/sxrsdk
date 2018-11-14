@@ -15,7 +15,7 @@
 
 package com.samsungxr;
 
-import android.app.Activity;
+//import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
