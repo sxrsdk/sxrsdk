@@ -29,7 +29,7 @@ android:
     - google-gdk-license-.+
 
 before_script:
-    - cd ${PROJECT_DIR}/
+    - cd $PROJECT_DIR/SXR/SDK
     - echo "only_monoscopic=true" >> gradle.properties
     - echo "useLocalDependencies=true" >> gradle.properties
       
