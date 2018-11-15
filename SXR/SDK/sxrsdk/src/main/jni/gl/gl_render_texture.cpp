@@ -103,7 +103,6 @@ GLRenderTexture::GLRenderTexture(int width, int height, int sample_count,
     viewport_[1] = viewport[1];
     viewport_[2] = viewport[2];
     viewport_[3] = viewport[3];
-
 }
 
 GLRenderTexture::~GLRenderTexture()
