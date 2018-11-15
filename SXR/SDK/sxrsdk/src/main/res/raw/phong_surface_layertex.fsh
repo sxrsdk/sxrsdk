@@ -19,6 +19,10 @@ layout(location = 14) in vec2 lightmap_coord;
 
 #ifdef HAS_normalTexture
 layout(location = 15) in vec2 normal_coord;
+
+#ifdef HAS_a_tangent
+layout(location = 7) in mat3 tangent_matrix;
+#endif
 #endif
 
 #ifdef HAS_emissiveTexture
