@@ -67,6 +67,7 @@ public:
         return 0;
     }
     virtual void bind();
+    virtual void unbind(){}
     virtual void beginRendering(Renderer* renderer);
     virtual void endRendering(Renderer*){
         vkCmdEndRenderPass(mCmdBuffer);

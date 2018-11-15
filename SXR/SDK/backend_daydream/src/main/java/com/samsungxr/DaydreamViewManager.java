@@ -31,6 +31,8 @@ class DaydreamViewManager extends SXRViewManager {
     private SXRCameraRig cameraRig;
     private boolean sensoredSceneUpdated = false;
     private  SXRRenderTarget mDaydreamRenderTarget = null;
+    private int defaultWidth = 1024;
+    private int defaultHeight = 1024;
 
     // This is done on the GL thread because refreshViewerProfile isn't thread-safe.
     private final Runnable refreshViewerProfileRunnable =
@@ -82,7 +84,8 @@ class DaydreamViewManager extends SXRViewManager {
     }
     public SXRRenderTarget getRenderTarget(){
         if(null == mDaydreamRenderTarget){
-            mDaydreamRenderTarget = new SXRRenderTarget(mApplication.getSXRContext());
+            mDaydreamRenderTarget = new SXRRenderTarget(mApplication.getSXRContext(),
+                    defaultWidth, defaultHeight);
         }
         return mDaydreamRenderTarget;
     }
