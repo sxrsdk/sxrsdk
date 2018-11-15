@@ -791,6 +791,7 @@ public class SXRInputManager implements IEventReceiver
             rdata.setDepthTest(false);
             rdata.disableLight();
             rdata.setRenderingOrder(SXRRenderData.SXRRenderingOrder.OVERLAY + 10);
+            rdata.setCastShadows(false);
             cursor.getTransform().setScale(0.2f, 0.2f, 1.0f);
             return cursor;
         }
