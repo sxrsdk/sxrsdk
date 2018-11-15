@@ -17,7 +17,7 @@
 
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.gearvrf.daydream"
+    package="com.samsungxr.daydream"
     android:versionCode="1"
     android:versionName="1.0" >
 
