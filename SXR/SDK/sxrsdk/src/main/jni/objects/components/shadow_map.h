@@ -17,7 +17,6 @@
 #ifndef SHADOW_MAP_H_
 #define SHADOW_MAP_H_
 
-#include <gl/gl_render_target.h>
 #include "render_target.h"
 #include "objects/textures/render_texture.h"
 

@@ -128,7 +128,6 @@ RenderTextureInfo *SXRActivity::getRenderTextureInfo(int eye, int index) {
     renderTextureInfo->fboWidth = fbo.getWidth();
     renderTextureInfo->multisamples = mMultisamplesConfiguration;
     renderTextureInfo->useMultiview = use_multiview;
-    renderTextureInfo->views = use_multiview ? 2 : 1;
     renderTextureInfo->texId = fbo.getColorTexId(index);
     renderTextureInfo->viewport[0] = x;
     renderTextureInfo->viewport[1] = y;
