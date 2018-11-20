@@ -195,7 +195,7 @@ Java_com_samsungxr_NativeIndexBuffer_setIntArray(JNIEnv * env, jobject obj, jlon
 
     if (data && (n > 0))
     {
-        ibuf->setIntVec(data, n);
+        rc = ibuf->setIntVec(data, n);
     }
     env->ReleaseIntArrayElements(jdata, reinterpret_cast<jint*>(data), 0);
     if (rc < 0)

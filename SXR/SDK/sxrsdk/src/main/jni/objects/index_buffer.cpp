@@ -182,7 +182,7 @@ namespace sxr {
         }
         if (mIndexCount == count)
         {
-            return true;
+            return 1;
         }
         if (count > 0)
         {
