@@ -145,10 +145,14 @@ void GLBitmapImage::updateFromBitmap(int texid)
     if (mIsBuffer)
     {
         updateFromBuffer(env, mGLTarget, mBitmap);
-    } else {
+    }
+    else
+    {
         bool mipmap = false;
-        if(!mIsCompressed && mTexParams.getMinFilter() >=  TextureParameters::NEAREST_MIPMAP_NEAREST)
+        if (!mIsCompressed && mTexParams.getMinFilter() >= TextureParameters::NEAREST_MIPMAP_NEAREST)
+        {
             mipmap = true;
+        }
         updateFromBitmap(env, mGLTarget, mBitmap, mipmap, mFormat);
     }
     checkGLError("GLBitmapImage::updateFromBitmap");
@@ -164,8 +168,8 @@ void GLBitmapImage::loadCompressedMipMaps(jbyte *data, int format)
         int height = mHeight >> level;
         if (width < 1) width = 1;
         if (height < 1) height = 1;
-        glCompressedTexImage2D(mGLTarget, level, format, width, height, levelOffset, levelSize,
-                               data);
+        glCompressedTexImage2D(mGLTarget, level, format, width, height,
+                               levelOffset, levelSize, data);
     }
 }
 
