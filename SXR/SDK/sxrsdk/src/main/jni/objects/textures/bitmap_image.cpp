@@ -60,10 +60,14 @@ void BitmapImage::update(JNIEnv* env, jobject bitmap, bool hasAlpha, int format)
         mBitmap = static_cast<jbyteArray>(env->NewGlobalRef(bitmap));
         mFormat = format;
         mIsBuffer = false;
-        if( hasAlpha ) {
-            if(bitmap_has_transparency(env, bitmap)) {
+        if (hasAlpha)
+        {
+            if (bitmap_has_transparency(env, bitmap))
+            {
                 set_transparency(true);
-            } else {
+            }
+            else
+            {
                 LOGW("BitmapImage: bitmap has an alpha channel with no translucent/transparent pixels.");
             }
         }

@@ -32,6 +32,9 @@ extern "C" {
     Java_com_samsungxr_NativeTexture_isReady(JNIEnv * env, jobject obj, jlong jtexture);
 
     JNIEXPORT void JNICALL
+    Java_com_samsungxr_NativeTexture_clearData(JNIEnv * env, jobject obj, jlong jtexture);
+
+    JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeTexture_updateTextureParameters(JNIEnv * env, jobject obj,
                 jlong jtexture, jintArray jtexture_parameters);
 
@@ -40,7 +43,7 @@ extern "C" {
 
     JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeTexture_setImage(JNIEnv * env, jobject obj,
-                jlong jtexture, jobject javaImage, jlong nativeImage);
+                jlong jtexture, jlong nativeImage);
 }
 ;
 
@@ -65,6 +68,12 @@ Java_com_samsungxr_NativeTexture_isReady(JNIEnv * env, jobject obj, jlong jtextu
     return texture->isReady();
 }
 
+JNIEXPORT void JNICALL
+Java_com_samsungxr_NativeTexture_clearData(JNIEnv* env, jobject obj, jlong jtexture)
+{
+    Texture* texture = reinterpret_cast<Texture*>(jtexture);
+    texture->clearData(env);
+}
 
 JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeTexture_updateTextureParameters(JNIEnv * env, jobject obj,
@@ -79,10 +88,10 @@ Java_com_samsungxr_NativeTexture_updateTextureParameters(JNIEnv * env, jobject o
 
 JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeTexture_setImage(JNIEnv* env, jobject obj, jlong jtexture,
-                                        jobject javaImage, jlong nativeImage)
+                                        jlong nativeImage)
 {
     Texture* texture = reinterpret_cast<Texture*>(jtexture);
     Image* image = reinterpret_cast<Image*>(nativeImage);
-    texture->setImage(env, javaImage, image);
+    texture->setImage(env, image);
 }
 }

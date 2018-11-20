@@ -62,9 +62,13 @@ namespace sxr {
 };
 
 JNIEXPORT jlong JNICALL
-Java_com_samsungxr_NativeIndexBuffer_ctor(JNIEnv* env, jobject obj, int bytesPerVertex, int vertexCount)
+Java_com_samsungxr_NativeIndexBuffer_ctor(JNIEnv* env, jobject obj, int bytesPerVertex, int indexCount)
 {
-    IndexBuffer* ibuf = Renderer::getInstance()->createIndexBuffer(bytesPerVertex, vertexCount);
+    IndexBuffer* ibuf = Renderer::getInstance()->createIndexBuffer(bytesPerVertex, indexCount);
+    if (indexCount != ibuf->getIndexCount())
+    {
+        throwOutOfMemoryError(env, "Cannot allocate index buffer");
+    }
     return reinterpret_cast<jlong>(ibuf);
 }
 
@@ -73,13 +77,12 @@ Java_com_samsungxr_NativeIndexBuffer_getShortVec(JNIEnv * env, jobject obj, jlon
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     void* bufptr = env->GetDirectBufferAddress(jshortbuf);
-    bool rc = false;
-    if (bufptr)
+    int capacity = env->GetDirectBufferCapacity(jshortbuf);
+    if (bufptr && (capacity > 0))
     {
-        int capacity = env->GetDirectBufferCapacity(jshortbuf);
-        rc = ibuf->getShortVec((unsigned short*) bufptr, capacity);
+        return ibuf->getShortVec((unsigned short*) bufptr, capacity);
     }
-    return rc;
+    return false;
 }
 
 
@@ -88,13 +91,12 @@ Java_com_samsungxr_NativeIndexBuffer_getIntVec(JNIEnv * env, jobject obj, jlong 
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     void* bufptr = env->GetDirectBufferAddress(jdata);
-    bool rc = false;
-    if (bufptr)
+    int capacity = env->GetDirectBufferCapacity(jdata);
+    if (bufptr && (capacity > 0))
     {
-        int capacity = env->GetDirectBufferCapacity(jdata);
-        rc = ibuf->getIntVec((unsigned int*) bufptr, capacity);
+        return ibuf->getIntVec((unsigned int*) bufptr, capacity);
     }
-    return rc;
+    return false;
 }
 
 JNIEXPORT jintArray JNICALL
@@ -104,7 +106,10 @@ Java_com_samsungxr_NativeIndexBuffer_getIntArray(JNIEnv* env, jobject obj, jlong
     int n = ibuf->getIndexCount();
     jintArray jdata = env->NewIntArray(n);
     unsigned int* data = reinterpret_cast<unsigned int*>(env->GetIntArrayElements(jdata, 0));
-    ibuf->getIntVec(data, n);
+    if (data && (n > 0))
+    {
+        ibuf->getIntVec(data, n);
+    }
     env->ReleaseIntArrayElements(jdata, reinterpret_cast<jint*>(data), 0);
     return jdata;
 }
@@ -113,10 +118,13 @@ JNIEXPORT jcharArray JNICALL
 Java_com_samsungxr_NativeIndexBuffer_getShortArray(JNIEnv* env, jobject obj, jlong jibuf)
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
-    jchar n = ibuf->getIndexCount();
+    int n = ibuf->getIndexCount();
     jcharArray jdata = env->NewCharArray(n);
     unsigned short* data = reinterpret_cast<unsigned short*>(env->GetCharArrayElements(jdata, 0));
-    ibuf->getShortVec(data, n);
+    if (data && (n > 0))
+    {
+        ibuf->getShortVec(data, n);
+    }
     env->ReleaseCharArrayElements(jdata, reinterpret_cast<jchar*>(data), 0);
     return jdata;
 }
@@ -126,8 +134,17 @@ Java_com_samsungxr_NativeIndexBuffer_setShortArray(JNIEnv * env, jobject obj, jl
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     jchar* data = env->GetCharArrayElements(jdata, 0);
-    bool rc = ibuf->setShortVec(data, static_cast<int>(env->GetArrayLength(jdata)));
+    int n = static_cast<int>(env->GetArrayLength(jdata));
+    int rc = 0;
+    if (data && (n > 0))
+    {
+        rc = ibuf->setShortVec(data, n);
+    }
     env->ReleaseCharArrayElements(jdata, data, 0);
+    if (rc < 0)
+    {
+        throwOutOfMemoryError(env, "Cannot allocate index buffer");
+    }
     return rc;
 }
 
@@ -136,11 +153,15 @@ Java_com_samsungxr_NativeIndexBuffer_setShortVec(JNIEnv * env, jobject obj, jlon
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     void* bufptr = env->GetDirectBufferAddress(jshortbuf);
-    bool rc = false;
+    int rc = 0;
     if (bufptr)
     {
         jlong capacity = env->GetDirectBufferCapacity(jshortbuf);
         rc = ibuf->setShortVec((unsigned short*) bufptr, capacity);
+    }
+    if (rc < 0)
+    {
+        throwOutOfMemoryError(env, "Cannot allocate index buffer");
     }
     return rc;
 }
@@ -150,13 +171,18 @@ Java_com_samsungxr_NativeIndexBuffer_setIntVec(JNIEnv* env, jobject obj, jlong j
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     void* bufptr = env->GetDirectBufferAddress(jintbuf);
-    bool rc = false;
+    int rc = 0;
     if (bufptr)
     {
         jlong capacity = env->GetDirectBufferCapacity(jintbuf);
         rc = ibuf->setIntVec((unsigned int*) bufptr, capacity);
     }
-    return rc;
+    if (rc < 0)
+    {
+        throwOutOfMemoryError(env, "Cannot allocate vertex buffer");
+        return -1;
+    }
+    return rc > 0;
 }
 
 JNIEXPORT bool JNICALL
@@ -164,9 +190,19 @@ Java_com_samsungxr_NativeIndexBuffer_setIntArray(JNIEnv * env, jobject obj, jlon
 {
     IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jibuf);
     unsigned int* data = reinterpret_cast<unsigned int*>(env->GetIntArrayElements(jdata, 0));
-    bool rc = ibuf->setIntVec(data, static_cast<int>(env->GetArrayLength(jdata)));
+    int rc = 0;
+    int n =  static_cast<int>(env->GetArrayLength(jdata));
+
+    if (data && (n > 0))
+    {
+        ibuf->setIntVec(data, n);
+    }
     env->ReleaseIntArrayElements(jdata, reinterpret_cast<jint*>(data), 0);
-    return rc;
+    if (rc < 0)
+    {
+        throwOutOfMemoryError(env, "Cannot allocate index buffer");
+    }
+    return rc > 0;
 }
 
 

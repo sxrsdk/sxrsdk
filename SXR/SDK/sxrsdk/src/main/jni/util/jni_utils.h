@@ -68,4 +68,14 @@ static JNIEnv* getCurrentEnv(JavaVM* javaVm) {
 static const int SUPPORTED_JNI_VERSION = JNI_VERSION_1_6;
 }
 
+static jint throwOutOfMemoryError(JNIEnv* env, const char *message)
+{
+    jclass exClass = env->FindClass("java/lang/OutOfMemoryError");
+
+    if (exClass != NULL)
+    {
+        return env->ThrowNew(exClass, message);
+    }
+    return -1;
+}
 #endif
