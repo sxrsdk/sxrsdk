@@ -843,8 +843,9 @@ public class Utility
             if (!hasNormals)
             {
                 generateNormals(newIndices, newIndices.length, mOutputPositions);
+                mUseNormals = true;
             }
-            else if (mUseNormals)
+            if (mUseNormals)
             {
                 vbuffer.setFloatArray("a_normal", mOutputNormals.array(), 3, 0);
             }
