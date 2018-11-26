@@ -10,7 +10,69 @@
 namespace sxr {
     ColliderData CapsuleCollider::isHit(Node* owner, const float sphere[])
     {
-        return nullptr;
+        ColliderData data;
+
+        float      radius = radius_;
+        float      height = height_;
+        long       direction = direction_;
+        glm::mat4  model_matrix;
+        glm::vec3  capsuleA;
+        glm::vec3  capsuleB;
+
+
+        Transform* t = owner->transform();
+        glm::mat4 model_inverse = glm::affineInverse(t->getModelMatrix());
+        float s[4] = { sphere[0], sphere[1], sphere[2], sphere[3] };
+        transformSphere(model_inverse, s);
+
+
+        model_matrix = t->getModelMatrix();
+        capsuleA.x = capsuleB.x = model_matrix[3][0];
+        capsuleA.y = capsuleB.y = model_matrix[3][1];
+        capsuleA.z = capsuleB.z = model_matrix[3][2];
+
+        if (radius <= 0)
+        {
+            radius = 1;
+        }
+
+        float half_height = height / 2.0f;
+
+        switch(direction)
+        {
+            case CAPSULE_DIRECTION_Y:
+                capsuleA.y += half_height;
+                capsuleB.y -= half_height;
+                break;
+            case CAPSULE_DIRECTION_X:
+                capsuleA.x += half_height;
+                capsuleB.x -= half_height;
+                break;
+            case CAPSULE_DIRECTION_Z:
+                capsuleA.z += half_height;
+                capsuleB.z -= half_height;
+                break;
+        }
+
+        glm::vec3 sphereCenter(s[0], s[1], s[2]);
+        float r = s[3] + radius;
+
+        // calculate distance between the collider center and the center line of the capsule
+        glm::vec3 lineDir = capsuleB - capsuleA;
+        float norm = (lineDir.x * lineDir.x) + (lineDir.y * lineDir.y) + (lineDir.z * lineDir.z);
+        glm::vec3 distVec = (sphereCenter - capsuleA) - (glm::dot(sphereCenter - capsuleA, lineDir) / norm) * lineDir;
+        float dist = (distVec.x * distVec.x) + (distVec.y * distVec.y) + (distVec.z * distVec.z);
+
+        dist = sqrt(dist);
+        if (dist <= r)                       // bounding sphere intersects collision sphere?
+        {
+            distVec *= radius / dist;          // hit point on collision sphere
+            data.IsHit = true;
+            data.ColliderHit = this;
+            data.HitPosition = distVec;
+            data.Distance = dist;
+        }
+        return data;
     }
 
     ColliderData CapsuleCollider::isHit(Node *owner, const glm::vec3 &rayStart, const glm::vec3 &rayDir)
