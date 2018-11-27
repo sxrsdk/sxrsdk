@@ -70,10 +70,10 @@ namespace sxr {
          * @param src         pointer to integer source data array.
          * @param srcSize     number of floats in the vector.
          * @param srcStride   number of floats to the next vertex.
-         * @returns true if successfully set, false on error.
+         * @returns 1 if successfully set, 0 on error, -1 if out of memory.
          * @see getIntVec
          */
-        bool    setFloatVec(const char* attributeName, const float* src, int srcSize, int srcStride);
+        int setFloatVec(const char* attributeName, const float* src, int srcSize, int srcStride);
 
         /**
          * Gets all the values of a float vertex attribute.
@@ -88,7 +88,7 @@ namespace sxr {
          * @param dest        pointer to integer source data array.
          * @param destSize    number of floats in the vector.
          * @param destStride  number of floats to the next vertex.
-         * @return true if vector retrieved, false if not found or size is wrong.
+         * @returns true if successfully set, false on error.
          * @see setVec
          */
         bool    getFloatVec(const char* attributeName, float* dest, int destSize, int destStride) const;
@@ -105,10 +105,10 @@ namespace sxr {
          * @param src         pointer to integer source data array.
          * @param srcSize     number of integers in the vector.
          * @param srcStride   number of integers to the next vertex.
-         * @returns true if successfully set, false on error.
+         * @returns 1 if successfully set, 0 on error, -1 if out of memory.
          * @see getIntVec
          */
-        bool            setIntVec(const char* attributeName, const int* src, int srcSize, int srcStride);
+        int setIntVec(const char* attributeName, const int* src, int srcSize, int srcStride);
 
         /**
          * Gets all the values of an integer vertex attribute.
@@ -138,7 +138,7 @@ namespace sxr {
         void            dump(const char* attrName) const;
 
     protected:
-        bool            setVertexCount(int vertexCount);
+        int             setVertexCount(int vertexCount);
         const void*     getData(const char* attributeName, int& size) const;
         const void*     getData(int index, int& size) const;
 
