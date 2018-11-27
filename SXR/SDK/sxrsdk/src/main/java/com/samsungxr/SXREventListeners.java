@@ -13,7 +13,7 @@ import org.joml.Vector3f;
 
 /**
  * This class contains null implementations for the event interfaces
- * (subclasses of {@link IEvents}, such as {@link IScriptEvents} and {@link IActivityEvents}).
+ * (subclasses of {@link IEvents}, such as {@link IScriptEvents} and {@link IApplicationEvents}).
  * They can be extended to override individual methods, which produces less code than
  * implementing the complete interfaces, when the latter is unnecessary.
  *
@@ -57,9 +57,9 @@ public class SXREventListeners {
     }
 
     /**
-     * Null implementation of {@link IActivityEvents}.
+     * Null implementation of {@link IApplicationEvents}.
      */
-    public static class ActivityEvents implements IActivityEvents {
+    public static class ApplicationEvents implements IApplicationEvents {
         @Override
         public void onPause() {
         }
