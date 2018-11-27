@@ -415,6 +415,21 @@ class MonoscopicViewManager extends SXRViewManager implements MonoscopicRotation
                         .getMainCameraRig().getCenterCamera(), mRenderBundle.getShaderManager(), mRenderBundle.getPostEffectRenderTextureA(),
                 mRenderBundle.getPostEffectRenderTextureB());
         captureCenterEye(renderTarget, false);
+
+        if (null != mScreenshotLeftCallback) {
+            renderTarget.cullFromCamera(mMainScene, mMainScene.getMainCameraRig().getLeftCamera(), mRenderBundle.getShaderManager());
+            renderTarget.render(mMainScene, mMainScene
+                            .getMainCameraRig().getLeftCamera(), mRenderBundle.getShaderManager(), mRenderBundle.getPostEffectRenderTextureA(),
+                    mRenderBundle.getPostEffectRenderTextureB());
+            captureLeftEye(renderTarget, false);
+        }
+        if (null != mScreenshotRightCallback) {
+            renderTarget.cullFromCamera(mMainScene, mMainScene.getMainCameraRig().getRightCamera(), mRenderBundle.getShaderManager());
+            renderTarget.render(mMainScene, mMainScene
+                            .getMainCameraRig().getRightCamera(), mRenderBundle.getShaderManager(), mRenderBundle.getPostEffectRenderTextureA(),
+                    mRenderBundle.getPostEffectRenderTextureB());
+            captureRightEye(renderTarget, false);
+        }
     }
 
     /**
