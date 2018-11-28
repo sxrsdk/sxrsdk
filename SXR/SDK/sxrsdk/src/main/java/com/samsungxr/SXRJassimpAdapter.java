@@ -948,7 +948,7 @@ class  SXRJassimpAdapter
             if ("".equals(nodeName))
             {
                 if ((mNodeMap.get(parent) == null) ||
-                    ((aiChild = handleNoName(node, sceneObject)) == null))
+                    ((aiChild = handleNoName(node, sceneObject, lightlist)) == null))
                 {
                     nodeName = "mesh";
                     sceneObject.setName(nodeName + "-" + meshId);
@@ -974,7 +974,7 @@ class  SXRJassimpAdapter
             }
         }
         else if ("".equals(nodeName) &&
-                ((aiChild = handleNoName(node, sceneObject)) != null))
+                ((aiChild = handleNoName(node, sceneObject, lightlist)) != null))
         {
             node = aiChild;
         }
@@ -984,7 +984,7 @@ class  SXRJassimpAdapter
         }
     }
 
-    private AiNode handleNoName(AiNode ainode, SXRNode gvrnode)
+    private AiNode handleNoName(AiNode ainode, SXRNode gvrnode, Hashtable<String, SXRLight> lightlist)
     {
         if (ainode.getNumChildren() > 1)
         {
@@ -998,6 +998,10 @@ class  SXRJassimpAdapter
             return null;
         }
         if (aichild.getNumMeshes() > 0)
+        {
+            return null;
+        }
+        if (lightlist.containsKey(childName))
         {
             return null;
         }
@@ -1040,6 +1044,7 @@ class  SXRJassimpAdapter
             q.normalize();
             light.setDefaultOrientation(q);
             sceneObject.attachLight(light);
+            lightlist.remove(light);
         }
     }
 
