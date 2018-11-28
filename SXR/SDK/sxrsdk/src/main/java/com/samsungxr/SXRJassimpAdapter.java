@@ -948,7 +948,7 @@ class  SXRJassimpAdapter
             if ("".equals(nodeName))
             {
                 if ((mNodeMap.get(parent) == null) ||
-                    ((aiChild = handleNoName(node, sceneObject)) == null))
+                    ((aiChild = handleNoName(node, sceneObject, lightlist)) == null))
                 {
                     nodeName = "mesh";
                     sceneObject.setName(nodeName + "-" + meshId);
