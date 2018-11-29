@@ -119,7 +119,7 @@ public class SXRKeyboardNode extends SXRNode {
         MeshUtils.resize(mKeyMesh, 1.0f);
 
         mKeyMeshDepthSize = MeshUtils.getBoundingSize(mKeyMesh)[2];
-        mKeyEventsHandler = new KeyEventsHandler(gvrContext.getActivity().getMainLooper(), this, mApplication);
+        mKeyEventsHandler = new KeyEventsHandler(this, mApplication);
         mSXRKeyboardCache = new HashMap<Integer, SXRKeyboard>();
         mEditableNode = null;
         mMiniKeyboard = null;
@@ -826,56 +826,7 @@ public class SXRKeyboardNode extends SXRNode {
         SXRKey mSelectedKey;
         SXRKey mPressedKey;
 
-        static class KeyEventDispatcher implements Runnable
-        {
-            public SXRKey HitKey;
-
-            public void run() { };
-        }
-
-        private KeyEventDispatcher mOnEnterKey = new KeyEventDispatcher()
-        {
-            public void run()
-            {
-                onKeyHovered(HitKey, true);
-            }
-        };
-
-
-        private Runnable mOnTouchStartKey = new Runnable()
-        {
-            public void run()
-            {
-                if (mSelectedKey != null) {
-                    onKeyPress(mSelectedKey, true);
-                }
-            }
-        };
-
-        private Runnable mOnTouchEndKey = new Runnable()
-        {
-            public void run()
-            {
-                if (mPressedKey != null) {
-                    onKeyPress(mPressedKey, false);
-                }
-            }
-        };
-
-        private KeyEventDispatcher mOnExitKey = new KeyEventDispatcher()
-        {
-            public void run()
-            {
-                onKeyHovered(HitKey, false);
-                if (mPressedKey != null)
-                {
-                    onKeyPress(mPressedKey, false);
-                }
-            }
-        };
-
-        public KeyEventsHandler(Looper loop, SXRKeyboardNode gvrKeyboard, SXRApplication activity) {
-            super(loop);
+        public KeyEventsHandler(SXRKeyboardNode gvrKeyboard, SXRApplication activity) {
             mGvrKeyboard = gvrKeyboard;
             mApplication = activity;
         }
@@ -917,21 +868,27 @@ public class SXRKeyboardNode extends SXRNode {
         }
 
         public void onEnter(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
-            mOnEnterKey.HitKey = (SXRKey) pickInfo.hitObject;
-            mApplication.getActivity().runOnUiThread(mOnEnterKey);
+            onKeyHovered((SXRKey) pickInfo.hitObject, true);
         }
 
         public void onExit(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
-            mOnExitKey.HitKey = (SXRKey) pickInfo.hitObject;
-            mApplication.getActivity().runOnUiThread(mOnExitKey);
+            onKeyHovered((SXRKey) pickInfo.hitObject, false);
+            if (mPressedKey != null)
+            {
+                onKeyPress(mPressedKey, false);
+            }
        }
 
         public void onTouchStart(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
-            mApplication.getActivity().runOnUiThread(mOnTouchStartKey);
+            if (mSelectedKey != null) {
+                onKeyPress(mSelectedKey, true);
+            }
         }
 
         public void onTouchEnd(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
-            mApplication.getActivity().runOnUiThread(mOnTouchEndKey);
+            if (mPressedKey != null) {
+                onKeyPress(mPressedKey, false);
+            }
         }
 
         @Override
