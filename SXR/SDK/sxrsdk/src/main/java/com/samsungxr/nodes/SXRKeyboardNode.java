@@ -273,26 +273,32 @@ public class SXRKeyboardNode extends SXRNode {
         }
     };
 
-    public void startInput(SXRViewNode sceneObject)
+    public void startInput(SXRNode sceneObject)
     {
-        mEditableNode = sceneObject;
-        mKeyEventsHandler.start();
-        if (mViewKeyHandler == null)
-        {
-            mViewKeyHandler = new InputMethodHandler(sceneObject);
-            sceneObject.getEventReceiver().addListener(mViewKeyHandler);
+        if (sceneObject != null) {
+            mEditableNode = sceneObject;
+            mKeyEventsHandler.start();
+            if (mViewKeyHandler == null && sceneObject instanceof SXRViewNode) {
+                mViewKeyHandler = new InputMethodHandler((SXRViewNode) sceneObject);
+                sceneObject.getEventReceiver().addListener(mViewKeyHandler);
+            }
+            mPicker.getEventReceiver().addListener(mKeyboardTouchManager);
+            onStartInput(mEditableNode);
         }
-        mPicker.getEventReceiver().addListener(mKeyboardTouchManager);
-        onStartInput(mEditableNode);
     }
 
     public void stopInput() {
-        mPicker.getEventReceiver().removeListener(mKeyboardTouchManager);
-        mKeyEventsHandler.stop();
-        onHideMiniKeyboard();
-        onClose();
-        onStopInput(mEditableNode);
-        mEditableNode = null;
+        if (mEditableNode != null) {
+            mPicker.getEventReceiver().removeListener(mKeyboardTouchManager);
+            if (mViewKeyHandler != null) {
+                mKeyEventsHandler.stop();
+                mEditableNode.getEventReceiver().removeListener(mKeyEventsHandler);
+            }
+            onHideMiniKeyboard();
+            onClose();
+            onStopInput(mEditableNode);
+            mEditableNode = null;
+        }
     }
 
     private static class EnableVisitor implements SXRNode.ComponentVisitor
@@ -1184,57 +1190,65 @@ public class SXRKeyboardNode extends SXRNode {
         }
 
         @Override
-        public void onKey(SXRKeyboardNode sceneObject, int primaryCode, int[] keyCodes)
+        public void onKey(SXRKeyboardNode sceneObject, final int primaryCode, final int[] keyCodes)
         {
             if (sceneObject != mGvrKeybaord || mInputConnection == null)
                 return;
 
-            if (isWordSeparator(primaryCode))
-            {
-                // Handle separator
-                sendKeyChar((char) primaryCode);
-                updateShiftKeyState(getCurrentInputEditorInfo());
-            }
-            else if (primaryCode == Keyboard.KEYCODE_DELETE)
-            {
-                handleBackspace();
-            }
-            else if (primaryCode == Keyboard.KEYCODE_SHIFT)
-            {
-            }
-            else if (primaryCode == Keyboard.KEYCODE_CANCEL)
-            {
-                handleClose();
-            }
-            else if (primaryCode == Keyboard.KEYCODE_DONE)
-            {
-                // FIXME: Should it close keyboard?
-                handleClose();
-            }
-            else if (primaryCode == Keyboard.KEYCODE_MODE_CHANGE && mGvrKeybaord != null)
-            {
-            }
-            else
-            {
-                handleCharacter(primaryCode, keyCodes);
-            }
+            mRootGroup.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (isWordSeparator(primaryCode))
+                    {
+                        // Handle separator
+                        sendKeyChar((char) primaryCode);
+                        updateShiftKeyState(getCurrentInputEditorInfo());
+                    }
+                    else if (primaryCode == Keyboard.KEYCODE_DELETE)
+                    {
+                        handleBackspace();
+                    }
+                    else if (primaryCode == Keyboard.KEYCODE_SHIFT)
+                    {
+                    }
+                    else if (primaryCode == Keyboard.KEYCODE_CANCEL)
+                    {
+                        handleClose();
+                    }
+                    else if (primaryCode == Keyboard.KEYCODE_DONE)
+                    {
+                        // FIXME: Should it close keyboard?
+                        handleClose();
+                    }
+                    else if (primaryCode == Keyboard.KEYCODE_MODE_CHANGE && mGvrKeybaord != null)
+                    {
+                    }
+                    else
+                    {
+                        handleCharacter(primaryCode, keyCodes);
+                    }
+                }
+            });
         }
 
         @Override
         public void onStartInput(SXRKeyboardNode sceneObject)
         {
-            // TODO: Finish previous input if exists or not finished before
-            View view = mRootGroup.findFocus();
             mGvrKeybaord = sceneObject;
-            EditorInfo tba = new EditorInfo();
-            tba.packageName = view.getContext().getPackageName();
-            tba.fieldId = view.getId();
-            InputConnection ic = view.onCreateInputConnection(tba);
+            mRootGroup.post(new Runnable() {
+                @Override
+                public void run() {
+                    View view = mRootGroup.findFocus();
+                    EditorInfo tba = new EditorInfo();
+                    tba.packageName = view.getContext().getPackageName();
+                    tba.fieldId = view.getId();
+                    InputConnection ic = view.onCreateInputConnection(tba);
 
-            if (ic != null)
-            {
-                startInput(ic, tba);
-            }
+                    if (ic != null)
+                    {
+                        startInput(ic, tba);
+                    }
+                }});
         }
 
         @Override
@@ -1245,7 +1259,13 @@ public class SXRKeyboardNode extends SXRNode {
             {
                 mGvrKeybaord = null;
             }
-            doFinishInput();
+
+            mRootGroup.post(new Runnable() {
+                @Override
+                public void run() {
+                    doFinishInput();
+                }
+            });
         }
 
         private void startInput(InputConnection ic, EditorInfo attribute)
