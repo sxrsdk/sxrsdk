@@ -439,7 +439,6 @@ namespace sxr
      */
     void GLRenderer::makeShadowMaps(Scene* scene, jobject javaSceneObject, ShaderManager* shader_manager)
     {
-        checkGLError("makeShadowMaps");
         GLint drawFB, readFB;
 
         glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFB);
