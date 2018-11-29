@@ -27,11 +27,11 @@ public class SXRVertexColorShader extends SXRShaderTemplate
     {
         super("float4 ambient_color; float4 diffuse_color; float4 specular_color; float4 emissive_color; float specular_exponent; float line_width",
               "",
-              "float3 a_position; float4 a_color, float3 a_normal", GLSLESVersion.VULKAN);
+              "float3 a_position float4 a_color float3 a_normal", GLSLESVersion.VULKAN);
         if (fragTemplate == null) {
             Context context = gvrcontext.getContext();
             fragTemplate = TextFile.readTextFile(context, R.raw.fragment_template);
-            vtxTemplate = TextFile.readTextFile(context, R.raw.vcolor_vertex);
+            vtxTemplate = TextFile.readTextFile(context, R.raw.vertex_template);
             vtxShader = TextFile.readTextFile(context, R.raw.pos_norm_tex);
             surfaceShader = TextFile.readTextFile(context, R.raw.vcolor_surface);
             normalShader = TextFile.readTextFile(context, R.raw.normalmap);

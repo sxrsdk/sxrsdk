@@ -45,14 +45,14 @@ namespace sxr {
     {
         if (mIndexData != nullptr)
         {
-            delete [] mIndexData;
+            free(mIndexData);
             mIndexData = nullptr;
         }
         mIndexCount = 0;
     }
 
 
-    bool    IndexBuffer::setShortVec(const unsigned short* src, int srcSize)
+    int IndexBuffer::setShortVec(const unsigned short* src, int srcSize)
     {
         unsigned short*  dest;
         std::lock_guard<std::mutex> lock(mUpdateLock);
@@ -60,24 +60,28 @@ namespace sxr {
         if (src == nullptr)
         {
             LOGE("IndexBuffer: source array not found");
-            return false;
+            return 0;
         }
-        else if (!setIndexCount(srcSize))
+        else
         {
-            return false;
+            int rc = setIndexCount(srcSize);
+            if (rc <= 0)
+            {
+                return rc;
+            }
         }
         if (mIndexByteSize != sizeof(short))
         {
             LOGE("IndexBuffer: cannot change type of index data");
-            return false;
+            return 0;
         }
         dest = reinterpret_cast<unsigned short*>(mIndexData);
         memcpy(dest, src, srcSize * sizeof(short));
         mIsDirty = true;
-        return true;
+        return 1;
     }
 
-    bool    IndexBuffer::setIntVec(const unsigned int* src, int srcSize)
+    int IndexBuffer::setIntVec(const unsigned int* src, int srcSize)
     {
         unsigned int*   dest;
         std::lock_guard<std::mutex> lock(mUpdateLock);
@@ -85,21 +89,25 @@ namespace sxr {
         if (src == nullptr)
         {
             LOGE("IndexBuffer: source array not found");
-            return false;
+            return 0;
         }
-        else if (!setIndexCount(srcSize))
+        else
         {
-            return false;
+            int rc = setIndexCount(srcSize);
+            if (rc <= 0)
+            {
+                return rc;
+            }
         }
         if (mIndexByteSize != sizeof(int))
         {
             LOGE("IndexBuffer: cannot change type of index data");
-            return false;
+            return 0;
         }
         dest = reinterpret_cast<unsigned int*>(mIndexData);
         memcpy(dest, src, srcSize * sizeof(int));
         mIsDirty = true;
-        return true;
+        return 1;
     }
 
     bool    IndexBuffer::getShortVec(unsigned short* dest, int destSize) const
@@ -161,34 +169,36 @@ namespace sxr {
         return mIndexCount;
     }
 
-    bool IndexBuffer::setIndexCount(int count)
+    int IndexBuffer::setIndexCount(int count)
     {
         if (mIndexByteSize <= 0)
         {
-            return false;
+            return 0;
         }
         if ((mIndexCount != 0) && (mIndexCount != count))
         {
             LOGE("IndexBuffer: cannot change size of index array from %d to %d", mIndexCount, count);
-            return false;
+            return 0;
         }
         if (mIndexCount == count)
         {
-            return true;
+            return 1;
         }
-        mIndexCount = count;
         if (count > 0)
         {
             int datasize = mIndexByteSize * count;
             LOGV("IndexBuffer: %p allocating index buffer of %d bytes\n", this, datasize);
-            mIndexData = new char[datasize];
-            return true;
+            mIndexData = (char*) malloc(datasize);
+            if (mIndexData != nullptr)
+            {
+                mIndexCount = count;
+                return 1;
+            }
+            LOGE("IndexBuffer: out of memory cannot allocate room for %d bytes\n", datasize);
+            return -1;
         }
-        else
-        {
-            LOGE("IndexBuffer: ERROR: no index buffer allocated\n");
-            return false;
-        }
+        LOGE("IndexBuffer: ERROR: no index buffer allocated\n");
+        return 0;
     }
 
     void IndexBuffer::dump() const

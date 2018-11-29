@@ -225,7 +225,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
             mViewManager.getEventManager().sendEventWithMask(
                     SEND_EVENT_MASK,
                     this,
-                    IActivityEvents.class,
+                    IApplicationEvents.class,
                     "onPause");
         }
     }
@@ -245,7 +245,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
             mViewManager.getEventManager().sendEventWithMask(
                     SEND_EVENT_MASK,
                     this,
-                    IActivityEvents.class,
+                    IApplicationEvents.class,
                     "onResume");
         }
     }
@@ -262,7 +262,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
             mViewManager.getEventManager().sendEventWithMask(
                     SEND_EVENT_MASK,
                     this,
-                    IActivityEvents.class,
+                    IApplicationEvents.class,
                     "onDestroy");
             mViewManager = null;
         }
@@ -384,7 +384,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
         mViewManager.getEventManager().sendEventWithMask(
                 SEND_EVENT_MASK,
                 this,
-                IActivityEvents.class,
+                IApplicationEvents.class,
                 "dispatchKeyEvent", event);
 
         if (mViewManager.dispatchKeyEvent(event)) {
@@ -452,7 +452,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
         mViewManager.getEventManager().sendEventWithMask(
                 SEND_EVENT_MASK,
                 this,
-                IActivityEvents.class,
+                IApplicationEvents.class,
                 "dispatchTouchEvent", event);
 
         return handled;
@@ -469,7 +469,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
             mViewManager.getEventManager().sendEventWithMask(
                     SEND_EVENT_MASK,
                     this,
-                    IActivityEvents.class,
+                    IApplicationEvents.class,
                     "onConfigurationChanged", newConfig);
         }
     }
@@ -484,7 +484,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
             mViewManager.getEventManager().sendEventWithMask(
                     SEND_EVENT_MASK,
                     this,
-                    IActivityEvents.class,
+                    IApplicationEvents.class,
                     "onTouchEvent", event);
         }
 
@@ -500,7 +500,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
             mViewManager.getEventManager().sendEventWithMask(
                     SEND_EVENT_MASK,
                     this,
-                    IActivityEvents.class,
+                    IApplicationEvents.class,
                     "onWindowFocusChanged", hasFocus);
         }
 
@@ -646,7 +646,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
             mViewManager.getEventManager().sendEventWithMask(
                     SEND_EVENT_MASK,
                     this,
-                    IActivityEvents.class,
+                    IApplicationEvents.class,
                     "onSetMain", sxrMain);
 
             final SXRConfigurationManager localConfigurationManager = mConfigurationManager;
@@ -726,7 +726,7 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
             }
         };
         mGestureDetector = new GestureDetector(mActivity.getApplicationContext(), gestureListener);
-        getEventReceiver().addListener(new SXREventListeners.ActivityEvents() {
+        getEventReceiver().addListener(new SXREventListeners.ApplicationEvents() {
             @Override
             public void dispatchTouchEvent(MotionEvent event) {
                 mGestureDetector.onTouchEvent(event);

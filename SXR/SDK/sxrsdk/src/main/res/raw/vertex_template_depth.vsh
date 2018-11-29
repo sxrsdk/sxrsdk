@@ -14,8 +14,8 @@ precision highp float;
 #ifdef HAS_a_bone_weights
 @BONES_UNIFORMS
 
-layout(location = 6) in vec4 a_bone_weights;
-layout(location = 7) in ivec4 a_bone_indices;
+layout(location = 7) in vec4 a_bone_weights;
+layout(location = 8) in ivec4 a_bone_indices;
 #endif
 #endif
 

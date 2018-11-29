@@ -90,6 +90,10 @@ Java_com_samsungxr_NativeVertexBuffer_ctor(JNIEnv* env, jobject obj, jstring des
     const char* char_desc = env->GetStringUTFChars(descriptor, 0);
     VertexBuffer* vbuf = Renderer::getInstance()->createVertexBuffer(char_desc, vertexCount);
     env->ReleaseStringUTFChars(descriptor, char_desc);
+    if (vertexCount != vbuf->getVertexCount())
+    {
+        throwOutOfMemoryError(env, "Cannot allocate vertex buffer");
+    }
     return reinterpret_cast<jlong>(vbuf);
 }
 
@@ -101,11 +105,14 @@ Java_com_samsungxr_NativeVertexBuffer_getFloatVec(JNIEnv* env, jobject obj,
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
     const char* char_key = env->GetStringUTFChars(attribName, 0);
     float* bufptr = (float*) env->GetDirectBufferAddress(jfloatbuf);
-    bool rc = false;
+    int rc = 0;
     if (bufptr)
     {
-        int capacity = env->GetDirectBufferCapacity(jfloatbuf) - ofs;
-        rc = vbuf->getFloatVec(char_key, bufptr + ofs, capacity, stride);
+        int capacity = env->GetDirectBufferCapacity(jfloatbuf);
+        if (capacity > 0)
+        {
+            rc = vbuf->getFloatVec(char_key, bufptr + ofs, capacity - ofs, stride);
+        }
     }
     env->ReleaseStringUTFChars(attribName, char_key);
     return rc;
@@ -124,9 +131,12 @@ Java_com_samsungxr_NativeVertexBuffer_getFloatArray(JNIEnv * env, jobject obj,
     {
         int n = (vbuf->getVertexCount() * entry->Size) / sizeof(float);
         jdata = env->NewFloatArray(n);
-        float *data = env->GetFloatArrayElements(jdata, 0);
-        vbuf->getFloatVec(char_key, data, n, 0);
-        env->ReleaseFloatArrayElements(jdata, data, 0);
+        if (jdata)
+        {
+            float* data = env->GetFloatArrayElements(jdata, 0);
+            vbuf->getFloatVec(char_key, data, n, 0);
+            env->ReleaseFloatArrayElements(jdata, data, 0);
+        }
     }
     env->ReleaseStringUTFChars(attribName, char_key);
     return jdata;
@@ -145,9 +155,12 @@ Java_com_samsungxr_NativeVertexBuffer_getIntArray(JNIEnv* env, jobject obj,
     {
         int n = (vbuf->getVertexCount() * entry->Size) / sizeof(float);
         jdata = env->NewIntArray(n);
-        int* data = env->GetIntArrayElements(jdata, 0);
-        vbuf->getIntVec(char_key, data, n, 0);
-        env->ReleaseIntArrayElements(jdata, data, 0);
+        if (jdata)
+        {
+            int* data = env->GetIntArrayElements(jdata, 0);
+            vbuf->getIntVec(char_key, data, n, 0);
+            env->ReleaseIntArrayElements(jdata, data, 0);
+        }
     }
     env->ReleaseStringUTFChars(attribName, char_key);
     return jdata;
@@ -160,13 +173,22 @@ Java_com_samsungxr_NativeVertexBuffer_setIntArray(JNIEnv * env, jobject obj,
 {
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
     const char* char_key = env->GetStringUTFChars(attribName, 0);
-
-    jint* attribData = env->GetIntArrayElements(jdata, 0) + ofs;
+    jint* attribData = env->GetIntArrayElements(jdata, 0);
     int n = static_cast<int>(env->GetArrayLength(jdata));
-    bool rc = vbuf->setIntVec(char_key, attribData, n - ofs, stride);
+    int rc = 0;
+
+    if (attribData && (n > 0))
+    {
+        rc = vbuf->setIntVec(char_key, attribData + ofs, n - ofs, stride);
+    }
     env->ReleaseIntArrayElements(jdata, attribData, 0);
     env->ReleaseStringUTFChars(attribName, char_key);
-    return rc;
+    if (rc < 0)
+    {
+        throwOutOfMemoryError(env, "Cannot allocate vertex buffer");
+        return -1;
+    }
+    return rc > 0;
 }
 
 JNIEXPORT bool JNICALL
@@ -177,10 +199,11 @@ Java_com_samsungxr_NativeVertexBuffer_getIntVec(JNIEnv* env, jobject obj,
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
     const char* char_key = env->GetStringUTFChars(attribName, 0);
     int* bufptr = (int*) env->GetDirectBufferAddress(jintbuf);
-    bool rc = false;
-    if (bufptr)
+    int capacity = env->GetDirectBufferCapacity(jintbuf) - ofs;
+    int rc = 0;
+
+    if (bufptr && (capacity > 0))
     {
-        int capacity = env->GetDirectBufferCapacity(jintbuf) - ofs;
         rc = vbuf->getIntVec(char_key, bufptr + ofs, capacity, stride);
     }
     env->ReleaseStringUTFChars(attribName, char_key);
@@ -194,12 +217,21 @@ Java_com_samsungxr_NativeVertexBuffer_setFloatArray(JNIEnv * env, jobject obj,
 {
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
     const char* char_key = env->GetStringUTFChars(attribName, 0);
-
-    jfloat* attribData = env->GetFloatArrayElements(jdata, 0) + ofs;
-    bool rc = vbuf->setFloatVec(char_key, attribData, static_cast<int>(env->GetArrayLength(jdata)), stride);
+    jfloat* attribData = env->GetFloatArrayElements(jdata, 0);
+    int rc = 0;
+    if (attribData)
+    {
+        rc = vbuf->setFloatVec(char_key, attribData + ofs,
+                                   static_cast<int>(env->GetArrayLength(jdata)), stride);
+        env->ReleaseFloatArrayElements(jdata, attribData, 0);
+    }
     env->ReleaseStringUTFChars(attribName, char_key);
-    env->ReleaseFloatArrayElements(jdata, attribData, 0);
-    return rc;
+    if (rc < 0)
+    {
+        throwOutOfMemoryError(env, "Cannot allocate vertex buffer");
+        return -1;
+    }
+    return rc > 0;
 }
 
 JNIEXPORT bool JNICALL
@@ -209,14 +241,22 @@ Java_com_samsungxr_NativeVertexBuffer_setFloatVec(JNIEnv* env, jobject obj,
 {
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
     const char* char_key = env->GetStringUTFChars(attribName, 0);
-    float* bufptr = (float*) env->GetDirectBufferAddress(jfloatbuf) + ofs;
-    bool rc = false;
+    float* bufptr = (float*) env->GetDirectBufferAddress(jfloatbuf);
+    int rc = 0;
     if (bufptr)
     {
-        int capacity = env->GetDirectBufferCapacity(jfloatbuf) - ofs;
-        rc = vbuf->setFloatVec(char_key, bufptr + ofs, capacity, stride);
+        int capacity = env->GetDirectBufferCapacity(jfloatbuf);
+        if (capacity > 0)
+        {
+            rc = vbuf->setFloatVec(char_key, bufptr + ofs, capacity - ofs, stride);
+        }
     }
     env->ReleaseStringUTFChars(attribName, char_key);
+    if (rc < 0)
+    {
+        throwOutOfMemoryError(env, "Cannot allocate vertex buffer");
+        return -1;
+    }
     return rc;
 }
 
@@ -227,13 +267,21 @@ Java_com_samsungxr_NativeVertexBuffer_setIntVec(JNIEnv* env, jobject obj,
 {
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
     const char* char_key = env->GetStringUTFChars(attribName, 0);
-
-    jint* attribData = env->GetIntArrayElements(jdata, 0) + ofs;
+    jint* attribData = env->GetIntArrayElements(jdata, 0);
     int n = static_cast<int>(env->GetArrayLength(jdata));
-    bool rc = vbuf->setIntVec(char_key, attribData, n - ofs, stride);
-    env->ReleaseStringUTFChars(attribName, char_key);
-    env->ReleaseIntArrayElements(jdata, attribData, 0);
-    return rc;
+    int rc = 0;
+    if (attribData && (n > 0))
+    {
+        rc = vbuf->setIntVec(char_key, attribData + ofs, n - ofs, stride);
+        env->ReleaseStringUTFChars(attribName, char_key);
+        env->ReleaseIntArrayElements(jdata, attribData, 0);
+    }
+    if (rc < 0)
+    {
+        throwOutOfMemoryError(env, "Cannot allocate vertex buffer");
+        return -1;
+    }
+    return rc > 0;
 }
 
 JNIEXPORT bool JNICALL
@@ -270,51 +318,47 @@ Java_com_samsungxr_NativeVertexBuffer_getBoundingVolume(JNIEnv* env, jobject,
                                                       jlong jvbuf, jfloatArray outputArray)
 {
     VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
+    int capacity = env->GetArrayLength(outputArray);
 
+    if (capacity < 4)
     {
-        int capacity = env->GetArrayLength(outputArray);
-        if (capacity < 4)
-        {
-            LOGE("VertexBuffer::getBoundingVolume destination buffer must hold at least 4 floats");
-            return -1;
-        }
-        BoundingVolume bv;
-        jfloat* f = env->GetFloatArrayElements(outputArray, 0);
-        vbuf->getBoundingVolume(bv);
-        if (capacity == 4)
-        {
-            f[0] = bv.center().x;
-            f[1] = bv.center().y;
-            f[2] = bv.center().z;
-            f[0] = bv.radius();
-        }
-        else if (capacity == 6)
-        {
-            f[0] = bv.min_corner().x;
-            f[1] = bv.min_corner().y;
-            f[2] = bv.min_corner().z;
-            f[3] = bv.max_corner().x;
-            f[4] = bv.max_corner().y;
-            f[5] = bv.max_corner().z;
-        }
-        else if (capacity >= 10)
-        {
-            f[0] = bv.center().x;
-            f[1] = bv.center().y;
-            f[2] = bv.center().z;
-            f[3] = bv.min_corner().x;
-            f[4] = bv.min_corner().y;
-            f[5] = bv.min_corner().z;
-            f[6] = bv.max_corner().x;
-            f[7] = bv.max_corner().y;
-            f[8] = bv.max_corner().z;
-            f[9] = bv.radius();
-        }
-
-        env->ReleaseFloatArrayElements(outputArray, f, 0);
-        return (bv.radius() > 0) ? 1 : 0;
+        LOGE("VertexBuffer::getBoundingVolume destination buffer must hold at least 4 floats");
+        return -1;
     }
-    return -1;
+    BoundingVolume bv;
+    jfloat* f = env->GetFloatArrayElements(outputArray, 0);
+    vbuf->getBoundingVolume(bv);
+    if (capacity == 4)
+    {
+        f[0] = bv.center().x;
+        f[1] = bv.center().y;
+        f[2] = bv.center().z;
+        f[0] = bv.radius();
+    }
+    else if (capacity == 6)
+    {
+        f[0] = bv.min_corner().x;
+        f[1] = bv.min_corner().y;
+        f[2] = bv.min_corner().z;
+        f[3] = bv.max_corner().x;
+        f[4] = bv.max_corner().y;
+        f[5] = bv.max_corner().z;
+    }
+    else if (capacity >= 10)
+    {
+        f[0] = bv.center().x;
+        f[1] = bv.center().y;
+        f[2] = bv.center().z;
+        f[3] = bv.min_corner().x;
+        f[4] = bv.min_corner().y;
+        f[5] = bv.min_corner().z;
+        f[6] = bv.max_corner().x;
+        f[7] = bv.max_corner().y;
+        f[8] = bv.max_corner().z;
+        f[9] = bv.radius();
+    }
+    env->ReleaseFloatArrayElements(outputArray, f, 0);
+    return (bv.radius() > 0) ? 1 : 0;
 }
 
 JNIEXPORT void JNICALL
@@ -325,7 +369,6 @@ Java_com_samsungxr_NativeVertexBuffer_dump(JNIEnv* env, jobject obj,
     const char* char_key = env->GetStringUTFChars(attrName, 0);
     vbuf->dump(char_key);
     env->ReleaseStringUTFChars(attrName, char_key);
-
 }
 
 }

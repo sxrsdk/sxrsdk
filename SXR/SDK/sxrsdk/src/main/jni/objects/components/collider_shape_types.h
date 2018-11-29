@@ -22,6 +22,7 @@ namespace sxr {
     const long COLLIDER_SHAPE_SPHERE    = 10002;
     const long COLLIDER_SHAPE_MESH      = 10003;
     const long COLLIDER_SHAPE_GROUP     = 10004;
+    const long COLLIDER_SHAPE_CAPSULE   = 10005;
 }
 
 #endif

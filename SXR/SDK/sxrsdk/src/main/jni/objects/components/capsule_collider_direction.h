@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--/* Copyright 2015 Samsung Electronics Co., LTD
+/* Copyright 2015 Samsung Electronics Co., LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,16 +11,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */-->
+ */
 
+#ifndef CAPSULE_COLLIDER_DIRECTION_H_
+#define CAPSULE_COLLIDER_DIRECTION_H_
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.samsungxr.oculus"
-    android:versionCode="1"
-    android:versionName="1.0">
+namespace sxr {
+    const long CAPSULE_DIRECTION_Y = 10000;
+    const long CAPSULE_DIRECTION_X = 10001;
+    const long CAPSULE_DIRECTION_Z = 10002;
+};
 
-    <application>
-        <meta-data android:name="com.samsung.android.vr.application.mode" android:value="vr_only"/>
-    </application>
-
-</manifest>
+#endif //CAPSULE_COLLIDER_DIRECTION_H_

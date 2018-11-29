@@ -182,6 +182,13 @@ public class SXRTexture extends SXRHybridObject implements SXRAndroidResource.Te
         return mTextureId;
     }
 
+    /**
+     * Clear the image data associated with this texture.
+     */
+    public void clearData()
+    {
+        NativeTexture.clearData(getNative());
+    }
 
     /**
      * Update the texture parameters {@link SXRTextureParameters} after the
@@ -252,9 +259,9 @@ public class SXRTexture extends SXRHybridObject implements SXRAndroidResource.Te
     {
         mImage = imageData;
         if (imageData != null)
-            NativeTexture.setImage(getNative(), imageData, imageData.getNative());
+            NativeTexture.setImage(getNative(), imageData.getNative());
         else
-            NativeTexture.setImage(getNative(), null, 0);
+            NativeTexture.setImage(getNative(),0);
     }
 
     /**
@@ -310,6 +317,7 @@ class NativeTexture {
     static native long constructor();
     static native int getId(long texture);
     static native boolean isReady(long texture);
+    static native void clearData(long texture);
     static native void updateTextureParameters(long texture, int[] textureParametersValues);
-    static native void setImage(long texPointer, SXRImage javeImage, long nativeImage);
+    static native void setImage(long texPointer, long nativeImage);
 }

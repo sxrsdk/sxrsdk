@@ -268,7 +268,7 @@ public class SXRMixedReality implements IMixedReality
         return mSession.makeInterpolated(poseA, poseB, t);
     }
 
-    private class ActivityEventsHandler extends SXREventListeners.ActivityEvents {
+    private class ActivityEventsHandler extends SXREventListeners.ApplicationEvents {
         @Override
         public void onPause() {
             pause();

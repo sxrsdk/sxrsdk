@@ -151,7 +151,7 @@ public:
     explicit Texture(int type = TEXTURE_2D);
     virtual ~Texture();
     void setImage(Image* image);
-    void setImage(JNIEnv* env, jobject javaImage, Image* image);
+    void setImage(JNIEnv* env, Image* image);
     void updateTextureParameters(const int* texture_parameters, int n);
 
     int getType() const { return mType; }
@@ -172,9 +172,10 @@ public:
         return image && image->transparency();
     }
 
+    void clearData(JNIEnv* env);
+
 protected:
     JavaVM* mJava;
-    jobject mJavaImage;
     int     mType;
     bool    mTexParamsDirty;
     TextureParameters   mTexParams;
@@ -182,7 +183,6 @@ protected:
 private:
     //since it can be read/written from the gl and other threads concurrently
     std::atomic<Image*> mImage;
-    void clearData(JNIEnv* env);
 
     Texture(const Texture& texture) = delete;
     Texture(Texture&& texture) = delete;

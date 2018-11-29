@@ -32,8 +32,7 @@ Texture::Texture(int type)
           mTexParamsDirty(false),
           mType(type),
           mImage(NULL),
-          mJava(NULL),
-          mJavaImage(NULL)
+          mJava(NULL)
 { }
 
 Texture::~Texture()
@@ -58,12 +57,12 @@ bool Texture::isReady()
 
 void Texture::clearData(JNIEnv* env)
 {
-    if (mJavaImage)
+    Image* image = mImage;
+    if (image)
     {
-        env->DeleteWeakGlobalRef(mJavaImage);
-        mJavaImage = NULL;
+        image->clear(env);
     }
-    mImage = NULL;
+    LOGV("Texture::clearImage %p", this);
 }
 
 void Texture::setImage(Image* image)
@@ -75,7 +74,7 @@ void Texture::setImage(Image* image)
     mImage = image;
 }
 
-void Texture::setImage(JNIEnv* env, jobject javaImage, Image* image)
+void Texture::setImage(JNIEnv* env, Image* image)
 {
     if (JNI_OK != env->GetJavaVM(&mJava))
     {
@@ -83,13 +82,12 @@ void Texture::setImage(JNIEnv* env, jobject javaImage, Image* image)
         return;
     }
     clearData(env);
-    mJavaImage = env->NewWeakGlobalRef(javaImage);
     mImage = image;
     if (image)
     {
         image->texParamsChanged(getTexParams());
     }
-    LOGV("Texture::setImage");
+    LOGV("Texture::setImage %p", this);
 }
 
 void Texture::updateTextureParameters(const int* texture_parameters, int n)

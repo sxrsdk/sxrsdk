@@ -386,6 +386,39 @@ public final class SXRAssetLoader {
                                                  "onAssetLoaded", new Object[] { mContext, model, mFileName, errors });
         }
 
+        /*
+         * Modify the main scene on the GL thread.
+         * If replacing the scene, the lights will be cleared on the GL thread.
+         * Adding the new node on the GL thread prevents the new lights
+         * from being cleared.
+         */
+        private Runnable mAddToScene = new Runnable()
+        {
+            public void run()
+            {
+                SXRNode mainCam = mModel.getNodeByName("MainCamera");
+                SXRCameraRig modelCam = (mainCam != null) ? mainCam.getCameraRig() : null;
+
+                if (mReplaceScene)
+                {
+                    mScene.clear();
+                    if (modelCam != null)
+                    {
+                        SXRCameraRig sceneCam = mScene.getMainCameraRig();
+                        sceneCam.getTransform().setModelMatrix(mainCam.getTransform().getLocalModelMatrix());
+                        sceneCam.setNearClippingDistance(modelCam.getNearClippingDistance());
+                        sceneCam.setFarClippingDistance(modelCam.getFarClippingDistance());
+                        sceneCam.setCameraRigType(modelCam.getCameraRigType());
+                    }
+                }
+                if (mModel.getParent() == null)
+                {
+                    Log.d(TAG, "ASSET: asset %s added to scene", mFileName);
+                    mScene.addNode(mModel);
+                }
+            }
+        };
+
         /**
          * Generate the onAssetLoaded event.
          * Add the model to the scene and start animations.
@@ -393,34 +426,18 @@ public final class SXRAssetLoader {
         private void generateLoadEvent()
         {
             String errors = !"".equals(mErrors) ? mErrors : null;
+            synchronized (mNumTextures)
+            {
+                /*
+                 * This prevents it from trying to load textures after the asset has been loaded.
+                 */
+                mNumTextures = -1;
+            }
             if (mModel != null)
             {
                 if ((mScene != null))
                 {
-                    if (mReplaceScene)
-                    {
-                        SXRNode mainCam = mModel.getNodeByName("MainCamera");
-                        SXRCameraRig modelCam = (mainCam != null) ? mainCam.getCameraRig() : null;
-
-                        mScene.clear();
-                        if (modelCam != null)
-                        {
-                            SXRCameraRig sceneCam = mScene.getMainCameraRig();
-                            sceneCam.getTransform().setModelMatrix(mainCam.getTransform().getLocalModelMatrix());
-                            sceneCam.setNearClippingDistance(modelCam.getNearClippingDistance());
-                            sceneCam.setFarClippingDistance(modelCam.getFarClippingDistance());
-                            sceneCam.setCameraRigType(modelCam.getCameraRigType());
-                        }
-                    }
-                    /*
-                     * If the model does not already have a parent,
-                     * add it to the scene.
-                     */
-                    if (mModel.getParent() == null)
-                    {
-                        Log.d(TAG, "ASSET: asset %s added to scene", mFileName);
-                        mScene.addNode(mModel);
-                    }
+                    mContext.runOnGlThread(mAddToScene);
                 }
                 /*
                  * If the model has animations, start them now.
@@ -430,13 +447,6 @@ public final class SXRAssetLoader {
                 {
                     animator.start();
                 }
-            }
-            synchronized (mNumTextures)
-            {
-                 /*
-                 * This prevents it from trying to load textures after the asset has been loaded.
-                 */
-                mNumTextures = -1;
             }
             onAssetLoaded(mContext, mModel, mFileName, errors);
         }

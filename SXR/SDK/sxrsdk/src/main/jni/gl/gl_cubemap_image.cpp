@@ -60,10 +60,14 @@ void GLCubemapImage::updateFromBitmap(int texid)
     {
         jobject bitmap = env->GetObjectArrayElement(bmapArray, i);
         jobject bmapref = env->NewLocalRef(bitmap);
-        GLBitmapImage::updateFromBitmap(env, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, bitmap, false, mFormat);
+        if (bmapref)
+        {
+            GLBitmapImage::updateFromBitmap(env, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, bitmap,
+                                            false, mFormat);
+        }
         env->DeleteLocalRef(bmapref);
     }
-    if(!mIsCompressed && mTexParams.getMinFilter() >=  TextureParameters::NEAREST_MIPMAP_NEAREST)
+    if (!mIsCompressed && mTexParams.getMinFilter() >= TextureParameters::NEAREST_MIPMAP_NEAREST)
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 }
 

@@ -20,9 +20,11 @@
 #include <string>
 #include <mutex>
 #include <vector>
+#include <jni.h>
 #include "objects/hybrid_object.h"
 #include "util/sxr_log.h"
 #include "gl/gl_headers.h"  // for GL_TEXTURE_xxx
+
 
 namespace sxr {
 class Texture;
@@ -83,6 +85,7 @@ public:
     virtual bool isReady() = 0;
     virtual void texParamsChanged(const TextureParameters&) = 0;
     virtual bool transparency() { return false; }
+    virtual void clearData(JNIEnv* env) { }
 
     bool hasData() const { return mState == HAS_DATA; }
     short getWidth() const { return mWidth; }
@@ -125,6 +128,12 @@ public:
             updateComplete();
         }
         return hasData();
+    }
+
+    void clear(JNIEnv* env)
+    {
+        std::lock_guard<std::mutex> lock(mUpdateLock);
+        clearData(env);
     }
 
 

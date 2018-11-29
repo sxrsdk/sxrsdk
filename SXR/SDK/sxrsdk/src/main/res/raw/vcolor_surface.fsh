@@ -1,7 +1,5 @@
 @MATERIAL_UNIFORMS
 
-layout(location = 3) in vec4 vertex_color;
-
 struct Surface
 {
    vec3 viewspaceNormal;
