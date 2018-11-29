@@ -314,7 +314,7 @@ public class SXRKeyboardNode extends SXRNode {
 
         public void disableAll(SXRNode root, long componentType)
         {
-            Enable = true;
+            Enable = false;
             root.forAllComponents(this, componentType);
         }
 
