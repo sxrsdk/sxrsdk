@@ -16,6 +16,7 @@
 #include "bullet_sxr_utils.h"
 
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
+#include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 
 namespace sxr {
 
@@ -28,6 +29,8 @@ btCollisionShape *convertCollider2CollisionShape(Collider *collider) {
         return convertSphereCollider2CollisionShape(static_cast<SphereCollider *>(collider));
     } else if (collider->shape_type() == COLLIDER_SHAPE_MESH) {
         return convertMeshCollider2CollisionShape(static_cast<MeshCollider *>(collider));
+    } else if (collider->shape_type() == COLLIDER_SHAPE_CAPSULE) {
+        return convertCapsuleCollider2CollisionShape(static_cast<CapsuleCollider *>(collider));
     }
 
     return NULL;
@@ -38,6 +41,26 @@ btCollisionShape *convertSphereCollider2CollisionShape(SphereCollider *collider)
 
     if (collider != NULL) {
         shape = new btSphereShape(btScalar(collider->get_radius()));
+    }
+
+    return shape;
+}
+
+btCollisionShape *convertCapsuleCollider2CollisionShape(CapsuleCollider *collider) {
+    btCollisionShape *shape = NULL;
+
+    if (collider != NULL) {
+        switch (collider->getDirection()) {
+            case CAPSULE_DIRECTION_Y:
+                shape = new btCapsuleShape(collider->getRadius(), collider->getHeight());
+                break;
+            case CAPSULE_DIRECTION_X:
+                shape = new btCapsuleShapeX(collider->getRadius(), collider->getHeight());
+                break;
+            case CAPSULE_DIRECTION_Z:
+                shape = new btCapsuleShapeZ(collider->getRadius(), collider->getHeight());
+                break;
+        }
     }
 
     return shape;
