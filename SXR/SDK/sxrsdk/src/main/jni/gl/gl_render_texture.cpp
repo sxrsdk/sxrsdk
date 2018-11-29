@@ -278,10 +278,13 @@ void GLRenderTexture::generateRenderTexture(int sample_count, int jdepth_format,
 
 void GLRenderTexture::beginRendering(Renderer* renderer)
 {
-    glViewport(viewport_[0], viewport_[1], viewport_[2], viewport_[3]);
-    glScissor(viewport_[0], viewport_[1], viewport_[2], viewport_[3]);
-    invalidateFrameBuffer(GL_FRAMEBUFFER, true, true, renderTexture_gl_render_buffer_ != NULL);
-    glDepthMask(GL_TRUE);
+    GL(glViewport(viewport_[0], viewport_[1], viewport_[2], viewport_[3]));
+    GL(glScissor(viewport_[0], viewport_[1], viewport_[2], viewport_[3]));
+
+    const bool isFbo = 0 != renderTexture_gl_frame_buffer_->id();
+    invalidateFrameBuffer(GL_FRAMEBUFFER, isFbo, true, renderTexture_gl_render_buffer_ != NULL);
+
+    GL(glDepthMask(GL_TRUE));
     GL(glEnable(GL_DEPTH_TEST));
     GL(glDepthFunc(GL_LEQUAL));
     GL(glEnable(GL_CULL_FACE));
@@ -314,7 +317,9 @@ void GLRenderTexture::endRendering(Renderer* renderer)
     const int height = image->getHeight();
     int fbid = getFrameBufferId();
 
-    invalidateFrameBuffer(GL_DRAW_FRAMEBUFFER, true, false, true);
+    const bool isFbo = 0 != renderTexture_gl_frame_buffer_->id();
+    invalidateFrameBuffer(GL_DRAW_FRAMEBUFFER, isFbo, false, true);
+
     if (renderTexture_gl_resolve_buffer_ && mSampleCount > 1)
     {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, fbid);
@@ -322,7 +327,7 @@ void GLRenderTexture::endRendering(Renderer* renderer)
         glBlitFramebuffer(0, 0, width, height,
                           0, 0, width, height,
                           GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        invalidateFrameBuffer(GL_READ_FRAMEBUFFER, true, true, false);
+        invalidateFrameBuffer(GL_READ_FRAMEBUFFER, isFbo, true, false);
     }
 
     GL(glDisable(GL_DEPTH_TEST));
@@ -335,7 +340,7 @@ void GLRenderTexture::invalidateFrameBuffer(GLenum target, bool is_fbo, const bo
     const int count = (int) color_buffer + ((int) depth_buffer) * 2;
     const GLenum fboAttachments[3] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT };
     const GLenum attachments[3] = { GL_COLOR_EXT, GL_DEPTH_EXT, GL_STENCIL_EXT };
-    glInvalidateFramebuffer(target, count, (is_fbo ? fboAttachments : attachments) + offset);
+    GL(glInvalidateFramebuffer(target, count, (is_fbo ? fboAttachments : attachments) + offset));
 }
 
 void GLRenderTexture::startReadBack() {
