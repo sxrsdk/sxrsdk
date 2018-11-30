@@ -153,7 +153,9 @@ int RenderData::bindShader(JNIEnv* env, jobject localNode, bool isMultiview)
         env->CallVoidMethod(bindShaderObject_, bindShaderMethod_, localNode, isMultiview);
         if (env->ExceptionCheck())
         {
-            LOGE("RENDER", "EXCEPTION in RenderData::bindShader");
+            LOGE("EXCEPTION in RenderData::bindShader");
+            env->ExceptionDescribe();
+            env->ExceptionClear();
             return 0;
         }
     }
