@@ -28,8 +28,11 @@ BitmapImage::~BitmapImage()
 {
     if (mJava)
     {
-        std::lock_guard<std::mutex> lock(mUpdateLock);
-        clearData(getCurrentEnv(mJava));
+        if (mUpdateLock.try_lock())
+        {
+            clearData(getCurrentEnv(mJava));
+            mUpdateLock.unlock();
+        }
     }
 }
 
