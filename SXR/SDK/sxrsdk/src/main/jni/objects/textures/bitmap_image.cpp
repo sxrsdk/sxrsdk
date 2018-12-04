@@ -28,11 +28,7 @@ BitmapImage::~BitmapImage()
 {
     if (mJava)
     {
-        if (mUpdateLock.try_lock())
-        {
-            clearData(getCurrentEnv(mJava));
-            mUpdateLock.unlock();
-        }
+        clear(getCurrentEnv(mJava));
     }
 }
 

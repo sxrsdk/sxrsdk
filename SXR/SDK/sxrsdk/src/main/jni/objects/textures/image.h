@@ -118,15 +118,23 @@ public:
 
     bool checkForUpdate(int texid)
     {
-        if (texid && updatePending())
+        if (texid && updatePending() && mUpdateLock.try_lock())
         {
-            std::lock_guard<std::mutex> lock(mUpdateLock);
             update(texid);
             updateComplete();
+            mUpdateLock.unlock();
         }
         return hasData();
     }
 
+    void clear(JNIEnv* env)
+    {
+        if (mUpdateLock.try_lock())
+        {
+            clearData(env);
+            mUpdateLock.unlock();
+        }
+    }
 
 protected:
     void signalUpdate()
