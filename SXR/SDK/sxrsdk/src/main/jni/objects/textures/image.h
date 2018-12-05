@@ -87,7 +87,6 @@ public:
     virtual bool isReady() = 0;
     virtual void texParamsChanged(const TextureParameters&) = 0;
     virtual bool transparency() { return false; }
-    virtual void clearData(JNIEnv* env) { }
 
     bool hasData() const { return mState == HAS_DATA; }
     short getWidth() const { return mWidth; }
