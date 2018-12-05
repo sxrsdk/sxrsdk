@@ -25,7 +25,6 @@
 
 #include "image.h"
 #include "util/scope_exit.h"
-#include "util/jni_utils.h"
 
 namespace sxr {
 /*

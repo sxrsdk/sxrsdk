@@ -22,7 +22,9 @@
 #include <vector>
 #include "objects/hybrid_object.h"
 #include "util/sxr_log.h"
+#include "util/sxr_jni.h"
 #include "gl/gl_headers.h"  // for GL_TEXTURE_xxx
+#include "util/jni_utils.h"
 
 namespace sxr {
 class Texture;
@@ -143,11 +145,9 @@ protected:
     }
 
     bool updatePending() const { return mState == UPDATE_PENDING; }
-    void updateComplete()
-    {
-        mState = HAS_DATA;
-    }
+    void updateComplete() { mState = HAS_DATA; }
     virtual void update(int texid) { }
+    virtual void clearData(JNIEnv*) { }
 
     std::mutex mUpdateLock;
     short   mType;
