@@ -24,10 +24,9 @@ namespace sxr {
 
     FloatImage::~FloatImage()
     {
-        if (mJava != NULL)
+        if (mJava)
         {
-            std::lock_guard<std::mutex> lock(mUpdateLock);
-            clearData(getCurrentEnv(mJava));
+            clear(getCurrentEnv(mJava));
         }
     }
 

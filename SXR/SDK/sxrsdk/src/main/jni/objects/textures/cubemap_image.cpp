@@ -54,11 +54,9 @@ namespace sxr {
 
     CubemapImage::~CubemapImage()
     {
-        if (mJava != NULL)
+        if (mJava)
         {
-            std::lock_guard<std::mutex> lock(mUpdateLock);
-            JNIEnv *env = getCurrentEnv(mJava);
-            clearData(env);
+            clear(getCurrentEnv(mJava));
         }
     }
 
