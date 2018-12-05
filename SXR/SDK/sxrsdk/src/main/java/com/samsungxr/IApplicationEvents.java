@@ -30,7 +30,7 @@ import org.joml.Vector3f;
  * User can add a listener to {@code SXRActivity.getEventReceiver()} to handle
  * these events, rather than subclassing {@link SXRActivity}.
  */
-public interface IActivityEvents extends IEvents {
+public interface IApplicationEvents extends IEvents {
     void onPause();
 
     void onResume();

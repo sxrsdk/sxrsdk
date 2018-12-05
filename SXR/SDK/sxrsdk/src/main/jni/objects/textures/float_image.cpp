@@ -44,7 +44,10 @@ namespace sxr {
         if (data != NULL)
         {
             mData = static_cast<jfloatArray>(env->NewGlobalRef(data));
-            signalUpdate();
+            if (mData)
+            {
+                signalUpdate();
+            }
         }
     }
 

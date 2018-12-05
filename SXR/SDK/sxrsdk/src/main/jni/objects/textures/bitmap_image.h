@@ -47,8 +47,7 @@ namespace sxr {
             return mHasTransparency;
         }
 
-    protected:
-        void clearData(JNIEnv* env);
+        virtual void clearData(JNIEnv* env);
 
     private:
         BitmapImage(const BitmapImage& texture) = delete;

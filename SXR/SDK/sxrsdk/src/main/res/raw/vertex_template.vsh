@@ -25,7 +25,7 @@ layout(location = 2) in vec3 a_normal;
 #endif
 
 #ifdef HAS_a_color
-layout(location = 6) in a_color;
+layout(location = 6) in vec4 a_color;
 #endif
 
 #ifdef HAS_VertexSkinShader

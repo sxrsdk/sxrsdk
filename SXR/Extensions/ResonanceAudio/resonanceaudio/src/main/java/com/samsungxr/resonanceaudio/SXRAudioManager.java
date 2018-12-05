@@ -18,12 +18,12 @@ package com.samsungxr.resonanceaudio;
 import android.app.Activity;
 
 import com.google.vr.sdk.audio.GvrAudioEngine;
-
 import com.samsungxr.SXRCameraRig;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRDrawFrameListener;
 import com.samsungxr.SXREventListeners;
 import com.samsungxr.SXRTransform;
+
 import org.joml.Quaternionf;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ import java.util.List;
  * tracks the head transform so the sound will be spatially
  * correct.
  */
-public class SXRAudioManager extends SXREventListeners.ActivityEvents
+public class SXRAudioManager extends SXREventListeners.ApplicationEvents
         implements SXRDrawFrameListener
 {
     private static final String TAG = SXRAudioManager.class.getSimpleName();

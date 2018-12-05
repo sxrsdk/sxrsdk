@@ -238,7 +238,24 @@ class WidgetPickHandler implements SXRInputManager.ICursorControllerSelectListen
         public void onEnter(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) {
         }
 
-        public void onInside(SXRNode sceneObj, SXRPicker.SXRPickedObject collision) {
+        public void onInside(final SXRNode sceneObj, SXRPicker.SXRPickedObject collision) {
+            final MotionEvent event = collision.motionEvent;
+            if (event != null) {
+                Log.d(Log.SUBSYSTEM.INPUT, TAG, "onMotionInside() event = %s", event);
+
+                final Widget widget = WidgetBehavior.getTarget(sceneObj);
+                if (widget != null && widget.isTouchable() && mTouched.contains(widget)) {
+                    Log.d(TAG, "onMotionInside() widget %s ", widget.getName());
+                    WidgetLib.getMainThread().runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            GestureDetector gestureDetector = new GestureDetector(
+                                    sceneObj.getSXRContext().getContext(), mGestureListener);
+                            gestureDetector.onTouchEvent(event);
+                        }
+                    });
+                }
+            }
         }
 
         private FlingHandler.FlingAction mFling;
