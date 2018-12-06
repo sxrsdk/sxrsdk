@@ -84,26 +84,36 @@ void GLBitmapImage::updateFromBuffer(JNIEnv *env, int target, jobject pixels)
 
 void GLBitmapImage::update(int texid)
 {
+    JNIEnv* env;
+
     if (mJava == NULL)
     {
         return;
     }
     if (mBitmap != NULL)
     {
-        updateFromBitmap(texid);
-        clearData(getCurrentEnv(mJava));
+        JNIEnv* env = getCurrentEnv(mJava);
+
+        if (env)
+        {
+            updateFromBitmap(env);
+            clearData(env);
+        }
     }
     else if (mData != NULL)
     {
-        updateFromMemory(texid);
-        clearData(getCurrentEnv(mJava));
+        JNIEnv* env = getCurrentEnv(mJava);
+
+        if (env)
+        {
+            updateFromMemory(env);
+            clearData(env);
+        }
     }
 }
 
-void GLBitmapImage::updateFromMemory(int texid)
+void GLBitmapImage::updateFromMemory(JNIEnv* env)
 {
-    JNIEnv *env = getCurrentEnv(mJava);
-
     if (mData == NULL)
     {
         LOGE("BitmapImage::updateFromMemory array is null");
@@ -130,13 +140,10 @@ void GLBitmapImage::updateFromMemory(int texid)
     }
     checkGLError("GLBitmapImage::updateFromMemory");
     env->ReleaseByteArrayElements(mData, pixels, 0);
-    clearData(env);
 }
 
-void GLBitmapImage::updateFromBitmap(int texid)
+void GLBitmapImage::updateFromBitmap(JNIEnv* env)
 {
-    JNIEnv *env = getCurrentEnv(mJava);
-
     if (mBitmap == NULL)
     {
         LOGE("BitmapImage::updateFromBitmap bitmap is null");

@@ -122,11 +122,11 @@ public:
 
     bool checkForUpdate(int texid)
     {
-        if (texid && updatePending() && mUpdateLock.try_lock())
+        if (texid && updatePending())
         {
+            std::lock_guard<std::mutex> lock(mUpdateLock);
             update(texid);
             updateComplete();
-            mUpdateLock.unlock();
         }
         return hasData();
     }

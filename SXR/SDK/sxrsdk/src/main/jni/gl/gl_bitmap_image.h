@@ -62,8 +62,8 @@ namespace sxr {
         }
     protected:
         virtual void update(int texid);
-        void updateFromMemory(int texid);
-        void updateFromBitmap(int texid);
+        void updateFromMemory(JNIEnv* env);
+        void updateFromBitmap(JNIEnv* env);
         void loadCompressedMipMaps(jbyte *data, int format);
 
     private:
