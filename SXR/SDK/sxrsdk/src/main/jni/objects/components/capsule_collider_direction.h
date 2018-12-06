@@ -13,16 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef COLLIDER_SHAPE_TYPES_H
-#define COLLIDER_SHAPE_TYPES_H
+#ifndef CAPSULE_COLLIDER_DIRECTION_H_
+#define CAPSULE_COLLIDER_DIRECTION_H_
 
 namespace sxr {
-    const long COLLIDER_SHAPE_UNKNOWN   = 10000;
-    const long COLLIDER_SHAPE_BOX       = 10001;
-    const long COLLIDER_SHAPE_SPHERE    = 10002;
-    const long COLLIDER_SHAPE_MESH      = 10003;
-    const long COLLIDER_SHAPE_GROUP     = 10004;
-    const long COLLIDER_SHAPE_CAPSULE   = 10005;
-}
+    const long CAPSULE_DIRECTION_Y = 10000;
+    const long CAPSULE_DIRECTION_X = 10001;
+    const long CAPSULE_DIRECTION_Z = 10002;
+};
 
-#endif
+#endif //CAPSULE_COLLIDER_DIRECTION_H_
