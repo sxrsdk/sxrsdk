@@ -64,6 +64,8 @@ final public class SXRGazeCursorController extends SXRCursorController
             mDisplayHeight = metrics.heightPixels;
             mDisplayDepth = depth;
             mPicker.setEnable(false);   // only pick based on touch
+
+            setCursorControl(CursorControl.CURSOR_CONSTANT_DEPTH);
         }
         else
         {
