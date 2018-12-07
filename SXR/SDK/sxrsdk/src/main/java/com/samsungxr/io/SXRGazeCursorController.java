@@ -64,6 +64,8 @@ final public class SXRGazeCursorController extends SXRCursorController
             mDisplayHeight = metrics.heightPixels;
             mDisplayDepth = depth;
             mPicker.setEnable(false);   // only pick based on touch
+
+            setCursorControl(CursorControl.CURSOR_CONSTANT_DEPTH);
         }
         else
         {
@@ -152,13 +154,20 @@ final public class SXRGazeCursorController extends SXRCursorController
                 return;
         }
 
-        if (isTouchScreenEnabled())
-        {
-            float x = eventX - mDisplayWidth / 2;
-            float y =  mDisplayHeight / 2 - eventY;
-            float z = -mDisplayDepth;
-            setPosition(x, y, z);
+        if (isTouchScreenEnabled()) {
+            final SXRPerspectiveCamera cam
+                    = getSXRContext().getMainScene().getMainCameraRig().getCenterCamera();
+            final float aspect = cam.getAspectRatio();
+            final double fov = Math.toRadians(cam.getFovY());
+            final float h = (float) (mDisplayDepth * Math.tan(fov * 0.5f));
+            final float w = aspect * h;
+
+            final float x = (eventX / mDisplayWidth - 0.5f) * w * 2;
+            final float y = (0.5f - eventY / mDisplayHeight) * h * 2;
+
+            setPosition(x, y, -mDisplayDepth);
         }
+
         setMotionEvent(event);
         invalidate();
     }

@@ -23,7 +23,9 @@
 #include <jni.h>
 #include "objects/hybrid_object.h"
 #include "util/sxr_log.h"
+#include "util/sxr_jni.h"
 #include "gl/gl_headers.h"  // for GL_TEXTURE_xxx
+#include "util/jni_utils.h"
 
 
 namespace sxr {
@@ -85,7 +87,6 @@ public:
     virtual bool isReady() = 0;
     virtual void texParamsChanged(const TextureParameters&) = 0;
     virtual bool transparency() { return false; }
-    virtual void clearData(JNIEnv* env) { }
 
     bool hasData() const { return mState == HAS_DATA; }
     short getWidth() const { return mWidth; }
@@ -132,8 +133,11 @@ public:
 
     void clear(JNIEnv* env)
     {
-        std::lock_guard<std::mutex> lock(mUpdateLock);
-        clearData(env);
+        if (mUpdateLock.try_lock())
+        {
+            clearData(env);
+            mUpdateLock.unlock();
+        }
     }
 
 
@@ -144,11 +148,9 @@ protected:
     }
 
     bool updatePending() const { return mState == UPDATE_PENDING; }
-    void updateComplete()
-    {
-        mState = HAS_DATA;
-    }
+    void updateComplete() { mState = HAS_DATA; }
     virtual void update(int texid) { }
+    virtual void clearData(JNIEnv*) { }
 
     std::mutex mUpdateLock;
     short   mType;
