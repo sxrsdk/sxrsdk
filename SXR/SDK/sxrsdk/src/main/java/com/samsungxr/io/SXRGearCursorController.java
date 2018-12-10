@@ -22,19 +22,20 @@ import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+import com.samsungxr.IApplicationEvents;
 import com.samsungxr.SXRApplication;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventManager;
 import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRImportSettings;
 import com.samsungxr.SXRMaterial;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRNode;
-import com.samsungxr.IApplicationEvents;
 import com.samsungxr.nodes.SXRLineNode;
 import com.samsungxr.utility.Log;
+
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -422,7 +423,7 @@ public final class SXRGearCursorController extends SXRCursorController
             try {
                 mControllerReader.getEvents(controllerID, mControllerEvents);
             } catch (final RuntimeException exc) {
-                Log.i(TAG, "getEvents threw: " + exc.toString());
+                Log.e(TAG, "getEvents threw: " + exc.toString());
                 exc.printStackTrace();
             }
 
