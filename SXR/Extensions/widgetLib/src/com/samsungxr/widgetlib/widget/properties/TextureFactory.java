@@ -16,22 +16,29 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.concurrent.Future;
+import java.util.Map;
 
 import static com.samsungxr.widgetlib.main.Utility.getId;
 import com.samsungxr.widgetlib.log.Log;
 import com.samsungxr.widgetlib.main.SXRBitmapTexture;
 
-public class TextureFactory {
+public final class TextureFactory {
     static final private String TAG = TextureFactory.class.getSimpleName();
     static final String MAIN_TEXTURE = "main_texture";
+    private final SXRContext mContext;
+    private final Map<SXRMaterial, SXRTexture> mTextureCache = new HashMap<>();
 
-    static public SXRTexture loadTexture(SXRContext context, JSONObject textureSpec) {
-        ImmediateLoader loader = new ImmediateLoader(context);
+
+    public TextureFactory(SXRContext sxrContext) {
+        mContext = sxrContext;
+    }
+
+    public SXRTexture loadTexture(JSONObject textureSpec) {
+        ImmediateLoader loader = new ImmediateLoader(mContext);
         try {
-            loadOneTextureFromJSON(context, textureSpec, loader);
-            return loader.getTexture();
+            return loadOneTextureFromJSON(textureSpec, loader);
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(TAG, e, "loadTexture()");
@@ -39,11 +46,10 @@ public class TextureFactory {
         }
     }
 
-    static public SXRTexture loadFutureTexture(SXRContext context, JSONObject textureSpec) {
-        ImmediateLoader loader = new ImmediateLoader(context);
+    public SXRTexture loadFutureTexture(JSONObject textureSpec) {
+        ImmediateLoader loader = new ImmediateLoader(mContext);
         try {
-            loadOneTextureFromJSON(context, textureSpec, loader);
-            return loader.getTexture();
+            return loadOneTextureFromJSON(textureSpec, loader);
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(TAG, e, "loadFutureTexture()");
@@ -51,7 +57,7 @@ public class TextureFactory {
         }
     }
 
-    static public void loadMaterialTextures(SXRMaterial material, JSONObject textureSpec) {
+    public void loadMaterialTextures(SXRMaterial material, JSONObject textureSpec) {
         try {
             loadTexturesFromJSON(material, textureSpec);
         } catch (Exception e) {
@@ -61,12 +67,12 @@ public class TextureFactory {
         }
     }
 
-    static private void loadTexturesFromJSON(final SXRMaterial material,
+    private void loadTexturesFromJSON(final SXRMaterial material,
                                              final JSONObject materialSpec) throws JSONException, IOException {
         final JSONObject mainTextureSpec = JSONHelpers
                 .optJSONObject(materialSpec, MaterialTextureProperties.main_texture);
         if (mainTextureSpec != null) {
-            loadOneTextureFromJSON(material.getSXRContext(), mainTextureSpec,
+            loadOneTextureFromJSON(mainTextureSpec,
                     new MaterialLoader(material, mainTextureSpec, "diffuseTexture"));
         }
 
@@ -78,14 +84,14 @@ public class TextureFactory {
                 String key = iter.next();
                 final JSONObject textureSpec = texturesSpec.optJSONObject(key);
                 if (textureSpec != null) {
-                    loadOneTextureFromJSON(material.getSXRContext(), textureSpec,
+                    loadOneTextureFromJSON(textureSpec,
                             new MaterialLoader(material, textureSpec, key));
                 }
             }
         }
     }
 
-    static private void loadOneTextureFromJSON(SXRContext context, final JSONObject textureSpec,
+    private SXRTexture loadOneTextureFromJSON(final JSONObject textureSpec,
                                                Loader loader) throws JSONException,
             IOException {
         TextureType textureType = JSONHelpers.getEnum(textureSpec,
@@ -93,16 +99,14 @@ public class TextureFactory {
                 TextureType.class);
         switch (textureType) {
             case bitmap:
-                loadBitmapTextureFromJSON(context, textureSpec, loader);
-                break;
+                return loadBitmapTextureFromJSON(textureSpec, loader);
             default:
                 throw RuntimeAssertion("Invalid texture type: %s",
                         textureType);
         }
     }
 
-    static private void loadBitmapTextureFromJSON(SXRContext context,
-                                                  final JSONObject textureSpec,
+    private SXRTexture loadBitmapTextureFromJSON(final JSONObject textureSpec,
                                                   Loader loader)
             throws JSONException, IOException {
         JSONObject bitmapSpec = JSONHelpers.getJSONObject(textureSpec, TextureType.bitmap);
@@ -114,7 +118,7 @@ public class TextureFactory {
 
         switch (BitmapResourceType.valueOf(resourceType)) {
             case asset:
-                resource = new SXRAndroidResource(context, id);
+                resource = new SXRAndroidResource(mContext, id);
                 break;
             case file:
                 resource = new SXRAndroidResource(id);
@@ -123,20 +127,20 @@ public class TextureFactory {
                 int resId = -1;
                 switch (BitmapType.valueOf(type)) {
                     case uncompressed:
-                        resId = getId(context.getContext(), id);
+                        resId = getId(mContext.getContext(), id);
                         Log.d(TAG, "loadBitmapTextureFromJSON uncompressed id = %s resId = %d", id, resId);
                         break;
                     case compressed:
-                        resId = getId(context.getContext(), id);
+                        resId = getId(mContext.getContext(), id);
                         Log.d(TAG, "loadBitmapTextureFromJSON compressed id = %s resId = %d", id, resId);
                         break;
                     default:
                         break;
                 }
-                resource = new SXRAndroidResource(context, resId);
+                resource = new SXRAndroidResource(mContext, resId);
                 break;
             case user:
-                File docDir = JSONHelpers.getExternalJSONDocumentDirectory(context.getContext());
+                File docDir = JSONHelpers.getExternalJSONDocumentDirectory(mContext.getContext());
                 File texturePath = new File(docDir, id);
                 resource = new SXRAndroidResource(texturePath);
                 break;
@@ -150,23 +154,21 @@ public class TextureFactory {
                 .optJSONObject(textureSpec,
                         TextureParametersProperties.texture_parameters);
         if (textureParamsSpec != null) {
-            textureParams = textureParametersFromJSON(context,
-                    textureParamsSpec);
+            textureParams = textureParametersFromJSON(textureParamsSpec);
         } else {
             textureParams = null;
         }
 
-        loader.loadTexture(resource, textureParams);
+        return loader.loadTexture(resource, textureParams);
     }
 
-    static private SXRTextureParameters textureParametersFromJSON(SXRContext context,
-                                                                  final JSONObject textureParamsSpec) throws JSONException {
+    private SXRTextureParameters textureParametersFromJSON(final JSONObject textureParamsSpec)
+            throws JSONException {
         if (textureParamsSpec == null || textureParamsSpec.length() == 0) {
             return null;
         }
 
-        final SXRTextureParameters textureParameters = new SXRTextureParameters(
-                context);
+        final SXRTextureParameters textureParameters = new SXRTextureParameters(mContext);
         final Iterator<String> iter = textureParamsSpec.keys();
         while (iter.hasNext()) {
             final String key = iter.next();
@@ -222,7 +224,7 @@ public class TextureFactory {
     }
 
     private interface Loader {
-        void loadTexture(SXRAndroidResource resource, SXRTextureParameters parameters);
+        SXRTexture loadTexture(SXRAndroidResource resource, SXRTextureParameters parameters);
     }
 
     private static class ImmediateLoader implements Loader {
@@ -231,20 +233,14 @@ public class TextureFactory {
         }
 
         @Override
-        public void loadTexture(SXRAndroidResource resource, SXRTextureParameters parameters) {
-            SXRAssetLoader assetLoader = mContext.getAssetLoader();
-            mTexture = assetLoader.loadTexture(resource, parameters);
-        }
-
-        public SXRTexture getTexture() {
-            return mTexture;
+        public SXRTexture loadTexture(SXRAndroidResource resource, SXRTextureParameters parameters) {
+            return mContext.getAssetLoader().loadTexture(resource, parameters);
         }
 
         private final SXRContext mContext;
-        private SXRTexture mTexture;
     }
 
-    private static class MaterialLoader implements Loader {
+    private class MaterialLoader implements Loader {
         MaterialLoader(SXRMaterial material, JSONObject textureSpec, String key) {
             mMaterial = material;
             mKey = key;
@@ -252,19 +248,21 @@ public class TextureFactory {
         }
 
         @Override
-        public void loadTexture(SXRAndroidResource resource, SXRTextureParameters parameters) {
+        public SXRTexture loadTexture(SXRAndroidResource resource, SXRTextureParameters parameters) {
             final SXRContext context = mMaterial.getSXRContext();
-            context.getAssetLoader().loadTexture(
+            SXRTexture texture = context.getAssetLoader().loadTexture(
                     resource, new SXRAndroidResource.TextureCallback() {
                         @Override
                         public void loaded(SXRImage resource11,
                                            SXRAndroidResource androidResource) {
                             mMaterial.setTexture(mKey, new SXRBitmapTexture(context, (SXRBitmapImage)resource11));
+                            mTextureCache.remove(mTextureCache.get(mMaterial));
                         }
 
                         @Override
                         public void failed(Throwable t, SXRAndroidResource androidResource) {
                             t.printStackTrace();
+                            mTextureCache.remove(mTextureCache.get(mMaterial));
                             Log.e(TAG, t, "Failed to load texture '%s' from spec: %s", mKey,
                                     mSpec);
                         }
@@ -275,6 +273,8 @@ public class TextureFactory {
                         }
                     },
                     parameters, SXRAssetLoader.DEFAULT_PRIORITY, SXRCompressedImage.BALANCED);
+            mTextureCache.put(mMaterial, texture);
+            return texture;
         }
 
         private final SXRMaterial mMaterial;
