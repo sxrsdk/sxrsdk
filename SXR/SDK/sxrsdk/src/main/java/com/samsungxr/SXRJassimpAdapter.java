@@ -1346,7 +1346,7 @@ class  SXRJassimpAdapter
             }
             catch (IOException ex2)
             {
-                assetRequest.onTextureError(mContext, ex2.getMessage(), mFileName);
+                assetRequest.onTextureError(gvrTex, mFileName, ex2.getMessage());
             }
         }
         else
