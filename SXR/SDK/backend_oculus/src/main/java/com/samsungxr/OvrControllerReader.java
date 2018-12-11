@@ -72,7 +72,7 @@ final class OvrControllerReader extends SXRGearCursorController.ControllerReader
 
         @Override
         public void dispatchKeyEvent(final KeyEvent event) {
-            if (KeyEvent.KEYCODE_BACK == event.getKeyCode()) {
+            if (KeyEvent.KEYCODE_BACK == event.getKeyCode() && KeyEvent.ACTION_DOWN == event.getAction()) {
                 mApplication.getActivity().dispatchKeyEvent(event);
             }
         }
