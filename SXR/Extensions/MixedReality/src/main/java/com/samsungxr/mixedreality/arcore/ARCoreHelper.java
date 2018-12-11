@@ -115,6 +115,10 @@ public class ARCoreHelper
             }
 
             arCorePlane.update(scale);
+
+            if (arCorePlane.geometryChange()) {
+                notifyPlaneGeometryChange(arCorePlane);
+            }
         }
     }
 
@@ -304,6 +308,14 @@ public class ARCoreHelper
                 childPlane,
                 parentPlane);
     }
+
+    private void notifyPlaneGeometryChange(SXRPlane plane) {
+        mGvrContext.getEventManager().sendEvent(mMixedReality,
+                IPlaneEvents.class,
+                "onPlaneGeometryChange",
+                plane);
+    }
+
 
     private void notifyAnchorStateChangeListeners(SXRAnchor anchor, SXRTrackingState trackingState) {
         mGvrContext.getEventManager().sendEvent(mMixedReality,

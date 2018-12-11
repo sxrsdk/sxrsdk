@@ -57,4 +57,11 @@ public interface IPlaneEvents extends IEvents
      * @param parentPlane the {@link SXRPlane} component which remains.
      */
     void onPlaneMerging(SXRPlane childPlane, SXRPlane parentPlane);
+
+    /**
+     * Called when the polygon that represents the plane changes.
+     *
+     * @param plane the {@link SXRPlane} component which its polygon changed.
+     */
+    void onPlaneGeometryChange(SXRPlane plane);
 }
