@@ -456,22 +456,26 @@ class  SXRJassimpAdapter
 
                     if (obj.getChildrenCount() == 0)
                     {
+                        Log.d("BONE", "Ignoring node %s with no children", nodeName);
                         return true;
                     }
                     if (parent == null)
                     {
+                        Log.d("BONE", "Ignoring node %s with no parent", nodeName);
                         return true;
                     }
                     String parName = parent.getName();
 
                     if ("".equals(parName))
                     {
+                        Log.d("BONE", "Ignoring node %s with unnamed parent", nodeName);
                         return true;
                     }
                     int parBoneId = mBoneNames.indexOf(parName);
 
                     if (parBoneId < 0)
                     {
+                        Log.d("BONE", "Ignoring node %s with no parent bone");
                         return true;
                     }
                 }
@@ -581,7 +585,7 @@ class  SXRJassimpAdapter
                     mtx.invert();
                     rootMtx.mul(mtx, mtx);
                     bindPose.setWorldMatrix(boneId, mtx);
-                    Log.e("BONE", "no bind pose matrix for bone %s", boneName);
+                    Log.w("BONE", "no bind pose matrix for bone %s", boneName);
                 }
             }
             mSkeleton.setBindPose(bindPose);
@@ -624,12 +628,9 @@ class  SXRJassimpAdapter
 
             if (channel != null)
             {
-                if (aiBone != null)
-                {
-                    skelAnim.addChannel(boneName, channel);
-                    animMap.remove(boneName);
-                }
-                else
+                skelAnim.addChannel(boneName, channel);
+                animMap.remove(boneName);
+                if (aiBone == null)
                 {
                     Log.e("BONE", "no bind pose matrix for bone %s", boneName);
                 }
@@ -947,7 +948,7 @@ class  SXRJassimpAdapter
             if ("".equals(nodeName))
             {
                 if ((mNodeMap.get(parent) == null) ||
-                    ((aiChild = handleNoName(node, sceneObject)) == null))
+                    ((aiChild = handleNoName(node, sceneObject, lightlist)) == null))
                 {
                     nodeName = "mesh";
                     sceneObject.setName(nodeName + "-" + meshId);
@@ -973,7 +974,7 @@ class  SXRJassimpAdapter
             }
         }
         else if ("".equals(nodeName) &&
-                ((aiChild = handleNoName(node, sceneObject)) != null))
+                ((aiChild = handleNoName(node, sceneObject, lightlist)) != null))
         {
             node = aiChild;
         }
@@ -983,7 +984,7 @@ class  SXRJassimpAdapter
         }
     }
 
-    private AiNode handleNoName(AiNode ainode, SXRNode gvrnode)
+    private AiNode handleNoName(AiNode ainode, SXRNode gvrnode, Hashtable<String, SXRLight> lightlist)
     {
         if (ainode.getNumChildren() > 1)
         {
@@ -997,6 +998,10 @@ class  SXRJassimpAdapter
             return null;
         }
         if (aichild.getNumMeshes() > 0)
+        {
+            return null;
+        }
+        if (lightlist.containsKey(childName))
         {
             return null;
         }
@@ -1039,6 +1044,7 @@ class  SXRJassimpAdapter
             q.normalize();
             light.setDefaultOrientation(q);
             sceneObject.attachLight(light);
+            lightlist.remove(light);
         }
     }
 

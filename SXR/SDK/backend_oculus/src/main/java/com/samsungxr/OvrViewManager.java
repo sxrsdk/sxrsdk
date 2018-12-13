@@ -135,7 +135,7 @@ class OvrViewManager extends SXRViewManager {
         mStatsLine.addColumn(mTracerDrawEyes2.getStatColumn());
         mStatsLine.addColumn(mTracerAfterDrawEyes.getStatColumn());
 
-        mControllerReader = new OvrControllerReader(mApplication.getActivityNative().getNative());
+        mControllerReader = new OvrControllerReader(application, mApplication.getActivityNative().getNative());
     }
 
     /**

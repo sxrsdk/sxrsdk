@@ -146,9 +146,20 @@ void RenderData::setStencilTest(bool flag) {
 /**
  * Called when the shader for a RenderData needs to be generated on the Java side.
  */
-void RenderData::bindShader(JNIEnv* env, jobject localNode, bool isMultiview)
+int RenderData::bindShader(JNIEnv* env, jobject localNode, bool isMultiview)
 {
-    env->CallVoidMethod(bindShaderObject_, bindShaderMethod_, localNode, isMultiview);
+    if (bindShaderObject_)
+    {
+        env->CallVoidMethod(bindShaderObject_, bindShaderMethod_, localNode, isMultiview);
+        if (env->ExceptionCheck())
+        {
+            LOGE("EXCEPTION in RenderData::bindShader");
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+            return 0;
+        }
+    }
+    return 1;
 }
 
 bool compareRenderDataByShader(RenderData *i, RenderData *j)
@@ -290,7 +301,10 @@ int RenderData::isValid(Renderer* renderer, const RenderState& rstate)
         JNIEnv* env = nullptr;
         int rc = rstate.scene->get_java_env(&env);
 
-        bindShader(env, rstate.javaNode, rstate.is_multiview);
+        if (!bindShader(env, rstate.javaNode, rstate.is_multiview))
+        {
+            return -1;
+        }
         if (rc > 0)
         {
             rstate.scene->detach_java_env();

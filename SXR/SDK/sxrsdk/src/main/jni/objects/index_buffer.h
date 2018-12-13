@@ -51,20 +51,20 @@ namespace sxr {
          *
          * @param src         pointer to short integer source data array.
          * @param srcSize     number of shorts in the vector.
-         * @returns true if successfully set, false on error.
+         * @returns 1 if successfully set, 0 on error, -1 if out of memory.
          * @see getShortVec
          */
-        bool    setShortVec(const unsigned short* src, int srcSize);
+        int setShortVec(const unsigned short* src, int srcSize);
 
         /**
          * Set all the values for long (32 bit) indices.
          *
          * @param src         pointer to integer source data array.
          * @param srcSize     number of ints in the vector.
-         * @returns true if successfully set, false on error.
+         * @returns 1 if successfully set, 0 on error, -1 if out of memory.
          * @see getIntVec
          */
-        bool    setIntVec(const unsigned int* src, int srcSize);
+        int setIntVec(const unsigned int* src, int srcSize);
 
         /**
          * Gets all the values for long (32 bit) indices.
@@ -92,7 +92,7 @@ namespace sxr {
         void            dump() const;
 
     protected:
-        bool            setIndexCount(int count);
+        int             setIndexCount(int count);
         bool            setIndexSize(int v);
 
         mutable std::mutex mUpdateLock;

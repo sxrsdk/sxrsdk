@@ -23,6 +23,7 @@
 
 namespace sxr {
 extern "C" {
+
     JNIEXPORT jlong JNICALL
         Java_com_samsungxr_NativeVulkanCore_getInstance(JNIEnv* env, jobject obj, jobject surface, jint vulkanPropValue);
 

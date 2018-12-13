@@ -21,6 +21,7 @@
 #include "objects/components/sphere_collider.h"
 #include "objects/components/box_collider.h"
 #include "objects/components/mesh_collider.h"
+#include "objects/components/capsule_collider.h"
 
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
@@ -31,6 +32,8 @@ namespace sxr {
     btCollisionShape *convertCollider2CollisionShape(Collider *collider);
 
     btCollisionShape *convertSphereCollider2CollisionShape(SphereCollider *collider);
+
+    btCollisionShape *convertCapsuleCollider2CollisionShape(CapsuleCollider *collider);
 
     btCollisionShape *convertBoxCollider2CollisionShape(BoxCollider *collider);
 

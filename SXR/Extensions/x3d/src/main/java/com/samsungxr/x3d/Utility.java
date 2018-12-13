@@ -840,12 +840,12 @@ public class Utility
                 mVertexBufferDefine.setVertexBuffer(vbuffer);
             }
             vbuffer.setFloatArray("a_position", mOutputPositions.array(), 3, 0);
-            if (!hasNormals)
+            if (mUseNormals)
             {
-                generateNormals(newIndices, newIndices.length, mOutputPositions);
-            }
-            else if (mUseNormals)
-            {
+                if (!hasNormals)
+                {
+                    generateNormals(newIndices, newIndices.length, mOutputPositions);
+                }
                 vbuffer.setFloatArray("a_normal", mOutputNormals.array(), 3, 0);
             }
             if (hasTexCoords)

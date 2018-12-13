@@ -119,7 +119,7 @@ public class SXRKeyboardNode extends SXRNode {
         MeshUtils.resize(mKeyMesh, 1.0f);
 
         mKeyMeshDepthSize = MeshUtils.getBoundingSize(mKeyMesh)[2];
-        mKeyEventsHandler = new KeyEventsHandler(gvrContext.getActivity().getMainLooper(), this, mApplication);
+        mKeyEventsHandler = new KeyEventsHandler(this, mApplication);
         mSXRKeyboardCache = new HashMap<Integer, SXRKeyboard>();
         mEditableNode = null;
         mMiniKeyboard = null;
@@ -273,26 +273,32 @@ public class SXRKeyboardNode extends SXRNode {
         }
     };
 
-    public void startInput(SXRViewNode sceneObject)
+    public void startInput(SXRNode sceneObject)
     {
-        mEditableNode = sceneObject;
-        mKeyEventsHandler.start();
-        if (mViewKeyHandler == null)
-        {
-            mViewKeyHandler = new InputMethodHandler(sceneObject);
-            sceneObject.getEventReceiver().addListener(mViewKeyHandler);
+        if (sceneObject != null) {
+            mEditableNode = sceneObject;
+            mKeyEventsHandler.start();
+            if (mViewKeyHandler == null && sceneObject instanceof SXRViewNode) {
+                mViewKeyHandler = new InputMethodHandler((SXRViewNode) sceneObject);
+                sceneObject.getEventReceiver().addListener(mViewKeyHandler);
+            }
+            mPicker.getEventReceiver().addListener(mKeyboardTouchManager);
+            onStartInput(mEditableNode);
         }
-        mPicker.getEventReceiver().addListener(mKeyboardTouchManager);
-        onStartInput(mEditableNode);
     }
 
     public void stopInput() {
-        mPicker.getEventReceiver().removeListener(mKeyboardTouchManager);
-        mKeyEventsHandler.stop();
-        onHideMiniKeyboard();
-        onClose();
-        onStopInput(mEditableNode);
-        mEditableNode = null;
+        if (mEditableNode != null) {
+            mPicker.getEventReceiver().removeListener(mKeyboardTouchManager);
+            if (mViewKeyHandler != null) {
+                mKeyEventsHandler.stop();
+                mEditableNode.getEventReceiver().removeListener(mKeyEventsHandler);
+            }
+            onHideMiniKeyboard();
+            onClose();
+            onStopInput(mEditableNode);
+            mEditableNode = null;
+        }
     }
 
     private static class EnableVisitor implements SXRNode.ComponentVisitor
@@ -308,7 +314,7 @@ public class SXRKeyboardNode extends SXRNode {
 
         public void disableAll(SXRNode root, long componentType)
         {
-            Enable = true;
+            Enable = false;
             root.forAllComponents(this, componentType);
         }
 
@@ -826,56 +832,7 @@ public class SXRKeyboardNode extends SXRNode {
         SXRKey mSelectedKey;
         SXRKey mPressedKey;
 
-        static class KeyEventDispatcher implements Runnable
-        {
-            public SXRKey HitKey;
-
-            public void run() { };
-        }
-
-        private KeyEventDispatcher mOnEnterKey = new KeyEventDispatcher()
-        {
-            public void run()
-            {
-                onKeyHovered(HitKey, true);
-            }
-        };
-
-
-        private Runnable mOnTouchStartKey = new Runnable()
-        {
-            public void run()
-            {
-                if (mSelectedKey != null) {
-                    onKeyPress(mSelectedKey, true);
-                }
-            }
-        };
-
-        private Runnable mOnTouchEndKey = new Runnable()
-        {
-            public void run()
-            {
-                if (mPressedKey != null) {
-                    onKeyPress(mPressedKey, false);
-                }
-            }
-        };
-
-        private KeyEventDispatcher mOnExitKey = new KeyEventDispatcher()
-        {
-            public void run()
-            {
-                onKeyHovered(HitKey, false);
-                if (mPressedKey != null)
-                {
-                    onKeyPress(mPressedKey, false);
-                }
-            }
-        };
-
-        public KeyEventsHandler(Looper loop, SXRKeyboardNode gvrKeyboard, SXRApplication activity) {
-            super(loop);
+        public KeyEventsHandler(SXRKeyboardNode gvrKeyboard, SXRApplication activity) {
             mGvrKeyboard = gvrKeyboard;
             mApplication = activity;
         }
@@ -917,21 +874,27 @@ public class SXRKeyboardNode extends SXRNode {
         }
 
         public void onEnter(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
-            mOnEnterKey.HitKey = (SXRKey) pickInfo.hitObject;
-            mApplication.getActivity().runOnUiThread(mOnEnterKey);
+            onKeyHovered((SXRKey) pickInfo.hitObject, true);
         }
 
         public void onExit(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
-            mOnExitKey.HitKey = (SXRKey) pickInfo.hitObject;
-            mApplication.getActivity().runOnUiThread(mOnExitKey);
+            onKeyHovered((SXRKey) pickInfo.hitObject, false);
+            if (mPressedKey != null)
+            {
+                onKeyPress(mPressedKey, false);
+            }
        }
 
         public void onTouchStart(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
-            mApplication.getActivity().runOnUiThread(mOnTouchStartKey);
+            if (mSelectedKey != null) {
+                onKeyPress(mSelectedKey, true);
+            }
         }
 
         public void onTouchEnd(SXRNode sceneObject, SXRPicker.SXRPickedObject pickInfo) {
-            mApplication.getActivity().runOnUiThread(mOnTouchEndKey);
+            if (mPressedKey != null) {
+                onKeyPress(mPressedKey, false);
+            }
         }
 
         @Override
@@ -1227,57 +1190,65 @@ public class SXRKeyboardNode extends SXRNode {
         }
 
         @Override
-        public void onKey(SXRKeyboardNode sceneObject, int primaryCode, int[] keyCodes)
+        public void onKey(SXRKeyboardNode sceneObject, final int primaryCode, final int[] keyCodes)
         {
             if (sceneObject != mGvrKeybaord || mInputConnection == null)
                 return;
 
-            if (isWordSeparator(primaryCode))
-            {
-                // Handle separator
-                sendKeyChar((char) primaryCode);
-                updateShiftKeyState(getCurrentInputEditorInfo());
-            }
-            else if (primaryCode == Keyboard.KEYCODE_DELETE)
-            {
-                handleBackspace();
-            }
-            else if (primaryCode == Keyboard.KEYCODE_SHIFT)
-            {
-            }
-            else if (primaryCode == Keyboard.KEYCODE_CANCEL)
-            {
-                handleClose();
-            }
-            else if (primaryCode == Keyboard.KEYCODE_DONE)
-            {
-                // FIXME: Should it close keyboard?
-                handleClose();
-            }
-            else if (primaryCode == Keyboard.KEYCODE_MODE_CHANGE && mGvrKeybaord != null)
-            {
-            }
-            else
-            {
-                handleCharacter(primaryCode, keyCodes);
-            }
+            mRootGroup.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (isWordSeparator(primaryCode))
+                    {
+                        // Handle separator
+                        sendKeyChar((char) primaryCode);
+                        updateShiftKeyState(getCurrentInputEditorInfo());
+                    }
+                    else if (primaryCode == Keyboard.KEYCODE_DELETE)
+                    {
+                        handleBackspace();
+                    }
+                    else if (primaryCode == Keyboard.KEYCODE_SHIFT)
+                    {
+                    }
+                    else if (primaryCode == Keyboard.KEYCODE_CANCEL)
+                    {
+                        handleClose();
+                    }
+                    else if (primaryCode == Keyboard.KEYCODE_DONE)
+                    {
+                        // FIXME: Should it close keyboard?
+                        handleClose();
+                    }
+                    else if (primaryCode == Keyboard.KEYCODE_MODE_CHANGE && mGvrKeybaord != null)
+                    {
+                    }
+                    else
+                    {
+                        handleCharacter(primaryCode, keyCodes);
+                    }
+                }
+            });
         }
 
         @Override
         public void onStartInput(SXRKeyboardNode sceneObject)
         {
-            // TODO: Finish previous input if exists or not finished before
-            View view = mRootGroup.findFocus();
             mGvrKeybaord = sceneObject;
-            EditorInfo tba = new EditorInfo();
-            tba.packageName = view.getContext().getPackageName();
-            tba.fieldId = view.getId();
-            InputConnection ic = view.onCreateInputConnection(tba);
+            mRootGroup.post(new Runnable() {
+                @Override
+                public void run() {
+                    View view = mRootGroup.findFocus();
+                    EditorInfo tba = new EditorInfo();
+                    tba.packageName = view.getContext().getPackageName();
+                    tba.fieldId = view.getId();
+                    InputConnection ic = view.onCreateInputConnection(tba);
 
-            if (ic != null)
-            {
-                startInput(ic, tba);
-            }
+                    if (ic != null)
+                    {
+                        startInput(ic, tba);
+                    }
+                }});
         }
 
         @Override
@@ -1288,7 +1259,13 @@ public class SXRKeyboardNode extends SXRNode {
             {
                 mGvrKeybaord = null;
             }
-            doFinishInput();
+
+            mRootGroup.post(new Runnable() {
+                @Override
+                public void run() {
+                    doFinishInput();
+                }
+            });
         }
 
         private void startInput(InputConnection ic, EditorInfo attribute)

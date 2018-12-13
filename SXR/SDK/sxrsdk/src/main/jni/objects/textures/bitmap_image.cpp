@@ -28,8 +28,7 @@ BitmapImage::~BitmapImage()
 {
     if (mJava)
     {
-        std::lock_guard<std::mutex> lock(mUpdateLock);
-        clearData(getCurrentEnv(mJava));
+        clear(getCurrentEnv(mJava));
     }
 }
 
@@ -46,7 +45,10 @@ void BitmapImage::update(JNIEnv* env, int width, int height, jbyteArray data)
     if (data != NULL)
     {
         mData = static_cast<jbyteArray>(env->NewGlobalRef(data));
-        signalUpdate();
+        if (mData)
+        {
+            signalUpdate();
+        }
     }
 }
 
@@ -60,10 +62,18 @@ void BitmapImage::update(JNIEnv* env, jobject bitmap, bool hasAlpha, int format)
         mBitmap = static_cast<jbyteArray>(env->NewGlobalRef(bitmap));
         mFormat = format;
         mIsBuffer = false;
-        if( hasAlpha ) {
-            if(bitmap_has_transparency(env, bitmap)) {
+        if (mBitmap == nullptr)
+        {
+            return;
+        }
+        if (hasAlpha)
+        {
+            if (bitmap_has_transparency(env, bitmap))
+            {
                 set_transparency(true);
-            } else {
+            }
+            else
+            {
                 LOGW("BitmapImage: bitmap has an alpha channel with no translucent/transparent pixels.");
             }
         }
@@ -86,7 +96,10 @@ void BitmapImage::update(JNIEnv* env, int xoffset, int yoffset, int width, int h
         mType = type;
         mBitmap = env->NewGlobalRef(buffer);
         mIsBuffer = true;
-        signalUpdate();
+        if (mBitmap)
+        {
+            signalUpdate();
+        }
     }
 }
 
@@ -105,11 +118,14 @@ void BitmapImage::update(JNIEnv *env, int width, int height, int imageSize,
     if (data != NULL)
     {
         mData = static_cast<jbyteArray>(env->NewGlobalRef(data));
-        mPixels = env->GetByteArrayElements(mData, 0);
-        set_transparency(hasAlpha(mFormat));
-        env->ReleaseByteArrayElements(mData, mPixels, 0);
-        mPixels = NULL;
-        signalUpdate();
+        if (mData)
+        {
+            mPixels = env->GetByteArrayElements(mData, 0);
+            set_transparency(hasAlpha(mFormat));
+            env->ReleaseByteArrayElements(mData, mPixels, 0);
+            mPixels = NULL;
+            signalUpdate();
+        }
     }
 }
 

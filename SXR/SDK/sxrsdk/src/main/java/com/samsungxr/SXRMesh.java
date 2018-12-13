@@ -757,7 +757,7 @@ public class SXRMesh extends SXRHybridObject implements PrettyPrint {
      * @param gvrContext    the current context
      * @param width         a number representing the width
      * @param height        a number representing the height
-     * @param centralAngle  the central angle of the arc
+     * @param centralAngle  the central angle of the arc in degrees
      * @param radius        the radius of the circle
      * @return
      */

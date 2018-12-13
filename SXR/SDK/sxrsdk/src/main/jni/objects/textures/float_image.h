@@ -17,9 +17,6 @@
 #define FLOAT_IMAGE_H
 
 #include "image.h"
-#include "util/sxr_jni.h"
-#include "util/sxr_log.h"
-#include "util/jni_utils.h"
 
 namespace sxr {
 /*
@@ -31,9 +28,7 @@ namespace sxr {
         FloatImage(int pixelFormat = GL_RG);
         virtual ~FloatImage();
         void update(JNIEnv* env, int width, int height, jfloatArray data, int pixelFormat = 0);
-
-    protected:
-        void clearData(JNIEnv* env);
+        virtual void clearData(JNIEnv* env);
 
     private:
         FloatImage(const FloatImage&) = delete;

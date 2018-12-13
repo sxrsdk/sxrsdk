@@ -89,6 +89,21 @@ public class SXRPoseMapper extends SXRAnimation
     }
 
     /**
+     * Get the bone map between source and target.
+     * <p>
+     * The bone map specifies the source bone index for each
+     * target bone. It is an array of integers
+     * with an entry for each target skeleton bone.
+     * In the case where the target skeleton has a bone that is not in
+     * the source skeleton, the index should be -1.
+     * @return integer array with bone mapping or null if not defined
+     *
+     * @see SXRSkeleton
+     * @see #setBoneMap(int[])
+     */
+    public int[] getBoneMap() { return mBoneMap; }
+
+    /**
      * Set the bone map between source and target.
      * @param bonemap	bone mapping data
      *

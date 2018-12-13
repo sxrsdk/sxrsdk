@@ -21,9 +21,6 @@
 #define BITMAP_IMAGE_H
 
 #include "image.h"
-#include "util/sxr_jni.h"
-#include "util/sxr_log.h"
-#include "util/jni_utils.h"
 
 namespace sxr {
     /*
@@ -50,8 +47,7 @@ namespace sxr {
             return mHasTransparency;
         }
 
-    protected:
-        void clearData(JNIEnv* env);
+        virtual void clearData(JNIEnv* env);
 
     private:
         BitmapImage(const BitmapImage& texture) = delete;

@@ -30,7 +30,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXREventListeners.ActivityEvents;
+import com.samsungxr.SXREventListeners.ApplicationEvents;
 import com.samsungxr.SXREventManager;
 
 class SXRAndroidWearTouchpad {
@@ -55,7 +55,7 @@ class SXRAndroidWearTouchpad {
         gvrContext = context;
         activity = gvrContext.getActivity();
         eventManager = gvrContext.getEventManager();
-        gvrContext.getApplication().getEventReceiver().addListener(new ActivityPauseEvent());
+        gvrContext.getApplication().getEventReceiver().addListener(new ApplicationPauseEvent());
         connectToWatch();
     }
 
@@ -141,7 +141,7 @@ class SXRAndroidWearTouchpad {
         }
     }
 
-    private class ActivityPauseEvent extends ActivityEvents {
+    private class ApplicationPauseEvent extends ApplicationEvents {
         @Override
         public void onPause() {
             super.onPause();

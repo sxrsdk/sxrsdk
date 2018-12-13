@@ -37,14 +37,14 @@ import com.samsungxr.SXRExternalTexture;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMaterial.SXRShaderType;
 import com.samsungxr.SXRMesh;
-import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRNode;
+import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRTexture;
 
 import java.lang.ref.WeakReference;
 
 public class SXRTextViewNode extends SXRNode {
-    private static final String TAG = SXRTextViewNode.class.getSimpleName();
+    private static final String TAG = "SXRTextViewNode";
 
     private static final int REALTIME_REFRESH_INTERVAL = 1;
     private static final int HIGH_REFRESH_INTERVAL = 10; // frames
@@ -69,7 +69,7 @@ public class SXRTextViewNode extends SXRNode {
     /**
      * The refresh frequency of this sceneobject.
      */
-    public static enum IntervalFrequency {
+    public enum IntervalFrequency {
         /*
          * Frequency REALTIME, means will refresh as soon as it changes.
          */
@@ -100,7 +100,7 @@ public class SXRTextViewNode extends SXRNode {
 
     private static int sReferenceCounter = 0;// This is for load balancing.
     private boolean mFirstFrame;
-    private boolean mIsChanged;
+    private int mChangeCounter;
     private volatile int mRefreshInterval = REALTIME_REFRESH_INTERVAL;
 
     private final Surface mSurface;
@@ -318,7 +318,9 @@ public class SXRTextViewNode extends SXRNode {
      */
     public void setTextSize(float size) {
         mTextView.setTextSize(size);
-        mIsChanged = true;
+        synchronized (this) {
+            ++mChangeCounter;
+        }
     }
 
     /**
@@ -347,7 +349,9 @@ public class SXRTextViewNode extends SXRNode {
      */
     public void setTextColor(int color) {
         mTextView.setTextColor(color);
-        mIsChanged = true;
+        synchronized (this) {
+            ++mChangeCounter;
+        }
     }
 
     /**
@@ -358,13 +362,18 @@ public class SXRTextViewNode extends SXRNode {
      */
     public void setText(CharSequence text) {
         mTextView.setText(text);
-        mIsChanged = true;
+        synchronized (this) {
+            ++mChangeCounter;
+        }
     }
 
     public void setText(String text) {
         mTextView.setText(text);
-        mIsChanged = true;
+        synchronized (this) {
+            ++mChangeCounter;
+        }
     }
+
     /**
      * Appends the text to be displayed.
      *
@@ -373,7 +382,9 @@ public class SXRTextViewNode extends SXRNode {
      */
     public void append(String text) {
         mTextView.append(text);
-        mIsChanged = true;
+        synchronized (this) {
+            ++mChangeCounter;
+        }
     }
 
     /**
@@ -406,7 +417,9 @@ public class SXRTextViewNode extends SXRNode {
      */
     public void setBackgroundColor(int color) {
         mTextViewContainer.setBackgroundColor(color);
-        mIsChanged = true;
+        synchronized (this) {
+            ++mChangeCounter;
+        }
     }
 
     /**
@@ -428,8 +441,12 @@ public class SXRTextViewNode extends SXRNode {
         if (justify == justifyTypes.BEGIN) mTextView.setGravity(Gravity.LEFT);
         else if (justify == justifyTypes.MIDDLE) mTextView.setGravity(Gravity.CENTER);
         else if (justify == justifyTypes.END) mTextView.setGravity(Gravity.RIGHT);
-            else if (justify == justifyTypes.FIRST) mTextView.setGravity(Gravity.START);
-                else mTextView.setGravity(Gravity.NO_GRAVITY);
+        else if (justify == justifyTypes.FIRST) mTextView.setGravity(Gravity.START);
+        else mTextView.setGravity(Gravity.NO_GRAVITY);
+
+        synchronized (this) {
+            ++mChangeCounter;
+        }
     }
 
     /**
@@ -442,12 +459,14 @@ public class SXRTextViewNode extends SXRNode {
      */
     public justifyTypes getJustification() {
         justifyTypes justify = null;
-        if ( mTextView.getGravity()== Gravity.LEFT) justify = justifyTypes.BEGIN;
-        else if ( mTextView.getGravity()== GRAVITY_LEFT) justify = justifyTypes.BEGIN;
-        else if ( mTextView.getGravity()== Gravity.CENTER) justify = justifyTypes.MIDDLE;
-            else if ( mTextView.getGravity()== Gravity.RIGHT) justify = justifyTypes.END;
-                else if ( mTextView.getGravity()== GRAVITY_RIGHT) justify = justifyTypes.END;
-                    else if ( mTextView.getGravity()== Gravity.START) justify = justifyTypes.FIRST;
+
+        if (mTextView.getGravity() == Gravity.LEFT) justify = justifyTypes.BEGIN;
+        else if (mTextView.getGravity() == GRAVITY_LEFT) justify = justifyTypes.BEGIN;
+        else if (mTextView.getGravity() == Gravity.CENTER) justify = justifyTypes.MIDDLE;
+        else if (mTextView.getGravity() == Gravity.RIGHT) justify = justifyTypes.END;
+        else if (mTextView.getGravity() == GRAVITY_RIGHT) justify = justifyTypes.END;
+        else if (mTextView.getGravity() == Gravity.START) justify = justifyTypes.FIRST;
+
         return justify;
     }
 
@@ -486,7 +505,9 @@ public class SXRTextViewNode extends SXRNode {
                 Typeface typeface = Typeface.createFromAsset(context.getAssets(), font);
                 if (typeface != null) {
                     mTextView.setTypeface(typeface, styleType);
-                    mIsChanged = true;
+                    synchronized (this) {
+                        ++mChangeCounter;
+                    }
                 }
             }
             catch (java.lang.RuntimeException e) {
@@ -527,12 +548,14 @@ public class SXRTextViewNode extends SXRNode {
      */
     public void setLineSpacing(float lineSpacing) {
         mTextView.setLineSpacing(lineSpacing, 1);
+        synchronized (this) {
+            ++mChangeCounter;
+        }
     }
 
     public float getLineHeight() {
         return mTextView.getLineHeight();
     }
-
 
     /**
      * Get the amount of extra spacing between lines.
@@ -541,7 +564,6 @@ public class SXRTextViewNode extends SXRNode {
     public float getLineSpacing() {
         return mTextView.getLineSpacingExtra();
     }
-
 
     /**
      * Set the view's background {@code Drawable}.
@@ -552,9 +574,10 @@ public class SXRTextViewNode extends SXRNode {
      */
     public void setBackGround(Drawable drawable) {
         mTextViewContainer.setBackground(drawable);
-        mIsChanged = true;
+        synchronized (this) {
+            ++mChangeCounter;
+        }
     }
-
 
     /**
      * Get the view's background {@code Drawable}, if any.
@@ -571,7 +594,9 @@ public class SXRTextViewNode extends SXRNode {
      */
     public void setGravity(int gravity) {
         mTextView.setGravity(gravity);
-        mIsChanged = true;
+        synchronized (this) {
+            ++mChangeCounter;
+        }
     }
 
     /**
@@ -650,7 +675,13 @@ public class SXRTextViewNode extends SXRNode {
             final SXRTextViewNode sceneObject = mRef.get();
             if (null != sceneObject) {
                 int refreshInterval = sceneObject.mRefreshInterval;
-                if ((sceneObject.mFirstFrame || sceneObject.mIsChanged) &&
+
+                final int changeCounter;
+                synchronized (this) {
+                    changeCounter = sceneObject.mChangeCounter;
+                }
+
+                if ((sceneObject.mFirstFrame || 0<changeCounter) &&
                     (REALTIME_REFRESH_INTERVAL == refreshInterval ||
                      (NONE_REFRESH_INTERVAL != refreshInterval
                       && (++sceneObject.mCount % refreshInterval == 0)))) {
@@ -661,7 +692,9 @@ public class SXRTextViewNode extends SXRNode {
                     } else {
                         sceneObject.mFirstFrame = false;
                     }
-                    sceneObject.mIsChanged = false;
+                    synchronized (this) {
+                        sceneObject.mChangeCounter -= changeCounter;
+                    }
                 }
                 if (NONE_REFRESH_INTERVAL == refreshInterval) {
                     mContext.unregisterDrawFrameListener(this);
@@ -682,7 +715,7 @@ public class SXRTextViewNode extends SXRNode {
             mTextViewContainer.draw(canvas);
             mSurface.unlockCanvasAndPost(canvas);
         } catch (Surface.OutOfResourcesException t) {
-            Log.e("SXRTextViewObject", "lockCanvas failed");
+            Log.e(TAG, "lockCanvas failed");
         }
         mSurfaceTexture.updateTexImage();
     }

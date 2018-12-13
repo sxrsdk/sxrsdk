@@ -25,7 +25,6 @@
 
 #include "image.h"
 #include "util/scope_exit.h"
-#include "util/jni_utils.h"
 
 namespace sxr {
 /*
@@ -42,6 +41,7 @@ namespace sxr {
         void update(JNIEnv* env, jobjectArray bitmapArray);
         void update(JNIEnv* env, int width, int height, int imageSize,
                     jobjectArray textureArray, const int* textureOffset);
+        virtual void clearData(JNIEnv* env);
 
     private:
         CubemapImage(const CubemapImage& base_texture) = delete;
@@ -50,7 +50,6 @@ namespace sxr {
         CubemapImage& operator=(CubemapImage&& base_texture) = delete;
 
     protected:
-        void clearData(JNIEnv* env);
         void updateFromBitmap(int texid);
         void updateFromMemory(int texid);
 

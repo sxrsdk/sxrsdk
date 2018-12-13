@@ -16,25 +16,26 @@
 
 package com.samsungxr.io;
 
-import android.app.Activity;
 import android.graphics.PointF;
 import android.os.SystemClock;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+import com.samsungxr.IApplicationEvents;
+import com.samsungxr.SXRApplication;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventManager;
 import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRImportSettings;
 import com.samsungxr.SXRMaterial;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRNode;
-import com.samsungxr.IActivityEvents;
 import com.samsungxr.nodes.SXRLineNode;
 import com.samsungxr.utility.Log;
+
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -422,7 +423,7 @@ public final class SXRGearCursorController extends SXRCursorController
             try {
                 mControllerReader.getEvents(controllerID, mControllerEvents);
             } catch (final RuntimeException exc) {
-                Log.i(TAG, "getEvents threw: " + exc.toString());
+                Log.e(TAG, "getEvents threw: " + exc.toString());
                 exc.printStackTrace();
             }
 
@@ -520,7 +521,7 @@ public final class SXRGearCursorController extends SXRCursorController
 
     private void handleControllerEvent(final ControllerEvent event)
     {
-        context.getEventManager().sendEvent(context.getApplication(), IActivityEvents.class,
+        context.getEventManager().sendEvent(context.getApplication(), IApplicationEvents.class,
                                             "onControllerEvent",
                                             CONTROLLER_KEYS.fromValue(event.key), event.position, event.rotation, event.pointF,
                                             event.touched, event.angularAcceleration,event.angularVelocity);
@@ -814,13 +815,13 @@ public final class SXRGearCursorController extends SXRCursorController
         }
 
         public void run() {
-            final Activity activity = mContext.getActivity();
+            final SXRApplication application = mContext.getApplication();
             for (final Iterator<KeyEvent> it = mKeyEvents.iterator(); it.hasNext(); ) {
                 final KeyEvent e = it.next();
                 mContext.getEventManager().sendEventWithMask(
                         SXREventManager.SEND_MASK_ALL & ~SXREventManager.SEND_MASK_OBJECT,
-                        activity,
-                        IActivityEvents.class,
+                        application,
+                        IApplicationEvents.class,
                         "dispatchKeyEvent", e);
                 it.remove();
             }
@@ -833,8 +834,8 @@ public final class SXRGearCursorController extends SXRCursorController
                 //@todo move the io package back to gearvrf
                 mContext.getEventManager().sendEventWithMask(
                         SXREventManager.SEND_MASK_ALL & ~SXREventManager.SEND_MASK_OBJECT,
-                        activity,
-                        IActivityEvents.class,
+                        application,
+                        IApplicationEvents.class,
                         "dispatchTouchEvent", dupe);
 
                 dupe.recycle();

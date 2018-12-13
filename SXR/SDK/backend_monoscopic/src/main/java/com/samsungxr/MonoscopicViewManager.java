@@ -347,8 +347,10 @@ class MonoscopicViewManager extends SXRViewManager implements MonoscopicRotation
                 mRenderBundle.addRenderTarget(mRenderTarget[2], SXRViewManager.EYE.LEFT, 2);
             }
             else{
-                mRenderTarget[0] = new SXRRenderTarget(mApplication.getSXRContext(), mViewportWidth,
-                                                        mViewportHeight);
+                final long infoNative = makeRenderTextureInfo(0, mViewportWidth, mViewportHeight);
+                final long renderTextureNative = SXRRenderBundle.getRenderTextureNative(infoNative);
+                final SXRRenderTexture renderTexture = new SXRRenderTexture(mApplication.getSXRContext(), mViewportWidth, mViewportHeight, renderTextureNative);
+                mRenderTarget[0] = new SXRRenderTarget(renderTexture, mApplication.getSXRContext().getMainScene());
             }
         }
 
@@ -414,6 +416,20 @@ class MonoscopicViewManager extends SXRViewManager implements MonoscopicRotation
                 mRenderBundle.getPostEffectRenderTextureB());
         captureCenterEye(renderTarget, false);
 
+        if (null != mScreenshotLeftCallback) {
+            renderTarget.cullFromCamera(mMainScene, mMainScene.getMainCameraRig().getLeftCamera(), mRenderBundle.getShaderManager());
+            renderTarget.render(mMainScene, mMainScene
+                            .getMainCameraRig().getLeftCamera(), mRenderBundle.getShaderManager(), mRenderBundle.getPostEffectRenderTextureA(),
+                    mRenderBundle.getPostEffectRenderTextureB());
+            captureLeftEye(renderTarget, false);
+        }
+        if (null != mScreenshotRightCallback) {
+            renderTarget.cullFromCamera(mMainScene, mMainScene.getMainCameraRig().getRightCamera(), mRenderBundle.getShaderManager());
+            renderTarget.render(mMainScene, mMainScene
+                            .getMainCameraRig().getRightCamera(), mRenderBundle.getShaderManager(), mRenderBundle.getPostEffectRenderTextureA(),
+                    mRenderBundle.getPostEffectRenderTextureB());
+            captureRightEye(renderTarget, false);
+        }
     }
 
     /**
@@ -449,6 +465,8 @@ class MonoscopicViewManager extends SXRViewManager implements MonoscopicRotation
             updateSensoredScene();
         }
     }
+
+    static native long makeRenderTextureInfo(int fboId, int fboWidth, int Height);
 }
 
 

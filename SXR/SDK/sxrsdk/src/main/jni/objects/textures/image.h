@@ -20,9 +20,13 @@
 #include <string>
 #include <mutex>
 #include <vector>
+#include <jni.h>
 #include "objects/hybrid_object.h"
 #include "util/sxr_log.h"
+#include "util/sxr_jni.h"
 #include "gl/gl_headers.h"  // for GL_TEXTURE_xxx
+#include "util/jni_utils.h"
+
 
 namespace sxr {
 class Texture;
@@ -60,20 +64,20 @@ public:
 
     Image() :
             HybridObject(), mState(UNINITIALIZED), mType(NONE), mFormat(0), mIsCompressed(false),
-            mXOffset(0), mYOffset(0), mWidth(0), mHeight(0), mDepth(1), mImageSize(0), mUpdateLock(),
+            mXOffset(0), mYOffset(0), mWidth(0), mHeight(0), mDepth(1), mImageSize(0),
             mLevels(0)
     {
     }
 
     explicit Image(ImageType type, int format) :
             HybridObject(), mState(UNINITIALIZED), mType(type), mFormat(format),mIsCompressed(false),
-            mXOffset(0), mYOffset(0), mWidth(0), mHeight(0), mDepth(1), mImageSize(0), mUpdateLock(),
+            mXOffset(0), mYOffset(0), mWidth(0), mHeight(0), mDepth(1), mImageSize(0),
             mLevels(0)
     {
     }
 
     explicit Image(ImageType type, short width, short height, int imagesize, int format, short levels) :
-            HybridObject(), mType(type), mState(UNINITIALIZED), mUpdateLock(), mIsCompressed(false),
+            HybridObject(), mType(type), mState(UNINITIALIZED), mIsCompressed(false),
             mXOffset(0), mYOffset(0), mWidth(width), mHeight(height), mDepth(1), mImageSize(imagesize),
             mFormat(format), mLevels(levels)
     {
@@ -127,6 +131,15 @@ public:
         return hasData();
     }
 
+    void clear(JNIEnv* env)
+    {
+        if (mUpdateLock.try_lock())
+        {
+            clearData(env);
+            mUpdateLock.unlock();
+        }
+    }
+
 
 protected:
     void signalUpdate()
@@ -135,11 +148,9 @@ protected:
     }
 
     bool updatePending() const { return mState == UPDATE_PENDING; }
-    void updateComplete()
-    {
-        mState = HAS_DATA;
-    }
+    void updateComplete() { mState = HAS_DATA; }
     virtual void update(int texid) { }
+    virtual void clearData(JNIEnv*) { }
 
     std::mutex mUpdateLock;
     short   mType;

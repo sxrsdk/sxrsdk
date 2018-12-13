@@ -24,10 +24,9 @@ namespace sxr {
 
     FloatImage::~FloatImage()
     {
-        if (mJava != NULL)
+        if (mJava)
         {
-            std::lock_guard<std::mutex> lock(mUpdateLock);
-            clearData(getCurrentEnv(mJava));
+            clear(getCurrentEnv(mJava));
         }
     }
 
@@ -45,7 +44,10 @@ namespace sxr {
         if (data != NULL)
         {
             mData = static_cast<jfloatArray>(env->NewGlobalRef(data));
-            signalUpdate();
+            if (mData)
+            {
+                signalUpdate();
+            }
         }
     }
 
