@@ -8,6 +8,7 @@ import com.samsungxr.widgetlib.widget.TouchManager;
 import com.samsungxr.widgetlib.widget.Widget;
 import com.samsungxr.widgetlib.widget.animation.SimpleAnimationTracker;
 import com.samsungxr.widgetlib.widget.properties.PropertyManager;
+import com.samsungxr.widgetlib.widget.properties.TextureFactory;
 import com.samsungxr.widgetlib.widget.properties.TypefaceManager;
 
 import com.samsungxr.SXRContext;
@@ -23,6 +24,7 @@ public class WidgetLib {
 
     private static WeakReference<WidgetLib> mInstance;
     private final TextureFutureHelper mTextureHelper;
+    private final TextureFactory mTextureFactory;
     private final FocusManager mFocusManager;
     private final TouchManager mTouchManager;
     private final ContentSceneController mContentSceneController;
@@ -85,6 +87,15 @@ public class WidgetLib {
      */
     public static TextureFutureHelper getTextureHelper() {
         return get().mTextureHelper;
+    }
+
+    /**
+     * Get instance of {@link TextureFactory}. If the library is not initialized
+     * {@link IllegalStateException} will be thrown.
+     * @return The instance of {@link TextureFactory}
+     */
+    public static TextureFactory getTextureFactory() {
+        return get().mTextureFactory;
     }
 
     /**
@@ -169,6 +180,7 @@ public class WidgetLib {
 
         mSXRContext = sxrContext;
         mTextureHelper = new TextureFutureHelper(sxrContext);
+        mTextureFactory = new TextureFactory(sxrContext);
         mMainThread = new MainThread(sxrContext);
         mTypefaceManager = new TypefaceManager(sxrContext);
         mSimpleAnimationTracker = new SimpleAnimationTracker(sxrContext);

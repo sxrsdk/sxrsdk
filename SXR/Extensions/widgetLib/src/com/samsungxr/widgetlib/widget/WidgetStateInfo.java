@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import com.samsungxr.widgetlib.log.Log;
 
+import com.samsungxr.widgetlib.main.WidgetLib;
 import com.samsungxr.widgetlib.widget.Widget.Visibility;
 import com.samsungxr.widgetlib.widget.animation.Animation;
 import com.samsungxr.widgetlib.widget.animation.AnimationFactory;
@@ -192,7 +193,7 @@ class WidgetStateInfo {
             }
         }
 
-        TextureFactory.loadMaterialTextures(material, materialSpec);
+        WidgetLib.getTextureFactory().loadMaterialTextures(material, materialSpec);
 
         return material;
     }
