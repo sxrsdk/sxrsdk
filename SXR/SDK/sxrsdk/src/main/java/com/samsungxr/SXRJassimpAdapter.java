@@ -20,6 +20,7 @@ import static java.lang.Math.max;
 
 import com.samsungxr.animation.SXRAnimation;
 import com.samsungxr.animation.SXRAnimator;
+import com.samsungxr.animation.SXRMorphAnimation;
 import com.samsungxr.animation.SXRPose;
 import com.samsungxr.animation.SXRSkeleton;
 import com.samsungxr.animation.SXRSkin;
@@ -38,6 +39,7 @@ import com.samsungxr.jassimp.AiLight;
 import com.samsungxr.jassimp.AiLightType;
 import com.samsungxr.jassimp.AiMaterial;
 import com.samsungxr.jassimp.AiMesh;
+import com.samsungxr.jassimp.AiMeshAnim;
 import com.samsungxr.jassimp.AiNode;
 import com.samsungxr.jassimp.AiNodeAnim;
 import com.samsungxr.jassimp.AiPostProcessSteps;
@@ -543,6 +545,20 @@ class  SXRJassimpAdapter
                 Log.d("BONE", "Adding node animation for %s", nodeName);
             }
         }
+
+
+        //add morph animations
+        if(aiAnim.getNumMeshChannels() > 0 ) {
+            for (AiMeshAnim aiMeshMorphAnim : aiAnim.getMeshChannels()) {
+                SXRNode baseObject = target.getNodeByName(aiMeshMorphAnim.getNodeName());
+                SXRMeshMorph morph = (SXRMeshMorph)baseObject.getComponent(SXRMeshMorph.getComponentType());
+                SXRMorphAnimation morphAnim = new SXRMorphAnimation(morph,
+                        aiMeshMorphAnim.getMorphAnimationKeys(), aiMeshMorphAnim.getNumMorphTargets() + 1);
+                if (morphAnim != null) {
+                    animator.addAnimation(morphAnim);
+                }
+            }
+        }
     }
 
     /*
@@ -867,10 +883,7 @@ class  SXRJassimpAdapter
 
         traverseGraph(model, scene.getSceneRoot(sWrapperProvider), lightList);
         makeSkeleton(model);
-        if (doAnimation)
-        {
-            processAnimations(model, scene, settings.contains(SXRImportSettings.START_ANIMATIONS));
-        }
+
         for (Map.Entry<SXRNode, Integer> entry : mNodeMap.entrySet())
         {
             SXRNode obj = entry.getKey();
@@ -881,6 +894,12 @@ class  SXRJassimpAdapter
                 processMesh(request, obj, meshId);
             }
         }
+
+        if (doAnimation)
+        {
+            processAnimations(model, scene, settings.contains(SXRImportSettings.START_ANIMATIONS));
+        }
+
         if (modelParent != null)
         {
             modelParent.addChildObject(model);
