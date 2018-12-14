@@ -379,6 +379,9 @@ void SXRActivity::onDrawFrame(jobject jViewManager) {
                 frameBuffer_[eye].destroy();
             }
 
+            if (nullptr != gearController) {
+                gearController->reset();
+            }
             vrapi_LeaveVrMode(oculusMobile_);
             oculusMobile_ = nullptr;
         } else {

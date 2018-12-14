@@ -37,10 +37,6 @@ Texture::Texture(int type)
 
 Texture::~Texture()
 {
-    if (mJava)
-    {
-        clearData(getCurrentEnv(mJava));
-    }
 }
 
 bool Texture::isReady()
@@ -62,7 +58,6 @@ void Texture::clearData(JNIEnv* env)
     {
         image->clear(env);
     }
-    LOGV("Texture::clearImage %p", this);
 }
 
 void Texture::setImage(Image* image)
@@ -87,7 +82,6 @@ void Texture::setImage(JNIEnv* env, Image* image)
     {
         image->texParamsChanged(getTexParams());
     }
-    LOGV("Texture::setImage %p", this);
 }
 
 void Texture::updateTextureParameters(const int* texture_parameters, int n)
