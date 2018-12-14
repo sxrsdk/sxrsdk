@@ -186,4 +186,13 @@ public interface IMixedReality extends IEventReceiver
 
     float[] makeInterpolated(float[] poseA, float[] poseB, float t);
 
+
+    /**
+     * Acquires the current set of estimated 3d points
+     * attached to real-world geometry.
+     *
+     * @return SXRPointCloud with points info
+     */
+    SXRPointCloud acquirePointCloud();
+
 }
