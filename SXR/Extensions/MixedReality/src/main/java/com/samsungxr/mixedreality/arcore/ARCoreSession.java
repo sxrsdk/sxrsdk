@@ -53,6 +53,7 @@ import com.samsungxr.SXRScene;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
 import com.samsungxr.mixedreality.CameraPermissionHelper;
+import com.samsungxr.mixedreality.IMixedRealityEvents;
 import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRMarker;
 import com.samsungxr.mixedreality.SXRHitResult;
@@ -61,6 +62,7 @@ import com.samsungxr.mixedreality.SXRPlane;
 import com.samsungxr.mixedreality.IAnchorEvents;
 import com.samsungxr.mixedreality.IPlaneEvents;
 import com.samsungxr.mixedreality.MRCommon;
+import com.samsungxr.mixedreality.SXRPointCloud;
 import com.samsungxr.utility.Log;
 import org.joml.Math;
 import org.joml.Matrix4f;
@@ -281,8 +283,8 @@ public class ARCoreSession extends MRCommon {
         gvrContext.registerDrawFrameListener(mARCoreHandler);
         syncARCamToVRCam(mLastARFrame.getCamera(), cameraRig);
         gvrContext.getEventManager().sendEvent(this,
-                IPlaneEvents.class,
-                "onStartPlaneDetection",
+                IMixedRealityEvents.class,
+                "onMixedRealityStart",
                 this);
     }
 
@@ -294,10 +296,10 @@ public class ARCoreSession extends MRCommon {
             } catch (CameraNotAvailableException e) {
                 e.printStackTrace();
                 mSXRContext.unregisterDrawFrameListener(this);
-                mSXRContext.getEventManager().sendEvent(this,
-                        IPlaneEvents.class,
-                        "onStopPlaneDetection",
-                        this);
+                mSXRContext.getEventManager().sendEvent(ARCoreSession.this,
+                        IMixedRealityEvents.class,
+                        "onMixedRealityStop",
+                        ARCoreSession.this);
                 return;
             }
 
@@ -325,6 +327,12 @@ public class ARCoreSession extends MRCommon {
             updateCloudAnchors(arFrame.getUpdatedAnchors());
 
             mLastARFrame = arFrame;
+
+            mSXRContext.getEventManager().sendEvent(ARCoreSession.this,
+                    IMixedRealityEvents.class,
+                    "onMixedRealityUpdate",
+                    ARCoreSession.this);
+
         }
     }
 
@@ -497,7 +505,7 @@ public class ARCoreSession extends MRCommon {
     @Override
     protected SXRHitResult onHitTest(SXRPicker.SXRPickedObject collision) {
         Vector2f tapPosition = convertToDisplayGeometrySpace(collision.hitLocation[0], collision.hitLocation[1]);
-        List<HitResult> hitResult = arFrame.hitTest(tapPosition.x, tapPosition.y);
+        List<HitResult> hitResult = mLastARFrame.hitTest(tapPosition.x, tapPosition.y);
 
         return mArCoreHelper.hitTest(hitResult, AR2VR_SCALE);
     }
@@ -506,13 +514,13 @@ public class ARCoreSession extends MRCommon {
     protected SXRHitResult onHitTest(float x, float y) {
         x *= mScreenToCamera.x;
         y *= mScreenToCamera.y;
-        List<HitResult> hitResult = arFrame.hitTest(x, y);
+        List<HitResult> hitResult = mLastARFrame.hitTest(x, y);
         return mArCoreHelper.hitTest(hitResult, AR2VR_SCALE);
     }
 
     @Override
     protected SXRLightEstimate onGetLightEstimate() {
-        return mArCoreHelper.getLightEstimate(arFrame.getLightEstimate());
+        return mArCoreHelper.getLightEstimate(mLastARFrame.getLightEstimate());
     }
 
     @Override
@@ -554,6 +562,14 @@ public class ARCoreSession extends MRCommon {
         newPose.toMatrix(newMatrixPose, 0);
 
         return newMatrixPose;
+    }
+
+    @Override
+    protected SXRPointCloud onAcquirePointCloud() {
+        ARCorePointCloud pointCloud = new ARCorePointCloud(AR2VR_SCALE);
+        pointCloud.setARPointCloud(mLastARFrame.acquirePointCloud());
+
+        return pointCloud;
     }
 
     private Vector2f convertToDisplayGeometrySpace(float x, float y) {

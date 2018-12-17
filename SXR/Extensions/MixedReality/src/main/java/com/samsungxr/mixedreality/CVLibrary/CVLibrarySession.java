@@ -70,6 +70,8 @@ import com.samsungxr.mixedreality.SXRHitResult;
 import com.samsungxr.mixedreality.SXRLightEstimate;
 import com.samsungxr.mixedreality.SXRMarker;
 import com.samsungxr.mixedreality.SXRPlane;
+import com.samsungxr.mixedreality.SXRPointCloud;
+
 import org.joml.Math;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -293,6 +295,11 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
         mtxA.setTranslation(vA);
         mtxA.get(result);
         return result;
+    }
+
+    @Override
+    public SXRPointCloud acquirePointCloud() {
+        return null;
     }
 
     private Vector3f configDisplayGeometry(SXRCameraRig cameraRig)

@@ -268,6 +268,11 @@ public class SXRMixedReality implements IMixedReality
         return mSession.makeInterpolated(poseA, poseB, t);
     }
 
+    @Override
+    public SXRPointCloud acquirePointCloud() {
+        return mSession.acquirePointCloud();
+    }
+
     private class ActivityEventsHandler extends SXREventListeners.ApplicationEvents {
         @Override
         public void onPause() {
