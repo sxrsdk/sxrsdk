@@ -45,4 +45,5 @@ script:
     - cd $PROJECT_DIR/SXR/Extensions
     - ./gradlew assembleDebug
     - cd $PROJECT_DIR/demos
+    - echo "useLocalDependencies=true" >> gradle.properties
     - ./gradlew assembleMonoscopicDebug
