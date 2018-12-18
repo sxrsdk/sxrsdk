@@ -495,6 +495,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     {
         public void onAssetLoaded(SXRContext context, SXRNode modelRoot, String filePath, String errors)
         {
+            context.getAssetLoader().getEventReceiver().removeListener(mLoadModelHandler);
             List<SXRComponent> components = modelRoot.getAllComponents(SXRSkeleton.getComponentType());
             String eventName = "onModelLoaded";
             if ((errors != null) && !errors.isEmpty())
