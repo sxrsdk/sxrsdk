@@ -15,7 +15,6 @@
 
 package com.samsungxr.mixedreality.arcore;
 
-import org.joml.Matrix4f;
 import android.support.annotation.NonNull;
 
 import com.google.ar.core.Plane;
@@ -32,21 +31,22 @@ import java.nio.FloatBuffer;
 class ARCorePlane extends SXRPlane {
     private Plane mARPlane;
     private ARCorePose mPose;
+    private FloatBuffer mLastPolygon;
 
-    protected ARCorePlane(SXRContext gvrContext, Plane plane) {
-        super(gvrContext);
+    protected ARCorePlane(SXRContext sxrContext, Plane plane) {
+        super(sxrContext);
         mPose = new ARCorePose();
         mARPlane = plane;
 
         if (mARPlane.getType() == Plane.Type.HORIZONTAL_DOWNWARD_FACING) {
             mPlaneType = Type.HORIZONTAL_DOWNWARD_FACING;
-        }
-        else if (mARPlane.getType() == Plane.Type.HORIZONTAL_UPWARD_FACING) {
+        } else if (mARPlane.getType() == Plane.Type.HORIZONTAL_UPWARD_FACING) {
             mPlaneType = Type.HORIZONTAL_UPWARD_FACING;
-        }
-        else {
+        } else {
             mPlaneType = Type.VERTICAL;
         }
+
+        mLastPolygon = getPolygon().asReadOnlyBuffer();
     }
 
     /**
@@ -74,7 +74,7 @@ class ARCorePlane extends SXRPlane {
 
     @Override
     public void getCenterPose(@NonNull float[] poseOut) {
-        if(poseOut.length != 16 ){
+        if (poseOut.length != 16) {
             throw new IllegalArgumentException("Array must be 16");
         }
         mARPlane.getCenterPose().toMatrix(poseOut, 0);
@@ -93,6 +93,26 @@ class ARCorePlane extends SXRPlane {
     @Override
     public FloatBuffer getPolygon() {
         return mARPlane.getPolygon();
+    }
+
+    @Override
+    public float[] get3dPolygonAsArray() {
+        float[] verticesArray = getPolygon().array();
+        int verticesArraySize = verticesArray.length;
+
+        // Vertices have two coordinates, so we have to divide for two
+        // to get the number of vertices
+        int vertexCount = verticesArraySize / 2;
+
+        float[] meshVertices = new float[verticesArraySize + vertexCount];
+
+        for (int i = 0, j = 0; i < verticesArraySize; i += 2) {
+            meshVertices[j++] = verticesArray[i];
+            meshVertices[j++] = 0;
+            meshVertices[j++] = verticesArray[i + 1];
+        }
+
+        return meshVertices;
     }
 
     @Override
@@ -122,18 +142,19 @@ class ARCorePlane extends SXRPlane {
      */
     protected void update(float scale) {
         SXRNode owner = getOwnerObject();
-        if (isEnabled() && (owner != null) && owner.isEnabled())
-        {
-            float w = getWidth();
-            float h = getHeight();
-            mPose.update(mARPlane.getCenterPose(), scale);
-            Matrix4f m = new Matrix4f();
-            m.set(mPose.getPoseMatrix());
-            m.scaleLocal(w * 0.95f, h * 0.95f, 1.0f);
-            owner.getTransform().setModelMatrix(m);
+        if (isEnabled() && (owner != null) && owner.isEnabled()) {
+            convertFromARtoVRSpace(scale);
         }
     }
-    
+
+    protected boolean geometryChange() {
+        if (mARPlane.getPolygon().compareTo(mLastPolygon) == 0) {
+            return false;
+        }
+        mLastPolygon = mARPlane.getPolygon().asReadOnlyBuffer();
+        return true;
+    }
+
     /**
      * Converts from ARCore world space to SXRf's world space.
      *
@@ -141,6 +162,6 @@ class ARCorePlane extends SXRPlane {
      */
     private void convertFromARtoVRSpace(float scale) {
         mPose.update(mARPlane.getCenterPose(), scale);
-        getTransform().setModelMatrix(mPose.getPoseMatrix());
+        getOwnerObject().getTransform().setModelMatrix(mPose.getPoseMatrix());
     }
 }
