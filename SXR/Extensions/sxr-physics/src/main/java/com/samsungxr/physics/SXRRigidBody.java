@@ -453,18 +453,18 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
     }
 
     /**
-     * Returns the continous collision detection motion threshold factor on this {@linkplain SXRRigidBody rigid body}.
+     * Returns the continuous collision detection motion threshold factor on this {@linkplain SXRRigidBody rigid body}.
      *
-     * @return The continous collision detection motion threshold factor scalar as a float
+     * @return The continuous collision detection motion threshold factor scalar as a float
      */
     public float getCcdMotionThreshold() {
         return Native3DRigidBody.getCcdMotionThreshold(getNative());
     }
 
     /**
-     * Set the continous collision detection motion threshold factor of this {@linkplain SXRRigidBody rigid body}
+     * Set the continuous collision detection motion threshold factor of this {@linkplain SXRRigidBody rigid body}
      *
-     * @param n the continous collision detection motion threshold factor
+     * @param n the continuous collision detection motion threshold factor
      */
     public void setCcdMotionThreshold(float n) {
         Native3DRigidBody.setCcdMotionThreshold(getNative(), n);
@@ -477,6 +477,24 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      */
     public float getContactProcessingThreshold() {
         return Native3DRigidBody.getContactProcessingThreshold(getNative());
+    }
+
+    /**
+     * Returns the radius of sphere used to collision detection on this {@linkplain SXRRigidBody rigid body}.
+     *
+     * @return The radius of sphere to continuous collision detection.
+     */
+    public float getCcdSweptSphereRadius() {
+        return Native3DRigidBody.getCcdSweptSphereRadius(getNative());
+    }
+
+    /**
+     * Set the sphere to continuous collision detection of this {@linkplain SXRRigidBody rigid body}
+     *
+     * @param n Radius of sphere to continuous collision detection.
+     */
+    public void setCcdSweptSphereRadius(float n) {
+        Native3DRigidBody.setCcdSweptSphereRadius(getNative(), n);
     }
 
     /**
@@ -588,6 +606,8 @@ class Native3DRigidBody {
 
     static native void setCcdMotionThreshold(long jrigid_body, float n);
 
+    static native void setCcdSweptSphereRadius(long jrigid_body, float n);
+
     static native void setContactProcessingThreshold(long jrigid_body, float n);
 
     static native void setIgnoreCollisionCheck(long jrigid_body, long jcollision_object, boolean ignore);
@@ -609,6 +629,8 @@ class Native3DRigidBody {
     static native float getRestitution(long jrigid_body);
 
     static native float getCcdMotionThreshold(long jrigid_body);
+
+    static native float getCcdSweptSphereRadius(long jrigid_body);
 
     static native float getContactProcessingThreshold(long jrigid_body);
 

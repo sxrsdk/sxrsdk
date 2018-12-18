@@ -104,6 +104,10 @@ extern "C" {
             jlong jrigid_body, jfloat n);
 
     JNIEXPORT void   JNICALL
+    Java_com_samsungxr_physics_Native3DRigidBody_setCcdSweptSphereRadius(JNIEnv * env, jobject obj,
+            jlong jrigid_body, jfloat n);
+
+    JNIEXPORT void   JNICALL
     Java_com_samsungxr_physics_Native3DRigidBody_setContactProcessingThreshold(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat n);
 
@@ -145,6 +149,10 @@ extern "C" {
 
     JNIEXPORT jfloat   JNICALL
     Java_com_samsungxr_physics_Native3DRigidBody_getCcdMotionThreshold(JNIEnv * env, jobject obj,
+            jlong jrigid_body) ;
+
+    JNIEXPORT jfloat   JNICALL
+    Java_com_samsungxr_physics_Native3DRigidBody_getCcdSweptSphereRadius(JNIEnv * env, jobject obj,
             jlong jrigid_body) ;
 
     JNIEXPORT jfloat   JNICALL
@@ -324,6 +332,14 @@ Java_com_samsungxr_physics_Native3DRigidBody_setCcdMotionThreshold(JNIEnv * env,
 }
 
 JNIEXPORT void   JNICALL
+Java_com_samsungxr_physics_Native3DRigidBody_setCcdSweptSphereRadius(JNIEnv * env, jobject obj,
+        jlong jrigid_body, jfloat n) {
+    PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
+
+    rigid_body->setCcdSweptSphereRadius(n);
+}
+
+JNIEXPORT void   JNICALL
 Java_com_samsungxr_physics_Native3DRigidBody_setContactProcessingThreshold(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat n) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
@@ -457,6 +473,14 @@ Java_com_samsungxr_physics_Native3DRigidBody_getCcdMotionThreshold(JNIEnv * env,
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
     return rigid_body->getCcdMotionThreshold();
+}
+
+JNIEXPORT jfloat   JNICALL
+Java_com_samsungxr_physics_Native3DRigidBody_getCcdSweptSphereRadius(JNIEnv * env, jobject obj,
+        jlong jrigid_body) {
+    PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
+
+    return rigid_body->getCcdSweptSphereRadius();
 }
 
 JNIEXPORT jfloat   JNICALL
