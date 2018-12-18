@@ -343,15 +343,6 @@ void GLRenderTexture::invalidateFrameBuffer(GLenum target, bool is_fbo, const bo
     GL(glInvalidateFramebuffer(target, count, (is_fbo ? fboAttachments : attachments) + offset));
 }
 
-void GLRenderTexture::startReadBack() {
-    GLRenderImage* image = static_cast<GLRenderImage*>(getImage());
-
-    glReadPixels(0, 0, image->getWidth(), image->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, 0);
-    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-    readback_started_ = true;
-    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-}
-
 bool GLRenderTexture::readRenderResult(uint8_t* readback_buffer){
     Image* image = getImage();
     long neededCapacity = image->getWidth() * image->getHeight();
@@ -376,10 +367,8 @@ bool GLRenderTexture::readRenderResult(uint8_t *readback_buffer, long capacity) 
                      "(capacity %ld, needed %ld)", capacity, neededCapacity);
         return false;
     }
-    if (!readback_started_) {
-        glReadPixels(0, 0, image->getWidth(), image->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, readback_buffer);
-    }
 
+    glReadPixels(0, 0, image->getWidth(), image->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, readback_buffer);
     return true;
 }
 
@@ -405,18 +394,7 @@ void GLRenderTexture::setLayerIndex(int layerIndex)
 {
     layer_index_ = layerIndex;
 }
-void GLMultiviewRenderTexture::startReadBack(int layer) {
-    GLRenderImage* image = static_cast<GLRenderImage*>(getImage());
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, getReadBufferId());
-    image->setupReadback(renderTexture_gl_pbo_, layer);
-    GLRenderTexture::startReadBack();
-}
-void GLNonMultiviewRenderTexture::startReadBack(int layer) {
-    GLRenderImage* image = static_cast<GLRenderImage*>(getImage());
-    glBindFramebuffer(GL_READ_FRAMEBUFFER,renderTexture_gl_frame_buffer_->id() );
-    image->setupReadback(renderTexture_gl_pbo_, layer);
-    GLRenderTexture::startReadBack();
-}
+
 GLNonMultiviewRenderTexture::GLNonMultiviewRenderTexture(int width, int height, int sample_count,
                                      int jcolor_format, int jdepth_format, bool resolve_depth,
                                      const TextureParameters* texture_parameters, int viewport[]):GLRenderTexture(width, height, sample_count, jcolor_format, jdepth_format,

@@ -19,7 +19,6 @@
 
 #include "render_data.h"
 #include "engine/renderer/renderer.h"
-#include "objects/components/texture_capturer.h"
 
 namespace sxr {
 
