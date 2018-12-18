@@ -272,7 +272,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                     animator.addAnimation(skelAnim);
                 }
                 addAnimation(animator);
-                ctx.getEventManager().sendEvent(this,
+                ctx.getEventManager().sendEvent(SXRAvatar.this,
                                                 IAvatarEvents.class,
                                                 "onAnimationLoaded",
                                                 SXRAvatar.this,
@@ -282,7 +282,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             }
             catch (IOException ex)
             {
-                ctx.getEventManager().sendEvent(this,
+                ctx.getEventManager().sendEvent(SXRAvatar.this,
                                                 IAvatarEvents.class,
                                                 "onAnimationLoaded",
                                                 SXRAvatar.this,

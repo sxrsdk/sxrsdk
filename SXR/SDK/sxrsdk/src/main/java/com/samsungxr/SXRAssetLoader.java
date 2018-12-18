@@ -1616,6 +1616,7 @@ public final class SXRAssetLoader implements IEventReceiver
                 assetRequest.setImportSettings(settings);
                 assetRequest.useCache(cacheEnabled);
                 getEventReceiver().addListener(handler);
+                assetRequest.setHandler(handler);
                 try
                 {
                     if (ext.equals("x3d"))
