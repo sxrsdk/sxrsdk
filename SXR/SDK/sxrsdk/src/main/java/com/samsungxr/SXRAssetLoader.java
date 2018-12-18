@@ -1225,6 +1225,10 @@ public final class SXRAssetLoader implements IEventReceiver
                 {
                     // onModelError is generated in this case
                 }
+                finally
+                {
+                    getEventReceiver().removeListener(handler);
+                }
             }
         });
     }
@@ -1281,6 +1285,10 @@ public final class SXRAssetLoader implements IEventReceiver
                 catch (IOException ex)
                 {
                     // onModelError is generated in this case
+                }
+                finally
+                {
+                    getEventReceiver().removeListener(handler);
                 }
             }
         });
@@ -1631,6 +1639,10 @@ public final class SXRAssetLoader implements IEventReceiver
                 catch (IOException ex)
                 {
                     // onModelError is generated in this case
+                }
+                finally
+                {
+                    getEventReceiver().removeListener(handler);
                 }
             }
         });
