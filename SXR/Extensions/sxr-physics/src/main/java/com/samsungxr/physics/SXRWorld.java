@@ -39,7 +39,6 @@ import org.joml.Vector3f;
  */
 public class SXRWorld extends SXRComponent implements IEventReceiver
 {
-    private boolean mInitialized;
     private final SXRPhysicsContext mPhysicsContext;
     private SXRWorldTask mWorldTask;
     private static final long DEFAULT_INTERVAL = 15;
@@ -125,7 +124,6 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         super(gvrContext, NativePhysics3DWorld.ctor());
         mListeners = new SXREventReceiver(this);
         mPhysicsDragger = new PhysicsDragger(gvrContext);
-        mInitialized = false;
         mCollisionMatrix = collisionMatrix;
         mWorldTask = new SXRWorldTask(interval);
         mPhysicsContext = SXRPhysicsContext.getInstance();
@@ -330,9 +328,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         rootNode.forAllComponents(mRigidBodiesVisitor, SXRRigidBody.getComponentType());
         rootNode.forAllComponents(mConstraintsVisitor, SXRConstraint.getComponentType());
 
-        if (!mInitialized) {
-            rootNode.getEventReceiver().addListener(mSceneEventsHandler);
-        } else if (isEnabled()){
+        if (isEnabled()){
             startSimulation();
         }
     }
@@ -341,9 +337,6 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         rootNode.forAllComponents(mConstraintsVisitor, SXRConstraint.getComponentType());
         rootNode.forAllComponents(mRigidBodiesVisitor, SXRRigidBody.getComponentType());
 
-        if (!mInitialized) {
-            rootNode.getEventReceiver().removeListener(mSceneEventsHandler);
-        }
         if (isEnabled()) {
             stopSimulation();
         }
@@ -372,7 +365,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     public void onEnable() {
         super.onEnable();
 
-        if (getOwnerObject() != null && mInitialized) {
+        if (getOwnerObject() != null) {
             startSimulation();
         }
     }
@@ -442,8 +435,6 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
             simulationTime = simulationTime + SystemClock.uptimeMillis();
 
             mPhysicsContext.runAtTimeOnPhysicsThread(this, simulationTime);
-
-
         }
 
         public void start() {
@@ -474,31 +465,6 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
             });
         }
     }
-
-    private INodeEvents mSceneEventsHandler = new INodeEvents() {
-
-        @Override
-        public void onInit(SXRContext gvrContext, SXRNode sceneObject) {
-            if (mInitialized)
-                return;
-
-            mInitialized = true;
-            getOwnerObject().getEventReceiver().removeListener(this);
-
-            if (isEnabled()) {
-                startSimulation();
-            }
-        }
-
-        @Override
-        public void onLoaded() {}
-
-        @Override
-        public void onAfterInit() {}
-
-        @Override
-        public void onStep() {}
-    };
 
     private ComponentVisitor mRigidBodiesVisitor = new ComponentVisitor() {
 
