@@ -138,6 +138,11 @@ public abstract class MRCommon implements IMixedReality
         return onMakeInterpolated(poseA, poseB, t);
     }
 
+    @Override
+    public SXRPointCloud acquirePointCloud() {
+        return onAcquirePointCloud();
+    }
+
     protected abstract void onResume();
 
     protected abstract void onPause();
@@ -171,4 +176,6 @@ public abstract class MRCommon implements IMixedReality
     protected abstract ArrayList<SXRMarker> onGetAllMarkers();
 
     protected abstract float[] onMakeInterpolated(float[] poseA, float[] poseB, float t);
+
+    protected abstract SXRPointCloud onAcquirePointCloud();
 }

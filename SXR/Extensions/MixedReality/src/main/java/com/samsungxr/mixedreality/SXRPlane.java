@@ -74,6 +74,14 @@ public abstract class SXRPlane extends SXRBehavior
     public abstract FloatBuffer getPolygon();
 
     /**
+     * Create a array of float containing the 3 coordinates
+     * vertices of the polygon that best represents the plane.
+     *
+     * @return The array of vertices
+     */
+    public abstract float[] get3dPolygonAsArray();
+
+    /**
      * @return The parent plane
      */
     public SXRPlane getParentPlane()
