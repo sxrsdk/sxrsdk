@@ -93,6 +93,7 @@ public final class SXRAssetLoader implements IEventReceiver
         protected boolean                 mReplaceScene = false;
         protected boolean                 mCacheEnabled = true;
         protected EnumSet<SXRImportSettings> mSettings = null;
+        protected IAssetEvents          mHandler;
 
         /**
          * Request to load an asset and add it to the scene.
@@ -114,6 +115,7 @@ public final class SXRAssetLoader implements IEventReceiver
             Log.d(TAG, "ASSET: loading %s ...", mFileName);
         }
 
+        public void setHandler(IAssetEvents handler) { mHandler = handler; }
         public boolean isCacheEnabled()         { return mCacheEnabled; }
         public void  useCache(boolean flag)     { mCacheEnabled = true; }
         public SXRContext getContext()          { return mContext; }
@@ -446,6 +448,11 @@ public final class SXRAssetLoader implements IEventReceiver
                 }
             }
             onAssetLoaded(mModel, mFileName, errors);
+            if (mHandler != null)
+            {
+                mContext.getAssetLoader().getEventReceiver().removeListener(mHandler);
+                mHandler = null;
+            }
         }
     }
 
@@ -1200,6 +1207,8 @@ public final class SXRAssetLoader implements IEventReceiver
 
                 getEventReceiver().addListener(handler);
                 assetRequest.setImportSettings(SXRImportSettings.getRecommendedSettings());
+                getEventReceiver().addListener(handler);
+                assetRequest.setHandler(handler);
                 model.setName(assetRequest.getBaseName());
                 try
                 {
@@ -1215,10 +1224,6 @@ public final class SXRAssetLoader implements IEventReceiver
                 catch (IOException ex)
                 {
                     // onModelError is generated in this case
-                }
-                finally
-                {
-                    getEventReceiver().removeListener(handler);
                 }
             }
         });
@@ -1259,6 +1264,7 @@ public final class SXRAssetLoader implements IEventReceiver
                 String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
                 assetRequest.setImportSettings(settings);
+                assetRequest.setHandler(handler);
                 getEventReceiver().addListener(handler);
                 model.setName(assetRequest.getBaseName());
                 try
@@ -1275,10 +1281,6 @@ public final class SXRAssetLoader implements IEventReceiver
                 catch (IOException ex)
                 {
                     // onModelError is generated in this case
-                }
-                finally
-                {
-                    getEventReceiver().removeListener(handler);
                 }
             }
         });
@@ -1431,6 +1433,7 @@ public final class SXRAssetLoader implements IEventReceiver
 
         model.setName(assetRequest.getBaseName());
         getEventReceiver().addListener(handler);
+        assetRequest.setHandler(handler);
         assetRequest.setImportSettings(SXRImportSettings.getRecommendedSettings());
         if (ext.equals("x3d"))
         {
@@ -1627,10 +1630,6 @@ public final class SXRAssetLoader implements IEventReceiver
                 catch (IOException ex)
                 {
                     // onModelError is generated in this case
-                }
-                finally
-                {
-                    getEventReceiver().removeListener(handler);
                 }
             }
         });
