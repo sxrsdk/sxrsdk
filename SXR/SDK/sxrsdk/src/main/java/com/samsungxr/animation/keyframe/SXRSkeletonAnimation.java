@@ -203,7 +203,20 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
             target.attachComponent(mSkeleton);
         }
     }
-
+    private String skelOrder = "";
+    boolean updatePose = false;
+    public void setSkelOrder(String order)
+    {
+        skelOrder = order;
+    }
+    public String getSkelOrder()
+    {
+        return skelOrder;
+    }
+    public void setUpdatePose(boolean setFlag)
+    {
+        updatePose = setFlag;
+    }
     @Override
     protected void animate(SXRHybridObject target, float ratio)
     {
@@ -216,6 +229,27 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
      */
     public void animate(float timeInSec)
     {
+        switch(this.skelOrder)
+        {
+            case "first":
+                if(updatePose)
+                {
+                    return;
+                }
+                break;
+            case "middle":
+                if(updatePose)
+                {
+                    return;
+                }
+                break;
+            case "last":
+                if(updatePose)
+                {
+                    return;
+                }
+                break;
+        }
         SXRSkeleton skel = getSkeleton();
         SXRPose pose = skel.getPose();
         computePose(timeInSec,pose);

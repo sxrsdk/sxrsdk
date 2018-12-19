@@ -19,6 +19,7 @@ package com.samsungxr.animation;
 import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRNode;
+import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
 
 import java.util.ArrayList;
@@ -47,6 +48,10 @@ public class SXRAnimator extends SXRBehavior
     protected boolean mAutoStart;
     protected boolean mIsRunning;
     protected String mName;
+    SXRNode mModel= null;
+    SXRAvatar mAvatar = null;
+    private String mBoneMap;
+    private int numberofInterp = 0;
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -281,7 +286,12 @@ public class SXRAnimator extends SXRBehavior
             anim.setRepeatCount(repeatCount);
         }
     }
-
+    public void setAvatar(SXRNode model, SXRAvatar avatar, String bonemap)
+    {
+        mModel = model;
+        mAvatar = avatar;
+        mBoneMap = bonemap;
+    }
     /**
      * Starts all of the animations in this animator.
      * @see SXRAnimator#reset()
@@ -299,7 +309,78 @@ public class SXRAnimator extends SXRBehavior
             anim.start(getSXRContext().getAnimationEngine());
         }
     }
+    public void start(float blendFactor)
+    {
+        if (mAnimations.size() == 0)
+        {
+            return;
+        }
+        mIsRunning = true;
+        int skelAnimSize = mAnimations.size();
 
+        for(int i=0;i<(skelAnimSize)-2;i=i+2)
+        {
+            //Log.i("debugSkeleton","animationNum"+skelAnimSize);
+            SXRSkeletonAnimation skelOne = (SXRSkeletonAnimation)mAnimations.get(i);
+            SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation)mAnimations.get(i+2);
+            SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(mModel, blendFactor, skelOne, skelTwo, skelOne.getSkeleton());
+            SXRPoseMapper retargeterP = new SXRPoseMapper(mAvatar.getSkeleton(), skelOne.getSkeleton(), blendFactor);
+            retargeterP.setBoneMap(mBoneMap);
+
+            mAnimations.add(blendAnim);
+            mAnimations.add(retargeterP);
+            numberofInterp++;
+        }
+
+        int allAnimSize = mAnimations.size();
+        int mAnimSkel = 0;
+        for(int idSkel=0;idSkel<allAnimSize;idSkel=idSkel+4)
+        {
+            if(idSkel==0)
+            {
+                mAnimations.get(mAnimSkel).setID(idSkel);
+                mAnimations.get(mAnimSkel+1).setID(idSkel+1);
+                SXRSkeletonAnimation skel = (SXRSkeletonAnimation)mAnimations.get(0);
+                skel.setSkelOrder("first");
+
+            }
+            else
+            {
+                mAnimations.get(mAnimSkel).setID(idSkel);
+                mAnimations.get(mAnimSkel+1).setID(idSkel+1);
+                SXRSkeletonAnimation skel = (SXRSkeletonAnimation)mAnimations.get(mAnimSkel);
+                if(idSkel!=(allAnimSize-2))
+                {
+                    skel.setSkelOrder("middle");
+                }
+                else
+                {
+                    skel.setSkelOrder("last");
+                }
+            }
+            mAnimSkel = mAnimSkel+2;
+        }
+        int mAnimInterp = allAnimSize-(2*numberofInterp);
+        for(int idIntp=0;idIntp<(numberofInterp*4); idIntp=idIntp+4)
+        {
+            mAnimations.get(mAnimInterp).setID(idIntp+2);
+            mAnimations.get(mAnimInterp+1).setID(idIntp+3);
+            mAnimations.get(mAnimInterp).setRepeatMode(SXRRepeatMode.REPEATED);
+            mAnimations.get(mAnimInterp+1).setRepeatMode(SXRRepeatMode.REPEATED);
+            mAnimations.get(mAnimInterp).setRepeatCount(-1);
+            mAnimations.get(mAnimInterp+1).setRepeatCount(-1);
+            mAnimInterp = mAnimInterp+2;
+        }
+
+        mAnimations.get(0).setFlag(allAnimSize);
+
+        for(int j=0;j<allAnimSize; j++) {
+            mAnimations.get(j).setBlendDuration(blendFactor,true);
+            mAnimations.get(j).start(getSXRContext().getAnimationEngine());
+        }
+
+
+    }
     /**
      * Starts all of the animations in this animator.
      * @see SXRAnimator#reset()
