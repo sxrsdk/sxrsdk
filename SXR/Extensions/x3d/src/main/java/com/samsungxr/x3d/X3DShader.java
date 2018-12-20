@@ -31,7 +31,7 @@ public class X3DShader extends SXRShaderTemplate
         if (fragTemplate == null)
         {
             Context context = gvrcontext.getContext();
-            fragTemplate = TextFile.readTextFile(context, com.samsungxr.R.raw.fragment_template);
+            fragTemplate = TextFile.readTextFile(context, com.samsungxr.R.raw.fragment_template_multitex);
             vtxTemplate = TextFile.readTextFile(context, com.samsungxr.R.raw.vertex_template_multitex);
             surfaceShader = TextFile.readTextFile(context, com.samsungxr.x3d.R.raw.x3d_surface);
             vtxShader = TextFile.readTextFile(context, com.samsungxr.R.raw.pos_norm_tex) +
