@@ -271,6 +271,7 @@ class  SXRJassimpAdapter
             SXRMeshMorph morph = new SXRMeshMorph(mContext, nAnimationMeshes);
             sceneObject.attachComponent(morph);
             int blendShapeNum = 0;
+            float[] weights = new float[nAnimationMeshes];
 
             for (AiAnimMesh animMesh : aiMesh.getAnimationMeshes())
             {
@@ -281,6 +282,7 @@ class  SXRJassimpAdapter
                 float[] tangentArray = null;
                 float[] bitangentArray = null;
 
+                weights[blendShapeNum] = animMesh.getDefaultWeight();
                 //copy target positions to anim vertex buffer
                 FloatBuffer animPositionBuffer = animMesh.getPositionBuffer();
                 if (animPositionBuffer != null)
@@ -325,6 +327,7 @@ class  SXRJassimpAdapter
                 morph.setBlendShape(blendShapeNum, animBuff);
                 blendShapeNum++;
             }
+            morph.setWeights(weights);
             morph.update();
         }
         catch (IllegalArgumentException ex)
@@ -1346,7 +1349,7 @@ class  SXRJassimpAdapter
             }
             catch (IOException ex2)
             {
-                assetRequest.onTextureError(mContext, ex2.getMessage(), mFileName);
+                assetRequest.onTextureError(gvrTex, mFileName, ex2.getMessage());
             }
         }
         else

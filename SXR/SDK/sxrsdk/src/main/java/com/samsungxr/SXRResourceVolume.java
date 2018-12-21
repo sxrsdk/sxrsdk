@@ -192,6 +192,11 @@ public class SXRResourceVolume {
             defaultPath = FileNameUtils.getParentDirectory(defaultPath);
             volumeType = SXRResourceVolume.VolumeType.ANDROID_SDCARD;
         }
+        else if (fname.startsWith("/storage/emulated/"))
+        {
+            defaultPath = FileNameUtils.getParentDirectory(defaultPath);
+            volumeType = SXRResourceVolume.VolumeType.ANDROID_SDCARD;
+        }
         else if (fname.startsWith("http:") || fname.startsWith("https:"))
         {
             volumeType = SXRResourceVolume.VolumeType.NETWORK;
@@ -317,10 +322,16 @@ public class SXRResourceVolume {
             break;
 
         case ANDROID_SDCARD:
-            String linuxPath = Environment.getExternalStorageDirectory()
-                    .getAbsolutePath();
-            resourceKey = new SXRAndroidResource(
-                    getFullPath(linuxPath, defaultPath, filePath));
+            String linuxPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+            if (!defaultPath.startsWith(linuxPath))
+            {
+                filePath = getFullPath(linuxPath, defaultPath, filePath);
+            }
+            else
+            {
+                filePath = getFullPath(defaultPath, filePath);
+            }
+            resourceKey = new SXRAndroidResource(filePath);
             break;
 
         case INPUT_STREAM:

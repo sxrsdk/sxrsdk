@@ -61,7 +61,8 @@ import java.util.UUID;
  * {@code assets} and {@code res/raw}), from directories on the device's SD
  * card and URLs on the internet that the application has permission to read.
  */
-public final class SXRAssetLoader {
+public final class SXRAssetLoader implements IEventReceiver
+{
     /**
      * The priority used by
      * {@link #loadTexture(SXRAndroidResource, SXRAndroidResource.TextureCallback)}
@@ -69,8 +70,7 @@ public final class SXRAssetLoader {
     public static final int DEFAULT_PRIORITY = 0;
 
     /**
-     * The default texture parameter instance for overloading texture methods
-     *
+     * The default texture parameter instance for overloading texture methods*
      */
     private final SXRTextureParameters mDefaultTextureParameters;
 
@@ -81,36 +81,33 @@ public final class SXRAssetLoader {
      * called by SXRAssetLoader to get around the restriction that SXRContext
      * can only have a single listener for asset events.
      */
-    public static class AssetRequest implements IAssetEvents
+    public static class AssetRequest implements IAssetImportEvents
     {
         protected final SXRContext        mContext;
         protected final SXRScene          mScene;
         protected final String            mFileName;
-        protected final IAssetEvents      mUserHandler;
         protected final SXRResourceVolume mVolume;
-        protected SXRNode          mModel = null;
+        protected SXRNode                 mModel = null;
         protected String                  mErrors;
         protected Integer                 mNumTextures;
         protected boolean                 mReplaceScene = false;
         protected boolean                 mCacheEnabled = true;
         protected EnumSet<SXRImportSettings> mSettings = null;
-
+        protected IAssetEvents          mHandler;
 
         /**
          * Request to load an asset and add it to the scene.
          * @param model SXRNode to be the root of the loaded asset.
          * @param fileVolume SXRResourceVolume containing path to file
          * @param scene SXRScene to add the asset to.
-         * @param userHandler user event handler to get asset events.
          * @param replaceScene true to replace entire scene with model, false to add model to scene
          */
-        public AssetRequest(SXRNode model, SXRResourceVolume fileVolume, SXRScene scene, IAssetEvents userHandler, boolean replaceScene)
+        public AssetRequest(SXRNode model, SXRResourceVolume fileVolume, SXRScene scene, boolean replaceScene)
         {
             mScene = scene;
             mContext = model.getSXRContext();
             mNumTextures = 0;
             mFileName = fileVolume.getFullPath();
-            mUserHandler = userHandler;
             mModel = null;
             mErrors = "";
             mReplaceScene = replaceScene;
@@ -118,6 +115,7 @@ public final class SXRAssetLoader {
             Log.d(TAG, "ASSET: loading %s ...", mFileName);
         }
 
+        public void setHandler(IAssetEvents handler) { mHandler = handler; }
         public boolean isCacheEnabled()         { return mCacheEnabled; }
         public void  useCache(boolean flag)     { mCacheEnabled = true; }
         public SXRContext getContext()          { return mContext; }
@@ -179,7 +177,7 @@ public final class SXRAssetLoader {
                     {
                         request.loaded(whiteTex, null);
                     }
-                    onTextureError(mContext, ex.getMessage(), request.TextureFile);
+                    onTextureError(request.Texture, ex.getMessage(), request.TextureFile);
                 }
             }
         }
@@ -249,22 +247,23 @@ public final class SXRAssetLoader {
         }
 
         /**
-         * Called when a model is successfully loaded.
-         * @param context   SXRContext which loaded the model
+         * Called when a model is successfully loaded.* @param context   SXRContext which loaded the model
          * @param model     root node of model hierarchy that was loaded
          * @param modelFile filename of model loaded
          */
-        public void onModelLoaded(SXRContext context, SXRNode model, String modelFile)
+        public void onModelLoaded(SXRNode model, String modelFile)
         {
             mModel = model;
             Log.d(TAG, "ASSET: successfully loaded model %s %d", modelFile, mNumTextures);
-            if (mUserHandler != null)
-            {
-                mUserHandler.onModelLoaded(context, model, modelFile);
-            }
-            mContext.getEventManager().sendEvent(mContext,
+            mContext.getEventManager().sendEvent(mContext.getAssetLoader(),
+                                                 IAssetImportEvents.class,
+                                                 "onModelLoaded", model, modelFile);
+            mContext.getEventManager().sendEvent(mContext.getAssetLoader(),
                     IAssetEvents.class,
-                    "onModelLoaded", new Object[]{mContext, model, modelFile});
+                    "onModelLoaded", mContext, model, modelFile);
+            mContext.getEventManager().sendEvent(mContext,
+                                                 IAssetEvents.class,
+                                                 "onModelLoaded", mContext, model, modelFile);
             if (mNumTextures == 0)
             {
                 generateLoadEvent();
@@ -277,18 +276,17 @@ public final class SXRAssetLoader {
 
         /**
          * Called when a texture is successfully loaded.
-         * @param context SXRContext which loaded the texture
          * @param texture texture that was loaded
          * @param texFile filename of texture loaded
          */
-        public void onTextureLoaded(SXRContext context, SXRTexture texture, String texFile)
+        public void onTextureLoaded(SXRTexture texture, String texFile)
         {
-            if (mUserHandler != null)
-            {
-                mUserHandler.onTextureLoaded(context, texture, texFile);
-            }
+            mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetImportEvents.class,
+                                                 "onTextureLoaded", texture, texFile);
+            mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetEvents.class,
+                                                 "onTextureLoaded", mContext, texture, texFile);
             mContext.getEventManager().sendEvent(mContext, IAssetEvents.class,
-                                                 "onTextureLoaded", new Object[] { mContext, texture, texFile });
+                                                 "onTextureLoaded", mContext, texture, texFile);
             synchronized (mNumTextures)
             {
                 Log.e(TAG, "ASSET: Texture: successfully loaded texture %s %d", texFile, mNumTextures);
@@ -319,13 +317,15 @@ public final class SXRAssetLoader {
         public void onModelError(SXRContext context, String error, String modelFile)
         {
             Log.e(TAG, "ASSET: ERROR: model %s did not load %s", modelFile, error);
-            if (mUserHandler != null)
-            {
-                mUserHandler.onModelError(context, error, modelFile);
-            }
+            mContext.getEventManager().sendEvent(mContext.getAssetLoader(),
+                                                 IAssetImportEvents.class,
+                                                 "onModelError", mContext, error, modelFile);
+            mContext.getEventManager().sendEvent(mContext.getAssetLoader(),
+                                                 IAssetEvents.class,
+                                                 "onModelError", mContext, error, modelFile);
             mContext.getEventManager().sendEvent(mContext,
                     IAssetEvents.class,
-                    "onModelError", new Object[] { mContext, error, modelFile });
+                    "onModelError", mContext, error, modelFile);
             mErrors += error + "\n";
             mModel = null;
             mNumTextures = 0;
@@ -334,19 +334,19 @@ public final class SXRAssetLoader {
 
         /**
          * Called when a texture cannot be loaded.
-         * @param context SXRContext which loaded the texture
+         * @param texture SXRTexture which failed to load
          * @param error error message
          * @param texFile filename of texture loaded
          */
-        public void onTextureError(SXRContext context, String error, String texFile)
+        public void onTextureError(SXRTexture texture, String texFile, String error)
         {
             mErrors += error + "\n";
-            if (mUserHandler != null)
-            {
-                mUserHandler.onTextureError(context, error, texFile);
-            }
+            mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetImportEvents.class,
+                                                 "onTextureError", texture, texFile, error);
+            mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetEvents.class,
+                                                 "onTextureError", mContext, error, texFile);
             mContext.getEventManager().sendEvent(mContext, IAssetEvents.class,
-                                                 "onTextureError", new Object[] { mContext, error, texFile });
+                                                 "onTextureError", mContext, error, texFile);
             synchronized (mNumTextures)
             {
                 Log.e(TAG, "ASSET: Texture: ERROR cannot load texture %s %d", texFile, mNumTextures);
@@ -370,20 +370,19 @@ public final class SXRAssetLoader {
 
         /**
          * Called when the model and all of its textures have loaded.
-         * @param context SXRContext which loaded the texture
          * @param model model that was loaded (will be null if model failed to load)
          * @param errors error messages (will be null if no errors)
          * @param modelFile filename of model loaded
          */
         @Override
-        public void onAssetLoaded(SXRContext context, SXRNode model, String modelFile, String errors)
+        public void onAssetLoaded(SXRNode model, String modelFile, String errors)
         {
-            if (mUserHandler != null)
-            {
-                mUserHandler.onAssetLoaded(context, model, modelFile, errors);
-            }
+            mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetImportEvents.class,
+                                                 "onAssetLoaded", model, mFileName, errors);
+            mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetEvents.class,
+                                                 "onAssetLoaded", mContext, model, mFileName, errors);
             mContext.getEventManager().sendEvent(mContext, IAssetEvents.class,
-                                                 "onAssetLoaded", new Object[] { mContext, model, mFileName, errors });
+                                                 "onAssetLoaded", mContext, model, mFileName, errors);
         }
 
         /*
@@ -448,7 +447,12 @@ public final class SXRAssetLoader {
                     animator.start();
                 }
             }
-            onAssetLoaded(mContext, mModel, mFileName, errors);
+            onAssetLoaded(mModel, mFileName, errors);
+            if (mHandler != null)
+            {
+                mContext.getAssetLoader().getEventReceiver().removeListener(mHandler);
+                mHandler = null;
+            }
         }
     }
 
@@ -502,12 +506,12 @@ public final class SXRAssetLoader {
             }
             if (mAssetRequest != null)
             {
-                mAssetRequest.onTextureLoaded(ctx, Texture, TextureFile);
+                mAssetRequest.onTextureLoaded(Texture, TextureFile);
             }
             else
             {
                 ctx.getEventManager().sendEvent(ctx, IAssetEvents.class,
-                        "onTextureLoaded", new Object[] { ctx, Texture, TextureFile });
+                        "onTextureLoaded", ctx, Texture, TextureFile);
             }
         }
 
@@ -521,7 +525,7 @@ public final class SXRAssetLoader {
             }
             if (mAssetRequest != null)
             {
-                mAssetRequest.onTextureError(ctx, t.getMessage(), TextureFile);
+                mAssetRequest.onTextureError(Texture, t.getMessage(), TextureFile);
 
                 SXRImage whiteTex = getDefaultImage(ctx);
                 if (whiteTex != null)
@@ -530,7 +534,7 @@ public final class SXRAssetLoader {
                 }
             }
             ctx.getEventManager().sendEvent(ctx, IAssetEvents.class,
-                    "onTextureError", new Object[] { ctx, t.getMessage(), TextureFile });
+                    "onTextureError", ctx, t.getMessage(), TextureFile);
         }
 
         @Override
@@ -576,12 +580,13 @@ public final class SXRAssetLoader {
         }
     }
 
-
     protected SXRContext mContext;
     protected static ResourceCache<SXRImage> mTextureCache = new ResourceCache<SXRImage>();
     protected ResourceCacheBase<SXRMesh> mMeshCache = new ResourceCacheBase<>();
     protected static HashMap<String, SXRImage> mEmbeddedCache = new HashMap<String, SXRImage>();
     protected static SXRBitmapImage mDefaultImage = null;
+    protected SXREventReceiver mListeners = null;
+
 
     /**
      * When the application is restarted we recreate the texture cache
@@ -608,6 +613,7 @@ public final class SXRAssetLoader {
     {
         mContext = context;
         mDefaultTextureParameters = new SXRTextureParameters(context);
+        mListeners = new SXREventReceiver(this);
     }
 
     /**
@@ -620,6 +626,12 @@ public final class SXRAssetLoader {
     {
         return mEmbeddedCache;
     }
+
+    /**
+     * Get the {@link SXREventReceiver} that listens for asset events
+     * @return event receiver for the asset loader
+     */
+    public SXREventReceiver getEventReceiver() { return mListeners; }
 
     private static SXRImage getDefaultImage(SXRContext ctx)
     {
@@ -1102,7 +1114,7 @@ public final class SXRAssetLoader {
     public SXRNode loadModel(final String filePath, final SXRScene scene) throws IOException
     {
         SXRNode model = new SXRNode(mContext);
-        AssetRequest assetRequest = new AssetRequest(model, new SXRResourceVolume(mContext, filePath), scene, null, false);
+        AssetRequest assetRequest = new AssetRequest(model, new SXRResourceVolume(mContext, filePath), scene, false);
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
         assetRequest.setImportSettings(SXRImportSettings.getRecommendedSettings());
@@ -1145,7 +1157,7 @@ public final class SXRAssetLoader {
     public SXRNode loadScene(final String filePath, final SXRScene scene) throws IOException
     {
         SXRNode model = new SXRNode(mContext);
-        AssetRequest assetRequest = new AssetRequest(model, new SXRResourceVolume(mContext, filePath), scene, null, true);
+        AssetRequest assetRequest = new AssetRequest(model, new SXRResourceVolume(mContext, filePath), scene, true);
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
         model.setName(assetRequest.getBaseName());
@@ -1189,11 +1201,14 @@ public final class SXRAssetLoader {
         {
             public void run()
             {
-                AssetRequest assetRequest = new AssetRequest(model, volume, scene, handler, true);
+                AssetRequest assetRequest = new AssetRequest(model, volume, scene, true);
                 String filePath = volume.getFullPath();
                 String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
+                getEventReceiver().addListener(handler);
                 assetRequest.setImportSettings(SXRImportSettings.getRecommendedSettings());
+                getEventReceiver().addListener(handler);
+                assetRequest.setHandler(handler);
                 model.setName(assetRequest.getBaseName());
                 try
                 {
@@ -1209,6 +1224,10 @@ public final class SXRAssetLoader {
                 catch (IOException ex)
                 {
                     // onModelError is generated in this case
+                }
+                finally
+                {
+                    getEventReceiver().removeListener(handler);
                 }
             }
         });
@@ -1244,11 +1263,13 @@ public final class SXRAssetLoader {
         {
             public void run()
             {
-                AssetRequest assetRequest = new AssetRequest(model, volume, scene, handler, true);
+                AssetRequest assetRequest = new AssetRequest(model, volume, scene,  true);
                 String filePath = volume.getFullPath();
                 String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
                 assetRequest.setImportSettings(settings);
+                assetRequest.setHandler(handler);
+                getEventReceiver().addListener(handler);
                 model.setName(assetRequest.getBaseName());
                 try
                 {
@@ -1264,6 +1285,10 @@ public final class SXRAssetLoader {
                 catch (IOException ex)
                 {
                     // onModelError is generated in this case
+                }
+                finally
+                {
+                    getEventReceiver().removeListener(handler);
                 }
             }
         });
@@ -1300,7 +1325,7 @@ public final class SXRAssetLoader {
             public void run()
             {
                 String filePath = volume.getFileName();
-                AssetRequest assetRequest = new AssetRequest(model, volume, scene, null, false);
+                AssetRequest assetRequest = new AssetRequest(model, volume, scene, false);
                 String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
                 model.setName(assetRequest.getBaseName());
@@ -1357,7 +1382,7 @@ public final class SXRAssetLoader {
             public void run()
             {
                 String filePath = volume.getFileName();
-                AssetRequest assetRequest = new AssetRequest(model, volume, scene, null, false);
+                AssetRequest assetRequest = new AssetRequest(model, volume, scene, false);
                 String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
                 model.setName(assetRequest.getBaseName());
@@ -1411,10 +1436,12 @@ public final class SXRAssetLoader {
     {
         SXRNode model = new SXRNode(mContext);
         SXRResourceVolume   volume = new SXRResourceVolume(mContext, filePath);
-        AssetRequest assetRequest = new AssetRequest(model, volume, null, handler, false);
+        AssetRequest assetRequest = new AssetRequest(model, volume, null, false);
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
         model.setName(assetRequest.getBaseName());
+        getEventReceiver().addListener(handler);
+        assetRequest.setHandler(handler);
         assetRequest.setImportSettings(SXRImportSettings.getRecommendedSettings());
         if (ext.equals("x3d"))
         {
@@ -1424,6 +1451,7 @@ public final class SXRAssetLoader {
         {
             loadJassimpModel(assetRequest, model);
         }
+        getEventReceiver().removeListener(handler);
         return model;
     }
 
@@ -1463,13 +1491,13 @@ public final class SXRAssetLoader {
      * @see #loadMesh(SXRAndroidResource.MeshCallback, SXRAndroidResource, int)
      */
     public SXRNode loadModel(String filePath,
-                                         EnumSet<SXRImportSettings> settings,
-                                         boolean cacheEnabled,
-                                         SXRScene scene) throws IOException
+                             EnumSet<SXRImportSettings> settings,
+                             boolean cacheEnabled,
+                             SXRScene scene) throws IOException
     {
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
         SXRNode model = new SXRNode(mContext);
-        AssetRequest assetRequest = new AssetRequest(model, new SXRResourceVolume(mContext, filePath), scene, null, false);
+        AssetRequest assetRequest = new AssetRequest(model, new SXRResourceVolume(mContext, filePath), scene, false);
         model.setName(assetRequest.getBaseName());
         assetRequest.setImportSettings(settings);
         assetRequest.useCache(cacheEnabled);
@@ -1521,15 +1549,15 @@ public final class SXRAssetLoader {
      * @see #loadMesh(SXRAndroidResource.MeshCallback, SXRAndroidResource, int)
      */
     public SXRNode loadModel(SXRAndroidResource resource,
-                                    EnumSet<SXRImportSettings> settings,
-                                    boolean cacheEnabled,
-                                    SXRScene scene) throws IOException
+                             EnumSet<SXRImportSettings> settings,
+                             boolean cacheEnabled,
+                             SXRScene scene) throws IOException
     {
         String filePath = resource.getResourceFilename();
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
         SXRNode model = new SXRNode(mContext);
         SXRResourceVolume volume = new SXRResourceVolume(mContext, resource);
-        AssetRequest assetRequest = new AssetRequest(model, volume, scene, null, false);
+        AssetRequest assetRequest = new AssetRequest(model, volume, scene, false);
 
         if (!cacheEnabled)
         {
@@ -1591,10 +1619,12 @@ public final class SXRAssetLoader {
                 String filePath = fileVolume.getFileName();
                 String ext = filePath.substring(filePath.length() - 3).toLowerCase();
                 AssetRequest assetRequest =
-                        new AssetRequest(model, fileVolume, null, handler, false);
+                        new AssetRequest(model, fileVolume, null, false);
                 model.setName(assetRequest.getBaseName());
                 assetRequest.setImportSettings(settings);
                 assetRequest.useCache(cacheEnabled);
+                getEventReceiver().addListener(handler);
+                assetRequest.setHandler(handler);
                 try
                 {
                     if (ext.equals("x3d"))
@@ -1609,6 +1639,10 @@ public final class SXRAssetLoader {
                 catch (IOException ex)
                 {
                     // onModelError is generated in this case
+                }
+                finally
+                {
+                    getEventReceiver().removeListener(handler);
                 }
             }
         });
@@ -1691,9 +1725,10 @@ public final class SXRAssetLoader {
             }
             catch (IOException ex)
             {
+                mContext.getEventManager().sendEvent(this, IAssetImportEvents.class,
+                                                     "onModelError", mContext, ex.getMessage(), androidResource.getResourcePath());
                 mContext.getEventManager().sendEvent(this, IAssetEvents.class,
-                        "onModelError", new Object[] { mContext, ex.getMessage(),
-                                androidResource.getResourcePath()});
+                        "onModelError", mContext, ex.getMessage(), androidResource.getResourcePath());
                 return null;
             }
         }
@@ -1847,7 +1882,7 @@ public final class SXRAssetLoader {
             throw new IOException(errmsg);
         }
         jassimpAdapter.processScene(request, model, assimpScene);
-        request.onModelLoaded(mContext, model, filePath);
+        request.onModelLoaded(model, filePath);
         mContext.runOnTheFrameworkThread(new Runnable() {
             public void run() {
                 // Inform the loaded object after it has been attached to the scene graph
