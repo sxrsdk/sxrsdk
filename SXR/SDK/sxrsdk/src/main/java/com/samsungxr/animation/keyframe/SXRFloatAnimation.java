@@ -284,6 +284,16 @@ public class SXRFloatAnimation implements PrettyPrint
     }
 
     /**
+     * Returns the interpolator.
+     *
+     * @return {@link LinearInterpolator} used to interpolate keys
+     */
+    public LinearInterpolator getInterpolator()
+    {
+        return mFloatInterpolator;
+    }
+
+    /**
      * Returns the number of keys.
      *
      * @return the number of keys
