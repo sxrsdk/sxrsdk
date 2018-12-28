@@ -827,6 +827,7 @@ class  SXRJassimpAdapter
             case NO_ANIMATION:
             case NO_LIGHTING:
             case NO_TEXTURING:
+            case NO_MORPH:
                 return null;
             default:
                 // Unsupported setting
@@ -1104,7 +1105,10 @@ class  SXRJassimpAdapter
             renderData.disableLight();
         }
         sceneObject.attachRenderData(renderData);
-        setMeshMorphComponent(mesh, sceneObject, aiMesh);
+        if (!settings.contains(SXRImportSettings.NO_MORPH))
+        {
+            setMeshMorphComponent(mesh, sceneObject, aiMesh);
+        }
     }
 
     private static final Map<AiTextureType, String> textureMap;

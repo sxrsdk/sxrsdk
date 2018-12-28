@@ -180,6 +180,8 @@ public class SXRResourceVolume {
         gvrContext = context;
         volumeType = SXRResourceVolume.VolumeType.ANDROID_ASSETS;
         defaultPath = filename;
+        String sdcard = Environment.getExternalStorageDirectory().getAbsolutePath();
+
         if (fname.startsWith("sd:"))
         {
             defaultPath = defaultPath.substring(3);
@@ -192,7 +194,7 @@ public class SXRResourceVolume {
             defaultPath = FileNameUtils.getParentDirectory(defaultPath);
             volumeType = SXRResourceVolume.VolumeType.ANDROID_SDCARD;
         }
-        else if (fname.startsWith("/storage/emulated/"))
+        else if (fname.startsWith(sdcard))
         {
             defaultPath = FileNameUtils.getParentDirectory(defaultPath);
             volumeType = SXRResourceVolume.VolumeType.ANDROID_SDCARD;
