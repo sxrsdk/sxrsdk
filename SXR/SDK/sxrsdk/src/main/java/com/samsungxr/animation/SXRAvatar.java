@@ -79,7 +79,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     public SXREventReceiver getEventReceiver() { return mReceiver; }
 
     /**
-     * Get the name of this avatar (supplied at construction time).
+     * Get the name of this avatar (supplied at construction time).BVH
      * @returns string with avatar name
      */
     public String getName() { return mAvatarRoot.getName(); }
@@ -253,7 +253,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             animator.setName(filePath);
             try
             {
-                BVHImporter importer = new BVHImporter(ctx);
+                BVHImporter importer = new BVHImporter(ctx, true);
                 SXRSkeletonAnimation skelAnim;
 
                 if (boneMap != null)

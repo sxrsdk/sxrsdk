@@ -22,6 +22,8 @@ import com.samsungxr.animation.keyframe.SXRAnimationBehavior;
 import com.samsungxr.animation.keyframe.SXRAnimationChannel;
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
+
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -50,10 +52,18 @@ public class BVHImporter
     private int xRotOffset;
     private int yRotOffset;
     private int zRotOffset;
+    private boolean mUseEuelerAngles = false;
+
+    public BVHImporter(SXRContext ctx, boolean useEulerAngles)
+    {
+        mContext = ctx;
+        mUseEuelerAngles = useEulerAngles;
+    }
 
     public BVHImporter(SXRContext ctx)
     {
         mContext = ctx;
+        mUseEuelerAngles = false;
     }
 
     public SXRSkeletonAnimation importAnimation(SXRAndroidResource res, SXRSkeleton skel) throws IOException
@@ -277,54 +287,10 @@ public class BVHImporter
                     y = Float.parseFloat(words[i+yRotOffset]);
                     z = Float.parseFloat(words[i+zRotOffset]);
 
-                    //rotation order
-
-                    for(int order = 0; order < 3; order++)
-                    {
-                        if(xRotOffset == order)
-                        {
-                            if(order == 0)
-                            {
-                                q.rotationX(x * (float) Math.PI / 180);
-                            }
-                            else
-                            {
-                                q.rotateX(x * (float) Math.PI / 180);
-                            }
-
-                        }
-                        else if(yRotOffset == order)
-                        {
-                            if(order == 0)
-                            {
-                                q.rotationY(y * (float) Math.PI / 180);
-                            }
-                            else
-                            {
-                                q.rotateY(y * (float) Math.PI / 180);
-                            }
-
-                        }
-                        else if(zRotOffset == order)
-                        {
-                            if(order == 0)
-                            {
-                                q.rotationZ(z * (float) Math.PI / 180);
-                            }
-                            else
-                            {
-                                q.rotateZ(z * (float) Math.PI / 180);
-                            }
-
-                        }
-
-                    }
-                    q.normalize();
-
+                    makeQuat(q, x, y, z);
                     pose.setLocalRotation(boneIndex, q.x, q.y, q.z, q.w);
                     boneIndex++;
                     bvhboneIndex++;
-
                 }
                 else
                 {
@@ -333,6 +299,49 @@ public class BVHImporter
             }
         }
         return pose;
+    }
+
+    private void makeQuat(Quaternionf q, float x, float y, float z)
+    {
+        float deg2rad =  (float) Math.PI / 180;
+        for (int order = 0; order < 3; order++)
+        {
+            if (xRotOffset == order)
+            {
+                if (order == 0)
+                {
+                    q.rotationX(x * deg2rad);
+                }
+                else
+                {
+                    q.rotateX(x * deg2rad);
+                }
+
+            }
+            else if (yRotOffset == order)
+            {
+                if (order == 0)
+                {
+                    q.rotationY(y * deg2rad);
+                }
+                else
+                {
+                    q.rotateY(y * deg2rad);
+                }
+            }
+            else if (zRotOffset == order)
+            {
+                if (order == 0)
+                {
+                    q.rotationZ(z * deg2rad);
+                }
+                else
+                {
+                    q.rotateZ(z * deg2rad);
+                }
+            }
+        }
+        q.normalize();
     }
 
     public SXRSkeletonAnimation readMotion(SXRSkeleton skel) throws IOException
@@ -352,6 +361,7 @@ public class BVHImporter
         SXRPose bindpose = skel.getBindPose();
         int frameIndex = 0;
         int numFrames = 0;
+        float deg2rad =  (float) Math.PI / 180;
 
         /*
          * Parse and accumulate all the motion keyframes.
@@ -377,10 +387,15 @@ public class BVHImporter
                 for (int i = 0; i < numbones; i++)
                 {
                     numFrames = Integer.parseInt(words[1]);
-                    float[] r = new float[5 * numFrames];
-                    float[] p = new float[4 * numFrames];
-                    rotKeysPerBone.add(r);
-                    posKeysPerBone.add(p);
+                    posKeysPerBone.add(new float[4 * numFrames]);
+                    if (mUseEuelerAngles)
+                    {
+                        rotKeysPerBone.add(new float[4 * numFrames]);
+                    }
+                    else
+                    {
+                        rotKeysPerBone.add(new float[5 * numFrames]);
+                    }
                 }
                 continue;
             }
@@ -396,6 +411,7 @@ public class BVHImporter
             int boneIndex = 0;
             int i = 0;
             int f;
+            Matrix4f mtx = new Matrix4f();
             while (i + 3 <= words.length)
             {
                 bonename = mBoneNames.get(boneIndex);
@@ -423,66 +439,31 @@ public class BVHImporter
                     posKeys[f + 3] = z;
                     i += 3;
                 }
-
                 rotKeys = rotKeysPerBone.get(boneIndex);
-
                 x = Float.parseFloat(words[i + xRotOffset]);
                 y = Float.parseFloat(words[i + yRotOffset]);
                 z = Float.parseFloat(words[i + zRotOffset]);
                 i += 3;
-
-                //rotation order
-
-                for(int order = 0; order < 3; order++)
+                if (mUseEuelerAngles)
                 {
-                    if(xRotOffset == order)
-                    {
-                        if(order == 0)
-                        {
-                            q.rotationX(x * (float) Math.PI / 180);
-                        }
-                        else
-                        {
-                            q.rotateX(x * (float) Math.PI / 180);
-                        }
-
-                    }
-                    else if(yRotOffset == order)
-                    {
-                        if(order == 0)
-                        {
-                            q.rotationY(y * (float) Math.PI / 180);
-                        }
-                        else
-                        {
-                            q.rotateY(y * (float) Math.PI / 180);
-                        }
-
-                    }
-                    else if(zRotOffset == order)
-                    {
-                        if(order == 0)
-                        {
-                            q.rotationZ(z * (float) Math.PI / 180);
-                        }
-                        else
-                        {
-                            q.rotateZ(z * (float) Math.PI / 180);
-                        }
-
-                    }
-
+                    f = 4 * frameIndex;
+                    rotKeys[f++] = curTime;
+                    rotKeys[f++] = x * deg2rad;
+                    rotKeys[f++] = y * deg2rad;
+                    rotKeys[f++] = z * deg2rad;
                 }
-
-                q.normalize();
-                bindpose.getLocalRotation(boneIndex, b);
-                q.mul(b);
-                f = 5 * frameIndex;
-                rotKeys[f++] = curTime;
-                rotKeys[f++] = q.x;
-                rotKeys[f++] = q.y;
-                rotKeys[f++] = q.z;
-                rotKeys[f] = q.w;
+                else
+                {
+                    makeQuat(q, x, y, z);
+                    bindpose.getLocalRotation(boneIndex, b);
+                    q.mul(b);
+                    f = 5 * frameIndex;
+                    rotKeys[f++] = curTime;
+                    rotKeys[f++] = q.x;
+                    rotKeys[f++] = q.y;
+                    rotKeys[f++] = q.z;
+                    rotKeys[f] = q.w;
+                }
                 boneIndex++;
                 //Log.d("BVH", "%s %f %f %f %f", bonename, q.x, q.y, q.z, q.w);
             }
@@ -512,8 +493,15 @@ public class BVHImporter
                 skel.getBindPose().getLocalPosition(boneIndex, pos);
                 posKeys = new float[] { 0, pos.x, pos.y, pos.z };
             }
-            channel = new SXRAnimationChannel(bonename, posKeys, rotKeys, null,
-                    SXRAnimationBehavior.DEFAULT, SXRAnimationBehavior.DEFAULT);
+            if (mUseEuelerAngles)
+            {
+                channel = new SXRBVHAnimationChannel(bonename, posKeys, rotKeys,
+                        SXRAnimationBehavior.DEFAULT, SXRAnimationBehavior.DEFAULT);
+            }
+            else
+            {
+                channel = new SXRAnimationChannel(bonename, posKeys, rotKeys, null, SXRAnimationBehavior.DEFAULT, SXRAnimationBehavior.DEFAULT);
+            }
             skelanim.addChannel(bonename, channel);
         }
         return skelanim;
