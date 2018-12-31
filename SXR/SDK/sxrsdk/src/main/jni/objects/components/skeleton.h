@@ -29,6 +29,7 @@ public:
     }
 
     int getNumBones() const { return mNumBones; }
+    void setBoneParents(int* parents, int numbones);
     void setBoneName(int boneIndex, const char* name);
     const char* getBoneName(int boneIndex) const;
     void setPose(const float* input);

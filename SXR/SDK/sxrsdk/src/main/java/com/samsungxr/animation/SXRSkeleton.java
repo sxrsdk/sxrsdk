@@ -124,7 +124,6 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
 
     protected String[] mBoneNames;
     protected Vector3f mRootOffset;     // offset for root bone animations
-    protected Vector3f mBoneAxis;       // axis of bone, defines bone coordinate system
     protected SXRPose mBindPose;        // bind pose for this skeleton
     protected SXRPose mInverseBindPose; // inverse bind pose for this skeleton
     protected SXRPose mPose;            // current pose for this skeleton
@@ -153,7 +152,6 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         super(ctx, NativeSkeleton.ctor(parentBones));
         mType = getComponentType();
         mParentBones = parentBones;
-        mBoneAxis = new Vector3f(0, 0, 1);
         mRootOffset = new Vector3f(0, 0, 0);
         mBoneOptions = new int[parentBones.length];
         mBoneNames = new String[parentBones.length];
@@ -183,7 +181,6 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         int numBones = boneNames.size();
         mType = getComponentType();
         mParentBones = sTempBoneParents;
-        mBoneAxis = new Vector3f(0, 0, 1);
         mRootOffset = new Vector3f(0, 0, 0);
         mBoneOptions = new int[numBones];
         mBoneNames = new String[numBones];
@@ -219,7 +216,6 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         int numBones = NativeSkeleton.getNumBones(nativePtr);
         mType = getComponentType();
         mParentBones = new int[numBones];
-        mBoneAxis = new Vector3f(0, 0, 1);
         mRootOffset = new Vector3f(0, 0, 0);
         mBoneOptions = new int[numBones];
         mBoneNames = new String[numBones];
@@ -746,27 +742,6 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     }
 
     /**
-     * Get the bone Z axis which defines the bone coordinate system.
-     * <p>
-     * The default bone coordinate system has the Z axis of
-     * the bone at (0, 0, 1).
-     */
-    public Vector3f getBoneAxis()
-    {
-        return mBoneAxis;
-    }
-
-    /**
-     * Set the bone Z axis which defines the bone coordinate system.
-     * The default bone coordinate system has the Z axis of
-     * the bone at (0, 0, 1).
-     */
-    public void setBoneAxis(Vector3f boneAxis)
-    {
-        mBoneAxis = boneAxis;
-    }
-
-    /**
      * Sets the name of the designated bone.
      *
      * @param boneindex zero based index of bone to rotate.
@@ -1107,64 +1082,106 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         int numBones = getNumBones();
         List<Integer> parentBoneIds = new ArrayList<Integer>(numBones + newSkel.getNumBones());
         List<String> newBoneNames = new ArrayList<String>(newSkel.getNumBones());
-        List<Matrix4f> newMatrices = new ArrayList<Matrix4f>(newSkel.getNumBones());
-        SXRPose oldBindPose = getBindPose();
-        SXRPose curPose = getPose();
+        List<Matrix4f> matrices = new ArrayList<Matrix4f>(newSkel.getNumBones());
+        List<SXRNode> bones = new ArrayList<SXRNode>(newSkel.getNumBones());
+        int numNewBones = 0;
 
+        /*
+         * Accumulate the bind pose matrices for the old skeleton
+         */
+        for (int j = 0; j < getNumBones(); ++j)
+        {
+            Matrix4f m = new Matrix4f();
+
+            getBindPose().getLocalMatrix(j, m);
+            matrices.add(m);
+        }
+        /*
+         * Accumulate the parent bone IDs for the old skeleton
+         */
         for (int i = 0; i < numBones; ++i)
         {
             parentBoneIds.add(mParentBones[i]);
         }
+        /*
+         * Add bones in the new skeleton that are not in
+         * the old skeleton.
+         */
         for (int j = 0; j < newSkel.getNumBones(); ++j)
         {
             String boneName = newSkel.getBoneName(j);
             int boneId = getBoneIndex(boneName);
+            Matrix4f m = new Matrix4f();
+
             if (boneId < 0)
             {
                 int parentId = newSkel.getParentBoneIndex(j);
-                Matrix4f m = new Matrix4f();
 
                 newSkel.getBindPose().getLocalMatrix(j, m);
-                newMatrices.add(m);
+                matrices.add(m);
                 newBoneNames.add(boneName);
+                bones.add(newSkel.getBone(j));
                 if (parentId >= 0)
                 {
                     boneName = newSkel.getBoneName(parentId);
                     parentId = getBoneIndex(boneName);
                 }
+                else
+                {
+                    parentId = 0;
+                }
                 parentBoneIds.add(parentId);
+                ++numNewBones;
             }
         }
-        if (parentBoneIds.size() == numBones)
+        if (numNewBones == 0)
         {
             return;
         }
-        int n = numBones +  parentBoneIds.size();
+        /*
+         * Enlarge arrays in this skeleton to accomodate
+         * the new bones added and copy the old data
+         */
+        int n = numBones + numNewBones;
         int[] parentIds = Arrays.copyOf(mParentBones, n);
         int[] boneOptions = Arrays.copyOf(mBoneOptions, n);
         String[] boneNames = Arrays.copyOf(mBoneNames, n);
 
         mBones = Arrays.copyOf(mBones, n);
         mPoseMatrices =  new float[n * 16];
-        for (int i = 0; i < parentBoneIds.size(); ++i)
+        /*
+         * Add bones from the new skeleton into this skeleton
+         */
+        for (int i = 0; i < numNewBones; ++i)
         {
-            n = numBones + i;
-            parentIds[n] = parentBoneIds.get(i);
-            boneNames[n] = newBoneNames.get(i);
-            boneOptions[n] = BONE_ANIMATE;
+            int m = numBones + i;
+            parentIds[m] = parentBoneIds.get(i);
+            boneNames[m] = newBoneNames.get(i);
+            boneOptions[m] = BONE_ANIMATE;
+            mBones[m] = bones.get(i);
         }
         mBoneOptions = boneOptions;
         mBoneNames = boneNames;
         mParentBones = parentIds;
         mPose = new SXRPose(this);
         mBindPose = new SXRPose(this);
-        mBindPose.copy(oldBindPose);
-        mPose.copy(curPose);
-        mBindPose.sync();
-        for (int j = 0; j < newSkel.getNumBones(); ++j)
+        mInverseBindPose = null;
+        mSkinPose = null;
+        /*
+         * Update the native skeleton
+         */
+        NativeSkeleton.setBoneParents(getNative(), mParentBones);
+        for (int i = numBones; i < n; ++i)
         {
-            mBindPose.setLocalMatrix(numBones + j, newMatrices.get(j));
-            mPose.setLocalMatrix(numBones + j, newMatrices.get(j));
+            NativeSkeleton.setBoneName(getNative(), i, boneNames[i]);
+        }
+        /*
+         * Update the poses for this skeleton
+         */
+        for (int j = 0; j < n; ++j)
+        {
+            mBindPose.setLocalMatrix(j, matrices.get(j));
+            mPose.setLocalMatrix(j, matrices.get(j));
         }
         setBindPose(mBindPose);
         mPose.sync();
@@ -1318,6 +1335,8 @@ class NativeSkeleton
     static native int getNumBones(long object);
 
     static native boolean getBoneParents(long object, int[] parentIds);
+
+    static native void setBoneParents(long object, int[] parentids);
 
     static native long getComponentType();
 

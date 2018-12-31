@@ -478,7 +478,7 @@ class  SXRJassimpAdapter
 
                     if (parBoneId < 0)
                     {
-                        Log.d("BONE", "Ignoring node %s with no parent bone");
+                        Log.d("BONE", "Ignoring node %s with no parent bone", nodeName);
                         return true;
                     }
                 }

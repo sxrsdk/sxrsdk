@@ -106,7 +106,6 @@ public class SXRSkin extends SXRComponent implements PrettyPrint
         {
             return;
         }
-        int[] newMap = new int[newSkel.getNumBones()];
         for (int i = 0; i < mBoneMap.length; ++i)
         {
             int oldIndex = mBoneMap[i];
@@ -114,14 +113,13 @@ public class SXRSkin extends SXRComponent implements PrettyPrint
             int newIndex = newSkel.getBoneIndex(boneName);
             if (newIndex >= 0)
             {
-                newMap[i] = newIndex;
+                mBoneMap[i] = newIndex;
             }
             else
             {
                 throw new IllegalArgumentException("Destination skeleton does not have bone " + boneName);
             }
         }
-        mBoneMap = newMap;
         mSkeleton = newSkel;
     }
 
