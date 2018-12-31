@@ -38,6 +38,7 @@ public:
     const glm::mat4* getSkinMatrix(int boneId) const;
     const int*    getBoneParents() const;
     int getBoneParent(int boneId) const;
+    int getBoneIndex(const char* name) const;
 
     int getParentBoneID(int boneId) const
     {

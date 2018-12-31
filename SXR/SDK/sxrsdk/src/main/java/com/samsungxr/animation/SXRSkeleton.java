@@ -1125,6 +1125,14 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
                 {
                     boneName = newSkel.getBoneName(parentId);
                     parentId = getBoneIndex(boneName);
+                    if (parentId < 0)
+                    {
+                        parentId = newBoneNames.indexOf(boneName);
+                        if (parentId >= 0)
+                        {
+                            parentId += numBones;
+                        }
+                    }
                 }
                 else
                 {

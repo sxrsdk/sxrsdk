@@ -26,6 +26,7 @@ public:
     int getNumBones() const { return mBoneMap.size(); }
 
     void setBoneMap(const int* bonemap, int numBones);
+    void setSkeleton(Skeleton* skel);
 
     void bindBuffer(Renderer* renderer, Shader* shader);
     bool updateGPU(Renderer* renderer, Shader* shader);
@@ -37,7 +38,8 @@ private:
     Skin& operator=(Skin&& s) = delete;
 
 private:
-    Skeleton& mSkeleton;
+    std::mutex  mLock;
+    Skeleton* mSkeleton;
     std::vector<int> mBoneMap;
     UniformBlock* mBonesBuffer;
 };

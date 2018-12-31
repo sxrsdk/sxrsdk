@@ -41,11 +41,26 @@ namespace sxr {
             mBoneNames.reserve(numbones);
             mBoneNames.resize(numbones);
         }
-        memcpy(mBoneParents, boneparents, numbones * sizeof(int));
-        memcpy(skinMatrices, mSkinMatrices, n);
-        memcpy(boneMatrices, mBoneMatrices, n);
-        mSkinMatrices = skinMatrices;
-        mBoneMatrices = boneMatrices;
+        {
+            std::lock_guard<std::mutex> lock(mLock);
+            memcpy(mBoneParents, boneparents, numbones * sizeof(int));
+            memcpy(skinMatrices, mSkinMatrices, n);
+            memcpy(boneMatrices, mBoneMatrices, n);
+            mSkinMatrices = skinMatrices;
+            mBoneMatrices = boneMatrices;
+        }
+    }
+
+    int Skeleton::getBoneIndex(const char* name) const
+    {
+        for (int i = 0; i < mBoneNames.size(); ++i)
+        {
+            if (strcmp(name, mBoneNames[i].c_str()) == 0)
+            {
+                return i;
+            }
+        }
+        return -1;
     }
 
     void Skeleton::setBoneName(int boneIndex, const char* boneName)

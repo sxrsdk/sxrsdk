@@ -315,6 +315,7 @@ public class BVHImporter
         }
         InputStreamReader inputreader = new InputStreamReader(stream);
         mReader = new BufferedReader(inputreader);
+        mFileName = res.getResourceFilename();
         readSkeleton();
         return createSkeleton();
     }

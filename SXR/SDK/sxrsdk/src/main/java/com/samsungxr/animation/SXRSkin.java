@@ -44,8 +44,8 @@ import org.joml.Vector3f;
 public class SXRSkin extends SXRComponent implements PrettyPrint
 {
     private static final String TAG = Log.tag(SXRSkin.class);
-    protected int[] mBoneMap = null;
     protected SXRSkeleton mSkeleton;
+    int mNumBones = 0;
 
     static public long getComponentType()
     {
@@ -72,7 +72,7 @@ public class SXRSkin extends SXRComponent implements PrettyPrint
      */
     public int getNumBones()
     {
-        return mBoneMap.length;
+        return mNumBones;
     }
 
     /**
@@ -88,7 +88,7 @@ public class SXRSkin extends SXRComponent implements PrettyPrint
      */
     public void setBoneMap(int[] boneMap)
     {
-        mBoneMap = boneMap;
+        mNumBones = boneMap.length;
         NativeSkin.setBoneMap(getNative(), boneMap);
     }
 
@@ -102,25 +102,11 @@ public class SXRSkin extends SXRComponent implements PrettyPrint
      */
     public void setSkeleton(SXRSkeleton newSkel)
     {
-        if (mSkeleton == newSkel)
+        if (mSkeleton != newSkel)
         {
-            return;
+            mSkeleton = newSkel;
+            NativeSkin.setSkeleton(getNative(), newSkel.getNative());
         }
-        for (int i = 0; i < mBoneMap.length; ++i)
-        {
-            int oldIndex = mBoneMap[i];
-            String boneName = mSkeleton.getBoneName(oldIndex);
-            int newIndex = newSkel.getBoneIndex(boneName);
-            if (newIndex >= 0)
-            {
-                mBoneMap[i] = newIndex;
-            }
-            else
-            {
-                throw new IllegalArgumentException("Destination skeleton does not have bone " + boneName);
-            }
-        }
-        mSkeleton = newSkel;
     }
 
     @Override
@@ -132,15 +118,6 @@ public class SXRSkin extends SXRComponent implements PrettyPrint
         sb.append(Log.getSpaces(indent) + 2);
         sb.append("numBones = " + Integer.toString(getNumBones()));
         sb.append(System.lineSeparator());
-        for (int i = 0; i < getNumBones(); ++i)
-        {
-            int boneId = mBoneMap[i];
-            String boneName = mSkeleton.getBoneName(boneId);
-            sb.append(Log.getSpaces(indent) + 4);
-            sb.append(Integer.toString(i));
-            sb.append(": ");
-            sb.append(boneName);
-        }
     }
 }
 
@@ -149,4 +126,5 @@ class NativeSkin
     static native long ctor(long skeleton);
     static native long getComponentType();
     static native boolean setBoneMap(long object, int[] boneMap);
+    static native void setSkeleton(long object, long skel);
 }

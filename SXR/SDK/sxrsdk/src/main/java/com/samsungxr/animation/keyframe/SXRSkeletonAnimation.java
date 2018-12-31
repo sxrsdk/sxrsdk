@@ -113,6 +113,18 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     }
 
     /**
+     * Get the number of animation channels
+     */
+    public int getNumChannels()
+    {
+        if (mBoneChannels == null)
+        {
+            return 0;
+        }
+        return mBoneChannels.length;
+    }
+
+    /**
      * Find the channel in the animation that animates the named bone.
      * @param boneName  name of bone to animate.
      */
@@ -255,7 +267,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
         sb.append(Log.getSpaces(indent));
         sb.append(SXRSkeletonAnimation.class.getSimpleName());
         sb.append("[name=" + mName + ", duration=" + getDuration() + ", "
-                + mBoneChannels.length + " channels]");
+                + getNumChannels() + " channels]");
         sb.append(System.lineSeparator());
 
         for (SXRAnimationChannel nodeAnim : mBoneChannels)
