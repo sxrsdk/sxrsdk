@@ -253,7 +253,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             animator.setName(filePath);
             try
             {
-                BVHImporter importer = new BVHImporter(ctx, true);
+                BVHImporter importer = new BVHImporter(ctx);
                 SXRSkeletonAnimation skelAnim;
 
                 if (boneMap != null)
@@ -299,6 +299,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
         }
     }
+
     /**
      * Adds an animation to this avatar.
      *
@@ -357,7 +358,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     {
         SXRAnimator anim = findAnimation(name);
 
-        if (name.equals(anim.getName()))
+        if ((anim != null) && name.equals(anim.getName()))
         {
             start(anim);
             return;
