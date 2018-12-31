@@ -232,7 +232,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         Matrix4f mtx = new Matrix4f();
         for (int boneId = 0; boneId < numBones; ++boneId)
         {
-            mtx.get(mPoseMatrices, boneId * 16);
+            mtx.set(mPoseMatrices, boneId * 16);
             mBindPose.setWorldMatrix(boneId, mtx);
             mPose.setWorldMatrix(boneId, mtx);
             mBoneNames[boneId] = NativeSkeleton.getBoneName(nativePtr, boneId);
