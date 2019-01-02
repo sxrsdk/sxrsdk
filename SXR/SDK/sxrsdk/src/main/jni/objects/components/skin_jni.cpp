@@ -19,6 +19,10 @@ extern "C" {
     JNIEXPORT jboolean JNICALL
     Java_com_samsungxr_animation_NativeSkin_setBoneMap(JNIEnv* env, jobject clz,
                                             jlong jskin, jintArray jboneMap);
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_animation_NativeSkin_setSkeleton(JNIEnv* env, jobject clz,
+                                                       jlong jskin, jlong jskel);
+
 
 } // extern "C"
 
@@ -47,6 +51,15 @@ Java_com_samsungxr_animation_NativeSkin_setBoneMap(JNIEnv* env, jobject clz,
     skin->setBoneMap(boneMap, n);
     env->ReleaseIntArrayElements(jboneMap, boneMap, JNI_ABORT);
     return true;
+}
+
+JNIEXPORT void JNICALL
+Java_com_samsungxr_animation_NativeSkin_setSkeleton(JNIEnv* env, jobject clz,
+                                                    jlong jskin, jlong jskel)
+{
+    Skin* skin = reinterpret_cast<Skin*>(jskin);
+    Skeleton* skel = reinterpret_cast<Skeleton*>(jskel);
+    skin->setSkeleton(skel);
 }
 
 } // namespace sxr

@@ -103,9 +103,14 @@ public enum SXRImportSettings {
     /**
      * Do not include textures and omit texture coordinates from meshes
      */
-    NO_TEXTURING(0x8000000);
+    NO_TEXTURING(0x8000000),
 
-    
+    /**
+     * Do not include blend shapes (morphs)
+     */
+    NO_MORPH(0x10000000);
+
+
     private int mValue;
     
     private static EnumSet<SXRImportSettings> recommendedSettings = EnumSet.of(TRIANGULATE, FLIP_UV, JOIN_IDENTICAL_VERTICES,

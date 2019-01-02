@@ -271,6 +271,7 @@ class  SXRJassimpAdapter
             SXRMeshMorph morph = new SXRMeshMorph(mContext, nAnimationMeshes);
             sceneObject.attachComponent(morph);
             int blendShapeNum = 0;
+            float[] weights = new float[nAnimationMeshes];
 
             for (AiAnimMesh animMesh : aiMesh.getAnimationMeshes())
             {
@@ -281,6 +282,7 @@ class  SXRJassimpAdapter
                 float[] tangentArray = null;
                 float[] bitangentArray = null;
 
+                weights[blendShapeNum] = animMesh.getDefaultWeight();
                 //copy target positions to anim vertex buffer
                 FloatBuffer animPositionBuffer = animMesh.getPositionBuffer();
                 if (animPositionBuffer != null)
@@ -325,6 +327,7 @@ class  SXRJassimpAdapter
                 morph.setBlendShape(blendShapeNum, animBuff);
                 blendShapeNum++;
             }
+            morph.setWeights(weights);
             morph.update();
         }
         catch (IllegalArgumentException ex)
@@ -475,7 +478,7 @@ class  SXRJassimpAdapter
 
                     if (parBoneId < 0)
                     {
-                        Log.d("BONE", "Ignoring node %s with no parent bone");
+                        Log.d("BONE", "Ignoring node %s with no parent bone", nodeName);
                         return true;
                     }
                 }
@@ -824,6 +827,7 @@ class  SXRJassimpAdapter
             case NO_ANIMATION:
             case NO_LIGHTING:
             case NO_TEXTURING:
+            case NO_MORPH:
                 return null;
             default:
                 // Unsupported setting
@@ -1101,7 +1105,10 @@ class  SXRJassimpAdapter
             renderData.disableLight();
         }
         sceneObject.attachRenderData(renderData);
-        setMeshMorphComponent(mesh, sceneObject, aiMesh);
+        if (!settings.contains(SXRImportSettings.NO_MORPH))
+        {
+            setMeshMorphComponent(mesh, sceneObject, aiMesh);
+        }
     }
 
     private static final Map<AiTextureType, String> textureMap;
@@ -1346,7 +1353,7 @@ class  SXRJassimpAdapter
             }
             catch (IOException ex2)
             {
-                assetRequest.onTextureError(mContext, ex2.getMessage(), mFileName);
+                assetRequest.onTextureError(gvrTex, mFileName, ex2.getMessage());
             }
         }
         else

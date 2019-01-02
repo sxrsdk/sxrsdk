@@ -23,19 +23,6 @@ import com.samsungxr.IEvents;
 public interface IPlaneEvents extends IEvents
 {
     /**
-     *
-     * Called when plane detection starts
-     * at initialization time.
-     */
-    void onStartPlaneDetection(IMixedReality mr);
-
-    /**
-     * Called when plane detection ends
-     * at shutdown time.
-     */
-    void onStopPlaneDetection(IMixedReality mr);
-
-    /**
      * Called when a new plane is detected.
      *
      * @param plane the new {@link SXRPlane} component created
@@ -57,4 +44,11 @@ public interface IPlaneEvents extends IEvents
      * @param parentPlane the {@link SXRPlane} component which remains.
      */
     void onPlaneMerging(SXRPlane childPlane, SXRPlane parentPlane);
+
+    /**
+     * Called when the polygon that represents the plane changes.
+     *
+     * @param plane the {@link SXRPlane} component which its polygon changed.
+     */
+    void onPlaneGeometryChange(SXRPlane plane);
 }

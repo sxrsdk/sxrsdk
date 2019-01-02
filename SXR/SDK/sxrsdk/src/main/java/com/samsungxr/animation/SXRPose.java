@@ -735,7 +735,13 @@ public class SXRPose implements PrettyPrint
         int numbones = getNumBones();
 
         if (getSkeleton() != src.getSkeleton())
+        {
             throw new IllegalArgumentException("SXRPose.copy: input pose does not have same skeleton as this pose");
+        }
+        if (numbones > src.getNumBones())
+        {
+            numbones = src.getNumBones();
+        }
         src.sync();
         for (int i = 0; i < numbones; ++i)
         {

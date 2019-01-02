@@ -19,7 +19,7 @@ import org.joml.Vector3f;
  * The order in which the transformations are applied is - as usual -
  * scaling, rotation, translation.
  */
-public final class SXRAnimationChannel implements PrettyPrint {
+public class SXRAnimationChannel implements PrettyPrint {
     private static final String TAG = SXRAnimationChannel.class.getSimpleName();
     private static final float[] mTempVec = new float[3];
 
@@ -319,22 +319,22 @@ public final class SXRAnimationChannel implements PrettyPrint {
     /**
      * Node name.
      */
-    private final String m_nodeName;
-    final private float[] mPosKey = new float[] {  0, 0, 0 };
-    final private float[] mScaleKey = new float[] { 1, 1, 1 };
-    final private float[] mRotKey = new float[] { 0, 0, 0, 1 };
-    final private Quaternionf mTempQuat = new Quaternionf(0, 0, 0, 1);
-    final private SXRFloatAnimation mPosInterpolator;
-    final private SXRQuatAnimation mRotInterpolator;
-    final private SXRFloatAnimation mSclInterpolator;
+    protected final String m_nodeName;
+    final protected float[] mPosKey = new float[] {  0, 0, 0 };
+    final protected float[] mScaleKey = new float[] { 1, 1, 1 };
+    final protected float[] mRotKey = new float[] { 0, 0, 0, 1 };
+    final protected Quaternionf mTempQuat = new Quaternionf(0, 0, 0, 1);
+    final protected SXRFloatAnimation mPosInterpolator;
+    final protected SXRQuatAnimation mRotInterpolator;
+    final protected SXRFloatAnimation mSclInterpolator;
 
     /**
      * Pre-animation behavior.
      */
-    private final SXRAnimationBehavior mPreState;
+    protected final SXRAnimationBehavior mPreState;
 
     /**
      * Post-animation behavior.
      */
-    private final SXRAnimationBehavior mPostState;
+    protected final SXRAnimationBehavior mPostState;
 }

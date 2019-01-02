@@ -61,7 +61,7 @@ final class X3DLoader {
 
             try {
                 x3dObject.Parse(inputStream, shaderSettings);
-                assetRequest.onModelLoaded(context, root, fileName);
+                assetRequest.onModelLoaded(root, fileName);
                 SXRAnimator animator = (SXRAnimator) root.getComponent(SXRAnimator.getComponentType());
 
                 if ((animator != null) && assetRequest.getImportSettings().contains(SXRImportSettings.NO_ANIMATION))
