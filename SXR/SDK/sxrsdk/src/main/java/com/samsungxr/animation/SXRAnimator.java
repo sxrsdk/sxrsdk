@@ -365,10 +365,10 @@ public class SXRAnimator extends SXRBehavior
         {
             mAnimations.get(mAnimInterp).setID(idIntp+2);
             mAnimations.get(mAnimInterp+1).setID(idIntp+3);
-            mAnimations.get(mAnimInterp).setRepeatMode(SXRRepeatMode.REPEATED);
-            mAnimations.get(mAnimInterp+1).setRepeatMode(SXRRepeatMode.REPEATED);
-            mAnimations.get(mAnimInterp).setRepeatCount(-1);
-            mAnimations.get(mAnimInterp+1).setRepeatCount(-1);
+            mAnimations.get(mAnimInterp).setRepeatMode(SXRRepeatMode.PINGPONG);
+            mAnimations.get(mAnimInterp+1).setRepeatMode(SXRRepeatMode.PINGPONG);
+            mAnimations.get(mAnimInterp).setRepeatCount(1);
+            mAnimations.get(mAnimInterp+1).setRepeatCount(1);
             mAnimInterp = mAnimInterp+2;
         }
 
