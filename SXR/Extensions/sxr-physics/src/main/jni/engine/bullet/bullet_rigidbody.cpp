@@ -19,6 +19,7 @@
 #include "objects/components/sphere_collider.h"
 #include "util/sxr_log.h"
 
+#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionShapes/btEmptyShape.h>
 #include <LinearMath/btDefaultMotionState.h>
@@ -35,6 +36,7 @@ BulletRigidBody::BulletRigidBody()
           mSimType(SimulationType::DYNAMIC)
 {
     mRigidBody->setUserPointer(this);
+    mWorld = nullptr;
 }
 
 BulletRigidBody::BulletRigidBody(btRigidBody *rigidBody)
@@ -55,6 +57,7 @@ BulletRigidBody::BulletRigidBody(btRigidBody *rigidBody)
     {
         mSimType = SimulationType::KINEMATIC;
     }
+    mWorld = nullptr;
 }
 
 BulletRigidBody::~BulletRigidBody() {
@@ -435,6 +438,44 @@ const float  BulletRigidBody::getCcdSweptSphereRadius() const {
 
 const float  BulletRigidBody::getContactProcessingThreshold() const {
     return mRigidBody->getContactProcessingThreshold();
+}
+
+void BulletRigidBody::reset(bool rebuildCollider)
+{
+    if (nullptr == mWorld)
+    {
+        // Not added yet
+        return;
+    }
+
+    int collisionFilterGroup = mRigidBody->getBroadphaseProxy()->m_collisionFilterGroup;
+    int collisionFilterMask = mRigidBody->getBroadphaseProxy()->m_collisionFilterMask;
+    mWorld->removeRigidBody(mRigidBody);
+
+    if (rebuildCollider)
+    {
+        Collider *collider = (Collider *) owner_object_->getComponent(COMPONENT_TYPE_COLLIDER);
+        bool isDynamic = (getMass() != 0.f);
+        delete mConstructionInfo.m_collisionShape;
+        mConstructionInfo.m_collisionShape = convertCollider2CollisionShape(collider);
+        if (isDynamic)
+        {
+            mConstructionInfo.m_collisionShape->calculateLocalInertia(getMass(),
+                    mConstructionInfo.m_localInertia);
+        }
+        else
+        {
+            mSimType = SimulationType::STATIC;
+        }
+        mRigidBody->setCollisionShape(mConstructionInfo.m_collisionShape);
+        mRigidBody->setMassProps(getMass(), mConstructionInfo.m_localInertia);
+        mRigidBody->updateInertiaTensor();
+    }
+
+    updateColisionShapeLocalScaling();
+    mRigidBody->setMotionState(this);
+    getWorldTransform(prevPos);
+    mWorld->addRigidBody(mRigidBody, collisionFilterGroup, collisionFilterMask);
 }
 
 }

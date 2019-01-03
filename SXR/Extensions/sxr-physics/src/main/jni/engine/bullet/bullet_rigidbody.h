@@ -22,6 +22,8 @@
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <LinearMath/btMotionState.h>
 
+class btDynamicsWorld;
+
 namespace sxr {
 class Node;
 
@@ -150,6 +152,8 @@ class BulletRigidBody : public PhysicsRigidBody,
 
     void updateConstructionInfo();
 
+    void reset(bool rebuildCollider);
+
 private:
 
     void finalize();
@@ -164,6 +168,10 @@ private:
     btTransform prevPos;
     btVector3 mScale;
     SimulationType mSimType;
+
+    btDynamicsWorld *mWorld;
+
+    friend class BulletWorld;
 };
 
 }
