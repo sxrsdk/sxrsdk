@@ -122,6 +122,7 @@ public abstract class SXRAnimation {
     protected int mIterations = 0;
 
     protected boolean isFinished = false;
+    protected boolean mReverse = false;
 
     /**
      * Base constructor.
@@ -343,6 +344,11 @@ public abstract class SXRAnimation {
         return this;
     }
 
+    public void setReverse(boolean reverse)
+    {
+       mReverse = reverse;
+    }
+
     /**
      * Start the animation.
      *
@@ -444,6 +450,14 @@ public abstract class SXRAnimation {
 
     protected void onFinish()
     {
+        if(!this.getClass().getName().contains("SXRPoseMapper")) {
+            if (this.getClass().getName().contains("SXRSkeletonAnimation")) {
+                getAnimation(this);
+                if (skeletonAnim.getSkelOrder() != "last") {
+                    skeletonAnim.setUpdatePose(false);
+                }
+            }
+        }
         if (sDebug)
         {
             Log.d("ANIMATION", "%s finished", getClass().getSimpleName());
@@ -533,6 +547,7 @@ public abstract class SXRAnimation {
      */
 
     final boolean onDrawFrame(float frameTime) {
+      //
         if(mBlend)
         {
             this.getAnimation(this);
@@ -542,6 +557,7 @@ public abstract class SXRAnimation {
                     return true;
                 }
             }
+
             if(this.getClass().getName().contains("SXRSkeletonAnimation")) {
                 if ((skeletonAnim.getSkelOrder() != ("last") && ((mElapsedTime - prevElapsedTime) >= ((this.getDuration()) - (mBlendDuration)) + (frameTime)))) {
                     interpolationAnim.frameTime = frameTime;
@@ -570,6 +586,7 @@ public abstract class SXRAnimation {
         if (cycled && mRepeatMode != SXRRepeatMode.ONCE) {
             // End of a cycle - see if we should continue
             mIterations += 1;
+            Log.i("repeatMode","print "+mIterations);
             if (mRepeatCount == 0) {
                 stillRunning = false; // last pass
             } else if (mRepeatCount > 0) {
@@ -588,7 +605,9 @@ public abstract class SXRAnimation {
 
         if (stillRunning) {
             final boolean countDown = mRepeatMode == SXRRepeatMode.PINGPONG
-                    && (mIterations & 1) == 1;
+                    && (mReverse == true);// && (mIterations & 1) == 1;
+                    //mReverse = false;
+
 
             float elapsedRatio = //
                     countDown != true ? interpolate(cycleTime, mDuration)
@@ -604,7 +623,9 @@ public abstract class SXRAnimation {
             animate(mTarget, endRatio);
 
             onFinish();
+
             if (mOnFinish != null) {
+
                 mOnFinish.finished(this);
             }
 

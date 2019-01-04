@@ -82,6 +82,7 @@ public class SXRPoseInterpolator extends SXRAnimation
     private float[][] sclBlend;
     static float frameTime =0;
     private boolean poseBlend = false;
+    private boolean mReverse = false;
     public SXRPoseInterpolator(SXRNode target, float duration, SXRPose poseOne, SXRPose poseTwo, SXRSkeleton skeleton)
     {
         super(target, duration);
@@ -136,7 +137,7 @@ public class SXRPoseInterpolator extends SXRAnimation
 
     //dynamic update
 
-    public SXRPoseInterpolator(SXRNode target, float duration, SXRSkeletonAnimation skelOne, SXRSkeletonAnimation skelTwo, SXRSkeleton skeleton)
+    public SXRPoseInterpolator(SXRNode target, float duration, SXRSkeletonAnimation skelOne, SXRSkeletonAnimation skelTwo, SXRSkeleton skeleton, boolean reverse)
     {
 
         super(target, duration);
@@ -183,10 +184,21 @@ public class SXRPoseInterpolator extends SXRAnimation
         mBones = new Bone[mSkeleton.getNumBones()];
         poseData = new float[poseDataSize*mSkeleton.getNumBones()];
         mDuration = duration;
+        mReverse = reverse;
 
+        if(!reverse)
+        {
+            initialPose = skelAnimSrc.computePose(skelAnimSrc.getDuration()-mDuration,skelAnimSrc.getSkeleton().getPose());
+            finalPose = skelAnimDest.computePose(0,skelAnimDest.getSkeleton().getPose());
+        }
+        else
+        {
+          //  finalPose = skelAnimSrc.computePose(0,skelAnimSrc.getSkeleton().getPose());
+          //  initialPose = skelAnimDest.computePose(skelAnimSrc.getDuration()-mDuration,skelAnimDest.getSkeleton().getPose());
+            initialPose = skelAnimSrc.computePose(0,skelAnimSrc.getSkeleton().getPose());
+            finalPose = skelAnimDest.computePose(skelAnimSrc.getDuration()-mDuration,skelAnimDest.getSkeleton().getPose());
+        }
 
-        initialPose = skelAnimSrc.computePose(skelAnimSrc.getDuration()-mDuration,skelAnimSrc.getSkeleton().getPose());
-        finalPose = skelAnimDest.computePose(0,skelAnimDest.getSkeleton().getPose());
 
 
         for (int i = 0; i < mSkeleton.getNumBones(); i++)
@@ -306,9 +318,21 @@ public class SXRPoseInterpolator extends SXRAnimation
 
     public void getFinalPose(float timer)
     {
+        SXRPose firstPose = null;
+        SXRPose secondPose = null;
 
-        SXRPose firstPose = skelAnimSrc.computePose(skelAnimSrc.getDuration()-mDuration+timer+frameTime,skelAnimSrc.getSkeleton().getPose());
-        SXRPose secondPose = skelAnimDest.computePose(0+timer,skelAnimDest.getSkeleton().getPose());
+        if(!mReverse)
+        {
+             firstPose = skelAnimSrc.computePose(skelAnimSrc.getDuration()-mDuration+timer+frameTime,skelAnimSrc.getSkeleton().getPose());
+             secondPose = skelAnimDest.computePose(0+timer,skelAnimDest.getSkeleton().getPose());
+        }
+        else
+        {
+          //  secondPose = skelAnimSrc.computePose(0+timer,skelAnimSrc.getSkeleton().getPose());
+          //  firstPose = skelAnimDest.computePose(skelAnimSrc.getDuration()-mDuration+timer+frameTime,skelAnimDest.getSkeleton().getPose());
+             firstPose = skelAnimSrc.computePose(0+timer,skelAnimSrc.getSkeleton().getPose());
+             secondPose = skelAnimDest.computePose(skelAnimSrc.getDuration()-mDuration+timer+frameTime,skelAnimDest.getSkeleton().getPose());
+        }
 
         float mul = 1/mDuration;
 
@@ -345,6 +369,7 @@ public class SXRPoseInterpolator extends SXRAnimation
     {
         animate(mDuration * ratio);
     }
+
 
     public void animate(float timer) {
 

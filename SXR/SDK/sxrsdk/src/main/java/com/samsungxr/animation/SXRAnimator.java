@@ -16,13 +16,16 @@
 
 package com.samsungxr.animation;
 
+import com.samsungxr.IEventReceiver;
 import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
+import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRNode;
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -40,7 +43,7 @@ import java.util.List;
  * @see SXRAnimator
  * @see SXRAnimationEngine
  */
-public class SXRAnimator extends SXRBehavior
+public class SXRAnimator extends SXRBehavior implements IEventReceiver
 {
     private static final String TAG = Log.tag(SXRAnimator.class);
     static private long TYPE_ANIMATOR = newComponentType(SXRAnimator.class);
@@ -52,6 +55,11 @@ public class SXRAnimator extends SXRBehavior
     SXRAvatar mAvatar = null;
     private String mBoneMap;
     private int numberofInterp = 0;
+    //event
+    protected SXREventReceiver mReceiver;
+    private int numOfAnim =0;
+    protected int mRepeatMode = SXRRepeatMode.ONCE;
+    protected boolean reverse = false;
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -67,6 +75,8 @@ public class SXRAnimator extends SXRBehavior
         mAutoStart = false;
         mIsRunning = false;
         mAnimations = new ArrayList<SXRAnimation>();
+        //event
+        mReceiver = new SXREventReceiver(this);
     }
 
     /**
@@ -89,6 +99,9 @@ public class SXRAnimator extends SXRBehavior
 
     static public long getComponentType() { return TYPE_ANIMATOR; }
 
+    //event
+    public SXREventReceiver getEventReceiver() { return mReceiver; }
+
     /**
      * Get the name of this animator.
      * <p>
@@ -109,6 +122,44 @@ public class SXRAnimator extends SXRBehavior
      * Determine if this animator is running (has been started).
      */
     public boolean isRunning() { return mIsRunning; }
+
+    //event
+    protected SXROnFinish onFinish = new SXROnFinish()
+    {
+    public void finished(SXRAnimation animation) {
+
+
+        numOfAnim++;
+        if(numOfAnim == mAnimations.size())
+        {
+          //  numOfAnim = 0;
+            removeAnimation(mAnimations.get(4));
+            removeAnimation(mAnimations.get(4));
+            for(int j=0;j<mAnimations.size(); j++) {
+                mAnimations.get(j).setRepeatCount(1);
+                mAnimations.get(j).setRepeatMode(SXRRepeatMode.PINGPONG);
+                reverse = true;
+                mAnimations.get(j).setReverse(reverse);
+            }
+            mIsRunning = false;
+         //   Log.i("printanimfinish","testanonymous"+mRepeatMode);
+            Collections.reverse(mAnimations);
+            for(int i=0;i<(mAnimations.size());i=i+2)
+            {
+                SXRAnimation temp = mAnimations.get(i);
+                mAnimations.set(i,mAnimations.get(i+1));
+                mAnimations.set(i+1,temp);
+                //mAnimations.get(i).setRepeatMode()
+
+            }
+
+            start(1);
+
+        }
+
+    }
+    };
+
 
     /**
      * Determine if this animator should start all the animations
@@ -218,6 +269,7 @@ public class SXRAnimator extends SXRBehavior
      */
     public void setRepeatMode(int repeatMode)
     {
+        mRepeatMode = repeatMode;
         for (SXRAnimation anim : mAnimations)
         {
             anim.setRepeatMode(repeatMode);
@@ -317,13 +369,14 @@ public class SXRAnimator extends SXRBehavior
         }
         mIsRunning = true;
         int skelAnimSize = mAnimations.size();
+        numberofInterp =0;
 
         for(int i=0;i<(skelAnimSize)-2;i=i+2)
         {
             //Log.i("debugSkeleton","animationNum"+skelAnimSize);
             SXRSkeletonAnimation skelOne = (SXRSkeletonAnimation)mAnimations.get(i);
             SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation)mAnimations.get(i+2);
-            SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(mModel, blendFactor, skelOne, skelTwo, skelOne.getSkeleton());
+            SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(mModel, blendFactor, skelOne, skelTwo, skelOne.getSkeleton(), reverse);
             SXRPoseMapper retargeterP = new SXRPoseMapper(mAvatar.getSkeleton(), skelOne.getSkeleton(), blendFactor);
             retargeterP.setBoneMap(mBoneMap);
 
@@ -376,6 +429,9 @@ public class SXRAnimator extends SXRBehavior
 
         for(int j=0;j<allAnimSize; j++) {
             mAnimations.get(j).setBlendDuration(blendFactor,true);
+            mAnimations.get(j).setOnFinish(onFinish);
+            //mAnimations.get(j).setReverse(reverse);
+
             mAnimations.get(j).start(getSXRContext().getAnimationEngine());
         }
 
