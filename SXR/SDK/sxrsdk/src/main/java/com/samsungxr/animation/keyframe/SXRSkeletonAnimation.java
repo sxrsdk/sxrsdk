@@ -246,7 +246,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
         {
             SXRAnimationChannel channel = mBoneChannels[i];
             if ((channel != null) &&
-                    (skel.getBoneOptions(i) == SXRSkeleton.BONE_ANIMATE))
+                (skel.getBoneOptions(i) == SXRSkeleton.BONE_ANIMATE))
             {
                 channel.animate(timeInSec, temp);
                 if (rootOffset != null)
@@ -259,9 +259,9 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
                 pose.setLocalMatrix(i, temp);
             }
         }
-
      return pose;
     }
+
     @Override
     public void prettyPrint(StringBuffer sb, int indent) {
         sb.append(Log.getSpaces(indent));

@@ -360,7 +360,6 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     {
         if (pose != mBindPose)
         {
-            pose.sync();
             mBindPose.copy(pose);
         }
         if (mInverseBindPose == null)
@@ -870,7 +869,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         super.onDetach(root);
         for (int i = 0; i < mBones.length; ++i)
         {
-            mBones[i] = null;
+            setBone(i, null);
         }
     }
 
@@ -902,7 +901,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
                 int boneindex = getBoneIndex(bonename);
                 if (boneindex >= 0)                // a bone we recognize?
                 {
-                    mBones[boneindex] = newbone;
+                    setBone(boneindex, newbone);
                     if (savepose != null)
                     {
                         savepose.setWorldMatrix(boneindex, newbone.getTransform().getModelMatrix4f());
@@ -1085,23 +1084,20 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         List<Matrix4f> matrices = new ArrayList<Matrix4f>(newSkel.getNumBones());
         List<SXRNode> bones = new ArrayList<SXRNode>(newSkel.getNumBones());
         int numNewBones = 0;
+        SXRPose oldBindPose = mBindPose;
 
+        oldBindPose.sync();
         /*
-         * Accumulate the bind pose matrices for the old skeleton
+         * Accumulate the bind pose matrices and parent bone IDs
+         * for the old skeleton
          */
-        for (int j = 0; j < getNumBones(); ++j)
+        for (int j = 0; j < numBones; ++j)
         {
             Matrix4f m = new Matrix4f();
 
-            getBindPose().getLocalMatrix(j, m);
+            parentBoneIds.add(mParentBones[j]);
+            oldBindPose.getLocalMatrix(j, m);
             matrices.add(m);
-        }
-        /*
-         * Accumulate the parent bone IDs for the old skeleton
-         */
-        for (int i = 0; i < numBones; ++i)
-        {
-            parentBoneIds.add(mParentBones[i]);
         }
         /*
          * Add bones in the new skeleton that are not in
@@ -1146,6 +1142,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         {
             return;
         }
+        numNewBones = 0;
         /*
          * Enlarge arrays in this skeleton to accomodate
          * the new bones added and copy the old data
@@ -1156,7 +1153,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         String[] boneNames = Arrays.copyOf(mBoneNames, n);
 
         mBones = Arrays.copyOf(mBones, n);
-        mPoseMatrices =  new float[n * 16];
+        mPoseMatrices = new float[n * 16];
         /*
          * Add bones from the new skeleton into this skeleton
          */
@@ -1166,15 +1163,15 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             parentIds[m] = parentBoneIds.get(i);
             boneNames[m] = newBoneNames.get(i);
             boneOptions[m] = BONE_ANIMATE;
-            mBones[m] = bones.get(i);
+            setBone(m, bones.get(i));
         }
         mBoneOptions = boneOptions;
         mBoneNames = boneNames;
         mParentBones = parentIds;
-        mPose = new SXRPose(this);
-        mBindPose = new SXRPose(this);
         mInverseBindPose = null;
         mSkinPose = null;
+        SXRPose bindPose = new SXRPose(this);
+        mPose = new SXRPose(this);
         /*
          * Update the native skeleton
          */
@@ -1188,12 +1185,9 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
          */
         for (int j = 0; j < n; ++j)
         {
-            mBindPose.setLocalMatrix(j, matrices.get(j));
-            mPose.setLocalMatrix(j, matrices.get(j));
+            bindPose.setLocalMatrix(j, matrices.get(j));
         }
-        setBindPose(mBindPose);
-        mPose.sync();
-        updateBonePose();
+        setBindPose(bindPose);
     }
 
     public SXRNode createSkeletonGeometry(SXRNode parent)
