@@ -289,7 +289,6 @@ public class SXRPose implements PrettyPrint
      * @see #setWorldMatrix
      * @see #getWorldRotations
      * @see #setWorldPositions
-     * @see SXRSkeleton#setBoneAxis
      * @see #getNumBones
      */
     public void setWorldRotations(float[] rotations)
@@ -330,7 +329,6 @@ public class SXRPose implements PrettyPrint
      * @see #getWorldRotation
      * @see #getLocalRotation
      * @see #setWorldMatrix
-     * @see SXRSkeleton#setBoneAxis
      */
     public void getWorldMatrix(int boneindex, Matrix4f mtx)
     {
@@ -351,7 +349,6 @@ public class SXRPose implements PrettyPrint
      * @see #setLocalRotation
      * @see #getWorldMatrix
      * @see #getWorldPositions
-     * @see SXRSkeleton#setBoneAxis
      */
     public void setWorldMatrix(int boneindex, Matrix4f mtx)
     {
@@ -392,7 +389,6 @@ public class SXRPose implements PrettyPrint
      * @see #getWorldRotation
      * @see #getWorldMatrix
      * @see #getNumBones
-     * @see SXRSkeleton#setBoneAxis
      */
     public void getWorldRotations(float[] rotations)
     {
@@ -425,7 +421,6 @@ public class SXRPose implements PrettyPrint
      * @see #setWorldRotation
      * @see #setWorldRotations
      * @see #setWorldMatrix
-     * @see SXRSkeleton#setBoneAxis
      */
     public void	getWorldRotation(int boneindex, Quaternionf q)
     {
@@ -484,7 +479,6 @@ public class SXRPose implements PrettyPrint
      *
      * @see #getWorldRotation
      * @see #getLocalRotation
-     * @see SXRSkeleton#setBoneAxis
      */
     public void getLocalMatrix(int boneindex, Matrix4f mtx)
     {
@@ -551,7 +545,6 @@ public class SXRPose implements PrettyPrint
      *					the angles are in the bone's local coordinate system.
      * @see #setLocalRotation
      * @see #getNumBones
-     * @see SXRSkeleton#setBoneAxis
      * @see #setWorldRotations
      * @see #setWorldMatrix
      */
@@ -583,7 +576,6 @@ public class SXRPose implements PrettyPrint
      * @see #setLocalRotation
      * @see #setWorldRotations
      * @see #setWorldMatrix
-     * @see SXRSkeleton#setBoneAxis
      */
     public void getLocalRotation(int boneindex, Quaternionf q)
     {
@@ -610,7 +602,6 @@ public class SXRPose implements PrettyPrint
      * @see #setLocalRotations
      * @see #setWorldRotations
      * @see #setWorldMatrix
-     * @see SXRSkeleton#setBoneAxis
      */
     public boolean setLocalRotation(int boneindex, float x, float y, float z, float w)
     {
@@ -649,7 +640,6 @@ public class SXRPose implements PrettyPrint
      * @see #setLocalRotation
      * @see #setWorldRotations
      * @see #setWorldMatrix
-     * @see SXRSkeleton#setBoneAxis
      */
     public void     getLocalPosition(int boneindex, Vector3f pos)
     {
@@ -805,7 +795,7 @@ public class SXRPose implements PrettyPrint
     public void  inverse(SXRPose src)
     {
         if (getSkeleton() != src.getSkeleton())
-            throw new IllegalArgumentException("SXRPose.copy: input pose is incompatible with this pose");
+            throw new IllegalArgumentException("SXRPose.inverse: input pose is incompatible with this pose");
         src.sync();
         int numbones = getNumBones();
         Bone srcBone = src.mBones[0];
@@ -813,7 +803,7 @@ public class SXRPose implements PrettyPrint
 
         mNeedSync = true;
         srcBone.WorldMatrix.invertAffine(dstBone.WorldMatrix);
-        srcBone.LocalMatrix.set(dstBone.WorldMatrix);
+        dstBone.LocalMatrix.set(dstBone.WorldMatrix);
         if (sDebug)
         {
             Log.d("BONE", "invert: %s %s", mSkeleton.getBoneName(0), dstBone.toString());

@@ -176,6 +176,7 @@ public class SXRPoseMapper extends SXRAnimation
             if ((sourceIndex >= 0) && (destIndex >= 0))
             {
                 mBoneMap[sourceIndex] = destIndex;
+                mDestSkeleton.setBoneOptions(destIndex, mDestSkeleton.getBoneOptions(destIndex) | SXRSkeleton.BONE_ANIMATE);
                 Log.w("BONE", "%s %d -> %s %d",
                       words[0], sourceIndex, words[1], destIndex);
             }
@@ -214,6 +215,7 @@ public class SXRPoseMapper extends SXRAnimation
             bonemap[i] = boneindex;
             if (boneindex >= 0)
             {
+                dstskel.setBoneOptions(boneindex, dstskel.getBoneOptions(boneindex) | SXRSkeleton.BONE_ANIMATE);
                 Log.w("BONE", "%s\n%d: %s\n%d: %s",
                         bonename, i, srcPose.getBone(i).toString(),
                         boneindex, dstPose.getBone(boneindex).toString());
