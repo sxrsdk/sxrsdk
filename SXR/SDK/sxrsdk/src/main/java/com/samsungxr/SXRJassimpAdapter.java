@@ -342,16 +342,16 @@ class  SXRJassimpAdapter
         SXRVertexBuffer vbuf = mesh.getVertexBuffer();
         int nverts = vbuf.getVertexCount();
         int n = nverts * MAX_WEIGHTS;
+        int numbones = aiBones.size();
         float[] weights = new float[n];
         int[] indices = new int[n];
-        int[] boneMap = new int[aiBones.size()];
+        int[] boneMap = new int[numbones];
+        float[] bindMatrices = new float[numbones * 16];
         int boneIndex = -1;
         SXRSkin skin = new SXRSkin(mSkeleton);
 
-        // Process bones
         Arrays.fill(weights, 0, n - 1,  0.0f);
         Arrays.fill(indices, 0, n - 1, 0);
-
         /*
          * Accumulate vertex weights and indices for all the bones
          * in this mesh. All vertices have four indices and four weights.
@@ -368,7 +368,9 @@ class  SXRJassimpAdapter
                 continue;
             }
             Log.e("BONE", "%d %s -> %d", boneId, boneName, boneIndex + 1);
+            float[] matrixdata = aiBone.getOffsetMatrix(sWrapperProvider);
             boneMap[++boneIndex] = boneId;
+            System.arraycopy(matrixdata, 0, bindMatrices, boneIndex * 16, 16);
             List<AiBoneWeight> boneWeights = aiBone.getBoneWeights();
             for (AiBoneWeight weight : boneWeights)
             {
@@ -391,6 +393,7 @@ class  SXRJassimpAdapter
             }
         }
         skin.setBoneMap(boneMap);
+        skin.setInverseBindPose(bindMatrices);
         /*
          * Normalize the weights for each vertex.
          * Sum the weights and divide by the sum.
@@ -404,10 +407,7 @@ class  SXRJassimpAdapter
             {
                 int j = (v * MAX_WEIGHTS) + i;
                 t += weights[j];
-                //is += " " + indices[j];
-                //ws += " " + weights[j];
             }
-            //Log.v("BONES", is + ws);
             if (t > 0.000001f)
             {
                 for (int i = 0; i < MAX_WEIGHTS; ++i)
@@ -560,8 +560,8 @@ class  SXRJassimpAdapter
 
             root.forAllDescendants(nodeProcessor);
             mSkeleton = new SXRSkeleton(root, nodeProcessor.getBoneNames());
-            SXRPose bindPose = new SXRPose(mSkeleton);
-            Matrix4f bindPoseMtx = new Matrix4f();
+            SXRPose pose = new SXRPose(mSkeleton);
+            Matrix4f poseMtx = new Matrix4f();
             SXRNode skelRoot = mSkeleton.getOwnerObject().getParent();
             Matrix4f rootMtx = skelRoot.getTransform().getModelMatrix4f();
 
@@ -576,9 +576,9 @@ class  SXRJassimpAdapter
                 {
                     float[] matrixdata = aiBone.getOffsetMatrix(sWrapperProvider);
 
-                    bindPoseMtx.set(matrixdata);
-                    bindPoseMtx.invert();
-                    bindPose.setWorldMatrix(boneId, bindPoseMtx);
+                    poseMtx.set(matrixdata);
+                    poseMtx.invert();
+                    pose.setWorldMatrix(boneId, poseMtx);
                 }
                 else if (bone != null)
                 {
@@ -587,26 +587,26 @@ class  SXRJassimpAdapter
 
                     mtx.invert();
                     rootMtx.mul(mtx, mtx);
-                    bindPose.setWorldMatrix(boneId, mtx);
+                    pose.setWorldMatrix(boneId, mtx);
                     Log.w("BONE", "no bind pose matrix for bone %s", boneName);
                 }
             }
-            mSkeleton.setBindPose(bindPose);
+            mSkeleton.setPose(pose);
         }
     }
 
     private void attachBoneAnimations(SXRSkeletonAnimation skelAnim, Map<String, SXRAnimationChannel> animMap)
     {
-        SXRPose bindPose = mSkeleton.getBindPose();
-        Matrix4f bindPoseMtx = new Matrix4f();
+        SXRPose pose = mSkeleton.getPose();
+        Matrix4f poseMtx = new Matrix4f();
         Vector3f vec = new Vector3f();
         final float EPSILON = 0.00001f;
         String boneName = mSkeleton.getBoneName(0);
         SXRAnimationChannel channel = animMap.get(boneName);
         AiBone aiBone;
 
-        bindPose.getWorldMatrix(0, bindPoseMtx);
-        bindPoseMtx.getScale(vec);
+        pose.getWorldMatrix(0, poseMtx);
+        poseMtx.getScale(vec);
         if (channel != null)
         {
             skelAnim.addChannel(boneName, channel);
@@ -615,7 +615,7 @@ class  SXRJassimpAdapter
              * This is required because of a bug in the FBX importer
              * which does not scale the animations to match the bind pose
              */
-            bindPoseMtx.getScale(vec);
+            poseMtx.getScale(vec);
             float delta = vec.lengthSquared();
             delta = 3.0f - delta;
             if (Math.abs(delta) > EPSILON)

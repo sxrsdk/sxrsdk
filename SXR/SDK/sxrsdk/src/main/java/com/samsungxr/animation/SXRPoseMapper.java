@@ -200,8 +200,8 @@ public class SXRPoseMapper extends SXRAnimation
     {
         int numsrcbones = srcskel.getNumBones();
         int[] bonemap = new int[numsrcbones];
-        SXRPose srcPose = srcskel.getBindPose();
-        SXRPose dstPose = dstskel.getBindPose();
+        SXRPose srcPose = srcskel.getPose();
+        SXRPose dstPose = dstskel.getPose();
 
         for (int i = 0; i < numsrcbones; ++i)
         {
@@ -287,43 +287,6 @@ public class SXRPoseMapper extends SXRAnimation
             }
         }
         dstskel.applyPose(mDestPose, SXRSkeleton.ROTATION_ONLY);
-        return true;
-    }
-
-    public boolean mapBindPose()
-    {
-        SXRSkeleton	srcskel = mSourceSkeleton;
-        SXRSkeleton	dstskel = mDestSkeleton;
-        Vector3f v = new Vector3f();
-        Matrix4f mtx = new Matrix4f();
-
-        if ((dstskel == null) || (srcskel == null))
-        {
-            return false;
-        }
-        if (mBoneMap == null)
-        {
-            mBoneMap = makeBoneMap(srcskel, dstskel);
-        }
-        SXRPose     srcpose = srcskel.getPose();
-        SXRPose     dstbindpose = dstskel.getBindPose();
-        int		    numsrcbones = srcskel.getNumBones();
-
-        srcskel.getPosition(v);
-        dstskel.setPosition(v);
-        for (int i = 0; i < numsrcbones; ++i)
-        {
-            int	boneindex = mBoneMap[i];
-
-            if (boneindex >= 0)
-            {
-                dstbindpose.getLocalMatrix(boneindex, mtx);
-                mtx.invert();
-                mtx.mul(srcpose.getBone(i).LocalMatrix);
-                mDestPose.setLocalMatrix(boneindex, mtx);
-            }
-        }
-        dstskel.applyPose(mDestPose, SXRSkeleton.BIND_POSE_RELATIVE);
         return true;
     }
 

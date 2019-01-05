@@ -50,6 +50,17 @@ namespace sxr
         }
     }
 
+    void Skin::setInverseBindPose(const float* inverseBindPose, int n)
+    {
+        std::lock_guard<std::mutex> lock(mLock);
+
+        if (mInverseBindPose == nullptr)
+        {
+            mInverseBindPose = (glm::mat4*) malloc(n * sizeof(glm::mat4));
+        }
+        memcpy(mInverseBindPose, inverseBindPose, n * sizeof(glm::mat4));
+    }
+
     void Skin::bindBuffer(Renderer* renderer, Shader* shader)
     {
         if (mBonesBuffer)
@@ -74,11 +85,13 @@ namespace sxr
         }
         {
             std::lock_guard<std::mutex> lock(mLock);
+            const glm::mat4* inverseBind = mInverseBindPose;
             for (int i = 0; i < numBones; ++i)
             {
                 int boneId = mBoneMap.at(i);
-                const glm::mat4* boneMatrix = mSkeleton->getSkinMatrix(boneId);
-                mBonesBuffer->setRange(i, boneMatrix, 1);
+                glm::mat4 m(*mSkeleton->getWorldBoneMatrix(boneId));
+                m *= *inverseBind;
+                mBonesBuffer->setRange(i, &m, 1);
             }
         }
         mBonesBuffer->updateGPU(renderer);

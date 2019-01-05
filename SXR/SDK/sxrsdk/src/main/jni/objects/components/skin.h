@@ -27,7 +27,7 @@ public:
 
     void setBoneMap(const int* bonemap, int numBones);
     void setSkeleton(Skeleton* skel);
-
+    void setInverseBindPose(const float* inverseBindPose, int numBones);
     void bindBuffer(Renderer* renderer, Shader* shader);
     bool updateGPU(Renderer* renderer, Shader* shader);
 
@@ -41,6 +41,7 @@ private:
     std::mutex  mLock;
     Skeleton* mSkeleton;
     std::vector<int> mBoneMap;
+    glm::mat4* mInverseBindPose;
     UniformBlock* mBonesBuffer;
 };
 

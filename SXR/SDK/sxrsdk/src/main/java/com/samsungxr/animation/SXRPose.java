@@ -305,9 +305,7 @@ public class SXRPose implements PrettyPrint
 
             bone.setWorldRotation(rotations[t], rotations[t + 1], rotations[t + 2], rotations[t + 3]);
             bone.Changed |= WORLD_ROT;
-
             calcLocal(bone, mSkeleton.getParentBoneIndex(i));
-
             if (sDebug)
             {
                 Log.d("BONE", "setWorldRotation: %s %s", mSkeleton.getBoneName(i), bone.toString());
@@ -352,7 +350,7 @@ public class SXRPose implements PrettyPrint
      */
     public void setWorldMatrix(int boneindex, Matrix4f mtx)
     {
-        Bone	  bone = mBones[boneindex];
+        Bone bone = mBones[boneindex];
 
         bone.WorldMatrix.set(mtx);
         if (mSkeleton.getParentBoneIndex(boneindex) >= 0)
@@ -700,7 +698,9 @@ public class SXRPose implements PrettyPrint
         float       tolerance = 3 * EPSILON;
 
         if (numbones != src.getNumBones())
+        {
             return false;
+        }
         sync();
         for (int i = 0; i < numbones; ++i)
         {
@@ -903,7 +903,9 @@ public class SXRPose implements PrettyPrint
             boolean	update;
 
             if (pid < 0)							        // root bone?
+            {
                 continue;
+            }
             update = (mBones[pid].Changed & (WORLD_ROT | LOCAL_ROT)) != 0;
             if (!mSkeleton.isLocked(i))				        // bone not locked?
             {

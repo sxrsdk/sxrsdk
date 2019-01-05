@@ -19,7 +19,7 @@ extern "C" {
     Java_com_samsungxr_animation_NativeSkeleton_setPose(JNIEnv* env, jobject clz,
                                                         jlong jskel, jfloatArray jmatrices);
     JNIEXPORT jboolean JNICALL
-    Java_com_samsungxr_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz,
+    Java_com_samsungxr_animation_NativeSkeleton_setWorldPose(JNIEnv* env, jobject clz,
                                                             jlong jskel, jfloatArray jmatrices);
     JNIEXPORT jboolean JNICALL
     Java_com_samsungxr_animation_NativeSkeleton_getPose(JNIEnv* env, jobject clz,
@@ -98,7 +98,7 @@ Java_com_samsungxr_animation_NativeSkeleton_getPose(JNIEnv* env, jobject clz,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_samsungxr_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz,
+Java_com_samsungxr_animation_NativeSkeleton_setWorldPose(JNIEnv* env, jobject clz,
                                                   jlong jskel, jfloatArray jmatrices)
 {
     Skeleton* skel = reinterpret_cast<Skeleton*>(jskel);
@@ -110,7 +110,7 @@ Java_com_samsungxr_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz
     }
     jfloat* inputMatrices = env->GetFloatArrayElements(jmatrices, JNI_FALSE);
 
-    skel->setSkinPose(inputMatrices);
+    skel->setWorldPose(inputMatrices);
     env->ReleaseFloatArrayElements(jmatrices, inputMatrices, JNI_ABORT);
     return true;
 }
