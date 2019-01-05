@@ -466,35 +466,6 @@ public abstract class SXRAnimation {
 
     protected void onRepeat(float frameTime, int count)
     {
-        if(mBlend)
-        {
-            if(!this.getClass().getName().contains("SXRPoseMapper")) {
-                if(this.getClass().getName().contains("SXRSkeletonAnimation"))
-                {
-                    getAnimation(this);
-                    if(skeletonAnim.getSkelOrder()!="last")
-                    {
-                        flagArr[this.getID()] = false;
-                        flagArr[this.getID()+1] = false;
-
-                        skeletonAnim.setUpdatePose(false);
-                    }
-                    else {
-                        flagArr[this.getID()] = false;
-                        flagArr[this.getID()+1] = false;
-                        flagArr[0] = true;
-                        flagArr[1] = true;
-                    }
-                }
-                else {
-                    flagArr[this.getID()] = false;
-                    flagArr[this.getID()+1] = false;
-                    flagArr[this.getID()-1] = false;
-                    flagArr[this.getID()-2] = false;
-                }
-
-            }
-        }
         if (sDebug)
         {
             Log.d("ANIMATION", "%s repeated %d", getClass().getSimpleName(), count);
@@ -586,7 +557,6 @@ public abstract class SXRAnimation {
         if (cycled && mRepeatMode != SXRRepeatMode.ONCE) {
             // End of a cycle - see if we should continue
             mIterations += 1;
-            Log.i("repeatMode","print "+mIterations);
             if (mRepeatCount == 0) {
                 stillRunning = false; // last pass
             } else if (mRepeatCount > 0) {

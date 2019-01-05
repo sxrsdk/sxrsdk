@@ -195,8 +195,8 @@ public class SXRPoseInterpolator extends SXRAnimation
         {
           //  finalPose = skelAnimSrc.computePose(0,skelAnimSrc.getSkeleton().getPose());
           //  initialPose = skelAnimDest.computePose(skelAnimSrc.getDuration()-mDuration,skelAnimDest.getSkeleton().getPose());
-            initialPose = skelAnimSrc.computePose(0,skelAnimSrc.getSkeleton().getPose());
-            finalPose = skelAnimDest.computePose(skelAnimSrc.getDuration()-mDuration,skelAnimDest.getSkeleton().getPose());
+            initialPose = skelAnimSrc.computePose(0+mDuration,skelAnimSrc.getSkeleton().getPose());
+            finalPose = skelAnimDest.computePose(skelAnimSrc.getDuration(),skelAnimDest.getSkeleton().getPose());
         }
 
 
@@ -328,10 +328,8 @@ public class SXRPoseInterpolator extends SXRAnimation
         }
         else
         {
-          //  secondPose = skelAnimSrc.computePose(0+timer,skelAnimSrc.getSkeleton().getPose());
-          //  firstPose = skelAnimDest.computePose(skelAnimSrc.getDuration()-mDuration+timer+frameTime,skelAnimDest.getSkeleton().getPose());
-             firstPose = skelAnimSrc.computePose(0+timer,skelAnimSrc.getSkeleton().getPose());
-             secondPose = skelAnimDest.computePose(skelAnimSrc.getDuration()-mDuration+timer+frameTime,skelAnimDest.getSkeleton().getPose());
+             firstPose = skelAnimSrc.computePose(mDuration-timer,skelAnimSrc.getSkeleton().getPose());
+             secondPose = skelAnimDest.computePose(skelAnimDest.getDuration()-timer,skelAnimDest.getSkeleton().getPose());
         }
 
         float mul = 1/mDuration;

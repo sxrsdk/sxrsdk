@@ -59,7 +59,10 @@ public class SXRAnimator extends SXRBehavior implements IEventReceiver
     protected SXREventReceiver mReceiver;
     private int numOfAnim =0;
     protected int mRepeatMode = SXRRepeatMode.ONCE;
+    protected int mRepeatCount = 1;
     protected boolean reverse = false;
+    protected float mBlend = 0;
+    private int count =0;
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -127,34 +130,70 @@ public class SXRAnimator extends SXRBehavior implements IEventReceiver
     protected SXROnFinish onFinish = new SXROnFinish()
     {
     public void finished(SXRAnimation animation) {
-
-
         numOfAnim++;
         if(numOfAnim == mAnimations.size())
         {
-          //  numOfAnim = 0;
-            removeAnimation(mAnimations.get(4));
-            removeAnimation(mAnimations.get(4));
-            for(int j=0;j<mAnimations.size(); j++) {
-                mAnimations.get(j).setRepeatCount(1);
-                mAnimations.get(j).setRepeatMode(SXRRepeatMode.PINGPONG);
-                reverse = true;
-                mAnimations.get(j).setReverse(reverse);
+           if(mRepeatMode==SXRRepeatMode.PINGPONG)
+           {
+            if(count<mRepeatCount||mRepeatCount<0){
+                    numOfAnim = 0;
+                    if(!reverse) {
+                        reverse = true;
+                        if(mRepeatCount>0)
+                        {
+                            count++;
+                        }
+
+                    }
+                    else
+                    {
+                        reverse = false;
+                    }
+                //numberofInterp;
+                for(int j=0;j<numberofInterp*2; j++) {
+                    removeAnimation(mAnimations.get(mAnimations.size()-1));//posemapper
+
+                }
+
+                    for(int j=0;j<mAnimations.size(); j++) {
+                        mAnimations.get(j).setRepeatCount(1);
+                        mAnimations.get(j).setRepeatMode(mRepeatMode);
+                        mAnimations.get(j).setReverse(reverse);
+                    }
+                    mIsRunning = false;
+
+                    Collections.reverse(mAnimations);
+                    for(int i=0;i<(mAnimations.size());i=i+2)
+                    {
+                        SXRAnimation temp = mAnimations.get(i);
+                        mAnimations.set(i,mAnimations.get(i+1));
+                        mAnimations.set(i+1,temp);
+
+                    }
+
+                    start(mBlend);
             }
-            mIsRunning = false;
-         //   Log.i("printanimfinish","testanonymous"+mRepeatMode);
-            Collections.reverse(mAnimations);
-            for(int i=0;i<(mAnimations.size());i=i+2)
+
+
+            }
+
+            if(mRepeatMode==SXRRepeatMode.REPEATED)
             {
-                SXRAnimation temp = mAnimations.get(i);
-                mAnimations.set(i,mAnimations.get(i+1));
-                mAnimations.set(i+1,temp);
-                //mAnimations.get(i).setRepeatMode()
+                if((count<mRepeatCount-1)||mRepeatCount<0) {
+                    numOfAnim = 0;
+                    for(int j=0;j<numberofInterp*2; j++) {
+                        removeAnimation(mAnimations.get(mAnimations.size()-1));//posemapper
 
+                    }
+                    for (int j = 0; j < mAnimations.size(); j++) {
+                        mAnimations.get(j).setRepeatCount(1);
+                        mAnimations.get(j).setRepeatMode(mRepeatMode);
+
+                    }
+                    start(mBlend);
+                    count++;
+                }
             }
-
-            start(1);
-
         }
 
     }
@@ -333,6 +372,7 @@ public class SXRAnimator extends SXRBehavior implements IEventReceiver
      */
     public void setRepeatCount(int repeatCount)
     {
+        mRepeatCount =  repeatCount;
         for (SXRAnimation anim : mAnimations)
         {
             anim.setRepeatCount(repeatCount);
@@ -363,6 +403,7 @@ public class SXRAnimator extends SXRBehavior implements IEventReceiver
     }
     public void start(float blendFactor)
     {
+        mBlend = blendFactor;
         if (mAnimations.size() == 0)
         {
             return;
@@ -418,10 +459,6 @@ public class SXRAnimator extends SXRBehavior implements IEventReceiver
         {
             mAnimations.get(mAnimInterp).setID(idIntp+2);
             mAnimations.get(mAnimInterp+1).setID(idIntp+3);
-            mAnimations.get(mAnimInterp).setRepeatMode(SXRRepeatMode.PINGPONG);
-            mAnimations.get(mAnimInterp+1).setRepeatMode(SXRRepeatMode.PINGPONG);
-            mAnimations.get(mAnimInterp).setRepeatCount(1);
-            mAnimations.get(mAnimInterp+1).setRepeatCount(1);
             mAnimInterp = mAnimInterp+2;
         }
 
@@ -430,8 +467,8 @@ public class SXRAnimator extends SXRBehavior implements IEventReceiver
         for(int j=0;j<allAnimSize; j++) {
             mAnimations.get(j).setBlendDuration(blendFactor,true);
             mAnimations.get(j).setOnFinish(onFinish);
-            //mAnimations.get(j).setReverse(reverse);
-
+            mAnimations.get(j).setRepeatMode(mRepeatMode);
+            mAnimations.get(j).setRepeatCount(1);
             mAnimations.get(j).start(getSXRContext().getAnimationEngine());
         }
 
