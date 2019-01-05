@@ -323,7 +323,7 @@ public class SXRPoseInterpolator extends SXRAnimation
 
         if(!mReverse)
         {
-             firstPose = skelAnimSrc.computePose(skelAnimSrc.getDuration()-mDuration+timer+frameTime,skelAnimSrc.getSkeleton().getPose());
+             firstPose = skelAnimSrc.computePose(skelAnimSrc.getDuration()-mDuration+timer,skelAnimSrc.getSkeleton().getPose());
              secondPose = skelAnimDest.computePose(0+timer,skelAnimDest.getSkeleton().getPose());
         }
         else

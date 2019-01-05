@@ -528,7 +528,15 @@ public abstract class SXRAnimation {
                     return true;
                 }
             }
+            if(this.getClass().getName().contains("SXRSkeletonAnimation"))
+            {
+                this.getAnimation(this);
+                if(skeletonAnim.getSkelOrder()=="last")
+                {
+                    Log.i("printposinterpolator","elapsedTime "+mElapsedTime);
 
+                }
+            }
             if(this.getClass().getName().contains("SXRSkeletonAnimation")) {
                 if ((skeletonAnim.getSkelOrder() != ("last") && ((mElapsedTime - prevElapsedTime) >= ((this.getDuration()) - (mBlendDuration)) + (frameTime)))) {
                     interpolationAnim.frameTime = frameTime;
@@ -589,6 +597,10 @@ public abstract class SXRAnimation {
             float endRatio = mRepeatMode == SXRRepeatMode.ONCE ? 1f : 0f;
 
             endRatio = interpolate(mDuration, mDuration);
+            if(mReverse==true)
+            {
+                endRatio=0;
+            }
 
             animate(mTarget, endRatio);
 
