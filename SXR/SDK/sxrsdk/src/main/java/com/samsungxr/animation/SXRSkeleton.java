@@ -83,12 +83,6 @@ import java.util.List;
 public class SXRSkeleton extends SXRComponent implements PrettyPrint
 {
     /**
-     * The pose space designates how the world matrices
-     * of the pose relate to one another.
-     */
-    public static final int BIND_POSE_RELATIVE = 1;
-
-    /**
      * world positions and orientations are relative to the root bone of the skeleton.
      */
     public static final int SKELETON_ROOT = 0;
@@ -861,6 +855,8 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         List<Matrix4f> matrices = new ArrayList<Matrix4f>(newSkel.getNumBones());
         List<SXRNode> bones = new ArrayList<SXRNode>(newSkel.getNumBones());
         int numNewBones = 0;
+        SXRPose curPose = getPose();
+        SXRPose newPose = newSkel.getPose();
 
         /*
          * Accumulate the bind pose matrices and parent bone IDs
@@ -884,25 +880,39 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             Matrix4f m = new Matrix4f();
             int parentId = -1;
 
-            newSkel.getPose().getLocalMatrix(j, m);
-            matrices.add(m);
             bones.add(newSkel.getBone(j));
             if (boneId < 0)         // source bone not in existing skeleton?
             {
                 parentId = newSkel.getParentBoneIndex(j);
+                newPose.getLocalMatrix(j, m);
+                newBoneNames.add(boneName);
+                bones.add(newSkel.getBone(j));
                 if (parentId >= 0)
                 {
                     boneName = newSkel.getBoneName(parentId);
                     parentId = getBoneIndex(boneName);
+                    if (parentId < 0)
+                    {
+                        parentId = newBoneNames.indexOf(boneName);
+                        if (parentId >= 0)
+                        {
+                            parentId += numBones;
+                        }
+                    }
                 }
+                else
+                {
+                    parentId = 0;
+                }
+                Log.d("SKELETON", "merge: adding bone %s #%d parent = %s",newBoneNames.get(numNewBones), numNewBones, boneName);
+                parentBoneIds.add(parentId);
+                ++numNewBones;
             }
-            else                    // source bone already there?
+            else
             {
-                boneName += "_root";
+                curPose.getLocalMatrix(boneId, m);
             }
-            newBoneNames.add(boneName);
-            parentBoneIds.add(parentId);
-            ++numNewBones;
+            matrices.add(m);
         }
         if (numNewBones == 0)
         {

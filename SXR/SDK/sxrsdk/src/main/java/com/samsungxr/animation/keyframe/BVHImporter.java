@@ -137,6 +137,7 @@ public class BVHImporter
         @Override
         public void start(SXRSkeleton skel)
         {
+            mBindPose = skel.getPose();
             mTempQuat1 = new Quaternionf();
             mTempQuat2 = new Quaternionf();
             mPosKey = new float[3];

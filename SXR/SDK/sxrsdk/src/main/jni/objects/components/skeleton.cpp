@@ -47,8 +47,8 @@ namespace sxr {
         {
             std::lock_guard<std::mutex> lock(mLock);
             memcpy(mBoneParents, boneparents, numbones * sizeof(int));
-            memcpy(skinMatrices, mWorldBoneMatrices, n);
-            memcpy(boneMatrices, mLocalBoneMatrices, n);
+            memcpy(skinMatrices, mWorldBoneMatrices, n * sizeof(glm::mat4));
+            memcpy(boneMatrices, mLocalBoneMatrices, n * sizeof(glm::mat4));
             mWorldBoneMatrices = skinMatrices;
             mLocalBoneMatrices = boneMatrices;
         }
