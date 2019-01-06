@@ -51,6 +51,7 @@ namespace sxr {
             memcpy(boneMatrices, mLocalBoneMatrices, n * sizeof(glm::mat4));
             mWorldBoneMatrices = skinMatrices;
             mLocalBoneMatrices = boneMatrices;
+            mNumBones = numbones;
         }
     }
 

@@ -850,9 +850,9 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     public void merge(SXRSkeleton newSkel)
     {
         int numBones = getNumBones();
-        List<Integer> parentBoneIds = new ArrayList<Integer>(numBones + newSkel.getNumBones());
+        int[] parentBoneIds = new int[newSkel.getNumBones()];
         List<String> newBoneNames = new ArrayList<String>(newSkel.getNumBones());
-        List<Matrix4f> matrices = new ArrayList<Matrix4f>(newSkel.getNumBones());
+        List<Matrix4f> matrices = new ArrayList<Matrix4f>(numBones + newSkel.getNumBones());
         List<SXRNode> bones = new ArrayList<SXRNode>(newSkel.getNumBones());
         int numNewBones = 0;
         SXRPose curPose = getPose();
@@ -866,7 +866,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         {
             Matrix4f m = new Matrix4f();
 
-            parentBoneIds.add(mParentBones[j]);
+            curPose.getWorldMatrix(j, m);
             matrices.add(m);
         }
         /*
@@ -878,41 +878,35 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             String boneName = newSkel.getBoneName(j);
             int boneId = getBoneIndex(boneName);
             Matrix4f m = new Matrix4f();
-            int parentId = -1;
+            int parentId;
 
+            newPose.getWorldMatrix(j, m);
+            parentId = newSkel.getParentBoneIndex(j);
             bones.add(newSkel.getBone(j));
-            if (boneId < 0)         // source bone not in existing skeleton?
+            if (boneId < 0)            // source bone not in existing skeleton?
             {
-                parentId = newSkel.getParentBoneIndex(j);
-                newPose.getLocalMatrix(j, m);
-                newBoneNames.add(boneName);
-                bones.add(newSkel.getBone(j));
-                if (parentId >= 0)
+                if (parentId >= 0)     // parent is found?
                 {
-                    boneName = newSkel.getBoneName(parentId);
-                    parentId = getBoneIndex(boneName);
-                    if (parentId < 0)
+                    String parName = newSkel.getBoneName(parentId);
+                    parentId = getBoneIndex(parName);
+                    if (parentId < 0)  // parent is a new bone
                     {
-                        parentId = newBoneNames.indexOf(boneName);
+                        parentId = newBoneNames.indexOf(parName);
                         if (parentId >= 0)
                         {
                             parentId += numBones;
                         }
                     }
                 }
-                else
+                if (parentId < 0)
                 {
                     parentId = 0;
                 }
-                Log.d("SKELETON", "merge: adding bone %s #%d parent = %s",newBoneNames.get(numNewBones), numNewBones, boneName);
-                parentBoneIds.add(parentId);
-                ++numNewBones;
-            }
-            else
-            {
-                curPose.getLocalMatrix(boneId, m);
             }
             matrices.add(m);
+            newBoneNames.add(boneName);
+            parentBoneIds[numNewBones] = parentId;
+            ++numNewBones;
         }
         if (numNewBones == 0)
         {
@@ -935,7 +929,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         for (int i = 0; i < numNewBones; ++i)
         {
             int m = numBones + i;
-            parentIds[m] = parentBoneIds.get(i);
+            parentIds[m] = parentBoneIds[i];
             boneNames[m] = newBoneNames.get(i);
             boneOptions[m] = BONE_ANIMATE;
             setBone(m, bones.get(i));
@@ -958,7 +952,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
          */
         for (int j = 0; j < n; ++j)
         {
-            mPose.setLocalMatrix(j, matrices.get(j));
+            mPose.setWorldMatrix(j, matrices.get(j));
         }
         mPose.sync();
     }

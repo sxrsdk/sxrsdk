@@ -12,9 +12,12 @@ import com.samsungxr.SXRImportSettings;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRResourceVolume;
 import com.samsungxr.SXRTexture;
+import com.samsungxr.SXRTransform;
 import com.samsungxr.animation.keyframe.BVHImporter;
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
+
+import org.joml.Vector3f;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -466,6 +469,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         List<SXRComponent> skins = modelRoot.getAllComponents(SXRSkin.getComponentType());
         SXRNode srcRootBone = skel.getBone(0);
 
+        mAvatarRoot.addChildObject(modelRoot);
         if (srcRootBone != null)
         {
             int boneIndex = mSkeleton.getBoneIndex(skel.getBoneName(0));
@@ -475,9 +479,11 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 SXRNode parent = mSkeleton.getBone(boneIndex);
                 if (parent != null)
                 {
-                    for (int i = 0; i < srcRootBone.getChildrenCount(); ++i)
+                    int n = srcRootBone.getChildrenCount();
+
+                    for (int i = 0; i < n; ++i)
                     {
-                        SXRNode child = srcRootBone.getChildByIndex(i);
+                        SXRNode child = srcRootBone.getChildByIndex(0);
                         srcRootBone.removeChildObject(child);
                         parent.addChildObject(child);
                     }
@@ -486,12 +492,13 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             }
         }
         mSkeleton.merge(skel);
+        mSkeleton.poseToBones();
+        mSkeleton.updateBonePose();
         for (SXRComponent c : skins)
         {
             SXRSkin skin = (SXRSkin) c;
             skin.setSkeleton(mSkeleton);
         }
-        mAvatarRoot.addChildObject(modelRoot);
     }
 
     protected IAssetEvents mLoadModelHandler = new IAssetEvents()
@@ -511,7 +518,6 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 if (mSkeleton != null)
                 {
                     mergeSkeleton(skel, modelRoot);
-                    mAvatarRoot.addChildObject(modelRoot);
                 }
                 else
                 {

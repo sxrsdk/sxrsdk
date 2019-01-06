@@ -69,11 +69,6 @@ public class SXRPose implements PrettyPrint
     public enum PoseSpace
     {
         /**
-         * world positions and orientations are relative to the bind pose of the skeleton.
-         */
-        BIND_POSE_RELATIVE,
-
-        /**
          * world positions and orientations are relative to the root bone of the skeleton.
          */
         SKELETON,
@@ -160,10 +155,7 @@ public class SXRPose implements PrettyPrint
         Bone bone = mBones[boneindex];
         int boneParent = mSkeleton.getParentBoneIndex(boneindex);
 
-        if ((boneParent >= 0) && ((bone.Changed & LOCAL_ROT) == LOCAL_ROT))
-        {
-            calcWorld(bone, boneParent);
-        }
+        calcWorld(bone, boneParent);
         pos.x = bone.WorldMatrix.m30();
         pos.y = bone.WorldMatrix.m31();
         pos.z = bone.WorldMatrix.m32();
@@ -869,10 +861,7 @@ public class SXRPose implements PrettyPrint
         bone.LocalMatrix.setTranslation(x, y, z);
         for (int i = 0; i < mBones.length; ++i)
         {
-            bone = mBones[i];
-            bone.WorldMatrix.m30(bone.WorldMatrix.m30() + dx);
-            bone.WorldMatrix.m31(bone.WorldMatrix.m31() + dy);
-            bone.WorldMatrix.m32(bone.WorldMatrix.m32() + dz);
+            mBones[i].WorldMatrix.translate(dx, dy, dz);
         }
         if (sDebug)
         {
@@ -967,9 +956,16 @@ public class SXRPose implements PrettyPrint
      */
     protected void		calcWorld(Bone bone, int parentId)
     {
-        getWorldMatrix(parentId, mTempMtxB);   // WorldMatrix (parent) TempMtxB
-        mTempMtxB.mul(bone.LocalMatrix);       // WorldMatrix = WorldMatrix(parent) * LocalMatrix
-        bone.WorldMatrix.set(mTempMtxB);
+        if (parentId >= 0)
+        {
+            getWorldMatrix(parentId, mTempMtxB);   // WorldMatrix (parent) TempMtxB
+            mTempMtxB.mul(bone.LocalMatrix);       // WorldMatrix = WorldMatrix(parent) * LocalMatrix
+            bone.WorldMatrix.set(mTempMtxB);
+        }
+        else
+        {
+            bone.WorldMatrix.set(bone.LocalMatrix);
+        }
      }
 
     /**
