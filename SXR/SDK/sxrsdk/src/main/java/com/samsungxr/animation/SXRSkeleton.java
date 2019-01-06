@@ -821,51 +821,29 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     }
 
     /*
-     * Compute the skinning matrices from the current pose.
+     * Update the C++ skeleton with the current pose.
      * <p>
      * The skin pose is relative to the untransformed mesh.
-     * It will be used to transform the vertices before
+     * The bone pose is relative to the skeleton bone.
+     * The skin pose is used to transform the vertices before
      * overall translate, rotation and scale are performed.
      * It is the current pose relative to the bind pose
      * of the mesh.
      * <p>
      * Each skinned mesh has an associated @{link SXRSkin} component
      * which manages the bones that affect that mesh.
-     * This function updates the GPU skinning matrices each frame.
-     * @see SXRSkin
-     */
-    public void updateSkinPose()
-    {
-        mPose.getWorldMatrices(mPoseMatrices);
-        NativeSkeleton.setWorldPose(getNative(), mPoseMatrices);
-    }
-
-    /*
-     * Compute the skinning matrices from the current pose.
-     * <p>
-     * The skin pose is relative to the untransformed mesh.
-     * It will be used to transform the vertices before
-     * overall translate, rotation and scale are performed.
-     * It is the current pose relative to the bind pose
-     * of the mesh.
-     * <p>
-     * Each skinned mesh has an associated @{link SXRSkin} component
-     * which manages the bones that affect that mesh.
-     * This function updates the GPU skinning matrices each frame.
+     * This skin component maintains the inverse bind pose
+     * of the mesh so it can be multiplied by the world bone pose
+     * to compute the proper skin pose.
+     * This function updates the local and world pose matrices each frame.
      * @see SXRSkin
      */
     public void updateBonePose()
     {
-        SXRPose pose = getPose();
-        int t = 0;
-
-        for (int i = 0; i < mParentBones.length; ++i)
-        {
-            pose.getLocalMatrix(i, mTempMtx);
-            mTempMtx.get(mPoseMatrices, t);
-            t += 16;
-        }
+        mPose.getLocalMatrices(mPoseMatrices);
         NativeSkeleton.setPose(getNative(), mPoseMatrices);
+        mPose.getWorldMatrices(mPoseMatrices);
+        NativeSkeleton.setWorldPose(getNative(), mPoseMatrices);
     }
 
     /**

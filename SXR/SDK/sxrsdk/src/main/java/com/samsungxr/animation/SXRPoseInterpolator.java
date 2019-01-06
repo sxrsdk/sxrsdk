@@ -252,8 +252,6 @@ public class SXRPoseInterpolator extends SXRAnimation
         }
         pSkeleton.poseToBones();
         pSkeleton.updateBonePose();
-        pSkeleton.updateSkinPose();
-
     }
 
 

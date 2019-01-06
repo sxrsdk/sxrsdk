@@ -233,7 +233,6 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
         computePose(timeInSec,pose);
         skel.poseToBones();
         skel.updateBonePose();
-        skel.updateSkinPose();
     }
 
     public SXRPose computePose(float timeInSec, SXRPose pose)

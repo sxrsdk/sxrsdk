@@ -9,7 +9,8 @@ namespace sxr
     Skin::Skin(Skeleton& skel)
     : Component(COMPONENT_TYPE_SKIN),
        mSkeleton(&skel),
-       mBonesBuffer(nullptr)
+       mBonesBuffer(nullptr),
+      mInverseBindPose(nullptr)
     { }
 
     Skin::~Skin()
@@ -17,6 +18,10 @@ namespace sxr
         if (mBonesBuffer)
         {
             delete mBonesBuffer;
+        }
+        if (mInverseBindPose)
+        {
+            free(mInverseBindPose);
         }
     };
 
@@ -54,6 +59,11 @@ namespace sxr
     {
         std::lock_guard<std::mutex> lock(mLock);
 
+        if (mInverseBindPose)
+        {
+            free(mInverseBindPose);
+            mInverseBindPose = nullptr;
+        }
         if (mInverseBindPose == nullptr)
         {
             mInverseBindPose = (glm::mat4*) malloc(n * sizeof(glm::mat4));
@@ -73,7 +83,7 @@ namespace sxr
     {
         int numBones = mBoneMap.size();
 
-        if (numBones == 0)
+        if ((numBones == 0) || (mInverseBindPose == nullptr))
         {
             return false;
         }
@@ -90,7 +100,8 @@ namespace sxr
             {
                 int boneId = mBoneMap.at(i);
                 glm::mat4 m(*mSkeleton->getWorldBoneMatrix(boneId));
-                m *= *inverseBind;
+
+                m *= inverseBind[i];
                 mBonesBuffer->setRange(i, &m, 1);
             }
         }

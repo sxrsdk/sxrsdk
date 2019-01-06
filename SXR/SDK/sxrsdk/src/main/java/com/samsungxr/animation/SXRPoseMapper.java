@@ -242,7 +242,6 @@ public class SXRPoseMapper extends SXRAnimation
         mapLocalToTarget();
         mDestSkeleton.poseToBones();
         mDestSkeleton.updateBonePose();
-        mDestSkeleton.updateSkinPose();
     }
 
 

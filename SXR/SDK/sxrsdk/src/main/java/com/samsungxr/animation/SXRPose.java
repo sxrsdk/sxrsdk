@@ -490,6 +490,32 @@ public class SXRPose implements PrettyPrint
     }
 
     /**
+     * Get the local matrices of all the bones in this pose (relative to parent node).
+     * <p>
+     * The local matrix for each bone are copied into the
+     * destination array as vectors in the order of their bone index.
+     * The array must be as large as 16 times the number of bones in the skeleton
+     * (which can be obtained by calling {@link #getNumBones}).
+     * @param dest	destination array to get local matrices.
+     *
+     * @see #getLocalRotation
+     * @see #getLocalMatrix
+     * @see #getLocalPosition
+     */
+    public void	getLocalMatrices(float[] dest)
+    {
+        if (dest.length != mBones.length * 16)
+        {
+            throw new IllegalArgumentException("Destination array is the wrong size");
+        }
+        sync();
+        for (int i = 0; i < mBones.length; ++i)
+        {
+            mBones[i].LocalMatrix.get(dest, i * 16);
+        }
+    }
+
+    /**
      * Set the local matrix for this bone (relative to parent bone).
      * <p>
      * All bones in the skeleton start out at the origin oriented along the bone axis (usually 0,0,1).
@@ -519,7 +545,6 @@ public class SXRPose implements PrettyPrint
         }
         if (sDebug)
         {
-
             Log.d("BONE",
                   "setLocalMatrix: %s %s",
                   mSkeleton.getBoneName(boneindex),
@@ -807,7 +832,6 @@ public class SXRPose implements PrettyPrint
         if (sDebug)
         {
             Log.d("BONE", "invert: %s %s", mSkeleton.getBoneName(0), dstBone.toString());
-
         }
         for (int i = 1; i < numbones; ++i)
         {

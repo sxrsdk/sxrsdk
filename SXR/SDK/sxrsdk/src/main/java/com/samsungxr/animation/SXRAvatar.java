@@ -521,7 +521,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                     eventName = "onAvatarLoaded";
                 }
                 mSkeleton.poseFromBones();
-                mSkeleton.updateSkinPose();
+                mSkeleton.updateBonePose();
             }
             else if (mSkeleton != null)
             {
