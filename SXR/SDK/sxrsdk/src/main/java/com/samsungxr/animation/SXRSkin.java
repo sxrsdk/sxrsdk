@@ -132,5 +132,5 @@ class NativeSkin
     static native long getComponentType();
     static native boolean setBoneMap(long object, int[] boneMap);
     static native void setSkeleton(long object, long skel);
-    static native void setInverseBindPose(long object, float[] matrices);
+    static native boolean setInverseBindPose(long object, float[] matrices);
 }
