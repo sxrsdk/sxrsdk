@@ -157,32 +157,33 @@ public class SXRPoseMapper extends SXRAnimation
             throw new IllegalArgumentException("Source skeleton cannot be null");
         }
         String[] lines = bonemap.split("[\r\n]");
-
-        mBoneMap = new int[mSourceSkeleton.getNumBones()];
-        Arrays.fill(mBoneMap, -1);
-        for (String line : lines)
+        synchronized (mDestSkeleton)
         {
-            String[] words;
+            mBoneMap = new int[mSourceSkeleton.getNumBones()];
+            Arrays.fill(mBoneMap, -1);
+            for (String line : lines)
+            {
+                String[] words;
 
-            line = line.trim();
-            if (line.isEmpty())
-            {
-                continue;
-            }
-            words = line.split("[\t ]");
-            int sourceIndex = mSourceSkeleton.getBoneIndex(words[0]);
-            int destIndex = mDestSkeleton.getBoneIndex(words[1]);
+                line = line.trim();
+                if (line.isEmpty())
+                {
+                    continue;
+                }
+                words = line.split("[\t ]");
+                int sourceIndex = mSourceSkeleton.getBoneIndex(words[0]);
+                int destIndex = mDestSkeleton.getBoneIndex(words[1]);
 
-            if ((sourceIndex >= 0) && (destIndex >= 0))
-            {
-                mBoneMap[sourceIndex] = destIndex;
-                mDestSkeleton.setBoneOptions(destIndex, mDestSkeleton.getBoneOptions(destIndex) | SXRSkeleton.BONE_ANIMATE);
-                Log.w("BONE", "%s %d -> %s %d",
-                      words[0], sourceIndex, words[1], destIndex);
-            }
-            else
-            {
-                Log.w("SXRPoseMapper", "makeBoneMap: cannot find bone " + words[0]);
+                if ((sourceIndex >= 0) && (destIndex >= 0))
+                {
+                    mBoneMap[sourceIndex] = destIndex;
+                    mDestSkeleton.setBoneOptions(destIndex, mDestSkeleton.getBoneOptions(destIndex) | SXRSkeleton.BONE_ANIMATE);
+                    Log.w("BONE", "%s %d -> %s %d", words[0], sourceIndex, words[1], destIndex);
+                }
+                else
+                {
+                    Log.w("SXRPoseMapper", "makeBoneMap: cannot find bone " + words[0]);
+                }
             }
         }
     }
@@ -235,13 +236,15 @@ public class SXRPoseMapper extends SXRAnimation
      */
     public void animate(SXRHybridObject target, float time)
     {
-        if ((mSourceSkeleton == null) || !mSourceSkeleton.isEnabled())
+        if ((mSourceSkeleton == null) || !mSourceSkeleton.isEnabled() || !mDestSkeleton.isEnabled())
         {
             return;
         }
-        mapLocalToTarget();
-        mDestSkeleton.poseToBones();
-        mDestSkeleton.updateBonePose();
+        synchronized (mDestSkeleton)
+        {
+            mapLocalToTarget();
+            mDestSkeleton.poseToBones();
+        }
     }
 
 
@@ -316,8 +319,6 @@ public class SXRPoseMapper extends SXRAnimation
         Matrix4f	mtx = new Matrix4f();
 
         srcpose.sync();
-        srcpose.getWorldPosition(0, v);
-        dstpose.setPosition(v.x, v.y, v.z);
         for (int i = 0; i < numsrcbones; ++i)
         {
             int	boneindex = mBoneMap[i];

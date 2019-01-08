@@ -25,7 +25,7 @@ namespace sxr {
         delete[] mBoneParents;
     };
 
-    void Skeleton::setBoneParents(int* boneparents, int numbones)
+    void Skeleton::updateBones(int boneparents[], const char* bonenames[], int numbones)
     {
         glm::mat4 *skinMatrices = new glm::mat4[numbones];
         glm::mat4 *boneMatrices = new glm::mat4[numbones];
@@ -52,6 +52,10 @@ namespace sxr {
             mWorldBoneMatrices = skinMatrices;
             mLocalBoneMatrices = boneMatrices;
             mNumBones = numbones;
+            for (int i = 0; i < numbones; ++i)
+            {
+                mBoneNames[i] = bonenames[i];
+            }
         }
     }
 

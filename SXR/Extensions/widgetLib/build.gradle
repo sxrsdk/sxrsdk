@@ -22,11 +22,11 @@ repositories {
 }
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 26
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 23
+        targetSdkVersion 26
         multiDexEnabled true
     }
 

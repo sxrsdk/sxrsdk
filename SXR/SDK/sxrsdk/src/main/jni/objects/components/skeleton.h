@@ -29,7 +29,7 @@ public:
     }
 
     int getNumBones() const { return mNumBones; }
-    void setBoneParents(int* parents, int numbones);
+    void updateBones(int parents[], const char* names[], int numbones);
     void setBoneName(int boneIndex, const char* name);
     const char* getBoneName(int boneIndex) const;
     void setPose(const float* input);
@@ -40,6 +40,7 @@ public:
     const int*    getBoneParents() const;
     int getBoneParent(int boneId) const;
     int getBoneIndex(const char* name) const;
+    std::mutex& getLock() { return mLock; }
 
     int getParentBoneID(int boneId) const
     {

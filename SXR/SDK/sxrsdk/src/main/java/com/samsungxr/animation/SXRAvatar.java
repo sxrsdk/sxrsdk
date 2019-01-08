@@ -469,7 +469,6 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         List<SXRComponent> skins = modelRoot.getAllComponents(SXRSkin.getComponentType());
         SXRNode srcRootBone = skel.getBone(0);
 
-        mAvatarRoot.addChildObject(modelRoot);
         if (srcRootBone != null)
         {
             int boneIndex = mSkeleton.getBoneIndex(skel.getBoneName(0));
@@ -492,13 +491,12 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             }
         }
         mSkeleton.merge(skel);
-        mSkeleton.poseToBones();
-        mSkeleton.updateBonePose();
         for (SXRComponent c : skins)
         {
             SXRSkin skin = (SXRSkin) c;
             skin.setSkeleton(mSkeleton);
         }
+        mAvatarRoot.addChildObject(modelRoot);
     }
 
     protected IAssetEvents mLoadModelHandler = new IAssetEvents()
@@ -527,7 +525,6 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                     eventName = "onAvatarLoaded";
                 }
                 mSkeleton.poseFromBones();
-                mSkeleton.updateBonePose();
             }
             else if (mSkeleton != null)
             {
