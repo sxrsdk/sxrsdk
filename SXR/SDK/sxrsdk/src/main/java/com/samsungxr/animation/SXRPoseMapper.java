@@ -41,7 +41,7 @@ public class SXRPoseMapper extends SXRAnimation
 
     public SXRAnimation setDuration(float start, float end)
     {
-        animationOffset =  start;
+        mAnimationOffset =  start;
         mDuration = end - start;
         return this;
     }

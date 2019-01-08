@@ -43,7 +43,7 @@ import java.util.List;
  * @see SXRAnimator
  * @see SXRAnimationEngine
  */
-public class SXRAnimator extends SXRBehavior implements IEventReceiver
+public class SXRAnimator extends SXRBehavior
 {
     private static final String TAG = Log.tag(SXRAnimator.class);
     static private long TYPE_ANIMATOR = newComponentType(SXRAnimator.class);
@@ -51,18 +51,15 @@ public class SXRAnimator extends SXRBehavior implements IEventReceiver
     protected boolean mAutoStart;
     protected boolean mIsRunning;
     protected String mName;
-    SXRNode mModel= null;
-    SXRAvatar mAvatar = null;
-    private String mBoneMap;
-    private int numberofInterp = 0;
-    //event
-    protected SXREventReceiver mReceiver;
-    private int numOfAnim =0;
     protected int mRepeatMode = SXRRepeatMode.ONCE;
     protected int mRepeatCount = 1;
-    protected boolean reverse = false;
-    protected float mBlend = 0;
-    private int count =0;
+    protected boolean mReverse = false;
+    protected float mBlendDuration = 0;
+    private SXRAvatar mAvatar = null;
+    private String mBoneMap;
+    private int numOfInterpolations = 0;
+    private int numOfAnimations =0;
+    private int loopIterator =0;
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -78,8 +75,6 @@ public class SXRAnimator extends SXRBehavior implements IEventReceiver
         mAutoStart = false;
         mIsRunning = false;
         mAnimations = new ArrayList<SXRAnimation>();
-        //event
-        mReceiver = new SXREventReceiver(this);
     }
 
     /**
@@ -102,9 +97,6 @@ public class SXRAnimator extends SXRBehavior implements IEventReceiver
 
     static public long getComponentType() { return TYPE_ANIMATOR; }
 
-    //event
-    public SXREventReceiver getEventReceiver() { return mReceiver; }
-
     /**
      * Get the name of this animator.
      * <p>
@@ -126,79 +118,57 @@ public class SXRAnimator extends SXRBehavior implements IEventReceiver
      */
     public boolean isRunning() { return mIsRunning; }
 
-    //event
     protected SXROnFinish onFinish = new SXROnFinish()
     {
     public void finished(SXRAnimation animation) {
-        numOfAnim++;
-        if(numOfAnim == mAnimations.size())
+        numOfAnimations++;
+        if(numOfAnimations == mAnimations.size())
         {
-           if(mRepeatMode==SXRRepeatMode.PINGPONG)
+           if(mRepeatMode == SXRRepeatMode.PINGPONG)
            {
-            if(count<mRepeatCount||mRepeatCount<0){
-                    numOfAnim = 0;
-                    if(!reverse) {
-                        reverse = true;
+            if(loopIterator < mRepeatCount||mRepeatCount < 0){
+                numOfAnimations = 0;
+                    if(!mReverse) {
+                        mReverse = true;
                         if(mRepeatCount>0)
                         {
-                            count++;
+                            loopIterator++;
                         }
-
                     }
                     else
                     {
-                        reverse = false;
+                        mReverse = false;
                     }
-                //numberofInterp;
-                for(int j=0;j<numberofInterp*2; j++) {
-                    removeAnimation(mAnimations.get(mAnimations.size()-1));//posemapper
 
-                }
+                removeBlendAnimation();
+                setStartParameters(mReverse);
+                mIsRunning = false;
+                Collections.reverse(mAnimations); //reverse the animations order
 
-                    for(int j=0;j<mAnimations.size(); j++) {
-                        mAnimations.get(j).setRepeatCount(1);
-                        mAnimations.get(j).setRepeatMode(mRepeatMode);
-                        mAnimations.get(j).setReverse(reverse);
-                    }
-                    mIsRunning = false;
-
-                    Collections.reverse(mAnimations);
-                    for(int i=0;i<(mAnimations.size());i=i+2)
+                for(int k=0;k<(mAnimations.size());k=k+2)
                     {
-                        SXRAnimation temp = mAnimations.get(i);
-                        mAnimations.set(i,mAnimations.get(i+1));
-                        mAnimations.set(i+1,temp);
-
+                        SXRAnimation temp = mAnimations.get(k);
+                        mAnimations.set(k,mAnimations.get(k+1)); // change the pose mapper and skeleton animation order
+                        mAnimations.set(k+1,temp);
                     }
-
-                    start(mBlend);
+                start(mBlendDuration);
             }
+           }
 
-
-            }
-
-            if(mRepeatMode==SXRRepeatMode.REPEATED)
+           if(mRepeatMode == SXRRepeatMode.REPEATED)
             {
-                if((count<mRepeatCount-1)||mRepeatCount<0) {
-                    numOfAnim = 0;
-                    for(int j=0;j<numberofInterp*2; j++) {
-                        removeAnimation(mAnimations.get(mAnimations.size()-1));//posemapper
-
-                    }
-                    for (int j = 0; j < mAnimations.size(); j++) {
-                        mAnimations.get(j).setRepeatCount(1);
-                        mAnimations.get(j).setRepeatMode(mRepeatMode);
-
-                    }
-                    start(mBlend);
-                    count++;
+                if((loopIterator < mRepeatCount-1)||mRepeatCount < 0) {
+                    numOfAnimations = 0;
+                    removeBlendAnimation();
+                    setStartParameters(mReverse);
+                    start(mBlendDuration);
+                    loopIterator++;
                 }
             }
         }
 
     }
     };
-
 
     /**
      * Determine if this animator should start all the animations
@@ -258,6 +228,20 @@ public class SXRAnimator extends SXRBehavior implements IEventReceiver
     public void removeAnimation(SXRAnimation anim)
     {
         mAnimations.remove(anim);
+    }
+
+    /**
+     * Removes blend animation from this animator.
+     * <p>
+     * This animation will not participate in any subsequent operations
+     * but it's state will not be changed when removed. For example,
+     * if the animation is already running it will not be stopped.
+     */
+    public void removeBlendAnimation()
+    {
+        for(int i=0;i< numOfInterpolations*2; i++) {
+            removeAnimation(mAnimations.get(mAnimations.size()-1)); //removes both blend animation and pose mapper
+        }
     }
 
     /**
@@ -378,12 +362,33 @@ public class SXRAnimator extends SXRBehavior implements IEventReceiver
             anim.setRepeatCount(repeatCount);
         }
     }
-    public void setAvatar(SXRNode model, SXRAvatar avatar, String bonemap)
+
+    /**
+     * Sets the avatar and boneMap for the animator.
+     * @param avatar resource with the animation
+     * @param boneMap bone map to map animation skeleton to avatar
+     */
+    public void setAvatar(SXRAvatar avatar, String boneMap)
     {
-        mModel = model;
         mAvatar = avatar;
-        mBoneMap = bonemap;
+        mBoneMap = boneMap;
     }
+
+    /**
+     * Sets the start parameters like repeat count, repeat mode and reverse for the animation.
+     * @param reverse determines whether animation plays in reverse or not
+     */
+    public void setStartParameters(boolean reverse)
+    {
+        for (SXRAnimation anim : mAnimations)
+        {
+            anim.setRepeatCount(1); //default
+            anim.setRepeatMode(mRepeatMode);
+            anim.setReverse(reverse);
+        }
+
+    }
+
     /**
      * Starts all of the animations in this animator.
      * @see SXRAnimator#reset()
@@ -401,79 +406,90 @@ public class SXRAnimator extends SXRBehavior implements IEventReceiver
             anim.start(getSXRContext().getAnimationEngine());
         }
     }
+
+    /**
+     * Starts all of the animations in this animator with blending between skeleton animations.
+     * @param blendFactor blend value to be applied between animations.
+     * @see SXRAnimator#reset()
+     * @see SXRAnimationEngine#start(SXRAnimation)
+     */
     public void start(float blendFactor)
     {
-        mBlend = blendFactor;
+        mBlendDuration = blendFactor;
         if (mAnimations.size() == 0)
         {
             return;
         }
         mIsRunning = true;
+
         int skelAnimSize = mAnimations.size();
-        numberofInterp =0;
+        numOfInterpolations =0;
 
         for(int i=0;i<(skelAnimSize)-2;i=i+2)
         {
-            //Log.i("debugSkeleton","animationNum"+skelAnimSize);
             SXRSkeletonAnimation skelOne = (SXRSkeletonAnimation)mAnimations.get(i);
             SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation)mAnimations.get(i+2);
-            SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(mModel, blendFactor, skelOne, skelTwo, skelOne.getSkeleton(), reverse);
+            SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(mAvatar.getModel(), mBlendDuration, skelOne, skelTwo, skelOne.getSkeleton(), mReverse);
             SXRPoseMapper retargeterP = new SXRPoseMapper(mAvatar.getSkeleton(), skelOne.getSkeleton(), blendFactor);
             retargeterP.setBoneMap(mBoneMap);
 
             mAnimations.add(blendAnim);
             mAnimations.add(retargeterP);
-            numberofInterp++;
+            numOfInterpolations++;
         }
 
         int allAnimSize = mAnimations.size();
         int mAnimSkel = 0;
-        for(int idSkel=0;idSkel<allAnimSize;idSkel=idSkel+4)
+
+        for(int idSkelAnim=0;idSkelAnim<allAnimSize;idSkelAnim=idSkelAnim+4)
         {
-            if(idSkel==0)
+            if(idSkelAnim==0)
             {
-                mAnimations.get(mAnimSkel).setID(idSkel);
-                mAnimations.get(mAnimSkel+1).setID(idSkel+1);
+                mAnimations.get(mAnimSkel).setID(idSkelAnim); //set id for skeleton animation
+                mAnimations.get(mAnimSkel+1).setID(idSkelAnim+1); //set id for pose mapper animation
+
                 SXRSkeletonAnimation skel = (SXRSkeletonAnimation)mAnimations.get(0);
-                skel.setSkelOrder("first");
+                skel.setSkelAnimOrder("first");
 
             }
             else
             {
-                mAnimations.get(mAnimSkel).setID(idSkel);
-                mAnimations.get(mAnimSkel+1).setID(idSkel+1);
+                mAnimations.get(mAnimSkel).setID(idSkelAnim);
+                mAnimations.get(mAnimSkel+1).setID(idSkelAnim+1);
+
                 SXRSkeletonAnimation skel = (SXRSkeletonAnimation)mAnimations.get(mAnimSkel);
-                if(idSkel!=(allAnimSize-2))
+                if(idSkelAnim!=(allAnimSize-2))
                 {
-                    skel.setSkelOrder("middle");
+                    skel.setSkelAnimOrder("middle");
                 }
                 else
                 {
-                    skel.setSkelOrder("last");
+                    skel.setSkelAnimOrder("last");
                 }
             }
             mAnimSkel = mAnimSkel+2;
         }
-        int mAnimInterp = allAnimSize-(2*numberofInterp);
-        for(int idIntp=0;idIntp<(numberofInterp*4); idIntp=idIntp+4)
+
+        int mAnimInterp = allAnimSize-(2*numOfInterpolations);
+
+        for(int idInterp=0;idInterp<(numOfInterpolations*4); idInterp=idInterp+4)
         {
-            mAnimations.get(mAnimInterp).setID(idIntp+2);
-            mAnimations.get(mAnimInterp+1).setID(idIntp+3);
+            mAnimations.get(mAnimInterp).setID(idInterp+2); //set id for interpolation animation
+            mAnimations.get(mAnimInterp+1).setID(idInterp+3); //set id for pose mapper animation
             mAnimInterp = mAnimInterp+2;
         }
 
-        mAnimations.get(0).setFlag(allAnimSize);
+        mAnimations.get(0).setPlayAnimation(allAnimSize);
 
         for(int j=0;j<allAnimSize; j++) {
-            mAnimations.get(j).setBlendDuration(blendFactor,true);
+            mAnimations.get(j).setBlend(true,blendFactor);
             mAnimations.get(j).setOnFinish(onFinish);
             mAnimations.get(j).setRepeatMode(mRepeatMode);
             mAnimations.get(j).setRepeatCount(1);
             mAnimations.get(j).start(getSXRContext().getAnimationEngine());
         }
-
-
     }
+
     /**
      * Starts all of the animations in this animator.
      * @see SXRAnimator#reset()
