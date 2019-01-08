@@ -44,9 +44,29 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
 {
     public interface TrackerEvents extends IEvents
     {
+        /**
+         * Called when body tracker starts processing images.
+         * @param tracker  {@link SXRBodyTracker} that is doing the tracking.
+         */
         public void onTrackStart(SXRBodyTracker tracker);
+
+        /**
+         * Called when body tracker stops processing images.
+         * @param tracker  {@link SXRBodyTracker} that is doing the tracking.
+         */
         public void onTrackEnd(SXRBodyTracker tracker);
+
+        /**
+         * Called each time the body tracker  processes an image.
+         * @param tracker  {@link SXRBodyTracker} that is doing the tracking.
+         */
         public void onTrackUpdate(SXRBodyTracker tracker);
+
+        /**
+         * Called when body tracker skeleton is defined.
+         * @param tracker  {@link SXRBodyTracker} that is doing the tracking.
+         */
+        public void onInitSkeleton(SXRBodyTracker tracker);
     };
 
     protected SXRPose mDestPose;

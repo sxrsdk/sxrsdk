@@ -120,15 +120,17 @@ void BulletWorld::stopDrag() {
 }
 
 void BulletWorld::addRigidBody(PhysicsRigidBody *body) {
-    btRigidBody *b = (static_cast<BulletRigidBody *>(body))->getRigidBody();
+    BulletRigidBody *rb = static_cast<BulletRigidBody *>(body);
     body->updateConstructionInfo();
-    mPhysicsWorld->addRigidBody(b);
+    mPhysicsWorld->addRigidBody(rb->getRigidBody());
+    rb->mWorld = mPhysicsWorld;
 }
 
 void BulletWorld::addRigidBody(PhysicsRigidBody *body, int collisiontype, int collidesWith) {
+    BulletRigidBody *rb = static_cast<BulletRigidBody *>(body);
     body->updateConstructionInfo();
-    mPhysicsWorld->addRigidBody((static_cast<BulletRigidBody *>(body))->getRigidBody(),
-                                collidesWith, collisiontype);
+    mPhysicsWorld->addRigidBody(rb->getRigidBody(), collidesWith, collisiontype);
+    rb->mWorld = mPhysicsWorld;
 }
 
 void BulletWorld::removeRigidBody(PhysicsRigidBody *body) {
