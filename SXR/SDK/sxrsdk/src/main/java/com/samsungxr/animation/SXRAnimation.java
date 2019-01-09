@@ -609,7 +609,7 @@ public abstract class SXRAnimation {
             float endRatio = mRepeatMode == SXRRepeatMode.ONCE ? 1f : 0f;
 
             endRatio = interpolate(mDuration, mDuration);
-            if(mReverse && mBlend)
+            if(mReverse)
             {
                 endRatio = 0;
             }

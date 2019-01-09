@@ -18,9 +18,12 @@ import com.samsungxr.utility.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static com.samsungxr.animation.SXRAnimation.DEFAULT_REPEAT_COUNT;
 
 /**
  * Group of animations that can be collectively manipulated.
@@ -48,6 +51,9 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     protected SXREventReceiver mReceiver;
     protected final List<SXRAnimator> mAnimQueue = new ArrayList<SXRAnimator>();
     protected int mRepeatMode = SXRRepeatMode.ONCE;
+    protected int mRepeatCount = DEFAULT_REPEAT_COUNT;
+    private float repeatCount = 0;
+    private boolean reverse = false;
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -170,7 +176,29 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                                                                         animator);
                 if (mRepeatMode == SXRRepeatMode.REPEATED)
                 {
-                    startAll(mRepeatMode);
+                    repeatCount++;
+                    if(repeatCount < mRepeatCount || mRepeatCount < 0){
+                        for (SXRAnimator anim : mAnimations)
+                        {
+                            anim.setStartParameters(mRepeatMode, reverse);
+                        }
+                        startAll(mRepeatMode , mRepeatCount);
+                    }
+                }
+                if (mRepeatMode == SXRRepeatMode.PINGPONG)
+                {
+                    repeatCount = repeatCount+0.5f ;
+                    if(repeatCount < mRepeatCount || mRepeatCount<0){
+
+                        reverse = !reverse;
+                        Collections.reverse(mAnimations);
+
+                        for (SXRAnimator anim : mAnimations)
+                        {
+                           anim.setStartParameters(mRepeatMode, reverse);
+                        }
+                        startAll(mRepeatMode, mRepeatCount);
+                    }
                 }
 
                 default: break;
@@ -404,9 +432,10 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * @param repeatMode SXRRepeatMode.REPEATED to repeatedly play,
      *                   SXRRepeatMode.ONCE to play only once
      */
-    public void startAll(int repeatMode)
+    public void startAll(int repeatMode, int repeatCount)
     {
         mRepeatMode = repeatMode;
+        mRepeatCount = repeatCount;
         for (SXRAnimator anim : mAnimations)
         {
             start(anim);

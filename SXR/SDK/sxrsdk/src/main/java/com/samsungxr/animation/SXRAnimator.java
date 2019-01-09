@@ -141,16 +141,9 @@ public class SXRAnimator extends SXRBehavior
                     }
 
                 removeBlendAnimation();
-                setStartParameters(mReverse);
+                setStartParameters(mRepeatMode, mReverse);
                 mIsRunning = false;
-                Collections.reverse(mAnimations); //reverse the animations order
-
-                for(int k=0;k<(mAnimations.size());k=k+2)
-                    {
-                        SXRAnimation temp = mAnimations.get(k);
-                        mAnimations.set(k,mAnimations.get(k+1)); // change the pose mapper and skeleton animation order
-                        mAnimations.set(k+1,temp);
-                    }
+                reverseAnimations(mAnimations);
                 start(mBlendDuration);
             }
            }
@@ -160,7 +153,7 @@ public class SXRAnimator extends SXRBehavior
                 if((loopIterator < mRepeatCount-1)||mRepeatCount < 0) {
                     numOfAnimations = 0;
                     removeBlendAnimation();
-                    setStartParameters(mReverse);
+                    setStartParameters(mRepeatMode, mReverse);
                     start(mBlendDuration);
                     loopIterator++;
                 }
@@ -263,6 +256,16 @@ public class SXRAnimator extends SXRBehavior
             ++index;
         }
         return -1;
+    }
+
+    public void reverseAnimations(List<SXRAnimation> mAnimations) {
+        Collections.reverse(mAnimations); //reverse the animations order
+
+        for (int k = 0; k < (mAnimations.size()); k = k + 2) {
+            SXRAnimation temp = mAnimations.get(k);
+            mAnimations.set(k, mAnimations.get(k + 1)); // change the pose mapper and skeleton animation order
+            mAnimations.set(k + 1, temp);
+        }
     }
 
     /**
@@ -376,20 +379,21 @@ public class SXRAnimator extends SXRBehavior
 
     /**
      * Sets the start parameters like repeat count, repeat mode and reverse for the animation.
-     * @param reverse determines whether animation plays in reverse or not
+     * @param repeatMode One of the {@link SXRRepeatMode} constants
+     * @param reverse determines whether animation play in backwards or not
      */
-    public void setStartParameters(boolean reverse)
+    public void setStartParameters(int repeatMode, boolean reverse)
     {
         for (SXRAnimation anim : mAnimations)
         {
             anim.setRepeatCount(1); //default
-            anim.setRepeatMode(mRepeatMode);
+            anim.setRepeatMode(repeatMode);
             anim.setReverse(reverse);
         }
 
     }
 
-    /**
+     /**
      * Starts all of the animations in this animator.
      * @see SXRAnimator#reset()
      * @see SXRAnimationEngine#start(SXRAnimation)
