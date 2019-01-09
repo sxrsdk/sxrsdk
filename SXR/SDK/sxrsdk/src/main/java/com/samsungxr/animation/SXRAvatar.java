@@ -12,14 +12,20 @@ import com.samsungxr.SXRImportSettings;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRResourceVolume;
 import com.samsungxr.SXRTexture;
+import com.samsungxr.SXRTransform;
 import com.samsungxr.animation.keyframe.BVHImporter;
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
 
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -42,6 +48,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     private static final String TAG = Log.tag(SXRAvatar.class);
     static private long TYPE_AVATAR = newComponentType(SXRAvatar.class);
     protected final List<SXRAnimator> mAnimations;
+    protected Map<String, SXRNode> mAttachments = new HashMap<String, SXRNode>();
     protected SXRSkeleton mSkeleton;
     protected final SXRNode mAvatarRoot;
     protected boolean mIsRunning;
@@ -117,6 +124,18 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         return mAnimations.size();
     }
 
+    /**
+     * Called when an animation on this avatar has started.
+     * @param animator  {@link }SXRAnimator} containing the animation that started.
+     */
+    public void onAnimationStarted(SXRAnimator animator) { }
+
+    /**
+     * Called when an animation on this avatar has completed a cycle.
+     * @param animator  {@link }SXRAnimator} containing the animation that finished.
+     * @param animation {@link SXRAnimation} that finished..
+     */
+    public void onAnimationFinished(SXRAnimator animator, SXRAnimation animation) { }
 
     protected SXROnFinish mOnFinish = new SXROnFinish()
     {
@@ -149,12 +168,14 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             switch (numEvents)
             {
                 case 2:
+                onAnimationFinished(animator, animation);
                 mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
                                                                         IAvatarEvents.class,
                                                                         "onAnimationFinished",
                                                                         SXRAvatar.this,
                                                                         animator,
                                                                         animation);
+                onAnimationStarted(animator);
                 mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
                                                                         IAvatarEvents.class,
                                                                         "onAnimationStarted",
@@ -163,6 +184,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 break;
 
                 case 1:
+                onAnimationStarted(animator);
                 mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
                                                                         IAvatarEvents.class,
                                                                         "onAnimationStarted",
@@ -179,20 +201,87 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     };
 
     /**
-     * Load the avatar base model
-     * @param avatarResource    resource with avatar model
+     * Load the avatar base model or an attachment.
+     * <p>
+     * The first model loaded is the avatar base model. It defines the
+     * skeleton of the avatar. Subsequent calls load attachments to
+     * this skeleton. The skeleton of the attachment is merged with
+     * the avatar skeleton so that a single skeleton drives
+     * the avatar and all of its attachments.
+     * @param avatarResource    resource with avatar mode.
+     * @see #removeModel(String)
      */
     public void loadModel(SXRAndroidResource avatarResource)
+    {
+        loadModel(avatarResource, null, null);
+    }
+
+    /**
+     * Load the avatar base model or an attachment.
+     * <p>
+     * The first model loaded is the avatar base model. It defines the
+     * skeleton of the avatar. Subsequent calls load attachments to
+     * this skeleton. The skeleton of the attachment is merged with
+     * the avatar skeleton so that a single skeleton drives
+     * the avatar and all of its attachments.
+     * <p>
+     * If the root bone of the attachment skeleton is found
+     * in the avatar skeleton, the attachment skeleton is put
+     * under this bone. Otherwise it is put under the root bone.
+     * @param avatarResource    resource with avatar or model file.
+     * @param modelDesc         avatar descriptor (for subclasses, unused in SXRAvatar).
+     * @see #removeModel(String)
+     */
+    public void loadModel(SXRAndroidResource avatarResource, String modelDesc)
+    {
+        loadModel(avatarResource, modelDesc, null);
+    }
+
+    /**
+     * Load an attachment onto the avatar.
+     * <p>
+     * The skeleton of the attachment is merged with
+     * the avatar skeleton so that a single skeleton drives
+     * the avatar and all of its attachments.
+     * @param avatarResource    resource with avatar file.
+     * @param modelDesc         model descriptor (for subclasses, unused in SXRAvatar).
+     * @param attachBone        name of skeleton bone to attach this model to.
+     * @see #removeModel(String)
+     */
+    public void loadModel(SXRAndroidResource avatarResource, String modelDesc, String attachBone)
     {
         EnumSet<SXRImportSettings> settings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_ANIMATION));
         SXRContext ctx = mAvatarRoot.getSXRContext();
         SXRResourceVolume volume = new SXRResourceVolume(ctx, avatarResource);
         SXRNode modelRoot = new SXRNode(ctx);
-
+        if (attachBone != null)
+        {
+            mAttachments.put(attachBone, modelRoot);
+        }
         ctx.getAssetLoader().loadModel(volume, modelRoot, settings, true, mLoadModelHandler);
     }
 
+    /**
+     * Remove a model that was added as an attachment.
+     * <p>
+     * The first model loaded is the avatar body. Subsequent models
+     * are attachments.
+     * @param boneName  name of root skeleton bone in attachment skin.
+     * @see #loadModel(SXRAndroidResource)
+     */
+    public void removeModel(String boneName)
+    {
+        SXRNode model = mAttachments.get(boneName);
+        if (model != null)
+        {
+            mAvatarRoot.removeChildObject(model);
+            mAttachments.remove(boneName);
+        }
+    }
 
+    /**
+     * Clear the avatar model and all of its attachments.
+     */
     public void clearAvatar()
     {
         SXRNode previousAvatar = (mAvatarRoot.getChildrenCount() > 0) ?
@@ -461,43 +550,60 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         model.getTransform().setPosition(-bv.center.x, -bv.center.y, -bv.center.z - 1.5f * bv.radius);
     }
 
-    public void mergeSkeleton(SXRSkeleton skel, SXRNode modelRoot)
+    protected String mergeSkeleton(SXRSkeleton skel, SXRNode modelRoot)
     {
-        List<SXRComponent> skins = modelRoot.getAllComponents(SXRSkin.getComponentType());
+        String attachBone = skel.getBoneName(0);
+        for (Map.Entry<String, SXRNode> item : mAttachments.entrySet())
+        {
+            if (item.getValue() == modelRoot)
+            {
+                attachBone = item.getKey();
+                skel.setBoneName(0, item.getKey());
+                break;
+            }
+        }
+        int boneIndex = mSkeleton.getBoneIndex(attachBone);
+        if (boneIndex < 0)
+        {
+            boneIndex = 0;
+            attachBone = mSkeleton.getBoneName(0);
+            skel.setBoneName(0, attachBone);
+        }
         SXRNode srcRootBone = skel.getBone(0);
+        if (srcRootBone != null)
+        {
+            SXRNode parent = mSkeleton.getBone(boneIndex);
+            if (parent != null)
+            {
+                int n = srcRootBone.getChildrenCount();
 
+                for (int i = 0; i < n; ++i)
+                {
+                    SXRNode child = srcRootBone.getChildByIndex(0);
+                    if (skel.getBoneIndex(child.getName()) >= 0)
+                    {
+                        srcRootBone.removeChildObject(child);
+                        parent.addChildObject(child);
+                    }
+                }
+            }
+        }
+        mAttachments.put(attachBone, modelRoot);
         mSkeleton.merge(skel);
+        List<SXRComponent> skins = modelRoot.getAllComponents(SXRSkin.getComponentType());
         for (SXRComponent c : skins)
         {
             SXRSkin skin = (SXRSkin) c;
             skin.setSkeleton(mSkeleton);
         }
-        if (srcRootBone != null)
-        {
-            int boneIndex = mSkeleton.getBoneIndex(skel.getBoneName(0));
-            if (boneIndex >= 0)
-            {
-                SXRNode parent = mSkeleton.getBone(boneIndex);
-                if (parent != null)
-                {
-                    for (int i = 0; i < srcRootBone.getChildrenCount(); ++i)
-                    {
-                        SXRNode child = srcRootBone.getChildByIndex(i);
-                        srcRootBone.removeChildObject(child);
-                        parent.addChildObject(child);
-                    }
-                    srcRootBone.getParent().removeChildObject(srcRootBone);
-                }
-            }
-        }
         mAvatarRoot.addChildObject(modelRoot);
+        return attachBone;
     }
 
     protected IAssetEvents mLoadModelHandler = new IAssetEvents()
     {
         public void onAssetLoaded(SXRContext context, SXRNode modelRoot, String filePath, String errors)
         {
-            context.getAssetLoader().getEventReceiver().removeListener(this);
             List<SXRComponent> skeletons = modelRoot.getAllComponents(SXRSkeleton.getComponentType());
             String eventName = "onModelLoaded";
             if ((errors != null) && !errors.isEmpty())
@@ -510,17 +616,15 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 if (mSkeleton != null)
                 {
                     mergeSkeleton(skel, modelRoot);
-                    mAvatarRoot.addChildObject(modelRoot);
                 }
                 else
                 {
                     mSkeleton = skel;
+                    mSkeleton.poseFromBones();
                     mAvatarRoot.addChildObject(modelRoot);
                     modelRoot = mAvatarRoot;
                     eventName = "onAvatarLoaded";
                 }
-                mSkeleton.poseFromBones();
-                mSkeleton.updateSkinPose();
             }
             else if (mSkeleton != null)
             {
@@ -596,11 +700,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                                                 errors);
         }
 
-        public void onModelLoaded(SXRContext context, SXRNode model, String filePath)
-        {
-            centerModel(model);
-        }
-
+        public void onModelLoaded(SXRContext context, SXRNode model, String filePath) { }
         public void onTextureLoaded(SXRContext context, SXRTexture texture, String filePath) { }
         public void onModelError(SXRContext context, String error, String filePath) { }
         public void onTextureError(SXRContext context, String error, String filePath) { }

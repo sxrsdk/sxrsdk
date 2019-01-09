@@ -137,7 +137,7 @@ public class BVHImporter
         @Override
         public void start(SXRSkeleton skel)
         {
-            mBindPose = skel.getBindPose();
+            mBindPose = skel.getPose();
             mTempQuat1 = new Quaternionf();
             mTempQuat2 = new Quaternionf();
             mPosKey = new float[3];
@@ -434,7 +434,7 @@ public class BVHImporter
             bindpose.setLocalPosition(i, p.x, p.y, p.z);
             skel.setBoneName(i, mBoneNames.get(i));
         }
-        skel.setBindPose(bindpose);
+        skel.setPose(bindpose);
         return skel;
     }
 
@@ -629,7 +629,7 @@ public class BVHImporter
             float[] posKeys = posKeysPerBone.get(boneIndex);
             if (order.length() == 3)
             {
-                mSkeleton.getBindPose().getLocalPosition(boneIndex, pos);
+                mSkeleton.getPose().getLocalPosition(boneIndex, pos);
                 posKeys = new float[]{0, pos.x, pos.y, pos.z};
             }
             channel = mKeyMaker.makeAnimationChannel(bonename, posKeys, rotKeys);
