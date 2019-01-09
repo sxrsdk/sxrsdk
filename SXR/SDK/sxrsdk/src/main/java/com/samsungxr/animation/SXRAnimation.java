@@ -127,6 +127,7 @@ public abstract class SXRAnimation {
     // Running state
     protected float mElapsedTime = 0f;
     protected int mIterations = 0;
+
     protected boolean isFinished = false;
     protected boolean mReverse = false;
     static boolean[] playAnimation;
@@ -486,28 +487,33 @@ public abstract class SXRAnimation {
     }
 
     /**
-     * Updates and sets the skeleton animation either to update the pose or not
+     * Sets the skeleton animation either to update the pose or not
      * based on the conditions with respect to time
      * @param animation
      *            this animation
      * @param currTime
      *            current time, in second
-     * @param frameTime
-     *            elapsed time since the previous animation frame, in second
      */
-    public void updateAnimation(SXRAnimation animation, float currTime, float frameTime)
+    public void updateAnimation(SXRAnimation animation, float currTime)
     {
         if(this.getClass().getName().contains("SXRSkeletonAnimation"))
         {
             this.getAnimation(animation);
 
-            if((mSkeletonAnimation.getSkelAnimOrder()!=("last")) && (currTime >= (this.getDuration()-mBlendDuration+frameTime)))
+            if((mSkeletonAnimation.getSkelAnimOrder() == "first"))
             {
-               mSkeletonAnimation.setUpdatePose(true);
+                if(currTime > (this.getDuration()-mBlendDuration))
+                {
+                    mSkeletonAnimation.setUpdatePose(true);
+                }
+                else
+                {
+                    mSkeletonAnimation.setUpdatePose(false);
+                }
             }
             else if(mSkeletonAnimation.getSkelAnimOrder()=="middle")
             {
-                if((0 < currTime) && (currTime < mBlendDuration) && (currTime) > (this.getDuration()-mBlendDuration))
+                if((0 < currTime) && (currTime < mBlendDuration) && (currTime > (this.getDuration()-mBlendDuration)))
                 {
                     mSkeletonAnimation.setUpdatePose(true);
                 }
@@ -553,23 +559,18 @@ public abstract class SXRAnimation {
                 }
             }
             if(this.getClass().getName().contains("SXRSkeletonAnimation")) {
-                if ((mSkeletonAnimation.getSkelAnimOrder() != ("last") && (mElapsedTime >= (this.getDuration() - mBlendDuration) + frameTime))) {
+                if ((mSkeletonAnimation.getSkelAnimOrder() != ("last") && (mElapsedTime > (this.getDuration() - mBlendDuration)))) {
                     playAnimation[this.getID() + 2] = true;
                     playAnimation[this.getID() + 3] = true;
                     playAnimation[this.getID() + 4] = true;
                     playAnimation[this.getID() + 5] = true;
                 }
             }
-            updateAnimation(this, mElapsedTime, frameTime);
+            updateAnimation(this, mElapsedTime);
         }
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
         mElapsedTime += (frameTime*mAnimationSpeed);
-
-        if(mBlend)
-        {
-            updateAnimation(this, mElapsedTime, frameTime);
-        }
 
         final int currentCycleCount = (int) (mElapsedTime / mDuration);
         final float cycleTime = (mElapsedTime % mDuration) + mAnimationOffset;

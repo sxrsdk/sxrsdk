@@ -17,72 +17,94 @@ package com.samsungxr.animation;
 
 import com.samsungxr.SXRHybridObject;
 import com.samsungxr.SXRNode;
-import com.samsungxr.SXRPicker;
 import com.samsungxr.animation.keyframe.SXRFloatAnimation;
 import com.samsungxr.animation.keyframe.SXRQuatAnimation;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import static com.samsungxr.animation.SXRPose.Bone;
-
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
-import com.samsungxr.utility.Log;
 
+/**
+ * Interpolate the poses or blend the skeleton animations.
+ * <p>
+ * The blending is performed by interpolating values between two poses
+ * which contain translations, rotations and scaling to apply to the bone
+ * over time.
+ * <p>
+ * Each frame the animation compute the matrix for animating
+ * that bone. This matrix is used to update the current pose
+ * of the skeleton and the nodes associated with the bone.
+ * After all channels have been evaluated, the skinning pose is
+ * computed to drive skinned meshes.
+ * @see SXRSkeleton
+ * @see com.samsungxr.animation.SXRSkin
+ * @see SXRPose
+ */
 public class SXRPoseInterpolator extends SXRAnimation
 {
     private SXRPose initialPose;
     private SXRPose finalPose;
-    // private SXRSkeleton pSkeleton;
     private Bone[] mBones;
+    private SXRSkeleton mSkeleton;
+    private SXRNode modelTarget;
 
-    private Vector3f poseOnePos;
-    private Vector3f poseTwoPos;
-    private Vector3f poseOneScl;
-    private Vector3f poseTwoScl;
-    private Quaternionf poseOneRot;
-    private Quaternionf poseTwoRot;
+    private Vector3f poseOnePos =  new Vector3f(0,0,0);
+    private Vector3f poseTwoPos =  new Vector3f(0,0,0);
+    private Vector3f poseOneScl =  new Vector3f(0,0,0);
+    private Vector3f poseTwoScl =  new Vector3f(0,0,0);
+    private Quaternionf poseOneRot =  new Quaternionf(0,0,0,1);
+    private Quaternionf poseTwoRot =  new Quaternionf(0,0,0,1);
 
-    private Vector3f tempVec;
-    private Quaternionf tempQuat;
+    private Vector3f tempVec = new Vector3f(0,0,0);
+    private Quaternionf tempQuat = new Quaternionf(0,0,0,1);
 
     private SXRQuatAnimation mRotInterpolator;
     private SXRFloatAnimation mPosInterpolator;
     private SXRFloatAnimation mSclInterpolator;
 
-    private float mDuration;
-    private float[] rotData;
-    private float[] posData;
-    private float[] sclData;
+    private float[] rotData = new float[10];
+    private float[] posData = new float[8];
+    private float[] sclData = new float[8];
     private float[] poseData;
-    private float[] posIData;
-    private float[] sclIData;
-    private float[] rotIData;
+    private float[] posInterpolatedData = new float[3];
+    private float[] sclInterpolatedData = new float[3];
+    private float[] rotInterpolatedData = new float[4];
 
-    private int poseDataSize;
-    private int initialPosIndex;
-    private int finalPosIndex;
-    private int initialRotIndex;
-    private int finalRotIndex;
-    private int initialSclIndex;
-    private int finalSclIndex;
+    private int poseDataSize = 20;
+    private int initialPosIndex=0; //initial position index for bone 0 in the poseData array
+    private int finalPosIndex=10;  //final position index for bone 0 in the poseData array
+    private int initialRotIndex=3; //initial rotation index for bone 0 in the poseData array
+    private int finalRotIndex=13;  //final rotation index for bone 0 in the poseData array
+    private int initialSclIndex=7; //initial scale index for bone 0 in the poseData array
+    private int finalSclIndex=17;  //final scale index for bone 0 in the poseData array
+
     private float startTime;
     private float endTime;
-    private int startTimeIndex;
-    private int endTimeIndex;
-    private int offset;
+    private int startTimeIndex = 0;
+    private int endTimeIndex =  4;
+    private int offset = 0;
     private Matrix4f mat;
-    private SXRNode modelTarget;
+    private float mDuration;
 
     //dynamic update
     private SXRSkeletonAnimation skelAnimSrc;
     private SXRSkeletonAnimation skelAnimDest;
-    private SXRSkeleton mSkeleton;
     private float[][] posBlend;
     private float[][] rotBlend;
     private float[][] sclBlend;
-    static float frameTime =0;
     private boolean poseBlend = false;
     private boolean mReverse = false;
+
+    /**
+     * Create a interpolation animation between two given poses.
+     *
+     * @param target The target hierachy containing nodes for bones.
+     * @param duration Duration of the animation in seconds.
+     * @param poseOne start pose.
+     * @param poseTwo end pose.
+     * @param skeleton The skeleton being animated.
+     */
     public SXRPoseInterpolator(SXRNode target, float duration, SXRPose poseOne, SXRPose poseTwo, SXRSkeleton skeleton)
     {
         super(target, duration);
@@ -93,136 +115,88 @@ public class SXRPoseInterpolator extends SXRAnimation
         finalPose = poseTwo;
         mSkeleton = skeleton;
 
-        poseOnePos =  new Vector3f(0,0,0);
-        poseTwoPos =  new Vector3f(0,0,0);
-        poseOneScl =  new Vector3f(0,0,0);
-        poseTwoScl =  new Vector3f(0,0,0);
-        poseOneRot =  new Quaternionf(0,0,0,1);
-        poseTwoRot =  new Quaternionf(0,0,0,1);
-
-        rotData = new float[10];
-        posData = new float[8];
-        sclData = new float[8];
-
-        posIData = new float[3];
-        sclIData = new float[3];
-        rotIData = new float[4];
-
-        tempVec = new Vector3f(0,0,0);
-        tempQuat = new Quaternionf(0,0,0,1);
-        initialPosIndex=0; //initial position index
-        finalPosIndex=10; //final position index
-        initialRotIndex=3; //initial rotation index
-        finalRotIndex=13;  //final rotation index
-        initialSclIndex=7;
-        finalSclIndex=17;
         startTime = 0;
         endTime =  duration;
-        startTimeIndex = 0;
-        endTimeIndex =  4;
-        offset = 0;
-        poseDataSize = 20;
+
         mBones = new Bone[mSkeleton.getNumBones()];
         poseData = new float[poseDataSize*mSkeleton.getNumBones()];
         mDuration = duration;
 
         for (int i = 0; i < mSkeleton.getNumBones(); i++)
         {
-            poseInterpolate(i);
+            setAnimationData(i);
         }
         mat = new Matrix4f();
         poseBlend = true;
     }
 
-
-    //dynamic update
-
+    /**
+     * Create a blending animation between two given skeleton animations.
+     *
+     * @param target The target hierachy containing nodes for bones.
+     * @param duration Duration of the animation in seconds.
+     * @param skelOne first skeleton animation.
+     * @param skelTwo second skeleton animation.
+     * @param skeleton The skeleton being animated.
+     * @param reverse determines whether the blending animation is to be played reverse.
+     */
     public SXRPoseInterpolator(SXRNode target, float duration, SXRSkeletonAnimation skelOne, SXRSkeletonAnimation skelTwo, SXRSkeleton skeleton, boolean reverse)
     {
-
         super(target, duration);
-
         modelTarget = target;
 
         skelAnimSrc = skelOne;
         skelAnimDest = skelTwo;
         mSkeleton = skeleton;
 
-        poseOnePos =  new Vector3f(0,0,0);
-        poseTwoPos =  new Vector3f(0,0,0);
-        poseOneScl =  new Vector3f(0,0,0);
-        poseTwoScl =  new Vector3f(0,0,0);
-        poseOneRot =  new Quaternionf(0,0,0,1);
-        poseTwoRot =  new Quaternionf(0,0,0,1);
-
-        rotData = new float[10];
-        posData = new float[8];
-        sclData = new float[8];
-
-        posIData = new float[3];
-        sclIData = new float[3];
-        rotIData = new float[4];
-
         posBlend = new float[skelAnimSrc.getSkeleton().getNumBones()][6];
         rotBlend = new float[skelAnimSrc.getSkeleton().getNumBones()][8];
         sclBlend = new float[skelAnimSrc.getSkeleton().getNumBones()][6];
 
-        tempVec = new Vector3f(0,0,0);
-        tempQuat = new Quaternionf(0,0,0,1);
-        initialPosIndex=0; //initial position index
-        finalPosIndex=10; //final position index
-        initialRotIndex=3; //initial rotation index
-        finalRotIndex=13;  //final rotation index
-        initialSclIndex=7;
-        finalSclIndex=17;
         startTime = 0;
         endTime =  duration;
-        startTimeIndex = 0;
-        endTimeIndex =  4;
-        offset = 0;
-        poseDataSize = 20;
+
         mBones = new Bone[mSkeleton.getNumBones()];
-        poseData = new float[poseDataSize*mSkeleton.getNumBones()];
+        poseData = new float[poseDataSize * mSkeleton.getNumBones()];
         mDuration = duration;
         mReverse = reverse;
 
         if(!reverse)
         {
-            initialPose = skelAnimSrc.computePose(skelAnimSrc.getDuration()-mDuration,skelAnimSrc.getSkeleton().getPose());
-            finalPose = skelAnimDest.computePose(0,skelAnimDest.getSkeleton().getPose());
+            initialPose = skelAnimSrc.computePose(skelAnimSrc.getDuration()-mDuration, skelAnimSrc.getSkeleton().getPose());
+            finalPose = skelAnimDest.computePose(0, skelAnimDest.getSkeleton().getPose());
         }
         else
         {
-          //  finalPose = skelAnimSrc.computePose(0,skelAnimSrc.getSkeleton().getPose());
-          //  initialPose = skelAnimDest.computePose(skelAnimSrc.getDuration()-mDuration,skelAnimDest.getSkeleton().getPose());
-            initialPose = skelAnimSrc.computePose(0+mDuration,skelAnimSrc.getSkeleton().getPose());
-            finalPose = skelAnimDest.computePose(skelAnimSrc.getDuration(),skelAnimDest.getSkeleton().getPose());
+            initialPose = skelAnimSrc.computePose(0+mDuration, skelAnimSrc.getSkeleton().getPose());
+            finalPose = skelAnimDest.computePose(skelAnimSrc.getDuration(), skelAnimDest.getSkeleton().getPose());
         }
-
-
 
         for (int i = 0; i < mSkeleton.getNumBones(); i++)
         {
-            poseInterpolate(i);
+            setAnimationData(i);
         }
-
         mat = new Matrix4f();
-
     }
 
-    public void poseInterpolate(int index)
+    public void setAnimationData(int index)
     {
         setPosePositions(index, initialPose, finalPose);
         setPoseRotations(index, initialPose, finalPose);
         setPoseScale(index, initialPose, finalPose);
     }
 
-
+    /**
+     * Retrive and set the animation data with position values from the initial and final pose.
+     *
+     * @param index bone id number.
+     * @param initialPose start pose of the skeleton.
+     * @param finalPose end pose of the skeleton.
+     */
     private void setPosePositions(int index, SXRPose initialPose, SXRPose finalPose)
     {
         initialPose.getLocalPosition(index,poseOnePos);
         finalPose.getLocalPosition(index,poseTwoPos);
-
         offset = index*poseDataSize;
 
         setPosePositions(offset+initialPosIndex,poseOnePos);
@@ -236,11 +210,19 @@ public class SXRPoseInterpolator extends SXRAnimation
         poseData[posOffset+2]=posePos.z();
     }
 
+    /**
+     * Retrive and set the animation data with rotation values from the initial and final pose.
+     *
+     * @param index bone id number.
+     * @param initialPose start pose of the skeleton.
+     * @param finalPose end pose of the skeleton.
+     */
     private void setPoseRotations(int index, SXRPose initialPose, SXRPose finalPose)
     {
         initialPose.getLocalRotation(index,poseOneRot);
         finalPose.getLocalRotation(index,poseTwoRot);
         offset = index*poseDataSize;
+
         setPoseRotations(offset+initialRotIndex,poseOneRot);
         setPoseRotations(offset+finalRotIndex,poseTwoRot);
     }
@@ -253,16 +235,22 @@ public class SXRPoseInterpolator extends SXRAnimation
         poseData[rotOffset+3]=poseRot.w();
     }
 
+    /**
+     * Retrive and set the animation data with scale values from the initial and final pose.
+     *
+     * @param index bone id number.
+     * @param initialPose start pose of the skeleton.
+     * @param finalPose end pose of the skeleton.
+     */
     private void setPoseScale(int index, SXRPose initialPose, SXRPose finalPose)
     {
         initialPose.getLocalScale(index,poseOneScl);
         finalPose.getLocalScale(index,poseTwoScl);
         offset = index*poseDataSize;
+
         setPoseScale(offset+initialSclIndex,poseOneScl);
         setPoseScale(offset+finalSclIndex,poseTwoScl);
     }
-
-
     public void setPoseScale(int sclOffset, Vector3f poseScl)
     {
         poseData[sclOffset]=poseScl.x();
@@ -270,6 +258,14 @@ public class SXRPoseInterpolator extends SXRAnimation
         poseData[sclOffset+2]=poseScl.z();
     }
 
+
+    /**
+     * Update the position values to send through the linear interpolator.
+     *
+     * @param offset position index in animation data.
+     * @param startTime previous time in animation, time in sec.
+     * @param endTime current time in animation, time in sec.
+     */
     public void updatePos(int offset, float startTime, float endTime)
     {
         posData[startTimeIndex] = startTime;
@@ -285,6 +281,13 @@ public class SXRPoseInterpolator extends SXRAnimation
         posData[pos+2] = poseData[posOffset+2];
     }
 
+    /**
+     * Update the rotation values to send through the spherical interpolator.
+     *
+     * @param offset rotation index in animation data.
+     * @param startTime previous time in animation, time in sec.
+     * @param endTime current time in animation, time in sec.
+     */
     public void updateRot(int offset, float startTime, float endTime)
     {
         rotData[startTimeIndex] = startTime;
@@ -301,6 +304,13 @@ public class SXRPoseInterpolator extends SXRAnimation
         rotData[rot+3] = poseData[rotOffset+3];
     }
 
+    /**
+     * Update the scale values to send through the linear interpolator.
+     *
+     * @param offset scale index in animation data.
+     * @param startTime previous time in animation, time in sec.
+     * @param endTime current time in animation, time in sec.
+     */
     public void updateScl(int offset, float startTime, float endTime)
     {
         sclData[startTimeIndex] = startTime;
@@ -308,7 +318,6 @@ public class SXRPoseInterpolator extends SXRAnimation
         updateScl(1, offset+initialSclIndex);
         updateScl(5, offset+finalSclIndex);
     }
-
     public void updateScl(int scl, int sclOffset)
     {
         sclData[scl] = poseData[sclOffset];
@@ -316,6 +325,13 @@ public class SXRPoseInterpolator extends SXRAnimation
         sclData[scl+2] = poseData[sclOffset+2];
     }
 
+    /**
+     * Calculate the blend pose from two skeleton animations.
+     * The blend is from mDuration to 0 for first skeleton animation that is first skeleton animation smoothly disappears
+     * The blend is from 0 to mDuration for second skeleton animation that is second skeleton animation smoothly appears
+     *
+     * @param timer animation time in seconds.
+     */
     public void getFinalPose(float timer)
     {
         SXRPose firstPose = null;
@@ -334,17 +350,16 @@ public class SXRPoseInterpolator extends SXRAnimation
 
         float mul = 1/mDuration;
 
-
         for(int k =0; k<skelAnimSrc.getSkeleton().getNumBones();k++)
         {
-            Vector3f poss = new Vector3f(0,0,0);
-            firstPose.getLocalPosition(k,poss);
-            Vector3f possT = new Vector3f(0,0,0);
-            secondPose.getLocalPosition(k,possT);
+            Vector3f posI = new Vector3f(0,0,0);
+            firstPose.getLocalPosition(k,posI);
+            Vector3f posF = new Vector3f(0,0,0);
+            secondPose.getLocalPosition(k,posF);
 
-            posBlend[k][3] = ((mDuration-timer)*mul*poss.x)+(possT.x*(timer*mul));
-            posBlend[k][4] = ((mDuration-timer)*mul*poss.y)+(possT.y*timer*mul);
-            posBlend[k][5] = ((mDuration-timer)*mul*poss.z)+(possT.z*timer*mul);
+            posBlend[k][3] = ((mDuration-timer)*mul*posI.x)+(posF.x*(timer*mul));
+            posBlend[k][4] = ((mDuration-timer)*mul*posI.y)+(posF.y*timer*mul);
+            posBlend[k][5] = ((mDuration-timer)*mul*posI.z)+(posF.z*timer*mul);
 
             finalPose.setLocalPosition(k,posBlend[k][3],  posBlend[k][4],  posBlend[k][5]);
 
@@ -361,14 +376,18 @@ public class SXRPoseInterpolator extends SXRAnimation
             finalPose.setLocalRotation(k,rotBlend[k][4],  rotBlend[k][5],  rotBlend[k][6],  rotBlend[k][7]);
 
         }
-
     }
+
+    @Override
     protected void animate(SXRHybridObject target, float ratio)
     {
         animate(mDuration * ratio);
     }
 
-
+    /**
+     * Compute pose of skeleton at the given time from the animation data.
+     * @param timer animation time in seconds.
+     */
     public void animate(float timer) {
 
         initialPose = mSkeleton.getPose();
@@ -394,15 +413,14 @@ public class SXRPoseInterpolator extends SXRAnimation
             mRotInterpolator = new SXRQuatAnimation(rotData);
             mSclInterpolator = new SXRFloatAnimation(sclData, 4);
 
-            mPosInterpolator.animate(timer,posIData);
-            mRotInterpolator.animate(timer,rotIData);
-            mSclInterpolator.animate(timer,sclIData);
+            mPosInterpolator.animate(timer,posInterpolatedData);
+            mRotInterpolator.animate(timer,rotInterpolatedData);
+            mSclInterpolator.animate(timer,sclInterpolatedData);
 
-            mat.translationRotateScale(posIData[0], posIData[1], posIData[2],rotIData[0], rotIData[1], rotIData[2], rotIData[3],sclIData[0], sclIData[1], sclIData[2]);
+            mat.translationRotateScale(posInterpolatedData[0], posInterpolatedData[1], posInterpolatedData[2],rotInterpolatedData[0], rotInterpolatedData[1], rotInterpolatedData[2], rotInterpolatedData[3],sclInterpolatedData[0], sclInterpolatedData[1], sclInterpolatedData[2]);
             initialPose.setLocalMatrix(i, mat);
-
-
         }
+
         mSkeleton.poseToBones();
         mSkeleton.updateBonePose();
         mSkeleton.updateSkinPose();
@@ -411,9 +429,5 @@ public class SXRPoseInterpolator extends SXRAnimation
         {
             startTime=timer;
         }
-
-
     }
-
-
 }
