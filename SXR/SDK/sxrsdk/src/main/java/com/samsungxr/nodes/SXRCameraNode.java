@@ -17,6 +17,7 @@ package com.samsungxr.nodes;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
@@ -46,7 +47,7 @@ public class SXRCameraNode extends SXRNode {
     private int fpsMode = -1;
     private boolean isCameraOpen = false;
     private CameraApplicationEvents cameraApplicationEvents;
-
+    private Camera.PreviewCallback callback = null;
     /**
      * Create a {@linkplain SXRNode node} (with arbitrarily
      * complex geometry) that shows live video from one of the device's cameras
@@ -193,9 +194,15 @@ public class SXRCameraNode extends SXRNode {
                 android.util.Log.d(TAG, "Camera not available or is in use");
                 return false;
             }
+            Parameters params = camera.getParameters();
+            params.setPreviewSize(1280,960);
+            camera.setParameters(params);
+
+
             camera.startPreview();
             camera.setPreviewTexture(mSurfaceTexture);
             isCameraOpen = true;
+
         } catch (Exception exception) {
             android.util.Log.d(TAG, "Camera not available or is in use");
             return false;
@@ -209,6 +216,8 @@ public class SXRCameraNode extends SXRNode {
             //nothing to do
             return;
         }
+
+        camera.setPreviewCallback(null);
 
         camera.stopPreview();
         camera.release();
@@ -276,46 +285,57 @@ public class SXRCameraNode extends SXRNode {
                 Log.v(TAG, "VR Mode supported!");
 
                 // set vr mode
-                params.set("vrmode", 1);
+//                params.set("vrmode", 1);
 
                 // true if the apps intend to record videos using
                 // MediaRecorder
-                params.setRecordingHint(true);
+//                params.setRecordingHint(true);
 
                 // set preview size
                 // params.setPreviewSize(640, 480);
 
                 // set fast-fps-mode: 0 for 30fps, 1 for 60 fps,
                 // 2 for 120 fps
-                params.set("fast-fps-mode", fpsMode);
+//                params.set("fast-fps-mode", fpsMode);
 
-                switch (fpsMode) {
-                    case 0: // 30 fps
-                        params.setPreviewFpsRange(30000, 30000);
-                        break;
-                    case 1: // 60 fps
-                        params.setPreviewFpsRange(60000, 60000);
-                        break;
-                    case 2: // 120 fps
-                        params.setPreviewFpsRange(120000, 120000);
-                        break;
-                    default:
-                }
+//                switch (fpsMode) {
+//                    case 0: // 30 fps
+//                        params.setPreviewFpsRange(30000, 30000);
+//                        break;
+//                    case 1: // 60 fps
+//                        params.setPreviewFpsRange(60000, 60000);
+//                        break;
+//                    case 2: // 120 fps
+//                        params.setPreviewFpsRange(120000, 120000);
+//                        break;
+//                    default:
+//                }
 
                 // for auto focus
-                params.set("focus-mode", "continuous-video");
+//                params.set("focus-mode", "continuous-video");
 
-                params.setVideoStabilization(false);
-                if ("true".equalsIgnoreCase(params.get("ois-supported"))) {
-                    params.set("ois", "center");
-                }
-
+//                params.setVideoStabilization(false);
+//                if ("true".equalsIgnoreCase(params.get("ois-supported"))) {
+//                    params.set("ois", "center");
+//                }
+                params.setPreviewFpsRange(30000, 30000);
+                params.setPreviewFormat(ImageFormat.NV21);
                 camera.setParameters(params);
                 cameraSetUpStatus = true;
             }
         }
 
         return cameraSetUpStatus;
+    }
+
+
+    /**
+     *
+     * @return the an Android {@link Camera} being used by this {@link SXRNode}.
+     */
+    public Camera getAndroidCamera()
+    {
+        return camera;
     }
 
     /**

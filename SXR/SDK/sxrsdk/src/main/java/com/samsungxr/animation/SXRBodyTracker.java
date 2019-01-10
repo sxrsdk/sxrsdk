@@ -73,7 +73,7 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
     protected final int mWidth = 1280;
     protected final int mHeight = 960;
     protected SXRSkeleton mTargetSkeleton;
-    protected Camera mCamera = null;
+//    protected Camera mCamera = null;
     protected SXRCameraNode mCameraOwner;
     protected byte[] mImageData = null;
     private boolean mTryOpenCamera = true;
@@ -153,14 +153,35 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
     {
         if (mTryOpenCamera)
         {
-            mCamera = openCamera();
-            mCameraOwner = new SXRCameraNode(getSXRContext(), mWidth / 2, mHeight / 2, mCamera);
+//            mCamera = openCamera();
+            try {
+                mCameraOwner = new SXRCameraNode(getSXRContext(), mWidth / 2, mHeight / 2);
+                Camera camera = mCameraOwner.getAndroidCamera();
+
+                camera.setPreviewCallback(new Camera.PreviewCallback()
+                {
+                    public void onPreviewFrame(byte[] data, Camera camera)
+                    {
+                        setImageData(data);
+                    }
+                });
+
+//                mCameraOwner.setPreviewCallback(new Camera.PreviewCallback()
+//                {
+//                    public void onPreviewFrame(byte[] data, Camera camera)
+//                    {
+//                        setImageData(data);
+//                    }
+//                });
+            } catch (SXRCameraNode.SXRCameraAccessException e) {
+                throw new IllegalAccessException("Cannot access body tracker");
+            }
             mCameraOwner.getTransform().setPositionZ(-200.0f);
             mTryOpenCamera = false;
         }
-        if (isEnabled() && (mCamera != null))
+        if (isEnabled())
         {
-            mCamera.startPreview();
+//            mCamera.startPreview();
             if (!onStart())
             {
                 throw new IllegalAccessException("Cannot access body tracker");
@@ -171,9 +192,9 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
     public void onEnable()
     {
         super.onEnable();
-        if (!isRunning() && (mCamera != null))
+        if (!isRunning() && (mCameraOwner != null))
         {
-            mCamera.startPreview();
+            mCameraOwner.close();
             onStart();
         }
     }
@@ -181,9 +202,9 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
     public void onDisable()
     {
         super.onDisable();
-        if (isRunning() && (mCamera != null))
+        if (isRunning() && (mCameraOwner != null))
         {
-            mCamera.stopPreview();
+            mCameraOwner.close();
             onStop();
         }
     }
@@ -195,11 +216,9 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
      */
     public void stop()
     {
-        if (mCamera != null)
+        if (mCameraOwner != null)
         {
-            mCamera.startPreview();
-            mCamera.release();
-            mCamera = null;
+            mCameraOwner.close();
             mTryOpenCamera = false;
             onStop();
         }
