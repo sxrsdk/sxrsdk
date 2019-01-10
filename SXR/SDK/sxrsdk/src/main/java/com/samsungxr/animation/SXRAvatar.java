@@ -23,7 +23,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static com.samsungxr.animation.SXRAnimation.DEFAULT_REPEAT_COUNT;
 
 /**
  * Group of animations that can be collectively manipulated.
@@ -51,7 +50,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     protected SXREventReceiver mReceiver;
     protected final List<SXRAnimator> mAnimQueue = new ArrayList<SXRAnimator>();
     protected int mRepeatMode = SXRRepeatMode.ONCE;
-    protected int mRepeatCount = DEFAULT_REPEAT_COUNT;
+    protected int mRepeatCount = 1;
     private float repeatCount = 0;
     private boolean reverse = false;
 

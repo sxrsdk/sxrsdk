@@ -33,8 +33,8 @@ import android.graphics.Color;
  * This class (and the {@linkplain SXRAnimationEngine engine}) supply the common
  * functionality: descendants are tiny classes that contain compiled (ie, no
  * runtime reflection is used) code to change individual properties. Most
- * animations involve a {@linkplain SXRTransform scene object's position,}
- * {@linkplain SXRMaterial a scene object's surface appearance,} or an optional
+ * animations involve a {@linkplain SXRTransform node's position,}
+ * {@linkplain SXRMaterial a node's surface appearance,} or an optional
  * {@linkplain SXRShaderData "post effect":} accordingly, most actual animations
  * descend from {@link SXRTransformAnimation}, {@link SXRMaterialAnimation}, or
  * {@link SXRPostEffectAnimation} and not directly from {@link SXRAnimation}.
@@ -173,7 +173,7 @@ public abstract class SXRAnimation {
      *             {@code supported} types
      */
     protected static Class<?> checkTarget(SXRHybridObject target,
-                                          Class<?>... supported) {
+            Class<?>... supported) {
         for (Class<?> type : supported) {
             if (type.isInstance(target)) {
                 return type;
@@ -548,7 +548,7 @@ public abstract class SXRAnimation {
      */
 
     final boolean onDrawFrame(float frameTime) {
-      //
+      
         if(mBlend)
         {
             this.getAnimation(this);

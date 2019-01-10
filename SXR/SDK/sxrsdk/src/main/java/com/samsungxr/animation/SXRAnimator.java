@@ -16,10 +16,8 @@
 
 package com.samsungxr.animation;
 
-import com.samsungxr.IEventReceiver;
 import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRNode;
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
