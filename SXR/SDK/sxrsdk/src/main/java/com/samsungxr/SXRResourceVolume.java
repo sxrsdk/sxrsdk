@@ -180,6 +180,8 @@ public class SXRResourceVolume {
         gvrContext = context;
         volumeType = SXRResourceVolume.VolumeType.ANDROID_ASSETS;
         defaultPath = filename;
+        String sdcard = Environment.getExternalStorageDirectory().getAbsolutePath();
+
         if (fname.startsWith("sd:"))
         {
             defaultPath = defaultPath.substring(3);
@@ -189,6 +191,11 @@ public class SXRResourceVolume {
         else if (fname.startsWith("/sdcard/"))
         {
             defaultPath = defaultPath.substring(8);
+            defaultPath = FileNameUtils.getParentDirectory(defaultPath);
+            volumeType = SXRResourceVolume.VolumeType.ANDROID_SDCARD;
+        }
+        else if (fname.startsWith(sdcard))
+        {
             defaultPath = FileNameUtils.getParentDirectory(defaultPath);
             volumeType = SXRResourceVolume.VolumeType.ANDROID_SDCARD;
         }
@@ -317,10 +324,16 @@ public class SXRResourceVolume {
             break;
 
         case ANDROID_SDCARD:
-            String linuxPath = Environment.getExternalStorageDirectory()
-                    .getAbsolutePath();
-            resourceKey = new SXRAndroidResource(
-                    getFullPath(linuxPath, defaultPath, filePath));
+            String linuxPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+            if (!defaultPath.startsWith(linuxPath))
+            {
+                filePath = getFullPath(linuxPath, defaultPath, filePath);
+            }
+            else
+            {
+                filePath = getFullPath(defaultPath, filePath);
+            }
+            resourceKey = new SXRAndroidResource(filePath);
             break;
 
         case INPUT_STREAM:

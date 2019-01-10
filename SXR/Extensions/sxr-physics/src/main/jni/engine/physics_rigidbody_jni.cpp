@@ -104,6 +104,10 @@ extern "C" {
             jlong jrigid_body, jfloat n);
 
     JNIEXPORT void   JNICALL
+    Java_com_samsungxr_physics_Native3DRigidBody_setCcdSweptSphereRadius(JNIEnv * env, jobject obj,
+            jlong jrigid_body, jfloat n);
+
+    JNIEXPORT void   JNICALL
     Java_com_samsungxr_physics_Native3DRigidBody_setContactProcessingThreshold(JNIEnv * env, jobject obj,
             jlong jrigid_body, jfloat n);
 
@@ -148,8 +152,16 @@ extern "C" {
             jlong jrigid_body) ;
 
     JNIEXPORT jfloat   JNICALL
+    Java_com_samsungxr_physics_Native3DRigidBody_getCcdSweptSphereRadius(JNIEnv * env, jobject obj,
+            jlong jrigid_body) ;
+
+    JNIEXPORT jfloat   JNICALL
     Java_com_samsungxr_physics_Native3DRigidBody_getContactProcessingThreshold(JNIEnv * env, jobject obj,
             jlong jrigid_body) ;
+
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_physics_Native3DRigidBody_reset(JNIEnv * env, jobject obj,
+            jlong jrigid_body, jboolean rebuildCollider);
 }
 
 JNIEXPORT jlong JNICALL
@@ -320,6 +332,14 @@ Java_com_samsungxr_physics_Native3DRigidBody_setCcdMotionThreshold(JNIEnv * env,
 }
 
 JNIEXPORT void   JNICALL
+Java_com_samsungxr_physics_Native3DRigidBody_setCcdSweptSphereRadius(JNIEnv * env, jobject obj,
+        jlong jrigid_body, jfloat n) {
+    PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
+
+    rigid_body->setCcdSweptSphereRadius(n);
+}
+
+JNIEXPORT void   JNICALL
 Java_com_samsungxr_physics_Native3DRigidBody_setContactProcessingThreshold(JNIEnv * env, jobject obj,
         jlong jrigid_body, jfloat n) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
@@ -456,10 +476,27 @@ Java_com_samsungxr_physics_Native3DRigidBody_getCcdMotionThreshold(JNIEnv * env,
 }
 
 JNIEXPORT jfloat   JNICALL
+Java_com_samsungxr_physics_Native3DRigidBody_getCcdSweptSphereRadius(JNIEnv * env, jobject obj,
+        jlong jrigid_body) {
+    PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
+
+    return rigid_body->getCcdSweptSphereRadius();
+}
+
+JNIEXPORT jfloat   JNICALL
 Java_com_samsungxr_physics_Native3DRigidBody_getContactProcessingThreshold(JNIEnv * env, jobject obj,
         jlong jrigid_body) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
     return rigid_body->getContactProcessingThreshold();
 }
+
+JNIEXPORT void JNICALL
+Java_com_samsungxr_physics_Native3DRigidBody_reset(JNIEnv * env, jobject obj,
+        jlong jrigid_body, jboolean rebuildCollider)
+{
+    PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
+    rigid_body->reset(rebuildCollider);
+}
+
 }

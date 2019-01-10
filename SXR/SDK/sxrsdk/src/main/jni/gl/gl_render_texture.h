@@ -58,10 +58,6 @@ public:
     virtual void endRendering(Renderer*);
     virtual bool isReady();
 
-    // Start to read back texture in the background. It can be optionally called before
-    // readRenderResult() to read pixels asynchronously. This function returns immediately.
-    virtual  void startReadBack();
-
     // Copy data in pixel buffer to client memory. This function is synchronous. When
     // it returns, the pixels have been copied to PBO and then to the client memory.
     virtual bool readRenderResult(uint8_t* readback_buffer, long capacity);
@@ -110,7 +106,7 @@ public:
 
         return  renderTexture_gl_read_buffer->id();
     }
-    void startReadBack(int layer);
+
     explicit GLMultiviewRenderTexture(int width, int height, int sample_count, int layers, GLuint fboId, GLuint texId, int const viewport[]):
             GLRenderTexture(width, height, sample_count, layers,fboId,texId, viewport){}
     explicit GLMultiviewRenderTexture(int width, int height, int sample_count, int layers, int depth_format, int const viewport[]): GLRenderTexture(width, height, sample_count, layers, depth_format, viewport),
@@ -154,7 +150,7 @@ public:
     virtual ~GLNonMultiviewRenderTexture(){
 
     }
-    void startReadBack(int layer);
+
     virtual bool isReady();
     virtual void beginRendering(Renderer* renderer);
 };

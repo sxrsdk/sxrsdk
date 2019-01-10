@@ -25,6 +25,47 @@ namespace sxr {
         delete[] mBoneParents;
     };
 
+    void Skeleton::setBoneParents(int* boneparents, int numbones)
+    {
+        glm::mat4 *skinMatrices = new glm::mat4[numbones];
+        glm::mat4 *boneMatrices = new glm::mat4[numbones];
+        int n = mBoneNames.size();
+        if (n != numbones)
+        {
+            mBoneParents = new int[numbones];
+
+            if (n >= numbones)
+            {
+                n = numbones;
+            }
+            else
+            {
+                mBoneNames.reserve(numbones);
+                mBoneNames.resize(numbones);
+            }
+        }
+        {
+            std::lock_guard<std::mutex> lock(mLock);
+            memcpy(mBoneParents, boneparents, numbones * sizeof(int));
+            memcpy(skinMatrices, mSkinMatrices, n);
+            memcpy(boneMatrices, mBoneMatrices, n);
+            mSkinMatrices = skinMatrices;
+            mBoneMatrices = boneMatrices;
+        }
+    }
+
+    int Skeleton::getBoneIndex(const char* name) const
+    {
+        for (int i = 0; i < mBoneNames.size(); ++i)
+        {
+            if (strcmp(name, mBoneNames[i].c_str()) == 0)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     void Skeleton::setBoneName(int boneIndex, const char* boneName)
     {
         if ((boneIndex >= 0) && (boneIndex < getNumBones()))
