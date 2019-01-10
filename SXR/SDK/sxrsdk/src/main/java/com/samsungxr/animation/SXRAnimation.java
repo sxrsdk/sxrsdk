@@ -558,6 +558,7 @@ public abstract class SXRAnimation {
                     return true;
                 }
             }
+
             if(this.getClass().getName().contains("SXRSkeletonAnimation")) {
                 if ((mSkeletonAnimation.getSkelAnimOrder() != ("last") && (mElapsedTime > (this.getDuration() - mBlendDuration)))) {
                     playAnimation[this.getID() + 2] = true;
@@ -568,6 +569,7 @@ public abstract class SXRAnimation {
             }
             updateAnimation(this, mElapsedTime);
         }
+        
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
         mElapsedTime += (frameTime*mAnimationSpeed);
