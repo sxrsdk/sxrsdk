@@ -73,7 +73,6 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
     protected final int mWidth = 1280;
     protected final int mHeight = 960;
     protected SXRSkeleton mTargetSkeleton;
-//    protected Camera mCamera = null;
     protected SXRCameraNode mCameraOwner;
     protected byte[] mImageData = null;
     private boolean mTryOpenCamera = true;
@@ -153,12 +152,9 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
     {
         if (mTryOpenCamera)
         {
-//            mCamera = openCamera();
             try {
                 mCameraOwner = new SXRCameraNode(getSXRContext(), mWidth / 2, mHeight / 2);
-                Camera camera = mCameraOwner.getAndroidCamera();
-
-                camera.setPreviewCallback(new Camera.PreviewCallback()
+                mCameraOwner.setPreviewCallback(new Camera.PreviewCallback()
                 {
                     public void onPreviewFrame(byte[] data, Camera camera)
                     {
@@ -166,13 +162,12 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
                     }
                 });
 
-//                mCameraOwner.setPreviewCallback(new Camera.PreviewCallback()
-//                {
-//                    public void onPreviewFrame(byte[] data, Camera camera)
-//                    {
-//                        setImageData(data);
-//                    }
-//                });
+                Camera.Parameters params = mCameraOwner.getCameraParameters();
+                params.setPreviewSize(1280,960);
+                params.setPreviewFpsRange(30000, 30000);
+                params.setPreviewFormat(ImageFormat.NV21);
+                mCameraOwner.setCameraParameters(params);
+
             } catch (SXRCameraNode.SXRCameraAccessException e) {
                 throw new IllegalAccessException("Cannot access body tracker");
             }
@@ -181,7 +176,6 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
         }
         if (isEnabled())
         {
-//            mCamera.startPreview();
             if (!onStart())
             {
                 throw new IllegalAccessException("Cannot access body tracker");
@@ -335,40 +329,6 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
         getSXRContext().getEventManager().sendEvent(this, TrackerEvents.class, "onTrackEnd", this);
     }
 
-    /**
-     * Opens the camera and starts capturing images.
-     * <p>
-     * The default implementation uses <i>ImageFormat.NV21</i>
-     * and tracks at 30fps. It captures 1280 x 960 images.
-     * The width and height is obtained from mWidth and mHeight
-     * so constructors may set this to change the image size.
-     * @return
-     * @throws CameraAccessException
-     * @throws IOException
-     */
-    protected Camera openCamera() throws CameraAccessException, IOException
-    {
-        Camera camera = Camera.open();
-
-        if (camera == null)
-        {
-            throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);
-        }
-        Camera.Parameters params = camera.getParameters();
-
-        params.setPreviewSize(mWidth, mHeight);
-        params.setPreviewFormat(ImageFormat.NV21);
-        params.setPreviewFpsRange(30000, 30000);
-        camera.setParameters(params);
-        camera.setPreviewCallback(new Camera.PreviewCallback()
-          {
-              public void onPreviewFrame(byte[] data, Camera camera)
-              {
-                  setImageData(data);
-              }
-          });
-        return camera;
-    }
 }
 
 class NativeBodyTracker
