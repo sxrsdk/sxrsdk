@@ -143,6 +143,11 @@ public abstract class MRCommon implements IMixedReality
         return onAcquirePointCloud();
     }
 
+    @Override
+    public void setPlaneFindingMode(SXRMixedReality.PlaneFindingMode mode) {
+        onSetPlaneFindingMode(mode);
+    }
+
     protected abstract void onResume();
 
     protected abstract void onPause();
@@ -178,4 +183,6 @@ public abstract class MRCommon implements IMixedReality
     protected abstract float[] onMakeInterpolated(float[] poseA, float[] poseB, float t);
 
     protected abstract SXRPointCloud onAcquirePointCloud();
+
+    protected abstract void onSetPlaneFindingMode(SXRMixedReality.PlaneFindingMode mode);
 }
