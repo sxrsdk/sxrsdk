@@ -272,23 +272,30 @@ public class SXRPoseMapper extends SXRAnimation
         {
             mBoneMap = makeBoneMap(srcskel, dstskel);
         }
-        SXRPose     srcpose = srcskel.getPose();
-        Quaternionf q = new Quaternionf();
-        int		    numsrcbones = srcskel.getNumBones();
-        mDestPose.clearRotations();
-        srcskel.getPosition(v);
-        dstskel.setPosition(v);
-        for (int i = 0; i < numsrcbones; ++i)
+        synchronized (srcskel)
         {
-            int	boneindex = mBoneMap[i];
+            SXRPose srcpose = srcskel.getPose();
+            Quaternionf q = new Quaternionf();
+            int numsrcbones = srcskel.getNumBones();
 
-            if (boneindex >= 0)
+            mDestPose.clearRotations();
+            srcskel.getPosition(v);
+            for (int i = 0; i < numsrcbones; ++i)
             {
-                srcpose.getLocalRotation(i, q);
-                mDestPose.setLocalRotation(boneindex, q.x, q.y, q.z, q.w);
+                int boneindex = mBoneMap[i];
+
+                if (boneindex >= 0)
+                {
+                    srcpose.getLocalRotation(i, q);
+                    mDestPose.setLocalRotation(boneindex, q.x, q.y, q.z, q.w);
+                }
             }
         }
-        dstskel.applyPose(mDestPose, SXRSkeleton.ROTATION_ONLY);
+        synchronized (dstskel)
+        {
+            dstskel.setPosition(v);
+            dstskel.applyPose(mDestPose, SXRSkeleton.ROTATION_ONLY);
+        }
         return true;
     }
 
@@ -314,7 +321,6 @@ public class SXRPoseMapper extends SXRAnimation
         }
         SXRPose srcpose = srcskel.getPose();
         SXRPose	dstpose = dstskel.getPose();
-        Vector3f    v = new Vector3f();
         int			numsrcbones = srcpose.getNumBones();
         Matrix4f	mtx = new Matrix4f();
 
@@ -330,51 +336,6 @@ public class SXRPoseMapper extends SXRAnimation
             }
         }
         dstpose.sync();
-        return true;
-    }
-
-
-    /**
-     * Maps the pose of the destination skeleton onto the source skeleton in world space.
-     * <p>
-     * The world bone rotations of matching bones are copied.
-     * If the PoseMapper has a bone map, it is used to determine which bones
-     * of the source skeleton correspond to which bones in the destination skeleton.
-     */
-    public boolean mapWorldToSource()
-    {
-        SXRSkeleton	srcskel = mSourceSkeleton;
-        SXRSkeleton	dstskel = mDestSkeleton;
-
-        if ((dstskel == null) || (srcskel == null))
-        {
-            return false;
-        }
-        if (mBoneMap == null)
-        {
-            mBoneMap = makeBoneMap(srcskel, dstskel);
-        }
-
-        SXRPose     srcpose = srcskel.getPose();
-        SXRPose	    dstpose = dstskel.getPose();
-        int			numsrcbones = srcpose.getNumBones();
-        Matrix4f	mtx = new Matrix4f();
-        Vector3f    v = new Vector3f();
-
-        dstpose.sync();
-        dstpose.getWorldPosition(0, v);
-        srcpose.setPosition(v.x, v.y, v.z);
-        for (int i = 0; i < numsrcbones; ++i)
-        {
-            int	boneindex = mBoneMap[i];
-
-            if (boneindex >= 0)
-            {
-                dstpose.getWorldMatrix(boneindex, mtx);
-                srcpose.setWorldMatrix(i, mtx);
-            }
-        }
-        srcpose.sync();
         return true;
     }
 

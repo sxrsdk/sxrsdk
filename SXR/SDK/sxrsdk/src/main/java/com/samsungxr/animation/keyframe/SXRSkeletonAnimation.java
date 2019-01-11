@@ -233,8 +233,11 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
 
         if (skel.isEnabled())
         {
-            computePose(timeInSec, pose);
-            skel.poseToBones();
+            synchronized (skel)
+            {
+                computePose(timeInSec, pose);
+                skel.poseToBones();
+            }
         }
     }
 
