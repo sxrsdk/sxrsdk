@@ -17,7 +17,6 @@ package com.samsungxr.nodes;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
@@ -33,7 +32,6 @@ import com.samsungxr.SXRTexture;
 import com.samsungxr.utility.Log;
 
 import java.io.IOException;
-import java.security.Policy;
 
 /**
  * A {@linkplain SXRNode node} that shows live video from one of
@@ -293,7 +291,7 @@ public class SXRCameraNode extends SXRNode {
 
                 // true if the apps intend to record videos using
                 // MediaRecorder
-//                params.setRecordingHint(true);
+                params.setRecordingHint(true);
 
                 // set preview size
                 // params.setPreviewSize(640, 480);
@@ -332,14 +330,19 @@ public class SXRCameraNode extends SXRNode {
 
 
     /**
+     * Set the preview callback which is invoked for every preview frame.
+     *
      * @param callback the {@link Camera.PreviewCallback} for the Android {@link Camera}.
      */
     public void setPreviewCallback(Camera.PreviewCallback callback)
     {
         previewCallback = callback;
-        camera.stopPreview();
-        camera.setPreviewCallback(callback);
-        camera.startPreview();
+
+        if(camera != null ) {
+            camera.stopPreview();
+            camera.setPreviewCallback(callback);
+            camera.startPreview();
+        }
     }
 
     /**
@@ -355,6 +358,7 @@ public class SXRCameraNode extends SXRNode {
     }
 
     /**
+     * Set the parameters for the android camera held by this node.
      *
      * @param params the {@link Parameters} to set for the Android {@link Camera}
      *               held by this node.

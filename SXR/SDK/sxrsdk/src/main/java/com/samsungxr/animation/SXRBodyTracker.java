@@ -72,6 +72,7 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
     protected SXRPose mDestPose;
     protected final int mWidth = 1280;
     protected final int mHeight = 960;
+    protected final int fps = 30;
     protected SXRSkeleton mTargetSkeleton;
     protected SXRCameraNode mCameraOwner;
     protected byte[] mImageData = null;
@@ -163,9 +164,11 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
                 });
 
                 Camera.Parameters params = mCameraOwner.getCameraParameters();
-                params.setPreviewSize(1280,960);
-                params.setPreviewFpsRange(30000, 30000);
-                params.setPreviewFormat(ImageFormat.NV21);
+                if(params != null) {
+                    params.setPreviewSize(mWidth, mHeight);
+                    params.setPreviewFpsRange(fps * 1000, fps * 1000);
+                    params.setPreviewFormat(ImageFormat.NV21);
+                }
                 mCameraOwner.setCameraParameters(params);
 
             } catch (SXRCameraNode.SXRCameraAccessException e) {
@@ -186,9 +189,8 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
     public void onEnable()
     {
         super.onEnable();
-        if (!isRunning() && (mCameraOwner != null))
+        if (!isRunning())
         {
-            mCameraOwner.close();
             onStart();
         }
     }
