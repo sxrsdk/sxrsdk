@@ -66,6 +66,7 @@ public class DefinedItem {
     private SXRVideoNode gvrVideoNode = null;
     private Viewpoint viewpoint = null;
     private SXRTextViewNode gvrTextViewNode = null;
+    private InlineObject inlineObject = null;
     /**
      * X3D Transforms use AxisAngle format for rotations,
      * and float3 for the SpotLight, DirectionalLight direction
@@ -256,6 +257,13 @@ public class DefinedItem {
     }
     public SFFloat getTextureRotation () {
         return textureRotation;
+    }
+
+    public void setInlineObject( InlineObject inlineObject ) {
+        this.inlineObject = inlineObject;
+    }
+    public InlineObject getInlineObject() {
+        return this.inlineObject;
     }
 
 }

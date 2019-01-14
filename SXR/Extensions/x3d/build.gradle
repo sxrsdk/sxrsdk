@@ -34,16 +34,25 @@ project.ext.gsonVersion = '2.8.2'
 
 repositories {
     maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    maven {
         url 'https://maven.google.com/'
         name 'Google'
     }
+    maven {
+        url "http://google.bintray.com/googlevr"
+    }
 }
 
+project.ext.arcoreVersion = "1.2.0"
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "org.joml:joml-android:${jomlVersion}"
     implementation "com.google.code.gson:gson:$gsonVersion"
     implementation 'com.google.android.exoplayer:exoplayer:2.6.0'
+    implementation "com.google.ar:core:${arcoreVersion}"
+    implementation 'com.android.support:support-v4:26.+'
     if (findProject(':sxrsdk')) {
         implementation project (':sxrsdk')
     } else {
@@ -54,6 +63,7 @@ dependencies {
     } else {
         implementation(name: 'script-debug', ext: 'aar')
     }
+    compile project(path: ':MixedReality')
 }
 
 
