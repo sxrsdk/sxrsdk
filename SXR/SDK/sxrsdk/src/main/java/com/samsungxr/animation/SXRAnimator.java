@@ -385,6 +385,10 @@ public class SXRAnimator extends SXRBehavior
         for (SXRAnimation anim : mAnimations)
         {
             anim.setRepeatCount(1); //default
+            if(repeatMode == SXRRepeatMode.REPEATED)
+            {
+               repeatMode = SXRRepeatMode.ONCE;
+            }
             anim.setRepeatMode(repeatMode);
             anim.setReverse(reverse);
         }
