@@ -1015,10 +1015,10 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         }
     }
 
-    public SXRNode createSkeletonGeometry(SXRNode parent)
+    public SXRNode createSkeletonGeometry(SXRNode parent, float boneScale)
     {
         GeometryHelper helper = new GeometryHelper(this);
-        return helper.createSkeletonGeometry(parent);
+        return helper.createSkeletonGeometry(parent, boneScale);
     }
 
     @Override
@@ -1050,7 +1050,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             mSkeleton = skel;
         }
 
-        public SXRNode createSkeletonGeometry(SXRNode root)
+        public SXRNode createSkeletonGeometry(SXRNode root, float boneScale)
         {
             SXRContext ctx = mSkeleton.getSXRContext();
             SXRMaterial flatMaterialSphr = new SXRMaterial(ctx);
@@ -1058,8 +1058,8 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
 
             flatMaterialSphr.setColor(1f, 1f, 0f);
             flatMaterialCyl.setColor(1f, 0f, 0f);
-            mCylProto =  new SXRCylinderNode(ctx, 0.2f, 0.2f, 1f, 2, 8, true);
-            mSphereProto =  new SXRSphereNode(ctx, true, flatMaterialSphr, 0.5f);
+            mCylProto =  new SXRCylinderNode(ctx, 0.2f * boneScale, 0.2f * boneScale, 1f, 2, 8, true);
+            mSphereProto =  new SXRSphereNode(ctx, true, flatMaterialSphr, boneScale * 0.5f);
             mCylProto.getRenderData().setMaterial(flatMaterialCyl);
             SXRNode rootGeo = makeSpheres();
 
