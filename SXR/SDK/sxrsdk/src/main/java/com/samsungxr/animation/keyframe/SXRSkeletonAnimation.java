@@ -19,6 +19,7 @@ import com.samsungxr.PrettyPrint;
 import com.samsungxr.SXRHybridObject;
 import com.samsungxr.SXRNode;
 import com.samsungxr.animation.SXRAnimation;
+import com.samsungxr.animation.SXRAnimator;
 import com.samsungxr.animation.SXRPose;
 import com.samsungxr.animation.SXRSkeleton;
 import com.samsungxr.utility.Log;
@@ -51,7 +52,7 @@ import java.util.List;
 public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     protected String mName;
     private SXRSkeleton mSkeleton = null;
-    private String mSkeletonAnimationOrder = "";
+    private SXRAnimator.Order mSkeletonAnimationOrder;
     private boolean mUpdatePose = false;
 
     /**
@@ -210,7 +211,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
      * Sets the order for skeleton animation.
      * @param order  order name for skeleton animation.
      */
-    public void setSkelAnimOrder(String order)
+    public void setSkelAnimOrder(SXRAnimator.Order order)
     {
         mSkeletonAnimationOrder = order;
     }
@@ -218,7 +219,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     /**
      * Get the order name for skeleton animation.
      */
-    public String getSkelAnimOrder()
+    public SXRAnimator.Order getSkelAnimOrder()
     {
         return mSkeletonAnimationOrder;
     }
@@ -246,21 +247,21 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     {
         switch(this.mSkeletonAnimationOrder)
         {
-            case "first":
+            case FIRST:
                 if(mUpdatePose)
                 {
                     return;
                 }
                 break;
 
-            case "middle":
+            case MIDDLE:
                 if(mUpdatePose)
                 {
                     return;
                 }
                 break;
 
-            case "last":
+            case LAST:
                 if(mUpdatePose)
                 {
                     return;

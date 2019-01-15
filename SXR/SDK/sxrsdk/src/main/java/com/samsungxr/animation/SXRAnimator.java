@@ -58,6 +58,10 @@ public class SXRAnimator extends SXRBehavior
     private int numOfInterpolations = 0;
     private int numOfAnimations =0;
     private int loopIterator =0;
+    public enum Order
+    {
+    FIRST, MIDDLE, LAST;
+    }
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -455,7 +459,7 @@ public class SXRAnimator extends SXRBehavior
                 mAnimations.get(mAnimSkel+1).setID(idSkelAnim+1); //set id for pose mapper animation
 
                 SXRSkeletonAnimation skel = (SXRSkeletonAnimation)mAnimations.get(0);
-                skel.setSkelAnimOrder("first");
+                skel.setSkelAnimOrder(Order.FIRST); //set order name for skeleton animation
 
             }
             else
@@ -466,11 +470,11 @@ public class SXRAnimator extends SXRBehavior
                 SXRSkeletonAnimation skel = (SXRSkeletonAnimation)mAnimations.get(mAnimSkel);
                 if(idSkelAnim!=(allAnimSize-2))
                 {
-                    skel.setSkelAnimOrder("middle");
+                    skel.setSkelAnimOrder(Order.MIDDLE); //set order name for skeleton animation
                 }
                 else
                 {
-                    skel.setSkelAnimOrder("last");
+                    skel.setSkelAnimOrder(Order.LAST); //set order name for skeleton animation
                 }
             }
             mAnimSkel = mAnimSkel+2;

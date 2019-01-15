@@ -468,7 +468,7 @@ public abstract class SXRAnimation {
     {
         if (this.getClass().getName().contains("SXRSkeletonAnimation")) {
                 getAnimation(this);
-                if (mSkeletonAnimation.getSkelAnimOrder() != "last") {
+                if (mSkeletonAnimation.getSkelAnimOrder() != SXRAnimator.Order.LAST) {
                     mSkeletonAnimation.setUpdatePose(false);
                 }
             }
@@ -500,7 +500,7 @@ public abstract class SXRAnimation {
         {
             this.getAnimation(animation);
 
-            if((mSkeletonAnimation.getSkelAnimOrder() == "first"))
+            if((mSkeletonAnimation.getSkelAnimOrder() == SXRAnimator.Order.FIRST))
             {
                 if(currTime > (this.getDuration()-mBlendDuration))
                 {
@@ -511,7 +511,7 @@ public abstract class SXRAnimation {
                     mSkeletonAnimation.setUpdatePose(false);
                 }
             }
-            else if(mSkeletonAnimation.getSkelAnimOrder()=="middle")
+            else if(mSkeletonAnimation.getSkelAnimOrder() == SXRAnimator.Order.MIDDLE)
             {
                 if((0 < currTime) && (currTime < mBlendDuration) && (currTime > (this.getDuration()-mBlendDuration)))
                 {
@@ -522,7 +522,7 @@ public abstract class SXRAnimation {
                     mSkeletonAnimation.setUpdatePose(false);
                 }
             }
-            else if(mSkeletonAnimation.getSkelAnimOrder()=="last")
+            else if(mSkeletonAnimation.getSkelAnimOrder() == SXRAnimator.Order.LAST)
             {
                 if((0 < currTime) && (currTime < mBlendDuration))
                 {
@@ -560,11 +560,11 @@ public abstract class SXRAnimation {
             }
 
             if(this.getClass().getName().contains("SXRSkeletonAnimation")) {
-                if ((mSkeletonAnimation.getSkelAnimOrder() != ("last") && (mElapsedTime > (this.getDuration() - mBlendDuration)))) {
-                    playAnimation[this.getID() + 2] = true;
-                    playAnimation[this.getID() + 3] = true;
-                    playAnimation[this.getID() + 4] = true;
-                    playAnimation[this.getID() + 5] = true;
+                if ((mSkeletonAnimation.getSkelAnimOrder() != SXRAnimator.Order.LAST && (mElapsedTime > (this.getDuration() - mBlendDuration)))) {
+                    playAnimation[this.getID() + 2] = true; //start playing next interpolator animation in the animator list
+                    playAnimation[this.getID() + 3] = true; //start playing pose mapper for the above interpolator animation
+                    playAnimation[this.getID() + 4] = true; //start playing next skeleton animation in the animator list
+                    playAnimation[this.getID() + 5] = true; //start playing pose mapper for the above skeleton animation
                 }
             }
             updateAnimation(this, mElapsedTime);
