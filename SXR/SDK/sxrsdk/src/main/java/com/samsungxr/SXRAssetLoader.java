@@ -255,15 +255,16 @@ public final class SXRAssetLoader implements IEventReceiver
         {
             mModel = model;
             Log.d(TAG, "ASSET: successfully loaded model %s %d", modelFile, mNumTextures);
+            if (mHandler != null)
+            {
+                mHandler.onModelLoaded(mContext, model, modelFile);
+            }
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(),
                                                  IAssetImportEvents.class,
                                                  "onModelLoaded", model, modelFile);
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(),
                     IAssetEvents.class,
                     "onModelLoaded", mContext, model, modelFile);
-            mContext.getEventManager().sendEvent(mContext,
-                                                 IAssetEvents.class,
-                                                 "onModelLoaded", mContext, model, modelFile);
             if (mNumTextures == 0)
             {
                 generateLoadEvent();
@@ -281,11 +282,13 @@ public final class SXRAssetLoader implements IEventReceiver
          */
         public void onTextureLoaded(SXRTexture texture, String texFile)
         {
+            if (mHandler != null)
+            {
+                mHandler.onTextureLoaded(mContext, texture, texFile);
+            }
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetImportEvents.class,
                                                  "onTextureLoaded", texture, texFile);
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetEvents.class,
-                                                 "onTextureLoaded", mContext, texture, texFile);
-            mContext.getEventManager().sendEvent(mContext, IAssetEvents.class,
                                                  "onTextureLoaded", mContext, texture, texFile);
             synchronized (mNumTextures)
             {
@@ -317,15 +320,16 @@ public final class SXRAssetLoader implements IEventReceiver
         public void onModelError(SXRContext context, String error, String modelFile)
         {
             Log.e(TAG, "ASSET: ERROR: model %s did not load %s", modelFile, error);
+            if (mHandler != null)
+            {
+                mHandler.onModelError(mContext, error, modelFile);
+            }
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(),
                                                  IAssetImportEvents.class,
                                                  "onModelError", mContext, error, modelFile);
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(),
                                                  IAssetEvents.class,
                                                  "onModelError", mContext, error, modelFile);
-            mContext.getEventManager().sendEvent(mContext,
-                    IAssetEvents.class,
-                    "onModelError", mContext, error, modelFile);
             mErrors += error + "\n";
             mModel = null;
             mNumTextures = 0;
@@ -341,11 +345,13 @@ public final class SXRAssetLoader implements IEventReceiver
         public void onTextureError(SXRTexture texture, String texFile, String error)
         {
             mErrors += error + "\n";
+            if (mHandler != null)
+            {
+                mHandler.onTextureError(mContext, error, texFile);
+            }
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetImportEvents.class,
                                                  "onTextureError", texture, texFile, error);
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetEvents.class,
-                                                 "onTextureError", mContext, error, texFile);
-            mContext.getEventManager().sendEvent(mContext, IAssetEvents.class,
                                                  "onTextureError", mContext, error, texFile);
             synchronized (mNumTextures)
             {
@@ -377,11 +383,13 @@ public final class SXRAssetLoader implements IEventReceiver
         @Override
         public void onAssetLoaded(SXRNode model, String modelFile, String errors)
         {
+            if (mHandler != null)
+            {
+                mHandler.onAssetLoaded(mContext, model, modelFile, errors);
+            }
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetImportEvents.class,
                                                  "onAssetLoaded", model, mFileName, errors);
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetEvents.class,
-                                                 "onAssetLoaded", mContext, model, mFileName, errors);
-            mContext.getEventManager().sendEvent(mContext, IAssetEvents.class,
                                                  "onAssetLoaded", mContext, model, mFileName, errors);
         }
 
@@ -448,11 +456,6 @@ public final class SXRAssetLoader implements IEventReceiver
                 }
             }
             onAssetLoaded(mModel, mFileName, errors);
-            if (mHandler != null)
-            {
-                mContext.getAssetLoader().getEventReceiver().removeListener(mHandler);
-                mHandler = null;
-            }
         }
     }
 
@@ -1207,7 +1210,6 @@ public final class SXRAssetLoader implements IEventReceiver
 
                 getEventReceiver().addListener(handler);
                 assetRequest.setImportSettings(SXRImportSettings.getRecommendedSettings());
-                getEventReceiver().addListener(handler);
                 assetRequest.setHandler(handler);
                 model.setName(assetRequest.getBaseName());
                 try
@@ -1265,7 +1267,6 @@ public final class SXRAssetLoader implements IEventReceiver
 
                 assetRequest.setImportSettings(settings);
                 assetRequest.setHandler(handler);
-                getEventReceiver().addListener(handler);
                 model.setName(assetRequest.getBaseName());
                 try
                 {
@@ -1614,7 +1615,6 @@ public final class SXRAssetLoader implements IEventReceiver
                 model.setName(assetRequest.getBaseName());
                 assetRequest.setImportSettings(settings);
                 assetRequest.useCache(cacheEnabled);
-                getEventReceiver().addListener(handler);
                 assetRequest.setHandler(handler);
                 try
                 {

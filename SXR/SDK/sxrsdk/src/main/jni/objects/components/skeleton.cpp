@@ -10,8 +10,8 @@ namespace sxr {
        :  Component(COMPONENT_TYPE_SKELETON),
           mNumBones(numbones)
     {
-        mSkinMatrices = new glm::mat4[numbones];
-        mBoneMatrices = new glm::mat4[numbones];
+        mWorldBoneMatrices = new glm::mat4[numbones];
+        mLocalBoneMatrices = new glm::mat4[numbones];
         mBoneParents = new int[numbones];
         mBoneNames.reserve(numbones);
         mBoneNames.resize(numbones);
@@ -20,12 +20,12 @@ namespace sxr {
 
     Skeleton::~Skeleton()
     {
-        delete[] mSkinMatrices;
-        delete[] mBoneMatrices;
+        delete[] mWorldBoneMatrices;
+        delete[] mLocalBoneMatrices;
         delete[] mBoneParents;
     };
 
-    void Skeleton::setBoneParents(int* boneparents, int numbones)
+    void Skeleton::updateBones(int boneparents[], const char* bonenames[], int numbones)
     {
         glm::mat4 *skinMatrices = new glm::mat4[numbones];
         glm::mat4 *boneMatrices = new glm::mat4[numbones];
@@ -47,10 +47,15 @@ namespace sxr {
         {
             std::lock_guard<std::mutex> lock(mLock);
             memcpy(mBoneParents, boneparents, numbones * sizeof(int));
-            memcpy(skinMatrices, mSkinMatrices, n);
-            memcpy(boneMatrices, mBoneMatrices, n);
-            mSkinMatrices = skinMatrices;
-            mBoneMatrices = boneMatrices;
+            memcpy(skinMatrices, mWorldBoneMatrices, n * sizeof(glm::mat4));
+            memcpy(boneMatrices, mLocalBoneMatrices, n * sizeof(glm::mat4));
+            mWorldBoneMatrices = skinMatrices;
+            mLocalBoneMatrices = boneMatrices;
+            mNumBones = numbones;
+            for (int i = 0; i < numbones; ++i)
+            {
+                mBoneNames[i] = bonenames[i];
+            }
         }
     }
 
@@ -100,27 +105,36 @@ namespace sxr {
     void Skeleton::setPose(const float* input)
     {
         std::lock_guard<std::mutex> lock(mLock);
-        memcpy(mBoneMatrices, input, mNumBones * sizeof(glm::mat4));
+        memcpy(mLocalBoneMatrices, input, mNumBones * sizeof(glm::mat4));
     }
 
     void Skeleton::getPose(float* output)
     {
         std::lock_guard<std::mutex> lock(mLock);
-        memcpy(output, mBoneMatrices, mNumBones * sizeof(glm::mat4));
+        memcpy(output, mLocalBoneMatrices, mNumBones * sizeof(glm::mat4));
     }
 
-    void Skeleton::setSkinPose(const float* input)
+    void Skeleton::setWorldPose(const float* input)
     {
         std::lock_guard<std::mutex> lock(mLock);
-        memcpy(mSkinMatrices, input, mNumBones * sizeof(glm::mat4));
+        memcpy(mWorldBoneMatrices, input, mNumBones * sizeof(glm::mat4));
     }
 
-    const glm::mat4* Skeleton::getSkinMatrix(int boneId) const
+    const glm::mat4* Skeleton::getWorldBoneMatrix(int boneId) const
     {
         if ((boneId < 0) || (boneId > getNumBones()))
         {
             return nullptr;
         }
-        return &mSkinMatrices[boneId];
+        return &mWorldBoneMatrices[boneId];
+    }
+
+    const glm::mat4* Skeleton::getLocalBoneMatrix(int boneId) const
+    {
+        if ((boneId < 0) || (boneId > getNumBones()))
+        {
+            return nullptr;
+        }
+        return &mLocalBoneMatrices[boneId];
     }
 }
