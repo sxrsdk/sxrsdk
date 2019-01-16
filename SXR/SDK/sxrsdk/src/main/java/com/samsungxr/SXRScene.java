@@ -357,7 +357,6 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
             mStatsConsole.setEyeMode(SXRConsole.EyeMode.BOTH_EYES);
         } else if (!mStatsEnabled && mStatsConsole != null) {
             mStatsConsole.setEyeMode(SXRConsole.EyeMode.NEITHER_EYE);
-            mStatsConsole.clear();
         }
     }
 

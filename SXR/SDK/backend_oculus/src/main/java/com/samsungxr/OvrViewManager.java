@@ -92,7 +92,6 @@ class OvrViewManager extends SXRViewManager {
         SXRPreference prefs = SXRPreference.get();
         DEBUG_STATS = prefs.getBooleanProperty(SXRPreference.KEY_DEBUG_STATS, false);
         DEBUG_STATS_PERIOD_MS = prefs.getIntegerProperty(SXRPreference.KEY_DEBUG_STATS_PERIOD_MS, 1000);
-        String statsWanted = prefs.getProperty(SXRPreference.KEY_STATS, null);
         try {
             SXRStatsLine.sFormat = SXRStatsLine.FORMAT
                     .valueOf(prefs.getProperty(SXRPreference.KEY_STATS_FORMAT, SXRStatsLine.FORMAT.DEFAULT.toString()));
@@ -118,53 +117,24 @@ class OvrViewManager extends SXRViewManager {
         // Debug statistics
         mStatsLine = new SXRStatsLine("gvrf-stats");
 
-        if (statsWanted == null)
-        {
-            mFPSTracer = new SXRFPSTracer("FPS");
-            mFPSTracer = new SXRFPSTracer("DrawFPS");
-            mTracerDrawFrame = new SXRMethodCallTracer("drawFrame");
-            mTracerDrawFrameGap = new SXRMethodCallTracer("drawFrameGap");
-            mTracerBeforeDrawEyes = new SXRMethodCallTracer("beforeDrawEyes");
-            mTracerDrawEyes = new SXRMethodCallTracer("drawEyes");
-            mTracerDrawEyes1 = new SXRMethodCallTracer("drawEyes1");
-            mTracerDrawEyes2 = new SXRMethodCallTracer("drawEyes2");
-            mStatsLine.addColumn(mFPSTracer.getStatColumn());
-            mStatsLine.addColumn(mTracerDrawFrame.getStatColumn());
-            mStatsLine.addColumn(mTracerDrawFrameGap.getStatColumn());
-            mStatsLine.addColumn(mTracerBeforeDrawEyes.getStatColumn());
-            mStatsLine.addColumn(mTracerDrawEyes.getStatColumn());
-            mStatsLine.addColumn(mTracerDrawEyes1.getStatColumn());
-            mStatsLine.addColumn(mTracerDrawEyes2.getStatColumn());
-            mStatsLine.addColumn(mTracerAfterDrawEyes.getStatColumn());
-        }
-        else
-        {
-            if (statsWanted.contains("fps"))
-            {
-                mFPSTracer = new SXRFPSTracer("FPS");
-                mStatsLine.addColumn(mFPSTracer.getStatColumn());
-            }
-            if (statsWanted.contains("frame"))
-            {
-                mTracerDrawFrame = new SXRMethodCallTracer("drawFrame");
-                mTracerDrawFrameGap = new SXRMethodCallTracer("drawFrameGap");
-                mStatsLine.addColumn(mTracerDrawFrame.getStatColumn());
-                mStatsLine.addColumn(mTracerDrawFrameGap.getStatColumn());
-            }
-            if (statsWanted.contains("eyes"))
-            {
-                mTracerBeforeDrawEyes = new SXRMethodCallTracer("beforeDrawEyes");
-                mTracerDrawEyes = new SXRMethodCallTracer("drawEyes");
-                mTracerDrawEyes1 = new SXRMethodCallTracer("drawEyes1");
-                mTracerDrawEyes2 = new SXRMethodCallTracer("drawEyes2");
-                mTracerAfterDrawEyes = new SXRMethodCallTracer("afterDrawEyes");
-                mStatsLine.addColumn(mTracerBeforeDrawEyes.getStatColumn());
-                mStatsLine.addColumn(mTracerDrawEyes.getStatColumn());
-                mStatsLine.addColumn(mTracerDrawEyes1.getStatColumn());
-                mStatsLine.addColumn(mTracerDrawEyes2.getStatColumn());
-                mStatsLine.addColumn(mTracerAfterDrawEyes.getStatColumn());
-            }
-        }
+        mFPSTracer = new SXRFPSTracer("DrawFPS");
+        mTracerDrawFrame = new SXRMethodCallTracer("drawFrame");
+        mTracerDrawFrameGap = new SXRMethodCallTracer("drawFrameGap");
+        mTracerBeforeDrawEyes = new SXRMethodCallTracer("beforeDrawEyes");
+        mTracerDrawEyes = new SXRMethodCallTracer("drawEyes");
+        mTracerDrawEyes1 = new SXRMethodCallTracer("drawEyes1");
+        mTracerDrawEyes2 = new SXRMethodCallTracer("drawEyes2");
+        mTracerAfterDrawEyes = new SXRMethodCallTracer("afterDrawEyes");
+
+        mStatsLine.addColumn(mFPSTracer.getStatColumn());
+        mStatsLine.addColumn(mTracerDrawFrame.getStatColumn());
+        mStatsLine.addColumn(mTracerDrawFrameGap.getStatColumn());
+        mStatsLine.addColumn(mTracerBeforeDrawEyes.getStatColumn());
+        mStatsLine.addColumn(mTracerDrawEyes.getStatColumn());
+        mStatsLine.addColumn(mTracerDrawEyes1.getStatColumn());
+        mStatsLine.addColumn(mTracerDrawEyes2.getStatColumn());
+        mStatsLine.addColumn(mTracerAfterDrawEyes.getStatColumn());
+
         mControllerReader = new OvrControllerReader(application, mApplication.getActivityNative().getNative());
     }
 
@@ -183,17 +153,16 @@ class OvrViewManager extends SXRViewManager {
     protected void beforeDrawEyes() {
         if (DEBUG_STATS) {
             mStatsLine.startLine();
-            if (mTracerDrawFrame != null)
-            {
-                mTracerDrawFrame.enter();
-                mTracerDrawFrameGap.leave();
-                mTracerBeforeDrawEyes.enter();
-            }
+
+            mTracerDrawFrame.enter();
+            mTracerDrawFrameGap.leave();
+
+            mTracerBeforeDrawEyes.enter();
         }
 
         super.beforeDrawEyes();
 
-        if (DEBUG_STATS && (mTracerBeforeDrawEyes != null)) {
+        if (DEBUG_STATS) {
             mTracerBeforeDrawEyes.leave();
         }
     }
@@ -209,7 +178,7 @@ class OvrViewManager extends SXRViewManager {
 
             if (use_multiview) {
 
-                if (DEBUG_STATS && (mTracerDrawEyes != null)) {
+                if (DEBUG_STATS) {
                     mTracerDrawEyes1.enter(); // this eye is drawn first
                     mTracerDrawEyes2.enter();
                 }
@@ -229,7 +198,7 @@ class OvrViewManager extends SXRViewManager {
 
                 captureFinish();
 
-                if (DEBUG_STATS && (mTracerDrawEyes != null)) {
+                if (DEBUG_STATS) {
                     mTracerDrawEyes1.leave();
                     mTracerDrawEyes2.leave();
                 }
@@ -238,7 +207,7 @@ class OvrViewManager extends SXRViewManager {
             } else {
 
                 if (eye == 1) {
-                    if (DEBUG_STATS && (mTracerDrawEyes != null)) {
+                    if (DEBUG_STATS) {
                         mTracerDrawEyes1.enter();
                     }
 
@@ -249,12 +218,12 @@ class OvrViewManager extends SXRViewManager {
                     captureRightEye(renderTarget, false);
 
                     captureFinish();
-                    if (DEBUG_STATS && (mTracerDrawEyes != null)) {
+                    if (DEBUG_STATS) {
                         mTracerDrawEyes1.leave();
                         mTracerDrawEyes.leave();
                     }
                 } else {
-                    if (DEBUG_STATS && (mTracerDrawEyes != null)) {
+                    if (DEBUG_STATS) {
                         mTracerDrawEyes1.leave();
                         mTracerDrawEyes.leave();
                     }
@@ -271,7 +240,7 @@ class OvrViewManager extends SXRViewManager {
 
                     captureLeftEye(renderTarget, false);
 
-                    if (DEBUG_STATS && (mTracerDrawEyes != null)) {
+                    if (DEBUG_STATS) {
                         mTracerDrawEyes2.leave();
                     }
                 }
@@ -288,7 +257,7 @@ class OvrViewManager extends SXRViewManager {
 
     @Override
     protected void afterDrawEyes() {
-        if (DEBUG_STATS && (mTracerDrawEyes != null)) {
+        if (DEBUG_STATS) {
             // Time afterDrawEyes from here
             mTracerAfterDrawEyes.enter();
         }
@@ -296,16 +265,12 @@ class OvrViewManager extends SXRViewManager {
         super.afterDrawEyes();
 
         if (DEBUG_STATS) {
-            if (mTracerDrawEyes != null) {
-                mTracerAfterDrawEyes.leave();
-            }
-            if (mTracerDrawFrame != null) {
-                mTracerDrawFrame.leave();
-                mTracerDrawFrameGap.enter();
-            }
-            if (mFPSTracer != null) {
-                mFPSTracer.tick();
-            }
+            mTracerAfterDrawEyes.leave();
+
+            mTracerDrawFrame.leave();
+            mTracerDrawFrameGap.enter();
+
+            mFPSTracer.tick();
             mStatsLine.printLine(DEBUG_STATS_PERIOD_MS);
 
             mMainScene.addStatMessage(System.lineSeparator() + mStatsLine.getStats(SXRStatsLine.FORMAT.MULTILINE));
