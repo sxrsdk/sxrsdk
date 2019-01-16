@@ -21,6 +21,7 @@ public class SXRPreference {
     public static final String KEY_DEBUG_STATS = "debug_stats";
     public static final String KEY_DEBUG_STATS_PERIOD_MS = "debug_stats_period_ms";
     public static final String KEY_STATS_FORMAT = "stats_format";
+    public static final String KEY_STATS = "stats";
 
     /**
      * The singleton instance.

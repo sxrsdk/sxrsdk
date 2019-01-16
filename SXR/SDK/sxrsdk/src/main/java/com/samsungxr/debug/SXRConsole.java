@@ -261,16 +261,20 @@ public class SXRConsole extends SXRMaterial
 
         SXRCamera leftCamera = cameraRig.getLeftCamera();
         SXRCamera rightCamera = cameraRig.getRightCamera();
+        SXRCamera centerCamera = cameraRig.getCenterCamera();
 
         // Remove from both (even if not present) add back later
         leftCamera.removePostEffect(this);
         rightCamera.removePostEffect(this);
-
+        centerCamera.removePostEffect(this);
         if (eyeMode == EyeMode.LEFT_EYE || eyeMode == EyeMode.BOTH_EYES) {
             leftCamera.addPostEffect(this);
         }
         if (eyeMode == EyeMode.RIGHT_EYE || eyeMode == EyeMode.BOTH_EYES) {
             rightCamera.addPostEffect(this);
+        }
+        if (eyeMode == EyeMode.BOTH_EYES) {
+            centerCamera.addPostEffect(this);
         }
     }
 
