@@ -510,23 +510,16 @@ public abstract class SXRAnimation {
      */
 
     final boolean onDrawFrame(float frameTime) {
-        if(mElapsedTime>this.getDuration()-1&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
-        {
-            if (mOnFinish != null) {
-                mOnFinish.finished(this);
-            }
 
-            isFinished = true;
-            return true;
-        }
 
         if(this.getClass().getName().contains("SXRSkeletonAnimation")&&this.getNameAll()=="first")
         {
-            Log.i("mCurrentTime"," elapsedR "+mElapsedTime);//+" mDuration "+mDuration);
+            Log.i("mCurrentTime"," elapsedR "+mElapsedTime+" reverse "+mReverse);//+" mDuration "+mDuration);
             mCurrentTime++;
         }
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
+        Log.i("mCurrentTime"," elapsedR "+mElapsedTime+" reverse "+mReverse);//+" mDuration "+mDuration);
 
 
         mElapsedTime += (frameTime*mAnimationSpeed);
@@ -557,7 +550,11 @@ public abstract class SXRAnimation {
                 }
             }
         }
-
+        if(mElapsedTime>this.getDuration()-1&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
+        {
+         stillRunning = false;
+         mDuration = this.getDuration()-1;
+        }
         if (stillRunning) {
             final boolean countDown = mRepeatMode == SXRRepeatMode.PINGPONG
                     && (mReverse == true || (mIterations & 1) == 1);
@@ -571,8 +568,18 @@ public abstract class SXRAnimation {
             float endRatio = mRepeatMode == SXRRepeatMode.ONCE ? 1f : 0f;
 
             endRatio = interpolate(mDuration, mDuration);
+            if(mReverse)
+            {
+                endRatio = 0;
+
+            }
 
             animate(mTarget, endRatio);
+
+            if(mElapsedTime>this.getDuration()-1&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
+            {
+                mDuration = this.getDuration()+1;
+            }
 
             onFinish();
             if (mOnFinish != null) {

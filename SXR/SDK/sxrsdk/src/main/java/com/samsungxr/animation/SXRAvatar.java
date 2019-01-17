@@ -169,7 +169,7 @@ public void setBlend(boolean blend)
                                 {
                                     SXRSkeletonAnimation skelOne = (SXRSkeletonAnimation)mAnimQueue.get(0).getAnimation(0);
                                     SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation)mAnimQueue.get(1).getAnimation(0);
-                                    SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(getModel(), 1, skelOne, skelTwo, skelOne.getSkeleton(), false);
+                                    SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(getModel(), 1, skelOne, skelTwo, skelOne.getSkeleton(), reverse);
                                     SXRPoseMapper retargeterP = new SXRPoseMapper(getSkeleton(), skelOne.getSkeleton(), 1);
                                     retargeterP.setBoneMap(boneMap);
                                     SXRAnimator temp = new SXRAnimator(contx);
@@ -222,11 +222,32 @@ public void setBlend(boolean blend)
                                                                         animator);
                 if (mRepeatMode == SXRRepeatMode.REPEATED)
                 {
+                    repeatCount++;
 
+                    if(repeatCount < mRepeatCount || mRepeatCount < 0){
                      startAll(mRepeatMode);
+                    }
 
                 }
+                    if (mRepeatMode == SXRRepeatMode.PINGPONG)
+                    {
+                        repeatCount = repeatCount+0.5f ;
+                        if(repeatCount < mRepeatCount || mRepeatCount<0) {
+                            reverse = !reverse;
+                            Collections.reverse(mAnimations);
+                            for (SXRAnimator anim : mAnimations)
+                            {
+                                anim.setRepeatCount(1); //default
+                                anim.setRepeatMode(mRepeatMode);
+                                //anim.setRepeatMode(repeatMode);
+                               // anim.setReverse(reverse);
+                               // anim.setReverse(reverse);
+                                anim.setReverse(reverse);
+                            }
+                            startAll(mRepeatMode);
+                        }
 
+                    }
                 default: break;
             }
         }

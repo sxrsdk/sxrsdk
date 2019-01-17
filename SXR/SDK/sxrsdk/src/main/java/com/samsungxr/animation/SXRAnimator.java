@@ -51,6 +51,8 @@ public class SXRAnimator extends SXRBehavior
     protected String mName;
     protected int mRepeatMode = SXRRepeatMode.ONCE;
     protected int mRepeatCount = 1;
+    protected boolean mReverse = false;
+
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -239,6 +241,14 @@ public class SXRAnimator extends SXRBehavior
         {
             anim.setRepeatMode(repeatMode);
         }
+    }
+    public void setReverse(boolean reverse)
+    {
+        for (SXRAnimation anim : mAnimations)
+        {
+            anim.setReverse(reverse);
+        }
+
     }
     /**
      * Sets the offset for the all animations in this animator.
