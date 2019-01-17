@@ -24,6 +24,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import static com.samsungxr.animation.SXRPose.Bone;
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
+import com.samsungxr.utility.Log;
 
 /**
  * Interpolate the poses or blend the skeleton animations.
@@ -334,6 +335,8 @@ public class SXRPoseInterpolator extends SXRAnimation
      */
     public void getFinalPose(float timer)
     {
+        Log.i("printskelAnimSrc","Interp "+timer+this.getNameAll());
+
         SXRPose firstPose = null;
         SXRPose secondPose = null;
 

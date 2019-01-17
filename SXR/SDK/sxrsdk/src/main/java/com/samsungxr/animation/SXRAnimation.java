@@ -116,6 +116,9 @@ public abstract class SXRAnimation {
     private SXRPoseInterpolator minterpolationAnimation = null;
     private SXRSkeletonAnimation mSkeletonAnimation = null;
     private SXRPoseMapper mPoseMapperAnimation = null;
+    private float mCurrentTime =0;
+    private String mName = "";
+
 
     /**
      * This is derived from {@link #mOnFinish}. Doing the {@code instanceof}
@@ -422,6 +425,16 @@ public abstract class SXRAnimation {
         }
     }
 
+    public void setNameAll(String name) {
+        mName = name;
+
+    }
+
+    public String getNameAll() {
+        return mName;
+
+    }
+
     /**
      * Start the animation.
      *
@@ -458,6 +471,10 @@ public abstract class SXRAnimation {
 
     public void onStart()
     {
+        if((this.getNameAll()=="last")||(this.getNameAll()=="middle"))
+        {
+            mElapsedTime += 1;
+        }
         if (sDebug)
         {
             Log.d("ANIMATION", "%s started", getClass().getSimpleName());
@@ -466,12 +483,6 @@ public abstract class SXRAnimation {
 
     protected void onFinish()
     {
-        if (this.getClass().getName().contains("SXRSkeletonAnimation")) {
-                getAnimation(this);
-                if (mSkeletonAnimation.getSkelAnimOrder() != SXRAnimator.Order.LAST) {
-                    mSkeletonAnimation.setUpdatePose(false);
-                }
-            }
         if (sDebug)
         {
             Log.d("ANIMATION", "%s finished", getClass().getSimpleName());
@@ -486,55 +497,6 @@ public abstract class SXRAnimation {
         }
     }
 
-    /**
-     * Sets the skeleton animation either to update the pose or not
-     * based on the conditions with respect to time
-     * @param animation
-     *            this animation
-     * @param currTime
-     *            current time, in second
-     */
-    public void updateAnimation(SXRAnimation animation, float currTime)
-    {
-        if(this.getClass().getName().contains("SXRSkeletonAnimation"))
-        {
-            this.getAnimation(animation);
-
-            if((mSkeletonAnimation.getSkelAnimOrder() == SXRAnimator.Order.FIRST))
-            {
-                if(currTime > (this.getDuration()-mBlendDuration))
-                {
-                    mSkeletonAnimation.setUpdatePose(true);
-                }
-                else
-                {
-                    mSkeletonAnimation.setUpdatePose(false);
-                }
-            }
-            else if(mSkeletonAnimation.getSkelAnimOrder() == SXRAnimator.Order.MIDDLE)
-            {
-                if((0 < currTime) && (currTime < mBlendDuration) && (currTime > (this.getDuration()-mBlendDuration)))
-                {
-                    mSkeletonAnimation.setUpdatePose(true);
-                }
-                else
-                {
-                    mSkeletonAnimation.setUpdatePose(false);
-                }
-            }
-            else if(mSkeletonAnimation.getSkelAnimOrder() == SXRAnimator.Order.LAST)
-            {
-                if((0 < currTime) && (currTime < mBlendDuration))
-                {
-                    mSkeletonAnimation.setUpdatePose(true);
-                }
-                else
-                {
-                    mSkeletonAnimation.setUpdatePose(false);
-                }
-            }
-        }
-    }
 
     /**
      * Called by the animation engine. Uses the frame time, the interpolator,
@@ -548,34 +510,32 @@ public abstract class SXRAnimation {
      */
 
     final boolean onDrawFrame(float frameTime) {
-      
-        if(mBlend)
+        if(mElapsedTime>this.getDuration()-1&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
         {
-            this.getAnimation(this);
-            if(!(this.getClass().getName().contains("SXROpacityAnimation")))
-            {
-                if(!playAnimation[this.getID()]) {
-                    return true;
-                }
+            if (mOnFinish != null) {
+                mOnFinish.finished(this);
             }
 
-            if(this.getClass().getName().contains("SXRSkeletonAnimation")) {
-                if ((mSkeletonAnimation.getSkelAnimOrder() != SXRAnimator.Order.LAST && (mElapsedTime > (this.getDuration() - mBlendDuration)))) {
-                    playAnimation[this.getID() + 2] = true; //start playing next interpolator animation in the animator list
-                    playAnimation[this.getID() + 3] = true; //start playing pose mapper for the above interpolator animation
-                    playAnimation[this.getID() + 4] = true; //start playing next skeleton animation in the animator list
-                    playAnimation[this.getID() + 5] = true; //start playing pose mapper for the above skeleton animation
-                }
-            }
-            updateAnimation(this, mElapsedTime);
+            isFinished = true;
+            return true;
         }
-        
+
+        if(this.getClass().getName().contains("SXRSkeletonAnimation")&&this.getNameAll()=="first")
+        {
+            Log.i("mCurrentTime"," elapsedR "+mElapsedTime);//+" mDuration "+mDuration);
+            mCurrentTime++;
+        }
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
+
+
 
         mElapsedTime += (frameTime*mAnimationSpeed);
 
+
         final int currentCycleCount = (int) (mElapsedTime / mDuration);
         final float cycleTime = (mElapsedTime % mDuration) + mAnimationOffset;
+
+
 
         final boolean cycled = previousCycleCount != currentCycleCount;
         boolean stillRunning = cycled != true;
@@ -611,10 +571,6 @@ public abstract class SXRAnimation {
             float endRatio = mRepeatMode == SXRRepeatMode.ONCE ? 1f : 0f;
 
             endRatio = interpolate(mDuration, mDuration);
-            if(mReverse)
-            {
-                endRatio = 0;
-            }
 
             animate(mTarget, endRatio);
 

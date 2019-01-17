@@ -52,8 +52,8 @@ import java.util.List;
 public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     protected String mName;
     private SXRSkeleton mSkeleton = null;
-    private SXRAnimator.Order mSkeletonAnimationOrder;
-    private boolean mUpdatePose = false;
+    private String skelOrder = "";
+
 
     /**
      * List of animation channels for each of the
@@ -206,31 +206,14 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
             target.attachComponent(mSkeleton);
         }
     }
-
-    /**
-     * Sets the order for skeleton animation.
-     * @param order  order name for skeleton animation.
-     */
-    public void setSkelAnimOrder(SXRAnimator.Order order)
+    public void setOrder(String order)
     {
-        mSkeletonAnimationOrder = order;
+        skelOrder = order;
     }
 
-    /**
-     * Get the order name for skeleton animation.
-     */
-    public SXRAnimator.Order getSkelAnimOrder()
+    public String getOrder()
     {
-        return mSkeletonAnimationOrder;
-    }
-
-    /**
-     * Sets the flag either to update the pose or not.
-     * @param updatePose true to update the pose; false not to update.
-     */
-    public void setUpdatePose(boolean updatePose)
-    {
-        mUpdatePose = updatePose;
+        return skelOrder;
     }
 
     @Override
@@ -245,32 +228,9 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
      */
     public void animate(float timeInSec)
     {
-        switch(this.mSkeletonAnimationOrder)
-        {
-            case FIRST:
-                if(mUpdatePose)
-                {
-                    return;
-                }
-                break;
-
-            case MIDDLE:
-                if(mUpdatePose)
-                {
-                    return;
-                }
-                break;
-
-            case LAST:
-                if(mUpdatePose)
-                {
-                    return;
-                }
-                break;
-        }
-
         SXRSkeleton skel = getSkeleton();
         SXRPose pose = skel.getPose();
+        Log.i("printskelAnimSrc","SkAnim "+timeInSec+" "+this.getNameAll());
         computePose(timeInSec,pose);
         skel.poseToBones();
         skel.updateBonePose();

@@ -53,6 +53,10 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     protected int mRepeatCount = 1;
     private float repeatCount = 0;
     private boolean reverse = false;
+    private String boneMap = "";
+    private SXRContext contx;
+    private int count =0;
+    private boolean mBlend = false;
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -64,6 +68,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     public SXRAvatar(SXRContext ctx, String name)
     {
         super(ctx);
+        contx = ctx;
         mReceiver = new SXREventReceiver(this);
         mType = getComponentType();
         mAvatarRoot = new SXRNode(ctx);
@@ -121,7 +126,14 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     {
         return mAnimations.size();
     }
-
+public void setBoneMap(String bone)
+{
+    boneMap = bone;
+}
+public void setBlend(boolean blend)
+{
+    mBlend = blend;
+}
 
     protected SXROnFinish mOnFinish = new SXROnFinish()
     {
@@ -134,10 +146,44 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 if (mAnimQueue.size() > 0)
                 {
                     animator = mAnimQueue.get(0);
+
                     if (animator.findAnimation(animation) >= 0)
                     {
+                        if(mBlend==true)
+                        {
+                            if(count == 0)
+                            {
+                                for(int i=1; i<mAnimQueue.size()-1; i++)
+                                {
+                                    Log.i("middleDUration","animation "+mAnimQueue.get(i).getAnimation(0).getDuration());
+                                    mAnimQueue.get(i).setNameAll("middle");
+                                }
+                                Log.i("middleDUration","last "+mAnimQueue.get(mAnimQueue.size()-1).getAnimation(0).getDuration());
+
+                                mAnimQueue.get(mAnimQueue.size()-1).setNameAll("last");
+                                count++;
+                            }
+                            if(mAnimQueue.get(0).getAnimation(0).getClass().getName().contains("SXRSkeletonAnimation"))
+                            {
+                                if(mAnimQueue.size()>=2)
+                                {
+                                    SXRSkeletonAnimation skelOne = (SXRSkeletonAnimation)mAnimQueue.get(0).getAnimation(0);
+                                    SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation)mAnimQueue.get(1).getAnimation(0);
+                                    SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(getModel(), 1, skelOne, skelTwo, skelOne.getSkeleton(), false);
+                                    SXRPoseMapper retargeterP = new SXRPoseMapper(getSkeleton(), skelOne.getSkeleton(), 1);
+                                    retargeterP.setBoneMap(boneMap);
+                                    SXRAnimator temp = new SXRAnimator(contx);
+                                    temp.addAnimation(blendAnim);
+                                    temp.addAnimation(retargeterP);
+                                    mAnimQueue.add(1,temp);
+                                }
+
+                            }
+                        }
+
                         mAnimQueue.remove(0);
                         mIsRunning = false;
+
                         if (mAnimQueue.size() > 0)
                         {
                             animator = mAnimQueue.get(0);
@@ -165,6 +211,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                                                                         "onAnimationStarted",
                                                                         SXRAvatar.this,
                                                                         animator);
+
                 break;
 
                 case 1:
@@ -175,29 +222,9 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                                                                         animator);
                 if (mRepeatMode == SXRRepeatMode.REPEATED)
                 {
-                    repeatCount++;
-                    if(repeatCount < mRepeatCount || mRepeatCount < 0){
-                        for (SXRAnimator anim : mAnimations)
-                        {
-                            anim.setStartParameters(mRepeatMode, reverse);
-                        }
-                        startAll(mRepeatMode , mRepeatCount);
-                    }
-                }
-                if (mRepeatMode == SXRRepeatMode.PINGPONG)
-                {
-                    repeatCount = repeatCount+0.5f ;
-                    if(repeatCount < mRepeatCount || mRepeatCount<0){
 
-                        reverse = !reverse;
-                        Collections.reverse(mAnimations);
+                     startAll(mRepeatMode);
 
-                        for (SXRAnimator anim : mAnimations)
-                        {
-                           anim.setStartParameters(mRepeatMode, reverse);
-                        }
-                        startAll(mRepeatMode, mRepeatCount);
-                    }
                 }
 
                 default: break;
@@ -270,6 +297,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public void loadAnimation(SXRAndroidResource animResource, String boneMap)
     {
+        boneMap = boneMap;
         String filePath = animResource.getResourcePath();
         SXRContext ctx = mAvatarRoot.getSXRContext();
         SXRResourceVolume volume = new SXRResourceVolume(ctx, animResource);
@@ -431,13 +459,17 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * @param repeatMode SXRRepeatMode.REPEATED to repeatedly play,
      *                   SXRRepeatMode.ONCE to play only once
      */
-    public void startAll(int repeatMode, int repeatCount)
+    public void startAll(int repeatMode)
     {
         mRepeatMode = repeatMode;
-        mRepeatCount = repeatCount;
+      //  mRepeatCount = repeatCount;
         for (SXRAnimator anim : mAnimations)
         {
-            start(anim);
+            Log.i("middleDUration","first "+anim.getAnimation(0).getDuration());
+            if(count == 0&&mBlend) {
+                anim.setNameAll("first");
+            }
+          start(anim);
         }
     }
 
@@ -451,6 +483,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 return;
             }
         }
+        int x = mAnimations.size();
         mIsRunning = true;
         animator.start(mOnFinish);
         mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
