@@ -46,7 +46,8 @@ public class SXRCameraNode extends SXRNode {
     private int fpsMode = -1;
     private boolean isCameraOpen = false;
     private CameraApplicationEvents cameraApplicationEvents;
-
+    private Camera.PreviewCallback previewCallback = null;
+    private Parameters userDefinedParameters = null;
     /**
      * Create a {@linkplain SXRNode node} (with arbitrarily
      * complex geometry) that shows live video from one of the device's cameras
@@ -193,9 +194,14 @@ public class SXRCameraNode extends SXRNode {
                 android.util.Log.d(TAG, "Camera not available or is in use");
                 return false;
             }
+
+            if(previewCallback != null)
+                camera.setPreviewCallback(previewCallback);
+
             camera.startPreview();
             camera.setPreviewTexture(mSurfaceTexture);
             isCameraOpen = true;
+
         } catch (Exception exception) {
             android.util.Log.d(TAG, "Camera not available or is in use");
             return false;
@@ -210,6 +216,7 @@ public class SXRCameraNode extends SXRNode {
             return;
         }
 
+        camera.setPreviewCallback(null);
         camera.stopPreview();
         camera.release();
         camera = null;
@@ -225,8 +232,12 @@ public class SXRCameraNode extends SXRNode {
         @Override
         public void onResume() {
             if (openCamera()) {
-                //restore fpsmode
-                setUpCameraForVrMode(fpsMode);
+
+                if(userDefinedParameters != null)
+                    setCameraParameters(userDefinedParameters);
+                else
+                    //restore fpsmode
+                    setUpCameraForVrMode(fpsMode);
             }
         }
     }
@@ -309,13 +320,57 @@ public class SXRCameraNode extends SXRNode {
                 if ("true".equalsIgnoreCase(params.get("ois-supported"))) {
                     params.set("ois", "center");
                 }
-
                 camera.setParameters(params);
                 cameraSetUpStatus = true;
             }
         }
 
         return cameraSetUpStatus;
+    }
+
+
+    /**
+     * Set the preview callback which is invoked for every preview frame.
+     *
+     * @param callback the {@link Camera.PreviewCallback} for the Android {@link Camera}.
+     */
+    public void setPreviewCallback(Camera.PreviewCallback callback)
+    {
+        previewCallback = callback;
+
+        if(camera != null ) {
+            camera.stopPreview();
+            camera.setPreviewCallback(callback);
+            camera.startPreview();
+        }
+    }
+
+    /**
+     *
+     * @return the {@link Parameters of the Android {@link Camera} held by this node}
+     */
+    public Parameters getCameraParameters()
+    {
+        if(camera != null)
+            return camera.getParameters();
+        else
+            return null;
+    }
+
+    /**
+     * Set the parameters for the android camera held by this node.
+     *
+     * @param params the {@link Parameters} to set for the Android {@link Camera}
+     *               held by this node.
+     */
+    public void setCameraParameters(Parameters params)
+    {
+        if(camera != null && params != null) {
+            userDefinedParameters = params;
+            camera.stopPreview();
+            camera.setParameters(params);
+            camera.startPreview();
+        }
     }
 
     /**
