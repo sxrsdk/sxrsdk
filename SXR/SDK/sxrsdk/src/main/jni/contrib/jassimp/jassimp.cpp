@@ -1036,11 +1036,12 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
         //animation meshes-------------------------------------------------------------------------
         for(unsigned int i = 0; i < cMesh->mNumAnimMeshes; ++i )
         {
+            aiAnimMesh* aMesh = cMesh->mAnimMeshes[i];
 
-            //todo: validity checks for animation meshes
-
-            aiAnimMesh * aMesh = cMesh->mAnimMeshes[i];
-            aMesh->mNumVertices = cMesh->mNumVertices;
+            if (aMesh->mVertices == nullptr) {
+            	continue;
+            }
+            //aMesh->mNumVertices = cMesh->mNumVertices;
 
             jobject jAnimMesh;
             SmartLocalRef refAnimMesh(env, jAnimMesh);
