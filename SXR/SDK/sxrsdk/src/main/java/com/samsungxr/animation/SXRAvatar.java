@@ -235,6 +235,11 @@ public void setBlend(boolean blend)
                         if(repeatCount < mRepeatCount || mRepeatCount<0) {
                             reverse = !reverse;
                             Collections.reverse(mAnimations);
+                            //reverse names
+                            String temp = "";
+                            temp = mAnimations.get(0).getAnimation(0).getNameAll();
+                            mAnimations.get(0).setNameAll(mAnimations.get(mAnimations.size()-1).getAnimation(0).getNameAll());
+                            mAnimations.get(mAnimations.size()-1).setNameAll(temp);
                             for (SXRAnimator anim : mAnimations)
                             {
                                 anim.setRepeatCount(1); //default
@@ -244,6 +249,7 @@ public void setBlend(boolean blend)
                                // anim.setReverse(reverse);
                                 anim.setReverse(reverse);
                             }
+                            Log.i("printpingong","how many");
                             startAll(mRepeatMode);
                         }
 

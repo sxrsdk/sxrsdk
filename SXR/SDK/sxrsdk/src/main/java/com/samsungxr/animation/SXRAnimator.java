@@ -244,6 +244,7 @@ public class SXRAnimator extends SXRBehavior
     }
     public void setReverse(boolean reverse)
     {
+        mReverse = reverse;
         for (SXRAnimation anim : mAnimations)
         {
             anim.setReverse(reverse);
@@ -348,6 +349,10 @@ public class SXRAnimator extends SXRBehavior
         mIsRunning = true;
         for (int i = 0; i < mAnimations.size(); ++i)
         {
+            if(mReverse)
+            {
+                SXRAnimation anim = mAnimations.get(i);
+            }
             SXRAnimation anim = mAnimations.get(i);
             anim.reset();
             if (i == 0)

@@ -471,6 +471,8 @@ public abstract class SXRAnimation {
 
     public void onStart()
     {
+        Log.i("ANIMATIONONSTART", "%s started", getClass().getSimpleName()+ this.getNameAll());
+
         if((this.getNameAll()=="last")||(this.getNameAll()=="middle"))
         {
             mElapsedTime += 1;
@@ -511,16 +513,17 @@ public abstract class SXRAnimation {
 
     final boolean onDrawFrame(float frameTime) {
 
-
+/*
         if(this.getClass().getName().contains("SXRSkeletonAnimation")&&this.getNameAll()=="first")
         {
             Log.i("mCurrentTime"," elapsedR "+mElapsedTime+" reverse "+mReverse);//+" mDuration "+mDuration);
             mCurrentTime++;
-        }
+        }*/
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
-        Log.i("mCurrentTime"," elapsedR "+mElapsedTime+" reverse "+mReverse);//+" mDuration "+mDuration);
-
+        if(this.getNameAll()=="first"&&mReverse==true) {
+            Log.i("mCurrentTime", " elapsedR " + mElapsedTime + " reverse " + mReverse + " mDuration " + mDuration + " frameTime " + frameTime + " mAnimSpe " + mAnimationSpeed+ " class "+this.getClass().getSimpleName());
+        }
 
         mElapsedTime += (frameTime*mAnimationSpeed);
 
@@ -532,6 +535,11 @@ public abstract class SXRAnimation {
 
         final boolean cycled = previousCycleCount != currentCycleCount;
         boolean stillRunning = cycled != true;
+      //  if((this.getNameAll()=="last"))
+      //  {
+            Log.i("printisStill"," running "+stillRunning);
+      //      // stillRunning = false;
+      //  }
 
         if (cycled && mRepeatMode != SXRRepeatMode.ONCE) {
             // End of a cycle - see if we should continue
@@ -558,6 +566,10 @@ public abstract class SXRAnimation {
         if (stillRunning) {
             final boolean countDown = mRepeatMode == SXRRepeatMode.PINGPONG
                     && (mReverse == true || (mIterations & 1) == 1);
+           // if(mReverse==true)
+          //  {
+            //    Log.i("animatinREversr","name "+this.getNameAll()+" type "+this.getClass().getSimpleName()+" elapse "+mElapsedTime);
+          //  }
 
             float elapsedRatio = //
                     countDown != true ? interpolate(cycleTime, mDuration)
@@ -576,17 +588,17 @@ public abstract class SXRAnimation {
 
             animate(mTarget, endRatio);
 
-            if(mElapsedTime>this.getDuration()-1&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
-            {
-                mDuration = this.getDuration()+1;
-            }
-
             onFinish();
             if (mOnFinish != null) {
                 mOnFinish.finished(this);
             }
 
             isFinished = true;
+            if(mElapsedTime>this.getDuration()-1&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
+            {
+                mDuration = this.getDuration()+1;
+            }
+
         }
 
         return stillRunning;

@@ -21,6 +21,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRDrawFrameListener;
 import com.samsungxr.SXRNode;
+import com.samsungxr.utility.Log;
 
 /**
  * This class runs {@linkplain SXRAnimation animations}.
@@ -48,6 +49,7 @@ import com.samsungxr.SXRNode;
 public class SXRAnimationEngine {
 
     private static SXRAnimationEngine sInstance = null;
+    private int count =0;
 
     static {
         SXRContext.addResetOnRestartHandler(new Runnable() {
@@ -114,6 +116,12 @@ public class SXRAnimationEngine {
             animation.reset();
             mAnimations.add(animation);
         }
+        if(mAnimations.get(0).mReverse==false)
+        {
+           // mAnimations.remove(0);
+          //  Log.i("printaimSixe","fcsdf"+mAnimations.size());
+           // count++;
+        }
         animation.onStart();
         return animation;
     }
@@ -146,8 +154,15 @@ public class SXRAnimationEngine {
 
         @Override
         public void onDrawFrame(float frameTime) {
+            if(mAnimations.get(0).mReverse==true&&count==0)
+            {
+              //  mAnimations.remove(0);
+               // count++;
+            }
             for (SXRAnimation animation : mAnimations) {
-                if (animation.onDrawFrame(frameTime) == false) {
+                boolean value = animation.onDrawFrame(frameTime);
+                Log.i("printaimSixe","fcsdf "+animation.getNameAll()+" class "+animation.getClass().getSimpleName()+" isFinished "+value);
+                if (value == false) {
                     mAnimations.remove(animation);
                 }
             }
