@@ -55,6 +55,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     protected SXREventReceiver mReceiver;
     protected final List<SXRAnimator> mAnimQueue = new ArrayList<SXRAnimator>();
     protected int mRepeatMode = SXRRepeatMode.ONCE;
+    protected EnumSet<SXRImportSettings> mImportSettings;
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -71,6 +72,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         mAvatarRoot = new SXRNode(ctx);
         mAvatarRoot.setName(name);
         mAnimations = new CopyOnWriteArrayList<>();
+        mImportSettings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_ANIMATION));
     }
 
     static public long getComponentType() { return TYPE_AVATAR; }
@@ -114,6 +116,20 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * Determine if this avatar is currently animating.
      */
     public boolean isRunning() { return mIsRunning; }
+
+
+    /**
+     * Set the import settings for loading the avatar.
+     * Avatars are always imported without animation. You can use
+     * the import settings to determine whether or not you want
+     * morphing, textures, etc.
+     * @param settings {@link SXRImportSettings} with the import settings desired.
+     */
+    public void setImportSettings(EnumSet<SXRImportSettings> settings)
+    {
+        mImportSettings = settings;
+        mImportSettings.add(SXRImportSettings.NO_ANIMATION);
+    }
 
     /**
      * Query the number of animations owned by this avatar.
@@ -250,7 +266,6 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public void loadModel(SXRAndroidResource avatarResource, String modelDesc, String attachBone)
     {
-        EnumSet<SXRImportSettings> settings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_ANIMATION));
         SXRContext ctx = mAvatarRoot.getSXRContext();
         SXRResourceVolume volume = new SXRResourceVolume(ctx, avatarResource);
         SXRNode modelRoot = new SXRNode(ctx);
@@ -258,7 +273,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         {
             mAttachments.put(attachBone, modelRoot);
         }
-        ctx.getAssetLoader().loadModel(volume, modelRoot, settings, true, mLoadModelHandler);
+        ctx.getAssetLoader().loadModel(volume, modelRoot, mImportSettings, true, mLoadModelHandler);
     }
 
     /**
