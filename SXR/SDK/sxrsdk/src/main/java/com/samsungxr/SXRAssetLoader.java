@@ -168,15 +168,6 @@ public final class SXRAssetLoader implements IEventReceiver
                 }
                 catch (IOException ex)
                 {
-                    SXRAndroidResource r = new SXRAndroidResource(mContext, R.drawable.white_texture);
-                    SXRAsynchronousResourceLoader.loadTexture(mContext, mTextureCache,
-                                                              request, r, DEFAULT_PRIORITY, SXRCompressedImage.BALANCED);
-
-                    SXRImage whiteTex = getDefaultImage(mContext);
-                    if (whiteTex != null)
-                    {
-                        request.loaded(whiteTex, null);
-                    }
                     onTextureError(request.Texture, ex.getMessage(), request.TextureFile);
                 }
             }
@@ -353,6 +344,14 @@ public final class SXRAssetLoader implements IEventReceiver
                                                  "onTextureError", texture, texFile, error);
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetEvents.class,
                                                  "onTextureError", mContext, error, texFile);
+            if (texture.getImage() == null)
+            {
+                SXRImage whiteTex = getDefaultImage(mContext);
+                if (whiteTex != null)
+                {
+                    texture.loaded(whiteTex, null);
+                }
+            }
             synchronized (mNumTextures)
             {
                 Log.e(TAG, "ASSET: Texture: ERROR cannot load texture %s %d", texFile, mNumTextures);
@@ -522,6 +521,7 @@ public final class SXRAssetLoader implements IEventReceiver
         public void failed(Throwable t, SXRAndroidResource resource)
         {
             SXRContext ctx = Texture.getSXRContext();
+            Texture.failed(t, resource);
             if (mCallback != null)
             {
                 mCallback.failed(t, resource);
@@ -529,15 +529,11 @@ public final class SXRAssetLoader implements IEventReceiver
             if (mAssetRequest != null)
             {
                 mAssetRequest.onTextureError(Texture, t.getMessage(), TextureFile);
-
-                SXRImage whiteTex = getDefaultImage(ctx);
-                if (whiteTex != null)
-                {
-                    Texture.loaded(whiteTex, null);
-                }
             }
-            ctx.getEventManager().sendEvent(ctx, IAssetEvents.class,
-                    "onTextureError", ctx, t.getMessage(), TextureFile);
+            else
+            {
+                ctx.getEventManager().sendEvent(ctx, IAssetEvents.class, "onTextureError", ctx, t.getMessage(), TextureFile);
+            }
         }
 
         @Override
