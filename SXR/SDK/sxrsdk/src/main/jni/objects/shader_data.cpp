@@ -19,7 +19,7 @@
 
 namespace sxr {
 /**
- * Constructs a bnse material.
+ * Constructs a base material.
  * The material contains a UniformBlock describing the possible uniforms
  * that can be used by this material. It also maintains the list of
  * possible textures in the order specified by the descriptor.
