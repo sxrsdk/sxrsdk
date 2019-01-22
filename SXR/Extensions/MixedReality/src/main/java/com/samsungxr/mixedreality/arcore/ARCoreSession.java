@@ -58,6 +58,7 @@ import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRMarker;
 import com.samsungxr.mixedreality.SXRHitResult;
 import com.samsungxr.mixedreality.SXRLightEstimate;
+import com.samsungxr.mixedreality.SXRMixedReality;
 import com.samsungxr.mixedreality.SXRPlane;
 import com.samsungxr.mixedreality.IAnchorEvents;
 import com.samsungxr.mixedreality.IPlaneEvents;
@@ -570,6 +571,29 @@ public class ARCoreSession extends MRCommon {
         pointCloud.setARPointCloud(mLastARFrame.acquirePointCloud());
 
         return pointCloud;
+    }
+
+    @Override
+    protected void onSetPlaneFindingMode(SXRMixedReality.PlaneFindingMode mode) {
+        if (mConfig == null) {
+            return;
+        }
+
+        switch (mode) {
+            case HORIZONTAL:
+                mConfig.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL);
+                break;
+            case HORIZONTAL_AND_VERTICAL:
+                mConfig.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL);
+                break;
+            case VERTICAL:
+                mConfig.setPlaneFindingMode(Config.PlaneFindingMode.VERTICAL);
+                break;
+            case DISABLED:
+            default:
+                mConfig.setPlaneFindingMode(Config.PlaneFindingMode.DISABLED);
+        }
+        mSession.configure(mConfig);
     }
 
     private Vector2f convertToDisplayGeometrySpace(float x, float y) {

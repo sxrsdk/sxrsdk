@@ -109,6 +109,11 @@ public class SXRSkin extends SXRComponent implements PrettyPrint
         }
     }
 
+    public void setInverseBindPose(float[] matrices)
+    {
+        NativeSkin.setInverseBindPose(getNative(), matrices);
+    }
+
     @Override
     public void prettyPrint(StringBuffer sb, int indent)
     {
@@ -127,4 +132,5 @@ class NativeSkin
     static native long getComponentType();
     static native boolean setBoneMap(long object, int[] boneMap);
     static native void setSkeleton(long object, long skel);
+    static native boolean setInverseBindPose(long object, float[] matrices);
 }

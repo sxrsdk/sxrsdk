@@ -69,6 +69,7 @@ import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRHitResult;
 import com.samsungxr.mixedreality.SXRLightEstimate;
 import com.samsungxr.mixedreality.SXRMarker;
+import com.samsungxr.mixedreality.SXRMixedReality;
 import com.samsungxr.mixedreality.SXRPlane;
 import com.samsungxr.mixedreality.SXRPointCloud;
 
@@ -300,6 +301,11 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
     @Override
     public SXRPointCloud acquirePointCloud() {
         return null;
+    }
+
+    @Override
+    public void setPlaneFindingMode(SXRMixedReality.PlaneFindingMode mode) {
+
     }
 
     private Vector3f configDisplayGeometry(SXRCameraRig cameraRig)

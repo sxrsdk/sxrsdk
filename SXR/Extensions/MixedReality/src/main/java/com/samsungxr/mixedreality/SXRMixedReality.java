@@ -273,6 +273,11 @@ public class SXRMixedReality implements IMixedReality
         return mSession.acquirePointCloud();
     }
 
+    @Override
+    public void setPlaneFindingMode(PlaneFindingMode mode) {
+        mSession.setPlaneFindingMode(mode);
+    }
+
     private class ActivityEventsHandler extends SXREventListeners.ApplicationEvents {
         @Override
         public void onPause() {
@@ -289,4 +294,26 @@ public class SXRMixedReality implements IMixedReality
         ON_RESUME,
         ON_PAUSE
     };
+
+    /**
+     * Designates the mode that the plane subsystem finds a new plane
+     */
+    public enum PlaneFindingMode {
+        /**
+         * Plane detection is disabled
+         */
+        DISABLED,
+        /**
+         * Detection of only horizontal planes is enabled.
+         */
+        HORIZONTAL,
+        /**
+         * Detection of both horizontal and vertical planes is enabled.
+         */
+        HORIZONTAL_AND_VERTICAL,
+        /**
+         * Detection of only vertical planes is enabled.
+         */
+        VERTICAL
+    }
 }
