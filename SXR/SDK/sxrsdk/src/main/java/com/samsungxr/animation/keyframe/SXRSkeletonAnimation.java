@@ -70,7 +70,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
      */
     public SXRSkeletonAnimation(String name, SXRNode target, float duration)
     {
-    	super(target, duration);
+        super(target, duration);
         mName = name;
     }
 
@@ -201,7 +201,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     {
         mTarget = target;
         if ((mSkeleton != null) &&
-            target.getComponent(SXRSkeleton.getComponentType()) == null)
+                target.getComponent(SXRSkeleton.getComponentType()) == null)
         {
             target.attachComponent(mSkeleton);
         }
@@ -230,8 +230,8 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     {
         SXRSkeleton skel = getSkeleton();
         SXRPose pose = skel.getPose();
-        computePose(timeInSec,pose);
         Log.i("printskelAnimSrc","SkAnim "+timeInSec+" "+this.getNameAll());
+        computePose(timeInSec,pose);
         skel.poseToBones();
         skel.updateBonePose();
         skel.updateSkinPose();
@@ -261,7 +261,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
             }
         }
 
-     return pose;
+        return pose;
     }
     @Override
     public void prettyPrint(StringBuffer sb, int indent) {

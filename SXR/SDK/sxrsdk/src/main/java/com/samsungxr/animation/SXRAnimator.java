@@ -53,7 +53,6 @@ public class SXRAnimator extends SXRBehavior
     protected int mRepeatCount = 1;
     protected boolean mReverse = false;
 
-
     /**
      * Make an instance of the SXRAnimator component.
      * Auto-start is not enabled - a call to start() is
@@ -316,7 +315,7 @@ public class SXRAnimator extends SXRBehavior
         }
     }
 
-     /**
+    /**
      * Starts all of the animations in this animator.
      * @see SXRAnimator#reset()
      * @see SXRAnimationEngine#start(SXRAnimation)
@@ -349,10 +348,6 @@ public class SXRAnimator extends SXRBehavior
         mIsRunning = true;
         for (int i = 0; i < mAnimations.size(); ++i)
         {
-            if(mReverse)
-            {
-                SXRAnimation anim = mAnimations.get(i);
-            }
             SXRAnimation anim = mAnimations.get(i);
             anim.reset();
             if (i == 0)

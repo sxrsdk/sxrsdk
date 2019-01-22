@@ -126,14 +126,14 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     {
         return mAnimations.size();
     }
-public void setBoneMap(String bone)
-{
-    boneMap = bone;
-}
-public void setBlend(boolean blend)
-{
-    mBlend = blend;
-}
+    public void setBoneMap(String bone)
+    {
+        boneMap = bone;
+    }
+    public void setBlend(boolean blend)
+    {
+        mBlend = blend;
+    }
 
     protected SXROnFinish mOnFinish = new SXROnFinish()
     {
@@ -200,44 +200,69 @@ public void setBlend(boolean blend)
             switch (numEvents)
             {
                 case 2:
-                mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
-                                                                        IAvatarEvents.class,
-                                                                        "onAnimationFinished",
-                                                                        SXRAvatar.this,
-                                                                        animator,
-                                                                        animation);
-                mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
-                                                                        IAvatarEvents.class,
-                                                                        "onAnimationStarted",
-                                                                        SXRAvatar.this,
-                                                                        animator);
+                    mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
+                            IAvatarEvents.class,
+                            "onAnimationFinished",
+                            SXRAvatar.this,
+                            animator,
+                            animation);
+                    mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
+                            IAvatarEvents.class,
+                            "onAnimationStarted",
+                            SXRAvatar.this,
+                            animator);
 
-                break;
+                    break;
 
                 case 1:
-                mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
-                                                                        IAvatarEvents.class,
-                                                                        "onAnimationStarted",
-                                                                        SXRAvatar.this,
-                                                                        animator);
-                if (mRepeatMode == SXRRepeatMode.REPEATED)
-                {
-                    repeatCount++;
+                    mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
+                            IAvatarEvents.class,
+                            "onAnimationStarted",
+                            SXRAvatar.this,
+                            animator);
+                    if (mRepeatMode == SXRRepeatMode.REPEATED)
+                    {
+                        repeatCount++;
 
-                    if(repeatCount < mRepeatCount || mRepeatCount < 0){
-                     startAll(mRepeatMode);
+                        if(repeatCount < mRepeatCount || mRepeatCount < 0){
+                            startAll(mRepeatMode);
+                        }
+
                     }
 
-                }
+                    //PINGPONG
+
                     if (mRepeatMode == SXRRepeatMode.PINGPONG)
                     {
-                        repeatCount = repeatCount+0.5f ;
-                        if(repeatCount < mRepeatCount || mRepeatCount<0) {
+
+                        if(repeatCount==0)
+                        {
+                            // SXRSkeletonAnimation skelOne = (SXRSkeletonAnimation)mAnimations.get(1).getAnimation(0);
+                            SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation)mAnimations.get(1).getAnimation(0);
+                            SXRPose poseOne = ((SXRSkeletonAnimation) mAnimations.get(1).getAnimation(0)).getSkeleton().getPose();
+                            SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(getModel(), 0.1f, poseOne, poseOne, skelTwo.getSkeleton());
+                            SXRPoseMapper retargeterP = new SXRPoseMapper(getSkeleton(), skelTwo.getSkeleton(), 1);
+                            retargeterP.setBoneMap(boneMap);
+                            SXRAnimator tempPO = new SXRAnimator(contx);
+                            tempPO.addAnimation(blendAnim);
+                            tempPO.addAnimation(retargeterP);
+
+                            mAnimQueue.add(tempPO);
+                            animator = mAnimQueue.get(0);
+                            animator.start(mOnFinish);
+
+                        }
+
+
+
+
+                        else if(repeatCount==0.5f)
+                        {
+                            // if(repeatCount < mRepeatCount || mRepeatCount<0) {
                             reverse = !reverse;
                             Collections.reverse(mAnimations);
-                            //reverse names
-                            String temp = "";
-                            temp = mAnimations.get(0).getAnimation(0).getNameAll();
+
+                            String temp = mAnimations.get(0).getAnimation(0).getNameAll();
                             mAnimations.get(0).setNameAll(mAnimations.get(mAnimations.size()-1).getAnimation(0).getNameAll());
                             mAnimations.get(mAnimations.size()-1).setNameAll(temp);
                             for (SXRAnimator anim : mAnimations)
@@ -245,15 +270,20 @@ public void setBlend(boolean blend)
                                 anim.setRepeatCount(1); //default
                                 anim.setRepeatMode(mRepeatMode);
                                 //anim.setRepeatMode(repeatMode);
-                               // anim.setReverse(reverse);
-                               // anim.setReverse(reverse);
+                                // anim.setReverse(reverse);
+                                // anim.setReverse(reverse);
                                 anim.setReverse(reverse);
                             }
                             Log.i("printpingong","how many");
                             startAll(mRepeatMode);
+                            //  }
                         }
 
+                        repeatCount = repeatCount+0.5f ;
+
+
                     }
+
                 default: break;
             }
         }
@@ -300,7 +330,7 @@ public void setBlend(boolean blend)
         if (boneObject == null)
         {
             throw new IllegalArgumentException(attachBone +
-                                                   " does not have a bone object in the avatar skeleton");
+                    " does not have a bone object in the avatar skeleton");
         }
         boneObject.addChildObject(modelRoot);
         ctx.getAssetLoader().loadModel(volume, modelRoot, settings, false, mLoadModelHandler);
@@ -309,7 +339,7 @@ public void setBlend(boolean blend)
     public void clearAvatar()
     {
         SXRNode previousAvatar = (mAvatarRoot.getChildrenCount() > 0) ?
-            mAvatarRoot.getChildByIndex(0) : null;
+                mAvatarRoot.getChildByIndex(0) : null;
 
         if (previousAvatar != null)
         {
@@ -355,22 +385,22 @@ public void setBlend(boolean blend)
                 }
                 addAnimation(animator);
                 ctx.getEventManager().sendEvent(this,
-                                                IAvatarEvents.class,
-                                                "onAnimationLoaded",
-                                                SXRAvatar.this,
-                                                animator,
-                                                filePath,
-                                                null);
+                        IAvatarEvents.class,
+                        "onAnimationLoaded",
+                        SXRAvatar.this,
+                        animator,
+                        filePath,
+                        null);
             }
             catch (IOException ex)
             {
                 ctx.getEventManager().sendEvent(this,
-                                                IAvatarEvents.class,
-                                                "onAnimationLoaded",
-                                                SXRAvatar.this,
-                                                null,
-                                                filePath,
-                                                ex.getMessage());
+                        IAvatarEvents.class,
+                        "onAnimationLoaded",
+                        SXRAvatar.this,
+                        null,
+                        filePath,
+                        ex.getMessage());
             }
         }
         else
@@ -489,14 +519,14 @@ public void setBlend(boolean blend)
     public void startAll(int repeatMode)
     {
         mRepeatMode = repeatMode;
-      //  mRepeatCount = repeatCount;
+        //  mRepeatCount = repeatCount;
         for (SXRAnimator anim : mAnimations)
         {
             Log.i("middleDUration","first "+anim.getAnimation(0).getDuration());
             if(count == 0&&mBlend) {
                 anim.setNameAll("first");
             }
-          start(anim);
+            start(anim);
         }
     }
 
@@ -514,10 +544,10 @@ public void setBlend(boolean blend)
         mIsRunning = true;
         animator.start(mOnFinish);
         mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
-                                                                IAvatarEvents.class,
-                                                                "onAnimationStarted",
-                                                                SXRAvatar.this,
-                                                                animator);
+                IAvatarEvents.class,
+                "onAnimationStarted",
+                SXRAvatar.this,
+                animator);
     }
 
     /**
@@ -611,12 +641,12 @@ public void setBlend(boolean blend)
                 Log.e(TAG, "Avatar skeleton not found in asset file " + filePath);
             }
             context.getEventManager().sendEvent(SXRAvatar.this,
-                                                IAvatarEvents.class,
-                                                eventName,
-                                                SXRAvatar.this,
-                                                modelRoot,
-                                                filePath,
-                                                errors);
+                    IAvatarEvents.class,
+                    eventName,
+                    SXRAvatar.this,
+                    modelRoot,
+                    filePath,
+                    errors);
         }
 
         public void onModelLoaded(SXRContext context, SXRNode model, String filePath) { }
@@ -646,12 +676,12 @@ public void setBlend(boolean blend)
                     errors = "No animations found in " + filePath;
                 }
                 context.getEventManager().sendEvent(SXRAvatar.this,
-                                                    IAvatarEvents.class,
-                                                    "onAnimationLoaded",
-                                                    SXRAvatar.this,
-                                                    null,
-                                                    filePath,
-                                                    errors);
+                        IAvatarEvents.class,
+                        "onAnimationLoaded",
+                        SXRAvatar.this,
+                        null,
+                        filePath,
+                        errors);
                 return;
             }
 
@@ -665,12 +695,12 @@ public void setBlend(boolean blend)
             }
             addAnimation(animator);
             context.getEventManager().sendEvent(SXRAvatar.this,
-                                                IAvatarEvents.class,
-                                                "onAnimationLoaded",
-                                                SXRAvatar.this,
-                                                animator,
-                                                filePath,
-                                                errors);
+                    IAvatarEvents.class,
+                    "onAnimationLoaded",
+                    SXRAvatar.this,
+                    animator,
+                    filePath,
+                    errors);
         }
 
         public void onModelLoaded(SXRContext context, SXRNode model, String filePath)

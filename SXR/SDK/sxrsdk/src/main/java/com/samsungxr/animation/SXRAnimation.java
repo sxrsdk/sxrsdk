@@ -109,7 +109,6 @@ public abstract class SXRAnimation {
     protected float mAnimationOffset = 0;
     protected float mAnimationSpeed = 1;
     protected SXROnFinish mOnFinish = null;
-    private int mAnimationId = 0;
     private float mBlendDuration = 0;
     private boolean mBlend = false;
     static int mAnimationsSize = 0;
@@ -176,7 +175,7 @@ public abstract class SXRAnimation {
      *             {@code supported} types
      */
     protected static Class<?> checkTarget(SXRHybridObject target,
-            Class<?>... supported) {
+                                          Class<?>... supported) {
         for (Class<?> type : supported) {
             if (type.isInstance(target)) {
                 return type;
@@ -361,19 +360,10 @@ public abstract class SXRAnimation {
      */
     public void setReverse(boolean reverse)
     {
-       mReverse = reverse;
+        mReverse = reverse;
     }
 
-    /**
-     * Sets the id for the animation.
-     * @param id number for the animation.
-     */
-    public void setID(int id)
-    {
-        mAnimationId = id;
-    }
-
-    /**
+   /**
      * Sets the blend and blend duration.
      * @param blend true to apply blend; false not to blend.
      * @param blendDuration duration of blend.
@@ -384,46 +374,6 @@ public abstract class SXRAnimation {
         mBlendDuration = blendDuration;
     }
 
-    /**
-     * Get the id for the animation.
-     * @return {@code mAnimationId} id for the animation;
-     */
-    public int getID()
-    {
-        return mAnimationId;
-    }
-
-    public void setPlayAnimation(int size)
-    {
-        mAnimationsSize = size;
-        playAnimation = new boolean[mAnimationsSize];
-        playAnimation[0]=true;
-        playAnimation[1]=true;
-
-        for(int i=2; i<mAnimationsSize; i++)
-        {
-            playAnimation[i] = false;
-        }
-    }
-
-    public void getAnimation(SXRAnimation anim)
-    {
-        if(anim.getClass().getName().contains("SXRPoseInterpolator"))
-        {
-            minterpolationAnimation = (SXRPoseInterpolator)this;
-
-        }
-        if(anim.getClass().getName().contains("SXRSkeletonAnimation"))
-        {
-            mSkeletonAnimation = (SXRSkeletonAnimation)this;
-
-        }
-        if(anim.getClass().getName().contains("SXRPoseMapper"))
-        {
-            mPoseMapperAnimation = (SXRPoseMapper)this;
-
-        }
-    }
 
     public void setNameAll(String name) {
         mName = name;
@@ -471,8 +421,6 @@ public abstract class SXRAnimation {
 
     public void onStart()
     {
-        Log.i("ANIMATIONONSTART", "%s started", getClass().getSimpleName()+ this.getNameAll());
-
         if((this.getNameAll()=="last")||(this.getNameAll()=="middle"))
         {
             mElapsedTime += 1;
@@ -512,18 +460,21 @@ public abstract class SXRAnimation {
      */
 
     final boolean onDrawFrame(float frameTime) {
-
-/*
-        if(this.getClass().getName().contains("SXRSkeletonAnimation")&&this.getNameAll()=="first")
+        /*
+        if(mElapsedTime>this.getDuration()-1&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
         {
-            Log.i("mCurrentTime"," elapsedR "+mElapsedTime+" reverse "+mReverse);//+" mDuration "+mDuration);
-            mCurrentTime++;
+            if (mOnFinish != null) {
+                mOnFinish.finished(this);
+            }
+
+            isFinished = true;
+            return true;
         }*/
+
+
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
-        if(this.getNameAll()=="first"&&mReverse==true) {
-            Log.i("mCurrentTime", " elapsedR " + mElapsedTime + " reverse " + mReverse + " mDuration " + mDuration + " frameTime " + frameTime + " mAnimSpe " + mAnimationSpeed+ " class "+this.getClass().getSimpleName());
-        }
+
 
         mElapsedTime += (frameTime*mAnimationSpeed);
 
@@ -535,11 +486,6 @@ public abstract class SXRAnimation {
 
         final boolean cycled = previousCycleCount != currentCycleCount;
         boolean stillRunning = cycled != true;
-      //  if((this.getNameAll()=="last"))
-      //  {
-            Log.i("printisStill"," running "+stillRunning);
-      //      // stillRunning = false;
-      //  }
 
         if (cycled && mRepeatMode != SXRRepeatMode.ONCE) {
             // End of a cycle - see if we should continue
@@ -558,18 +504,17 @@ public abstract class SXRAnimation {
                 }
             }
         }
-        if(mElapsedTime>this.getDuration()-1&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
+
+        if(mElapsedTime>this.getDuration()-1f&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
         {
-         stillRunning = false;
-         mDuration = this.getDuration()-1;
+            stillRunning = false;
+            mDuration = this.getDuration()-1;
         }
+
+
         if (stillRunning) {
             final boolean countDown = mRepeatMode == SXRRepeatMode.PINGPONG
                     && (mReverse == true || (mIterations & 1) == 1);
-           // if(mReverse==true)
-          //  {
-            //    Log.i("animatinREversr","name "+this.getNameAll()+" type "+this.getClass().getSimpleName()+" elapse "+mElapsedTime);
-          //  }
 
             float elapsedRatio = //
                     countDown != true ? interpolate(cycleTime, mDuration)
@@ -587,18 +532,16 @@ public abstract class SXRAnimation {
             }
 
             animate(mTarget, endRatio);
-
+            if(mElapsedTime>this.getDuration()-1&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
+            {
+                mDuration = this.getDuration()+1;
+            }
             onFinish();
             if (mOnFinish != null) {
                 mOnFinish.finished(this);
             }
 
             isFinished = true;
-            if(mElapsedTime>this.getDuration()-1&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
-            {
-                mDuration = this.getDuration()+1;
-            }
-
         }
 
         return stillRunning;
