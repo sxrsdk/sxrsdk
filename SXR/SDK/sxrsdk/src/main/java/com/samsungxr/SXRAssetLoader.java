@@ -256,6 +256,9 @@ public final class SXRAssetLoader implements IEventReceiver
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(),
                     IAssetEvents.class,
                     "onModelLoaded", mContext, model, modelFile);
+            mContext.getEventManager().sendEvent(mContext,
+                                                 IAssetEvents.class,
+                                                 "onModelLoaded", mContext, model, modelFile);
             if (mNumTextures == 0)
             {
                 generateLoadEvent();
@@ -280,6 +283,8 @@ public final class SXRAssetLoader implements IEventReceiver
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetImportEvents.class,
                                                  "onTextureLoaded", texture, texFile);
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetEvents.class,
+                                                 "onTextureLoaded", mContext, texture, texFile);
+            mContext.getEventManager().sendEvent(mContext, IAssetEvents.class,
                                                  "onTextureLoaded", mContext, texture, texFile);
             synchronized (mNumTextures)
             {
@@ -321,6 +326,9 @@ public final class SXRAssetLoader implements IEventReceiver
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(),
                                                  IAssetEvents.class,
                                                  "onModelError", mContext, error, modelFile);
+            mContext.getEventManager().sendEvent(mContext,
+                                                 IAssetEvents.class,
+                                                 "onModelError", mContext, error, modelFile);
             mErrors += error + "\n";
             mModel = null;
             mNumTextures = 0;
@@ -343,6 +351,8 @@ public final class SXRAssetLoader implements IEventReceiver
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetImportEvents.class,
                                                  "onTextureError", texture, texFile, error);
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetEvents.class,
+                                                 "onTextureError", mContext, error, texFile);
+            mContext.getEventManager().sendEvent(mContext, IAssetEvents.class,
                                                  "onTextureError", mContext, error, texFile);
             if (texture.getImage() == null)
             {
@@ -389,6 +399,8 @@ public final class SXRAssetLoader implements IEventReceiver
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetImportEvents.class,
                                                  "onAssetLoaded", model, mFileName, errors);
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetEvents.class,
+                                                 "onAssetLoaded", mContext, model, mFileName, errors);
+            mContext.getEventManager().sendEvent(mContext, IAssetEvents.class,
                                                  "onAssetLoaded", mContext, model, mFileName, errors);
         }
 
