@@ -53,10 +53,11 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     protected int mRepeatCount = 1;
     private float repeatCount = 0;
     private boolean reverse = false;
-    private String boneMap = "";
+    private String mBoneMap = "";
     private SXRContext contx;
     private int count =0;
     private boolean mBlend = false;
+    private boolean tempolator = false;
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -128,7 +129,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     }
     public void setBoneMap(String bone)
     {
-        boneMap = bone;
+        mBoneMap = bone;
     }
     public void setBlend(boolean blend)
     {
@@ -171,7 +172,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                                     SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation)mAnimQueue.get(1).getAnimation(0);
                                     SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(getModel(), 1, skelOne, skelTwo, skelOne.getSkeleton(), reverse);
                                     SXRPoseMapper retargeterP = new SXRPoseMapper(getSkeleton(), skelOne.getSkeleton(), 1);
-                                    retargeterP.setBoneMap(boneMap);
+                                    retargeterP.setBoneMap(mBoneMap);
                                     SXRAnimator temp = new SXRAnimator(contx);
                                     temp.addAnimation(blendAnim);
                                     temp.addAnimation(retargeterP);
@@ -235,14 +236,13 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                     if (mRepeatMode == SXRRepeatMode.PINGPONG)
                     {
 
-                        if(repeatCount==0)
+                        if(!tempolator)
                         {
-                            // SXRSkeletonAnimation skelOne = (SXRSkeletonAnimation)mAnimations.get(1).getAnimation(0);
-                            SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation)mAnimations.get(1).getAnimation(0);
-                            SXRPose poseOne = ((SXRSkeletonAnimation) mAnimations.get(1).getAnimation(0)).getSkeleton().getPose();
+                            SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation)mAnimations.get(mAnimations.size()-1).getAnimation(0);
+                            SXRPose poseOne = ((SXRSkeletonAnimation) mAnimations.get(mAnimations.size()-1).getAnimation(0)).getSkeleton().getPose();
                             SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(getModel(), 0.1f, poseOne, poseOne, skelTwo.getSkeleton());
                             SXRPoseMapper retargeterP = new SXRPoseMapper(getSkeleton(), skelTwo.getSkeleton(), 1);
-                            retargeterP.setBoneMap(boneMap);
+                            retargeterP.setBoneMap(mBoneMap);
                             SXRAnimator tempPO = new SXRAnimator(contx);
                             tempPO.addAnimation(blendAnim);
                             tempPO.addAnimation(retargeterP);
@@ -250,15 +250,14 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                             mAnimQueue.add(tempPO);
                             animator = mAnimQueue.get(0);
                             animator.start(mOnFinish);
+                            tempolator = true;
 
                         }
-
-
-
-
-                        else if(repeatCount==0.5f)
+                        else
                         {
-                            // if(repeatCount < mRepeatCount || mRepeatCount<0) {
+                            Log.i("repeatcound","log"+repeatCount);
+                            repeatCount = repeatCount+0.5f ;
+                             if(repeatCount < mRepeatCount || mRepeatCount<0) {
                             reverse = !reverse;
                             Collections.reverse(mAnimations);
 
@@ -269,17 +268,15 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                             {
                                 anim.setRepeatCount(1); //default
                                 anim.setRepeatMode(mRepeatMode);
-                                //anim.setRepeatMode(repeatMode);
-                                // anim.setReverse(reverse);
-                                // anim.setReverse(reverse);
                                 anim.setReverse(reverse);
                             }
-                            Log.i("printpingong","how many");
                             startAll(mRepeatMode);
-                            //  }
+                              }
+                              tempolator =false;
+
+
                         }
 
-                        repeatCount = repeatCount+0.5f ;
 
 
                     }
@@ -354,7 +351,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public void loadAnimation(SXRAndroidResource animResource, String boneMap)
     {
-        boneMap = boneMap;
+        mBoneMap = boneMap;
         String filePath = animResource.getResourcePath();
         SXRContext ctx = mAvatarRoot.getSXRContext();
         SXRResourceVolume volume = new SXRResourceVolume(ctx, animResource);
