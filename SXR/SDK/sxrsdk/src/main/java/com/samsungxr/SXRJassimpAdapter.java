@@ -274,22 +274,17 @@ class  SXRJassimpAdapter
             sceneObject.attachComponent(morph);
             int blendShapeNum = 0;
             float[] weights = new float[nAnimationMeshes];
-
+            float[] normalArray = null;
             for (AiAnimMesh animMesh : aiMesh.getAnimationMeshes())
             {
                 SXRVertexBuffer animBuff = new SXRVertexBuffer(mesh.getVertexBuffer(),
                                                                "float3 a_position float3 a_normal float3 a_tangent float3 a_bitangent");
-                float[] vertexArray = null;
-                float[] normalArray = null;
-                float[] tangentArray = null;
-                float[] bitangentArray = null;
-
                 weights[blendShapeNum] = animMesh.getDefaultWeight();
                 //copy target positions to anim vertex buffer
                 FloatBuffer animPositionBuffer = animMesh.getPositionBuffer();
                 if (animPositionBuffer != null)
                 {
-                    vertexArray = new float[animPositionBuffer.capacity()];
+                    float[] vertexArray = new float[animPositionBuffer.capacity()];
                     animPositionBuffer.get(vertexArray, 0, animPositionBuffer.capacity());
                     animBuff.setFloatArray("a_position", vertexArray);
                 }
@@ -307,11 +302,11 @@ class  SXRJassimpAdapter
                 FloatBuffer animTangentBuffer = animMesh.getTangentBuffer();
                 if (animTangentBuffer != null)
                 {
-                    tangentArray = new float[animTangentBuffer.capacity()];
+                    float[] tangentArray = new float[animTangentBuffer.capacity()];
                     animTangentBuffer.get(tangentArray, 0, animTangentBuffer.capacity());
                     animBuff.setFloatArray("a_tangent", tangentArray);
                     //calculate bitangents
-                    bitangentArray = new float[tangentArray.length];
+                    float[] bitangentArray = new float[tangentArray.length];
                     for (int i = 0; i < tangentArray.length; i += 3)
                     {
                         Vector3f tangent =
@@ -577,26 +572,15 @@ class  SXRJassimpAdapter
             root.forAllDescendants(nodeProcessor);
             mSkeleton = new SXRSkeleton(root, nodeProcessor.getBoneNames());
             SXRPose pose = new SXRPose(mSkeleton);
-            Matrix4f poseMtx = new Matrix4f();
             SXRNode skelRoot = mSkeleton.getOwnerObject().getParent();
             Matrix4f rootMtx = skelRoot.getTransform().getModelMatrix4f();
 
             rootMtx.invert();
             for (int boneId = 0; boneId < mSkeleton.getNumBones(); ++boneId)
             {
-                String boneName = mSkeleton.getBoneName(boneId);
-                AiBone aiBone = mBoneMap.get(boneName);
                 SXRNode bone = mSkeleton.getBone(boneId);
 
-                if (aiBone != null)
-                {
-                    float[] matrixdata = aiBone.getOffsetMatrix(sWrapperProvider);
-
-                    poseMtx.set(matrixdata);
-                    poseMtx.invert();
-                    pose.setWorldMatrix(boneId, poseMtx);
-                }
-                else if (bone != null)
+                if (bone != null)
                 {
                     SXRTransform t = bone.getTransform();
                     Matrix4f mtx = t.getModelMatrix4f();
@@ -604,7 +588,6 @@ class  SXRJassimpAdapter
                     mtx.invert();
                     rootMtx.mul(mtx, mtx);
                     pose.setWorldMatrix(boneId, mtx);
-                    Log.w("BONE", "no bind pose matrix for bone %s", boneName);
                 }
             }
             mSkeleton.setPose(pose);

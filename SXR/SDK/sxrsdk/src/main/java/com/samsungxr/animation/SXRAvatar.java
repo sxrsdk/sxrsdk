@@ -365,9 +365,12 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         }
         else
         {
-            EnumSet<SXRImportSettings> settings = SXRImportSettings.getRecommendedSettingsWith(
-                    EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_TEXTURING, SXRImportSettings.NO_MORPH));
-
+            EnumSet<SXRImportSettings> settings = EnumSet.of(SXRImportSettings.TRIANGULATE,
+                                                             SXRImportSettings.FLIP_UV,
+                                                             SXRImportSettings.LIMIT_BONE_WEIGHT,
+                                                             SXRImportSettings.CALCULATE_TANGENTS,
+                                                             SXRImportSettings.NO_ANIMATION,
+                                                             SXRImportSettings.SORTBY_PRIMITIVE_TYPE);
             SXRNode animRoot = new SXRNode(ctx);
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
         }
