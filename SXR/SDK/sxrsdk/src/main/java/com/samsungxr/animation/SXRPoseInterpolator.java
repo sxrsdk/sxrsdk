@@ -335,7 +335,7 @@ public class SXRPoseInterpolator extends SXRAnimation
      */
     public void getFinalPose(float timer)
     {
-        Log.i("printskelAnimSrc","Interp "+timer+this.getNameAll());
+        Log.i("printskelAnimSrc","Interp "+timer+this.getAnimationOrder());
 
         SXRPose firstPose = null;
         SXRPose secondPose = null;

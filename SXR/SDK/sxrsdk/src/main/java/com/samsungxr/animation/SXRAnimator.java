@@ -105,10 +105,15 @@ public class SXRAnimator extends SXRBehavior
      */
     public void setName(String name) { mName = name; }
 
-    public void setNameAll(String name) {
+    /**
+     * Set order name for all the animations
+     * @param order order name to be set
+     */
+    public void setAnimationOrder(SXRAvatar.mAnimationsOrder order) {
+
         for (SXRAnimation anim : mAnimations)
         {
-            anim.setNameAll(name);
+            anim.setAnimationOrder(order);
         }
     }
 
@@ -198,13 +203,16 @@ public class SXRAnimator extends SXRBehavior
         return -1;
     }
 
-    public void reverseAnimations(List<SXRAnimation> mAnimations) {
-        Collections.reverse(mAnimations); //reverse the animations order
-
-        for (int k = 0; k < (mAnimations.size()); k = k + 2) {
-            SXRAnimation temp = mAnimations.get(k);
-            mAnimations.set(k, mAnimations.get(k + 1)); // change the pose mapper and skeleton animation order
-            mAnimations.set(k + 1, temp);
+    /**
+     * Sets the blend and blend duration.
+     * @param blend true to apply blend; false no blend.
+     * @param blendDuration duration of blend.
+     */
+    public void setBlend(boolean blend, float blendDuration)
+    {
+        for (SXRAnimation anim : mAnimations)
+        {
+            anim.setBlend(blend,blendDuration);
         }
     }
 

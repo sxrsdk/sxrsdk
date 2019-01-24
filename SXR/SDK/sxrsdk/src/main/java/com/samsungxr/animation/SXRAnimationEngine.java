@@ -116,12 +116,6 @@ public class SXRAnimationEngine {
             animation.reset();
             mAnimations.add(animation);
         }
-        if(mAnimations.get(0).mReverse==false)
-        {
-           // mAnimations.remove(0);
-          //  Log.i("printaimSixe","fcsdf"+mAnimations.size());
-           // count++;
-        }
         animation.onStart();
         return animation;
     }
@@ -154,11 +148,8 @@ public class SXRAnimationEngine {
 
         @Override
         public void onDrawFrame(float frameTime) {
-
             for (SXRAnimation animation : mAnimations) {
-                boolean value = animation.onDrawFrame(frameTime);
-                Log.i("printaimSixe","fcsdf "+animation.getNameAll()+" class "+animation.getClass().getSimpleName()+" isFinished "+value);
-                if (value == false) {
+                if (animation.onDrawFrame(frameTime) == false) {
                     mAnimations.remove(animation);
                 }
             }

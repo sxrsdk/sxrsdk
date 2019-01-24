@@ -111,12 +111,7 @@ public abstract class SXRAnimation {
     protected SXROnFinish mOnFinish = null;
     private float mBlendDuration = 0;
     private boolean mBlend = false;
-    static int mAnimationsSize = 0;
-    private SXRPoseInterpolator minterpolationAnimation = null;
-    private SXRSkeletonAnimation mSkeletonAnimation = null;
-    private SXRPoseMapper mPoseMapperAnimation = null;
-    private float mCurrentTime =0;
-    private String mName = "";
+    private SXRAvatar.mAnimationsOrder mOrderName;
 
 
     /**
@@ -132,7 +127,6 @@ public abstract class SXRAnimation {
 
     protected boolean isFinished = false;
     protected boolean mReverse = false;
-    static boolean[] playAnimation;
 
     /**
      * Base constructor.
@@ -365,7 +359,7 @@ public abstract class SXRAnimation {
 
    /**
      * Sets the blend and blend duration.
-     * @param blend true to apply blend; false not to blend.
+     * @param blend true to apply blend; false no blend.
      * @param blendDuration duration of blend.
      */
     public void setBlend(boolean blend, float blendDuration)
@@ -374,15 +368,19 @@ public abstract class SXRAnimation {
         mBlendDuration = blendDuration;
     }
 
-
-    public void setNameAll(String name) {
-        mName = name;
-
+    /**
+     * Set order name for all this animation
+     * @param name order name to be set
+     */
+    public void setAnimationOrder(SXRAvatar.mAnimationsOrder name) {
+        mOrderName = name;
     }
 
-    public String getNameAll() {
-        return mName;
-
+    /**
+     * Gets order name for this animation
+     */
+    public SXRAvatar.mAnimationsOrder getAnimationOrder() {
+        return mOrderName;
     }
 
     /**
@@ -421,9 +419,10 @@ public abstract class SXRAnimation {
 
     public void onStart()
     {
-        if((this.getNameAll()=="last")||(this.getNameAll()=="middle"))
+        if((mBlend && this.mOrderName==SXRAvatar.mAnimationsOrder.LAST)
+                ||(this.mOrderName==SXRAvatar.mAnimationsOrder.MIDDLE))
         {
-            mElapsedTime += 1;
+            mElapsedTime += mBlendDuration; //start animations after blend duration
         }
         if (sDebug)
         {
@@ -460,29 +459,13 @@ public abstract class SXRAnimation {
      */
 
     final boolean onDrawFrame(float frameTime) {
-        /*
-        if(mElapsedTime>this.getDuration()-1&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
-        {
-            if (mOnFinish != null) {
-                mOnFinish.finished(this);
-            }
-
-            isFinished = true;
-            return true;
-        }*/
-
 
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
-
-
         mElapsedTime += (frameTime*mAnimationSpeed);
-
 
         final int currentCycleCount = (int) (mElapsedTime / mDuration);
         final float cycleTime = (mElapsedTime % mDuration) + mAnimationOffset;
-
-
 
         final boolean cycled = previousCycleCount != currentCycleCount;
         boolean stillRunning = cycled != true;
@@ -505,12 +488,13 @@ public abstract class SXRAnimation {
             }
         }
 
-        if(mElapsedTime>this.getDuration()-1f&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
-        {
-            stillRunning = false;
-            mDuration = this.getDuration()-1;
-        }
+        if(mBlend && mElapsedTime>this.getDuration()-mBlendDuration &&
+                ((this.mOrderName==SXRAvatar.mAnimationsOrder.FIRST)
+                        ||(this.mOrderName==SXRAvatar.mAnimationsOrder.MIDDLE))) {
 
+            stillRunning = false; //stop animations ahead for the blending to occur
+            mDuration = this.getDuration()-mBlendDuration;
+        }
 
         if (stillRunning) {
             final boolean countDown = mRepeatMode == SXRRepeatMode.PINGPONG
@@ -523,18 +507,22 @@ public abstract class SXRAnimation {
             animate(mTarget, elapsedRatio);
         } else {
             float endRatio = mRepeatMode == SXRRepeatMode.ONCE ? 1f : 0f;
+            float endAnimationTime = 0;
 
-            endRatio = interpolate(mDuration, mDuration);
-            if(mReverse)
+            if(mBlend && mReverse && (!(this.mOrderName==SXRAvatar.mAnimationsOrder.LAST)))
             {
-                endRatio = 0;
-
+                endAnimationTime = mReverse ? (mBlendDuration/this.getDuration()) : 0;
             }
 
+            endRatio = mReverse ? endAnimationTime : interpolate(mDuration, mDuration);
+
             animate(mTarget, endRatio);
-            if(mElapsedTime>this.getDuration()-1&&((this.getNameAll()=="first")||(this.getNameAll()=="middle")))
-            {
-                mDuration = this.getDuration()+1;
+
+            if(mBlend && mElapsedTime>this.getDuration()-mBlendDuration &&
+                    ((this.mOrderName==SXRAvatar.mAnimationsOrder.FIRST)
+                            ||(this.mOrderName==SXRAvatar.mAnimationsOrder.MIDDLE))) {
+
+               mDuration = this.getDuration()+mBlendDuration; //set the duration back to original
             }
             onFinish();
             if (mOnFinish != null) {

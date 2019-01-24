@@ -51,13 +51,18 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     protected final List<SXRAnimator> mAnimQueue = new ArrayList<SXRAnimator>();
     protected int mRepeatMode = SXRRepeatMode.ONCE;
     protected int mRepeatCount = 1;
-    private float repeatCount = 0;
+    private float repeatCounter = 0;
     private boolean reverse = false;
+    private float mBlendFactor = 0;
     private String mBoneMap = "";
-    private SXRContext contx;
-    private int count =0;
+    private SXRContext mContext;
     private boolean mBlend = false;
-    private boolean tempolator = false;
+    private boolean dummy = false;
+    private boolean order = false;
+    public enum mAnimationsOrder
+    {
+        FIRST, MIDDLE, LAST;
+    }
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -69,7 +74,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     public SXRAvatar(SXRContext ctx, String name)
     {
         super(ctx);
-        contx = ctx;
+        mContext = ctx;
         mReceiver = new SXREventReceiver(this);
         mType = getComponentType();
         mAvatarRoot = new SXRNode(ctx);
@@ -127,13 +132,16 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     {
         return mAnimations.size();
     }
-    public void setBoneMap(String bone)
-    {
-        mBoneMap = bone;
-    }
-    public void setBlend(boolean blend)
+
+    /**
+     * Sets the blend and blend duration.
+     * @param blend true to apply blend; false no blend.
+     * @param blendFactor duration of blend.
+     */
+    public void setBlend(boolean blend, float blendFactor)
     {
         mBlend = blend;
+        mBlendFactor = blendFactor;
     }
 
     protected SXROnFinish mOnFinish = new SXROnFinish()
@@ -150,35 +158,18 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
 
                     if (animator.findAnimation(animation) >= 0)
                     {
-                        if(mBlend==true)
+                        if(mBlend)
                         {
-                            if(count == 0)
+                            if(!order)
                             {
-                                for(int i=1; i<mAnimQueue.size()-1; i++)
-                                {
-                                    Log.i("middleDUration","animation "+mAnimQueue.get(i).getAnimation(0).getDuration());
-                                    mAnimQueue.get(i).setNameAll("middle");
-                                }
-                                Log.i("middleDUration","last "+mAnimQueue.get(mAnimQueue.size()-1).getAnimation(0).getDuration());
-
-                                mAnimQueue.get(mAnimQueue.size()-1).setNameAll("last");
-                                count++;
+                              orderAnimations(); //order the animations for Avatar
                             }
-                            if(mAnimQueue.get(0).getAnimation(0).getClass().getName().contains("SXRSkeletonAnimation"))
-                            {
-                                if(mAnimQueue.size()>=2)
-                                {
-                                    SXRSkeletonAnimation skelOne = (SXRSkeletonAnimation)mAnimQueue.get(0).getAnimation(0);
-                                    SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation)mAnimQueue.get(1).getAnimation(0);
-                                    SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(getModel(), 1, skelOne, skelTwo, skelOne.getSkeleton(), reverse);
-                                    SXRPoseMapper retargeterP = new SXRPoseMapper(getSkeleton(), skelOne.getSkeleton(), 1);
-                                    retargeterP.setBoneMap(mBoneMap);
-                                    SXRAnimator temp = new SXRAnimator(contx);
-                                    temp.addAnimation(blendAnim);
-                                    temp.addAnimation(retargeterP);
-                                    mAnimQueue.add(1,temp);
-                                }
 
+                            //For skeleton animation add interpolator
+                            if(mAnimQueue.get(0).getAnimation(0).getClass().getName().contains("SXRSkeletonAnimation")
+                                    && mAnimQueue.size()>=2)
+                            {
+                                addAnimationInterpolator(0,1, mBlendFactor, 1);
                             }
                         }
 
@@ -188,6 +179,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                         if (mAnimQueue.size() > 0)
                         {
                             animator = mAnimQueue.get(0);
+                            animator.setBlend(mBlend, mBlendFactor);
                             animator.start(mOnFinish);
                             numEvents = 2;
                         }
@@ -221,12 +213,15 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                             "onAnimationStarted",
                             SXRAvatar.this,
                             animator);
+
+                    //REPEATED
+
                     if (mRepeatMode == SXRRepeatMode.REPEATED)
                     {
-                        repeatCount++;
+                        repeatCounter++;
 
-                        if(repeatCount < mRepeatCount || mRepeatCount < 0){
-                            startAll(mRepeatMode);
+                        if(repeatCounter < mRepeatCount || mRepeatCount < 0){
+                            startAll(mRepeatMode, mRepeatCount);
                         }
 
                     }
@@ -235,49 +230,37 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
 
                     if (mRepeatMode == SXRRepeatMode.PINGPONG)
                     {
-
-                        if(!tempolator)
+                        if(!dummy)
                         {
-                            SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation)mAnimations.get(mAnimations.size()-1).getAnimation(0);
-                            SXRPose poseOne = ((SXRSkeletonAnimation) mAnimations.get(mAnimations.size()-1).getAnimation(0)).getSkeleton().getPose();
-                            SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(getModel(), 0.1f, poseOne, poseOne, skelTwo.getSkeleton());
-                            SXRPoseMapper retargeterP = new SXRPoseMapper(getSkeleton(), skelTwo.getSkeleton(), 1);
-                            retargeterP.setBoneMap(mBoneMap);
-                            SXRAnimator tempPO = new SXRAnimator(contx);
-                            tempPO.addAnimation(blendAnim);
-                            tempPO.addAnimation(retargeterP);
-
-                            mAnimQueue.add(tempPO);
-                            animator = mAnimQueue.get(0);
-                            animator.start(mOnFinish);
-                            tempolator = true;
-
+                            //play dummy animation till stillRunning set to false for previous animation in mAnimQueue
+                            playDummyAnimation(animator);
                         }
                         else
                         {
-                            Log.i("repeatcound","log"+repeatCount);
-                            repeatCount = repeatCount+0.5f ;
-                             if(repeatCount < mRepeatCount || mRepeatCount<0) {
-                            reverse = !reverse;
-                            Collections.reverse(mAnimations);
+                            repeatCounter = repeatCounter + 0.5f ; //increment in halves for PINGPONG
 
-                            String temp = mAnimations.get(0).getAnimation(0).getNameAll();
-                            mAnimations.get(0).setNameAll(mAnimations.get(mAnimations.size()-1).getAnimation(0).getNameAll());
-                            mAnimations.get(mAnimations.size()-1).setNameAll(temp);
+                            if(repeatCounter < mRepeatCount || mRepeatCount<0) {
+
+                                reverse = !reverse;
+                                Collections.reverse(mAnimations); //reverse the order of animations in the list
+
+                                mAnimationsOrder temp = mAnimations.get(0).getAnimation(0).getAnimationOrder();
+                                mAnimations.get(0).setAnimationOrder(mAnimations.get(mAnimations.size()-1).getAnimation(0).getAnimationOrder());
+                                mAnimations.get(mAnimations.size()-1).setAnimationOrder(temp);  //alter the order names FIRST to LAST & LAST to FIRST
+
                             for (SXRAnimator anim : mAnimations)
                             {
-                                anim.setRepeatCount(1); //default
+                                anim.setRepeatCount(1); //set default value 1 for SXRAnimation
                                 anim.setRepeatMode(mRepeatMode);
                                 anim.setReverse(reverse);
                             }
-                            startAll(mRepeatMode);
-                              }
-                              tempolator =false;
 
+                            startAll(mRepeatMode, mRepeatCount);
+
+                            }
+                            dummy =false;
 
                         }
-
-
 
                     }
 
@@ -286,6 +269,79 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         }
     };
 
+    /**
+     * Assign order name to the animations in avatar: FIRST, MIDDLE, and LAST
+     */
+    private void orderAnimations()
+    {
+        for(int i=1; i<mAnimQueue.size()-1; i++)
+        {
+
+            mAnimQueue.get(i).setAnimationOrder(mAnimationsOrder.MIDDLE);
+        }
+
+        mAnimQueue.get(mAnimQueue.size()-1).setAnimationOrder(mAnimationsOrder.LAST);
+        order = true;
+    }
+
+    /**
+     * Add blend of skeleton animation to the avatar
+     * @param previous index of previous animation in mAnimQueue
+     * @param next     index of next animation in mAnimQueue
+     * @param duration duration of blend animation
+     * @param position add blend animation to the given position in mAnimQueue
+     */
+    public void addAnimationInterpolator(int previous, int next, float duration, int position)
+    {
+        SXRSkeletonAnimation skelOne = (SXRSkeletonAnimation)mAnimQueue.get(previous).getAnimation(0);
+        SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation)mAnimQueue.get(next).getAnimation(0);
+
+        SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(getModel(), duration, skelOne, skelTwo, skelOne.getSkeleton(), reverse);
+        SXRPoseMapper retargeterP = new SXRPoseMapper(getSkeleton(), skelOne.getSkeleton(), duration);
+        retargeterP.setBoneMap(mBoneMap);
+
+        SXRAnimator temp = new SXRAnimator(mContext);
+        temp.addAnimation(blendAnim);
+        temp.addAnimation(retargeterP);
+
+        mAnimQueue.add(position,temp);
+    }
+
+    /**
+     * Add interpolation of pose animation to the avatar
+     * @param previous index of previous animation in mAnimQueue
+     * @param next     index of next animation in mAnimQueue
+     * @param duration duration of blend animation
+     * @param position add blend animation to the given position in mAnimQueue
+     */
+    public void addPoseInterpolator(int previous, int next, float duration, int position)
+    {
+        SXRSkeletonAnimation skelAnim = (SXRSkeletonAnimation)mAnimations.get(previous).getAnimation(0);
+        SXRPose poseOne = ((SXRSkeletonAnimation) mAnimations.get(previous).getAnimation(0)).getSkeleton().getPose();
+        SXRPose poseTwo = ((SXRSkeletonAnimation) mAnimations.get(next).getAnimation(0)).getSkeleton().getPose();
+
+        SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(getModel(), duration, poseOne, poseTwo, skelAnim.getSkeleton());
+        SXRPoseMapper retargeterP = new SXRPoseMapper(getSkeleton(), skelAnim.getSkeleton(), duration);
+
+        retargeterP.setBoneMap(mBoneMap);
+        SXRAnimator temp = new SXRAnimator(mContext);
+        temp.addAnimation(blendAnim);
+        temp.addAnimation(retargeterP);
+
+        mAnimQueue.add(position,temp);
+    }
+
+    /**
+     * Play dummy animation to delay start playing next animation
+     * @param animator finished animation
+     */
+    private void playDummyAnimation(SXRAnimator animator)
+    {
+        addPoseInterpolator(mAnimations.size()-1, mAnimations.size()-1, 0.1f, 0);
+        animator = mAnimQueue.get(0);
+        animator.start(mOnFinish);
+        dummy = true;
+    }
     /**
      * Load the avatar base model
      * @param avatarResource    resource with avatar model
@@ -512,16 +568,19 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * to play one at a time in succession.
      * @param repeatMode SXRRepeatMode.REPEATED to repeatedly play,
      *                   SXRRepeatMode.ONCE to play only once
+     *                   SXRRepeatMode.PINGPONG to play start to finish, finish to start;
+     * @param repeatCount play the avatar animations as given count
+     *                    -1 play repeatedly
      */
-    public void startAll(int repeatMode)
+    public void startAll(int repeatMode, int repeatCount)
     {
         mRepeatMode = repeatMode;
-        //  mRepeatCount = repeatCount;
+        mRepeatCount = repeatCount;
         for (SXRAnimator anim : mAnimations)
         {
-            Log.i("middleDUration","first "+anim.getAnimation(0).getDuration());
-            if(count == 0&&mBlend) {
-                anim.setNameAll("first");
+            if(mBlend && !order) {
+                anim.setBlend(mBlend, mBlendFactor);
+                anim.setAnimationOrder(mAnimationsOrder.FIRST);
             }
             start(anim);
         }

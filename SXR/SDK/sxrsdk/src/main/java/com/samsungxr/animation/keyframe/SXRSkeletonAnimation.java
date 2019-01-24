@@ -52,7 +52,6 @@ import java.util.List;
 public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     protected String mName;
     private SXRSkeleton mSkeleton = null;
-    private String skelOrder = "";
 
 
     /**
@@ -206,15 +205,6 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
             target.attachComponent(mSkeleton);
         }
     }
-    public void setOrder(String order)
-    {
-        skelOrder = order;
-    }
-
-    public String getOrder()
-    {
-        return skelOrder;
-    }
 
     @Override
     protected void animate(SXRHybridObject target, float ratio)
@@ -230,7 +220,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     {
         SXRSkeleton skel = getSkeleton();
         SXRPose pose = skel.getPose();
-        Log.i("printskelAnimSrc","SkAnim "+timeInSec+" "+this.getNameAll());
+        Log.i("printskelAnimSrc","SkAnim "+timeInSec+" "+this.getAnimationOrder());
         computePose(timeInSec,pose);
         skel.poseToBones();
         skel.updateBonePose();
