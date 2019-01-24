@@ -562,10 +562,34 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         }
     }
 
-    public void centerModel(SXRNode model)
+    public float centerModel(SXRNode model, Vector3f pos)
     {
-        SXRNode.BoundingVolume bv = model.getBoundingVolume();
-        model.getTransform().setPosition(-bv.center.x, -bv.center.y, -bv.center.z - 1.5f * bv.radius);
+        if (mSkeleton != null)
+        {
+            float[] bv = mSkeleton.getBound();
+            float cx = (bv[3] + bv[0]) / 2.0f;
+            float cy = (bv[4] + bv[1]) / 2.0f;
+            float cz = (bv[5] + bv[2]) / 2.0f;
+            float r = Math.max(bv[3] - bv[0], Math.max(bv[4] - bv[1], bv[5] - bv[2]));
+            float sf = 1 / r;
+            cx /= r;
+            cy /= r;
+            cz /= r;
+            pos.x -= cx;
+            pos.y -= cy;
+            pos.z -= cz;
+            return sf;
+        }
+        else
+        {
+            SXRNode.BoundingVolume bv = model.getBoundingVolume();
+            float sf = 1 / bv.radius;
+            bv = model.getBoundingVolume();
+            pos.x -= bv.center.x;
+            pos.y -= bv.center.y;
+            pos.z -= bv.center.z;
+            return sf;
+        }
     }
 
     protected String mergeSkeleton(SXRSkeleton skel, SXRNode modelRoot)

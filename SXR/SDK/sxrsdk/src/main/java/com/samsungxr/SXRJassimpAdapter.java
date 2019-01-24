@@ -572,22 +572,17 @@ class  SXRJassimpAdapter
             root.forAllDescendants(nodeProcessor);
             mSkeleton = new SXRSkeleton(root, nodeProcessor.getBoneNames());
             SXRPose pose = new SXRPose(mSkeleton);
-            SXRNode skelRoot = mSkeleton.getOwnerObject().getParent();
-            Matrix4f rootMtx = skelRoot.getTransform().getModelMatrix4f();
+            SXRNode bone = mSkeleton.getBone(0);
+            Matrix4f mtx = bone.getTransform().getModelMatrix4f();
 
-            rootMtx.invert();
-            for (int boneId = 0; boneId < mSkeleton.getNumBones(); ++boneId)
+            pose.setLocalMatrix(0, mtx);
+            for (int boneId = 1; boneId < mSkeleton.getNumBones(); ++boneId)
             {
-                SXRNode bone = mSkeleton.getBone(boneId);
-
+                bone = mSkeleton.getBone(boneId);
                 if (bone != null)
                 {
-                    SXRTransform t = bone.getTransform();
-                    Matrix4f mtx = t.getModelMatrix4f();
-
-                    mtx.invert();
-                    rootMtx.mul(mtx, mtx);
-                    pose.setWorldMatrix(boneId, mtx);
+                    mtx = bone.getTransform().getLocalModelMatrix4f();
+                    pose.setLocalMatrix(boneId, mtx);
                 }
             }
             mSkeleton.setPose(pose);
