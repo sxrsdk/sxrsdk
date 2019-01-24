@@ -573,8 +573,11 @@ class  SXRJassimpAdapter
             mSkeleton = new SXRSkeleton(root, nodeProcessor.getBoneNames());
             SXRPose pose = new SXRPose(mSkeleton);
             SXRNode bone = mSkeleton.getBone(0);
+            Matrix4f rootMtx = root.getTransform().getLocalModelMatrix4f();
             Matrix4f mtx = bone.getTransform().getModelMatrix4f();
 
+            rootMtx.invert(rootMtx);            // factor out root matrix
+            rootMtx.mul(mtx, mtx);              // it will be applied to meshes
             pose.setLocalMatrix(0, mtx);
             for (int boneId = 1; boneId < mSkeleton.getNumBones(); ++boneId)
             {
