@@ -1,4 +1,4 @@
-/* Copyright 2015 Samsung Electronics Co., LTD
+/* Copyright 2018 Samsung Electronics Co., LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -335,11 +335,9 @@ public class SXRPoseInterpolator extends SXRAnimation
      */
     public void getFinalPose(float timer)
     {
-        Log.i("printskelAnimSrc","Interp "+timer+this.getAnimationOrder());
-
         SXRPose firstPose = null;
         SXRPose secondPose = null;
-
+        Log.i("printskelAnimSrc","Interp "+timer+this.getAnimationOrder());
         if(!mReverse)
         {
             firstPose = skelAnimSrc.computePose(skelAnimSrc.getDuration()-mDuration+timer,skelAnimSrc.getSkeleton().getPose());
