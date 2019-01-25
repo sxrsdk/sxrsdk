@@ -503,17 +503,31 @@ public abstract class SXRAnimation {
                             : interpolate(mDuration - cycleTime, mDuration);
 
             animate(mTarget, elapsedRatio);
+
         } else {
+
             float endRatio = mRepeatMode == SXRRepeatMode.ONCE ? 1f : 0f;
 
-            float endRatioBlend; //endRatio when mBlend true
-            endRatioBlend = mReverse ? (mBlendDuration / this.getDuration()) : (mElapsedTime / this.getDuration());
-            if(endRatioBlend == mBlendDuration / this.getDuration() && this.mOrderName == SXRAnimationOrder.LAST )
+            float endRatioBlend; //endRatio in blend
+            float endRatioReverse; //endRatio in reverse
+
+            if(this.mOrderName == SXRAnimationOrder.FIRST || this.mOrderName == SXRAnimationOrder.MIDDLE)
             {
-                endRatioBlend = 0;
+                endRatioBlend = interpolate (mDuration - mBlendDuration, mDuration);
+                endRatioReverse = interpolate (mBlendDuration, mDuration); //set end ratio for first and middle animations
+
+            }
+            else
+            {
+                endRatioBlend = interpolate(mDuration, mDuration);
+                endRatioReverse = 0;
             }
 
-            endRatio = mBlend ? endRatioBlend : interpolate(mDuration, mDuration);
+            endRatio = mReverse ? endRatioReverse : interpolate(mDuration, mDuration);
+
+            endRatioBlend = mReverse ? endRatioReverse : endRatioBlend;
+
+            endRatio = mBlend ? endRatioBlend : endRatio;
 
             animate(mTarget, endRatio);
 

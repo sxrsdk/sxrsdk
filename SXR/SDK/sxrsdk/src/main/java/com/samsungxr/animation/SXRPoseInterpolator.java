@@ -337,7 +337,7 @@ public class SXRPoseInterpolator extends SXRAnimation
     {
         SXRPose firstPose = null;
         SXRPose secondPose = null;
-        Log.i("printskelAnimSrc","Interp "+timer+this.getAnimationOrder());
+
         if(!mReverse)
         {
             firstPose = skelAnimSrc.computePose(skelAnimSrc.getDuration()-mDuration+timer,skelAnimSrc.getSkeleton().getPose());

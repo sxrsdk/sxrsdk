@@ -163,7 +163,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                             if(!order)
                             { orderAnimations(); } //assign order names to animations for Avatar
 
-                            if(animator.getAnimationOrder()!=null) {
+                            if(animator.getAnimationOrder()!=SXRAnimationOrder.INTER) {
                                 addBlendAnimation(0, mBlendFactor, 1);
                             }
                         }
@@ -275,7 +275,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         SXRAnimator temp = new SXRAnimator(mContext);
         temp.addAnimation(blendAnim);
         temp.addAnimation(retargeterP);
-
+        temp.setAnimationOrder(SXRAnimationOrder.INTER);
         mAnimQueue.add(position,temp);
     }
 
