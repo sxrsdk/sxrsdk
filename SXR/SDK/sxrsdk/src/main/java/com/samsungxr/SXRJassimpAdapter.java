@@ -66,7 +66,7 @@ class  SXRJassimpAdapter
     private SXRContext mContext;
     private String mFileName;
     private SXRSkeleton mSkeleton;
-
+    private SXRNode mMeshParent = null;
     private static final int MAX_TEX_COORDS = JassimpConfig.MAX_NUMBER_TEXCOORDS;
     private static final int MAX_VERTEX_COLORS = JassimpConfig.MAX_NUMBER_COLORSETS;
 
@@ -573,11 +573,20 @@ class  SXRJassimpAdapter
             mSkeleton = new SXRSkeleton(root, nodeProcessor.getBoneNames());
             SXRPose pose = new SXRPose(mSkeleton);
             SXRNode bone = mSkeleton.getBone(0);
-            Matrix4f rootMtx = root.getTransform().getLocalModelMatrix4f();
+            Matrix4f rootMtx;
+
+            if (mMeshParent != null)
+            {
+                rootMtx = mMeshParent.getTransform().getModelMatrix4f();
+            }
+            else
+            {
+                rootMtx = root.getTransform().getModelMatrix4f();
+            }
             Matrix4f mtx = bone.getTransform().getModelMatrix4f();
 
-            rootMtx.invert(rootMtx);            // factor out root matrix
-            rootMtx.mul(mtx, mtx);              // it will be applied to meshes
+            rootMtx.invert(rootMtx);            // factor out matrix already applied
+            rootMtx.mul(mtx, mtx);              // to the meshes
             pose.setLocalMatrix(0, mtx);
             for (int boneId = 1; boneId < mSkeleton.getNumBones(); ++boneId)
             {
@@ -964,6 +973,10 @@ class  SXRJassimpAdapter
             }
             mNodeMap.put(sceneObject, meshId);
             findBones(mScene.getMeshes().get(meshId));
+            if (mMeshParent == null)
+            {
+                mMeshParent = sceneObject.getParent();
+            }
         }
         else if (node.getNumMeshes() > 1)
         {
@@ -975,6 +988,10 @@ class  SXRJassimpAdapter
                 sceneObject.addChildObject(child);
                 mNodeMap.put(child, meshId);
                 findBones(mScene.getMeshes().get(meshId));
+                if (mMeshParent == null)
+                {
+                    mMeshParent = sceneObject.getParent();
+                }
             }
         }
         else if ("".equals(nodeName) &&

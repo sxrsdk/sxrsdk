@@ -19,6 +19,7 @@ import com.samsungxr.utility.Log;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -562,19 +563,39 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         }
     }
 
+    /**
+     * Center the avatar, taking into account the skeleton transformations.
+     * @param model root of hierarchy containing avatar
+     * @param pos   on input: camera position, on output: avatar position
+     * @return scale factor
+     */
     public float centerModel(SXRNode model, Vector3f pos)
     {
         if (mSkeleton != null)
         {
+            SXRNode bone = mSkeleton.getBone(0);
+            Matrix4f mtx1 = bone.getTransform().getModelMatrix4f();
+            Matrix4f mtx2 = new Matrix4f();
             float[] bv = mSkeleton.getBound();
-            float cx = (bv[3] + bv[0]) / 2.0f;
-            float cy = (bv[4] + bv[1]) / 2.0f;
-            float cz = (bv[5] + bv[2]) / 2.0f;
-            float r = Math.max(bv[3] - bv[0], Math.max(bv[4] - bv[1], bv[5] - bv[2]));
-            float sf = 1 / r;
-            cx /= r;
-            cy /= r;
-            cz /= r;
+            Vector4f cmin = new Vector4f(bv[0], bv[1], bv[2], 1);
+            Vector4f cmax = new Vector4f(bv[3], bv[4], bv[5], 1);
+
+            mSkeleton.getPose().getLocalMatrix(0, mtx2);
+            mtx2.invert(mtx2);
+            mtx1.mul(mtx2, mtx2);
+            cmin.mul(mtx2);
+            cmax.mul(mtx2);
+
+            float cx = (cmax.x + cmin.x) / 2;
+            float cy = (cmax.y + cmin.y) / 2;
+            float cz = (cmax.z + cmin.z) / 2;
+            float r = Math.max(cmax.x - cmin.x,
+                               Math.max(cmax.y - cmin.y,
+                                        cmax.z - cmin.z));
+            float sf = 0.5f / r;
+            cx *= sf;
+            cy *= sf;
+            cz *= sf;
             pos.x -= cx;
             pos.y -= cy;
             pos.z -= cz;
