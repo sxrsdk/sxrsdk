@@ -1060,10 +1060,6 @@ class  SXRJassimpAdapter
         SXRLight light =  lightlist.get(name);
         if (light != null)
         {
-            Quaternionf q = new Quaternionf();
-            q.rotationX((float) -Math.PI / 2.0f);
-            q.normalize();
-            light.setDefaultOrientation(q);
             sceneObject.attachLight(light);
             lightlist.remove(light);
         }
@@ -1436,6 +1432,11 @@ class  SXRJassimpAdapter
                 continue;
             }
             lightlist.put(name, l);
+            Quaternionf q = new Quaternionf();
+            float[] d = light.getDirection(sWrapperProvider);
+            q.rotationTo(new Vector3f(0, 0, -1), new Vector3f(d[0], d[1], d[2]));
+            q.normalize();
+            l.setDefaultOrientation(q);
             com.samsungxr.jassimp.AiColor ambientCol = light.getColorAmbient(sWrapperProvider);
             com.samsungxr.jassimp.AiColor diffuseCol = light.getColorDiffuse(sWrapperProvider);
             com.samsungxr.jassimp.AiColor specular = light.getColorSpecular(sWrapperProvider);
