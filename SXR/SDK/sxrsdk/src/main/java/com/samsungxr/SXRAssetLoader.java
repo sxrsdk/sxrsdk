@@ -19,6 +19,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.os.Environment;
 
 import com.samsungxr.SXRAndroidResource.TextureCallback;
 import com.samsungxr.animation.SXRAnimator;
@@ -53,6 +54,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static android.os.Environment.getExternalStorageDirectory;
 
 /**
  * {@link SXRAssetLoader} provides methods for importing 3D models and textures.
@@ -210,7 +213,6 @@ public final class SXRAssetLoader implements IEventReceiver
                 if (image != null)
                 {
                     Log.d(TAG, "ASSET: loadEmbeddedTexture found %s", resource.getResourcePath());
-                    bmapTex.setImage(image);
                     request.loaded(image, resource);
                     return bmapTex;
                 }
@@ -231,7 +233,6 @@ public final class SXRAssetLoader implements IEventReceiver
                 image = bmaptex;
                 Log.d(TAG, "ASSET: loadEmbeddedTexture saved %s", resource.getResourcePath());
                 texCache.put(request.TextureFile, image);
-                bmapTex.setImage(image);
             }
             request.loaded(image, resource);
             return bmapTex;
