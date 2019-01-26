@@ -44,16 +44,36 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
 {
     public interface TrackerEvents extends IEvents
     {
+        /**
+         * Called when body tracker starts processing images.
+         * @param tracker  {@link SXRBodyTracker} that is doing the tracking.
+         */
         public void onTrackStart(SXRBodyTracker tracker);
+
+        /**
+         * Called when body tracker stops processing images.
+         * @param tracker  {@link SXRBodyTracker} that is doing the tracking.
+         */
         public void onTrackEnd(SXRBodyTracker tracker);
+
+        /**
+         * Called each time the body tracker  processes an image.
+         * @param tracker  {@link SXRBodyTracker} that is doing the tracking.
+         */
         public void onTrackUpdate(SXRBodyTracker tracker);
+
+        /**
+         * Called when body tracker skeleton is defined.
+         * @param tracker  {@link SXRBodyTracker} that is doing the tracking.
+         */
+        public void onInitSkeleton(SXRBodyTracker tracker);
     };
 
     protected SXRPose mDestPose;
     protected final int mWidth = 1280;
     protected final int mHeight = 960;
+    protected final int fps = 30;
     protected SXRSkeleton mTargetSkeleton;
-    protected Camera mCamera = null;
     protected SXRCameraNode mCameraOwner;
     protected byte[] mImageData = null;
     private boolean mTryOpenCamera = true;
@@ -133,14 +153,32 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
     {
         if (mTryOpenCamera)
         {
-            mCamera = openCamera();
-            mCameraOwner = new SXRCameraNode(getSXRContext(), mWidth / 2, mHeight / 2, mCamera);
+            try {
+                mCameraOwner = new SXRCameraNode(getSXRContext(), mWidth / 2, mHeight / 2);
+                mCameraOwner.setPreviewCallback(new Camera.PreviewCallback()
+                {
+                    public void onPreviewFrame(byte[] data, Camera camera)
+                    {
+                        setImageData(data);
+                    }
+                });
+
+                Camera.Parameters params = mCameraOwner.getCameraParameters();
+                if(params != null) {
+                    params.setPreviewSize(mWidth, mHeight);
+                    params.setPreviewFpsRange(fps * 1000, fps * 1000);
+                    params.setPreviewFormat(ImageFormat.NV21);
+                }
+                mCameraOwner.setCameraParameters(params);
+
+            } catch (SXRCameraNode.SXRCameraAccessException e) {
+                throw new IllegalAccessException("Cannot access body tracker");
+            }
             mCameraOwner.getTransform().setPositionZ(-200.0f);
             mTryOpenCamera = false;
         }
-        if (isEnabled() && (mCamera != null))
+        if (isEnabled())
         {
-            mCamera.startPreview();
             if (!onStart())
             {
                 throw new IllegalAccessException("Cannot access body tracker");
@@ -151,9 +189,8 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
     public void onEnable()
     {
         super.onEnable();
-        if (!isRunning() && (mCamera != null))
+        if (!isRunning())
         {
-            mCamera.startPreview();
             onStart();
         }
     }
@@ -161,9 +198,9 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
     public void onDisable()
     {
         super.onDisable();
-        if (isRunning() && (mCamera != null))
+        if (isRunning() && (mCameraOwner != null))
         {
-            mCamera.stopPreview();
+            mCameraOwner.close();
             onStop();
         }
     }
@@ -175,11 +212,9 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
      */
     public void stop()
     {
-        if (mCamera != null)
+        if (mCameraOwner != null)
         {
-            mCamera.startPreview();
-            mCamera.release();
-            mCamera = null;
+            mCameraOwner.close();
             mTryOpenCamera = false;
             onStop();
         }
@@ -296,40 +331,6 @@ public abstract class SXRBodyTracker extends SXRComponent implements IEventRecei
         getSXRContext().getEventManager().sendEvent(this, TrackerEvents.class, "onTrackEnd", this);
     }
 
-    /**
-     * Opens the camera and starts capturing images.
-     * <p>
-     * The default implementation uses <i>ImageFormat.NV21</i>
-     * and tracks at 30fps. It captures 1280 x 960 images.
-     * The width and height is obtained from mWidth and mHeight
-     * so constructors may set this to change the image size.
-     * @return
-     * @throws CameraAccessException
-     * @throws IOException
-     */
-    protected Camera openCamera() throws CameraAccessException, IOException
-    {
-        Camera camera = Camera.open();
-
-        if (camera == null)
-        {
-            throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);
-        }
-        Camera.Parameters params = camera.getParameters();
-
-        params.setPreviewSize(mWidth, mHeight);
-        params.setPreviewFormat(ImageFormat.NV21);
-        params.setPreviewFpsRange(30000, 30000);
-        camera.setParameters(params);
-        camera.setPreviewCallback(new Camera.PreviewCallback()
-          {
-              public void onPreviewFrame(byte[] data, Camera camera)
-              {
-                  setImageData(data);
-              }
-          });
-        return camera;
-    }
 }
 
 class NativeBodyTracker

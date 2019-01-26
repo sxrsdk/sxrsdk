@@ -15,13 +15,10 @@
 package com.samsungxr.animation.keyframe;
 import com.samsungxr.SXRAndroidResource;
 import com.samsungxr.SXRContext;
-import com.samsungxr.animation.SXRAnimation;
 import com.samsungxr.animation.SXRPose;
 import com.samsungxr.animation.SXRSkeleton;
-import com.samsungxr.animation.keyframe.SXRAnimationBehavior;
-import com.samsungxr.animation.keyframe.SXRAnimationChannel;
-import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
-import com.samsungxr.utility.Log;
+
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -30,10 +27,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
 
-
+/**
+ * Imports animation in the BioVision Hierarchical format
+ * {@link "https://research.cs.wisc.edu/graphics/Courses/cs-838-1999/Jeff/BVH.html"}
+ * BVH files are text and contain a skeleton description and animation data.
+ * Only positions and rotations are animated in the BVH format.
+ * <p>
+ * The BVH importer imports the skeleton separately from the animation.
+ * You can provide a compatible skeleton when importing the motion data
+ * and the importer will output an animation for that skeleton.
+ * <p>
+ * The default output format of the BVH importer is a
+ * {@link SXRSkeletonAnimation} with a {@link SXRAnimationChannel} for
+ * each animated bone. The {@link BVHKey} interface is provided to
+ * allow applications to provide their own position and rotation key
+ * generation code. The keys must still be consecutive floats but
+ * callers can do things like preserve the Euler angles in the
+ * source animation format or scale the position keys.
+ * @see SXRSkeleton
+ * @see SXRSkeletonAnimation
+ */
 public class BVHImporter
 {
     private String mFileName;
@@ -41,21 +55,219 @@ public class BVHImporter
     private final ArrayList<String> mBoneNames = new ArrayList();
     private final ArrayList<Vector3f> mBonePositions = new ArrayList();
     private final ArrayList<Integer> mBoneParents = new ArrayList();
-    private final ArrayList<Integer> mBoneChannels = new ArrayList();
+    private final ArrayList<String> mBoneChannels = new ArrayList();
+    private final BVHKey  mKeyMaker;
     private BufferedReader mReader;
-    private boolean channelOrder=false;
-    private int xPosOffset;
-    private int yPosOffset;
-    private int zPosOffset;
-    private int xRotOffset;
-    private int yRotOffset;
-    private int zRotOffset;
+    private SXRSkeleton mSkeleton;
 
+    /**
+     * Interface for making position and rotation keys from BVH data.
+     * Position keys are assumed to be three floats on input and output.
+     * Rotation keys are the Euler angles from the original BVH motion data
+     * on input. The output rotation key is a fixed number of floats.
+     */
+    public interface BVHKey
+    {
+        /**
+         * Called at the start of motion data import.
+         * @param skeleton  {@link SXRSkeleton} the motion data is applied to.
+         */
+        public void start(SXRSkeleton skeleton);
+
+        /**
+         * Called to generate the next rotation key.
+         * On entry the array contains the input rotation angles.
+         * On return the array will have the output rotation key.
+         * @param boneIndex index of bone this key applies to.
+         * @param order     order of input rotation angles, "xyz", "yxz", "zxy", ...
+         * @param rot       array containing the input key (3 floats).
+         * @param offset    offset of input key in input array.
+         */
+        public void makeRotationKey(int boneIndex, String order, float[] rot, int offset);
+
+        /**
+         * Called to generate the next position key.
+         * On entry the array contains the position values.
+         * On return the array will have the output position key.
+         * @param boneIndex index of bone this key applies to.
+         * @param order     order of input position components, "xyz", "yxz", "zxy", ...
+         * @param pos       array containing the input key (3 floats).
+         * @param offset    offset of input key in input array.
+         */
+        public void makePositionKey(int boneIndex, String order, float[] pos, int offset);
+
+        /**
+         * Gets the size of a rotation key.
+         * Each key is a set of consecutive floats.
+         * Position keys are always 3 floats,
+         * Rotation keys may Euler angles, quaternions,
+         * angle axis, etc.
+         * @return number of floats in a rotation key.
+         */
+        public int getRotKeySize();
+
+        /**
+         * Create an animation channel from the position and rotation keys.
+         * <p>
+         * {@link SXRAnimationChannel} assumes its input keys are quaternions.
+         * Interfaces which change this format will need to subclass
+         * SXRAnimationChannel to provide a way to animate rotation
+         * using the custom key format.
+         * @param boneName  name of bone tanimated by the channel.
+         * @param posKeys   array of position keys.
+         * @param rotKeys   array of rotation keys.
+         * @return {@link SXRAnimationChannel} containing animation for this bone.
+         */
+        public SXRAnimationChannel makeAnimationChannel(String boneName, float[] posKeys, float[] rotKeys);
+    };
+
+    /**
+     * Default implementation of BVH key generation.
+     * Position keys are shuffled based on the order specified.
+     * Rotations keys are converted from Euler rotations (3 floats)
+     * in a specified order to quaternions (4 floats).
+     */
+    private final BVHKey mDefaultKeyMaker = new BVHKey()
+    {
+        private Quaternionf mTempQuat1;
+        private Quaternionf mTempQuat2;
+        private SXRPose mBindPose;
+        private float[] mPosKey;
+
+        @Override
+        public void start(SXRSkeleton skel)
+        {
+            mBindPose = skel.getPose();
+            mTempQuat1 = new Quaternionf();
+            mTempQuat2 = new Quaternionf();
+            mPosKey = new float[3];
+        }
+
+        @Override
+        public void makeRotationKey(int boneIndex, String order, float[] key, int offset)
+        {
+            makeQuat(mTempQuat1, order, key, offset);
+            mBindPose.getLocalRotation(boneIndex, mTempQuat2);
+            mTempQuat1.mul(mTempQuat2);
+            key[offset++] = mTempQuat1.x;
+            key[offset++] = mTempQuat1.y;
+            key[offset++] = mTempQuat1.z;
+            key[offset] = mTempQuat1.w;
+        }
+
+        @Override
+        public void makePositionKey(int boneIndex, String order, float[] pos, int offset)
+        {
+            mPosKey[0] = pos[offset];
+            mPosKey[1] = pos[offset + 1];
+            mPosKey[2] = pos[offset + 2];
+            for (int i = 0; i < 3; i++)
+            {
+                char c = order.charAt(i);
+                float v = mPosKey[i];
+                if (c == 'x')
+                {
+                    pos[offset] = v;
+                }
+                else if (c == 'y')
+                {
+                    pos[offset + 1] = v;
+                }
+                else
+                {
+                    pos[offset + 2] = v;
+                }
+            }
+        }
+
+        @Override
+        public int getRotKeySize()
+        {
+            return 4;
+        }
+
+        private void makeQuat(Quaternionf q, String order, float[] angles, int offset)
+        {
+            float deg2rad =  (float) Math.PI / 180;
+            char c = order.charAt(0);
+            float v = angles[offset];
+
+            if (c == 'x')
+            {
+                q.rotationX(v * deg2rad);
+            }
+            else if (c == 'y')
+            {
+                q.rotationY(v * deg2rad);
+            }
+            else
+            {
+                q.rotationZ(v * deg2rad);
+            }
+            for (int i = 1; i < 3; i++)
+            {
+                v = angles[offset + i];
+                c = order.charAt(i);
+                if (c == 'x')
+                {
+                    q.rotateX(v * deg2rad);
+                }
+                else if (c == 'y')
+                {
+                    q.rotateY(v * deg2rad);
+                }
+                else
+                {
+                    q.rotateZ(v * deg2rad);
+                }
+            }
+            q.normalize();
+        }
+
+        public SXRAnimationChannel makeAnimationChannel(String boneName, float[] posKeys, float[] rotKeys)
+        {
+            return new SXRAnimationChannel(boneName, posKeys, rotKeys, null, SXRAnimationBehavior.DEFAULT, SXRAnimationBehavior.DEFAULT);
+        }
+    };
+
+    /**
+     * Create a BVHImporter instance with custom key generation.
+     * @param ctx       {@link SXRContext} to use for animation.
+     * @param keyMaker  {@link BVHKey} interface to make position and rotation keys.
+     */
+    public BVHImporter(SXRContext ctx, BVHKey keyMaker)
+    {
+        mContext = ctx;
+        if (keyMaker != null)
+        {
+            mKeyMaker = keyMaker;
+        }
+        else
+        {
+            mKeyMaker = mDefaultKeyMaker;
+        }
+    }
+
+    /**
+     * Create a BVHImporter instance with default key generation.
+     * Positions are 3 floats and rotations are quaternions (4 floats).
+     * @param ctx       {@link SXRContext} to use for animation.
+     */
     public BVHImporter(SXRContext ctx)
     {
         mContext = ctx;
+        mKeyMaker = mDefaultKeyMaker;
     }
 
+    /**
+     * Import the animation from the input resource and apply it to the specified skeleton.
+     * <p>
+     * This skeleton should contain the same bones names as those used in the BVH file.
+     * @param res       {@link SXRAndroidResource} containing the BVH animation data.
+     * @param skel      {@link SXRSkeleton} to animate.
+     * @return {@link SXRSkeletonAnimation} containing the animation data read from the BVH file.
+     * @throws IOException if BVH file cannot be opened.
+     */
     public SXRSkeletonAnimation importAnimation(SXRAndroidResource res, SXRSkeleton skel) throws IOException
     {
         InputStream stream = res.getStream();
@@ -86,6 +298,13 @@ public class BVHImporter
         return readPose(skel);
     }
 
+    /**
+     * Import the animation from the input resource.
+     * The skeleton is constructed from the BVH file.
+     * @param res       {@link SXRAndroidResource} containing the BVH animation data.
+     * @return {@link SXRSkeletonAnimation} containing the animation data read from the BVH file.
+     * @throws IOException if BVH file cannot be opened.
+     */
     public SXRSkeleton importSkeleton(SXRAndroidResource res) throws IOException
     {
         InputStream stream = res.getStream();
@@ -96,6 +315,7 @@ public class BVHImporter
         }
         InputStreamReader inputreader = new InputStreamReader(stream);
         mReader = new BufferedReader(inputreader);
+        mFileName = res.getResourceFilename();
         readSkeleton();
         return createSkeleton();
     }
@@ -128,11 +348,11 @@ public class BVHImporter
 
         mBoneParents.add(boneIndex, parentIndex);
         mBoneNames.add(boneIndex, bonename);
-        mBoneChannels.add(boneIndex, 0);
+        mBoneChannels.add(boneIndex, "");
         while ((line = mReader.readLine().trim()) != null)
         {
-            String[]    words = line.split("[ \t]");
-            String      opcode;
+            String[] words = line.split("[ \t]");
+            String opcode;
 
             if (line == "")
                 continue;
@@ -159,45 +379,35 @@ public class BVHImporter
             }
             else if (opcode.equals("CHANNELS"))
             {
-                if(!channelOrder)
+                String channelOrder = "";
+                for (int j = 2; j < words.length; j++)
                 {
-                       for(int j=2; j<5; j++)
-                       {
-                           if(words[j].equals("Xposition"))  //positions order
-                           {
-                               xPosOffset = j-2;
-                           }
-                           else if (words[j].equals("Yposition"))
-                           {
-                               yPosOffset = j-2;
-                           }
-                           else if (words[j].equals("Zposition"))
-                           {
-                               zPosOffset = j-2;
-                           }
-
-                       }
-
-                        for(int j=5; j<words.length; j++)
-                        {
-                            if(words[j].equals("Xrotation"))  //rotations order
-                            {
-                                xRotOffset = j-5;
-                            }
-                            else if (words[j].equals("Yrotation"))
-                            {
-                                yRotOffset = j-5;
-                            }
-                            else if (words[j].equals("Zrotation"))
-                            {
-                                zRotOffset = j-5;
-                            }
-
-                        }
-
-                    channelOrder = true;
+                    if (words[j].equals("Xposition"))  //positions order
+                    {
+                        channelOrder += 'x';
+                    }
+                    else if (words[j].equals("Yposition"))
+                    {
+                        channelOrder += 'y';
+                    }
+                    else if (words[j].equals("Zposition"))
+                    {
+                        channelOrder += 'z';
+                    }
+                    else if (words[j].equals("Xrotation"))  //rotations order
+                    {
+                        channelOrder += 'x';
+                    }
+                    else if (words[j].equals("Yrotation"))
+                    {
+                        channelOrder += 'y';
+                    }
+                    else if (words[j].equals("Zrotation"))
+                    {
+                        channelOrder += 'z';
+                    }
                 }
-               mBoneChannels.add(boneIndex, Integer.parseInt(words[1]));
+                mBoneChannels.add(boneIndex, channelOrder);
             }
             else if (opcode.equals("MOTION") || opcode.equals("}"))
             {
@@ -224,7 +434,7 @@ public class BVHImporter
             bindpose.setLocalPosition(i, p.x, p.y, p.z);
             skel.setBoneName(i, mBoneNames.get(i));
         }
-        skel.setBindPose(bindpose);
+        skel.setPose(bindpose);
         return skel;
     }
 
@@ -232,10 +442,9 @@ public class BVHImporter
     {
         float       x, y, z;
         String      line;
-        String      bvhbonename = "";
-        Quaternionf q = new Quaternionf();
         SXRPose     pose = new SXRPose(skel);
 
+        mSkeleton = skel;
         /*
          * Parse and accumulate all the motion keyframes.
          * Keyframes for the root bone position are in rootPosKeys;
@@ -256,103 +465,59 @@ public class BVHImporter
                 continue;
             }
             int boneIndex = 0;
-            int bvhboneIndex = 0;
             int i = 0;
+            float[] p = new float[3];
+            float[] r = new float[mDefaultKeyMaker.getRotKeySize()];
             while (i + 5 < words.length)
             {
-                String boneNameSkel = skel.getBoneName(boneIndex);
-                bvhbonename = mBoneNames.get(bvhboneIndex);
-                if (bvhbonename.equals(boneNameSkel))
+                String order = mBoneChannels.get(boneIndex);
+                if (order.isEmpty())
                 {
-                    if (bvhbonename == null)
-                    {
-                        throw new IOException("Cannot find bone " + bvhbonename + " in skeleton");
-                    }
-                    x = Float.parseFloat(words[i+xPosOffset]);    // positions
-                    y = Float.parseFloat(words[i+yPosOffset]);
-                    z = Float.parseFloat(words[i+zPosOffset]);
-                    pose.setLocalPosition(boneIndex, x, y, z);
-
-                    x = Float.parseFloat(words[i+xRotOffset]);
-                    y = Float.parseFloat(words[i+yRotOffset]);
-                    z = Float.parseFloat(words[i+zRotOffset]);
-
-                    //rotation order
-
-                    for(int order = 0; order < 3; order++)
-                    {
-                        if(xRotOffset == order)
-                        {
-                            if(order == 0)
-                            {
-                                q.rotationX(x * (float) Math.PI / 180);
-                            }
-                            else
-                            {
-                                q.rotateX(x * (float) Math.PI / 180);
-                            }
-
-                        }
-                        else if(yRotOffset == order)
-                        {
-                            if(order == 0)
-                            {
-                                q.rotationY(y * (float) Math.PI / 180);
-                            }
-                            else
-                            {
-                                q.rotateY(y * (float) Math.PI / 180);
-                            }
-
-                        }
-                        else if(zRotOffset == order)
-                        {
-                            if(order == 0)
-                            {
-                                q.rotationZ(z * (float) Math.PI / 180);
-                            }
-                            else
-                            {
-                                q.rotateZ(z * (float) Math.PI / 180);
-                            }
-
-                        }
-
-                    }
-                    q.normalize();
-
-                    pose.setLocalRotation(boneIndex, q.x, q.y, q.z, q.w);
-                    boneIndex++;
-                    bvhboneIndex++;
-
+                    continue;
                 }
-                else
+                if (order.length() > 3)
                 {
-                    boneIndex++;
+                    Float.parseFloat(words[i]);
+                    Float.parseFloat(words[i + 1]);
+                    Float.parseFloat(words[i + 2]);
+                    mDefaultKeyMaker.makePositionKey(boneIndex, order, p, 0);
+                    order = order.substring(3);
+                    pose.setLocalPosition(boneIndex, p[0], p[1], p[2]);
+                    i += 3;
                 }
+                r[0] = Float.parseFloat(words[i]);
+                r[1] = Float.parseFloat(words[i + 1]);
+                r[2] = Float.parseFloat(words[i + 2]);
+                mDefaultKeyMaker.makeRotationKey(boneIndex, order, r, 0);
+                pose.setLocalRotation(boneIndex, r[0], r[1], r[2], r[3]);
+                boneIndex++;
             }
         }
         return pose;
     }
 
+
+    /**
+     * Import the motion data from the currently open BVH file.
+     *
+     * @param skel      {@link SXRSkeleton} to animate.
+     * @return {@link SXRSkeletonAnimation} with an {@SXRAnimationChannel} for each animated bone.
+     * @throws IOException if motion data cannot be read.
+     */
     public SXRSkeletonAnimation readMotion(SXRSkeleton skel) throws IOException
     {
-        int         numbones = skel.getNumBones();
-        float       x, y, z;
-        String      line;
-        String      bonename = "";
-        float       secondsPerFrame = 0;
-        float       curTime = 0;
-        float[]     rotKeys;
-        float[]     posKeys;
-        ArrayList<float[]> rotKeysPerBone = new ArrayList<>(numbones);
-        ArrayList<float[]> posKeysPerBone = new ArrayList<>(numbones);
-        Quaternionf q = new Quaternionf();
-        Quaternionf b = new Quaternionf();
-        SXRPose bindpose = skel.getBindPose();
-        int frameIndex = 0;
-        int numFrames = 0;
+        int                 numbones = skel.getNumBones();
+        ArrayList<float[]>  rotKeysPerBone = new ArrayList<>(numbones);
+        ArrayList<float[]>  posKeysPerBone = new ArrayList<>(numbones);
+        int                 rotKeySize = mKeyMaker.getRotKeySize();
+        int                 frameIndex = 0;
+        int                 numFrames = 0;
+        String              line;
+        float               secondsPerFrame = 0;
+        float               curTime = 0;
 
+        mSkeleton = skel;
+        mKeyMaker.start(skel);
         /*
          * Parse and accumulate all the motion keyframes.
          * Keyframes for the root bone position are in rootPosKeys;
@@ -377,10 +542,8 @@ public class BVHImporter
                 for (int i = 0; i < numbones; i++)
                 {
                     numFrames = Integer.parseInt(words[1]);
-                    float[] r = new float[5 * numFrames];
-                    float[] p = new float[4 * numFrames];
-                    rotKeysPerBone.add(r);
-                    posKeysPerBone.add(p);
+                    posKeysPerBone.add(new float[4 * numFrames]);
+                    rotKeysPerBone.add(new float[(rotKeySize + 1) * numFrames]);
                 }
                 continue;
             }
@@ -393,96 +556,47 @@ public class BVHImporter
              * Parsing motion for each frame.
              * Each line in the file contains the root joint position and rotations for all joints.
              */
+            Matrix4f mtx = new Matrix4f();
             int boneIndex = 0;
             int i = 0;
             int f;
+            float x, y, z;
+            float deg2rad = (float) Math.PI / 180.0f;
+            float[] pos = new float[3];
+            float[] rot = new float[mKeyMaker.getRotKeySize()];
             while (i + 3 <= words.length)
             {
-                bonename = mBoneNames.get(boneIndex);
+                String order = mBoneChannels.get(boneIndex);
+                String bonename = mBoneNames.get(boneIndex);
                 if (bonename == null)
                 {
                     throw new IOException("Cannot find bone " + bonename + " in skeleton");
                 }
-                if (mBoneChannels.get(boneIndex) == 0)
+                if (order.isEmpty())
                 {
                     ++boneIndex;
                     continue;
                 }
-                if (mBoneChannels.get(boneIndex) > 3)
+                if (order.length() > 3)
                 {
-
+                    float[] posKeys = posKeysPerBone.get(boneIndex);
                     f = frameIndex * 4;
-                    posKeys = posKeysPerBone.get(boneIndex);
-                    x = Float.parseFloat(words[i + xPosOffset]);     // X, Y, Z position
-                    y = Float.parseFloat(words[i + yPosOffset]);
-                    z = Float.parseFloat(words[i + zPosOffset]);
-
-                    posKeys[f] = curTime;
-                    posKeys[f + 1] = x;                 // bone position
-                    posKeys[f + 2] = y;
-                    posKeys[f + 3] = z;
+                    posKeys[f++] = curTime;
+                    posKeys[f] = Float.parseFloat(words[i]);
+                    posKeys[f + 1] = Float.parseFloat(words[i + 1]);
+                    posKeys[f + 2] = Float.parseFloat(words[i + 2]);
+                    mKeyMaker.makePositionKey(boneIndex, order, posKeys, f);
+                    order = order.substring(3);
                     i += 3;
                 }
-
-                rotKeys = rotKeysPerBone.get(boneIndex);
-
-                x = Float.parseFloat(words[i + xRotOffset]);
-                y = Float.parseFloat(words[i + yRotOffset]);
-                z = Float.parseFloat(words[i + zRotOffset]);
-                i += 3;
-
-                //rotation order
-
-                for(int order = 0; order < 3; order++)
-                {
-                    if(xRotOffset == order)
-                    {
-                        if(order == 0)
-                        {
-                            q.rotationX(x * (float) Math.PI / 180);
-                        }
-                        else
-                        {
-                            q.rotateX(x * (float) Math.PI / 180);
-                        }
-
-                    }
-                    else if(yRotOffset == order)
-                    {
-                        if(order == 0)
-                        {
-                            q.rotationY(y * (float) Math.PI / 180);
-                        }
-                        else
-                        {
-                            q.rotateY(y * (float) Math.PI / 180);
-                        }
-
-                    }
-                    else if(zRotOffset == order)
-                    {
-                        if(order == 0)
-                        {
-                            q.rotationZ(z * (float) Math.PI / 180);
-                        }
-                        else
-                        {
-                            q.rotateZ(z * (float) Math.PI / 180);
-                        }
-
-                    }
-
-                }
-
-                q.normalize();
-                bindpose.getLocalRotation(boneIndex, b);
-                q.mul(b);
-                f = 5 * frameIndex;
+                float[] rotKeys = rotKeysPerBone.get(boneIndex);
+                f = (rotKeySize + 1) * frameIndex;
                 rotKeys[f++] = curTime;
-                rotKeys[f++] = q.x;
-                rotKeys[f++] = q.y;
-                rotKeys[f++] = q.z;
-                rotKeys[f] = q.w;
+                rotKeys[f] = Float.parseFloat(words[i]);
+                rotKeys[f + 1] = Float.parseFloat(words[i + 1]);
+                rotKeys[f + 2] = Float.parseFloat(words[i + 2]);
+                i += 3;
+                mKeyMaker.makeRotationKey(boneIndex, order, rotKeys, f);
                 boneIndex++;
                 //Log.d("BVH", "%s %f %f %f %f", bonename, q.x, q.y, q.z, q.w);
             }
@@ -492,28 +606,33 @@ public class BVHImporter
                 break;
             }
         }
-        /*
-         * Create a skeleton animation with separate channels for each bone
-         */
+        return  makeAnimation(curTime, posKeysPerBone, rotKeysPerBone);
+    }
+
+    /*
+     * Create a skeleton animation with separate channels for each bone
+     */
+    protected SXRSkeletonAnimation makeAnimation(float duration, ArrayList<float[]> posKeysPerBone,  ArrayList<float[]> rotKeysPerBone)
+    {
         SXRAnimationChannel channel;
-        SXRSkeletonAnimation skelanim = new SXRSkeletonAnimation(mFileName, skel, curTime);
+        SXRSkeletonAnimation skelanim = new SXRSkeletonAnimation(mFileName, mSkeleton, duration);
         Vector3f pos = new Vector3f();
         for (int boneIndex = 0; boneIndex < mBoneNames.size(); ++boneIndex)
         {
-            if (mBoneChannels.get(boneIndex) == 0)
+            String order = mBoneChannels.get(boneIndex);
+            if (order.isEmpty())
             {
                 continue;
             }
-            bonename = mBoneNames.get(boneIndex);
-            rotKeys = rotKeysPerBone.get(boneIndex);
-            posKeys = posKeysPerBone.get(boneIndex);
-            if (mBoneChannels.get(boneIndex) == 3)
+            String bonename = mBoneNames.get(boneIndex);
+            float[] rotKeys = rotKeysPerBone.get(boneIndex);
+            float[] posKeys = posKeysPerBone.get(boneIndex);
+            if (order.length() == 3)
             {
-                skel.getBindPose().getLocalPosition(boneIndex, pos);
-                posKeys = new float[] { 0, pos.x, pos.y, pos.z };
+                mSkeleton.getPose().getLocalPosition(boneIndex, pos);
+                posKeys = new float[]{0, pos.x, pos.y, pos.z};
             }
-            channel = new SXRAnimationChannel(bonename, posKeys, rotKeys, null,
-                    SXRAnimationBehavior.DEFAULT, SXRAnimationBehavior.DEFAULT);
+            channel = mKeyMaker.makeAnimationChannel(bonename, posKeys, rotKeys);
             skelanim.addChannel(bonename, channel);
         }
         return skelanim;

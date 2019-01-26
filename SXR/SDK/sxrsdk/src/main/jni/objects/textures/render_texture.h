@@ -43,16 +43,14 @@ public:
             : Texture(TextureType::TEXTURE_2D),
               mSampleCount(sample_count),
               mUseStencil(false),
-              mBackColor{ 0, 0, 0, 1.0f},
-              readback_started_(false)
+              mBackColor{ 0, 0, 0, 1.0f}
     { }
 
     explicit RenderTexture(Image* image)
     : Texture(image->getType()),
       mSampleCount(1),
       mUseStencil(false),
-      mBackColor{ 0, 0, 0, 1.0f},
-      readback_started_(false)
+      mBackColor{ 0, 0, 0, 1.0f}
     {
         setImage(image);
     }
@@ -65,10 +63,6 @@ public:
     virtual void unbind() = 0;
     virtual void beginRendering(Renderer*) = 0;
     virtual void endRendering(Renderer*) = 0;
-
-    // Start to read back texture in the background. It can be optionally called before
-    // readRenderResult() to read pixels asynchronously. This function returns immediately.
-    virtual void startReadBack() = 0;
 
     // Copy data in pixel buffer to client memory. This function is synchronous. When
     // it returns, the pixels have been copied to PBO and then to the client memory.
@@ -101,7 +95,6 @@ protected:
     float   mBackColor[4];
     bool    mUseStencil;
     int     mSampleCount = 1;
-    bool    readback_started_;  // set by startReadBack()
 };
 
 }

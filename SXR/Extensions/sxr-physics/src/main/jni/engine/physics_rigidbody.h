@@ -88,6 +88,8 @@ class PhysicsRigidBody : public Component {
 	virtual const float getCcdSweptSphereRadius() const = 0;
 	virtual const float getContactProcessingThreshold() const = 0;
 	virtual void updateConstructionInfo() = 0;
+
+    virtual void reset(bool rebuildCollider = true) = 0;
 };
 
 }

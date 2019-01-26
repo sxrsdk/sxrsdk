@@ -17,29 +17,30 @@ extern "C" {
 
     JNIEXPORT jboolean JNICALL
     Java_com_samsungxr_animation_NativeSkeleton_setPose(JNIEnv* env, jobject clz,
-                                            jlong jskel, jfloatArray jmatrices);
+                                                        jlong jskel, jfloatArray jmatrices);
     JNIEXPORT jboolean JNICALL
-    Java_com_samsungxr_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz,
-        jlong jskel, jfloatArray jmatrices);
-
+    Java_com_samsungxr_animation_NativeSkeleton_setWorldPose(JNIEnv* env, jobject clz,
+                                                            jlong jskel, jfloatArray jmatrices);
     JNIEXPORT jboolean JNICALL
     Java_com_samsungxr_animation_NativeSkeleton_getPose(JNIEnv* env, jobject clz,
                                                       jlong jskel, jfloatArray jmatrices);
-
     JNIEXPORT void JNICALL
     Java_com_samsungxr_animation_NativeSkeleton_setBoneName(JNIEnv* env, jobject clz,
-                                                  jlong jskel, jint index, jstring name);
-
+                                                            jlong jskel, jint index, jstring name);
     JNIEXPORT jstring JNICALL
     Java_com_samsungxr_animation_NativeSkeleton_getBoneName(JNIEnv* env, jobject clz,
-                                                          jlong jskel, jint index);
+                                                           jlong jskel, jint index);
 
     JNIEXPORT jint JNICALL
     Java_com_samsungxr_animation_NativeSkeleton_getNumBones(JNIEnv* env, jobject clz,
-                                                         jlong jskel);
+                                                            jlong jskel);
     JNIEXPORT jboolean JNICALL
     Java_com_samsungxr_animation_NativeSkeleton_getBoneParents(JNIEnv* env, jobject clz,
-                                                      jlong jskel, jintArray parents);
+                                                                jlong jskel, jintArray parents);
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_animation_NativeSkeleton_updateBones(JNIEnv* env, jobject obj,
+                                                            jlong jskel, jintArray boneparents, jobjectArray bonenames);
+
 
 } // extern "C"
 
@@ -97,7 +98,7 @@ Java_com_samsungxr_animation_NativeSkeleton_getPose(JNIEnv* env, jobject clz,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_samsungxr_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz,
+Java_com_samsungxr_animation_NativeSkeleton_setWorldPose(JNIEnv* env, jobject clz,
                                                   jlong jskel, jfloatArray jmatrices)
 {
     Skeleton* skel = reinterpret_cast<Skeleton*>(jskel);
@@ -109,7 +110,7 @@ Java_com_samsungxr_animation_NativeSkeleton_setSkinPose(JNIEnv* env, jobject clz
     }
     jfloat* inputMatrices = env->GetFloatArrayElements(jmatrices, JNI_FALSE);
 
-    skel->setSkinPose(inputMatrices);
+    skel->setWorldPose(inputMatrices);
     env->ReleaseFloatArrayElements(jmatrices, inputMatrices, JNI_ABORT);
     return true;
 }
@@ -156,5 +157,29 @@ Java_com_samsungxr_animation_NativeSkeleton_getBoneName(JNIEnv* env, jobject clz
     const char* name = skel->getBoneName(index);
     return env->NewStringUTF(name);
 }
+
+JNIEXPORT void JNICALL
+Java_com_samsungxr_animation_NativeSkeleton_updateBones(JNIEnv* env, jobject obj,
+                                                        jlong jskel, jintArray jboneparents, jobjectArray jbonenames)
+{
+    jint numbones = env->GetArrayLength(jboneparents);
+    jint* boneParents = env->GetIntArrayElements(jboneparents, JNI_FALSE);
+    Skeleton* skel = reinterpret_cast<Skeleton*>(jskel);
+    const char* names[numbones];
+
+    for (int i = 0; i < numbones; ++i)
+    {
+        jstring str = (jstring) env->GetObjectArrayElement(jbonenames, i);
+        names[i] = env->GetStringUTFChars(str, JNI_FALSE);
+    }
+    skel->updateBones(boneParents, names, numbones);
+    for (int i = 0; i < numbones; ++i)
+    {
+        jstring str = (jstring) env->GetObjectArrayElement(jbonenames, i);
+        env->ReleaseStringUTFChars(str, names[i]);
+    }
+    env->ReleaseIntArrayElements(jboneparents, boneParents, JNI_ABORT);
+}
+
 
 }

@@ -115,6 +115,18 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     }
 
     /**
+     * Get the number of animation channels
+     */
+    public int getNumChannels()
+    {
+        if (mBoneChannels == null)
+        {
+            return 0;
+        }
+        return mBoneChannels.length;
+    }
+
+    /**
      * Find the channel in the animation that animates the named bone.
      * @param boneName  name of bone to animate.
      */
@@ -220,10 +232,15 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     {
         SXRSkeleton skel = getSkeleton();
         SXRPose pose = skel.getPose();
-        computePose(timeInSec,pose);
-        skel.poseToBones();
-        skel.updateBonePose();
-        skel.updateSkinPose();
+
+        if (skel.isEnabled())
+        {
+            synchronized (skel)
+            {
+                computePose(timeInSec, pose);
+                skel.poseToBones();
+            }
+        }
     }
 
     public SXRPose computePose(float timeInSec, SXRPose pose)
@@ -236,7 +253,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
         {
             SXRAnimationChannel channel = mBoneChannels[i];
             if ((channel != null) &&
-                    (skel.getBoneOptions(i) == SXRSkeleton.BONE_ANIMATE))
+                (skel.getBoneOptions(i) == SXRSkeleton.BONE_ANIMATE))
             {
                 channel.animate(timeInSec, temp);
                 if (rootOffset != null)
@@ -249,15 +266,15 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
                 pose.setLocalMatrix(i, temp);
             }
         }
-
-        return pose;
+     return pose;
     }
+
     @Override
     public void prettyPrint(StringBuffer sb, int indent) {
         sb.append(Log.getSpaces(indent));
         sb.append(SXRSkeletonAnimation.class.getSimpleName());
         sb.append("[name=" + mName + ", duration=" + getDuration() + ", "
-                + mBoneChannels.length + " channels]");
+                + getNumChannels() + " channels]");
         sb.append(System.lineSeparator());
 
         for (SXRAnimationChannel nodeAnim : mBoneChannels)

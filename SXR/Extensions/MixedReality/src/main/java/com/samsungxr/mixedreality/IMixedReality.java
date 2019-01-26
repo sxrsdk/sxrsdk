@@ -186,4 +186,19 @@ public interface IMixedReality extends IEventReceiver
 
     float[] makeInterpolated(float[] poseA, float[] poseB, float t);
 
+    /**
+     * Acquires the current set of estimated 3d points
+     * attached to real-world geometry.
+     *
+     * @return SXRPointCloud with points info
+     */
+    SXRPointCloud acquirePointCloud();
+
+    /**
+     * Set the behavior of the plane detection subsystem.
+     *
+     * @param mode The mode to find planes (see {@link SXRMixedReality.PlaneFindingMode})
+     */
+    void setPlaneFindingMode(SXRMixedReality.PlaneFindingMode mode);
+
 }

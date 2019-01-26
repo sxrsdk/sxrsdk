@@ -22,9 +22,7 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.mixedreality.SXRPlane;
 import com.samsungxr.mixedreality.SXRTrackingState;
 
-import java.lang.reflect.Array;
 import java.nio.FloatBuffer;
-import java.util.Arrays;
 
 
 class CVLibraryPlane extends SXRPlane {
@@ -98,6 +96,11 @@ class CVLibraryPlane extends SXRPlane {
     public FloatBuffer getPolygon() {
 
         //return mARPlane.getPolygon();
+        return null;
+    }
+
+    @Override
+    public float[] get3dPolygonAsArray() {
         return null;
     }
 

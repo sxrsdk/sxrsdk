@@ -29,14 +29,18 @@ public:
     }
 
     int getNumBones() const { return mNumBones; }
+    void updateBones(int parents[], const char* names[], int numbones);
     void setBoneName(int boneIndex, const char* name);
     const char* getBoneName(int boneIndex) const;
     void setPose(const float* input);
     void getPose(float* output);
-    void setSkinPose(const float* input);
-    const glm::mat4* getSkinMatrix(int boneId) const;
+    void setWorldPose(const float* input);
+    const glm::mat4* getLocalBoneMatrix(int boneId) const;
+    const glm::mat4* getWorldBoneMatrix(int boneId) const;
     const int*    getBoneParents() const;
     int getBoneParent(int boneId) const;
+    int getBoneIndex(const char* name) const;
+    std::mutex& getLock() { return mLock; }
 
     int getParentBoneID(int boneId) const
     {
@@ -57,8 +61,8 @@ private:
     std::mutex  mLock;
     int         mNumBones;
     int*        mBoneParents;
-    glm::mat4*  mSkinMatrices;
-    glm::mat4*  mBoneMatrices;
+    glm::mat4*  mWorldBoneMatrices;
+    glm::mat4*  mLocalBoneMatrices;
     std::vector<std::string> mBoneNames;
 };
 

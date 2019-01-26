@@ -157,31 +157,33 @@ public class SXRPoseMapper extends SXRAnimation
             throw new IllegalArgumentException("Source skeleton cannot be null");
         }
         String[] lines = bonemap.split("[\r\n]");
-
-        mBoneMap = new int[mSourceSkeleton.getNumBones()];
-        Arrays.fill(mBoneMap, -1);
-        for (String line : lines)
+        synchronized (mDestSkeleton)
         {
-            String[] words;
+            mBoneMap = new int[mSourceSkeleton.getNumBones()];
+            Arrays.fill(mBoneMap, -1);
+            for (String line : lines)
+            {
+                String[] words;
 
-            line = line.trim();
-            if (line.isEmpty())
-            {
-                continue;
-            }
-            words = line.split("[\t ]");
-            int sourceIndex = mSourceSkeleton.getBoneIndex(words[0]);
-            int destIndex = mDestSkeleton.getBoneIndex(words[1]);
+                line = line.trim();
+                if (line.isEmpty())
+                {
+                    continue;
+                }
+                words = line.split("[\t ]");
+                int sourceIndex = mSourceSkeleton.getBoneIndex(words[0]);
+                int destIndex = mDestSkeleton.getBoneIndex(words[1]);
 
-            if ((sourceIndex >= 0) && (destIndex >= 0))
-            {
-                mBoneMap[sourceIndex] = destIndex;
-                Log.w("BONE", "%s %d -> %s %d",
-                      words[0], sourceIndex, words[1], destIndex);
-            }
-            else
-            {
-                Log.w("SXRPoseMapper", "makeBoneMap: cannot find bone " + words[0]);
+                if ((sourceIndex >= 0) && (destIndex >= 0))
+                {
+                    mBoneMap[sourceIndex] = destIndex;
+                    mDestSkeleton.setBoneOptions(destIndex, mDestSkeleton.getBoneOptions(destIndex) | SXRSkeleton.BONE_ANIMATE);
+                    Log.w("BONE", "%s %d -> %s %d", words[0], sourceIndex, words[1], destIndex);
+                }
+                else
+                {
+                    Log.w("SXRPoseMapper", "makeBoneMap: cannot find bone " + words[0]);
+                }
             }
         }
     }
@@ -199,8 +201,8 @@ public class SXRPoseMapper extends SXRAnimation
     {
         int numsrcbones = srcskel.getNumBones();
         int[] bonemap = new int[numsrcbones];
-        SXRPose srcPose = srcskel.getBindPose();
-        SXRPose dstPose = dstskel.getBindPose();
+        SXRPose srcPose = srcskel.getPose();
+        SXRPose dstPose = dstskel.getPose();
 
         for (int i = 0; i < numsrcbones; ++i)
         {
@@ -214,6 +216,7 @@ public class SXRPoseMapper extends SXRAnimation
             bonemap[i] = boneindex;
             if (boneindex >= 0)
             {
+                dstskel.setBoneOptions(boneindex, dstskel.getBoneOptions(boneindex) | SXRSkeleton.BONE_ANIMATE);
                 Log.w("BONE", "%s\n%d: %s\n%d: %s",
                         bonename, i, srcPose.getBone(i).toString(),
                         boneindex, dstPose.getBone(boneindex).toString());
@@ -233,14 +236,15 @@ public class SXRPoseMapper extends SXRAnimation
      */
     public void animate(SXRHybridObject target, float time)
     {
-        if ((mSourceSkeleton == null) || !mSourceSkeleton.isEnabled())
+        if ((mSourceSkeleton == null) || !mSourceSkeleton.isEnabled() || !mDestSkeleton.isEnabled())
         {
             return;
         }
-        mapLocalToTarget();
-        mDestSkeleton.poseToBones();
-        mDestSkeleton.updateBonePose();
-        mDestSkeleton.updateSkinPose();
+        synchronized (mDestSkeleton)
+        {
+            mapLocalToTarget();
+            mDestSkeleton.poseToBones();
+        }
     }
 
 
@@ -268,60 +272,30 @@ public class SXRPoseMapper extends SXRAnimation
         {
             mBoneMap = makeBoneMap(srcskel, dstskel);
         }
-        SXRPose     srcpose = srcskel.getPose();
-        Quaternionf q = new Quaternionf();
-        int		    numsrcbones = srcskel.getNumBones();
-        mDestPose.clearRotations();
-        srcskel.getPosition(v);
-        dstskel.setPosition(v);
-        for (int i = 0; i < numsrcbones; ++i)
+        synchronized (srcskel)
         {
-            int	boneindex = mBoneMap[i];
+            SXRPose srcpose = srcskel.getPose();
+            Quaternionf q = new Quaternionf();
+            int numsrcbones = srcskel.getNumBones();
 
-            if (boneindex >= 0)
+            mDestPose.clearRotations();
+            srcskel.getPosition(v);
+            for (int i = 0; i < numsrcbones; ++i)
             {
-                srcpose.getLocalRotation(i, q);
-                mDestPose.setLocalRotation(boneindex, q.x, q.y, q.z, q.w);
+                int boneindex = mBoneMap[i];
+
+                if (boneindex >= 0)
+                {
+                    srcpose.getLocalRotation(i, q);
+                    mDestPose.setLocalRotation(boneindex, q.x, q.y, q.z, q.w);
+                }
             }
         }
-        dstskel.applyPose(mDestPose, SXRSkeleton.ROTATION_ONLY);
-        return true;
-    }
-
-    public boolean mapBindPose()
-    {
-        SXRSkeleton	srcskel = mSourceSkeleton;
-        SXRSkeleton	dstskel = mDestSkeleton;
-        Vector3f v = new Vector3f();
-        Matrix4f mtx = new Matrix4f();
-
-        if ((dstskel == null) || (srcskel == null))
+        synchronized (dstskel)
         {
-            return false;
+            dstskel.setPosition(v);
+            dstskel.applyPose(mDestPose, SXRSkeleton.ROTATION_ONLY);
         }
-        if (mBoneMap == null)
-        {
-            mBoneMap = makeBoneMap(srcskel, dstskel);
-        }
-        SXRPose     srcpose = srcskel.getPose();
-        SXRPose     dstbindpose = dstskel.getBindPose();
-        int		    numsrcbones = srcskel.getNumBones();
-
-        srcskel.getPosition(v);
-        dstskel.setPosition(v);
-        for (int i = 0; i < numsrcbones; ++i)
-        {
-            int	boneindex = mBoneMap[i];
-
-            if (boneindex >= 0)
-            {
-                dstbindpose.getLocalMatrix(boneindex, mtx);
-                mtx.invert();
-                mtx.mul(srcpose.getBone(i).LocalMatrix);
-                mDestPose.setLocalMatrix(boneindex, mtx);
-            }
-        }
-        dstskel.applyPose(mDestPose, SXRSkeleton.BIND_POSE_RELATIVE);
         return true;
     }
 
@@ -347,13 +321,10 @@ public class SXRPoseMapper extends SXRAnimation
         }
         SXRPose srcpose = srcskel.getPose();
         SXRPose	dstpose = dstskel.getPose();
-        Vector3f    v = new Vector3f();
         int			numsrcbones = srcpose.getNumBones();
         Matrix4f	mtx = new Matrix4f();
 
         srcpose.sync();
-        srcpose.getWorldPosition(0, v);
-        dstpose.setPosition(v.x, v.y, v.z);
         for (int i = 0; i < numsrcbones; ++i)
         {
             int	boneindex = mBoneMap[i];
@@ -365,51 +336,6 @@ public class SXRPoseMapper extends SXRAnimation
             }
         }
         dstpose.sync();
-        return true;
-    }
-
-
-    /**
-     * Maps the pose of the destination skeleton onto the source skeleton in world space.
-     * <p>
-     * The world bone rotations of matching bones are copied.
-     * If the PoseMapper has a bone map, it is used to determine which bones
-     * of the source skeleton correspond to which bones in the destination skeleton.
-     */
-    public boolean mapWorldToSource()
-    {
-        SXRSkeleton	srcskel = mSourceSkeleton;
-        SXRSkeleton	dstskel = mDestSkeleton;
-
-        if ((dstskel == null) || (srcskel == null))
-        {
-            return false;
-        }
-        if (mBoneMap == null)
-        {
-            mBoneMap = makeBoneMap(srcskel, dstskel);
-        }
-
-        SXRPose     srcpose = srcskel.getPose();
-        SXRPose	    dstpose = dstskel.getPose();
-        int			numsrcbones = srcpose.getNumBones();
-        Matrix4f	mtx = new Matrix4f();
-        Vector3f    v = new Vector3f();
-
-        dstpose.sync();
-        dstpose.getWorldPosition(0, v);
-        srcpose.setPosition(v.x, v.y, v.z);
-        for (int i = 0; i < numsrcbones; ++i)
-        {
-            int	boneindex = mBoneMap[i];
-
-            if (boneindex >= 0)
-            {
-                dstpose.getWorldMatrix(boneindex, mtx);
-                srcpose.setWorldMatrix(i, mtx);
-            }
-        }
-        srcpose.sync();
         return true;
     }
 
