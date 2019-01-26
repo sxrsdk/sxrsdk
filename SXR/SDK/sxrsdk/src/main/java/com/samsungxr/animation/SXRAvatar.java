@@ -150,6 +150,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         mBlendFactor = blendFactor;
         mNumAnimations = numAnimations;
     }
+    /**
      * Called when an animation on this avatar has started.
      * @param animator  {@link }SXRAnimator} containing the animation that started.
      */
