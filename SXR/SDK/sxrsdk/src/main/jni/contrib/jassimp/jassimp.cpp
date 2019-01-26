@@ -4,6 +4,7 @@
 #include <assimp/scene.h>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
+#include <assimp/ProgressHandler.hpp>
 
 #ifdef JNI_LOG
 #ifdef ANDROID
@@ -640,6 +641,24 @@ class JavaIOSystem : public Assimp::IOSystem {
 	
 };
 
+class JavaProgressHandler : public Assimp::ProgressHandler {
+private:
+    JNIEnv* mJniEnv;
+    jobject& mJavaProgressHandler;
+
+public:
+    JavaProgressHandler(JNIEnv* env, jobject& javaProgressHandler) :
+            mJniEnv(env),
+            mJavaProgressHandler(javaProgressHandler)
+    {};
+
+    bool Update(float percentage)
+    {
+        jvalue params[1];
+        params[0].f = percentage;
+        return call(mJniEnv, mJavaProgressHandler, "jassimp/AiProgressHandler", "update", "(F)Z", params);
+    }
+};
 
 static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 {
@@ -1860,9 +1879,9 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			return false;
 		}
 
-		wrapVec3Params[0].f = cLight->mPosition.x;
-		wrapVec3Params[1].f = cLight->mPosition.y;
-		wrapVec3Params[2].f = cLight->mPosition.z;
+		wrapVec3Params[0].f = cLight->mDirection.x;
+		wrapVec3Params[1].f = cLight->mDirection.y;
+		wrapVec3Params[2].f = cLight->mDirection.z;
 		jobject jDirection;
 		SmartLocalRef refDirection(env, jDirection);
 		if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jDirection))
@@ -2133,7 +2152,7 @@ JNIEXPORT jstring JNICALL Java_com_samsungxr_jassimp_Jassimp_getErrorString
 
 
 JNIEXPORT jobject JNICALL Java_com_samsungxr_jassimp_Jassimp_aiImportFile
-  (JNIEnv *env, jclass jClazz, jstring jFilename, jlong postProcess, jobject ioSystem)
+  (JNIEnv *env, jclass jClazz, jstring jFilename, jlong postProcess, jobject ioSystem, jobject progressHandler)
 {
 	jobject jScene = NULL; 
 
@@ -2148,7 +2167,12 @@ JNIEXPORT jobject JNICALL Java_com_samsungxr_jassimp_Jassimp_aiImportFile
 		imp.SetIOHandler(new JavaIOSystem(env, ioSystem));		
 		lprintf("Created aiFileIO\n");
 	}
-	
+
+    if(progressHandler != NULL)
+    {
+        imp.SetProgressHandler(new JavaProgressHandler(env, progressHandler));
+    }
+
 	lprintf("opening file: %s\n", cFilename);
 
 	/* do import */
