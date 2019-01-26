@@ -509,7 +509,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         else
         {
             EnumSet<SXRImportSettings> settings = SXRImportSettings.getRecommendedSettingsWith(
-                    EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_TEXTURING, SXRImportSettings.NO_MORPH));
+                    EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_TEXTURING));
 
             SXRNode animRoot = new SXRNode(ctx);
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
