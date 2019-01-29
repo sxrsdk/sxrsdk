@@ -19,11 +19,9 @@ package com.samsungxr.animation;
 import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRNode;
-import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
