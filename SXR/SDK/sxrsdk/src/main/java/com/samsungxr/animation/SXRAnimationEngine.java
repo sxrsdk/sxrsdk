@@ -48,7 +48,6 @@ import com.samsungxr.SXRNode;
 public class SXRAnimationEngine {
 
     private static SXRAnimationEngine sInstance = null;
-    private int count =0;
 
     static {
         SXRContext.addResetOnRestartHandler(new Runnable() {
