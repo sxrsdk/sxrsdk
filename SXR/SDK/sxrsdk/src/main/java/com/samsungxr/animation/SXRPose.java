@@ -249,6 +249,7 @@ public class SXRPose implements PrettyPrint
             throw new IllegalArgumentException("Destination array is the wrong size");
         }
         mNeedSync = true;
+        mBones[0].setLocalPosition(positions[0], positions[1], positions[2]);
         for (int i = 0; i < mBones.length; ++i)
         {
             Bone bone = mBones[i];
