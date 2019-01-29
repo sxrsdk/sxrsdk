@@ -22,7 +22,6 @@ import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRShaderData;
 import com.samsungxr.SXRTransform;
-import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
 
 import android.graphics.Color;

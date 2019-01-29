@@ -21,7 +21,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRDrawFrameListener;
 import com.samsungxr.SXRNode;
-import com.samsungxr.utility.Log;
 
 /**
  * This class runs {@linkplain SXRAnimation animations}.
