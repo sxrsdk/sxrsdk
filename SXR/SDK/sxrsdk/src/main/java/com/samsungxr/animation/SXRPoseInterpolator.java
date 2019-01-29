@@ -421,10 +421,7 @@ public class SXRPoseInterpolator extends SXRAnimation
             mat.translationRotateScale(posInterpolatedData[0], posInterpolatedData[1], posInterpolatedData[2],rotInterpolatedData[0], rotInterpolatedData[1], rotInterpolatedData[2], rotInterpolatedData[3],sclInterpolatedData[0], sclInterpolatedData[1], sclInterpolatedData[2]);
             initialPose.setLocalMatrix(i, mat);
         }
-
         mSkeleton.poseToBones();
-        mSkeleton.updateBonePose();
-        mSkeleton.updateSkinPose();
 
         if(!poseBlend)
         {
