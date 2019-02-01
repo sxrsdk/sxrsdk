@@ -1780,7 +1780,7 @@ static bool loadAnimations(JNIEnv *env, const aiScene* cScene, jobject& jScene)
             newMeshMorphAnimParams[0].l = animationName;
             newMeshMorphAnimParams[1].i = cMeshMorphAnim->mNumKeys;
             newMeshMorphAnimParams[2].i = numMorphTargets;
-            if (!createInstance(env, "org/gearvrf/jassimp/AiMeshAnim", "(Ljava/lang/String;II)V", newMeshMorphAnimParams, jMeshMorphAnim))
+            if (!createInstance(env, "com/samsungxr/jassimp/AiMeshAnim", "(Ljava/lang/String;II)V", newMeshMorphAnimParams, jMeshMorphAnim))
             {
                 return false;
             }
