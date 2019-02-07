@@ -50,10 +50,7 @@ public class SXRAnimator extends SXRBehavior
     protected int mRepeatMode = SXRRepeatMode.ONCE;
     protected int mRepeatCount = 1;
     protected boolean mReverse = false;
-<<<<<<< HEAD
-    protected SXRAnimationOrder mOrderName;
-=======
->>>>>>> blendingAnimations1
+
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -123,29 +120,6 @@ public class SXRAnimator extends SXRBehavior
             }
         }
         return d;
-    }
-
-    /**
-     * Set order name for all the animations in this animator
-     * @param order order name to be set
-     */
-    public void setAnimationOrder(SXRAnimationOrder order) {
-
-        mOrderName = order;
-
-        for (SXRAnimation anim : mAnimations)
-        {
-            anim.setAnimationOrder(order);
-        }
-    }
-
-    /**
-     * Get order name for this animator.
-     * @returns SXRAnimationOrder with order name of animator, may be null
-     */
-    public SXRAnimationOrder getAnimationOrder() {
-
-        return mOrderName;
     }
 
     /**
@@ -232,19 +206,6 @@ public class SXRAnimator extends SXRBehavior
             ++index;
         }
         return -1;
-    }
-
-    /**
-     * Sets the blend and blend duration for the animations in this animator.
-     * @param blend true to apply blend; false no blend.
-     * @param blendDuration duration of blend animation.
-     */
-    public void setBlend(boolean blend, float blendDuration)
-    {
-        for (SXRAnimation anim : mAnimations)
-        {
-            anim.setBlend(blend,blendDuration);
-        }
     }
 
     /**

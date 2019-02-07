@@ -154,18 +154,6 @@ public class SXRAvatar extends SXRBehavior
     }
 
     /**
-     * Sets the blend, blend duration and number of animations.
-     * @param blend true to apply blend; false no blend.
-     * @param blendFactor duration of blend.
-     * @param numAnimations number of animations to be loaded for avatar
-     */
-    public void setBlend(boolean blend, float blendFactor, int numAnimations)
-    {
-        mBlend = blend;
-        mBlendFactor = blendFactor;
-        mNumAnimations = numAnimations;
-    }
-    /**
      * Called when an animation on this avatar has started.
      * @param animator  {@link }SXRAnimator} containing the animation that started.
      */

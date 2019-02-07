@@ -108,10 +108,6 @@ public abstract class SXRAnimation {
     protected float mStartOffset = 0;
     protected float mSpeed = 1;
     protected SXROnFinish mOnFinish = null;
-    protected float mBlendDuration = 0;
-    protected boolean mBlend = false;
-    protected SXRAnimationOrder mOrderName = null;
-
 
     /**
      * This is derived from {@link #mOnFinish}. Doing the {@code instanceof}
@@ -461,12 +457,6 @@ public abstract class SXRAnimation {
                     stillRunning = true; // repeat indefinitely
                 }
             }
-        }
-
-        if(mBlend && mElapsedTime > this.getDuration() - mBlendDuration &&
-                ((this.mOrderName == SXRAnimationOrder.FIRST)
-                        ||(this.mOrderName == SXRAnimationOrder.MIDDLE))) {
-            stillRunning = false; //stop animation ahead for the blending to occur
         }
 
         if (stillRunning) {
