@@ -105,8 +105,8 @@ public abstract class SXRAnimation {
     protected SXRInterpolator mInterpolator = null;
     protected int mRepeatMode = SXRRepeatMode.ONCE;
     protected int mRepeatCount = DEFAULT_REPEAT_COUNT;
-    protected float mAnimationOffset = 0;
-    protected float mAnimationSpeed = 1;
+    protected float mStartOffset = 0;
+    protected float mSpeed = 1;
     protected SXROnFinish mOnFinish = null;
     protected float mBlendDuration = 0;
     protected boolean mBlend = false;
@@ -175,6 +175,15 @@ public abstract class SXRAnimation {
         }
         // else
         throw new IllegalArgumentException();
+    }
+
+    /**
+     * Get the target object modified by this animation.
+     * @return {@link SXRHybridObject} target object
+     */
+    public SXRHybridObject getTarget()
+    {
+        return mTarget;
     }
 
     /**
@@ -264,13 +273,13 @@ public abstract class SXRAnimation {
      *             If {@code startOffset} is either negative or greater than
      *             the animation duration
      */
-    public SXRAnimation setOffset(float startOffset)
+    public SXRAnimation setStartOffset(float startOffset)
     {
-        if(startOffset<0 || startOffset>mDuration){
+        if (startOffset < 0 || startOffset > mDuration){
             throw new IllegalArgumentException("offset should not be either negative or greater than duration");
         }
-        mAnimationOffset = startOffset;
-        mDuration =  mDuration-mAnimationOffset;
+        mStartOffset = startOffset;
+        mDuration = mDuration - mStartOffset;
         return this;
     }
     /**
@@ -288,7 +297,7 @@ public abstract class SXRAnimation {
         if(speed<=0){
             throw new IllegalArgumentException("speed should be greater than zero");
         }
-        mAnimationSpeed =  speed;
+        mSpeed =  speed;
         return this;
     }
     /**
@@ -307,7 +316,7 @@ public abstract class SXRAnimation {
         if(start>end || start<0 || end>mDuration){
             throw new IllegalArgumentException("start and end values are wrong");
         }
-        mAnimationOffset =  start;
+        mStartOffset =  start;
         mDuration = end-start;
         return this;
     }
@@ -355,33 +364,6 @@ public abstract class SXRAnimation {
         mReverse = reverse;
     }
 
-   /**
-     * Sets the blend and blend duration.
-     * @param blend true to apply blend; false no blend.
-     * @param blendDuration duration of blend.
-     */
-    public void setBlend(boolean blend, float blendDuration)
-    {
-        mBlend = blend;
-        mBlendDuration = blendDuration;
-    }
-
-    /**
-     * Set order name for this animation
-     * @param name order name to be set
-     */
-    public void setAnimationOrder(SXRAnimationOrder name) {
-        mOrderName = name;
-    }
-
-    /**
-     * Get order name for this animation.
-     * @returns SXRAnimationOrder with order name of this animation, may be null
-     */
-    public SXRAnimationOrder getAnimationOrder() {
-        return mOrderName;
-    }
-
     /**
      * Start the animation.
      *
@@ -418,11 +400,6 @@ public abstract class SXRAnimation {
 
     public void onStart()
     {
-        if((mBlend && this.mOrderName == SXRAnimationOrder.LAST)
-                ||(this.mOrderName == SXRAnimationOrder.MIDDLE))
-        {
-            mElapsedTime += mBlendDuration; //start animations after blend duration
-        }
         if (sDebug)
         {
             Log.d("ANIMATION", "%s started", getClass().getSimpleName());
@@ -449,7 +426,7 @@ public abstract class SXRAnimation {
     /**
      * Called by the animation engine. Uses the frame time, the interpolator,
      * and the repeat mode to generate a call to
-     * {@link #animate(SXRHybridObject, float)}.
+     * {@link #animate(float)}.
      *
      * @param frameTime
      *            elapsed time since the previous animation frame, in seconds
@@ -458,13 +435,12 @@ public abstract class SXRAnimation {
      */
 
     final boolean onDrawFrame(float frameTime) {
-
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
-        mElapsedTime += (frameTime*mAnimationSpeed);
+        mElapsedTime += (frameTime * mSpeed);
 
         final int currentCycleCount = (int) (mElapsedTime / mDuration);
-        final float cycleTime = (mElapsedTime % mDuration) + mAnimationOffset;
+        final float cycleTime = (mElapsedTime % mDuration) + mStartOffset;
 
         final boolean cycled = previousCycleCount != currentCycleCount;
         boolean stillRunning = cycled != true;
@@ -494,56 +470,33 @@ public abstract class SXRAnimation {
         }
 
         if (stillRunning) {
-            final boolean countDown = mRepeatMode == SXRRepeatMode.PINGPONG
-                    && (mReverse == true || (mIterations & 1) == 1);
+            final boolean countDown = mReverse ||
+                            ((mRepeatMode == SXRRepeatMode.PINGPONG) &&
+                            ((mIterations & 1) == 1));
 
-            float elapsedRatio = //
-                    countDown != true ? interpolate(cycleTime, mDuration)
-                            : interpolate(mDuration - cycleTime, mDuration);
-
-            animate(mTarget, elapsedRatio);
+            float elapsedRatio = countDown ? interpolate(mDuration - cycleTime, mDuration) :
+                                             interpolate(cycleTime, mDuration);
+            animate(elapsedRatio * mDuration);
 
         } else {
-
-            float endRatio = mRepeatMode == SXRRepeatMode.ONCE ? 1f : 0f;
-
-            float endRatioBlend; //endRatio in blend
-            float endRatioReverse; //endRatio in reverse
-
-            if(this.mOrderName == SXRAnimationOrder.FIRST || this.mOrderName == SXRAnimationOrder.MIDDLE)
-            {
-                endRatioBlend = interpolate (mDuration - mBlendDuration, mDuration);
-                endRatioReverse = interpolate (mBlendDuration, mDuration); //set end ratio for first and middle animations
-
-            }
-            else
-            {
-                endRatioBlend = interpolate(mDuration, mDuration);
-                endRatioReverse = 0;
-            }
-
-            endRatio = mReverse ? endRatioReverse : interpolate(mDuration, mDuration);
-
-            endRatioBlend = mReverse ? endRatioReverse : endRatioBlend;
-
-            endRatio = mBlend ? endRatioBlend : endRatio;
-
-            animate(mTarget, endRatio);
+            float endRatio = interpolate(mDuration, mDuration);
+            animate(endRatio * mDuration);
 
             onFinish();
+            isFinished = true;
             if (mOnFinish != null) {
                 mOnFinish.finished(this);
             }
-
-            isFinished = true;
         }
 
         return stillRunning;
     }
 
-    private float interpolate(float cycleTime, float duration) {
+    private float interpolate(float cycleTime, float duration)
+    {
         float ratio = cycleTime / duration;
-        return mInterpolator == null ? ratio : mInterpolator.mapRatio(ratio);
+        float v = (mInterpolator == null) ? ratio : mInterpolator.mapRatio(ratio);
+        return v;
     }
 
     /**
@@ -594,13 +547,10 @@ public abstract class SXRAnimation {
         return mRepeatCount;
     }
 
-    public float getAnimationOffset() {
-        return mAnimationOffset;
-    }
 
-    public float getAnimationSpeed()
+    public float getSpeed()
     {
-        return mAnimationSpeed;
+        return mSpeed;
     }
 
 
@@ -641,19 +591,6 @@ public abstract class SXRAnimation {
      */
     public void animate(float timeInSec)
     {
-        float ratio = timeInSec / mDuration;
-        animate(mTarget, ratio);
     }
 
-    /**
-     * Override this to create a new animation. Generally, you do this by
-     * changing some property of the {@code mTarget}, and letting SXRF handle
-     * screen updates automatically.
-     *
-     * @param target
-     *            The SXRF object to animate
-     * @param ratio
-     *            The start state is 0; the stop state is 1.
-     */
-    protected abstract void animate(SXRHybridObject target, float ratio);
 }

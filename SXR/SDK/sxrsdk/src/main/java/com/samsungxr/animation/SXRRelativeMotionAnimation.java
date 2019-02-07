@@ -42,7 +42,10 @@ public class SXRRelativeMotionAnimation extends SXRTransformAnimation
     public SXRRelativeMotionAnimation(SXRTransform target, float duration,
             float deltaX, float deltaY, float deltaZ) {
         super(target, duration);
-
+        if (duration < 0)
+        {
+            throw new IllegalArgumentException("Duration cannot be negative");
+        }
         mStartX = mPosition.x;
         mStartY = mPosition.y;
         mStartZ = mPosition.z;
@@ -72,7 +75,9 @@ public class SXRRelativeMotionAnimation extends SXRTransformAnimation
     }
 
     @Override
-    protected void animate(SXRHybridObject target, float ratio) {
+    public void animate(float timeInSec)
+    {
+        float ratio = timeInSec / mDuration;
         mTransform.setPosition(mStartX + mDeltaX * ratio, //
                 mStartY + mDeltaY * ratio, //
                 mStartZ + mDeltaZ * ratio);

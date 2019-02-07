@@ -724,9 +724,9 @@ public abstract class SXRContext implements IEventReceiver {
 
         final SXRMaterialAnimation fadeOut = new SXRMaterialAnimation(rd.getMaterial(), duration / 4.0f) {
             @Override
-            protected void animate(SXRHybridObject target, float ratio) {
-                final SXRMaterial material = (SXRMaterial) target;
-                material.setOpacity(finalOpacity - ratio * finalOpacity);
+            public void animate(float time) {
+                final SXRMaterial material = (SXRMaterial) getTarget();
+                material.setOpacity(finalOpacity * (1.0f - time / getDuration()));
             }
         };
         fadeOut.setOnFinish(new SXROnFinish() {
@@ -738,9 +738,9 @@ public abstract class SXRContext implements IEventReceiver {
 
         final SXRMaterialAnimation fadeIn = new SXRMaterialAnimation(rd.getMaterial(), 3.0f * duration / 4.0f) {
             @Override
-            protected void animate(SXRHybridObject target, float ratio) {
-                final SXRMaterial material = (SXRMaterial) target;
-                material.setOpacity(ratio * finalOpacity);
+            public void animate(float time) {
+                final SXRMaterial material = (SXRMaterial) getTarget();
+                material.setOpacity((finalOpacity * time) / getDuration());
             }
         };
         fadeIn.setOnFinish(new SXROnFinish() {

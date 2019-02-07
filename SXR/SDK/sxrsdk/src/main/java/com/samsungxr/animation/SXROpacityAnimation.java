@@ -39,7 +39,10 @@ public class SXROpacityAnimation extends SXRMaterialAnimation {
      */
     public SXROpacityAnimation(SXRMaterial target, float duration, float opacity) {
         super(target, duration);
-
+        if (duration < 0)
+        {
+            throw new IllegalArgumentException("Duration cannot be negative");
+        }
         if (mMaterial.hasUniform("u_opacity"))
         {
             mInitialOpacity = mMaterial.getOpacity();
@@ -76,8 +79,9 @@ public class SXROpacityAnimation extends SXRMaterialAnimation {
     }
 
     @Override
-    protected void animate(SXRHybridObject target, float ratio) {
-        float opacity = mDeltaOpacity * ratio;
+    public void animate(float timeInSec)
+    {
+        float opacity = mDeltaOpacity * timeInSec / mDuration;
         if (mInitialColor != null)
         {
             mMaterial.setVec4("diffuse_color", mInitialColor[0],

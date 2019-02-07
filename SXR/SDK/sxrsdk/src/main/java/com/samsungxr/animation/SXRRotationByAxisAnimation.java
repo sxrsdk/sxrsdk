@@ -53,6 +53,10 @@ public class SXRRotationByAxisAnimation extends SXRTransformAnimation
         mAxisY = y;
         mAxisZ = z;
         mStartRotation.set(mRotation);
+        if (duration < 0)
+        {
+            throw new IllegalArgumentException("Duration cannot be negative");
+        }
     }
 
     /**
@@ -79,8 +83,9 @@ public class SXRRotationByAxisAnimation extends SXRTransformAnimation
     }
 
     @Override
-    protected void animate(SXRHybridObject target, float ratio)
+    public void animate(float timeInSec)
     {
+        float ratio = timeInSec / mDuration;
         float angle = ratio * mAngle;
 
         mRotation.fromAxisAngleDeg(mAxisX, mAxisY, mAxisZ, angle);

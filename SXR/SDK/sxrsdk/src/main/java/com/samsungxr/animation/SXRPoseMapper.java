@@ -1,9 +1,6 @@
 package com.samsungxr.animation;
 
 import com.samsungxr.SXRHybridObject;
-import com.samsungxr.animation.SXRAnimation;
-import com.samsungxr.animation.SXRPose;
-import com.samsungxr.animation.SXRSkeleton;
 import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -39,10 +36,16 @@ public class SXRPoseMapper extends SXRAnimation
         mDestPose = new SXRPose(dstskel);
     }
 
-    public SXRAnimation setDuration(float start, float end)
+    public SXRAnimation setDuration(float dur)
     {
-        mAnimationOffset =  start;
-        mDuration = end - start;
+        mDuration = dur;
+        return this;
+    }
+
+    @Override
+    public SXRAnimation setStartOffset(float start)
+    {
+        mStartOffset = start;
         return this;
     }
 
@@ -234,7 +237,7 @@ public class SXRPoseMapper extends SXRAnimation
      * If a Skeleton is our target or a child, we update the joint angles
      * for the user associated with it.
      */
-    public void animate(SXRHybridObject target, float time)
+    public void animate(float timeInSec)
     {
         if ((mSourceSkeleton == null) || !mSourceSkeleton.isEnabled() || !mDestSkeleton.isEnabled())
         {

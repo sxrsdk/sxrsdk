@@ -92,6 +92,13 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     }
 
     /**
+     * Get the name of this skeleton animation.
+     * This is the name provided in the constructor.
+     * @return string name of animation.
+     */
+    public String getName() { return mName; }
+
+    /**
      * Get the skeleton for this animation.
      * @return {@link SXRSkeleton} this animation drives.
      */
@@ -217,12 +224,6 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
         }
     }
 
-    @Override
-    protected void animate(SXRHybridObject target, float ratio)
-    {
-        animate(getDuration() * ratio);
-    }
-
     /**
      * Compute pose of skeleton at the given time from the animation channels.
      * @param timeInSec animation time in seconds.
@@ -265,7 +266,10 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
                 pose.setLocalMatrix(i, temp);
             }
         }
-     return pose;
+        Vector3f v = new Vector3f();
+        skel.getPosition(v);
+        Log.d("ANIMATOR", "SkelAnim %s t = %f (%f, %f, %f)", mName, timeInSec, v.x, v.y, v.z);
+        return pose;
     }
 
     @Override
