@@ -11,7 +11,7 @@ env:
 before_install:   
   - echo yes | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2"
   - echo yes | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.2"
-  - yes | sdkmanager --licenses
+#  - yes | sdkmanager --licenses
   # newest Android NDK
   - wget https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip -O ndk.zip
   - unzip ndk.zip  > /dev/null 2>&1
@@ -24,10 +24,10 @@ android:
     - platform-tools
     - build-tools-28.0.3
     - android-25
-  licenses:
-    - android-sdk-preview-license-.+
-    - android-sdk-license-.+
-    - google-gdk-license-.+
+#  licenses:
+#    - android-sdk-preview-license-.+
+#    - android-sdk-license-.+
+#    - google-gdk-license-.+
 
 install:
     - git clone  https://sxrsdk:82c3775188fc23e31abd0d3e8db8fd499f17af34@github.com/sxrsdk/sxrsdk-demos.git $PROJECT_DIR/demos
