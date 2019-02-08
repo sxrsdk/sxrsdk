@@ -121,14 +121,18 @@ void Transform::setModelMatrix(glm::mat4 matrix) {
     glm::vec3 scale;
     glm::quat rotation;
     glm::vec3 translation;
-    glm::vec3 skew;
-    glm::vec4 perspective;
-    glm::decompose(matrix, scale, rotation, translation, skew, perspective);
 
     mutex_.lock();
-    position_ = translation;
-    scale_ = scale;
-    rotation_ = glm::conjugate(rotation);
+    scale_.x = glm::length(matrix[0]);
+    scale_.y = glm::length(matrix[1]);
+    scale_.z = glm::length(matrix[2]);
+    matrix[0] /= scale_.x;
+    matrix[1] /= scale_.y;
+    matrix[2] /= scale_.z;
+    position_.x = matrix[3][0];
+    position_.y = matrix[3][1];
+    position_.z = matrix[3][2];
+    rotation_ = glm::quat_cast(matrix);
     mutex_.unlock();
     invalidate(true);
 }

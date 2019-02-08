@@ -138,7 +138,7 @@ public final class AiAnimation {
      * @return the number of mesh animation channels
      */
     public int getNumMeshChannels() {
-        throw new UnsupportedOperationException("not implemented yet");
+        return m_meshMorphAnims.size();
     }
 
     
@@ -150,7 +150,7 @@ public final class AiAnimation {
      * @return the list of mesh animation channels
      */
     public List<AiMeshAnim> getMeshChannels() {
-        throw new UnsupportedOperationException("not implemented yet");
+        return m_meshMorphAnims;
     }
     
     
@@ -176,4 +176,10 @@ public final class AiAnimation {
      * Bone animation channels.
      */
     private final List<AiNodeAnim> m_nodeAnims = new ArrayList<AiNodeAnim>();
+
+
+    /**
+     * Mesh Morph animation channels
+     */
+    private final List<AiMeshAnim> m_meshMorphAnims = new ArrayList<AiMeshAnim>();
 }

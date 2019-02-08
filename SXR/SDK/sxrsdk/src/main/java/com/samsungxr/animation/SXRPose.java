@@ -15,6 +15,7 @@
 package com.samsungxr.animation;
 
 import com.samsungxr.PrettyPrint;
+import com.samsungxr.SXRNode;
 import com.samsungxr.utility.Log;
 import org.joml.Math;
 import org.joml.Matrix4f;
@@ -248,6 +249,7 @@ public class SXRPose implements PrettyPrint
             throw new IllegalArgumentException("Destination array is the wrong size");
         }
         mNeedSync = true;
+        mBones[0].setLocalPosition(positions[0], positions[1], positions[2]);
         for (int i = 0; i < mBones.length; ++i)
         {
             Bone bone = mBones[i];
@@ -686,6 +688,58 @@ public class SXRPose implements PrettyPrint
         {
             Log.d("BONE", "setLocalPosition: %s %s", mSkeleton.getBoneName(boneindex), bone.toString());
         }
+    }
+
+    /**
+     * Get the bounding volume of the skeleton's bones.
+     * @return float array with minX, minY, minZ, maxX, maxY maxZ
+     * @see #setWorldRotations
+     * @see #setWorldMatrix
+     * @see #setWorldPositions
+     */
+    public float[] getBound()
+    {
+        sync();
+        float x = mBones[0].WorldMatrix.m30();
+        float y = mBones[0].WorldMatrix.m31();
+        float z = mBones[0].WorldMatrix.m32();
+        float[] bv = new float[6];
+
+        bv[0] = bv[3] = x;
+        bv[1] = bv[4] = y;
+        bv[2] = bv[5] = z;
+        for (int i = 1; i < mBones.length; ++i)
+        {
+            int t = i * 3;
+            x = mBones[i].WorldMatrix.m30();
+            y = mBones[i].WorldMatrix.m31();
+            z = mBones[i].WorldMatrix.m32();
+            if (x < bv[0])
+            {
+                bv[0] = x;
+            }
+            else if (x > bv[3])
+            {
+                bv[3] = x;
+            }
+            if (y < bv[1])
+            {
+                bv[1] = y;
+            }
+            else if (y > bv[4])
+            {
+                bv[4] = y;
+            }
+            if (z < bv[2])
+            {
+                bv[2] = z;
+            }
+            else if (z > bv[5])
+            {
+                bv[5] = z;
+            }
+        }
+        return bv;
     }
 
     /**
