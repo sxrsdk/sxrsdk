@@ -30,7 +30,7 @@ android:
 #    - google-gdk-license-.+
 
 install:
-    - git clone  https://sxrsdk:82c3775188fc23e31abd0d3e8db8fd499f17af34@github.com/sxrsdk/sxrsdk-demos.git $PROJECT_DIR/demos
+    - git clone --depth 1 https://sxrsdk:82c3775188fc23e31abd0d3e8db8fd499f17af34@github.com/sxrsdk/sxrsdk-demos.git $PROJECT_DIR/demos
 
 before_script:
     - cd $PROJECT_DIR/SXR/SDK
