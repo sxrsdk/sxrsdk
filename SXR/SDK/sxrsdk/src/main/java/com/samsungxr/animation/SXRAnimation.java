@@ -361,6 +361,12 @@ public abstract class SXRAnimation {
     }
 
     /**
+     * Determine whether animation is reversed or no.
+     * @return true if reversed, false if not.
+     */
+    public boolean getReverse() { return mReverse; }
+
+    /**
      * Start the animation.
      *
      * Changing properties once the animation is running can have unpredictable
@@ -433,7 +439,8 @@ public abstract class SXRAnimation {
     final boolean onDrawFrame(float frameTime) {
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
-        mElapsedTime += (frameTime * mSpeed);
+//        mElapsedTime += (frameTime * mSpeed);
+        mElapsedTime += 1 / 30.0f;
 
         final int currentCycleCount = (int) (mElapsedTime / mDuration);
         final float cycleTime = (mElapsedTime % mDuration) + mStartOffset;
@@ -458,20 +465,23 @@ public abstract class SXRAnimation {
                 }
             }
         }
-
+        final boolean countDown = mReverse ||
+                                 ((mRepeatMode == SXRRepeatMode.PINGPONG) &&
+                                 ((mIterations & 1) == 1));
         if (stillRunning) {
-            final boolean countDown = mReverse ||
-                            ((mRepeatMode == SXRRepeatMode.PINGPONG) &&
-                            ((mIterations & 1) == 1));
 
             float elapsedRatio = countDown ? interpolate(mDuration - cycleTime, mDuration) :
                                              interpolate(cycleTime, mDuration);
             animate(elapsedRatio * mDuration);
 
         } else {
-            float endRatio = interpolate(mDuration, mDuration);
-            animate(endRatio * mDuration);
-
+            if (countDown) {
+                animate(0);
+            }
+            else {
+                float endRatio = interpolate(mDuration, mDuration);
+                animate(endRatio * mDuration);
+            }
             onFinish();
             isFinished = true;
             if (mOnFinish != null) {

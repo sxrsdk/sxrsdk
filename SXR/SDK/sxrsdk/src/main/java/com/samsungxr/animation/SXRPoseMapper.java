@@ -298,6 +298,7 @@ public class SXRPoseMapper extends SXRAnimation
         {
             dstskel.setPosition(v);
             dstskel.applyPose(mDestPose, SXRSkeleton.ROTATION_ONLY);
+            Log.d("ANIMATOR", "PoseMapper (%f, %f, %f)", v.x, v.y, v.z);
         }
         return true;
     }

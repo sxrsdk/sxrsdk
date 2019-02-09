@@ -15,15 +15,10 @@
 
 package com.samsungxr.animation;
 
-import com.samsungxr.SXRHybridObject;
-import com.samsungxr.SXRNode;
-import com.samsungxr.animation.keyframe.SXRFloatAnimation;
-import com.samsungxr.animation.keyframe.SXRQuatAnimation;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import static com.samsungxr.animation.SXRPose.Bone;
-import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
+import com.samsungxr.utility.Log;
 
 
 /**
@@ -88,7 +83,6 @@ public class SXRPoseInterpolator extends SXRAnimation
     public void animate(float timer)
     {
         SXRPose pose2 = mDestSkeleton.getPose();
-
         for (int k = 0; k < mDestSkeleton.getNumBones(); k++)
         {
             float t = timer / getDuration();
@@ -108,5 +102,6 @@ public class SXRPoseInterpolator extends SXRAnimation
         }
         pose2.sync();
         pose2.getLocalPosition(0, mTempVec1);
+        Log.d("ANIMATOR", "PoseInterpolator t=%f (%f, %f, %f)", timer, mTempVec1.x, mTempVec1.y, mTempVec1.z);
     }
 }

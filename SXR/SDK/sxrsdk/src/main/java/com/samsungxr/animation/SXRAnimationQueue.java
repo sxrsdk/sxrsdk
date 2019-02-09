@@ -3,11 +3,9 @@ package com.samsungxr.animation;
 import com.samsungxr.IEvents;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRDrawFrameListener;
-import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -111,6 +109,20 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
          * @param a {@link SXRAnimator} animator to remove blend animations from.
          */
         public void removeBlendAnimation(SXRAnimationQueue queue, SXRAnimator a);
+
+        /**
+         * Called to reverse the blend animation(s) added by {@link #addBlendAnimation} .
+         * @param {@link SXRAnimationQueue} which generated the callback.
+         * @param a {@link SXRAnimator} animator with blend animations.
+         */
+        public void reverseBlendAnimation(SXRAnimationQueue queue, SXRAnimator a);
+
+        /**
+         * Determine if the given animator is currently blending.
+         * @return true if blending, false if not
+         */
+        public boolean isBlending(SXRAnimationQueue q, SXRAnimator a);
+
     };
 
     protected SXRContext mContext;
@@ -405,9 +417,13 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
     {
         synchronized (mAnimQueue)
         {
-            if (mIsRunning && (mAnimQueue.size() > 0))
+            if (mIsRunning)
             {
-                mAnimQueue.clear();
+                while (mAnimQueue.size() > 0)
+                {
+                    SXRAnimator a = mAnimQueue.get(0);
+                    stop(a);
+                }
                 onStop();
             }
         }
@@ -425,29 +441,32 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
             SXRAnimator animator = mAnimQueue.get(mCurIndex);
             if (!animator.isRunning())
             {
-                animator.setReverse(reverse);
-                if ((mBlendFactor > 0) && (mRepeatMode == SXRRepeatMode.REPEATED))
-                {
-                    mQueueListener.addBlendAnimation(this, animator, mBlendFactor);
-                }
                 animator.start();
                 mQueueListener.onAnimationStarted(this, animator);
             }
             int nextIndex = NextAnimIndex(mCurIndex);
-            if (nextIndex >= 0)
+            if (nextIndex < 0)
             {
-                SXRAnimator animator2 = mAnimQueue.get(nextIndex);
-                if (!animator2.isRunning() && (mBlendFactor > 0))
+                nextIndex = mCurIndex;
+                if (reverse)
                 {
-                    SXRAnimation a = animator.getAnimation(0);
-                    float timeleft = a.getDuration() - a.getElapsedTime();
-                    if (mBlendFactor >= timeleft)
-                    {
-                        animator2.setReverse(reverse);
-                        mQueueListener.addBlendAnimation(this, animator2, animator, mBlendFactor);
-                        animator2.start();
-                        mQueueListener.onAnimationStarted(this, animator2);
-                    }
+                    if (--nextIndex < 0) nextIndex = mAnimQueue.size() - 1;
+                }
+                else
+                {
+                    if (++nextIndex >= mAnimQueue.size()) nextIndex = 0;
+                }
+            }
+            SXRAnimator animator2 = mAnimQueue.get(nextIndex);
+            if ((mBlendFactor > 0) && !mQueueListener.isBlending(this, animator2))
+            {
+                SXRAnimation a = animator.getAnimation(0);
+                float timeleft = a.getDuration() - a.getElapsedTime();
+                if (mBlendFactor >= timeleft)
+                {
+                    mQueueListener.addBlendAnimation(this, animator2, animator, mBlendFactor);
+                    animator2.start();
+                    mQueueListener.onAnimationStarted(this, animator2);
                 }
             }
             nextIndex = mCurIndex;
@@ -497,19 +516,21 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
         }
         else
         {
-            animator.stop();
-            mQueueListener.removeBlendAnimation(this, animator);
-            if (nextIndex < 0)
+            if (mRepeatMode == SXRRepeatMode.PINGPONG)
             {
-                if (mRepeatMode == SXRRepeatMode.PINGPONG)
+                animator.stop();
+                mQueueListener.reverseBlendAnimation(this, animator);
+                if (nextIndex < 0)
                 {
                     reverse = !reverse;
+                    return;
                 }
-                else
-                {
-                    mCurIndex = 0;
-                }
-                return;
+            }
+            else
+            {
+                stop(animator);
+                start(animator);
+                nextIndex = 0;
             }
         }
         mCurIndex = nextIndex;
