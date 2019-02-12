@@ -439,8 +439,7 @@ public abstract class SXRAnimation {
     final boolean onDrawFrame(float frameTime) {
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
-//        mElapsedTime += (frameTime * mSpeed);
-        mElapsedTime += 1 / 30.0f;
+        mElapsedTime += (frameTime * mSpeed);
 
         final int currentCycleCount = (int) (mElapsedTime / mDuration);
         final float cycleTime = (mElapsedTime % mDuration) + mStartOffset;

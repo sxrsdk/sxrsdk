@@ -490,33 +490,29 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
         int nextIndex = NextAnimIndex(mCurIndex);
 
         mQueueListener.onAnimationFinished(this, oldAnimator);
-        if (mRepeatMode == SXRRepeatMode.ONCE)
+        if (mRepeatMode == SXRRepeatMode.PINGPONG)
         {
-            stop(animator);
+            animator.stop();
+            mQueueListener.removeBlendAnimation(this, animator);
+            animator.setReverse(!animator.getReverse());
             if (nextIndex < 0)
             {
-                onStop();
+                reverse = !reverse;
                 return;
             }
         }
         else
         {
-            if (mRepeatMode == SXRRepeatMode.PINGPONG)
+            stop(animator);
+            if (mRepeatMode == SXRRepeatMode.REPEATED)
             {
-                animator.stop();
-                mQueueListener.removeBlendAnimation(this, animator);
-                animator.setReverse(!animator.getReverse());
-                if (nextIndex < 0)
-                {
-                    reverse = !reverse;
-                    return;
-                }
-            }
-            else
-            {
-                stop(animator);
                 start(animator);
-                nextIndex = 0;
+                return;
+            }
+            else if (nextIndex < 0)
+            {
+                onStop();
+                return;
             }
         }
         mCurIndex = nextIndex;

@@ -186,6 +186,14 @@ public class SXRAvatar extends SXRBehavior
         SXRSkeletonAnimation skelOne = (SXRSkeletonAnimation) src.getAnimation(0);
         SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation) dst.getAnimation(0);;
 
+        for (int i = 0; i < src.getAnimationCount(); ++i)
+        {
+            SXRAnimation anim = src.getAnimation(i);
+            if (anim instanceof SXRPoseMapper)
+            {
+                SXRAnimationEngine.getInstance(mContext).stop(anim);
+            }
+        }
         for (int i = 0; i < dst.getAnimationCount(); ++i)
         {
             SXRAnimation anim  = dst.getAnimation(i);
