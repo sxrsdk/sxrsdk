@@ -256,6 +256,12 @@ public class SXRAnimator extends SXRBehavior
     }
 
     /**
+     * Determines if animator is running in reverse
+     * @return true if reversed, false if not
+     */
+    public boolean getReverse() { return mReverse; }
+
+    /**
      * Sets the offset for the all animations in this animator.
      *
      * @param startOffset animation will start at the specified offset value
