@@ -48,7 +48,7 @@ public class SXRPhongLayeredShader extends SXRShaderTemplate
                  "float2 u_lightmap_offset; float2 u_lightmap_scale; " +
                 "int diffuseTexture1_blendop; int ambientTexture1_blendop; int specularTexture1_blendop; " +
                 "int emissiveTexture1_blendop; int lightmapTexture1_blendop; " +
-                "float specular_exponent; float line_width; int u_numblendshapes; float u_blendweights[75];",
+                "float specular_exponent; float line_width; int u_numblendshapes; float u_blendweights[200];",
 
                 "sampler2D diffuseTexture; sampler2D ambientTexture; sampler2D specularTexture; sampler2D opacityTexture; sampler2D lightmapTexture; sampler2D normalTexture; sampler2D emissiveTexture; sampler2D blendshapeTexture; " +
                 "sampler2D diffuseTexture1; sampler2D ambientTexture1; sampler2D specularTexture1; sampler2D lightmapTexture1; sampler2D emissiveTexture1",
@@ -104,6 +104,7 @@ public class SXRPhongLayeredShader extends SXRShaderTemplate
         material.setFloat("specular_exponent", 0.0f);
         material.setFloat("line_width", 1.0f);
         material.setFloat("u_opacity", 0.0f);
+        material.setInt("u_numblendshapes", 0);
     }
 }
 

@@ -67,14 +67,11 @@ public class SXRMeshMorph extends SXRBehavior
     protected int mDescriptorFlags = 0;
 
     final protected int mNumBlendShapes;
-    //final protected boolean mMorphNormals;
     protected int mFloatsPerVertex;
     protected int mTexWidth;
     protected int mNumVerts;
-    protected boolean desc;
     protected float[] mWeights;
     protected float[] mBlendShapeDiffs;
-    protected String[] descriptors = new String[2];
     protected float[] mBaseBlendShape;
     protected SXRVertexBuffer mbaseShape;
 
@@ -92,6 +89,10 @@ public class SXRMeshMorph extends SXRBehavior
         if (numBlendShapes <= 0)
         {
             throw new IllegalArgumentException("Number of blend shapes must be positive");
+        }
+        if (numBlendShapes > 200)
+        {
+            throw new IllegalArgumentException("Number of blend shapes must be less than 200");
         }
         mFloatsPerVertex = 0;
         mTexWidth = 0; // 3 floats for position
@@ -130,8 +131,6 @@ public class SXRMeshMorph extends SXRBehavior
             throw new IllegalStateException("Scene object shader does not support morphing");
         }
         copyBaseShape(mesh.getVertexBuffer());
-        mtl.setInt("u_numblendshapes", mNumBlendShapes);
-        mtl.setFloatArray("u_blendweights", mWeights);
     }
 
     public void onDetach(SXRNode sceneObj)
@@ -212,26 +211,57 @@ public class SXRMeshMorph extends SXRBehavior
         }
     }
 
+    /**
+     * Get the weight for a specific blend shapel
+     * @param index 0 based index of blend shape
+     * @return weight associated with blend shape
+     * @see #setWeights(float[])
+     */
     public float getWeight(int index)
     {
         return mWeights[index];
     }
 
+    /**
+     * Get the array of blend shape weights.
+     * The entries are in the same order as the blend
+     * shapes are indexed.
+     * @return blend shape weights
+     * @see #setWeights(float[])
+     */
     public final float[] getWeights()
     {
         return mWeights;
     }
 
+    /**
+     * Update the blend shape weights.
+     * This will update the {@link SXRMaterial} associated with the
+     * geometry being morphed. The blend shape weights array
+     * must have an entry for each blend shape.
+     * @param weights array of blend shape weights
+     * @see #getWeights()
+     */
     public void setWeights(float[] weights)
     {
         SXRMaterial mtl = getMaterial();
+        if (weights.length != mNumBlendShapes)
+        {
+            throw new IllegalArgumentException("Weights array must have an entry for each blend shape");
+        }
         System.arraycopy(weights, 0, mWeights, 0, mWeights.length);
         if (mtl != null)
         {
+            mtl.setInt("u_numblendshapes", mNumBlendShapes);
             mtl.setFloatArray("u_blendweights", mWeights);
         }
     }
 
+    /**
+     * Update a blend shape from the geometry in a node.
+     * @param index 0-based index of blend shape to update.
+     * @param obj {@SXRNode} with the mesh containing blend shape geometry.
+     */
     public void setBlendShape(int index, SXRNode obj)
     {
         SXRRenderData rdata = obj.getRenderData();
@@ -247,6 +277,11 @@ public class SXRMeshMorph extends SXRBehavior
         setBlendShape(index, vbuf);
     }
 
+    /**
+     * Update a blend shape from the geometry in a vertex buffer.
+     * @param index 0-based index of blend shape to update.
+     * @param vbuf {@SXRVertexBuffer} with the blend shape geometry.
+     */
     public void setBlendShape(int index, SXRVertexBuffer vbuf)
     {
         int shapeDescriptorFlags = 0;
@@ -286,11 +321,20 @@ public class SXRMeshMorph extends SXRBehavior
         return ((SXRRenderData) comp).getMaterial();
     }
 
+    /**
+     * Gets the number of blend shapes.
+     * This is established at creation time and cannot be changed.
+     * @return number of blend shapes
+     */
     public int getBlendShapeCount()
     {
         return mNumBlendShapes;
     }
 
+    /**
+     * Update the blend shape information in the GPU.
+     * @return true if updated, false on error
+     */
     public boolean update()
     {
         SXRTexture blendshapeTex;

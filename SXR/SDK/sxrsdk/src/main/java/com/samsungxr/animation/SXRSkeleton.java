@@ -323,6 +323,15 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     }
 
     /**
+     * Get the bounding volume of the skeleton's bones.
+     * @return float array with minX, minY, minZ, maxX, maxY maxZ
+     */
+    public float[] getBound()
+    {
+        return mPose.getBound();
+    }
+
+    /**
      * Get the current skeleton pose.
      * <p>
      * The<i>current pose</i> is the pose the skeleton is currently in. It contains the

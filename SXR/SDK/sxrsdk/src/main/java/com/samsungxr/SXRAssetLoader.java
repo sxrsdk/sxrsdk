@@ -19,6 +19,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.os.Environment;
 
 import com.samsungxr.SXRAndroidResource.TextureCallback;
 import com.samsungxr.animation.SXRAnimator;
@@ -53,6 +54,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static android.os.Environment.getExternalStorageDirectory;
 
 /**
  * {@link SXRAssetLoader} provides methods for importing 3D models and textures.
@@ -168,15 +171,6 @@ public final class SXRAssetLoader implements IEventReceiver
                 }
                 catch (IOException ex)
                 {
-                    SXRAndroidResource r = new SXRAndroidResource(mContext, R.drawable.white_texture);
-                    SXRAsynchronousResourceLoader.loadTexture(mContext, mTextureCache,
-                                                              request, r, DEFAULT_PRIORITY, SXRCompressedImage.BALANCED);
-
-                    SXRImage whiteTex = getDefaultImage(mContext);
-                    if (whiteTex != null)
-                    {
-                        request.loaded(whiteTex, null);
-                    }
                     onTextureError(request.Texture, ex.getMessage(), request.TextureFile);
                 }
             }
@@ -219,7 +213,6 @@ public final class SXRAssetLoader implements IEventReceiver
                 if (image != null)
                 {
                     Log.d(TAG, "ASSET: loadEmbeddedTexture found %s", resource.getResourcePath());
-                    bmapTex.setImage(image);
                     request.loaded(image, resource);
                     return bmapTex;
                 }
@@ -240,7 +233,6 @@ public final class SXRAssetLoader implements IEventReceiver
                 image = bmaptex;
                 Log.d(TAG, "ASSET: loadEmbeddedTexture saved %s", resource.getResourcePath());
                 texCache.put(request.TextureFile, image);
-                bmapTex.setImage(image);
             }
             request.loaded(image, resource);
             return bmapTex;
@@ -265,6 +257,9 @@ public final class SXRAssetLoader implements IEventReceiver
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(),
                     IAssetEvents.class,
                     "onModelLoaded", mContext, model, modelFile);
+            mContext.getEventManager().sendEvent(mContext,
+                                                 IAssetEvents.class,
+                                                 "onModelLoaded", mContext, model, modelFile);
             if (mNumTextures == 0)
             {
                 generateLoadEvent();
@@ -289,6 +284,8 @@ public final class SXRAssetLoader implements IEventReceiver
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetImportEvents.class,
                                                  "onTextureLoaded", texture, texFile);
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetEvents.class,
+                                                 "onTextureLoaded", mContext, texture, texFile);
+            mContext.getEventManager().sendEvent(mContext, IAssetEvents.class,
                                                  "onTextureLoaded", mContext, texture, texFile);
             synchronized (mNumTextures)
             {
@@ -330,6 +327,9 @@ public final class SXRAssetLoader implements IEventReceiver
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(),
                                                  IAssetEvents.class,
                                                  "onModelError", mContext, error, modelFile);
+            mContext.getEventManager().sendEvent(mContext,
+                                                 IAssetEvents.class,
+                                                 "onModelError", mContext, error, modelFile);
             mErrors += error + "\n";
             mModel = null;
             mNumTextures = 0;
@@ -353,6 +353,16 @@ public final class SXRAssetLoader implements IEventReceiver
                                                  "onTextureError", texture, texFile, error);
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetEvents.class,
                                                  "onTextureError", mContext, error, texFile);
+            mContext.getEventManager().sendEvent(mContext, IAssetEvents.class,
+                                                 "onTextureError", mContext, error, texFile);
+            if (texture.getImage() == null)
+            {
+                SXRImage whiteTex = getDefaultImage(mContext);
+                if (whiteTex != null)
+                {
+                    texture.loaded(whiteTex, null);
+                }
+            }
             synchronized (mNumTextures)
             {
                 Log.e(TAG, "ASSET: Texture: ERROR cannot load texture %s %d", texFile, mNumTextures);
@@ -390,6 +400,8 @@ public final class SXRAssetLoader implements IEventReceiver
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetImportEvents.class,
                                                  "onAssetLoaded", model, mFileName, errors);
             mContext.getEventManager().sendEvent(mContext.getAssetLoader(), IAssetEvents.class,
+                                                 "onAssetLoaded", mContext, model, mFileName, errors);
+            mContext.getEventManager().sendEvent(mContext, IAssetEvents.class,
                                                  "onAssetLoaded", mContext, model, mFileName, errors);
         }
 
@@ -522,6 +534,7 @@ public final class SXRAssetLoader implements IEventReceiver
         public void failed(Throwable t, SXRAndroidResource resource)
         {
             SXRContext ctx = Texture.getSXRContext();
+            Texture.failed(t, resource);
             if (mCallback != null)
             {
                 mCallback.failed(t, resource);
@@ -529,15 +542,11 @@ public final class SXRAssetLoader implements IEventReceiver
             if (mAssetRequest != null)
             {
                 mAssetRequest.onTextureError(Texture, t.getMessage(), TextureFile);
-
-                SXRImage whiteTex = getDefaultImage(ctx);
-                if (whiteTex != null)
-                {
-                    Texture.loaded(whiteTex, null);
-                }
             }
-            ctx.getEventManager().sendEvent(ctx, IAssetEvents.class,
-                    "onTextureError", ctx, t.getMessage(), TextureFile);
+            else
+            {
+                ctx.getEventManager().sendEvent(ctx, IAssetEvents.class, "onTextureError", ctx, t.getMessage(), TextureFile);
+            }
         }
 
         @Override
@@ -1208,7 +1217,6 @@ public final class SXRAssetLoader implements IEventReceiver
                 String filePath = volume.getFullPath();
                 String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
-                getEventReceiver().addListener(handler);
                 assetRequest.setImportSettings(SXRImportSettings.getRecommendedSettings());
                 assetRequest.setHandler(handler);
                 model.setName(assetRequest.getBaseName());
@@ -1433,7 +1441,6 @@ public final class SXRAssetLoader implements IEventReceiver
         String ext = filePath.substring(filePath.length() - 3).toLowerCase();
 
         model.setName(assetRequest.getBaseName());
-        getEventReceiver().addListener(handler);
         assetRequest.setHandler(handler);
         assetRequest.setImportSettings(SXRImportSettings.getRecommendedSettings());
         if (ext.equals("x3d"))

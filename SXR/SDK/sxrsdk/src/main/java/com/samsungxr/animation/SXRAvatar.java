@@ -19,6 +19,7 @@ import com.samsungxr.utility.Log;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     protected SXREventReceiver mReceiver;
     protected final List<SXRAnimator> mAnimQueue = new ArrayList<SXRAnimator>();
     protected int mRepeatMode = SXRRepeatMode.ONCE;
+    protected EnumSet<SXRImportSettings> mImportSettings;
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -71,6 +73,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         mAvatarRoot = new SXRNode(ctx);
         mAvatarRoot.setName(name);
         mAnimations = new CopyOnWriteArrayList<>();
+        mImportSettings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_ANIMATION));
     }
 
     static public long getComponentType() { return TYPE_AVATAR; }
@@ -114,6 +117,20 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * Determine if this avatar is currently animating.
      */
     public boolean isRunning() { return mIsRunning; }
+
+
+    /**
+     * Set the import settings for loading the avatar.
+     * Avatars are always imported without animation. You can use
+     * the import settings to determine whether or not you want
+     * morphing, textures, etc.
+     * @param settings {@link SXRImportSettings} with the import settings desired.
+     */
+    public void setImportSettings(EnumSet<SXRImportSettings> settings)
+    {
+        mImportSettings = settings;
+        mImportSettings.add(SXRImportSettings.NO_ANIMATION);
+    }
 
     /**
      * Query the number of animations owned by this avatar.
@@ -250,7 +267,6 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public void loadModel(SXRAndroidResource avatarResource, String modelDesc, String attachBone)
     {
-        EnumSet<SXRImportSettings> settings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_ANIMATION));
         SXRContext ctx = mAvatarRoot.getSXRContext();
         SXRResourceVolume volume = new SXRResourceVolume(ctx, avatarResource);
         SXRNode modelRoot = new SXRNode(ctx);
@@ -258,7 +274,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         {
             mAttachments.put(attachBone, modelRoot);
         }
-        ctx.getAssetLoader().loadModel(volume, modelRoot, settings, true, mLoadModelHandler);
+        ctx.getAssetLoader().loadModel(volume, modelRoot, mImportSettings, true, mLoadModelHandler);
     }
 
     /**
@@ -350,9 +366,12 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         }
         else
         {
-            EnumSet<SXRImportSettings> settings = SXRImportSettings.getRecommendedSettingsWith(
-                    EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_TEXTURING, SXRImportSettings.NO_MORPH));
-
+            EnumSet<SXRImportSettings> settings = EnumSet.of(SXRImportSettings.TRIANGULATE,
+                                                             SXRImportSettings.FLIP_UV,
+                                                             SXRImportSettings.LIMIT_BONE_WEIGHT,
+                                                             SXRImportSettings.CALCULATE_TANGENTS,
+                                                             SXRImportSettings.NO_ANIMATION,
+                                                             SXRImportSettings.SORTBY_PRIMITIVE_TYPE);
             SXRNode animRoot = new SXRNode(ctx);
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
         }
@@ -544,10 +563,54 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         }
     }
 
-    public void centerModel(SXRNode model)
+    /**
+     * Center the avatar, taking into account the skeleton transformations.
+     * @param model root of hierarchy containing avatar
+     * @param pos   on input: camera position, on output: avatar position
+     * @return scale factor
+     */
+    public float centerModel(SXRNode model, Vector3f pos)
     {
-        SXRNode.BoundingVolume bv = model.getBoundingVolume();
-        model.getTransform().setPosition(-bv.center.x, -bv.center.y, -bv.center.z - 1.5f * bv.radius);
+        if (mSkeleton != null)
+        {
+            SXRNode bone = mSkeleton.getBone(0);
+            Matrix4f mtx1 = bone.getTransform().getModelMatrix4f();
+            Matrix4f mtx2 = new Matrix4f();
+            float[] bv = mSkeleton.getBound();
+            Vector4f cmin = new Vector4f(bv[0], bv[1], bv[2], 1);
+            Vector4f cmax = new Vector4f(bv[3], bv[4], bv[5], 1);
+
+            mSkeleton.getPose().getLocalMatrix(0, mtx2);
+            mtx2.invert(mtx2);
+            mtx1.mul(mtx2, mtx2);
+            cmin.mul(mtx2);
+            cmax.mul(mtx2);
+
+            float cx = (cmax.x + cmin.x) / 2;
+            float cy = (cmax.y + cmin.y) / 2;
+            float cz = (cmax.z + cmin.z) / 2;
+            float r = Math.max(cmax.x - cmin.x,
+                               Math.max(cmax.y - cmin.y,
+                                        cmax.z - cmin.z));
+            float sf = 0.5f / r;
+            cx *= sf;
+            cy *= sf;
+            cz *= sf;
+            pos.x -= cx;
+            pos.y -= cy;
+            pos.z -= cz;
+            return sf;
+        }
+        else
+        {
+            SXRNode.BoundingVolume bv = model.getBoundingVolume();
+            float sf = 1 / bv.radius;
+            bv = model.getBoundingVolume();
+            pos.x -= bv.center.x;
+            pos.y -= bv.center.y;
+            pos.z -= bv.center.z;
+            return sf;
+        }
     }
 
     protected String mergeSkeleton(SXRSkeleton skel, SXRNode modelRoot)
