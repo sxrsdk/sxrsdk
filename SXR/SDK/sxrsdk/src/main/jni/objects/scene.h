@@ -15,7 +15,7 @@
 
 
 /***************************************************************************
- * Holds nodes. Can be used by engines.
+ * Holds scene objects. Can be used by engines.
  ***************************************************************************/
 
 #ifndef SCENE_H_
@@ -29,8 +29,8 @@
 #include "objects/shader_data.h"
 #include "components/camera_rig.h"
 #include "engine/renderer/renderer.h"
+#include "objects/light.h"
 #include "objects/lightlist.h"
-#include "objects/node.h"
 
 
 namespace sxr {
@@ -38,45 +38,131 @@ namespace sxr {
 class Light;
 class Collider;
 
+/**
+ * Manages the scene graph and global properties such as
+ * the camera rig, light sources, picking and colliders.
+ * An application may have more than one scene and scene objects
+ * can be shared between scenes.
+ * @see SceneObject
+ * @see Collider
+ * @see Light
+ */
 class Scene: public HybridObject {
 public:
     static const int MAX_LIGHTS = 16;
     Scene();
     virtual ~Scene();
-    void set_java(JavaVM* javaVM, jobject javaScene);
+
+    /**
+     * Get the topmost root of the scene graph.
+     * This node cannot be removed.
+     * @return root of scene graph.
+     */
     Node* getRoot() { return scene_root_; }
-    void addNode(Node* node);
-    void removeNode(Node* node);
+
+    /**
+     * Remove a scene object from the root.
+     * @param scene_object Node to remove.
+     * @see #addNode
+     */
+    void removeNode(Node* scene_object);
+
+    /**
+     * Remove all of the scene objects added by the application.
+     * The camera rig and cursor will remain.
+     * @see #removeNode
+     */
     void removeAllNodes();
 
-    const CameraRig* main_camera_rig() {
+    /**
+     * Get the main camera rig for the scene.
+     * The scene objects within the scene may have Camera
+     * components attached. The main CameraRig is attached to
+     * a scene object underneath the root.
+     * @return CameraRig for main camera.
+     * @see #set_main_camera_rig
+     */
+    const CameraRig* main_camera_rig()
+    {
         return main_camera_rig_;
     }
-    void set_main_camera_rig(CameraRig* camera_rig) {
+
+    /**
+     * Set the main camera rig for the scene.
+     * The main CameraRig is attached to
+     * a scene object underneath the root.
+     * @return CameraRig for main camera.
+     * @see #main_camera_rig
+     */
+    void set_main_camera_rig(CameraRig* camera_rig)
+    {
         main_camera_rig_ = camera_rig;
     }
+
+    /**
+     * Get a vector with all of the scene objects.
+     * This function is ridiculously inefficient
+     * and should be avoided.
+     * @return vector with all the scene objects.
+     */
     std::vector<Node*> getWholeNodes();
 
-    void set_frustum_culling( bool frustum_flag){ frustum_flag_ = frustum_flag; }
+    /**
+     * Enable or disable view frustum culling.
+     * When culling is enabled, GearVRF does not render
+     * scene objects outside the camera view frustum.
+     * @param flag  true to enable frustum culling, false to disabled
+     * @see #get_frustum_culling
+     */
+    void set_frustum_culling( bool flag)
+    {
+        frustum_flag_ = flag;
+    }
+
+    /**
+     * Determine whether view frustum culling is enabled.
+     * @return true if enabled, false if not
+     * @see #set_frustum_culling
+     */
     bool get_frustum_culling(){ return frustum_flag_; }
 
-    void set_occlusion_culling( bool occlusion_flag){ occlusion_flag_ = occlusion_flag; }
+    /**
+     * Enable or disable view occlusion culling.
+     * When occlusion culling is enabled, GearVRF tries to
+     * not render objects that are obscured by other objects.
+     * @param frustum_flag true to enable frustum culling, false to disabled
+     * @see #get_occlusion_culling
+     */
+    void set_occlusion_culling(bool flag)
+    {
+        occlusion_flag_ = flag;
+    }
+
+    /**
+     * Determine whether occlusion culling is enabled.
+     * @return true if enabled, false if not
+     * @see #set_occlusion_culling
+     */
     bool get_occlusion_culling(){ return occlusion_flag_; }
 
     /*
      * Adds a new light to the scene.
-     * Return true if light was added, false if already there or too many lights.
+     * @return true if light was added, false if already there or too many lights.
+     * @see #removeLight
      */
     bool addLight(Light* light);
 
     /*
      * Removes an existing light from the scene.
-     * Return true if light was removed, false if light was not in the scene.
+     * @return true if light was removed, false if light was not in the scene.
+     * @see #addLight
      */
     bool removeLight(Light* light);
 
     /*
      * Removes all the lights from the scene.
+     * @see #addLight
+     * @see #removeLight
      */
     void clearLights();
 
@@ -84,33 +170,63 @@ public:
      * Executes a Java function which generates the
      * depth shaders for shadow mapping.
      */
-    void makeDepthShaders(jobject jscene);
+    bool makeDepthShaders(Renderer* renderer, jobject jscene);
 
-    void resetStats() {
-        gRenderer = Renderer::getInstance();
-        gRenderer->resetStats();
-
+    /**
+     * Reset draw call and triangle rendering statistics.
+     */
+    void resetStats()
+    {
+        Renderer* r = Renderer::getInstance();
+        if (r)
+        {
+            r->resetStats();
+        }
     }
-    int getNumberDrawCalls() {
-        if(nullptr!= gRenderer){
-            return gRenderer->getNumberDrawCalls();
+
+    /**
+     * Get the number of draw calls made so far in the current frame.
+     * @return count of draw calls
+     */
+    int getNumberDrawCalls()
+    {
+        Renderer* r = Renderer::getInstance();
+        if (r)
+        {
+            return r->getNumberDrawCalls();
         }
         return 0;
     }
-    int getNumberTriangles() {
-        if(nullptr!= gRenderer) {
-            return gRenderer->getNumberTriangles();
+
+    /**
+     * Get the number of triangles rendered so far in the current frame.
+     * @return count of draw triangles rendered
+     */
+    int getNumberTriangles()
+    {
+        Renderer* r = Renderer::getInstance();
+        if (r)
+        {
+            return r->getNumberTriangles();
         }
         return 0;
     }
 
     void exportToFile(std::string filepath);
 
+    /**
+     * Get the list of lights used by this scene.
+     * @return LightList
+     */
     const LightList& getLights() const
     {
         return lights_;
     }
 
+    /**
+     * Get the list of lights used by this scene.
+     * @return LightList
+     */
     LightList& getLights()
     {
         return lights_;
@@ -121,11 +237,17 @@ public:
      * Otherwise, all objects are pickable.
      * Enabling this feature incurs a small amount of overhead
      * during culling to gather the visible colliders.
+     * @see #getPickVisible
+     * @see #addCollider
+     * @see #removeCollider
      */
     void setPickVisible(bool pickflag) { pick_visible_ = pickflag; }
 
     /*
      * Returns true if only visible objects are picked.
+     * @see #setPickVisible
+     * @see #addCollider
+     * @see #removeCollider
      */
     bool getPickVisible() const { return pick_visible_; }
 
@@ -134,15 +256,19 @@ public:
      * This list is used to optimize picking by only
      * searching the pickable objects.
      * Colliders are added to this list when attached
-     * to a node.
-     */
+     * to a scene object.
+     * @see #setPickVisible
+     * @see #removeCollider
+    */
     void addCollider(Collider* collider);
 
     /*
      * Remove a collider from the internal collider list.
      * Colliders are removed from the list when detached
-     * from a node.
-     */
+     * from a scene object.
+     * @see #setPickVisible
+     * @see #addCollider
+    */
     void removeCollider(Collider* collider);
 
     /*
@@ -150,13 +276,19 @@ public:
      * This list is constructed every frame during culling
      * to contain only the pickable objects that are visible.
      * This function does not lock the collider list!
+     * @see #setPickVisible
+     * @see #addCollider
+     * @see #removeCollider
      */
     void clearVisibleColliders() { visibleColliders.clear(); }
 
     /*
-     * Called during culling to add a node's
+     * Called during culling to add a scene object's
      * collider to the visible collider list.
-     */
+     * @see #setPickVisible
+     * @see #addCollider
+     * @see #removeCollider
+    */
     void pick(Node* sceneobj);
 
     /*
@@ -174,23 +306,29 @@ public:
      * Unlock the collider list.
      * Don't call this unless you have called lockColliders first.
      */
-    void unlockColliders() {
+    void unlockColliders()
+    {
         collider_mutex_.unlock();
     }
 
-    JavaVM* getJavaVM() const { return javaVM_; }
-
-    int get_java_env(JNIEnv** envptr);
-
-    static Scene* main_scene() {
+    /**
+     * Get the current main scene (the one being rendered
+     * in stereo to both eyes).
+     * @return main Scene object
+     * @see #set_main_scene
+     */
+    static Scene* main_scene()
+    {
         return main_scene_;
     }
 
+    /**
+     * Set the current main scene (the one being rendered
+     * in stereo to both eyes).
+     * @param new main scene
+     * @see #get_main_scene
+     */
     static void set_main_scene(Scene* scene);
-
-    void detach_java_env() {
-        javaVM_->DetachCurrentThread();
-    }
 
     void setSceneRoot(Node *sceneRoot);
 
@@ -199,16 +337,20 @@ private:
     Scene(Scene&& scene) = delete;
     Scene& operator=(const Scene& scene) = delete;
     Scene& operator=(Scene&& scene) = delete;
-    void clearAllColliders();
 
+    /*
+     * Clear the entire collider list.
+     * @see #setPickVisible
+     * @see #addCollider
+     * @see #removeCollider
+     */
+    void clearAllColliders();
 
 private:
     static Scene* main_scene_;
-    JavaVM* javaVM_;
     jmethodID makeDepthShadersMethod_;
     Node* scene_root_ = nullptr;
     CameraRig* main_camera_rig_;
-    int dirtyFlag_;
     bool frustum_flag_;
     bool occlusion_flag_;
     bool pick_visible_;

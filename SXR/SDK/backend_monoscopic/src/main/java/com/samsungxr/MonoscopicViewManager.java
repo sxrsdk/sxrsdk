@@ -16,6 +16,7 @@
 package com.samsungxr;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.util.DisplayMetrics;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -24,6 +25,7 @@ import com.samsungxr.debug.SXRFPSTracer;
 import com.samsungxr.debug.SXRMethodCallTracer;
 import com.samsungxr.debug.SXRStatsLine;
 import com.samsungxr.utility.Log;
+import com.samsungxr.utility.Threads;
 import com.samsungxr.utility.VrAppSettings;
 
 /*
@@ -270,7 +272,6 @@ class MonoscopicViewManager extends SXRViewManager implements MonoscopicRotation
     void onPause() {
         super.onPause();
         mRotationSensor.onPause();
-
         if(NativeVulkanCore.getVulkanPropValue() > 0) {
             activeFlag = false;
 
@@ -411,9 +412,10 @@ class MonoscopicViewManager extends SXRViewManager implements MonoscopicRotation
         mMainScene.getMainCameraRig().updateRotation();
         SXRRenderTarget renderTarget = getRenderTarget();
         renderTarget.cullFromCamera(mMainScene, mMainScene.getMainCameraRig().getCenterCamera(), mRenderBundle.getShaderManager());
-        renderTarget.render(mMainScene, mMainScene
-                        .getMainCameraRig().getCenterCamera(), mRenderBundle.getShaderManager(), mRenderBundle.getPostEffectRenderTextureA(),
-                mRenderBundle.getPostEffectRenderTextureB());
+        renderTarget.render(mMainScene, mMainScene.getMainCameraRig().getCenterCamera(),
+                            mRenderBundle.getShaderManager(),
+                            mRenderBundle.getPostEffectRenderTextureA(),
+                            mRenderBundle.getPostEffectRenderTextureB());
         captureCenterEye(renderTarget, false);
 
         if (null != mScreenshotLeftCallback) {
@@ -430,6 +432,33 @@ class MonoscopicViewManager extends SXRViewManager implements MonoscopicRotation
                     mRenderBundle.getPostEffectRenderTextureB());
             captureRightEye(renderTarget, false);
         }
+    }
+
+    protected void captureCenterEye(SXRRenderTarget renderTarget, boolean isMultiview) {
+        if (mScreenshotCenterCallback == null) {
+            return;
+        }
+        // TODO: when we will use multithreading, create new camera using centercamera as we are adding posteffects into it
+        final SXRCamera centerCamera = mMainScene.getMainCameraRig().getCenterCamera();
+        final SXRMaterial postEffect = new SXRMaterial(this, SXRMaterial.SXRShaderType.VerticalFlip.ID);
+
+        centerCamera.addPostEffect(postEffect);
+        renderTarget.render(mMainScene, centerCamera, mRenderBundle.getShaderManager(),
+                            mRenderBundle.getPostEffectRenderTextureA(),
+                            mRenderBundle.getPostEffectRenderTextureB());
+        centerCamera.removePostEffect(postEffect);
+        readRenderResult(renderTarget, EYE.CENTER, false);
+
+        final Bitmap bitmap = Bitmap.createBitmap(mReadbackBufferWidth, mReadbackBufferHeight, Bitmap.Config.ARGB_8888);
+        mReadbackBuffer.rewind();
+        bitmap.copyPixelsFromBuffer(mReadbackBuffer);
+        final SXRScreenshotCallback callback = mScreenshotCenterCallback;
+        Threads.spawn(new Runnable() {
+            public void run() {
+                callback.onScreenCaptured(bitmap);
+            }
+        });
+        mScreenshotCenterCallback = null;
     }
 
     /**

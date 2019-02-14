@@ -36,8 +36,9 @@ VulkanShader::VulkanShader(int id,
                const char* textureDescriptor,
                const char* vertexDescriptor,
                const char* vertexShader,
-               const char* fragmentShader)
-    : Shader(id, signature, uniformDescriptor, textureDescriptor, vertexDescriptor, vertexShader, fragmentShader) { }
+               const char* fragmentShader,
+               const char* matrixCalc)
+    : Shader(id, signature, uniformDescriptor, textureDescriptor, vertexDescriptor, vertexShader, fragmentShader, matrixCalc) { }
 
 void VulkanShader::initialize()
 {

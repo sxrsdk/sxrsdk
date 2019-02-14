@@ -28,15 +28,20 @@ layout ( location = 8 ) out vec2 bottomRightTextureCoordinate;
 
 void main()
 {
- #ifdef HAS_MULTIVIEW
-     bool render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? true : false;
-     mat4 mvp = u_mvp_[gl_ViewID_OVR];
-     if(!render_mask)
-         mvp = mat4(0.0);  //  if render_mask is not set for particular eye, dont render that object
-     gl_Position = mvp  * vec4(a_position, 1);
- #else
- 	gl_Position = u_mvp * vec4(a_position, 1);
- #endif
+    mat4 mvp = u_mvp;
+#ifdef HAS_STEREO
+#ifdef HAS_MULTIVIEW
+    float render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? 1.0 : 0.0;
+    mvp[3][0] = mvp[3][0] - (u_proj_offset * float(gl_ViewID_OVR));
+    mvp = mvp * float(render_mask);
+#else
+    float render_mask = (u_render_mask & (unit(u_right) + uint(1))) > uint(0) ? 1.0 : 0.0;
+    //generate right eye mvp from left
+    mvp[3][0] = mvp[3][0] - (u_proj_offset * float(u_right));
+    mvp = mvp * float(render_mask);
+#endif
+#endif
+    gl_Position = mvp * vec4(a_position, 1);
 
      vec2 widthStep = vec2(texelWidth, 0.0);
      vec2 heightStep = vec2(0.0, texelHeight);

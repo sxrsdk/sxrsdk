@@ -181,7 +181,7 @@ public class SXRLight extends SXRJavaComponent implements SXRDrawFrameListener
     /**
      * Get the position of the light in world coordinates.
      *
-     * The position is computed from the node the light is attached to.
+     * The position is computed from the scene object the light is attached to.
      * It corresponds to the "world_position" uniform for the light.
      *
      * @return the world position of the light as a 3 element array
@@ -193,7 +193,7 @@ public class SXRLight extends SXRJavaComponent implements SXRDrawFrameListener
     /**
      * Set the world position of the light.
      *
-     * The position is computed from the node the light is attached to.
+     * The position is computed from the scene object the light is attached to.
      * It corresponds to the "world_position" uniform for the light.
      *
      * @param x
@@ -527,7 +527,7 @@ public class SXRLight extends SXRJavaComponent implements SXRDrawFrameListener
      * SXR lights default to looking down the positive Z axis with a light
      * direction of (0, 0, 1). This function lets you change the initial forward
      * vector for lights. This orientation is multiplied by the world
-     * transformation matrix of the node the light is attached to in
+     * transformation matrix of the scene object the light is attached to in
      * order to derive the light direction in world space that is passed to the
      * fragment shader.
      *
@@ -568,7 +568,7 @@ public class SXRLight extends SXRJavaComponent implements SXRDrawFrameListener
 
     /**
      * Updates the position and direction of this light from the transform of
-     * node that owns it.
+     * scene object that owns it.
      */
     public void onDrawFrame(float frameTime)
     {
@@ -576,8 +576,8 @@ public class SXRLight extends SXRJavaComponent implements SXRDrawFrameListener
         {
             return;
         }
-        float[] odir = getVec3("world_direction");
-        float[] opos = getVec3("world_position");
+        float[] odir = getVec4("world_direction");
+        float[] opos = getVec4("world_position");
         SXRNode parent = owner;
         Matrix4f worldmtx = parent.getTransform().getModelMatrix4f();
 

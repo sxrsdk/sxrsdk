@@ -3,7 +3,6 @@ package com.samsungxr.x3d;
 import android.content.Context;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRScene;
 import com.samsungxr.SXRShaderData;
 import com.samsungxr.SXRShaderTemplate;
@@ -18,7 +17,8 @@ public class X3DShader extends SXRShaderTemplate
     private static String fragTemplate = null;
     private static String vtxTemplate = null;
     private static String surfaceShader = null;
-    private static String addLight = null;
+    private static String fragmentLight = null;
+    private static String vertexLight = null;
     private static String vtxShader = null;
 
     public X3DShader(SXRContext gvrcontext)
@@ -36,12 +36,14 @@ public class X3DShader extends SXRShaderTemplate
             surfaceShader = TextFile.readTextFile(context, com.samsungxr.x3d.R.raw.x3d_surface);
             vtxShader = TextFile.readTextFile(context, com.samsungxr.R.raw.pos_norm_tex) +
                         TextFile.readTextFile(context, com.samsungxr.x3d.R.raw.x3d_vertex);
-            addLight = TextFile.readTextFile(context, com.samsungxr.R.raw.addlight);
+            fragmentLight = TextFile.readTextFile(context, com.samsungxr.R.raw.fragment_addlight);
+            vertexLight = TextFile.readTextFile(context, com.samsungxr.R.raw.vertex_addlight);
         }
         setSegment("FragmentTemplate", fragTemplate);
         setSegment("VertexTemplate", vtxTemplate);
         setSegment("FragmentSurface", surfaceShader);
-        setSegment("FragmentAddLight", addLight);
+        setSegment("FragmentAddLight", fragmentLight);
+        setSegment("VertexAddLight", vertexLight);
         setSegment("VertexShader", vtxShader);
         setSegment("VertexNormalShader", "");
         setSegment("VertexSkinShader", "");
@@ -69,5 +71,11 @@ public class X3DShader extends SXRShaderTemplate
         material.setVec4("specular_color", 0.0f, 0.0f, 0.0f, 1.0f);
         material.setVec4("emissive_color", 0.0f, 0.0f, 0.0f, 1.0f);
         material.setFloat("specular_exponent", 0.0f);
+    }
+
+    @Override
+    public String getMatrixCalc(boolean usesLights)
+    {
+        return usesLights ? "left_mvp; model; (model~ * inverse_left_view)^; (model~ * inverse_right_view)^" : null;
     }
 }

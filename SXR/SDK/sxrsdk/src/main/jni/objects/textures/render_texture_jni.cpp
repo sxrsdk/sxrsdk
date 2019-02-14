@@ -120,14 +120,16 @@ JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeRenderTexture_beginRendering(JNIEnv * env, jobject obj,
                                                     jlong ptr) {
     RenderTexture *render_texture = reinterpret_cast<RenderTexture*>(ptr);
-    render_texture->beginRendering(gRenderer->getInstance());
+    Renderer* r = Renderer::getInstance();
+    render_texture->beginRendering(r);
 }
 
 JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeRenderTexture_endRendering(JNIEnv * env, jobject obj,
                                                   jlong ptr) {
     RenderTexture *render_texture = reinterpret_cast<RenderTexture*>(ptr);
-    render_texture->endRendering(gRenderer->getInstance());
+    Renderer* r = Renderer::getInstance();
+    render_texture->endRendering(r);
 }
 JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeRenderTexture_bind(JNIEnv * env, jobject obj, jlong ptr)

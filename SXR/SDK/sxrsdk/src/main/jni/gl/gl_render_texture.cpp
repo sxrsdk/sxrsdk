@@ -345,7 +345,7 @@ void GLRenderTexture::invalidateFrameBuffer(GLenum target, bool is_fbo, const bo
 
 bool GLRenderTexture::readRenderResult(uint8_t* readback_buffer){
     Image* image = getImage();
-    long neededCapacity = image->getWidth() * image->getHeight();
+    long neededCapacity = image->getWidth() * image->getHeight() * 4;
     if (!readback_buffer) {
         LOGE("GLRenderTexture::readRenderResult: readback_buffer is null");
         return false;
@@ -356,7 +356,7 @@ bool GLRenderTexture::readRenderResult(uint8_t* readback_buffer){
 
 bool GLRenderTexture::readRenderResult(uint8_t *readback_buffer, long capacity) {
     Image* image = getImage();
-    long neededCapacity = image->getWidth() * image->getHeight();
+    long neededCapacity = image->getWidth() * image->getHeight() * 4;
     if (!readback_buffer) {
         LOGE("GLRenderTexture::readRenderResult: readback_buffer is null");
         return false;

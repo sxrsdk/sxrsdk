@@ -1,17 +1,11 @@
-
-#ifdef HAS_MULTIVIEW
-   vec4 pos = u_mv_[gl_ViewID_OVR] * vertex.local_position;
-#else
-   vec4 pos = u_mv * vertex.local_position;
-#endif
+#ifdef HAS_LIGHTSOURCES
+    vec4 pos = u_model * vertex.local_position;
+    pos = u_view * pos;
     vertex.viewspace_position = pos.xyz / pos.w;
-
-#ifdef HAS_MULTIVIEW
-	vertex.viewspace_normal = normalize((u_mv_it_[gl_ViewID_OVR] * vertex.local_normal).xyz);
-#else
-	vertex.viewspace_normal = normalize((u_mv_it * vertex.local_normal).xyz);
+    vertex.viewspace_normal = normalize((u_modelview_it * vertex.local_normal).xyz);
+    vertex.view_direction = normalize(-vertex.viewspace_position);
 #endif
-   vertex.view_direction = normalize(-vertex.viewspace_position);
+
 #ifdef HAS_a_texcoord
     diffuse_coord = a_texcoord.xy;
     specular_coord = a_texcoord.xy;

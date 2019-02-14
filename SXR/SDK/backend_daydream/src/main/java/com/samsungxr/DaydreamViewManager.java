@@ -84,7 +84,7 @@ class DaydreamViewManager extends SXRViewManager {
     }
     public SXRRenderTarget getRenderTarget(){
         if(null == mDaydreamRenderTarget){
-            mDaydreamRenderTarget = new SXRRenderTarget(mApplication.getSXRContext(),
+            mDaydreamRenderTarget = new SXRRenderTarget(mApplication.getSXRContext().getMainScene(),
                     defaultWidth, defaultHeight);
         }
         return mDaydreamRenderTarget;

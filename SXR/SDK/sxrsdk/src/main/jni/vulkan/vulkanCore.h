@@ -66,6 +66,7 @@ struct TextureObject{
 class Scene;
 class ShaderManager;
 class RenderData;
+class RenderState;
 class VulkanRenderData;
 class Camera;
 class VulkanData;
@@ -124,8 +125,8 @@ public:
 
     bool InitDescriptorSetForRenderData(VulkanRenderer* renderer, int pass, Shader*, VulkanRenderData* vkData, LightList *lights, VulkanMaterial* vkmtl);
     void beginCmdBuffer(VkCommandBuffer cmdBuffer);
-    void BuildCmdBufferForRenderData(std::vector<RenderData *> &render_data_vector, Camera*, ShaderManager*,RenderTarget*,VkRenderTexture*, bool, bool);
-    void BuildCmdBufferForRenderDataPE(VkCommandBuffer &cmdBuffer, ShaderManager*, Camera*, RenderData* rdata, VkRenderTexture*, int);
+    void BuildCmdBufferForRenderData(std::vector<RenderData *> &render_data_vector, const RenderState& state, RenderTarget*,VkRenderTexture*, bool postEffect);
+    void BuildCmdBufferForRenderDataPE(VkCommandBuffer &cmdBuffer,  const RenderState& state, RenderData* rdata, VkRenderTexture*, int);
 
     int waitForFence(VkFence fence);
 

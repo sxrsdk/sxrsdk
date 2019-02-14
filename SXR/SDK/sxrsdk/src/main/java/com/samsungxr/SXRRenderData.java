@@ -242,10 +242,10 @@ public final class SXRRenderData extends SXRComponent implements IRenderable, Pr
         }
     }
 
-    public void setShader(int shader, boolean useMultiview)
+    public void setShader(int shader)
     {
         SXRRenderPass pass = mRenderPassList.get(0);
-        pass.setShader(shader, useMultiview);
+        pass.setShader(shader);
     }
 
     /**
@@ -261,14 +261,14 @@ public final class SXRRenderData extends SXRComponent implements IRenderable, Pr
      * @param scene scene being rendered
      * @see SXRShaderTemplate SXRMaterialShader.getShaderType
      */
-    public synchronized void bindShader(SXRScene scene, boolean isMultiview)
+    public synchronized void bindShader(SXRScene scene, boolean isMultiview, boolean isStereo)
     {
         SXRRenderPass pass = mRenderPassList.get(0);
         SXRShaderId shader = pass.getMaterial().getShaderType();
         SXRShader template = shader.getTemplate(getSXRContext());
         if (template != null)
         {
-            template.bindShader(getSXRContext(), this, scene, isMultiview);
+            template.bindShader(getSXRContext(), this, scene, isMultiview, isStereo);
         }
         for (int i = 1; i < mRenderPassList.size(); ++i)
         {
@@ -277,44 +277,11 @@ public final class SXRRenderData extends SXRComponent implements IRenderable, Pr
             template = shader.getTemplate(getSXRContext());
             if (template != null)
             {
-                template.bindShader(getSXRContext(), pass, scene, isMultiview);
+                template.bindShader(getSXRContext(), pass, scene, isMultiview, isStereo);
             }
         }
     }
-    /**
-     * Selects a specific vertex and fragment shader to use for rendering.
-     *
-     * If a shader template has been specified, it is used to generate
-     * a vertex and fragment shader based on mesh attributes, bound textures
-     * and light sources. If the textures bound to the material are changed
-     * or a new light source is added, this function must be called again
-     * to select the appropriate shaders. This function may cause recompilation
-     * of shaders which is quite slow.
-     *
-     * @param scene scene being rendered
-     * @see SXRShaderTemplate SXRMaterialShader.getShaderType
-     */
-    public synchronized void bindShader(SXRScene scene)
-    {
-        SXRRenderPass pass = mRenderPassList.get(0);
-        SXRShaderId shader = pass.getMaterial().getShaderType();
-        SXRShader template = shader.getTemplate(getSXRContext());
-        boolean isMultiview = getSXRContext().getApplication().getAppSettings().isMultiviewSet();
-        if (template != null)
-        {
-            template.bindShader(getSXRContext(), this, scene, isMultiview);
-        }
-        for (int i = 1; i < mRenderPassList.size(); ++i)
-        {
-            pass = mRenderPassList.get(i);
-            shader = pass.getMaterial().getShaderType();
-            template = shader.getTemplate(getSXRContext());
-            if (template != null)
-            {
-                template.bindShader(getSXRContext(), pass, scene, isMultiview);
-            }
-        }
-    }
+
 
     static final class BindShaderFromNative {
         private final WeakReference<SXRRenderData> mRenderData;
@@ -325,10 +292,10 @@ public final class SXRRenderData extends SXRComponent implements IRenderable, Pr
 
         //called from c++
         @SuppressWarnings("unused")
-        private void call(SXRScene scene, boolean isMultiview) {
+        public void call(SXRScene scene, boolean isMultiview, boolean isStereo) {
             final SXRRenderData renderData = mRenderData.get();
             if (null != renderData) {
-                renderData.bindShader(scene, isMultiview);
+                renderData.bindShader(scene, isMultiview, isStereo);
             } else {
                 Log.w(TAG, "render data instance is no more; not binding shader");
             }
@@ -758,6 +725,7 @@ public final class SXRRenderData extends SXRComponent implements IRenderable, Pr
         return this;
     }
 
+
     /**
      * Checks if a renderable object can cast shadows.
      * @return true if shadows are cast, false if not.
@@ -901,8 +869,6 @@ class NativeRenderData {
     static native int getDrawMode(long renderData);
 
     static native void setDrawMode(long renderData, int draw_mode);
-
-    static native void setTextureCapturer(long renderData, long texture_capturer);
 
     static native void setCastShadows(long renderData, boolean castShadows);
 

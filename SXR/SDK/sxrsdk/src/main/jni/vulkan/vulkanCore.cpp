@@ -16,6 +16,7 @@
 #include <thread>
 #include <iostream>
 #include <shaderc/shaderc.hpp>
+#include "engine/renderer/renderer.h"
 #include "objects/scene.h"
 #include "objects/node.h"
 #include "objects/components/skin.h"
@@ -82,7 +83,7 @@ namespace sxr {
         imageMemoryBarrier.subresourceRange = subresourceRange;
 
         switch (oldImageLayout) {
-            case VK_IMAGE_LAYOUT_UNDEFINED:
+            default:
                 imageMemoryBarrier.srcAccessMask = 0;
                 break;
             case VK_IMAGE_LAYOUT_PREINITIALIZED:
@@ -94,12 +95,12 @@ namespace sxr {
             case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
                 imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
                 break;
-            default:
-                //other source layouts not yet handled
-                break;
         }
 
         switch (newImageLayout) {
+            default:
+                imageMemoryBarrier.dstAccessMask = 0;
+                break;
             case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
                 imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
                 break;
@@ -108,9 +109,6 @@ namespace sxr {
                 break;
             case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
                 imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-                break;
-            default:
-                //other source layouts not yet handled
                 break;
         }
 
@@ -1167,9 +1165,10 @@ void VulkanCore::InitPipelineForRenderData(const SXR_VK_Vertices* m_vertices, Vu
     }
 
     void VulkanCore::BuildCmdBufferForRenderData(std::vector<RenderData *> &render_data_vector,
-                                                 Camera *camera, ShaderManager* shader_manager, RenderTarget* renderTarget, VkRenderTexture* postEffectRenderTexture, bool postEffectFlag, bool shadowmapFlag) {
-
+                                                 const RenderState& state, RenderTarget* renderTarget, VkRenderTexture* postEffectRenderTexture, bool postEffectFlag) {
+        Renderer& renderer = *Renderer::getInstance();
         VkResult err;
+        Camera* camera = state.camera;
         // For the triangle sample, we pre-record our command buffer, as it is static.
         // We have a buffer per swap chain image, so loop over the creation process.
         VkCommandBuffer cmdBuffer;
@@ -1181,10 +1180,10 @@ void VulkanCore::InitPipelineForRenderData(const SXR_VK_Vertices* m_vertices, Vu
         beginCmdBuffer(cmdBuffer);
 
         if(renderTarget!= NULL)
-            renderTarget->beginRendering(Renderer::getInstance());
+            renderTarget->beginRendering(renderer);
         else {
             postEffectRenderTexture->setBackgroundColor(camera->background_color_r(), camera->background_color_g(),camera->background_color_b(), camera->background_color_a());
-            postEffectRenderTexture->beginRendering(Renderer::getInstance());
+            postEffectRenderTexture->beginRendering(&renderer);
         }
 
         for (int j = 0; j < render_data_vector.size(); j++) {
@@ -1193,15 +1192,15 @@ void VulkanCore::InitPipelineForRenderData(const SXR_VK_Vertices* m_vertices, Vu
 
             for(int curr_pass = postEffectFlag ? (rdata->pass_count() - 1) : 0 ;curr_pass < rdata->pass_count(); curr_pass++) {
                 VulkanShader *shader;
-                if(shadowmapFlag){
+                if(state.shadow_map){
                     const char *depthShaderName = rdata->owner_object()->getComponent(Skin::getComponentType())
                                                   ? "SXRDepthShader$a_bone_weights$a_bone_indices"
                                                   : "SXRDepthShader";
-                    shader = static_cast<VulkanShader *>(shader_manager->findShader(depthShaderName));
+                    shader = static_cast<VulkanShader *>(state.shader_manager->findShader(depthShaderName));
                 }
                 else {
-                    shader = static_cast<VulkanShader *>(shader_manager->getShader(
-                            rdata->get_shader(false, curr_pass)));
+                    shader = static_cast<VulkanShader *>(state.shader_manager->getShader(
+                            rdata->get_shader(curr_pass), state));
                 }
                 float line_width;
                 ShaderData* material = rdata->pass(curr_pass)->material();
@@ -1215,9 +1214,9 @@ void VulkanCore::InitPipelineForRenderData(const SXR_VK_Vertices* m_vertices, Vu
         }
 
         if(renderTarget!= NULL)
-            renderTarget->endRendering(Renderer::getInstance());
+            renderTarget->endRendering(renderer);
         else
-            postEffectRenderTexture->endRendering(Renderer::getInstance());
+            postEffectRenderTexture->endRendering(&renderer);
 
         // By ending the command buffer, it is put out of record mode.
         err = vkEndCommandBuffer(cmdBuffer);
@@ -1225,10 +1224,11 @@ void VulkanCore::InitPipelineForRenderData(const SXR_VK_Vertices* m_vertices, Vu
     }
 
 
-    void VulkanCore::BuildCmdBufferForRenderDataPE(VkCommandBuffer &cmdBuffer, ShaderManager* shader_manager, Camera *camera, RenderData* rdataPE, VkRenderTexture* renderTexture, int pass) {
+    void VulkanCore::BuildCmdBufferForRenderDataPE(VkCommandBuffer &cmdBuffer, const RenderState& state, RenderData* rdataPE, VkRenderTexture* renderTexture, int pass) {
         // For the triangle sample, we pre-record our command buffer, as it is static.
         // We have a buffer per swap chain image, so loop over the creation process.
 
+        Camera* camera = state.camera;
         VkResult err;
         beginCmdBuffer(cmdBuffer);
 
@@ -1237,7 +1237,7 @@ void VulkanCore::InitPipelineForRenderData(const SXR_VK_Vertices* m_vertices, Vu
 
         VulkanRenderData *vkRdata = static_cast<VulkanRenderData *>(rdataPE);
 
-        VulkanShader *shader = static_cast<VulkanShader *>(shader_manager->getShader(rdataPE->get_shader(false,pass)));
+        VulkanShader *shader = static_cast<VulkanShader *>(state.shader_manager->getShader(rdataPE->get_shader(pass), state));
         vkRdata->render(shader,cmdBuffer,pass);
 
         renderTexture->endRendering(Renderer::getInstance());
@@ -1382,7 +1382,7 @@ void VulkanCore::InitPipelineForRenderData(const SXR_VK_Vertices* m_vertices, Vu
 
         ShadowMap* shadowMap = NULL;
         if(lights != NULL)
-        shadowMap= lights->scanLights();
+        shadowMap= lights->getShadowMap();
 
         if(shadowMap && !vkShader->isDepthShader()){
 

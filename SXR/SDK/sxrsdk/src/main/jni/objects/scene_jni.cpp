@@ -31,7 +31,7 @@ extern "C" {
 
     JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeScene_removeNode(JNIEnv * env,
-            jobject obj, jlong jscene, jlong jnode);
+            jobject obj, jlong jscene, jlong jscene_object);
 
     JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeScene_removeAllNodes(JNIEnv * env,
@@ -70,6 +70,10 @@ extern "C" {
     Java_com_samsungxr_NativeScene_getLightList(JNIEnv* env, jobject obj, jlong scene);
 
     JNIEXPORT void JNICALL
+    Java_com_samsungxr_NativeScene_addCollider(JNIEnv * env,
+            jobject obj, jlong jscene, jlong jcollider);
+
+    JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeScene_setMainScene(JNIEnv * env, jobject obj, jlong jscene);
 
     JNIEXPORT void JNICALL
@@ -93,20 +97,13 @@ Java_com_samsungxr_NativeScene_ctor(JNIEnv* env, jobject obj) {
     return reinterpret_cast<jlong>(new Scene());
 }
 
-JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeScene_setJava(JNIEnv *env, jclass, jlong nativeScene, jobject javaScene) {
-    JavaVM* jvm;
-    env->GetJavaVM(&jvm);
-    Scene* scene = reinterpret_cast<Scene*>(nativeScene);
-    scene->set_java(jvm, javaScene);
-}
 
 JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeScene_removeNode(JNIEnv * env,
-        jobject obj, jlong jscene, jlong jnode) {
+        jobject obj, jlong jscene, jlong jscene_object) {
     Scene* scene = reinterpret_cast<Scene*>(jscene);
-    Node* node = reinterpret_cast<Node*>(jnode);
-    scene->removeNode(node);
+    Node* scene_object = reinterpret_cast<Node*>(jscene_object);
+    scene->removeNode(scene_object);
 }
 
 JNIEXPORT void JNICALL
@@ -201,6 +198,13 @@ Java_com_samsungxr_NativeScene_getLightList(JNIEnv* env, jobject obj, jlong jsce
     return jlights;
 }
 
+JNIEXPORT void JNICALL
+Java_com_samsungxr_NativeScene_addCollider(JNIEnv * env,
+        jobject obj, jlong jscene, jlong jcollider) {
+    Scene* scene = reinterpret_cast<Scene*>(jscene);
+    Collider* collider = reinterpret_cast<Collider*>(jcollider);
+    scene->addCollider(collider);
+}
 
 JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeScene_setMainScene(JNIEnv * env, jobject obj, jlong jscene) {

@@ -39,9 +39,9 @@ layout(location = 8) in ivec4 a_bone_indices;
 
 #ifdef HAS_VertexNormalShader
 #ifdef HAS_a_tangent
-layout(location = 8) in vec3 a_tangent;
-layout(location = 9) in vec3 a_bitangent;
-layout(location = 7) out mat3 tangent_matrix;
+layout(location = 9) in vec3 a_tangent;
+layout(location = 10) in vec3 a_bitangent;
+layout(location = 4) out mat3 tangent_matrix;
 #endif
 #endif
 
@@ -103,6 +103,10 @@ struct Vertex
 // This section contains code to compute
 // vertex contributions to lighting.
 //
+#ifdef HAS_VertexAddLight
+@VertexAddLight
+#endif
+
 @LIGHTSOURCES
 #endif
 	
@@ -153,17 +157,22 @@ void main() {
 @TEXCOORDS
 
 #endif
+	mat4 mvp = u_mvp;
 	viewspace_position = vertex.viewspace_position;
 	viewspace_normal = vertex.viewspace_normal;
 	view_direction = vertex.view_direction;
 	vertex_color = vertex.vertex_color;
+
+#ifdef HAS_STEREO
 #ifdef HAS_MULTIVIEW
-	 bool render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? true : false;
-     mat4 mvp = u_mvp_[gl_ViewID_OVR];
-     if(!render_mask)
-         mvp = mat4(0.0);  //  if render_mask is not set for particular eye, dont render that object
-     gl_Position = mvp  * vertex.local_position;
+    float render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? 1.0 : 0.0;
+    mvp[3][0] = mvp[3][0] - (u_proj_offset * float(gl_ViewID_OVR));
 #else
-	gl_Position = u_mvp * vertex.local_position;	
+    float render_mask = (u_render_mask & (unit(u_right) + uint(1))) > uint(0) ? 1.0 : 0.0;
+    //generate right eye mvp from left
+    mvp[3][0] = mvp[3][0] - (u_proj_offset * float(u_right));
 #endif
+    mvp = mvp * float(render_mask);
+#endif
+    gl_Position = mvp * vertex.local_position;
 }

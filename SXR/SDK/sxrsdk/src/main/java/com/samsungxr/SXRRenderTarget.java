@@ -17,7 +17,7 @@ package com.samsungxr;
 
 /**
  * A render target is a component which allows the scene to be rendered
- * into a texture from the viewpoint of a particular node.
+ * into a texture from the viewpoint of a particular scene object.
  * SXRRenderTarget can initiate a DrawFrameListener which causes
  * the scene to be rendered into the texture every frame.
  * To initiate rendering you must call @{link #startListening()}.
@@ -28,68 +28,111 @@ package com.samsungxr;
  */
 public class SXRRenderTarget extends SXRBehavior
 {
-
-    protected SXRMaterial mMaterial;
     protected SXRRenderTexture mTexture;
     protected SXRScene  mScene;
     protected SXRCamera mCamera;
+    protected boolean   mIsStereo;
+
     static public long getComponentType()
     {
         return NativeRenderTarget.getComponentType();
     }
+
     /**
-     * Constructs a render target component which renders the given scene to a designated texture.
-     * The objects in the scene are rendered from the viewpoint of the node
+     * Constructs a render target component which renders the given scene to a texture.
+     * The objects in the scene are rendered from the viewpoint of the scene object
      * the SXRRenderTarget is attached to. Nothing is rendered if
-     * the render target is not attached to a node.
-     * You must call @{link #setEnable(true)} to initiate rendering.
+     * the render target is not attached to a scene object.
      *
-     * @param texture   SXRRenderTexture to render to.
-     * @param scene     SXRScene to render.
-     * @see #setEnable(boolean)
+     * @param texture   {@link SXRRenderTexture} to render to.
+     * @param scene     {@link SXRScene} to render.
      */
     public SXRRenderTarget(SXRRenderTexture texture, SXRScene scene)
     {
-        this(texture,scene,false);
-    }
-    public SXRRenderTarget(SXRContext gvrContext)
-    {
-        super(gvrContext,NativeRenderTarget.defaultCtor(gvrContext.getMainScene().getNative()));
-        mScene = gvrContext.getMainScene();
+        super(scene.getSXRContext(),
+              NativeRenderTarget.ctorMultiview(texture.getNative(), false, false));
+        mScene = scene;
+        mTexture = texture;
+        mIsStereo = false;
+        setCamera(scene.getMainCameraRig().getCenterCamera());
     }
 
-    public SXRRenderTarget(SXRContext gvrContext, int defaultViewportW, int defaultViewportH)
+    /**
+     * Constructs a render target component which renders the main scene to a designated texture.
+     * The objects in the scene are rendered from the viewpoint of the scene object
+     * the SXRRenderTarget is attached to. Nothing is rendered if
+     * the render target is not attached to a scene object.
+     *
+     * @param texture   SXRRenderTexture to render to.
+     */
+    public SXRRenderTarget(SXRRenderTexture texture, boolean isStereo)
     {
-        super(gvrContext,NativeRenderTarget.ctorViewport(gvrContext.getMainScene().getNative(),
-                defaultViewportW, defaultViewportH));
-        mScene = gvrContext.getMainScene();
+        super(texture.getSXRContext(),
+              NativeRenderTarget.ctorMultiview(texture.getNative(), false, isStereo));
+        mScene = texture.getSXRContext().getMainScene();
+        mTexture = texture;
+        mIsStereo = isStereo;
+    }
+
+    /**
+     * Constructs a render target component which renders the given scene in stereo.
+     * @param scene     {@link SXRScene} to render.
+     * @param width     default width of viewport
+     * @param height    default height of viewport
+     */
+    public SXRRenderTarget(SXRScene scene, int width, int height)
+    {
+        super(scene.getSXRContext(),
+              NativeRenderTarget.ctorViewport(scene.getNative(), width, height));
+        mScene = scene;
+        mIsStereo = true;
+    }
+
+    /**
+     * Constructs a render target component which renders to the same scene
+     * as the specified render target. The objects in the scene are rendered
+     * from the viewpoint of the scene's camera.
+     *
+     * @param texture       SXRRenderTexture to render to.
+     * @param renderTarget  SXRRenderTarget to share
+     */
+    public SXRRenderTarget(SXRRenderTexture texture, SXRRenderTarget renderTarget)
+    {
+        super(texture.getSXRContext(),
+              NativeRenderTarget.ctor(texture.getNative(), renderTarget.getNative()));
+        setEnable(false);
+        mTexture = texture;
+        mIsStereo = renderTarget.isStereo();
+    }
+
+    public SXRRenderTarget(SXRRenderTexture texture, SXRScene scene, boolean isMultiview)
+    {
+        super(texture.getSXRContext(),
+              NativeRenderTarget.ctorMultiview(texture.getNative(), isMultiview, true));
+        setEnable(false);
+        mTexture = texture;
+        mScene = scene;
+        mIsStereo = true;
+    }
+
+    public boolean isStereo() { return mIsStereo; }
+
+    public void setStereo(boolean flag)
+    {
+        mIsStereo = flag;
+        NativeRenderTarget.setStereo(getNative(), flag);
     }
 
     public SXRCamera getCamera(){
         return mCamera;
     }
-    public void setCamera(SXRCamera camera){
+
+    public void setCamera(SXRCamera camera)
+    {
         mCamera = camera;
         NativeRenderTarget.setCamera(getNative(), camera.getNative());
     }
-    public SXRRenderTarget(SXRRenderTexture texture, SXRScene scene, SXRRenderTarget renderTarget)
-    {
-        super(texture.getSXRContext(), NativeRenderTarget.ctor(texture.getNative(), renderTarget.getNative()));
-        setEnable(false);
-        mTexture = texture;
-        mScene = scene;
-        setMainScene(scene);
-    }
-    public SXRRenderTarget(SXRRenderTexture texture, SXRScene scene, boolean isMultiview)
-    {
-        super(texture.getSXRContext(), NativeRenderTarget.ctorMultiview(texture.getNative(),isMultiview));
-        setEnable(false);
-        mTexture = texture;
-        mScene = scene;
-        setMainScene(scene);
-        setCamera(scene.getMainCameraRig().getCenterCamera());
 
-    }
     public void attachRenderTarget(SXRRenderTarget renderTarget){
         NativeRenderTarget.attachRenderTarget(getNative(),renderTarget.getNative());
     }
@@ -99,18 +142,15 @@ public class SXRRenderTarget extends SXRBehavior
     public void endRendering(){
         NativeRenderTarget.endRendering(getNative());
     }
-    public void cullFromCamera(SXRScene scene, SXRCamera camera, SXRShaderManager shaderManager){
-        NativeRenderTarget.cullFromCamera(scene.getNative(), scene, getNative(),camera.getNative(), shaderManager.getNative());
+    public void cullFromCamera(SXRScene scene, SXRCamera camera, SXRShaderManager shaderManager)
+    {
+        NativeRenderTarget.cullFromCamera(getNative(), scene.getNative(), scene, camera.getNative(), shaderManager.getNative());
     }
 
     public void render(SXRScene scene, SXRCamera camera, SXRShaderManager shaderManager, SXRRenderTexture posteffectRenderTextureA, SXRRenderTexture posteffectRenderTextureB) {
         NativeRenderTarget.render(getNative(), camera.getNative(), shaderManager.getNative(), posteffectRenderTextureA.getNative(), posteffectRenderTextureB.getNative(), scene.getNative(), scene);
     }
 
-    public void setMainScene(SXRScene scene){
-        mScene = scene;
-        NativeRenderTarget.setMainScene(getNative(),scene.getNative());
-    }
     /**
      * Internal constructor for subclasses.
      * @param ctx
@@ -151,17 +191,16 @@ public class SXRRenderTarget extends SXRBehavior
 
 class NativeRenderTarget
 {
-    static native long defaultCtor(long scene);
+    static native long ctor(long texture, long sourceRendertarget);
     static native long ctorViewport(long scene, int defaultViewportW, int defaultViewportH);
+    static native long ctorMultiview(long texture, boolean isMultiview, boolean isStereo);
     static native long getComponentType();
-    static native void setMainScene(long rendertarget, long scene);
     static native void beginRendering(long rendertarget, long camera);
     static native void endRendering(long rendertarget);
-    static native long ctorMultiview(long texture, boolean isMultiview);
     static native void setCamera(long rendertarget, long camera);
-    static native long ctor(long texture, long sourceRendertarget);
-    static native void cullFromCamera(long scene, SXRScene javaNode, long renderTarget,long camera, long shader_manager );
-    static native void render(long renderTarget, long camera, long shader_manager, long posteffectrenderTextureA, long posteffectRenderTextureB, long scene, SXRScene javaNode);
+    static native void setStereo(long rendertarget, boolean isStereo);
+    static native void cullFromCamera(long renderTarget, long scene, SXRScene javaScene, long camera, long shader_manager);
+    static native void render(long renderTarget, long camera, long shader_manager, long posteffectrenderTextureA, long posteffectRenderTextureB, long scene, SXRScene javaSceneObject);
     static native void setTexture(long rendertarget, long texture);
     static native void attachRenderTarget(long renderTarget, long nextRenderTarget);
 }

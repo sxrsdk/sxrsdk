@@ -63,7 +63,7 @@ namespace sxr {
             jfloatArray array = static_cast<jfloatArray>(env->NewLocalRef(mData));
             float* pixels = env->GetFloatArrayElements(array, 0);
             int internalFormat = (mFormat == GL_RGB) ? GL_RGB32F : GL_RG32F;
-            glBindTexture(mType, texid);
+            glBindTexture(mGLTarget, texid);
             glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, mWidth, mHeight, 0, mFormat, GL_FLOAT, pixels);
             env->ReleaseFloatArrayElements(array, pixels, 0);
             env->DeleteLocalRef(array);

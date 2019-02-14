@@ -16,23 +16,16 @@
 #include "engine/renderer/gl_renderer.h"
 #include "gl/gl_render_data.h"
 #include "objects/node.h"
+#include "gl_vertex_buffer.h"
 #include "objects/components/skeleton.h"
 #include "objects/components/skin.h"
 
 namespace sxr
 {
-    void GLRenderData::render(Shader* shader, Renderer* renderer)
+    void GLRenderData::bindToShader(Shader* shader, Renderer* renderer)
     {
-        GLShader*   glshader = static_cast<GLShader*>(shader);
-        int         programId = glshader->getProgramId();
-        int         indexCount = mesh_->getIndexCount();
-        int         vertexCount = mesh_->getVertexCount();
-        int         mode = draw_mode();
+        GLVertexBuffer* glvbuf = static_cast<GLVertexBuffer*>(mesh_->getVertexBuffer());
 
-#ifdef DEBUG_SHADER
-        LOGV("SHADER: RenderData::render binding vertex arrays to program %d %p %d vertices, %d indices",
-                                     programId, this, vertexCount, indexCount);
-#endif
         if (shader->hasBones())
         {
             Skin* skin = (Skin*) owner_object()->getComponent(Skin::getComponentType());
@@ -42,24 +35,12 @@ namespace sxr
                 skin->bindBuffer(renderer, shader);
             }
         }
-        mesh_->getVertexBuffer()->bindToShader(shader, mesh_->getIndexBuffer());
-        checkGLError("renderMesh::mesh_->getVertexBuffer()->bindToShader(");
-        switch (mesh_->getIndexSize())
-        {
-            case 2:
-            glDrawElements(mode, indexCount, GL_UNSIGNED_SHORT, 0);
-            break;
 
-            case 4:
-            glDrawElements(mode, indexCount, GL_UNSIGNED_INT, 0);
-            break;
-
-            default:
-            glDrawArrays(mode, 0, vertexCount);
-            break;
-        }
-        checkGLError(" RenderData::render after draw");
-        glBindVertexArray(0);
+#ifdef DEBUG_SHADER
+        LOGV("SHADER: RenderData::render binding vertex arrays to program %d %p %d vertices, %d indices",
+                                     programId, this, vertexCount, indexCount);
+#endif
+        glvbuf->bindToShader(shader, mesh_->getIndexBuffer());
+        checkGLError("RenderData::bindToShader");
     }
-
 }

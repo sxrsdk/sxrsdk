@@ -35,14 +35,9 @@ namespace sxr
     public:
 
         GLRenderData() : RenderData() { }
-
-        GLRenderData(const RenderData &rdata) : RenderData(rdata)
-        {
-        }
-
+        GLRenderData(const RenderData &rdata) : RenderData(rdata) { }
         virtual ~GLRenderData() {}
-
-        virtual void render(Shader*, Renderer*);
+        virtual void bindToShader(Shader* shader, Renderer* renderer);
 
     private:
         GLRenderData(GLRenderData &&render_data) = delete;

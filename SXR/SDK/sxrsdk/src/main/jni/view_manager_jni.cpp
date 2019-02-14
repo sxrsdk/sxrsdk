@@ -31,11 +31,10 @@ extern "C" {
                                                         jlong jshader_manager,
                                                         jint width, jint height) {
         Scene *scene = reinterpret_cast<Scene *>(jscene);
-
+        Renderer* r = Renderer::getInstance();
         ShaderManager *shader_manager = reinterpret_cast<ShaderManager *>(jshader_manager);
-        gRenderer = Renderer::getInstance();
         javaNode = jni->NewLocalRef(javaNode);
-        gRenderer->makeShadowMaps(scene, javaNode, shader_manager);
+        r->makeShadowMaps(scene, javaNode, shader_manager);
         jni->DeleteLocalRef(javaNode);
     }
 
@@ -48,6 +47,7 @@ extern "C" {
     {
         Scene *scene = reinterpret_cast<Scene *>(jscene);
         RenderTarget *renderTarget = reinterpret_cast<RenderTarget *>(jrenderTarget);
+        Renderer* r = Renderer::getInstance();
         ShaderManager *shader_manager =
                 reinterpret_cast<ShaderManager *>(jshader_manager);
         RenderTexture *post_effect_render_texture_a =
@@ -56,9 +56,9 @@ extern "C" {
                 reinterpret_cast<RenderTexture *>(jpost_effect_render_texture_b);
 
         javaNode = jni->NewLocalRef(javaNode);
-        renderTarget->cullFromCamera(scene, javaNode, renderTarget->getCamera(),gRenderer,shader_manager);
+        renderTarget->cullFromCamera(scene, javaNode, renderTarget->getCamera(), shader_manager);
 
-        gRenderer->renderRenderTarget(scene, javaNode, renderTarget,shader_manager,post_effect_render_texture_a,post_effect_render_texture_b);
+        r->renderRenderTarget(scene, javaNode, renderTarget,shader_manager,post_effect_render_texture_a,post_effect_render_texture_b);
 
         //unbind the fbo on which the drawing was done
         if(renderTarget->getTexture())

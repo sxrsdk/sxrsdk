@@ -70,13 +70,10 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
      */
     public SXRScene(SXRContext gvrContext) {
         super(gvrContext, NativeScene.ctor());
-
         mSceneRoot = new SXRNode(gvrContext);
         NativeScene.setSceneRoot(getNative(), mSceneRoot.getNative());
-
-        NativeScene.setJava(getNative(), this);
-
-        if(MAX_LIGHTS == 0) {
+        if(MAX_LIGHTS == 0)
+        {
             MAX_LIGHTS = gvrContext.getApplication().getConfigurationManager().getMaxLights();
         }
 
@@ -105,33 +102,39 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
         getEventReceiver().addListener(mSceneEventListener);
     }
 
+    private SXRScene(SXRContext gvrContext, long ptr) {
+        super(gvrContext, ptr);
+        mSceneRoot = new SXRNode(gvrContext);
+        setFrustumCulling(true);
+    }
+    
     /**
-     * Add a {@linkplain SXRNode node} as
+     * Add a {@linkplain SXRNode scene object} as
      * a child of the scene root.
      * 
-     * @param sceneObject
-     *            The {@linkplain SXRNode node} to add.
+     * @param node
+     *            The {@linkplain SXRNode scene object} to add.
      */
-    public void addNode(SXRNode sceneObject) {
-        mSceneRoot.addChildObject(sceneObject);
+    public void addNode(SXRNode node) {
+        mSceneRoot.addChildObject(node);
     }
 
     /**
-     * Remove a {@linkplain SXRNode node} from
+     * Remove a {@linkplain SXRNode scene object} from
      * the scene root.
      * 
-     * @param sceneObject
-     *            The {@linkplain SXRNode node} to remove.
+     * @param node
+     *            The {@linkplain SXRNode scene object} to remove.
      */
-    public void removeNode(SXRNode sceneObject) {
-        mSceneRoot.removeChildObject(sceneObject);
+    public void removeNode(SXRNode node) {
+        mSceneRoot.removeChildObject(node);
     }
 
     /**
-     * Removes from scene root the first {@linkplain SXRNode node}
+     * Removes from scene root the first {@linkplain SXRNode scene object}
      * that has the given name.
      *
-     * @param name name of node to be removed.
+     * @param name name of scene object to be removed.
      *
      * @return true if child was removed, false if it was not found.
      *
@@ -142,10 +145,10 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
     }
     
     /**
-     * Removes from scene root any {@linkplain SXRNode node}
+     * Removes from scene root any {@linkplain SXRNode scene object}
      * that has the given name by performing case-sensitive search.
      *
-     * @param name name of node to be removed.
+     * @param name name of scene object to be removed.
      *
      * @return number of removed objects, 0 if none was found.
      */
@@ -154,7 +157,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
     }
 
     /**
-     * Remove all nodes.
+     * Remove all scene objects.
      */
     public synchronized void removeAllNodes() {
         final SXRCameraRig rig = getMainCameraRig();
@@ -186,7 +189,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
 
     /**
      * Clears the scene and resets the scene to initial state.
-     * Currently, it only removes all nodes.
+     * Currently, it only removes all scene objects.
      */
     public void clear() {
         removeAllNodes();
@@ -196,7 +199,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
      * Get the root of the scene hierarchy.
      * This node is a common ancestor to all the objects
      * in the scene.
-     * @return top level node.
+     * @return top level scene object.
      * @see #addNode(SXRNode)
      * @see #removeNode(SXRNode)
      */
@@ -205,14 +208,14 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
     }
     
     /**
-     * The top-level nodes (children of the root node).
+     * The top-level scene objects (children of the root node).
      * 
      * @return A read-only list containing all direct children of the root node.
      *
      * @since 2.0.0
      * @see SXRScene#getRoot()
      * @see SXRScene#addNode(SXRNode)
-     * @see SXRScene#removeNode(SXRNode) removeNode
+     * @see SXRScene#removeNode(SXRNode) removeSceneObject
      */
     public List<SXRNode> getNodes() {
         return mSceneRoot.getChildren();
@@ -256,8 +259,8 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
         return list.toArray(new SXRNode[list.size()]);
     }
 
-    private void addChildren(List<SXRNode> list, SXRNode sceneObject) {
-        for (SXRNode child : sceneObject.rawGetChildren()) {
+    private void addChildren(List<SXRNode> list, SXRNode node) {
+        for (SXRNode child : node.rawGetChildren()) {
             list.add(child);
             addChildren(list, child);
         }
@@ -428,7 +431,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
      * Get the list of lights used by this scene.
      * 
      * This list is maintained by GearVRF by gathering the
-     * lights attached to the nodes in the scene.
+     * lights attached to the scene objects in the scene.
      * 
      * @return array of lights or null if no lights in scene.
      */
@@ -462,7 +465,7 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
             mMainCameraRig.prettyPrint(sb, indent + 4);
         }
 
-        // Show all nodes
+        // Show all scene objects
         mSceneRoot.prettyPrint(sb, indent + 2);
     }
 
@@ -491,23 +494,23 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
         List<SXRAtlasInformation> atlasInfoList = texture.getAtlasInformation();
 
         for (SXRAtlasInformation atlasInfo: atlasInfoList) {
-            SXRNode sceneObject = getNodeByName(atlasInfo.getName());
+            SXRNode node = getNodeByName(atlasInfo.getName());
 
-            if (sceneObject == null || sceneObject.getRenderData() == null) {
-                Log.w(TAG, "Null render data or node " + atlasInfo.getName()
+            if (node == null || node.getRenderData() == null) {
+                Log.w(TAG, "Null render data or scene object " + atlasInfo.getName()
                         + " not found to apply texture atlas.");
                 continue;
             }
 
             if (shaderId == SXRMaterial.SXRShaderType.LightMap.ID
-                    && !sceneObject.getRenderData().isLightMapEnabled()) {
+                    && !node.getRenderData().isLightMapEnabled()) {
                 // TODO: Add support to enable and disable light map at run time.
                 continue;
             }
             SXRMaterial material = new SXRMaterial(getSXRContext(), shaderId);
             material.setTexture(key + "_texture", texture);
             material.setTextureAtlasInfo(key, atlasInfo);
-            sceneObject.getRenderData().setMaterial(material);
+            node.getRenderData().setMaterial(material);
         }
     }
 
@@ -546,15 +549,15 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
         public void onInit(SXRContext gvrContext, SXRScene scene) {
             recursivelySendOnInit(mSceneRoot);
         }
-        private void recursivelySendOnInit(SXRNode sceneObject) {
+        private void recursivelySendOnInit(SXRNode node) {
             getSXRContext().getEventManager().sendEvent(
-                    sceneObject, INodeEvents.class, "onInit", getSXRContext(), sceneObject);
-            SXRScriptBehaviorBase script = (SXRScriptBehaviorBase) sceneObject.getComponent(SXRScriptBehaviorBase.getComponentType());
+                    node, INodeEvents.class, "onInit", getSXRContext(), node);
+            SXRScriptBehaviorBase script = (SXRScriptBehaviorBase) node.getComponent(SXRScriptBehaviorBase.getComponentType());
             if (script != null) {
                 getSXRContext().getEventManager().sendEvent(
                         script, ISceneEvents.class, "onInit", getSXRContext(), SXRScene.this);
             }
-            for (SXRNode child : sceneObject.rawGetChildren()) {
+            for (SXRNode child : node.rawGetChildren()) {
                 recursivelySendOnInit(child);
             }
         }
@@ -564,11 +567,11 @@ public class SXRScene extends SXRHybridObject implements PrettyPrint, IScriptabl
             recursivelySendSimpleEvent(mSceneRoot, "onAfterInit");
         }
 
-        private void recursivelySendSimpleEvent(SXRNode sceneObject, String eventName) {
+        private void recursivelySendSimpleEvent(SXRNode node, String eventName) {
             getSXRContext().getEventManager().sendEvent(
-                    sceneObject, INodeEvents.class, eventName);
+                    node, INodeEvents.class, eventName);
 
-            for (SXRNode child : sceneObject.getChildren()) {
+            for (SXRNode child : node.getChildren()) {
                 recursivelySendSimpleEvent(child, eventName);
             }
         }
