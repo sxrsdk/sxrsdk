@@ -9,10 +9,10 @@ namespace sxr {
 
 extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_NativeRenderTarget_ctorMultiview(JNIEnv *env, jobject obj, jlong jtexture, jboolean isMultiview);
+    Java_com_samsungxr_NativeRenderTarget_ctorMultiview(JNIEnv *env, jobject obj, jlong jtexture, jboolean isMultiview, jboolean isStereo);
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_NativeRenderTarget_ctor(JNIEnv *env, jobject obj, jlong jtexture,  jlong ptr);
+    Java_com_samsungxr_NativeRenderTarget_ctor(JNIEnv *env, jobject obj, jlong jtexture, jlong jsrcTarget);
 
     JNIEXPORT jlong JNICALL
     Java_com_samsungxr_NativeRenderTarget_getComponentType(JNIEnv *env, jobject obj);
@@ -21,10 +21,10 @@ extern "C" {
     Java_com_samsungxr_NativeRenderTarget_setTexture(JNIEnv *env, jobject obj, jlong ptr, jlong texture);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeRenderTarget_setMainScene(JNIEnv *env, jobject obj, jlong ptr, jlong Sceneptr);
+    Java_com_samsungxr_NativeRenderTarget_setCamera(JNIEnv *env, jobject obj, jlong ptr, jlong camera);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeRenderTarget_setCamera(JNIEnv *env, jobject obj, jlong ptr, jlong camera);
+    Java_com_samsungxr_NativeRenderTarget_setStereo(JNIEnv *env, jobject obj, jlong ptr, jboolean stereo);
 
     JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeRenderTarget_beginRendering(JNIEnv *env, jobject obj, jlong ptr, jlong camera);
@@ -33,71 +33,59 @@ extern "C" {
     Java_com_samsungxr_NativeRenderTarget_endRendering(JNIEnv *env, jobject obj, jlong ptr);
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_NativeRenderTarget_defaultCtor(JNIEnv *env, jobject obj, jlong jscene);
+    Java_com_samsungxr_NativeRenderTarget_ctorViewport(JNIEnv *env, jobject obj, jlong jscene, jint w, jint h);
 
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_NativeRenderTarget_ctorViewport(JNIEnv *env, jobject obj, jlong jscene,
-                                                     jint defaultViewportW, jint defaultViewportH);
     JNIEXPORT void JNICALL
-            Java_com_samsungxr_NativeRenderTarget_attachRenderTarget(JNIEnv *env, jobject obj, jlong jrendertarget, jlong jnextrendertarget);
+    Java_com_samsungxr_NativeRenderTarget_attachRenderTarget(JNIEnv *env, jobject obj, jlong jrendertarget, jlong jnextrendertarget);
+
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeRenderTarget_cullFromCamera(JNIEnv *env, jobject obj, jlong jscene, jobject javaNode, jlong ptr, jlong jcamera, jlong jshaderManager);
+    Java_com_samsungxr_NativeRenderTarget_cullFromCamera(JNIEnv *env, jobject obj, jlong jrendertarget, jlong jscene, jobject javaSceneObject, jlong jcamera, jlong jshaderManager);
+
     JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeRenderTarget_render(JNIEnv *env, jobject obj, jlong renderTarget, jlong camera,
                                                jlong shader_manager, jlong posteffectrenderTextureA, jlong posteffectRenderTextureB, jlong jscene,
-                                               jobject javaNode);
+                                               jobject javaSceneObject);
 };
 
 JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeRenderTarget_render(JNIEnv *env, jobject obj, jlong renderTarget,
                                            jlong camera,
                                            jlong shader_manager, jlong posteffectrenderTextureA,
-                                           jlong posteffectRenderTextureB, jlong jscene, jobject javaNode) {
+                                           jlong posteffectRenderTextureB, jlong jscene, jobject javaSceneObject) {
     RenderTarget* target = reinterpret_cast<RenderTarget*>(renderTarget);
     Scene* scene = reinterpret_cast<Scene*>(jscene);
+    Renderer* r = Renderer::getInstance();
+
     // Do not remote this: need it for screenshot capturer, center camera rendering
     target->setCamera(reinterpret_cast<Camera*>(camera));
-    javaNode = env->NewLocalRef(javaNode);
-    gRenderer->getInstance()->renderRenderTarget(scene, javaNode, target, reinterpret_cast<ShaderManager*>(shader_manager),
+    javaSceneObject = env->NewLocalRef(javaSceneObject);
+    r->renderRenderTarget(scene, javaSceneObject, target, reinterpret_cast<ShaderManager*>(shader_manager),
                                                  reinterpret_cast<RenderTexture*>(posteffectrenderTextureA), reinterpret_cast<RenderTexture*>(posteffectRenderTextureB));
-    env->DeleteLocalRef(javaNode);
+    env->DeleteLocalRef(javaSceneObject);
 }
 
 JNIEXPORT jlong JNICALL
-Java_com_samsungxr_NativeRenderTarget_defaultCtor(JNIEnv *env, jobject obj, jlong jscene){
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    return reinterpret_cast<jlong>(Renderer::getInstance()->createRenderTarget(scene));
-
-}
-
-JNIEXPORT jlong JNICALL
-Java_com_samsungxr_NativeRenderTarget_ctorViewport(JNIEnv *env, jobject obj, jlong jscene,
-                                                 jint defaultViewportW, jint defaultViewportH){
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    return reinterpret_cast<jlong>(Renderer::getInstance()->createRenderTarget(scene, defaultViewportW,
-                                                                               defaultViewportH));
-}
-
-JNIEXPORT jlong JNICALL
-Java_com_samsungxr_NativeRenderTarget_ctorMultiview(JNIEnv *env, jobject obj, jlong jtexture, jboolean isMultiview)
+Java_com_samsungxr_NativeRenderTarget_ctorViewport(JNIEnv* env, jobject obj, jlong jscene, jint w, jint h)
 {
-
-    RenderTexture* texture = reinterpret_cast<RenderTexture*>(jtexture);
-    return reinterpret_cast<jlong>(Renderer::getInstance()->createRenderTarget(texture, isMultiview));
+    Scene* scene = reinterpret_cast<Scene*>(jscene);
+    return reinterpret_cast<jlong>(Renderer::getInstance()->createRenderTarget(scene, w, h));
 }
+
 JNIEXPORT jlong JNICALL
-Java_com_samsungxr_NativeRenderTarget_ctor(JNIEnv *env, jobject obj, jlong jtexture, jlong ptr)
+Java_com_samsungxr_NativeRenderTarget_ctorMultiview(JNIEnv *env, jobject obj, jlong jtexture, jboolean isMultiview, jboolean isStereo)
 {
     RenderTexture* texture = reinterpret_cast<RenderTexture*>(jtexture);
-    RenderTarget* sourceRenderTarget = reinterpret_cast<RenderTarget*>(ptr);
+    return reinterpret_cast<jlong>(Renderer::getInstance()->createRenderTarget(texture, isMultiview, isStereo));
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_samsungxr_NativeRenderTarget_ctor(JNIEnv *env, jobject obj, jlong jtexture, jlong jsrcTarget)
+{
+    RenderTexture* texture = reinterpret_cast<RenderTexture*>(jtexture);
+    RenderTarget* sourceRenderTarget = reinterpret_cast<RenderTarget*>(jsrcTarget);
     return reinterpret_cast<jlong>(Renderer::getInstance()->createRenderTarget(texture, sourceRenderTarget));
 }
-JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeRenderTarget_setMainScene(JNIEnv *env, jobject obj, jlong ptr, jlong Sceneptr){
-    RenderTarget* target = reinterpret_cast<RenderTarget*>(ptr);
-    Scene* scene = reinterpret_cast<Scene*>(Sceneptr);
-    target->setMainScene(scene);
-}
+
 
 JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeRenderTarget_attachRenderTarget(JNIEnv *env, jobject obj, jlong jrendertarget, jlong jnextrendertarget){
@@ -111,26 +99,26 @@ Java_com_samsungxr_NativeRenderTarget_beginRendering(JNIEnv *env, jobject obj, j
     RenderTarget* target = reinterpret_cast<RenderTarget*>(ptr);
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     target->setCamera(camera);
-    target->beginRendering(gRenderer->getInstance());
+    target->beginRendering(*Renderer::getInstance());
 }
 
 JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeRenderTarget_endRendering(JNIEnv *env, jobject obj, jlong ptr){
     RenderTarget* target = reinterpret_cast<RenderTarget*>(ptr);
-    target->endRendering(gRenderer->getInstance());
+    target->endRendering(*Renderer::getInstance());
 }
 
 
 JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeRenderTarget_cullFromCamera(JNIEnv *env, jobject obj, jlong jscene, jobject javaNode, jlong ptr, jlong jcamera, jlong jshaderManager){
-
-    RenderTarget* target = reinterpret_cast<RenderTarget*>(ptr);
+Java_com_samsungxr_NativeRenderTarget_cullFromCamera(JNIEnv *env, jobject obj, jlong rtarget, jlong jscene, jobject javaSceneObject, jlong jcamera, jlong jshaderManager)
+{
+    RenderTarget* target = reinterpret_cast<RenderTarget*>(rtarget);
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     Scene* scene = reinterpret_cast<Scene*>(jscene);
     ShaderManager* shaderManager = reinterpret_cast<ShaderManager*> (jshaderManager);
-    javaNode = env->NewLocalRef(javaNode);
-    target->cullFromCamera(scene, javaNode, camera,gRenderer->getInstance(), shaderManager);
-    env->DeleteLocalRef(javaNode);
+    jobject jsceneref = env->NewLocalRef(javaSceneObject);
+    target->cullFromCamera(scene, jsceneref, camera, shaderManager);
+    env->DeleteLocalRef(jsceneref);
 }
 
 JNIEXPORT void JNICALL
@@ -147,6 +135,13 @@ Java_com_samsungxr_NativeRenderTarget_setCamera(JNIEnv *env, jobject obj, jlong 
     RenderTarget* target = reinterpret_cast<RenderTarget*>(ptr);
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     target->setCamera(camera);
+}
+
+JNIEXPORT void JNICALL
+Java_com_samsungxr_NativeRenderTarget_setStereo(JNIEnv *env, jobject obj, jlong ptr, jboolean stereo)
+{
+    RenderTarget* target = reinterpret_cast<RenderTarget*>(ptr);
+    target->setStereo(stereo);
 }
 
 JNIEXPORT jlong JNICALL

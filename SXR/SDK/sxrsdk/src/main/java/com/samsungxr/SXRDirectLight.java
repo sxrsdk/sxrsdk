@@ -19,10 +19,12 @@ import com.samsungxr.shaders.SXRPhongShader;
 import com.samsungxr.utility.TextFile;
 import org.joml.Matrix4f;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Illuminates object in the scene with a directional light source.
  * 
- * The direction of the light is the forward orientation of the node
+ * The direction of the light is the forward orientation of the scene object
  * the light is attached to. Light is emitted in that direction
  * from infinitely far away.
  *
@@ -33,7 +35,7 @@ import org.joml.Matrix4f;
  * <table>
  * <tr><td>enabled</td><td>1 = light is enabled, 0 = light is disabled/td></tr>
  * <tr><td>world_direction</td><td>direction of spot light in world coordinates</td></tr>
- *  derived from node orientation<td></tr>
+ *  derived from scene object orientation<td></tr>
  * <tr><td>ambient_intensity</td><td>intensity of ambient light emitted</td></tr>
  * <tr><td>diffuse_intensity</td><td>intensity of diffuse light emitted</td></tr>
  * <tr><td>specular_intensity</td><td>intensity of specular light emitted</td></tr>
@@ -55,6 +57,8 @@ public class SXRDirectLight extends SXRLight
     private static String fragmentShader = null;
     private static String vertexShader = null;
     private boolean useShadowShader = true;
+    private AtomicBoolean mChanged = new AtomicBoolean();
+
     protected final static String DIRECT_UNIFORM_DESC = UNIFORM_DESC +
         " float4 diffuse_intensity"
         + " float4 ambient_intensity"
@@ -83,6 +87,7 @@ public class SXRDirectLight extends SXRLight
     {
         super(ctx, uniformDesc, vertexDesc);
         setLightClass(getClass().getSimpleName());
+        mChanged.set(true);
         setFloat("shadow_map_index", -1.0f);
         setAmbientIntensity(0.0f, 0.0f, 0.0f, 1.0f);
         setDiffuseIntensity(1.0f, 1.0f, 1.0f, 1.0f);
@@ -218,6 +223,7 @@ public class SXRDirectLight extends SXRLight
                     shadowMap = new SXRShadowMap(getSXRContext(), shadowCam);
                     owner.attachComponent(shadowMap);
                 }
+                mChanged.set(true);
             }
             else if (shadowMap != null)
             {
@@ -270,15 +276,18 @@ public class SXRDirectLight extends SXRLight
 
     /**
      * Updates the position, direction and shadow matrix
-     * of this light from the transform of node that owns it.
+     * of this light from the transform of scene object that owns it.
      * The shadow matrix is the model/view/projection matrix
      * from the point of view of the light.
      */
     public void onDrawFrame(float frameTime)
     {
-        if (!isEnabled() || (getFloat("enabled") <= 0.0f) || (owner == null)) { return; }
+        if (!isEnabled() || (owner == null) || (getFloat("enabled") <= 0.0f))
+        {
+            return;
+        }
         float[] odir = getVec3("world_direction");
-        boolean changed = false;
+        boolean changed = mChanged.getAndSet(false);
         Matrix4f worldmtx = owner.getTransform().getModelMatrix4f();
 
         mOldDir.x = odir[0];

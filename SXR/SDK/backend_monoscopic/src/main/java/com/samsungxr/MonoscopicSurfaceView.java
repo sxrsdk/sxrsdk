@@ -77,7 +77,6 @@ class MonoscopicSurfaceView extends GLSurfaceView implements
         setEGLContextFactory(new MonoscopicContextFactory());
         setEGLConfigChooser(new MonoscopicConfigChooser(8, 8, 8, 8, 24, 8));
         setRenderer(new MonoscopicSurfaceViewRenderer(viewManager));
-
         /*
          * requestRender() will be called efficiently with VSync.
          */
@@ -95,7 +94,8 @@ class MonoscopicSurfaceView extends GLSurfaceView implements
     public void surfaceCreated(SurfaceHolder holder) {
         super.surfaceCreated(holder);
         holder.setFormat(PixelFormat.TRANSLUCENT);
-
+        int token = holder.getSurface().hashCode();
+        SXRRenderer.initialize(token);
         Choreographer.getInstance().removeFrameCallback(this);
         Choreographer.getInstance().postFrameCallback(this);
     }
@@ -109,6 +109,8 @@ class MonoscopicSurfaceView extends GLSurfaceView implements
     public void surfaceDestroyed(SurfaceHolder holder) {
         Choreographer.getInstance().removeFrameCallback(this);
         super.surfaceDestroyed(holder);
+        int token = holder.getSurface().hashCode();
+        SXRRenderer.reset(token);
     }
 }
 

@@ -23,16 +23,12 @@ namespace sxr{
 VkCommandBuffer& VkRenderTarget::getCommandBuffer(){
     return static_cast<VkRenderTexture*>(mRenderTexture)->getCommandBuffer();
 }
- void VkRenderTarget::beginRendering(Renderer* renderer){
-     RenderTarget::beginRendering(renderer);
- }
 
-VkRenderTarget::VkRenderTarget(RenderTexture* renderTexture, bool is_multiview): RenderTarget(renderTexture, is_multiview){
-}
 
-VkRenderTarget::VkRenderTarget(Scene* scene): RenderTarget(scene){
-}
-VkRenderTarget::VkRenderTarget(Scene* scene, int defaultViewportW, int defaultViewportH): RenderTarget(scene, defaultViewportW, defaultViewportH){
+VkRenderTarget::VkRenderTarget(RenderTexture* renderTexture, bool is_multiview, bool is_stereo)
+: RenderTarget(renderTexture, is_multiview, is_stereo ){ }
+
+VkRenderTarget::VkRenderTarget(Scene* scene, int w, int h): RenderTarget(scene, w, h){
 }
 VkRenderTarget::VkRenderTarget(RenderTexture* renderTexture, const RenderTarget* source): RenderTarget(renderTexture, source){
 }

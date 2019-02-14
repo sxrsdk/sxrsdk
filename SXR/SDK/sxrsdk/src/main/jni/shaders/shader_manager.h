@@ -22,6 +22,8 @@
 
 #include <mutex>
 #include <map>
+#include <vector>
+#include <engine/renderer/render_state.h>
 #include "objects/hybrid_object.h"
 
 namespace sxr {
@@ -32,9 +34,8 @@ class Shader;
  * A shader can be referenced by the ID given to it by the
  * ShaderManager when it is added. It can also be referenced
  * by its unique signature string provided by the Java layer.
- *
- * There can be more than one shader manager. Usually GearVRF
- * keeps two - one for material shaders and one for post effect shaders.
+ *<p>
+ * There is only one shader manager.
  * All shaders are global and are maintained between scene changes.
  */
 class ShaderManager: public HybridObject {
@@ -55,6 +56,7 @@ public:
  * @param vertexDescriptor  String giving the names and types of vertex attributes
  * @param vertexShader      String with GLSL source for vertex shader
  * @param fragmentShader    String with GLSL source for fragment shader
+ * @param matrixCalc        String with matrix calculation expressions
  *
  * This function is called by the Java layer to request generation of a specific
  * vertex / fragment shader pair. If the shader has not already been generated,
@@ -65,8 +67,9 @@ public:
                   const char* uniformDescriptor,
                   const char* textureDescriptor,
                   const char* vertexDescriptor,
-                  const char* vertex_shader,
-                  const char* fragment_shader);
+                  const char* vertexShader,
+                  const char* fragmentShader,
+                  const char* matrixCalc);
 
     /*
      * Find a shader by its signature.
@@ -76,18 +79,13 @@ public:
     Shader* findShader(const char* signature);
 
     /*
-     * Get a shader by its ShaderManager ID.
-     * This ID is not the same as the native shader program ID.
+     * Get a shader by its ShaderManager ID and render state.
      *
-     * @param ID returned from addShader
+     * @param id        returned from addShader
+     * @param state     RenderState shader will be used with
      * @returns -> Shader or NULL if not found
      */
-    Shader* getShader(int id);
-
-    /*
-     * Print signatures and IDS of all shaders to logcat
-     */
-    void dump();
+    Shader* getShader(int id, const RenderState& state);
 
 private:
     ShaderManager(const ShaderManager& shader_manager) = delete;
@@ -96,12 +94,15 @@ private:
     ShaderManager& operator=(ShaderManager&& shader_manager) = delete;
 
 private:
+    void addShader(int id, std::vector<Shader*>& table, Shader* shader);
+
     int latest_shader_id_ = 0;
     std::map<std::string, Shader*> shadersBySignature;
-    std::map<int, Shader*> shadersByID;
+    std::vector<Shader*> MVShaders;
+    std::vector<Shader*> StereoShaders;
+    std::vector<Shader*> MonoShaders;
     std::mutex lock_;
 };
 
-typedef ShaderManager PostEffectShaderManager;
 }
 #endif

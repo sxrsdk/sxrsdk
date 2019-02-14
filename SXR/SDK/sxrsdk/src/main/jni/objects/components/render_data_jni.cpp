@@ -154,23 +154,19 @@ extern "C" {
             JNIEnv * env, jobject obj, jlong jrender_data, jint draw_mode);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeRenderData_setTextureCapturer(JNIEnv * env, jobject obj,
-                                                         jlong jrender_data, jlong jtexture_capturer);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeRenderData_setStencilFunc(JNIEnv *env, jclass type, jlong renderData,
+    Java_com_samsungxr_NativeRenderData_setStencilFunc(JNIEnv *env, jobject type, jlong renderData,
                                                      jint func, jint ref, jint mask);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeRenderData_setStencilOp(JNIEnv *env, jclass type, jlong renderData,
+    Java_com_samsungxr_NativeRenderData_setStencilOp(JNIEnv *env, jobject type, jlong renderData,
                                                    jint fail, jint zfail, jint zpass);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeRenderData_setStencilMask(JNIEnv *env, jclass type, jlong renderData,
+    Java_com_samsungxr_NativeRenderData_setStencilMask(JNIEnv *env, jobject type, jlong renderData,
                                                      jint mask);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeRenderData_setStencilTest(JNIEnv *env, jclass type, jlong renderData, jboolean flag);
+    Java_com_samsungxr_NativeRenderData_setStencilTest(JNIEnv *env, jobject type, jlong renderData, jboolean flag);
 
     JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeRenderData_setAlphaBlendFunc(JNIEnv * env,
@@ -185,7 +181,7 @@ extern "C" {
                                                             jobject obj, jlong jrender_data);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeRenderData_setBindShaderObject(JNIEnv *env, jclass type, jlong jRenderData,
+    Java_com_samsungxr_NativeRenderData_setBindShaderObject(JNIEnv *env, jobject type, jlong jRenderData,
                                                           jobject bindShaderObject);
 }
 
@@ -439,13 +435,6 @@ Java_com_samsungxr_NativeRenderData_getDrawMode(
     return render_data->draw_mode();
 }
 
-JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeRenderData_setTextureCapturer(JNIEnv * env, jobject obj,
-                                                     jlong jrender_data, jlong jtexture_capturer) {
-    RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
-    render_data->set_texture_capturer(
-            reinterpret_cast<TextureCapturer*>(jtexture_capturer));
-}
 
 JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeRenderData_setCastShadows(JNIEnv * env,
@@ -464,35 +453,36 @@ Java_com_samsungxr_NativeRenderData_getCastShadows(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeRenderData_setStencilFunc(JNIEnv *env, jclass type, jlong renderData,
+Java_com_samsungxr_NativeRenderData_setStencilFunc(JNIEnv *env, jobject type, jlong renderData,
                                                  jint func, jint ref, jint mask) {
     RenderData* rd = reinterpret_cast<RenderData*>(renderData);
     rd->setStencilFunc(func, ref, mask);
 }
 
 JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeRenderData_setStencilOp(JNIEnv *env, jclass type, jlong renderData,
+Java_com_samsungxr_NativeRenderData_setStencilOp(JNIEnv *env, jobject type, jlong renderData,
                                                jint fail, jint zfail, jint zpass) {
     RenderData* rd = reinterpret_cast<RenderData*>(renderData);
     rd->setStencilOp(fail, zfail, zpass);
 }
 
 JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeRenderData_setStencilMask(JNIEnv *env, jclass type, jlong renderData,
+Java_com_samsungxr_NativeRenderData_setStencilMask(JNIEnv *env, jobject type, jlong renderData,
                                                  jint mask) {
     RenderData* rd = reinterpret_cast<RenderData*>(renderData);
     rd->setStencilMask(mask);
 }
 
 JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeRenderData_setStencilTest(JNIEnv *env, jclass type, jlong renderData, jboolean flag) {
+Java_com_samsungxr_NativeRenderData_setStencilTest(JNIEnv *env, jobject type, jlong renderData, jboolean flag) {
     RenderData* rd = reinterpret_cast<RenderData*>(renderData);
     rd->setStencilTest(flag);
 }
 
 JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeRenderData_setBindShaderObject(JNIEnv* env, jclass, jlong jRenderData, jobject bindShaderObject) {
+Java_com_samsungxr_NativeRenderData_setBindShaderObject(JNIEnv* env, jobject clz, jlong jRenderData, jobject bindShaderObject) {
     RenderData* rd = reinterpret_cast<RenderData*>(jRenderData);
+
     rd->setBindShaderObject(env, bindShaderObject);
 }
 

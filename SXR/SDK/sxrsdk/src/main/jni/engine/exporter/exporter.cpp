@@ -22,7 +22,7 @@
 #include "objects/node.h"
 #include "util/sxr_log.h"
 #include "objects/components/render_data.h"
-
+#include "objects/mesh.h"
 #include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
 

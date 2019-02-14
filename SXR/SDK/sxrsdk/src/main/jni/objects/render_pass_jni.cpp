@@ -40,11 +40,11 @@ extern "C" {
 
     JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeRenderPass_setShader(JNIEnv* env,
-            jobject obj, jlong jrender_pass, jint jshaderid, jboolean jUse_multiview);
+            jobject obj, jlong jrender_pass, jint jshaderid);
 
     JNIEXPORT jint JNICALL
     Java_com_samsungxr_NativeRenderPass_getShader(JNIEnv* env,
-            jobject obj, jlong jrender_pass, jboolean useMultiview);
+            jobject obj, jlong jrender_pass);
 }
 
 JNIEXPORT jlong JNICALL
@@ -72,18 +72,18 @@ Java_com_samsungxr_NativeRenderPass_setCullFace(JNIEnv* env,
 
 JNIEXPORT void JNICALL
 Java_com_samsungxr_NativeRenderPass_setShader(JNIEnv* env,
-        jobject obj, jlong jrender_pass, jint jshaderid, jboolean jUse_multiview)
+        jobject obj, jlong jrender_pass, jint jshaderid)
 {
     RenderPass* pass = reinterpret_cast<RenderPass*>(jrender_pass);
-    pass->set_shader(jshaderid, jUse_multiview);
+    pass->set_shader(jshaderid);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_samsungxr_NativeRenderPass_getShader(JNIEnv* env,
-     jobject obj, jlong jrender_pass, jboolean useMultiview)
+     jobject obj, jlong jrender_pass)
 {
     RenderPass* pass = reinterpret_cast<RenderPass*>(jrender_pass);
-    return pass->get_shader(useMultiview);
+    return pass->get_shader();
 }
 }
 

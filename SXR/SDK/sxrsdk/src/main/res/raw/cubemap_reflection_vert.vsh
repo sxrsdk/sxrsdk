@@ -13,24 +13,34 @@ layout(location = 1) in vec3 a_normal;
 
 layout(location = 1) out vec3 viewspace_position;
 layout(location = 2) out vec3 viewspace_normal;
+
+#ifdef HAS_STEREO
+#ifdef HAS_MULTIVIEW
+    #define u_modelview_it u_matrices[u_matrix_offset + gl_ViewID_OVR + uint(2)]
+#else
+    #define u_modelview_it u_matrices[u_matrix_offset + u_right + uint(2)]
+#endif
+#else
+    #define u_modelview_it u_matrices[u_matrix_offset + uint(2)]
+#endif
+
 void main()
 {
-  mat4 mv, mvp, mv_it;
+    mat4 mvp = u_mvp;
+    mat4 mv = u_view * u_model;
+#ifdef HAS_STEREO
 #ifdef HAS_MULTIVIEW
-    bool render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? true : false;
-    mvp = u_mvp_[gl_ViewID_OVR];
-    mv  = u_mv_[gl_ViewID_OVR];
-    mv_it = u_mv_it_[gl_ViewID_OVR];
-    if(!render_mask){
-        mvp = mat4(0.0);  //  if render_mask is not set for particular eye, dont render that object
-    }
+    float render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? 1.0 : 0.0;
+    mvp[3][0] = mvp[3][0] - (u_proj_offset * float(gl_ViewID_OVR));
 #else
-   mvp = u_mvp;
-   mv  = u_mv;
-   mv_it = u_mv_it;
+    float render_mask = (u_render_mask & (unit(u_right) + uint(1))) > uint(0) ? 1.0 : 0.0;
+    //generate right eye mvp from left
+    mvp[3][0] = mvp[3][0] - (u_proj_offset * float(u_right));
 #endif
-  vec4 v_viewspace_position_vec4 = mv * vec4(a_position,1.0);
-  viewspace_position = v_viewspace_position_vec4.xyz / v_viewspace_position_vec4.w;
-  viewspace_normal = (mv_it * vec4(a_normal, 1.0)).xyz;
-  gl_Position = mvp * vec4(a_position, 1.0);
- }
+    mvp = mvp * float(render_mask);
+#endif
+    vec4 vsp = mv * vec4(a_position,1.0);
+    viewspace_position = vsp.xyz / vsp.w;
+    viewspace_normal = (u_modelview_it * vec4(a_normal, 1.0)).xyz;
+    gl_Position = mvp * vec4(a_position, 1.0);
+}

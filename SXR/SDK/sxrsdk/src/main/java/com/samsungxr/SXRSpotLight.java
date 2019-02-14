@@ -22,9 +22,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Illuminates object in the scene with a cone shaped beam.
  * 
- * The apex of the cone is at the position of the node
+ * The apex of the cone is at the position of the scene object
  * the light is attached to. The direction of the cone is the
- * forward direction of that node.
+ * forward direction of that scene object.
  * 
  * There are two angles for the cone. Beyond the "outer angle"
  * no light is emitted. Inside the "inner angle" the light is
@@ -40,9 +40,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <table>
  * <tr><td>enabled</td><td>1 = light is enabled, 0 = light is disabled</td></tr>
  * <tr><td>world_position</td><td>position of spot light in world coordinates</td></tr>
- *  derived from node position</td></tr>
+ *  derived from scene object position</td></tr>
  * <tr><td>world_direction</td><td>direction of spot light in world coordinates</td></tr>
- *  derived from node orientation</td></tr>
+ *  derived from scene object orientation</td></tr>
  * <tr><td>ambient_intensity</td><td>intensity of ambient light emitted</td></tr>
  * <tr><td>diffuse_intensity</td><td>intensity of diffuse light emitted</td></tr>
  * <tr><td>specular_intensity</td><td>intensity of specular light emitted</td></tr>
@@ -227,13 +227,16 @@ public class SXRSpotLight extends SXRPointLight
 
     /**
      * Updates the position, direction and shadow matrix
-     * of this light from the transform of node that owns it.
+     * of this light from the transform of scene object that owns it.
      * The shadow matrix is the model/view/projection matrix
      * from the point of view of the light.
      */
     public void onDrawFrame(float frameTime)
     {
-        if (!isEnabled() || (getFloat("enabled") <= 0.0f) || (owner == null)) { return; }
+        if (!isEnabled() || (owner == null) || (getFloat("enabled") <= 0.0f))
+        {
+            return;
+        }
         Matrix4f worldmtx = owner.getTransform().getModelMatrix4f();
         boolean changed = mChanged.getAndSet(false);
 

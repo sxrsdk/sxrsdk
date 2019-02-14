@@ -74,14 +74,13 @@ namespace sxr
         return bounding_volume;
     }
 
-    void Mesh::getTransformedBoundingBoxInfo(glm::mat4 *Mat, float* transformed_bounding_box)
+    void Mesh::getTransformedBoundingBoxInfo(const glm::mat4& M, float* transformed_bounding_box)
     {
         if (!have_bounding_volume_)
         {
             getBoundingVolume();
         }
 
-        glm::mat4 M = *Mat;
         float a, b;
 
         //Inspired by Graphics Gems - TransBox.c
@@ -142,14 +141,6 @@ namespace sxr
                 transformed_bounding_box[5] += a;
             }
         }
-    }
-
-    bool Mesh::getAttributeInfo(const char* attributeName,
-                                int &index,
-                                int &offset,
-                                int &size) const
-    {
-        return mVertices->getInfo(attributeName, index, offset, size);
     }
 
     bool Mesh::getVertices(float *vertices, int nelems)

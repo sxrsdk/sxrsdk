@@ -30,38 +30,66 @@ bool Renderer::isVulkan_ = false;
 /***
     We are implementing Vulkan. Enable through system properties.
 ***/
-Renderer* Renderer::getInstance(std::string type){
-    if( nullptr == instance ) {
+Renderer* Renderer::getInstance(int token)
+{
+    if (token == 0)
+    {
+        return instance;
+    }
+    if (nullptr == instance)
+    {
         int vulkanPropValue = getVulkanPropValue();
-        if(vulkanPropValue) {
+        if (vulkanPropValue)
+        {
             instance = new VulkanRenderer(vulkanPropValue);
-
-            if(static_cast<VulkanRenderer*>(instance)->getCore() != NULL)
+            if (static_cast<VulkanRenderer*>(instance)->getCore() != NULL)
+            {
                 isVulkan_ = true;
+                LOGD("RENDER: create Vulkan Renderer %p token = %d", instance, instance->getToken());
+            }
             else
+            {
                 LOGE("Vulkan is not supported on your device");
-
-        } else {
-            instance = new GLRenderer();
+            }
+        }
+        else
+        {
+            instance = new GLRenderer(token);
+            LOGD("RENDER: create GLRenderer %p token = %d", instance, instance->getToken());
         }
     }
     return instance;
 }
 
+Renderer* Renderer::getInstance()
+{
+    return instance;
+}
+
+void Renderer::resetInstance()
+{
+    if (instance)
+    {
+        LOGD("RENDER: delete Renderer %p token = %d", instance, instance->getToken());
+        delete instance;
+        instance = NULL;
+    }
+}
+
 int Renderer::getVulkanPropValue(){
     // Debug setting selecting Vulkan renderer:
-    //     setprop debug.sxr.vulkan <value>
+    //     setprop debug.gearvrf.vulkan <value>
     //     <property not present>, <empty>, not recognized, or 0
-    //                            - use setting from sxr.xml (not implemented yet. Select OpenGL ES.)
-    //     1                      - pretend sxr.xml asked for Vulkan (not implemented yet. Select Vulkan.)
+    //                            - use setting from gvr.xml (not implemented yet. Select OpenGL ES.)
+    //     1                      - pretend gvr.xml asked for Vulkan (not implemented yet. Select Vulkan.)
     //     2                      - vulkan with validation layers enabled (use for debugging)
-    static int vulkanPropValue = -1; // TODO: obtain setting from sxr.xml
+    static int vulkanPropValue = -1; // TODO: obtain setting from gvr.xml
 
     if(vulkanPropValue != -1)
         return vulkanPropValue;
 
     vulkanPropValue = 0; //defaults to GL
-    const prop_info *pi = __system_property_find("debug.sxr.vulkan");
+    const prop_info *pi = __system_property_find("debug.gearvrf.vulkan");
     char buffer[PROP_VALUE_MAX];
     int len = 0;
     if( pi ) {
@@ -71,14 +99,14 @@ int Renderer::getVulkanPropValue(){
         // TODO: "1" should check if Vulkan is supported
         if( strcmp(buffer,"1") == 0){
             vulkanPropValue = 1;
-            LOGI("Vulkan renderer: debug.sxr.vulkan is \"%s\".", buffer );
+            LOGI("Vulkan renderer: debug.gearvrf.vulkan is \"%s\".", buffer );
         }
         else if(strcmp(buffer,"2") == 0){
             vulkanPropValue = 2;
-            LOGI("Vulkan renderer with Validation layers: debug.sxr.vulkan is \"%s\".", buffer );
+            LOGI("Vulkan renderer with Validation layers: debug.gearvrf.vulkan is \"%s\".", buffer );
         }
         else {
-            LOGI("OpenGL ES renderer: debug.sxr.vulkan is \"%s\".", buffer );
+            LOGI("OpenGL ES renderer: debug.gearvrf.vulkan is \"%s\".", buffer );
         }
     }
 

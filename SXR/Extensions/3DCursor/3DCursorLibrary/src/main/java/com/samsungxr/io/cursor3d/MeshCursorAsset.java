@@ -37,7 +37,7 @@ import java.util.concurrent.Future;
  */
 class MeshCursorAsset extends CursorAsset {
     private static final String TAG = MeshCursorAsset.class.getSimpleName();
-    private static final int OVERLAY_RENDER_ORDER = 100000;
+    private static final int OVERLAY_RENDER_ORDER = SXRRenderData.SXRRenderingOrder.OVERLAY;
     private SXRTexture texture;
     private SXRMesh mesh;
     private float x;

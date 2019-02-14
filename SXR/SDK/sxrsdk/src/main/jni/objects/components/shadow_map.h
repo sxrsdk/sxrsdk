@@ -21,23 +21,15 @@
 #include "objects/textures/render_texture.h"
 
 namespace sxr {
-class Renderer;
-class GLFrameBuffer;
-
     class ShadowMap : public RenderTarget
     {
     public:
-        explicit ShadowMap(ShaderData* mtl);
-        virtual void  beginRendering(Renderer* renderer);
+        explicit ShadowMap();
+        ~ShadowMap();
         void setLayerIndex(int layerIndex);
-
-        ShaderData* getShadowMaterial(){
-            return mShadowMaterial;
-        }
 
     protected:
         int         mLayerIndex;
-        ShaderData* mShadowMaterial;
     };
 }
 #endif

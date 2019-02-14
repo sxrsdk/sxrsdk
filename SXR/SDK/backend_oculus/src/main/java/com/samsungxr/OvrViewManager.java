@@ -283,7 +283,6 @@ class OvrViewManager extends SXRViewManager {
         SXRGearCursorController gearController = mInputManager.getGearController();
         if (gearController != null)
             gearController.attachReader(mControllerReader);
-
     }
     void createSwapChain(){
         boolean isMultiview = mApplication.getAppSettings().isMultiviewSet();

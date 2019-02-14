@@ -18,15 +18,16 @@ namespace sxr {
  * A vertex is a user-defined set of 32-bit float or integer components
  * used by the vertex shader during rendering to compute the position
  * and lighting of meshes. The layout of a vertex buffer is defined with
- * a string and is the same for all vertices in the pool.
+ * a string and is the same for all vertices in the block.
  * Typical vertex components include location (Vec3), normal (Vec3),
- * color (Color) and texture coordinates (Vec2).
+ * and texture coordinates (Vec2).
  *
  * The format of the vertex data in the array maps directly to
  * what is required by the underlying renderer so that vertices
  * may be quickly copied without reformatting.
  *
  * @see Mesh
+ * @see IndexBuffer
  */
     class VertexBuffer : public HybridObject, public DataDescriptor
     {
@@ -70,10 +71,10 @@ namespace sxr {
          * @param src         pointer to integer source data array.
          * @param srcSize     number of floats in the vector.
          * @param srcStride   number of floats to the next vertex.
-         * @returns 1 if successfully set, 0 on error, -1 if out of memory.
+         * @returns true if successfully set, false on error.
          * @see getIntVec
          */
-        int setFloatVec(const char* attributeName, const float* src, int srcSize, int srcStride);
+        bool    setFloatVec(const char* attributeName, const float* src, int srcSize, int srcStride);
 
         /**
          * Gets all the values of a float vertex attribute.
@@ -88,7 +89,7 @@ namespace sxr {
          * @param dest        pointer to integer source data array.
          * @param destSize    number of floats in the vector.
          * @param destStride  number of floats to the next vertex.
-         * @returns true if successfully set, false on error.
+         * @return true if vector retrieved, false if not found or size is wrong.
          * @see setVec
          */
         bool    getFloatVec(const char* attributeName, float* dest, int destSize, int destStride) const;
@@ -105,10 +106,10 @@ namespace sxr {
          * @param src         pointer to integer source data array.
          * @param srcSize     number of integers in the vector.
          * @param srcStride   number of integers to the next vertex.
-         * @returns 1 if successfully set, 0 on error, -1 if out of memory.
+         * @returns true if successfully set, false on error.
          * @see getIntVec
          */
-        int setIntVec(const char* attributeName, const int* src, int srcSize, int srcStride);
+        bool            setIntVec(const char* attributeName, const int* src, int srcSize, int srcStride);
 
         /**
          * Gets all the values of an integer vertex attribute.
@@ -128,17 +129,43 @@ namespace sxr {
          */
         bool            getIntVec(const char* attributeName, int* data, int dataByteSize, int dataStride) const;
 
+        /**
+         * Call the designated function for the specified attribute for each vertex in the buffer.
+         * @param attrName  name of vertex attribute
+         * @param func      function to call
+         * @return true if success, false on error
+         */
         bool            forAllVertices(const char* attrName, std::function<void (int iter, const float* vertex)> func) const;
         bool            forAllVertices(std::function<void (int iter, const float* vertex)> func) const;
-        bool            getInfo(const char* attributeName, int& index, int& offset, int& size) const;
+
+        /**
+         * Get information about a specific vertex attribute
+         * @param attrName  name of attribute to get info for
+         * @param index     this parameter gets the entry index upon return
+         * @param offset    this parameter gets tne entry byte offset upon return
+         * @param size      this parameter gets the byte size of the entry upon return
+         * @return true if successful, false if attribute not found
+         */
+        bool            getInfo(const char* attrName, int& index, int& offset, int& size) const;
+
+        /**
+         * Get the bounding volume of the vertices in the buffer
+         * @param bv    this parameter gets the bounding volume upon return
+         */
         void            getBoundingVolume(BoundingVolume& bv) const;
+
+        /**
+         * Copy the vertices to the GPU if they have changed.
+         * @return true if successful, false on error
+         */
         virtual bool    updateGPU(Renderer*, IndexBuffer*, Shader*) = 0;
-        virtual void    bindToShader(Shader* shader, IndexBuffer* ibuf) = 0;
+
+
         void            dump() const;
         void            dump(const char* attrName) const;
 
     protected:
-        int             setVertexCount(int vertexCount);
+        bool            setVertexCount(int vertexCount);
         const void*     getData(const char* attributeName, int& size) const;
         const void*     getData(int index, int& size) const;
 
@@ -148,5 +175,5 @@ namespace sxr {
         int             mBoneFlags = 0;     // indicates which vertex attributes are bones
     };
 
-} // end sxrf
+} // end gvrf
 

@@ -37,7 +37,7 @@ public class SXRVertexColorShader extends SXRShaderTemplate
             normalShader = TextFile.readTextFile(context, R.raw.normalmap);
             skinShader = TextFile.readTextFile(context, R.raw.vertexskinning);
             morphShader = TextFile.readTextFile(context, R.raw.vertexmorph);
-            addLight = TextFile.readTextFile(context, R.raw.addlight);
+            addLight = TextFile.readTextFile(context, R.raw.fragment_addlight);
         }
         setSegment("FragmentTemplate", fragTemplate);
         setSegment("VertexTemplate", vtxTemplate);

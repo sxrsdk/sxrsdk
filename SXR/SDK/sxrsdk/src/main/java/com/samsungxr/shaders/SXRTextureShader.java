@@ -14,18 +14,19 @@
  */
 package com.samsungxr.shaders;
 
-import android.content.Context;
+import java.util.HashMap;
 
-import com.samsungxr.IRenderable;
-import com.samsungxr.R;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRScene;
 import com.samsungxr.SXRShaderData;
 import com.samsungxr.SXRShaderTemplate;
+import com.samsungxr.IRenderable;
 import com.samsungxr.utility.TextFile;
 
-import java.util.HashMap;
+import android.content.Context;
+
+import com.samsungxr.R;
 
 /**
  * Manages a set of variants on vertex and fragment shaders from the same source
@@ -36,7 +37,8 @@ public class SXRTextureShader extends SXRShaderTemplate
     private static String fragTemplate = null;
     private static String vtxTemplate = null;
     private static String surfaceShader = null;
-    private static String addLight = null;
+    private static String fragmentLight = null;
+    private static String vertexLight = null;
     private static String vtxShader = null;
 
     public SXRTextureShader(SXRContext gvrcontext)
@@ -50,31 +52,30 @@ public class SXRTextureShader extends SXRShaderTemplate
             vtxTemplate = TextFile.readTextFile(context, R.raw.vertex_template);
             surfaceShader = TextFile.readTextFile(context, R.raw.texture_surface);
             vtxShader = TextFile.readTextFile(context, R.raw.pos_norm_tex);
-            addLight = TextFile.readTextFile(context, R.raw.addlight);
+            fragmentLight = TextFile.readTextFile(context, R.raw.fragment_addlight);
+            vertexLight = TextFile.readTextFile(context, R.raw.vertex_addlight);
         }
         setSegment("FragmentTemplate", fragTemplate);
         setSegment("VertexTemplate", vtxTemplate);
         setSegment("FragmentSurface", surfaceShader);
-        setSegment("FragmentAddLight", addLight);
+        setSegment("FragmentAddLight", fragmentLight);
+        setSegment("VertexAddLight", vertexLight);
         setSegment("VertexMorphShader", "");
         setSegment("VertexShader", vtxShader);
         setSegment("VertexNormalShader", "");
         setSegment("VertexSkinShader", "");
-        setSegment("VertexMorph", "");
+        setOutputMatrixCount(3);
         mHasVariants = true;
         mUsesLights = true;
     }
+
     public HashMap<String, Integer> getRenderDefines(IRenderable renderable, SXRScene scene)
     {
         boolean lightMapEnabled  = (renderable instanceof SXRRenderData) ? ((SXRRenderData) renderable).isLightMapEnabled() : false;
         HashMap<String, Integer> defines = super.getRenderDefines(renderable, scene);
         if (!lightMapEnabled)
         {
-            defines.put("lightMapTexture", 0);
-        }
-        if (!defines.containsKey("LIGHTSOURCES") || (defines.get("LIGHTSOURCES") != 1))
-        {
-            defines.put("a_normal", 0);
+            defines.put("lightmapTexture", 0);
         }
         return defines;
     }
@@ -90,6 +91,13 @@ public class SXRTextureShader extends SXRShaderTemplate
         material.setVec4("emissive_color", 0.0f, 0.0f, 0.0f, 1.0f);
         material.setFloat("specular_exponent", 0.0f);
     }
+
+    @Override
+    public String getMatrixCalc(boolean usesLights)
+    {
+        return usesLights ? "left_mvp; model; (model~ * inverse_left_view)^; (model~ * inverse_right_view)^" : null;
+    }
+
 }
 
 

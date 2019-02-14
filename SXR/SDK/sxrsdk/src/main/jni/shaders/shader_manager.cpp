@@ -1,5 +1,5 @@
 #include "util/sxr_log.h"
-
+#include <string.h>
 #include "shader_manager.h"
 #include "shader.h"
 #include "engine/renderer/renderer.h"
@@ -10,11 +10,35 @@ namespace sxr {
 #ifdef DEBUG_SHADER
         LOGE("SHADER: deleting ShaderManager");
 #endif
-        for (auto it = shadersByID.begin(); it != shadersByID.end(); ++it) {
-            Shader *shader = it->second;
-            delete shader;
+        for (auto it = MVShaders.begin(); it != MVShaders.end(); ++it)
+        {
+            Shader *shader = *it;
+            if (shader)
+            {
+                delete shader;
+            }
         }
-        shadersByID.clear();
+        for (auto it = StereoShaders.begin(); it != StereoShaders.end(); ++it)
+        {
+            Shader *shader = *it;
+            if (shader)
+            {
+                delete shader;
+            }
+        }
+        for (auto it = MonoShaders.begin(); it != MonoShaders.end(); ++it)
+        {
+            {
+                Shader *shader = *it;
+                if (shader)
+                {
+                    delete shader;
+                }
+            }
+        }
+        StereoShaders.clear();
+        MonoShaders.clear();
+        MVShaders.clear();
         shadersBySignature.clear();
     }
 
@@ -23,7 +47,8 @@ namespace sxr {
                                  const char* textureDescriptor,
                                  const char* vertexDescriptor,
                                  const char* vertex_shader,
-                                 const char* fragment_shader)
+                                 const char* fragment_shader,
+                                 const char* matrixCalc)
     {
         Shader* shader = findShader(signature);
         if (shader != NULL)
@@ -32,9 +57,20 @@ namespace sxr {
         }
         std::lock_guard<std::mutex> lock(lock_);
         int id = ++latest_shader_id_;
-        shader = Renderer::getInstance()->createShader(id, signature, uniformDescriptor, textureDescriptor, vertexDescriptor, vertex_shader, fragment_shader);
+        shader = Renderer::getInstance()->createShader(id, signature, uniformDescriptor, textureDescriptor, vertexDescriptor, vertex_shader, fragment_shader, matrixCalc);
         shadersBySignature[signature] = shader;
-        shadersByID[id] = shader;
+        if (strstr(signature, "MULTIVIEW"))
+        {
+            addShader(id, MVShaders, shader);
+        }
+        else if (strstr(signature, "STEREO"))
+        {
+            addShader(id, StereoShaders, shader);
+        }
+        else
+        {
+            addShader(id, MonoShaders, shader);
+        }
 #ifdef DEBUG_SHADER
         LOGD("SHADER: added shader %d %s", id, signature);
 #endif
@@ -60,36 +96,41 @@ namespace sxr {
         }
     }
 
-    Shader* ShaderManager::getShader(int id)
+    void ShaderManager::addShader(int id, std::vector<Shader*>& table, Shader* shader)
+    {
+        if (id >= table.size())
+        {
+            table.reserve(id + 1);
+            table.resize(id + 1);
+        }
+        table[id] = shader;
+    }
+
+    Shader* ShaderManager::getShader(int id, const RenderState& state)
     {
         std::lock_guard<std::mutex> lock(lock_);
-        auto it = shadersByID.find(id);
-        if (it != shadersByID.end())
+        std::vector<Shader*>& table = (state.is_multiview ? MVShaders :
+                                        (state.is_stereo ? StereoShaders :
+                                        MonoShaders));
+
+        if (id >= table.size())
         {
-            Shader* shader = it->second;
-            const std::string& sig = shader->signature();
+            return nullptr;
+        }
+        Shader* shader = table[id];
 #ifdef DEBUG_SHADER
+        if (shader)
+        {
+            Shader* shader = *it;
+            const std::string& sig = shader->signature();
             LOGV("SHADER: getShader %d -> %s", id, sig.c_str());
-#endif
-            return shader;
         }
         else
         {
-#ifdef DEBUG_SHADER
             LOGE("SHADER: getShader %d NOT FOUND", id);
-#endif
-            return NULL;
         }
+#endif
+        return shader;
     }
 
-    void ShaderManager::dump()
-    {
-        for (auto it = shadersByID.begin(); it != shadersByID.end(); ++it)
-        {
-            Shader* shader = it->second;
-            long id = shader->getShaderID();
-            const std::string& sig = shader->signature();
-            LOGD("SHADER: #%ld %s", id, sig.c_str());
-        }
-    }
 }

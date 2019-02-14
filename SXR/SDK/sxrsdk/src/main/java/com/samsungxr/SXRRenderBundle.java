@@ -59,7 +59,7 @@ class SXRRenderBundle {
         else if(eye == SXRViewManager.EYE.LEFT)
             mLeftEyeRenderTarget[index] = new SXRRenderTarget(renderTexture, mSXRContext.getMainScene());
         else
-            mRightEyeRenderTarget[index] = new SXRRenderTarget(renderTexture, mSXRContext.getMainScene(),mLeftEyeRenderTarget[index]);
+            mRightEyeRenderTarget[index] = new SXRRenderTarget(renderTexture, mLeftEyeRenderTarget[index]);
     }
 
 

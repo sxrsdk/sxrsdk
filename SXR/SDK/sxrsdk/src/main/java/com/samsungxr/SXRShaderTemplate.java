@@ -327,10 +327,10 @@ public class SXRShaderTemplate extends SXRShader
         {
             throw new IllegalArgumentException(type + "Template segment missing - cannot make shader");
         }
-        String combinedSource = replaceTransforms(template);
-        boolean useLights = (scene != null) && (scene.getLightList().length > 0);
+        boolean useLights = lightClasses != null;
         String lightShaderSource = "";
 
+        String combinedSource = replaceTransforms(template, useLights);
         shaderSource.append("#version " + mGLSLVersion.toString() + "\n");
         if (definedNames.containsKey("LIGHTSOURCES") &&
             definedNames.get("LIGHTSOURCES") == 0)
@@ -361,7 +361,7 @@ public class SXRShaderTemplate extends SXRShader
                 else if (!definedNames.containsKey(key) ||
                         (definedNames.get(key) != 0))
                 {
-                    shaderSource.append("#define HAS_" + key + " 1;\n");
+                    shaderSource.append("#define HAS_" + key + " 1\n");
                 }
                 combinedSource = combinedSource.replace("@" + key, segmentSource);
             }
@@ -426,21 +426,36 @@ public class SXRShaderTemplate extends SXRShader
      *            scene being rendered
      */
     @Override
-    public int bindShader(SXRContext context, IRenderable rdata, SXRScene scene, boolean isMultiview)
+    public int bindShader(SXRContext context, IRenderable rdata, SXRScene scene, boolean isMultiview, boolean isStereo)
     {
         SXRMesh mesh = rdata.getMesh();
         SXRShaderData material = rdata.getMaterial();
         SXRLight[] lightlist = (scene != null) ? scene.getLightList() : null;
         HashMap<String, Integer> variantDefines = getRenderDefines(rdata, scene);
+        boolean useLights = usesLights() && variantDefines.containsKey("LIGHTSOURCES") && (variantDefines.get("LIGHTSOURCES") != 0);
 
-        if(isMultiview)
+        if (isMultiview)
+        {
             variantDefines.put("MULTIVIEW", 1);
-        else
+            variantDefines.put("STEREO", 0);
+        }
+        else if (isStereo)
+        {
+            variantDefines.put("STEREO", 1);
             variantDefines.put("MULTIVIEW", 0);
+        }
+        else
+        {
+            variantDefines.put("STEREO", 0);
+            variantDefines.put("MULTIVIEW", 0);
+        }
 
         String meshDesc = mesh.getVertexBuffer().getDescriptor();
         String signature = generateVariantDefines(variantDefines, meshDesc, material);
-        signature += generateLightSignature(lightlist);
+        if (useLights)
+        {
+            signature += generateLightSignature(lightlist);
+        }
         SXRShaderManager shaderManager = context.getShaderManager();
         int nativeShader = shaderManager.getShader(signature);
 
@@ -448,7 +463,7 @@ public class SXRShaderTemplate extends SXRShader
         {
             if (nativeShader == 0)
             {
-                Map<String, LightClass> lightClasses = scanLights(lightlist);
+                Map<String, LightClass> lightClasses = useLights ? scanLights(lightlist) : null;
 
                 String vertexShaderSource = generateShaderVariant("Vertex", variantDefines,
                                                                   scene, lightClasses, material);
@@ -461,22 +476,22 @@ public class SXRShaderTemplate extends SXRShader
                 nativeShader = shaderManager.addShader(signature, uniformDescriptor.toString(),
                                                        textureDescriptor.toString(),
                                                        vertexDescriptor.toString(),
-                                                       vertexShaderSource, fragmentShaderSource);
-                bindCalcMatrixMethod(shaderManager, nativeShader);
+                                                       vertexShaderSource, fragmentShaderSource,
+                                                       getMatrixCalc(useLights));
                 if (mWriteShadersToDisk)
                 {
-                    writeShader(context, "V-" + signature + ".glsl", vertexShaderSource);
-                    writeShader(context, "F-" + signature + ".glsl", fragmentShaderSource);
+                    writeShader("V-" + signature + ".glsl", vertexShaderSource);
+                    writeShader("F-" + signature + ".glsl", fragmentShaderSource);
                 }
                 Log.i(TAG, "SHADER: generated shader #%d %s", nativeShader, signature);
             }
             else
             {
-                Log.i(TAG, "SHADER: found shader #%d %s", nativeShader, signature);
+                //Log.i(TAG, "SHADER: found shader #%d %s", nativeShader, signature);
             }
             if (nativeShader > 0)
             {
-                rdata.setShader(nativeShader, isMultiview);
+                rdata.setShader(nativeShader);
             }
             return nativeShader;
         }
@@ -500,6 +515,7 @@ public class SXRShaderTemplate extends SXRShader
         String signature = generateVariantDefines(variantDefines, meshDesc, material);
         SXRShaderManager shaderManager = context.getShaderManager();
         int nativeShader = shaderManager.getShader(signature);
+        boolean useLights = usesLights() && variantDefines.containsKey("LIGHTSOURCES") && (variantDefines.get("LIGHTSOURCES") != 0);
 
         synchronized (shaderManager)
         {
@@ -515,13 +531,13 @@ public class SXRShaderTemplate extends SXRShader
 
                 updateDescriptors(material, meshDesc, uniformDescriptor, textureDescriptor, vertexDescriptor);
                 nativeShader = shaderManager.addShader(signature, uniformDescriptor.toString(),
-                                                       textureDescriptor.toString(), vertexDescriptor.toString(),
-                                                       vertexShaderSource, fragmentShaderSource);
-                bindCalcMatrixMethod(shaderManager, nativeShader);
+                                                       textureDescriptor.toString(), mVertexDescriptor,
+                                                       vertexShaderSource, fragmentShaderSource,
+                                                       getMatrixCalc(useLights));
                 if (mWriteShadersToDisk)
                 {
-                    writeShader(context, "V-" + signature + ".glsl", vertexShaderSource);
-                    writeShader(context, "F-" + signature + ".glsl", fragmentShaderSource);
+                    writeShader("V-" + signature + ".glsl", vertexShaderSource);
+                    writeShader("F-" + signature + ".glsl", fragmentShaderSource);
                 }
                 Log.i(TAG, "SHADER: generated shader #%d %s", nativeShader, signature);
             }
@@ -556,9 +572,13 @@ public class SXRShaderTemplate extends SXRShader
         {
             defines.put("MULTIVIEW", 1);
         }
-        if ((lights == null) || (lights.length == 0) || !renderable.isLightEnabled())
+        if ((lights == null) ||
+            (lights.length == 0) ||
+            !renderable.getMesh().hasAttribute("a_normal") ||
+            !renderable.isLightEnabled())
         {
             defines.put("LIGHTSOURCES", 0);
+            defines.put("a_normal", 0);
             return defines;
         }
         defines.put("LIGHTSOURCES", 1);

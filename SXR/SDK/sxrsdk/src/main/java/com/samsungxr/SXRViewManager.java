@@ -706,26 +706,26 @@ abstract class SXRViewManager extends SXRContext {
 
         SXRRenderTexture posteffectRenderTextureB = null;
         SXRRenderTexture posteffectRenderTextureA = null;
-
+        renderTarget.setStereo(false);
         if(isMultiview) {
             posteffectRenderTextureA = mRenderBundle.getEyeCapturePostEffectRenderTextureA();
             posteffectRenderTextureB = mRenderBundle.getEyeCapturePostEffectRenderTextureB();
             renderTarget = mRenderBundle.getEyeCaptureRenderTarget();
-            renderTarget.cullFromCamera(mMainScene, centerCamera ,mRenderBundle.getShaderManager());
+            renderTarget.cullFromCamera(mMainScene, centerCamera, mRenderBundle.getShaderManager());
             renderTarget.beginRendering(centerCamera);
         }
         else {
             posteffectRenderTextureA = mRenderBundle.getPostEffectRenderTextureA();
             posteffectRenderTextureB = mRenderBundle.getPostEffectRenderTextureB();
+            renderTarget.cullFromCamera(mMainScene, centerCamera, mRenderBundle.getShaderManager());
         }
-
-        renderTarget.render(mMainScene,centerCamera, mRenderBundle.getShaderManager(), posteffectRenderTextureA, posteffectRenderTextureB);
+        renderTarget.render(mMainScene, centerCamera, mRenderBundle.getShaderManager(), posteffectRenderTextureA, posteffectRenderTextureB);
         centerCamera.removePostEffect(postEffect);
         readRenderResult(renderTarget, EYE.MULTIVIEW, false);
 
         if(isMultiview)
             renderTarget.endRendering();
-
+        renderTarget.setStereo(true);
         final Bitmap bitmap = Bitmap.createBitmap(mReadbackBufferWidth, mReadbackBufferHeight, Bitmap.Config.ARGB_8888);
         mReadbackBuffer.rewind();
         bitmap.copyPixelsFromBuffer(mReadbackBuffer);
@@ -849,8 +849,8 @@ abstract class SXRViewManager extends SXRContext {
     protected int mReadbackBufferWidth;
     protected int mReadbackBufferHeight;
 
-    protected native void makeShadowMaps(long scene, SXRScene javaNode, long shader_manager, int width, int height);
-    protected native void cullAndRender(long render_target, long scene, SXRScene javaNode, long shader_manager, long postEffectRenderTextureA, long postEffectRenderTextureB);
+    protected native void makeShadowMaps(long scene, SXRScene javaSceneObject, long shader_manager, int width, int height);
+    protected native void cullAndRender(long render_target, long scene, SXRScene javaSceneObject, long shader_manager, long postEffectRenderTextureA, long postEffectRenderTextureB);
     private native static void readRenderResultNative(Object readbackBuffer, long renderTarget, int eye, boolean useMultiview);
 
     private static final String TAG = "SXRViewManager";

@@ -21,7 +21,7 @@
 #include "camera.h"
 
 #include "glm/gtc/matrix_inverse.hpp"
-
+#include "engine/renderer/renderer.h"
 #include "objects/node.h"
 #include "util/sxr_log.h"
 

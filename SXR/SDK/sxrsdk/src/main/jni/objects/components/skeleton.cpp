@@ -3,8 +3,6 @@
 #include "objects/components/component.inl"
 #include "engine/renderer/renderer.h"
 
-#define MAX_BONES 60
-
 namespace sxr {
     Skeleton::Skeleton(int* boneparents, int numbones)
        :  Component(COMPONENT_TYPE_SKELETON),

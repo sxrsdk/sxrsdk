@@ -215,8 +215,8 @@ jfloatArray boundingVolumeToArray(JNIEnv* env, const BoundingVolume& bvol) {
 JNIEXPORT jfloatArray JNICALL
 Java_com_samsungxr_NativeNode_getBoundingVolume(JNIEnv * env,
         jobject obj, jlong jNode) {
-    Node* sceneObject = reinterpret_cast<Node*>(jNode);
-    const BoundingVolume& bvol = sceneObject->getBoundingVolume();
+    Node* node = reinterpret_cast<Node*>(jNode);
+    const BoundingVolume& bvol = node->getBoundingVolume();
     return boundingVolumeToArray(env, bvol);
 }
 
@@ -224,8 +224,8 @@ JNIEXPORT jfloatArray JNICALL
 Java_com_samsungxr_NativeNode_expandBoundingVolumeByPoint(JNIEnv * env,
         jobject obj, jlong jNode, jfloat pointX, jfloat pointY, jfloat pointZ) {
 
-    Node* sceneObject = reinterpret_cast<Node*>(jNode);
-    BoundingVolume& bvol = sceneObject->getBoundingVolume();
+    Node* node = reinterpret_cast<Node*>(jNode);
+    BoundingVolume& bvol = node->getBoundingVolume();
     bvol.expand(glm::vec3(pointX, pointY, pointZ));
 
     return boundingVolumeToArray(env, bvol);
@@ -235,8 +235,8 @@ JNIEXPORT jfloatArray JNICALL
 Java_com_samsungxr_NativeNode_expandBoundingVolumeByCenterAndRadius(JNIEnv * env,
         jobject obj, jlong jNode, jfloat centerX, jfloat centerY, jfloat centerZ, jfloat radius) {
 
-    Node* sceneObject = reinterpret_cast<Node*>(jNode);
-    BoundingVolume& bvol = sceneObject->getBoundingVolume();
+    Node* node = reinterpret_cast<Node*>(jNode);
+    BoundingVolume& bvol = node->getBoundingVolume();
     bvol.expand(glm::vec3(centerX, centerY, centerZ), radius);
 
     return boundingVolumeToArray(env, bvol);

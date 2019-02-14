@@ -2,7 +2,6 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
-
 #ifdef HAS_MULTIVIEW
 #extension GL_OVR_multiview2 : enable
 layout(num_views = 2) in;
@@ -41,7 +40,8 @@ layout(location = 8) in ivec4 a_bone_indices;
 #ifdef HAS_a_tangent
 layout(location = 9) in vec3 a_tangent;
 layout(location = 10) in vec3 a_bitangent;
-layout(location = 7) out mat3 tangent_matrix;
+
+layout(location = 4) out mat3 tangent_matrix;
 #endif
 #endif
 
@@ -57,7 +57,6 @@ layout(location = 13) out vec2 emissive_coord;
 layout(location = 14) out vec2 lightmap_coord;
 layout(location = 15) out vec2 opacity_coord;
 layout(location = 16) out vec2 normal_coord;
-
 
 #ifdef HAS_blendshapeTexture
 layout (set = 0, binding = 17) uniform sampler2D blendshapeTexture;
@@ -76,7 +75,12 @@ struct Vertex
 };
 
 #ifdef HAS_LIGHTSOURCES
-	@LIGHTSOURCES
+
+#ifdef HAS_VertexAddLight
+@VertexAddLight
+#endif
+
+@LIGHTSOURCES
 #endif
 	
 void main() {
@@ -95,7 +99,6 @@ void main() {
 #else
     vertex.vertex_color = vec4(1, 1, 1, 1);
 #endif
-
 #ifdef HAS_VertexMorphShader
 @VertexMorphShader
 #endif
@@ -111,22 +114,28 @@ void main() {
 @VertexShader
 
 #ifdef HAS_LIGHTSOURCES
-     LightVertex(vertex);
- #endif
- #ifdef HAS_TEXCOORDS
- @TEXCOORDS
- #endif
-     viewspace_position = vertex.viewspace_position;
-     viewspace_normal = vertex.viewspace_normal;
-     view_direction = vertex.view_direction;
-     vertex_color = vertex.vertex_color;
- #ifdef HAS_MULTIVIEW
-     bool render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? true : false;
-     mat4 mvp = u_mvp_[gl_ViewID_OVR];
-     if (!render_mask)
-         mvp = mat4(0.0);  //  if render_mask is not set for particular eye, dont render that object
-     gl_Position = mvp  * vertex.local_position;
- #else
- 	gl_Position = u_mvp * vertex.local_position;
- #endif
- }
+    LightVertex(vertex);
+#endif
+#ifdef HAS_TEXCOORDS
+@TEXCOORDS
+#endif
+    mat4 mvp = u_mvp;
+	viewspace_position = vertex.viewspace_position;
+	viewspace_normal = vertex.viewspace_normal;
+	view_direction = vertex.view_direction;
+	vertex_color = vertex.vertex_color;
+
+#ifdef HAS_STEREO
+#ifdef HAS_MULTIVIEW
+    float render_mask = (u_render_mask & (gl_ViewID_OVR + uint(1))) > uint(0) ? 1.0 : 0.0;
+    mvp[3][0] = mvp[3][0] - (u_proj_offset * float(gl_ViewID_OVR));
+#else
+    float render_mask = (u_render_mask & (unit(u_right) + uint(1))) > uint(0) ? 1.0 : 0.0;
+    //generate right eye mvp from left
+    mvp[3][0] = mvp[3][0] - (u_proj_offset * float(u_right));
+#endif
+    mvp = mvp * float(render_mask);
+#endif
+    gl_Position = mvp * vertex.local_position;
+
+}

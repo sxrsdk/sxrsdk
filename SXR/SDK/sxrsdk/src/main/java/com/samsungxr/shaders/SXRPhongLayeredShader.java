@@ -36,7 +36,8 @@ public class SXRPhongLayeredShader extends SXRShaderTemplate
     private static String fragTemplate = null;
     private static String vtxTemplate = null;
     private static String surfaceShader = null;
-    private static String addLight = null;
+    private static String fragmentLight = null;
+    private static String vertexLight = null;
     private static String vtxShader = null;
     private static String normalShader = null;
     private static String skinShader = null;
@@ -66,12 +67,14 @@ public class SXRPhongLayeredShader extends SXRShaderTemplate
             normalShader = TextFile.readTextFile(context, R.raw.normalmap);
             skinShader = TextFile.readTextFile(context, R.raw.vertexskinning);
             morphShader = TextFile.readTextFile(context, R.raw.vertexmorph);
-            addLight = TextFile.readTextFile(context, R.raw.addlight);
+            fragmentLight = TextFile.readTextFile(context, R.raw.fragment_addlight);
+            vertexLight = TextFile.readTextFile(context, R.raw.vertex_addlight);
         }
         setSegment("FragmentTemplate", fragTemplate);
         setSegment("VertexTemplate", vtxTemplate);
         setSegment("FragmentSurface", surfaceShader);
-        setSegment("FragmentAddLight", addLight);
+        setSegment("FragmentAddLight", fragmentLight);
+        setSegment("VertexAddLight", vertexLight);
         setSegment("VertexSkinShader", skinShader);
         setSegment("VertexShader", vtxShader);
         setSegment("VertexNormalShader", normalShader);
@@ -87,13 +90,20 @@ public class SXRPhongLayeredShader extends SXRShaderTemplate
         boolean lightMapEnabled  = (renderable instanceof SXRRenderData) ? ((SXRRenderData) renderable).isLightMapEnabled() : false;
 
         if (!lightMapEnabled)
-            defines.put("lightMapTexture", 0);
+            defines.put("lightmapTexture", 0);
         if (!defines.containsKey("LIGHTSOURCES") || (defines.get("LIGHTSOURCES") != 1))
         {
             defines.put("a_normal", 0);
         }
         return defines;
     }
+
+    @Override
+    public String getMatrixCalc(boolean usesLights)
+    {
+        return usesLights ? "left_mvp; model; (model~ * inverse_left_view)^; (model~ * inverse_right_view)^" : null;
+    }
+
 
     protected void setMaterialDefaults(SXRShaderData material)
     {
@@ -106,5 +116,6 @@ public class SXRPhongLayeredShader extends SXRShaderTemplate
         material.setFloat("u_opacity", 0.0f);
         material.setInt("u_numblendshapes", 0);
     }
+
 }
 

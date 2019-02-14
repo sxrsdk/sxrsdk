@@ -137,9 +137,9 @@ public class SXRRenderPass extends SXRHybridObject implements IRenderable {
      *            The native shader this {@link SXRRenderPass pass}
      *            will be rendered with.
      */
-    public void setShader(int shader, boolean useMultiview)
+    public void setShader(int shader)
     {
-        NativeRenderPass.setShader(getNative(), shader, useMultiview);
+        NativeRenderPass.setShader(getNative(), shader);
     }
 
     /**
@@ -153,9 +153,9 @@ public class SXRRenderPass extends SXRHybridObject implements IRenderable {
     /**
      * Get the integer ID for the native shader used by this pass.
      */
-    int getShader(boolean useMultiview)
+    int getShader()
     {
-        return NativeRenderPass.getShader(getNative(), useMultiview);
+        return NativeRenderPass.getShader(getNative());
     }
 
 
@@ -185,11 +185,11 @@ class NativeRenderPass {
 
     static native long ctor();
 
-    static native int getShader(long renderPass, boolean useMultiview);
+    static native int getShader(long renderPass);
 
     static native void setMaterial(long renderPass, long material);
 
-    static native void setShader(long renderPass, int shader, boolean useMultiview);
+    static native void setShader(long renderPass, int shader);
 
     static native void setCullFace(long renderPass, int cullFace);
 }

@@ -15,7 +15,6 @@
 package com.samsungxr.shaders;
 
 import java.util.HashMap;
-import java.util.List;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRRenderData;
@@ -29,7 +28,7 @@ import android.content.Context;
 
 import com.samsungxr.R;
 
-   /**
+/**
     * Manages a set of variants on vertex and fragment shaders from the same source
     * code.
     */
@@ -38,7 +37,8 @@ import com.samsungxr.R;
        private static String fragTemplate = null;
        private static String vtxTemplate = null;
        private static String surfaceShader = null;
-       private static String addLight = null;
+       private static String fragmentLight = null;
+       private static String vertexLight = null;
        private static String vtxShader = null;
        private static String normalShader = null;
        private static String skinShader = null;
@@ -51,55 +51,62 @@ import com.samsungxr.R;
                    "float3 a_position float2 a_texcoord float2 a_texcoord1 float2 a_texcoord2 float2 a_texcoord3 float3 a_normal float4 a_color float4 a_bone_weights int4 a_bone_indices float3 a_tangent float3 a_bitangent",
                    GLSLESVersion.VULKAN);
 
-           if (fragTemplate == null)
-           {
-               Context context = gvrcontext.getContext();
-               fragTemplate = TextFile.readTextFile(context, R.raw.fragment_template_multitex);
-               vtxTemplate = TextFile.readTextFile(context, R.raw.vertex_template_multitex);
-               surfaceShader = TextFile.readTextFile(context, R.raw.phong_surface_multitex);
-               vtxShader = TextFile.readTextFile(context, R.raw.pos_norm_multitex);
-               normalShader = TextFile.readTextFile(context, R.raw.normalmap);
-               skinShader = TextFile.readTextFile(context, R.raw.vertexskinning);
-               morphShader = TextFile.readTextFile(context, R.raw.vertexmorph);
-               addLight = TextFile.readTextFile(context, R.raw.addlight);
-           }
-           setSegment("FragmentTemplate", fragTemplate);
-           setSegment("VertexTemplate", vtxTemplate);
-           setSegment("FragmentSurface", surfaceShader);
-           setSegment("FragmentAddLight", addLight);
-           setSegment("VertexSkinShader", skinShader);
-           setSegment("VertexMorphShader", morphShader);
-           setSegment("VertexShader", vtxShader);
-           setSegment("VertexNormalShader", normalShader);
+        if (fragTemplate == null)
+        {
+            Context context = gvrcontext.getContext();
+            fragTemplate = TextFile.readTextFile(context, R.raw.fragment_template_multitex);
+            vtxTemplate = TextFile.readTextFile(context, R.raw.vertex_template_multitex);
+            surfaceShader = TextFile.readTextFile(context, R.raw.phong_surface_multitex);
+            vtxShader = TextFile.readTextFile(context, R.raw.pos_norm_multitex);
+            normalShader = TextFile.readTextFile(context, R.raw.normalmap);
+            skinShader = TextFile.readTextFile(context, R.raw.vertexskinning);
+            morphShader = TextFile.readTextFile(context, R.raw.vertexmorph);
+            fragmentLight = TextFile.readTextFile(context, R.raw.fragment_addlight);
+            vertexLight = TextFile.readTextFile(context, R.raw.vertex_addlight);
+        }
+        setSegment("FragmentTemplate", fragTemplate);
+        setSegment("VertexTemplate", vtxTemplate);
+        setSegment("FragmentSurface", surfaceShader);
+        setSegment("FragmentAddLight", fragmentLight);
+        setSegment("VertexAddLight", vertexLight);
+        setSegment("VertexSkinShader", skinShader);
+        setSegment("VertexShader", vtxShader);
+        setSegment("VertexNormalShader", normalShader);
+        setSegment("VertexMorphShader", morphShader);
+        mHasVariants = true;
+        mUsesLights = true;
+    }
 
-           mHasVariants = true;
-           mUsesLights = true;
-       }
-       
-       public HashMap<String, Integer> getRenderDefines(IRenderable renderable, SXRScene scene)
-       {
-           HashMap<String, Integer> defines = super.getRenderDefines(renderable, scene);
-           boolean lightMapEnabled  = (renderable instanceof SXRRenderData) ? ((SXRRenderData) renderable).isLightMapEnabled() : false;
+    public HashMap<String, Integer> getRenderDefines(IRenderable renderable, SXRScene scene)
+    {
+        HashMap<String, Integer> defines = super.getRenderDefines(renderable, scene);
+        boolean lightMapEnabled = (renderable instanceof SXRRenderData) ?
+                ((SXRRenderData) renderable).isLightMapEnabled() : false;
 
-           if (!lightMapEnabled)
-               defines.put("lightMapTexture", 0);
-           if (!defines.containsKey("LIGHTSOURCES") || (defines.get("LIGHTSOURCES") != 1))
-           {
-               defines.put("a_normal", 0);
-           }
-           return defines;
-       }
+        if (!lightMapEnabled)
+        {
+            defines.put("lightmapTexture", 0);
+        }
+        return defines;
+    }
 
-       protected void setMaterialDefaults(SXRShaderData material)
-       {
-           material.setVec4("ambient_color", 0.2f, 0.2f, 0.2f, 1.0f);
-           material.setVec4("diffuse_color", 0.8f, 0.8f, 0.8f, 1.0f);
-           material.setVec4("specular_color", 0.0f, 0.0f, 0.0f, 1.0f);
-           material.setVec4("emissive_color", 0.0f, 0.0f, 0.0f, 1.0f);
-           material.setFloat("specular_exponent", 0.0f);
-           material.setFloat("line_width", 1.0f);
-           material.setFloat("u_opacity", 0.0f);
-           material.setInt("u_numblendshapes", 0);
-       }
+   protected void setMaterialDefaults(SXRShaderData material)
+   {
+       material.setVec4("ambient_color", 0.2f, 0.2f, 0.2f, 1.0f);
+       material.setVec4("diffuse_color", 0.8f, 0.8f, 0.8f, 1.0f);
+       material.setVec4("specular_color", 0.0f, 0.0f, 0.0f, 1.0f);
+       material.setVec4("emissive_color", 0.0f, 0.0f, 0.0f, 1.0f);
+       material.setFloat("specular_exponent", 0.0f);
+       material.setFloat("line_width", 1.0f);
+       material.setFloat("u_opacity", 0.0f);
+       material.setInt("u_numblendshapes", 0);
    }
+
+    @Override
+    public String getMatrixCalc(boolean usesLights)
+    {
+        return usesLights ? "left_mvp; model; (model~ * inverse_left_view)^; (model~ * inverse_right_view)^" : null;
+    }
+
+}
 

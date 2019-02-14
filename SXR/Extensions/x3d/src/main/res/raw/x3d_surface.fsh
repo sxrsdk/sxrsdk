@@ -26,7 +26,7 @@ layout(location = 15) in vec2 opacity_coord;
 layout(location = 16) in vec2 normal_coord;
 
 #ifdef HAS_a_tangent
-layout(location = 7) in mat3 tangent_matrix;
+layout(location = 4) in mat3 tangent_matrix;
 #endif
 #endif
 
@@ -50,7 +50,7 @@ layout(location = 21) in vec2 emissive_coord1;
 layout(set = 0, binding = 21) uniform sampler2D emissiveTexture1;
 #endif
 
-#ifdef HAS_lightMapTexture1
+#ifdef HAS_lightmapTexture1
 layout(location = 22) in vec2 lightmap_coord1;
 #endif
 
@@ -170,14 +170,10 @@ diffuse.xyz *= diffuse.a;
 	viewspaceNormal = viewspace_normal;
 #endif
 
-#ifdef HAS_lightMapTexture
-	vec2 lcoord = (lightmap_coord * u_lightMap_scale) + u_lightMap_offset;
-	diffuse *= texture(lightMapTexture, vec2(lcoord.x, 1 - lcoord.y));
-	#ifdef HAS_lightMapTexture1
-		lcoord = (lightmap_coord1 * u_lightMap_scale) + u_lightMap_offset;
-    	diffuse = BlendColors(diffuse, texture(lightMapTexture1, vec2(lcoord.x, 1 - lcoord.y), lightMapTexture1_blendop);
-    #endif
-	return Surface(viewspaceNormal, ambient, vec4(0.0, 0.0, 0.0, 0.0), specular, emission);
+#ifdef HAS_lightmapTexture
+	vec2 lmap_coord = (lightmap_coord * u_lightmap_scale) + u_lightmap_offset;
+	diffuse *= texture(lightmapTexture, vec2(lmap_coord.x, 1 - lmap_coord.y);
+	return Surface(viewspaceNormal, ambient, vec4(0.0, 0.0, 0.0, 0.0), specular, diffuse);
 #else
 	return Surface(viewspaceNormal, ambient, diffuse, specular, emission);
 #endif

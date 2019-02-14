@@ -7,9 +7,9 @@
 precision highp float;
 precision lowp int;
 
-layout(location = 0) out vec4 fragColor;
-
 @MATRIX_UNIFORMS
+
+layout(location = 0) out vec4 fragColor;
 
 layout(location = 0) in vec3 view_direction;
 layout(location = 1) in vec3 viewspace_position;
@@ -37,10 +37,11 @@ float unpackFloatFromVec4i(const vec4 value)
     return dot(value, unpackFactors);
 }
 
-
 @FragmentSurface
 
+#ifdef HAS_LIGHTSOURCES
 @FragmentAddLight
+#endif
 
 @LIGHTSOURCES
 
