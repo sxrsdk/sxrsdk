@@ -39,8 +39,8 @@ layout(location = 8) in ivec4 a_bone_indices;
 
 #ifdef HAS_VertexNormalShader
 #ifdef HAS_a_tangent
-layout(location = 8) in vec3 a_tangent;
-layout(location = 9) in vec3 a_bitangent;
+layout(location = 9) in vec3 a_tangent;
+layout(location = 10) in vec3 a_bitangent;
 layout(location = 7) out mat3 tangent_matrix;
 #endif
 #endif
