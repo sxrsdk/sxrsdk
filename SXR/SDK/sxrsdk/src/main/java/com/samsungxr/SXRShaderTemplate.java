@@ -226,6 +226,8 @@ public class SXRShaderTemplate extends SXRShader
                 definedNames.put(name, 1);
                 if (!signature.contains(name))
                     signature += "$" + name;
+                if (name.contains("texcoord"))
+                    definedNames.put("HAS_TEXCOORDS", 1);
             }
             else if (material.getTexture(name) != null)
             {
@@ -371,13 +373,9 @@ public class SXRShaderTemplate extends SXRShader
         combinedSource = combinedSource.replace("@LIGHTSOURCES", lightShaderSource);
         combinedSource = combinedSource.replace("@MATERIAL_UNIFORMS", material.makeShaderLayout());
         combinedSource = combinedSource.replace("@BONES_UNIFORMS", SXRShaderManager.makeLayout(sBonesDescriptor, "Bones_ubo", true));
-        if (type.equals("Vertex"))
+        if (type.equals("Vertex") && (definedNames.get("HAS_TEXCOORDS") != null))
         {
             String texcoordSource = assignTexcoords(material);
-            if (texcoordSource.length() > 0)
-            {
-                shaderSource.append("#define HAS_TEXCOORDS 1\n");
-            }
             combinedSource = combinedSource.replace("@TEXCOORDS", texcoordSource);
         }
         for (Map.Entry<String, Integer> entry : definedNames.entrySet())
@@ -449,7 +447,6 @@ public class SXRShaderTemplate extends SXRShader
             variantDefines.put("STEREO", 0);
             variantDefines.put("MULTIVIEW", 0);
         }
-
         String meshDesc = mesh.getVertexBuffer().getDescriptor();
         String signature = generateVariantDefines(variantDefines, meshDesc, material);
         if (useLights)
