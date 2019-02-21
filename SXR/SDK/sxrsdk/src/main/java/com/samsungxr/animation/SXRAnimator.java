@@ -368,7 +368,7 @@ public class SXRAnimator extends SXRBehavior
         }
     }
 
-    void animate(float timeInSec)
+    public void animate(float timeInSec)
     {
         for (SXRAnimation anim : mAnimations)
         {
