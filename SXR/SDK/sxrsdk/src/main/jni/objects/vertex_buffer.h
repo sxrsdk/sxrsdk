@@ -155,6 +155,15 @@ namespace sxr {
         void            getBoundingVolume(BoundingVolume& bv) const;
 
         /**
+         * Apply the given transform to the vertices.
+         * Multiplies the positions by the matrix,
+         * multiplies the normals by it's inverse transpose.
+         * @param trans matrix to apply
+         * @param doNormals Transform the normals of the mesh by the inverse transpose of the matrix
+         */
+        void            transform(glm::mat4& trans, bool doNormals);
+
+        /**
          * Copy the vertices to the GPU if they have changed.
          * @return true if successful, false on error
          */

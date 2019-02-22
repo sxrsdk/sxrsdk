@@ -903,6 +903,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
      */
     public void updateBonePose()
     {
+        mPose.sync();
         mPose.getLocalMatrices(mPoseMatrices);
         NativeSkeleton.setPose(getNative(), mPoseMatrices);
         mPose.getWorldMatrices(mPoseMatrices);
