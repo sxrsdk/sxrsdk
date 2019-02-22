@@ -14,6 +14,7 @@ import com.samsungxr.SXRNode;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRResourceVolume;
 import com.samsungxr.SXRTexture;
+import com.samsungxr.SXRTransform;
 import com.samsungxr.SXRVertexBuffer;
 import com.samsungxr.animation.keyframe.BVHImporter;
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
@@ -307,15 +308,25 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * as well as scaling the vertex positions.
      * The {@link SXRSkeleton} pose is changed to match
      * the new geometry.
+     * <p>
+     * One consequence of scaling the avatar is that
+     * animations which worked at the previous scale
+     * may no longer work as the positions will be
+     * incorrect.
+     * </p>
      * @param sf    floating point scale factor
      */
-    public void scale(final float sf)
+    public void scaleAvatar(float sf)
+    {
+        scaleSkin(mAvatarRoot, mSkeleton, sf);
+    }
+
+    static public void scaleSkin(final SXRNode root, final SXRSkeleton skel, final float sf)
     {
         final Matrix4f scaleMtx = new Matrix4f();
         final float[] scaleData = new float[16];
-        SXRNode avatarRoot = mAvatarRoot;
-        SXRSkeleton skel = mSkeleton;
         final Set<SXRVertexBuffer> meshes = new HashSet<SXRVertexBuffer>();
+        int n = skel.getNumBones();
 
         /*
          * scale the mesh geometry and if there are
@@ -323,18 +334,21 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
          */
         scaleMtx.scale(sf);
         scaleMtx.get(scaleData);
-        avatarRoot.forAllComponents(new SXRNode.ComponentVisitor()
+        root.forAllComponents(new SXRNode.ComponentVisitor()
         {
             @Override
             public boolean visit(SXRComponent comp)
             {
-                SXRSkin skin = (SXRSkin) comp;
-                skin.scalePositions(sf);
-                SXRRenderData rd = (SXRRenderData) skin.getComponent(SXRRenderData.getComponentType());
+                SXRRenderData rd = (SXRRenderData) comp;
+                SXRSkin skin = (SXRSkin) rd.getComponent(SXRSkin.getComponentType());
+                if (skin != null)
+                {
+                    skin.scalePositions(sf);
+                }
                 meshes.add(rd.getMesh().getVertexBuffer());
                 return true;
             }
-        }, SXRSkin.getComponentType());
+        }, SXRRenderData.getComponentType());
         for (SXRVertexBuffer vbuf : meshes)
         {
             vbuf.transform(scaleData, false);
@@ -344,13 +358,27 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
          */
         SXRPose pose  = skel.getPose();
         Vector3f p = new Vector3f();
-        int n = skel.getNumBones();
-
         for (int i = 0; i < n; ++i)
         {
+            SXRNode bone = skel.getBone(i);
             pose.getLocalPosition(i, p);
             p.mul(sf);
             pose.setLocalPosition(i, p.x, p.y, p.z);
+            for (int c = 0; c < bone.getChildrenCount(); ++c)
+            {
+                SXRNode node = bone.getChildByIndex(c);
+                SXRRenderData rd = node.getRenderData();
+                SXRTransform t = (SXRTransform) node.getComponent(SXRTransform.getComponentType());
+                int boneIndex = skel.getBoneIndex(node.getName());
+                if (boneIndex < 0)
+                {
+                    t.setPosition(t.getPositionX() * sf, t.getPositionY() * sf, t.getPositionZ() * sf);
+                }
+                if (rd != null)
+                {
+                    meshes.add(rd.getMesh().getVertexBuffer());
+                }
+            }
         }
         skel.updateBonePose();
     }
@@ -688,29 +716,10 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         int boneIndex = mSkeleton.getBoneIndex(attachBone);
         if (boneIndex < 0)
         {
-            boneIndex = 0;
             attachBone = mSkeleton.getBoneName(0);
             skel.setBoneName(0, attachBone);
         }
-        SXRNode srcRootBone = skel.getBone(0);
-        if (srcRootBone != null)
-        {
-            SXRNode parent = mSkeleton.getBone(boneIndex);
-            if (parent != null)
-            {
-                int n = srcRootBone.getChildrenCount();
 
-                for (int i = 0; i < n; ++i)
-                {
-                    SXRNode child = srcRootBone.getChildByIndex(0);
-                    if (skel.getBoneIndex(child.getName()) >= 0)
-                    {
-                        srcRootBone.removeChildObject(child);
-                        parent.addChildObject(child);
-                    }
-                }
-            }
-        }
         mAttachments.put(attachBone, modelRoot);
         mSkeleton.merge(skel);
         List<SXRComponent> skins = modelRoot.getAllComponents(SXRSkin.getComponentType());
