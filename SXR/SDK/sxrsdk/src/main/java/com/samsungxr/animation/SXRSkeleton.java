@@ -35,7 +35,9 @@ import org.joml.Vector3f;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -1004,18 +1006,15 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
                 SXRNode newBone = bones.get(i);
                 parentIds[m] = pid;
                 boneNames[m] = newBoneNames.get(i);
-                if (pid >= 0)
+                SXRNode parent = mBones[pid];
+                for (int c = 0; c < newBone.getChildrenCount(); ++c)
                 {
-                    SXRNode parent = mBones[pid];
-                    for (int c = 0; c < newBone.getChildrenCount(); ++c)
+                    SXRNode child = newBone.getChildByIndex(c);
+                    if (newSkel.getBoneIndex(child.getName()) < 0)
                     {
-                        SXRNode child = newBone.getChildByIndex(c);
-                        if (newSkel.getBoneIndex(child.getName()) < 0)
-                        {
-                            newBone.removeChildObject(child);
-                            parent.addChildObject(child);
-                            --c;
-                        }
+                        newBone.removeChildObject(child);
+                        parent.addChildObject(child);
+                        --c;
                     }
                 }
                 setBone(m, newBone);
@@ -1038,6 +1037,82 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             }
             mPose.sync();
             poseToBones();
+        }
+    }
+
+    /**
+     * Scale the skeleton and associated geometry uniformly.
+     * <p>
+     * This function modifies the inverse bind pose matrices
+     * in the {@link SXRSkin} components for the meshes
+     * as well as scaling the vertex positions.
+     * The {@link SXRSkeleton} pose is changed to match
+     * the new geometry.
+     * <p>
+     * One consequence of scaling is that
+     * animations which worked at the previous scale
+     * may no longer work as the positions will be
+     * incorrect.
+     * </p>
+     * @param sf    floating point scale factor
+     */
+    public void scaleSkin(final SXRNode root, final float sf)
+    {
+        final Set<SXRVertexBuffer> meshes = new HashSet<SXRVertexBuffer>();
+
+        synchronized (this)
+        {
+            poseToBones();
+            setEnable(false);
+            /*
+             * scale the node and skin positions
+             */
+            root.forAllDescendants(new SXRNode.SceneVisitor()
+            {
+                @Override
+                public boolean visit(SXRNode node)
+                {
+                    SXRRenderData rd = node.getRenderData();
+                    SXRSkin skin = (SXRSkin) node.getComponent(SXRSkin.getComponentType());
+                    if (skin != null)
+                    {
+                        skin.scalePositions(sf);
+                    }
+                    else
+                    {
+                        SXRTransform t = node.getTransform();
+                        t.setPosition(t.getPositionX() * sf,
+                                      t.getPositionY() * sf,
+                                      t.getPositionZ() * sf);
+                    }
+                    if (rd != null)
+                    {
+                        float bbox[] = new float[6];
+                        rd.getMesh().getBoxBound(bbox);
+                        float cx = (bbox[3] + bbox[0]) / 2;
+                        float cy = (bbox[4] + bbox[1]) / 2;
+                        float cz = (bbox[5] + bbox[2]) / 2;
+                        Log.d("NOLA", "%s %f, %f, %f", node.getName(), cx, cy, cz);
+                        meshes.add(rd.getMesh().getVertexBuffer());
+                    }
+                    return true;
+                }
+            });
+            poseFromBones();
+
+            /*
+             * scale the mesh geometry
+             */
+            final Matrix4f scaleMtx = new Matrix4f();
+            final float[] scaleData = new float[16];
+            scaleMtx.scale(sf);
+            scaleMtx.get(scaleData);
+            for (SXRVertexBuffer vbuf : meshes)
+            {
+                vbuf.transform(scaleData, false);
+            }
+            updateBonePose();
+            setEnable(true);
         }
     }
 

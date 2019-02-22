@@ -315,72 +315,11 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * incorrect.
      * </p>
      * @param sf    floating point scale factor
+     * @see SXRSkeleton#scaleSkin(SXRNode, float)
      */
     public void scaleAvatar(float sf)
     {
-        scaleSkin(mAvatarRoot, mSkeleton, sf);
-    }
-
-    static public void scaleSkin(final SXRNode root, final SXRSkeleton skel, final float sf)
-    {
-        final Matrix4f scaleMtx = new Matrix4f();
-        final float[] scaleData = new float[16];
-        final Set<SXRVertexBuffer> meshes = new HashSet<SXRVertexBuffer>();
-        int n = skel.getNumBones();
-
-        /*
-         * scale the mesh geometry and if there are
-         * any skins, scale their positions
-         */
-        scaleMtx.scale(sf);
-        scaleMtx.get(scaleData);
-        root.forAllComponents(new SXRNode.ComponentVisitor()
-        {
-            @Override
-            public boolean visit(SXRComponent comp)
-            {
-                SXRRenderData rd = (SXRRenderData) comp;
-                SXRSkin skin = (SXRSkin) rd.getComponent(SXRSkin.getComponentType());
-                if (skin != null)
-                {
-                    skin.scalePositions(sf);
-                }
-                meshes.add(rd.getMesh().getVertexBuffer());
-                return true;
-            }
-        }, SXRRenderData.getComponentType());
-        for (SXRVertexBuffer vbuf : meshes)
-        {
-            vbuf.transform(scaleData, false);
-        }
-        /*
-         * now scale the skeleton positions
-         */
-        SXRPose pose  = skel.getPose();
-        Vector3f p = new Vector3f();
-        for (int i = 0; i < n; ++i)
-        {
-            SXRNode bone = skel.getBone(i);
-            pose.getLocalPosition(i, p);
-            p.mul(sf);
-            pose.setLocalPosition(i, p.x, p.y, p.z);
-            for (int c = 0; c < bone.getChildrenCount(); ++c)
-            {
-                SXRNode node = bone.getChildByIndex(c);
-                SXRRenderData rd = node.getRenderData();
-                SXRTransform t = (SXRTransform) node.getComponent(SXRTransform.getComponentType());
-                int boneIndex = skel.getBoneIndex(node.getName());
-                if (boneIndex < 0)
-                {
-                    t.setPosition(t.getPositionX() * sf, t.getPositionY() * sf, t.getPositionZ() * sf);
-                }
-                if (rd != null)
-                {
-                    meshes.add(rd.getMesh().getVertexBuffer());
-                }
-            }
-        }
-        skel.updateBonePose();
+        mSkeleton.scaleSkin(mAvatarRoot, sf);
     }
 
     /**
