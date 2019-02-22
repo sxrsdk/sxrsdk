@@ -1000,9 +1000,25 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             for (int i = 0; i < numNewBones; ++i)
             {
                 int m = numBones + i;
-                parentIds[m] = parentBoneIds[i];
+                int pid = parentBoneIds[i];
+                SXRNode newBone = bones.get(i);
+                parentIds[m] = pid;
                 boneNames[m] = newBoneNames.get(i);
-                setBone(m, bones.get(i));
+                if (pid >= 0)
+                {
+                    SXRNode parent = mBones[pid];
+                    for (int c = 0; c < newBone.getChildrenCount(); ++c)
+                    {
+                        SXRNode child = newBone.getChildByIndex(c);
+                        if (newSkel.getBoneIndex(child.getName()) < 0)
+                        {
+                            newBone.removeChildObject(child);
+                            parent.addChildObject(child);
+                            --c;
+                        }
+                    }
+                }
+                setBone(m, newBone);
             }
             mBoneOptions = boneOptions;
             mBoneNames = boneNames;
