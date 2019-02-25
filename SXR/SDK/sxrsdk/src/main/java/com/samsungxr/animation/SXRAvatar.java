@@ -260,15 +260,15 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * The skeleton of the attachment is merged with
      * the avatar skeleton so that a single skeleton drives
      * the avatar and all of its attachments.
-     * @param avatarResource    resource with avatar file.
+     * @param modelResource    resource with avatar file.
      * @param modelDesc         model descriptor (for subclasses, unused in SXRAvatar).
      * @param attachBone        name of skeleton bone to attach this model to.
      * @see #removeModel(String)
      */
-    public void loadModel(SXRAndroidResource avatarResource, String modelDesc, String attachBone)
+    public void loadModel(SXRAndroidResource modelResource, String modelDesc, String attachBone)
     {
         SXRContext ctx = mAvatarRoot.getSXRContext();
-        SXRResourceVolume volume = new SXRResourceVolume(ctx, avatarResource);
+        SXRResourceVolume volume = new SXRResourceVolume(ctx, modelResource);
         SXRNode modelRoot = new SXRNode(ctx);
         if (attachBone != null)
         {

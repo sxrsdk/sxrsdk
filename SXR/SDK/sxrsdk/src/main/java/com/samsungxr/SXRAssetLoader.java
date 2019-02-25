@@ -1454,6 +1454,58 @@ public final class SXRAssetLoader implements IEventReceiver
         return model;
     }
 
+    /**
+     * Loads a hierarchy of nodes {@link SXRNode} from a 3D model.
+     * <p>
+     * This function blocks the current thread while loading the model
+     * but loads the textures asynchronously in the background.
+     * IAssetEvents are emitted to the event handler supplied first and then to
+     * the event listener attached to the context.
+     * <p>
+     * If you are loading large models, you can call {@link #loadModel(SXRNode, SXRResourceVolume, SXRScene)}
+     * to load the model asychronously to avoid blocking the main thread.
+     * @param filePath
+     *            A filename, relative to the root of the volume.
+     *            If the filename starts with "sd:" the file is assumed to reside on the SD Card.
+     *            If the filename starts with "http:" or "https:" it is assumed to be a URL.
+     *            Otherwise the file is assumed to be relative to the "assets" directory.
+     *            Texture paths are relative to the directory the asset is loaded from.
+     *
+     * @param settings
+     *            Additional import {@link SXRImportSettings settings}
+     **
+     * @param handler
+     *            IAssetEvents handler to process asset loading events
+     *
+     * @return A {@link SXRNode} that contains the meshes with textures and bones
+     * and animations.
+     * @throws IOException
+     * @see #loadModel(SXRNode, SXRResourceVolume, SXRScene)
+     * @see #loadMesh(SXRAndroidResource.MeshCallback, SXRAndroidResource, int)
+     */
+    public SXRNode loadModel(String filePath,
+                             EnumSet<SXRImportSettings> settings,
+                             IAssetEvents handler) throws IOException
+    {
+        SXRNode model = new SXRNode(mContext);
+        SXRResourceVolume   volume = new SXRResourceVolume(mContext, filePath);
+        AssetRequest assetRequest = new AssetRequest(model, volume, null, false);
+        String ext = filePath.substring(filePath.length() - 3).toLowerCase();
+
+        model.setName(assetRequest.getBaseName());
+        assetRequest.setHandler(handler);
+        assetRequest.setImportSettings(settings);
+        assetRequest.useCache(true);
+        if (ext.equals("x3d"))
+        {
+            loadX3DModel(assetRequest, model);
+        }
+        else
+        {
+            loadJassimpModel(assetRequest, model);
+        }
+        return model;
+    }
 
     /**
      * Loads a hierarchy of nodes {@link SXRNode} from a 3D model.
