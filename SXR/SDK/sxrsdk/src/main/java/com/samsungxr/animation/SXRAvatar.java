@@ -9,10 +9,12 @@ import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRImportSettings;
+import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRNode;
+import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRResourceVolume;
 import com.samsungxr.SXRTexture;
-import com.samsungxr.SXRTransform;
+import com.samsungxr.SXRVertexBuffer;
 import com.samsungxr.animation.keyframe.BVHImporter;
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
@@ -25,8 +27,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -293,6 +297,62 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             mAvatarRoot.removeChildObject(model);
             mAttachments.remove(boneName);
         }
+    }
+
+    /**
+     * Scale the avatar uniformly.
+     * <p>
+     * This function modifies the inverse bind pose matrices
+     * in the {@link SXRSkin} components for the meshes
+     * as well as scaling the vertex positions.
+     * The {@link SXRSkeleton} pose is changed to match
+     * the new geometry.
+     * @param sf    floating point scale factor
+     */
+    public void scale(final float sf)
+    {
+        final Matrix4f scaleMtx = new Matrix4f();
+        final float[] scaleData = new float[16];
+        SXRNode avatarRoot = mAvatarRoot;
+        SXRSkeleton skel = mSkeleton;
+        final Set<SXRVertexBuffer> meshes = new HashSet<SXRVertexBuffer>();
+
+        /*
+         * scale the mesh geometry and if there are
+         * any skins, scale their positions
+         */
+        scaleMtx.scale(sf);
+        scaleMtx.get(scaleData);
+        avatarRoot.forAllComponents(new SXRNode.ComponentVisitor()
+        {
+            @Override
+            public boolean visit(SXRComponent comp)
+            {
+                SXRSkin skin = (SXRSkin) comp;
+                skin.scalePositions(sf);
+                SXRRenderData rd = (SXRRenderData) skin.getComponent(SXRRenderData.getComponentType());
+                meshes.add(rd.getMesh().getVertexBuffer());
+                return true;
+            }
+        }, SXRSkin.getComponentType());
+        for (SXRVertexBuffer vbuf : meshes)
+        {
+            vbuf.transform(scaleData, false);
+        }
+        /*
+         * now scale the skeleton positions
+         */
+        SXRPose pose  = skel.getPose();
+        Vector3f p = new Vector3f();
+        int n = skel.getNumBones();
+
+        for (int i = 0; i < n; ++i)
+        {
+            pose.getLocalPosition(i, p);
+            p.mul(sf);
+            pose.setLocalPosition(i, p.x, p.y, p.z);
+        }
+        skel.updateBonePose();
     }
 
     /**

@@ -29,6 +29,8 @@ import com.samsungxr.animation.SXRSkeleton;
 import com.samsungxr.utility.Exceptions;
 import com.samsungxr.utility.Log;
 
+import org.joml.Matrix4f;
+
 /**
  * Describes an indexed triangle mesh as a set of shared vertices with integer
  * indices for each triangle.
@@ -630,6 +632,31 @@ public class SXRMesh extends SXRHybridObject implements PrettyPrint {
     public void getBoxBound(float[] bounds)
     {
         mVertices.getBoxBound(bounds);
+    }
+
+    /**
+     * Apply the given transform to the mesh.
+     * <p>
+     * Multiplies the vertices by the matrix, multiplies the normals
+     * by the inverse transpose of the matrix.
+     * </p>
+     * @param mtx 4x4 matrix to apply to the mesh
+     * @param doNormals if true, transform the normals by the inverse transpose of the matrix
+     */
+    public void transform(float[] mtx, boolean doNormals) { mVertices.transform(mtx, doNormals); }
+
+    /**
+     * Apply the given transform to the mesh.
+     * <p>
+     * Multiplies the vertices by the matrix, multiplies the normals
+     * by the inverse transpose of the matrix.
+     * </p>
+     * @param mtx float array with 4x4 matrix to apply
+     * @param doNormals if true, transform the normals by the inverse transpose of the matrix
+     */
+    public void transform(Matrix4f mtx, boolean doNormals)
+    {
+        mVertices.transform(mtx, doNormals);
     }
 
     /**

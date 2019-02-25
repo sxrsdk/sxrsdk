@@ -16,15 +16,21 @@ extern "C" {
     JNIEXPORT jlong JNICALL
     Java_com_samsungxr_animation_NativeSkin_getComponentType(JNIEnv* env, jobject clz);
 
-    JNIEXPORT jboolean JNICALL
+    JNIEXPORT void JNICALL
     Java_com_samsungxr_animation_NativeSkin_setBoneMap(JNIEnv* env, jobject clz,
                                             jlong jskin, jintArray jboneMap);
     JNIEXPORT void JNICALL
     Java_com_samsungxr_animation_NativeSkin_setSkeleton(JNIEnv* env, jobject clz,
                                                        jlong jskin, jlong jskel);
-    JNIEXPORT jboolean JNICALL
+    JNIEXPORT void JNICALL
     Java_com_samsungxr_animation_NativeSkin_setInverseBindPose(JNIEnv* env, jobject clz,
                                                        jlong jskin, jfloatArray jmatrices);
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_animation_NativeSkin_getInverseBindPose(JNIEnv* env, jobject clz,
+                                                       jlong jskin, jfloatArray jmatrices);
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_animation_NativeSkin_scalePositions(JNIEnv* env, jobject clz,
+                                                          jlong jskin, float sf);
 
 } // extern "C"
 
@@ -42,7 +48,7 @@ Java_com_samsungxr_animation_NativeSkin_getComponentType(JNIEnv * env, jobject c
     return Skin::getComponentType();
 }
 
-JNIEXPORT jboolean JNICALL
+JNIEXPORT void JNICALL
 Java_com_samsungxr_animation_NativeSkin_setBoneMap(JNIEnv* env, jobject clz,
                                         jlong jskin, jintArray jboneMap)
 {
@@ -52,7 +58,6 @@ Java_com_samsungxr_animation_NativeSkin_setBoneMap(JNIEnv* env, jobject clz,
 
     skin->setBoneMap(boneMap, n);
     env->ReleaseIntArrayElements(jboneMap, boneMap, JNI_ABORT);
-    return true;
 }
 
 JNIEXPORT void JNICALL
@@ -64,7 +69,7 @@ Java_com_samsungxr_animation_NativeSkin_setSkeleton(JNIEnv* env, jobject clz,
     skin->setSkeleton(skel);
 }
 
-JNIEXPORT jboolean JNICALL
+JNIEXPORT void JNICALL
 Java_com_samsungxr_animation_NativeSkin_setInverseBindPose(JNIEnv* env, jobject clz,
                                                            jlong jskin, jfloatArray jmatrices)
 {
@@ -73,6 +78,25 @@ Java_com_samsungxr_animation_NativeSkin_setInverseBindPose(JNIEnv* env, jobject 
     jfloat* matrices = env->GetFloatArrayElements(jmatrices, JNI_FALSE);
     skin->setInverseBindPose(matrices, n);
     env->ReleaseFloatArrayElements(jmatrices, matrices, JNI_ABORT);
-    return true;
 }
+
+JNIEXPORT void JNICALL
+Java_com_samsungxr_animation_NativeSkin_getInverseBindPose(JNIEnv* env, jobject clz,
+                                                           jlong jskin, jfloatArray jmatrices)
+{
+    Skin* skin = reinterpret_cast<Skin*>(jskin);
+    int n = env->GetArrayLength(jmatrices) * sizeof(float) / sizeof(glm::mat4);
+    jfloat* matrices = env->GetFloatArrayElements(jmatrices, JNI_FALSE);
+    skin->setInverseBindPose(matrices, n);
+    env->ReleaseFloatArrayElements(jmatrices, matrices, JNI_ABORT);
+}
+
+JNIEXPORT void JNICALL
+Java_com_samsungxr_animation_NativeSkin_scalePositions(JNIEnv* env, jobject clz,
+                                                  jlong jskin, float sf)
+{
+    Skin* skin = reinterpret_cast<Skin*>(jskin);
+    skin->scalePositions(sf);
+}
+
 } // namespace sxr

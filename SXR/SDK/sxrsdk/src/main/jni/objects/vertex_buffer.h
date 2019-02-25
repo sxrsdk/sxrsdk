@@ -132,6 +132,20 @@ namespace sxr {
         bool            forAllVertices(std::function<void (int iter, const float* vertex)> func) const;
         bool            getInfo(const char* attributeName, int& index, int& offset, int& size) const;
         void            getBoundingVolume(BoundingVolume& bv) const;
+
+        /**
+         * Apply the given transform to the vertices.
+         * Multiplies the positions by the matrix,
+         * multiplies the normals by it's inverse transpose.
+         * @param trans matrix to apply
+         * @param doNormals Transform the normals of the mesh by the inverse transpose of the matrix
+         */
+        void            transform(glm::mat4& trans, bool doNormals);
+
+        /**
+         * Copy the vertices to the GPU if they have changed.
+         * @return true if successful, false on error
+         */
         virtual bool    updateGPU(Renderer*, IndexBuffer*, Shader*) = 0;
         virtual void    bindToShader(Shader* shader, IndexBuffer* ibuf) = 0;
         void            dump() const;
