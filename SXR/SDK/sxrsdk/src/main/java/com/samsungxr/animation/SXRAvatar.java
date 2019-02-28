@@ -186,11 +186,20 @@ public class SXRAvatar extends SXRBehavior
         SXRSkeletonAnimation skelOne = (SXRSkeletonAnimation) src.getAnimation(0);
         SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation) dst.getAnimation(0);;
 
+        for (int i = 0; i < src.getAnimationCount(); ++i)
+        {
+            SXRAnimation anim = src.getAnimation(i);
+            if (anim instanceof SXRPoseMapper)
+            {
+                SXRAnimationEngine.getInstance(mContext).stop(anim);
+            }
+        }
         for (int i = 0; i < dst.getAnimationCount(); ++i)
         {
             SXRAnimation anim  = dst.getAnimation(i);
             if (anim instanceof SXRPoseInterpolator)
             {
+                anim.reset();
                 return anim;
             }
             if (anim instanceof SXRPoseMapper)
@@ -204,33 +213,6 @@ public class SXRAvatar extends SXRBehavior
         }
         SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(skelTwo.getSkeleton(), skelOne.getSkeleton(), duration);
         dst.addAnimation(blendAnim);
-        return blendAnim;
-    }
-
-    public SXRAnimation addBlendAnimation(SXRAnimationQueue queue, SXRAnimator a, float duration)
-    {
-        SXRSkeletonAnimation skelAnim = (SXRSkeletonAnimation) a.getAnimation(0);
-
-        for (int i = 0; i < a.getAnimationCount(); ++i)
-        {
-            SXRAnimation anim  = a.getAnimation(i);
-            if (anim instanceof SXRPoseInterpolator)
-            {
-                return anim;
-            }
-            if (anim instanceof SXRPoseMapper)
-            {
-                SXRPose pose = new SXRPose(skelAnim.getSkeleton().getPose());
-                SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(skelAnim.getSkeleton(), pose, duration);
-                a.removeAnimation(anim);
-                a.addAnimation(blendAnim);
-                a.addAnimation(anim);
-                return blendAnim;
-            }
-        }
-        SXRPose pose = new SXRPose(skelAnim.getSkeleton().getPose());
-        SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(skelAnim.getSkeleton(), pose, duration);
-        a.addAnimation(blendAnim);
         return blendAnim;
     }
 
@@ -261,13 +243,13 @@ public class SXRAvatar extends SXRBehavior
 
     public void reverseBlendAnimation(SXRAnimationQueue queue, SXRAnimator a)
     {
+        a.setReverse(!a.getReverse());
         for (int i = 0; i < a.getAnimationCount(); ++i)
         {
             SXRAnimation anim = a.getAnimation(i);
-            if (!(anim instanceof SXRPoseInterpolator))
+            if (anim instanceof SXRPoseInterpolator)
             {
-                boolean r = anim.getReverse();
-                anim.setReverse(!r);
+                anim.setReverse(false);
             }
         }
     }
@@ -522,7 +504,7 @@ public class SXRAvatar extends SXRBehavior
      *                   SXRRepeatMode.ONCE to play only once
      *                   SXRRepeatMode.PINGPONG to play start to finish, finish to start;
      */
-    public void startAll(int repeatMode, int repeatCount)
+    public void startAll(int repeatMode)
     {
         mAnimsToPlay.startAll(repeatMode);
     }

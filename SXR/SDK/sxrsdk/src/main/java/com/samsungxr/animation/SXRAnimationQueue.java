@@ -91,19 +91,6 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
         public SXRAnimation addBlendAnimation(SXRAnimationQueue queue, SXRAnimator a1, SXRAnimator a2, float blendDuration);
 
         /**
-         * Called to generate an animation which blends smoothly
-         * between the initial state and a given animator over a time period.
-         * At the end of the blend duration, the second animator dicates
-         * the current state. In the middle of the blend period, the
-         * current state is a 50 / 50 blend between the animator
-         * and the initial state.
-         * @param {@link SXRAnimationQueue} which generated the callback.
-         * @param a {@link SXRAnimator} animator to blend.
-         * @param blendDuration time to blend in seconds
-         */
-        public SXRAnimation addBlendAnimation(SXRAnimationQueue queue, SXRAnimator a, float blendDuration);
-
-        /**
          * Called to remove the blend animation(s) added by {@link #addBlendAnimation} .
          * @param {@link SXRAnimationQueue} which generated the callback.
          * @param a {@link SXRAnimator} animator to remove blend animations from.
@@ -448,17 +435,15 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
             if (nextIndex < 0)
             {
                 nextIndex = mCurIndex;
-                if (reverse)
-                {
-                    if (--nextIndex < 0) nextIndex = mAnimQueue.size() - 1;
-                }
-                else
+                if (mRepeatMode != SXRRepeatMode.PINGPONG)
                 {
                     if (++nextIndex >= mAnimQueue.size()) nextIndex = 0;
                 }
             }
             SXRAnimator animator2 = mAnimQueue.get(nextIndex);
-            if ((mBlendFactor > 0) && !mQueueListener.isBlending(this, animator2))
+            if ((mBlendFactor > 0) &&
+                (animator != animator2) &&
+                !mQueueListener.isBlending(this, animator2))
             {
                 SXRAnimation a = animator.getAnimation(0);
                 float timeleft = a.getDuration() - a.getElapsedTime();
@@ -505,32 +490,29 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
         int nextIndex = NextAnimIndex(mCurIndex);
 
         mQueueListener.onAnimationFinished(this, oldAnimator);
-        if (mRepeatMode == SXRRepeatMode.ONCE)
+        if (mRepeatMode == SXRRepeatMode.PINGPONG)
         {
-            stop(animator);
+            animator.stop();
+            mQueueListener.removeBlendAnimation(this, animator);
+            animator.setReverse(!animator.getReverse());
             if (nextIndex < 0)
             {
-                onStop();
+                reverse = !reverse;
                 return;
             }
         }
         else
         {
-            if (mRepeatMode == SXRRepeatMode.PINGPONG)
+            stop(animator);
+            if (mRepeatMode == SXRRepeatMode.REPEATED)
             {
-                animator.stop();
-                mQueueListener.reverseBlendAnimation(this, animator);
-                if (nextIndex < 0)
-                {
-                    reverse = !reverse;
-                    return;
-                }
-            }
-            else
-            {
-                stop(animator);
                 start(animator);
-                nextIndex = 0;
+                return;
+            }
+            else if (nextIndex < 0)
+            {
+                onStop();
+                return;
             }
         }
         mCurIndex = nextIndex;

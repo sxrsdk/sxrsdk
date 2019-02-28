@@ -176,10 +176,9 @@ class AnimatedCursorAsset extends MeshCursorAsset {
             animationTextures = texturesForAnimation;
         }
 
-        @Override
-        protected void animate(SXRHybridObject target, float ratio) {
+        public void animate(float timeInSec) {
             final int size = animationTextures.size();
-            final int fileIndex = (int) (ratio * size);
+            final int fileIndex = (int) ((timeInSec/getDuration())  * size);
 
             if (lastFileIndex == fileIndex || fileIndex == size) {
                 return;
@@ -187,7 +186,7 @@ class AnimatedCursorAsset extends MeshCursorAsset {
 
             lastFileIndex = fileIndex;
 
-            SXRMaterial material = (SXRMaterial) target;
+            SXRMaterial material = (SXRMaterial) mTarget;
             material.setMainTexture(animationTextures.get(fileIndex));
         }
     }

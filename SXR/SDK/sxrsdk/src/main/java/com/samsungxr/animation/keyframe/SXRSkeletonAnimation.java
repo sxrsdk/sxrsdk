@@ -266,9 +266,6 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
                 pose.setLocalMatrix(i, temp);
             }
         }
-        Vector3f v = new Vector3f();
-        skel.getPosition(v);
-        Log.d("ANIMATOR", "SkelAnim %s t = %f (%f, %f, %f)", mName, timeInSec, v.x, v.y, v.z);
         return pose;
     }
 

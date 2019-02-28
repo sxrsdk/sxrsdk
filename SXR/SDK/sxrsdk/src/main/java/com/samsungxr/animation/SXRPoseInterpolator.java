@@ -101,7 +101,5 @@ public class SXRPoseInterpolator extends SXRAnimation
             pose2.setLocalMatrix(k, mTempMtx);
         }
         pose2.sync();
-        pose2.getLocalPosition(0, mTempVec1);
-        Log.d("ANIMATOR", "PoseInterpolator t=%f (%f, %f, %f)", timer, mTempVec1.x, mTempVec1.y, mTempVec1.z);
     }
 }
