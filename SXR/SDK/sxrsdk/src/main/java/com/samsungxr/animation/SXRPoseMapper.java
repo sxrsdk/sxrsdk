@@ -17,6 +17,7 @@ public class SXRPoseMapper extends SXRAnimation
     protected SXRSkeleton mDestSkeleton;
     protected int[]       mBoneMap;
     protected SXRPose     mDestPose;
+    protected float       mScale = 1.0f;
 
     /**
      * Constructs an animation retargeting engine.
@@ -280,6 +281,7 @@ public class SXRPoseMapper extends SXRAnimation
 
             mDestPose.clearRotations();
             srcskel.getPosition(v);
+            v.mul(mScale);
             for (int i = 0; i < numsrcbones; ++i)
             {
                 int boneindex = mBoneMap[i];
@@ -337,6 +339,15 @@ public class SXRPoseMapper extends SXRAnimation
         }
         dstpose.sync();
         return true;
+    }
+
+    public void setScale(float sf)
+    {
+        if (sf <= 0)
+        {
+            throw new IllegalArgumentException("Scale factor must be positive");
+        }
+        mScale = sf;
     }
 
 }

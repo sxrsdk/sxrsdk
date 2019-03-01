@@ -49,120 +49,6 @@ import java.util.jar.Attributes;
  */
 public class SXRAvatar implements IEventReceiver
 {
-    /**
-     * Descriptor file format:
-     * name: modelName,
-     * bone: boneName,
-     * replace: [ string, string, string, ... ]
-     */
-    protected class Attachment
-    {
-        protected final String mName;
-        protected SXRNode mRootNode;
-        protected SXRSkeleton mSkeleton;
-        protected List<String> mReplaceParts = new ArrayList<>();
-        protected List<SXRNode> mHidden;
-        protected final Map<String, String> mProperties = new HashMap<>();
-
-        public Attachment(String name)
-        {
-            mName = name;
-        }
-
-        public SXRSkeleton getSkeleton() { return mSkeleton; }
-
-        public String getName() { return mName; }
-
-        public SXRNode getRoot() { return mRootNode; }
-
-        public void setProperty(String propName, String propVal)
-        {
-            mProperties.put(propName, propVal);
-        }
-
-        public String getProperty(String propName)
-        {
-            return mProperties.get(propName);
-        }
-
-        public void setRoot(SXRNode node) { mRootNode = node; }
-
-        public boolean parseDescription(String jsonData)
-        {
-            try
-            {
-                parseDescription(new JSONObject(jsonData));
-                return true;
-            }
-            catch (JSONException ex)
-            {
-                Log.e(TAG, ex.getMessage());
-                return false;
-            }
-        }
-
-        protected void parseDescription(JSONObject root) throws JSONException
-        {
-            if (root.has("attachbone"))
-            {
-                mProperties.put("attachbone", root.getString("attachbone"));
-            }
-            if (root.has("replace"))
-            {
-                JSONArray replaceParts = root.getJSONArray("replace");
-
-                for (int i = 0; i < replaceParts.length(); ++i)
-                {
-                    String s = replaceParts.getString(i);
-                    mReplaceParts.add(s);
-                }
-            }
-        }
-
-        public void show()
-        {
-            if (mHidden == null)
-            {
-                mHidden = new ArrayList<SXRNode>();
-                for (String name : mReplaceParts)
-                {
-                    SXRNode node = mRootNode.getNodeByName(name);
-                    if (node == null)
-                    {
-                        Log.w(TAG, "Node %s cannot be hidden", name);
-                    }
-                    node.setEnable(false);
-                    mHidden.add(node);
-                }
-            }
-            else
-            {
-                for (SXRNode node : mHidden)
-                {
-                    node.setEnable(false);
-                }
-            }
-            mRootNode.setEnable(true);
-        }
-
-        public void hide()
-        {
-            if (mHidden != null)
-            {
-                for (SXRNode node : mHidden)
-                {
-                    node.setEnable(true);
-                }
-            }
-            mRootNode.setEnable(false);
-        }
-
-        public void remove()
-        {
-            hide();
-        }
-    }
-
     private static final String TAG = Log.tag(SXRAvatar.class);
     protected final List<SXRAnimator> mAnimations;
     protected Map<String, Attachment> mAttachments = new HashMap<String, Attachment>();
@@ -527,6 +413,7 @@ public class SXRAvatar implements IEventReceiver
         }
         return null;
     }
+
     public void setProperty(String propName, String val)
     {
         Attachment a = mAttachments.get("avatar");
@@ -539,34 +426,6 @@ public class SXRAvatar implements IEventReceiver
         return a.getProperty(propName);
     }
 
-    /**
-     * Show a model that was previously added as an attachment.
-     * @see #loadModel(SXRAndroidResource, String, String)
-     * @see #hideModel(String)
-     */
-    public void showModel(String attachmentName)
-    {
-        Attachment a = mAttachments.get(attachmentName);
-        if (a != null)
-        {
-            a.show();
-        }
-    }
-
-    /**
-     * Show a model that was previously added as an attachment.
-     * The model remains part of the avatar, it is just not visible.
-     * @see #loadModel(SXRAndroidResource, String, String)
-     * @see #showModel(String)
-     */
-    public void hideModel(String attachmentName)
-    {
-        Attachment a = mAttachments.get(attachmentName);
-        if (a != null)
-        {
-            a.hide();
-        }
-    }
 
     /**
      * Scale the avatar uniformly.
@@ -934,7 +793,7 @@ public class SXRAvatar implements IEventReceiver
         {
             skel.setBoneName(0, attachBone);
             a = addAttachment(attachBone);
-            a.setRoot(modelRoot);
+            a.setModelRoot(modelRoot);
             a.setProperty("attachbone", attachBone);
         }
         mSkeleton.merge(skel);
