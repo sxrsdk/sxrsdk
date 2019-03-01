@@ -20,6 +20,7 @@ import static java.lang.Math.max;
 
 import com.samsungxr.animation.SXRAnimation;
 import com.samsungxr.animation.SXRAnimator;
+import com.samsungxr.animation.SXRMorphAnimation;
 import com.samsungxr.animation.SXRPose;
 import com.samsungxr.animation.SXRSkeleton;
 import com.samsungxr.animation.SXRSkin;
@@ -38,6 +39,7 @@ import com.samsungxr.jassimp.AiLight;
 import com.samsungxr.jassimp.AiLightType;
 import com.samsungxr.jassimp.AiMaterial;
 import com.samsungxr.jassimp.AiMesh;
+import com.samsungxr.jassimp.AiMeshAnim;
 import com.samsungxr.jassimp.AiNode;
 import com.samsungxr.jassimp.AiNodeAnim;
 import com.samsungxr.jassimp.AiPostProcessSteps;
@@ -64,7 +66,7 @@ class  SXRJassimpAdapter
     private SXRContext mContext;
     private String mFileName;
     private SXRSkeleton mSkeleton;
-
+    private SXRNode mMeshParent = null;
     private static final int MAX_TEX_COORDS = JassimpConfig.MAX_NUMBER_TEXCOORDS;
     private static final int MAX_VERTEX_COLORS = JassimpConfig.MAX_NUMBER_COLORSETS;
 
@@ -272,22 +274,17 @@ class  SXRJassimpAdapter
             sceneObject.attachComponent(morph);
             int blendShapeNum = 0;
             float[] weights = new float[nAnimationMeshes];
-
+            float[] normalArray = null;
             for (AiAnimMesh animMesh : aiMesh.getAnimationMeshes())
             {
                 SXRVertexBuffer animBuff = new SXRVertexBuffer(mesh.getVertexBuffer(),
                                                                "float3 a_position float3 a_normal float3 a_tangent float3 a_bitangent");
-                float[] vertexArray = null;
-                float[] normalArray = null;
-                float[] tangentArray = null;
-                float[] bitangentArray = null;
-
                 weights[blendShapeNum] = animMesh.getDefaultWeight();
                 //copy target positions to anim vertex buffer
                 FloatBuffer animPositionBuffer = animMesh.getPositionBuffer();
                 if (animPositionBuffer != null)
                 {
-                    vertexArray = new float[animPositionBuffer.capacity()];
+                    float[] vertexArray = new float[animPositionBuffer.capacity()];
                     animPositionBuffer.get(vertexArray, 0, animPositionBuffer.capacity());
                     animBuff.setFloatArray("a_position", vertexArray);
                 }
@@ -305,11 +302,11 @@ class  SXRJassimpAdapter
                 FloatBuffer animTangentBuffer = animMesh.getTangentBuffer();
                 if (animTangentBuffer != null)
                 {
-                    tangentArray = new float[animTangentBuffer.capacity()];
+                    float[] tangentArray = new float[animTangentBuffer.capacity()];
                     animTangentBuffer.get(tangentArray, 0, animTangentBuffer.capacity());
                     animBuff.setFloatArray("a_tangent", tangentArray);
                     //calculate bitangents
-                    bitangentArray = new float[tangentArray.length];
+                    float[] bitangentArray = new float[tangentArray.length];
                     for (int i = 0; i < tangentArray.length; i += 3)
                     {
                         Vector3f tangent =
@@ -543,6 +540,20 @@ class  SXRJassimpAdapter
                 Log.d("BONE", "Adding node animation for %s", nodeName);
             }
         }
+
+
+        //add morph animations
+        if(aiAnim.getNumMeshChannels() > 0 ) {
+            for (AiMeshAnim aiMeshMorphAnim : aiAnim.getMeshChannels()) {
+                SXRNode baseObject = target.getNodeByName(aiMeshMorphAnim.getNodeName());
+                SXRMeshMorph morph = (SXRMeshMorph)baseObject.getComponent(SXRMeshMorph.getComponentType());
+                SXRMorphAnimation morphAnim = new SXRMorphAnimation(morph,
+                        aiMeshMorphAnim.getMorphAnimationKeys(), aiMeshMorphAnim.getNumMorphTargets() + 1);
+                if (morphAnim != null) {
+                    animator.addAnimation(morphAnim);
+                }
+            }
+        }
     }
 
     /*
@@ -561,34 +572,29 @@ class  SXRJassimpAdapter
             root.forAllDescendants(nodeProcessor);
             mSkeleton = new SXRSkeleton(root, nodeProcessor.getBoneNames());
             SXRPose pose = new SXRPose(mSkeleton);
-            Matrix4f poseMtx = new Matrix4f();
-            SXRNode skelRoot = mSkeleton.getOwnerObject().getParent();
-            Matrix4f rootMtx = skelRoot.getTransform().getModelMatrix4f();
+            SXRNode bone = mSkeleton.getBone(0);
+            Matrix4f rootMtx;
 
-            rootMtx.invert();
-            for (int boneId = 0; boneId < mSkeleton.getNumBones(); ++boneId)
+            if (mMeshParent != null)
             {
-                String boneName = mSkeleton.getBoneName(boneId);
-                AiBone aiBone = mBoneMap.get(boneName);
-                SXRNode bone = mSkeleton.getBone(boneId);
+                rootMtx = mMeshParent.getTransform().getModelMatrix4f();
+            }
+            else
+            {
+                rootMtx = root.getTransform().getModelMatrix4f();
+            }
+            Matrix4f mtx = bone.getTransform().getModelMatrix4f();
 
-                if (aiBone != null)
+            rootMtx.invert(rootMtx);            // factor out matrix already applied
+            rootMtx.mul(mtx, mtx);              // to the meshes
+            pose.setLocalMatrix(0, mtx);
+            for (int boneId = 1; boneId < mSkeleton.getNumBones(); ++boneId)
+            {
+                bone = mSkeleton.getBone(boneId);
+                if (bone != null)
                 {
-                    float[] matrixdata = aiBone.getOffsetMatrix(sWrapperProvider);
-
-                    poseMtx.set(matrixdata);
-                    poseMtx.invert();
-                    pose.setWorldMatrix(boneId, poseMtx);
-                }
-                else if (bone != null)
-                {
-                    SXRTransform t = bone.getTransform();
-                    Matrix4f mtx = t.getModelMatrix4f();
-
-                    mtx.invert();
-                    rootMtx.mul(mtx, mtx);
-                    pose.setWorldMatrix(boneId, mtx);
-                    Log.w("BONE", "no bind pose matrix for bone %s", boneName);
+                    mtx = bone.getTransform().getLocalModelMatrix4f();
+                    pose.setLocalMatrix(boneId, mtx);
                 }
             }
             mSkeleton.setPose(pose);
@@ -867,10 +873,7 @@ class  SXRJassimpAdapter
 
         traverseGraph(model, scene.getSceneRoot(sWrapperProvider), lightList);
         makeSkeleton(model);
-        if (doAnimation)
-        {
-            processAnimations(model, scene, settings.contains(SXRImportSettings.START_ANIMATIONS));
-        }
+
         for (Map.Entry<SXRNode, Integer> entry : mNodeMap.entrySet())
         {
             SXRNode obj = entry.getKey();
@@ -881,6 +884,12 @@ class  SXRJassimpAdapter
                 processMesh(request, obj, meshId);
             }
         }
+
+        if (doAnimation)
+        {
+            processAnimations(model, scene, settings.contains(SXRImportSettings.START_ANIMATIONS));
+        }
+
         if (modelParent != null)
         {
             modelParent.addChildObject(model);
@@ -964,6 +973,10 @@ class  SXRJassimpAdapter
             }
             mNodeMap.put(sceneObject, meshId);
             findBones(mScene.getMeshes().get(meshId));
+            if (mMeshParent == null)
+            {
+                mMeshParent = sceneObject.getParent();
+            }
         }
         else if (node.getNumMeshes() > 1)
         {
@@ -975,6 +988,10 @@ class  SXRJassimpAdapter
                 sceneObject.addChildObject(child);
                 mNodeMap.put(child, meshId);
                 findBones(mScene.getMeshes().get(meshId));
+                if (mMeshParent == null)
+                {
+                    mMeshParent = sceneObject.getParent();
+                }
             }
         }
         else if ("".equals(nodeName) &&
@@ -1043,10 +1060,6 @@ class  SXRJassimpAdapter
         SXRLight light =  lightlist.get(name);
         if (light != null)
         {
-            Quaternionf q = new Quaternionf();
-            q.rotationX((float) -Math.PI / 2.0f);
-            q.normalize();
-            light.setDefaultOrientation(q);
             sceneObject.attachLight(light);
             lightlist.remove(light);
         }
@@ -1419,6 +1432,11 @@ class  SXRJassimpAdapter
                 continue;
             }
             lightlist.put(name, l);
+            Quaternionf q = new Quaternionf();
+            float[] d = light.getDirection(sWrapperProvider);
+            q.rotationTo(new Vector3f(0, 0, -1), new Vector3f(d[0], d[1], d[2]));
+            q.normalize();
+            l.setDefaultOrientation(q);
             com.samsungxr.jassimp.AiColor ambientCol = light.getColorAmbient(sWrapperProvider);
             com.samsungxr.jassimp.AiColor diffuseCol = light.getColorDiffuse(sWrapperProvider);
             com.samsungxr.jassimp.AiColor specular = light.getColorSpecular(sWrapperProvider);

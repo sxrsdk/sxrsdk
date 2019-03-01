@@ -63,8 +63,7 @@ public:
             offset_factor_(0.0f), offset_units_(0.0f),
             sample_coverage_(1.0f),
             source_alpha_blend_func_(GL_ONE), dest_alpha_blend_func_(GL_ONE_MINUS_SRC_ALPHA),
-            texture_capturer(0),
-            bones_ubo_(nullptr)
+            texture_capturer(0)
     {
         render_data_flags.use_light_ = true;
         render_data_flags.use_lightmap_ = false;
@@ -382,9 +381,7 @@ public:
     int stencil_op_sfail() { return stencilOpSfail_; }
     int stencil_op_dpfail() { return stencilOpDpfail_; }
     int stencil_op_dppass() { return stencilOpDppass_; }
-    UniformBlock* getBonesUbo() {
-        return bones_ubo_;
-    }
+
     void adjustRenderingOrderForTransparency(bool hasAlpha);
 
     unsigned short getRenderDataFlagsHashCode(){
@@ -401,7 +398,6 @@ protected:
     static const int DEFAULT_RENDERING_ORDER = Geometry;
     jmethodID bindShaderMethod_;
     Mesh* mesh_;
-    UniformBlock* bones_ubo_;
     Batch* batch_;
     std::string hash_code;
     std::vector<RenderPass*> render_pass_list_;

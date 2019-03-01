@@ -45,6 +45,7 @@ import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 
+import jassimp.AiProgressHandler;
 
 
 /**
@@ -122,10 +123,26 @@ public final class Jassimp {
                   throws IOException {
         
         return aiImportFile(filename, AiPostProcessSteps.toRawValue(
-                postProcessing), ioSystem);
+                postProcessing), ioSystem, null);
     }
-    
-    
+
+    /**
+     * Imports a file via assimp.
+     *
+     * @param filename the file to import
+     * @param postProcessing post processing flags
+     * @param ioSystem ioSystem to load files, or null for default
+     * @return the loaded scene, or null if an error occurred
+     * @throws IOException if an error occurs
+     */
+    public static AiScene importFile(String filename,
+                                     Set<AiPostProcessSteps> postProcessing, AiIOSystem<?> ioSystem,
+                                     AiProgressHandler progressHandler) throws IOException {
+
+        return aiImportFile(filename, AiPostProcessSteps.toRawValue(
+                postProcessing), ioSystem, progressHandler);
+    }
+
     /**
      * Returns the size of a struct or ptimitive.<p>
      * 
@@ -303,7 +320,7 @@ public final class Jassimp {
      * @throws IOException if an error occurs
      */
     private static native AiScene aiImportFile(String filename, 
-            long postProcessing, AiIOSystem<?> ioSystem) throws IOException;
+            long postProcessing, AiIOSystem<?> ioSystem, AiProgressHandler handler) throws IOException;
     
     
     /**

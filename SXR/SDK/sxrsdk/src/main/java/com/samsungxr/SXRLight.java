@@ -524,7 +524,7 @@ public class SXRLight extends SXRJavaComponent implements SXRDrawFrameListener
      * Set the default orientation of the light when there is no transformation
      * applied.
      *
-     * GearVRF lights default to looking down the positive Z axis with a light
+     * SXR lights default to looking down the positive Z axis with a light
      * direction of (0, 0, 1). This function lets you change the initial forward
      * vector for lights. This orientation is multiplied by the world
      * transformation matrix of the node the light is attached to in

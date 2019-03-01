@@ -11,7 +11,11 @@ env:
 before_install:   
   - echo yes | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2"
   - echo yes | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.2"
+<<<<<<< HEAD
   - yes | sdkmanager --licenses
+=======
+#  - yes | sdkmanager --licenses
+>>>>>>> f1aee862439623d41aa8aea8f6e591eef5f03320
   # newest Android NDK
   - wget https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip -O ndk.zip
   - unzip ndk.zip  > /dev/null 2>&1
@@ -22,15 +26,16 @@ android:
     - tools # to get the new `repository-11.xml`
     - tools # see https://github.com/travis-ci/travis-ci/issues/6040#issuecomment-219367943)
     - platform-tools
-    - build-tools-25.0.3
+    - build-tools-28.0.3
     - android-25
-  licenses:
-    - android-sdk-preview-license-.+
-    - android-sdk-license-.+
-    - google-gdk-license-.+
+    - android-28
+#  licenses:
+#    - android-sdk-preview-license-.+
+#    - android-sdk-license-.+
+#    - google-gdk-license-.+
 
 install:
-    - git clone  https://sxrsdk:82c3775188fc23e31abd0d3e8db8fd499f17af34@github.com/sxrsdk/sxrsdk-demos.git $PROJECT_DIR/demos
+    - git clone --depth 1 https://sxrsdk:82c3775188fc23e31abd0d3e8db8fd499f17af34@github.com/sxrsdk/sxrsdk-demos.git $PROJECT_DIR/demos
 
 before_script:
     - cd $PROJECT_DIR/SXR/SDK

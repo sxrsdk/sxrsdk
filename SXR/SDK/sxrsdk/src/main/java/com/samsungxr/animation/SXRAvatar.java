@@ -57,9 +57,9 @@ public class SXRAvatar extends SXRBehavior
     protected final SXRNode mAvatarRoot;
     protected SXREventReceiver mReceiver;
     protected EnumSet<SXRImportSettings> mImportSettings;
-
     private String mBoneMap = "";
     private SXRContext mContext;
+
 
     /**
      * Make an instance of the SXRAnimator component.

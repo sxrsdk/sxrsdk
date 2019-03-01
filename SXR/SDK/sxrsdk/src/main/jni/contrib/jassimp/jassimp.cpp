@@ -4,6 +4,7 @@
 #include <assimp/scene.h>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
+#include <assimp/ProgressHandler.hpp>
 
 #ifdef JNI_LOG
 #ifdef ANDROID
@@ -435,6 +436,25 @@ static bool copyBuffer(JNIEnv *env, jobject jMesh, const char* jBufferName, void
 	return true;
 }
 
+static bool copyBufferatOffset(JNIEnv *env, jobject jMesh, const char* jBufferName, void* cData,
+							   size_t size, const int offset)
+{
+	jobject jBuffer = NULL;
+	SmartLocalRef bufferRef(env, jBuffer);
+	if (!getField(env, jMesh, jBufferName, "Ljava/nio/ByteBuffer;", jBuffer))
+	{
+		return false;
+	}
+	unsigned char* jBufferPtr = (unsigned char*)env->GetDirectBufferAddress(jBuffer);
+	if (NULL == jBufferPtr)
+	{
+		lprintf("could not access direct buffer\n");
+		return false;
+	}
+	memcpy(&jBufferPtr[offset], cData, size);
+	return true;
+}
+
 
 static bool copyBufferArray(JNIEnv *env, jobject jMesh, const char* jBufferName, int index, void* cData, size_t size)
 {
@@ -621,6 +641,24 @@ class JavaIOSystem : public Assimp::IOSystem {
 	
 };
 
+class JavaProgressHandler : public Assimp::ProgressHandler {
+private:
+    JNIEnv* mJniEnv;
+    jobject& mJavaProgressHandler;
+
+public:
+    JavaProgressHandler(JNIEnv* env, jobject& javaProgressHandler) :
+            mJniEnv(env),
+            mJavaProgressHandler(javaProgressHandler)
+    {};
+
+    bool Update(float percentage)
+    {
+        jvalue params[1];
+        params[0].f = percentage;
+        return call(mJniEnv, mJavaProgressHandler, "jassimp/AiProgressHandler", "update", "(F)Z", params);
+    }
+};
 
 static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 {
@@ -1033,105 +1071,104 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		}
 
 
-        //animation meshes-------------------------------------------------------------------------
-        for(unsigned int i = 0; i < cMesh->mNumAnimMeshes; ++i )
-        {
+		//animation meshes-------------------------------------------------------------------------
+		for(unsigned int i = 0; i < cMesh->mNumAnimMeshes; ++i )
+		{
 
-            //todo: validity checks for animation meshes
+			//todo: validity checks for animation meshes
 
-            aiAnimMesh * aMesh = cMesh->mAnimMeshes[i];
-            aMesh->mNumVertices = cMesh->mNumVertices;
+			aiAnimMesh * aMesh = cMesh->mAnimMeshes[i];
+			aMesh->mNumVertices = cMesh->mNumVertices;
 
-            jobject jAnimMesh;
-            SmartLocalRef refAnimMesh(env, jAnimMesh);
-            if (!createInstance(env, "com/samsungxr/jassimp/AiAnimMesh", jAnimMesh))
-            {
-                return false;
-            }
+			jobject jAnimMesh;
+			SmartLocalRef refAnimMesh(env, jAnimMesh);
+			if (!createInstance(env, "com/samsungxr/jassimp/AiAnimMesh", jAnimMesh))
+			{
+				return false;
+			}
 
-            /* add animation mesh to m_animMeshes java.util.List */
-            jobject jAnimMeshes = NULL;
-            SmartLocalRef refAnimMeshes(env, jAnimMeshes);
+			/* add animation mesh to m_animMeshes java.util.List */
+			jobject jAnimMeshes = NULL;
+			SmartLocalRef refAnimMeshes(env, jAnimMeshes);
 
-            if (!getField(env, jMesh, "m_animMeshes", "Ljava/util/List;", jAnimMeshes))
-            {
-                return false;
-            }
+			if (!getField(env, jMesh, "m_animMeshes", "Ljava/util/List;", jAnimMeshes))
+			{
+				return false;
+			}
 
-            jvalue addParams[1];
-            addParams[0].l = jAnimMesh;
-            if (!call(env, jAnimMeshes, "java/util/Collection", "add", "(Ljava/lang/Object;)Z", addParams))
-            {
-                return false;
-            }
+			jvalue addParams[1];
+			addParams[0].l = jAnimMesh;
+			if (!call(env, jAnimMeshes, "java/util/Collection", "add", "(Ljava/lang/Object;)Z", addParams))
+			{
+				return false;
+			}
 
-            /* allocate buffers - we do this from java so they can be garbage collected */
+			/* allocate buffers - we do this from java so they can be garbage collected */
 
-            jvalue allocateBuffersParams[1];
-            allocateBuffersParams[0].i = aMesh->mNumVertices;
-            if (!callv(env, jAnimMesh, "com/samsungxr/jassimp/AiAnimMesh", "allocateBuffers", "(I)V", allocateBuffersParams))
-            {
-                return false;
-            }
-
-
-            if (aMesh->mNumVertices > 0)
-            {
-                /* push vertex data to java */
-                if (!copyBuffer(env, jAnimMesh, "m_vertices", aMesh->mVertices, aMesh->mNumVertices * sizeof(aiVector3D)))
-                {
-                    lprintf("could not copy animation vertex data\n");
-                    return false;
-                }
-                lprintf("    with %u vertices\n", aMesh->mNumVertices);
-            }
-
-            /* push normals to java */
-            if (aMesh->mNormals != NULL)
-            {
-                jvalue allocateDataChannelParams[1];
-                allocateDataChannelParams[0].i = 0;
-                if (!callv(env, jAnimMesh, "com/samsungxr/jassimp/AiAnimMesh", "allocateDataChannel", "(I)V", allocateDataChannelParams))
-                {
-                    lprintf("could not allocate animation normal data channel\n");
-                    return false;
-                }
-                if (!copyBuffer(env, jAnimMesh, "m_normals", aMesh->mNormals, aMesh->mNumVertices * 3 * sizeof(float)))
-                {
-                    lprintf("could not copy animation normal data\n");
-                    return false;
-                }
-
-                lprintf("   with animation mesh normals\n");
-            }
+			jvalue allocateBuffersParams[1];
+			allocateBuffersParams[0].i = aMesh->mNumVertices;
+			if (!callv(env, jAnimMesh, "com/samsungxr/jassimp/AiAnimMesh", "allocateBuffers", "(I)V", allocateBuffersParams))
+			{
+				return false;
+			}
 
 
-            /* push tangents to java */
-            if (aMesh->mTangents != NULL)
-            {
-                jvalue allocateDataChannelParams[1];
-                allocateDataChannelParams[0].i = 1;
-                if (!callv(env, jAnimMesh, "com/samsungxr/jassimp/AiAnimMesh", "allocateDataChannel", "(I)V", allocateDataChannelParams))
-                {
-                    lprintf("could not allocate tangents data channel\n");
-                    return false;
-                }
-                if (!copyBuffer(env, jAnimMesh, "m_tangents", aMesh->mTangents, aMesh->mNumVertices * 3 * sizeof(float)))
-                {
-                    lprintf("could not copy animation tangents data\n");
-                    return false;
-                }
+			if (aMesh->mNumVertices > 0)
+			{
+				/* push vertex data to java */
+				if (!copyBuffer(env, jAnimMesh, "m_vertices", aMesh->mVertices, aMesh->mNumVertices * sizeof(aiVector3D)))
+				{
+					lprintf("could not copy animation vertex data\n");
+					return false;
+				}
+				lprintf("    with %u vertices\n", aMesh->mNumVertices);
+			}
 
-                lprintf("   with animation mesh tangents\n");
-            }
+			/* push normals to java */
+			if (aMesh->mNormals != NULL)
+			{
+				jvalue allocateDataChannelParams[1];
+				allocateDataChannelParams[0].i = 0;
+				if (!callv(env, jAnimMesh, "com/samsungxr/jassimp/AiAnimMesh", "allocateDataChannel", "(I)V", allocateDataChannelParams))
+				{
+					lprintf("could not allocate animation normal data channel\n");
+					return false;
+				}
+				if (!copyBuffer(env, jAnimMesh, "m_normals", aMesh->mNormals, aMesh->mNumVertices * 3 * sizeof(float)))
+				{
+					lprintf("could not copy animation normal data\n");
+					return false;
+				}
 
-            //set default weight of animation mesh
-            if (!setFloatField(env, jAnimMesh, "m_weight", aMesh->mWeight))
-            {
-                return false;
-            }
-        }
+				lprintf("   with animation mesh normals\n");
+			}
 
+
+			/* push tangents to java */
+			if (aMesh->mTangents != NULL)
+			{
+				jvalue allocateDataChannelParams[1];
+				allocateDataChannelParams[0].i = 1;
+				if (!callv(env, jAnimMesh, "com/samsungxr/jassimp/AiAnimMesh", "allocateDataChannel", "(I)V", allocateDataChannelParams))
+				{
+					lprintf("could not allocate tangents data channel\n");
+					return false;
+				}
+				if (!copyBuffer(env, jAnimMesh, "m_tangents", aMesh->mTangents, aMesh->mNumVertices * 3 * sizeof(float)))
+				{
+					lprintf("could not copy animation tangents data\n");
+					return false;
+				}
+
+				lprintf("   with animation mesh tangents\n");
+			}
+
+			//set default weight of animation mesh
+			if (!setFloatField(env, jAnimMesh, "m_weight", aMesh->mWeight))
+			{
+				return false;
+			}
+		}
 	}
 
 	return true;
@@ -1730,6 +1767,55 @@ static bool loadAnimations(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				return false;
 			}
 		}
+
+        for (unsigned int c = 0; c < cAnimation->mNumMorphMeshChannels; c++)
+        {
+            const aiMeshMorphAnim *cMeshMorphAnim = cAnimation->mMorphMeshChannels[c];
+            int numMorphTargets = cMeshMorphAnim->mKeys[0].mNumValuesAndWeights;
+            jobject jMeshMorphAnim;
+            SmartLocalRef refNodeAnim(env, jMeshMorphAnim);
+            jvalue newMeshMorphAnimParams[3];
+            jstring animationName = env->NewStringUTF(cMeshMorphAnim->mName.C_Str());
+            SmartLocalRef refAnimationName(env, animationName);
+            newMeshMorphAnimParams[0].l = animationName;
+            newMeshMorphAnimParams[1].i = cMeshMorphAnim->mNumKeys;
+            newMeshMorphAnimParams[2].i = numMorphTargets;
+            if (!createInstance(env, "com/samsungxr/jassimp/AiMeshAnim", "(Ljava/lang/String;II)V", newMeshMorphAnimParams, jMeshMorphAnim))
+            {
+                return false;
+            }
+            /* add meshMorphAnim to m_animations java.util.List */
+            jobject jMeshMorphAnims = NULL;
+            SmartLocalRef refNodeAnims(env, jMeshMorphAnims);
+            if (!getField(env, jAnimation, "m_meshMorphAnims", "Ljava/util/List;", jMeshMorphAnims))
+            {
+                return false;
+            }
+            jvalue addParams[1];
+            addParams[0].l = jMeshMorphAnim;
+            if (!call(env, jMeshMorphAnims, "java/util/Collection", "add", "(Ljava/lang/Object;)Z", addParams))
+            {
+                return false;
+            }
+            for(int i = 0; i < cMeshMorphAnim->mNumKeys; i ++ )
+            {
+                /* copy time stamp */
+                if (!copyBufferatOffset(env, jMeshMorphAnim, "m_morphTargetWeights",  &cMeshMorphAnim->mKeys[i].mTime,
+                                        sizeof(double), sizeof(double) * i * (numMorphTargets + 1)))
+                {
+                    return false;
+                }
+                /* copy blend weights */
+                if (!copyBufferatOffset(env, jMeshMorphAnim, "m_morphTargetWeights",
+                                        cMeshMorphAnim->mKeys[i].mWeights,
+                                        sizeof(double) * numMorphTargets,
+                                        (sizeof(double) * i * (numMorphTargets + 1)) + sizeof(double)))
+                {
+                    return false;
+                }
+            }
+        }
+
 	}
 
 	lprintf("converting animations finished\n");
@@ -1793,9 +1879,9 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			return false;
 		}
 
-		wrapVec3Params[0].f = cLight->mPosition.x;
-		wrapVec3Params[1].f = cLight->mPosition.y;
-		wrapVec3Params[2].f = cLight->mPosition.z;
+		wrapVec3Params[0].f = cLight->mDirection.x;
+		wrapVec3Params[1].f = cLight->mDirection.y;
+		wrapVec3Params[2].f = cLight->mDirection.z;
 		jobject jDirection;
 		SmartLocalRef refDirection(env, jDirection);
 		if (!callStaticObject(env, "com/samsungxr/jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jDirection))
@@ -2066,7 +2152,7 @@ JNIEXPORT jstring JNICALL Java_com_samsungxr_jassimp_Jassimp_getErrorString
 
 
 JNIEXPORT jobject JNICALL Java_com_samsungxr_jassimp_Jassimp_aiImportFile
-  (JNIEnv *env, jclass jClazz, jstring jFilename, jlong postProcess, jobject ioSystem)
+  (JNIEnv *env, jclass jClazz, jstring jFilename, jlong postProcess, jobject ioSystem, jobject progressHandler)
 {
 	jobject jScene = NULL; 
 
@@ -2081,7 +2167,12 @@ JNIEXPORT jobject JNICALL Java_com_samsungxr_jassimp_Jassimp_aiImportFile
 		imp.SetIOHandler(new JavaIOSystem(env, ioSystem));		
 		lprintf("Created aiFileIO\n");
 	}
-	
+
+    if(progressHandler != NULL)
+    {
+        imp.SetProgressHandler(new JavaProgressHandler(env, progressHandler));
+    }
+
 	lprintf("opening file: %s\n", cFilename);
 
 	/* do import */
