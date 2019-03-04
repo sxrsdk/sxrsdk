@@ -201,12 +201,13 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 break;
 
                 case 1:
-                onAnimationStarted(animator);
-                mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
-                                                                        IAvatarEvents.class,
-                                                                        "onAnimationStarted",
-                                                                        SXRAvatar.this,
-                                                                        animator);
+                    onAnimationFinished(animator, animation);
+                    mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
+                            IAvatarEvents.class,
+                            "onAnimationFinished",
+                            SXRAvatar.this,
+                            animator,
+                            animation);
                 if (mRepeatMode == SXRRepeatMode.REPEATED)
                 {
                     startAll(mRepeatMode);
@@ -370,8 +371,9 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                                                              SXRImportSettings.FLIP_UV,
                                                              SXRImportSettings.LIMIT_BONE_WEIGHT,
                                                              SXRImportSettings.CALCULATE_TANGENTS,
-                                                             SXRImportSettings.NO_ANIMATION,
+                                                             SXRImportSettings.NO_TEXTURING,
                                                              SXRImportSettings.SORTBY_PRIMITIVE_TYPE);
+
             SXRNode animRoot = new SXRNode(ctx);
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
         }
@@ -395,6 +397,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * @param index index of animation to get
      * @see SXRAvatar#addAnimation(SXRAnimator)
      */
+
     public SXRAnimator getAnimation(int index)
     {
         return mAnimations.get(index);
