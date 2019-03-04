@@ -400,4 +400,8 @@ void SXRActivity::onDrawFrame(jobject jViewManager) {
         LOGD("Activity: usingMultview = %d", use_multiview);
         return use_multiview;
     }
+
+    void SXRActivity::recenterPose() const {
+        vrapi_RecenterPose(oculusMobile_);
+    }
 }
