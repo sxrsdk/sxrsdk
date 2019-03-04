@@ -56,8 +56,6 @@ public:
         mBuffer = buffer;
     }
 private:
-    void PrepareFramebuffer();
-
     void SetViewport(const gvr::BufferViewport &viewport);
 
     std::unique_ptr <gvr::GvrApi> gvr_api_;
@@ -68,12 +66,11 @@ private:
     gvr::BufferViewport scratch_viewport_;
     gvr::UserPrefs mUserPrefs;
     gvr::Sizei render_size_;
-    gvr::Mat4f head_view_;
     float* mBuffer;
     jmethodID onDrawEyeMethodId_ = nullptr;
     jobject rendererObject_ = nullptr;
 
-    sxr::CameraRig *cameraRig_;
+    sxr::CameraRig *cameraRig_ = nullptr;
 };
 
 #endif  // DAYDREAM_RENDERER_H_

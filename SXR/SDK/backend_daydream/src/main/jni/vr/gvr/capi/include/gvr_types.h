@@ -19,6 +19,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#if defined(__cplusplus) && !defined(GVR_NO_CPP_WRAPPER)
+#include <cassert>
+#include <type_traits>
+#include <utility>  // for std::swap
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -41,7 +47,7 @@ typedef enum {
 typedef enum {
   /// A Cardboard-compatible viewer. A typical Cardboard viewer supports a
   /// simple touchscreen-based trigger input mechanism. On most platforms, this
-  // is the default viewer type if no viewer has been explicitly paired.
+  /// is the default viewer type if no viewer has been explicitly paired.
   GVR_VIEWER_TYPE_CARDBOARD = 0,
   /// A Daydream-compatible viewer. A typical Daydream viewer supports 3DOF
   /// controller input (as defined in gvr_controller.h), and is intended only
@@ -50,12 +56,31 @@ typedef enum {
   GVR_VIEWER_TYPE_DAYDREAM = 1,
 } gvr_viewer_type;
 
-// Types of VR-specific features which may or may not be supported on the
-// underlying platform.
+/// Types of VR-specific features which may or may not be supported on the
+/// underlying platform.
 typedef enum {
-  // Asynchronous reprojection warps the app's rendered frame using the most
-  // recent head pose just before pushing the frame to the display.
+  /// Asynchronous reprojection warps the app's rendered frame using the most
+  /// recent head pose just before pushing the frame to the display.
   GVR_FEATURE_ASYNC_REPROJECTION = 0,
+  /// Support for framebuffers suitable for rendering with the GL_OVR_multiview2
+  /// and GL_OVR_multiview_multisampled_render_to_texture extensions.
+  GVR_FEATURE_MULTIVIEW = 1,
+  /// Support for external surface creation and compositing. Note that this
+  /// feature may be supported only under certain configurations, e.g., when
+  /// async reprojection is explicitly enabled.
+  GVR_FEATURE_EXTERNAL_SURFACE = 2,
+  /// Support for providing head poses with 6 degrees-of-freedom (orientation
+  /// and position).
+  GVR_FEATURE_HEAD_POSE_6DOF = 3,
+  /// Indicates that buffers which are part of a frame are backed by Android
+  /// AHardwareBuffer objects. When this feature is available, the function
+  /// gvr_frame_get_hardware_buffer can be called to get the AHardwareBuffer
+  /// pointer.
+  /// Hardware buffers are only supported on Android O and later, on a
+  /// best-effort basis. Future versions of GVR and/or Android may also cease to
+  /// support hardware buffers if the underlying implementation no longer
+  /// supports this rendering path.
+  GVR_FEATURE_HARDWARE_BUFFERS = 4,
 } gvr_feature;
 
 /// @}
@@ -104,19 +129,22 @@ typedef struct gvr_vec3f {
   float z;
 } gvr_vec3f;
 
-/// A floating point 4x4 matrix.
-typedef struct gvr_mat4f { float m[4][4]; } gvr_mat4f;
+/// A floating point 4x4 matrix stored in row-major form. It needs to be
+/// transposed before being used with OpenGL.
+typedef struct gvr_mat4f {
+  float m[4][4];
+} gvr_mat4f;
 
 /// A floating point quaternion, in JPL format.
 /// We use this simple struct in order not to impose a dependency on a
 /// particular math library. The user of this API is free to encapsulate this
 /// into any math library they want.
 typedef struct gvr_quatf {
-  /// qx, qy, qz are the vector component.
+  /// qx, qy, qz are the vector components.
   float qx;
   float qy;
   float qz;
-  /// qw is the linelar component.
+  /// qw is the scalar component.
   float qw;
 } gvr_quatf;
 
@@ -167,6 +195,92 @@ typedef struct gvr_swap_chain_ gvr_swap_chain;
 /// chain.
 typedef struct gvr_frame_ gvr_frame;
 
+/// Generic flag type.
+typedef uint32_t gvr_flags;
+
+/// Generic 64-bit flag type.
+typedef uint64_t gvr_flags64;
+
+/// Opaque handle to a collection of properties.
+typedef struct gvr_properties_ gvr_properties;
+
+/// Represents a Daydream Controller API object, used to invoke the
+/// Daydream Controller API.
+typedef struct gvr_controller_context_ gvr_controller_context;
+
+/// A generic container for various pure value types.
+typedef struct gvr_value {
+  int32_t value_type;  // gvr_value_type
+  gvr_flags flags;
+  union {
+    float f;
+    double d;
+    int32_t i;
+    int64_t i64;
+    gvr_flags fl;
+    gvr_flags64 fl64;
+    gvr_sizei si;
+    gvr_recti ri;
+    gvr_rectf rf;
+    gvr_vec2f v2f;
+    gvr_vec3f v3f;
+    gvr_quatf qf;
+    gvr_mat4f m4f;
+    gvr_clock_time_point t;
+
+    // Pad the struct to 256 bytes.
+    uint8_t padding[248];
+  };
+} gvr_value;
+
+/// @addtogroup types
+/// @{
+
+/// The type of a recentering associated with a GVR_EVENT_RECENTER event.
+typedef enum {
+  /// Recentering state received from the platform upon starting or resuming the
+  /// application. This event is usually precedes a
+  /// GVR_EVENT_HEAD_TRACKING_RESUMED event in the same frame.
+  GVR_RECENTER_EVENT_RESTART = 1,
+
+  /// A recenter event triggered by the controller (e.g. long-press on Home
+  /// button or connecting controller as part of donning UX).
+  GVR_RECENTER_EVENT_ALIGNED = 2,
+
+  /// A recenter event triggered by proximity sensor detecting the user has put
+  /// put the headset on (a.k.a. donned the headset).
+  GVR_RECENTER_EVENT_DON = 3,
+} gvr_recenter_event_type;
+
+/// @}
+
+/// Event data associated with a GVR_EVENT_RECENTER event, which indicates head
+/// tracking recentering. (Controller recentering is signaled separately
+/// through gvr_controller_state_get_recentered().) The client may wish to
+/// handle this event to provide custom recentering logic.
+typedef struct gvr_recenter_event_data {
+  int32_t recenter_type;  // gvr_recenter_event_type
+  gvr_flags recenter_event_flags;
+
+  /// The new transform that maps from headset's "sensor" space to the
+  /// recentered "start" space. This transform can also be retrieved by querying
+  /// for the GVR_PROPERTY_RECENTER_TRANSFORM property.
+  gvr_mat4f start_space_from_tracking_space_transform;
+} gvr_recenter_event_data;
+
+/// Container for various GVR-events to which the client can optionally respond.
+typedef struct gvr_event {
+  gvr_clock_time_point timestamp;
+  int32_t type;  // gvr_event_type
+  gvr_flags flags;
+  union {
+    gvr_recenter_event_data recenter_event_data;
+
+    // Pad the struct to 512 bytes.
+    uint8_t padding[496];
+  };
+} gvr_event;
+
 /// @addtogroup types
 /// @{
 
@@ -175,7 +289,28 @@ typedef enum {
   GVR_ERROR_NONE = 0,
   GVR_ERROR_CONTROLLER_CREATE_FAILED = 2,
   GVR_ERROR_NO_FRAME_AVAILABLE = 3,
+
+  /// Error code indicating that no events are currently available.
+  /// See also gvr_poll_event()
+  GVR_ERROR_NO_EVENT_AVAILABLE = 1000000,
+
+  /// Error code indicating that the given property is not available.
+  /// See also gvr_properties_get().
+  GVR_ERROR_NO_PROPERTY_AVAILABLE = 1000001,
 } gvr_error;
+
+/// Flags indicating the current status of the tracker.
+/// See also GVR_PROPERTY_TRACKING_STATUS.
+enum {
+  /// The tracker is in an invalid (potentially paused) state, or no valid
+  /// tracker exists.
+  GVR_TRACKING_STATUS_FLAG_INVALID = (1U << 0),
+  /// The tracker is still initializing, so the pose may not be accurate.
+  GVR_TRACKING_STATUS_FLAG_INITIALIZING = (1U << 1),
+  /// The tracker pose is derived from 6DoF sensors and has a translational
+  /// component.
+  GVR_TRACKING_STATUS_FLAG_HAS_6DOF = (1U << 2),
+};
 
 /// Controller API options (bit flags).
 enum {
@@ -191,10 +326,13 @@ enum {
   GVR_CONTROLLER_ENABLE_GESTURES = 1 << 4,
   /// Indicates that controller pose prediction should be enabled.
   GVR_CONTROLLER_ENABLE_POSE_PREDICTION = 1 << 5,
-  /// Indicates that controller position data should be reported.
+  /// Indicates that system should provide real position data if available.
   GVR_CONTROLLER_ENABLE_POSITION = 1 << 6,
   /// Indicates that controller battery data should be reported.
   GVR_CONTROLLER_ENABLE_BATTERY = 1 << 7,
+  /// Indicates that elbow model should be enabled if the system doesn't provide
+  /// real position data.
+  GVR_CONTROLLER_ENABLE_ARM_MODEL = 1 << 8,
 };
 
 /// Constants that represent the status of the controller API.
@@ -243,10 +381,13 @@ typedef enum {
   GVR_CONTROLLER_BUTTON_APP = 3,
   GVR_CONTROLLER_BUTTON_VOLUME_UP = 4,
   GVR_CONTROLLER_BUTTON_VOLUME_DOWN = 5,
+  GVR_CONTROLLER_BUTTON_TRIGGER = 6,
+  GVR_CONTROLLER_BUTTON_GRIP = 7,
+  GVR_CONTROLLER_BUTTON_RESERVED2 = 8,
 
-  /// Note: there are 5 buttons on the controller, but the state arrays have
+  /// Note: there are 8 buttons on the controller, but the state arrays have
   /// this many elements due to the inclusion of a dummy "none" button.
-  GVR_CONTROLLER_BUTTON_COUNT = 6,
+  GVR_CONTROLLER_BUTTON_COUNT = 9,
 } gvr_controller_button;
 
 /// Controller battery states.
@@ -262,7 +403,6 @@ typedef enum {
   /// of an UNKNOWN state before any battery information is collected, etc.
   GVR_CONTROLLER_BATTERY_LEVEL_COUNT = 6,
 } gvr_controller_battery_level;
-
 
 /// @}
 
@@ -352,41 +492,83 @@ typedef enum {
   // Enables to initialize a yet undefined rendering mode.
   GVR_AUDIO_SURROUND_FORMAT_INVALID = 0,
 
-  // Virtual stereo speakers at -30 degrees and +30 degrees.
-  GVR_AUDIO_SURROUND_FORMAT_SURROUND_STEREO = 1,
+  // Virtual mono speaker at 0 degrees (front).
+  GVR_AUDIO_SURROUND_FORMAT_SURROUND_MONO = 1,
 
-  // 5.1 surround sound according to the ITU-R BS 775 speaker configuration
+  // Virtual stereo speakers at -30 degrees and +30 degrees.
+  GVR_AUDIO_SURROUND_FORMAT_SURROUND_STEREO = 2,
+
+  // 5.1 surround sound according to the ITU-R BS.775-3 speaker configuration
   // recommendation:
-  //   - Front left (FL) at 30 degrees.
-  //   - Front right (FR) at -30 degrees.
-  //   - Front center (FC) at 0 degrees.
+  //   - Left (L) at 30 degrees.
+  //   - Right (R) at -30 degrees.
+  //   - Center (C) at 0 degrees.
   //   - Low frequency effects (LFE) at front center at 0 degrees.
-  //   - Left side (LS) at 110 degrees.
-  //   - Right side (RS) at -110 degrees.
+  //   - Left surround (LS) at 110 degrees.
+  //   - Right surround (RS) at -110 degrees.
   //
-  // The 5.1 channel input layout must matches AAC: FL, FR, FC, LFE, LS, RS.
+  // The 5.1 channel input layout must matches AAC: L, R, C, LFE, LS, RS.
   // Note that this differs from the Vorbis/Opus 5.1 channel layout, which
-  // is: FL, FC, FR, LS, RS, LFE.
-  GVR_AUDIO_SURROUND_FORMAT_SURROUND_FIVE_DOT_ONE = 2,
+  // is: L, C, R, LS, RS, LFE.
+  GVR_AUDIO_SURROUND_FORMAT_SURROUND_FIVE_DOT_ONE = 3,
+
+  // 7.1 surround sound according to the ITU-R BS.775-3 speaker configuration
+  // recommendation:
+  //   - Left (FL) at 30 degrees.
+  //   - Right (FR) at -30 degrees.
+  //   - Center (C) at 0 degrees.
+  //   - Low frequency effects (LFE) at front center at 0 degrees.
+  //   - Left surround 1 (LS1) at 90 degrees.
+  //   - Right surround 1 (RS1) at -90 degrees.
+  //   - Left surround 2 (LS2) at 150 degrees.
+  //   - Right surround 2 (LS2) at -150 degrees.
+  //
+  // The 7.1 channel input layout must matches AAC: L, R, C, LFE, LS1, RS1,
+  // LS2, RS2.
+  // Note that this differs from the Vorbis/Opus 7.1 channel layout, which
+  // is: L, C, R, LS1, RS1, LS2, RS2, LFE.
+  GVR_AUDIO_SURROUND_FORMAT_SURROUND_SEVEN_DOT_ONE = 10,
 
   // First-order ambisonics (AmbiX format: 4 channels, ACN channel ordering,
   // SN3D normalization).
-  GVR_AUDIO_SURROUND_FORMAT_FIRST_ORDER_AMBISONICS = 3,
+  GVR_AUDIO_SURROUND_FORMAT_FIRST_ORDER_AMBISONICS = 4,
 
   // Second-order ambisonics (AmbiX format: 9 channels, ACN channel ordering,
   // SN3D normalization).
-  GVR_AUDIO_SURROUND_FORMAT_SECOND_ORDER_AMBISONICS = 4,
+  GVR_AUDIO_SURROUND_FORMAT_SECOND_ORDER_AMBISONICS = 5,
 
   // Third-order ambisonics (AmbiX format: 16 channels, ACN channel ordering,
   // SN3D normalization).
-  GVR_AUDIO_SURROUND_FORMAT_THIRD_ORDER_AMBISONICS = 5,
+  GVR_AUDIO_SURROUND_FORMAT_THIRD_ORDER_AMBISONICS = 6,
+
+  // First-order ambisonics with a non-diegetic stereo. The first 4 channels
+  // contain ambisonic AmbiX format.
+  // (AmbiX format: 4 channels, ACN channel ordering, SN3D normalization).
+  // Channel 5 to 6 contain non-diegetic stereo.
+  GVR_AUDIO_SURROUND_FORMAT_FIRST_ORDER_AMBISONICS_WITH_NON_DIEGETIC_STEREO = 7,
+
+  // Second-order ambisonics with a non-diegetic stereo. The first 9 channels
+  // contain ambisonic AmbiX format.
+  // (AmbiX format: 9 channels, ACN channel ordering, SN3D normalization).
+  // Channel 10 to 11 contain non-diegetic stereo.
+  GVR_AUDIO_SURROUND_FORMAT_SECOND_ORDER_AMBISONICS_WITH_NON_DIEGETIC_STEREO =
+      8,
+
+  // Third-order ambisonics with a non-diegetic stereo. The first 16 channels
+  // contain ambisonic AmbiX format.
+  // (AmbiX format: 16 channels, ACN channel ordering, SN3D normalization).
+  // Channel 17 to 18 contain non-diegetic stereo.
+  GVR_AUDIO_SURROUND_FORMAT_THIRD_ORDER_AMBISONICS_WITH_NON_DIEGETIC_STEREO = 9,
+
+  // Note: Next available value is: 11
 } gvr_audio_surround_format_type;
 
 /// Valid color formats for swap chain buffers.
 typedef enum {
-  /// Equivalent to GL_RGBA8
+  /// Equivalent to GL_RGBA8. Pixel values are expected to be premultiplied
+  /// with alpha.
   GVR_COLOR_FORMAT_RGBA_8888 = 0,
-  /// Equivalent to GL_RGB565
+  /// Equivalent to GL_RGB565.
   GVR_COLOR_FORMAT_RGB_565 = 1,
 } gvr_color_format_type;
 
@@ -420,6 +602,20 @@ typedef enum {
   GVR_CONTROLLER_LEFT_HANDED = 1,
 } gvr_controller_handedness;
 
+/// Types of gaze behaviors used for arm model.
+typedef enum {
+  // Body rotation matches head rotation all the time.
+  GVR_ARM_MODEL_SYNC_GAZE = 0,
+  // Body rotates as head rotates, but at a smaller angle.
+  GVR_ARM_MODEL_FOLLOW_GAZE = 1,
+  // Body doesn't rotate as head rotates.
+  GVR_ARM_MODEL_IGNORE_GAZE = 2,
+  // Body rotation and position matches head rotation and position all the time.
+  // As the 6DOF position is incorporated into the final controller pose, use
+  // this for best results in 6DOF applications.
+  GVR_ARM_MODEL_SYNC_GAZE_AND_POSITION = 3,
+} gvr_arm_model_behavior;
+
 typedef struct gvr_user_prefs_ gvr_user_prefs;
 
 // Anonymous enum for miscellaneous integer constants.
@@ -433,19 +629,180 @@ enum {
   /// gvr_buffer_viewport_set_source_buffer_index() to use the external surface
   /// as the buffer contents.
   GVR_BUFFER_INDEX_EXTERNAL_SURFACE = -1,
+  /// Invalid source id that can be used to initialize source id variables
+  /// during construction.
+  GVR_AUDIO_INVALID_SOURCE_ID = -1,
 };
 
+/// Property types exposed by the gvr_properties_get() API.
+typedef enum {
+  /// The height of the floor, if available, relative to the current start space
+  /// origin. In general, for tracking systems with an eye level origin, this
+  /// value will be negative.
+  /// Type: float
+  GVR_PROPERTY_TRACKING_FLOOR_HEIGHT = 1,
+
+  /// The current transform that maps from headset's "sensor" space to the
+  /// recentered "start" space. Apps can optionally undo or extend this
+  /// transform to perform custom recentering logic with the SDK-provided poses,
+  /// but the SDK assumes poses supplied during frame submission are in start
+  /// space. This transform matches the one reported in the most recent
+  /// gvr_recenter_event_data.
+  /// Type: gvr_mat4f
+  GVR_PROPERTY_RECENTER_TRANSFORM = 2,
+
+  /// The type of safety region, if any, currently employed by the headset's
+  /// tracker.
+  /// Type: int (gvr_safety_region_type)
+  GVR_PROPERTY_SAFETY_REGION = 3,
+
+  /// Distance from safety cylinder axis at which the user's state transitions
+  /// from outside to inside, generating a GVR_EVENT_SAFETY_REGION_ENTER event.
+  /// This value is guaranteed to be less than
+  /// GVR_PROPERTY_SAFETY_CYLINDER_EXIT_RADIUS.
+  /// Type: float
+  GVR_PROPERTY_SAFETY_CYLINDER_ENTER_RADIUS = 4,
+
+  /// Distance from safety cylinder axis at which the user's state transitions
+  /// from inside to outside, generating a GVR_EVENT_SAFETY_REGION_EXIT event.
+  /// This value is guaranteed to be greater than
+  /// GVR_PROPERTY_SAFETY_CYLINDER_ENTER_RADIUS.
+  /// Type: float
+  GVR_PROPERTY_SAFETY_CYLINDER_EXIT_RADIUS = 5,
+
+  /// The current status of the head tracker, if available.
+  /// Type: gvr_flags
+  GVR_PROPERTY_TRACKING_STATUS = 6
+} gvr_property_type;
+
+/// Safety region types exposed from the GVR_PROPERTY_SAFETY_REGION property.
+typedef enum {
+  GVR_SAFETY_REGION_NONE = 0,
+
+  /// A safety region defined by a vertically-oriented cylinder, extending
+  /// infinitely along the Y axis, and centered at the start space origin.
+  /// Extents can be queried with the GVR_PROPERTY_SAFETY_CYLINDER_INNER_RADIUS
+  /// and GVR_PROPERTY_SAFETY_CYLINDER_OUTER_RADIUS property keys.
+  GVR_SAFETY_REGION_CYLINDER = 1,
+} gvr_safety_region_type;
+
+/// Value types for the contents of a gvr_value object instance.
+typedef enum {
+  GVR_VALUE_TYPE_NONE = 0,
+  GVR_VALUE_TYPE_FLOAT = 1,
+  GVR_VALUE_TYPE_DOUBLE = 2,
+  GVR_VALUE_TYPE_INT = 3,
+  GVR_VALUE_TYPE_INT64 = 4,
+  GVR_VALUE_TYPE_FLAGS = 5,
+  GVR_VALUE_TYPE_SIZEI = 6,
+  GVR_VALUE_TYPE_RECTI = 7,
+  GVR_VALUE_TYPE_RECTF = 8,
+  GVR_VALUE_TYPE_VEC2F = 9,
+  GVR_VALUE_TYPE_VEC3F = 10,
+  GVR_VALUE_TYPE_QUATF = 11,
+  GVR_VALUE_TYPE_MAT4F = 12,
+  GVR_VALUE_TYPE_CLOCK_TIME_POINT = 13,
+} gvr_value_type;
+
+/// The type of gvr_event.
+typedef enum {
+  /// Notification that head tracking has been recentered. (Note that controller
+  /// recentering is signaled separately through
+  /// gvr_controller_state_get_recentered().)
+  /// Event data type: gvr_recenter_event_data
+  GVR_EVENT_RECENTER = 1,
+
+  /// Notification that the user has exited the safety region, as defined by the
+  /// gvr_safety_region_type.
+  /// Event data type: none
+  GVR_EVENT_SAFETY_REGION_EXIT = 2,
+
+  /// Notification that the user has re-entered the safety region, as defined by
+  /// the gvr_safety_region_type.
+  /// Event data type: none
+  GVR_EVENT_SAFETY_REGION_ENTER = 3,
+
+  /// Notification that head tracking was resumed (or started for the first
+  /// time). Before this event is sent, head tracking will always return the
+  /// identity pose. This event is usually preceded in the same frame by a
+  /// GVR_EVENT_RECENTER of recenter_type GVR_RECENTER_EVENT_RESTART.
+  /// Event data type: none
+  GVR_EVENT_HEAD_TRACKING_RESUMED = 4,
+
+  /// Notification that head tracking was paused.
+  /// Event data type: none
+  GVR_EVENT_HEAD_TRACKING_PAUSED = 5,
+} gvr_event_type;
+
 /// @}
+
+// Forward declaration of Android AHardwareBuffer.
+typedef struct AHardwareBuffer AHardwareBuffer;
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
 #if defined(__cplusplus) && !defined(GVR_NO_CPP_WRAPPER)
-// These typedefs convert the C-style names to C++-style names.
-
 namespace gvr {
 
+template <typename WrappedType>
+void NoopDestroy(WrappedType** cobject) {
+  // Make sure that we don't forget to specify the destroy function.
+  // If the wrapped object type doesn't need destruction, add it here.
+  static_assert(std::is_same<WrappedType, gvr_frame>::value ||
+                    std::is_same<WrappedType, const gvr_user_prefs>::value ||
+                    std::is_same<WrappedType, const gvr_properties>::value,
+                "Did you forget to specify a destroy function?");
+}
+
+/// Base class for all C++ wrapper objects.
+template <typename WrappedType,
+          void (*DestroyFunction)(WrappedType**) = NoopDestroy<WrappedType>>
+class WrapperBase {
+ public:
+  /// Initializes a wrapper that holds a C object.
+  explicit WrapperBase(WrappedType* cobject = nullptr) : cobject_(cobject) {}
+
+  ~WrapperBase() {
+    if (cobject_ != nullptr) DestroyFunction(&cobject_);
+  }
+
+  WrapperBase(WrapperBase&& other) : cobject_(nullptr) {
+    std::swap(cobject_, other.cobject_);
+  }
+
+  WrapperBase& operator=(WrapperBase&& other) {
+    std::swap(cobject_, other.cobject_);
+    return *this;
+  }
+
+  // Disallow copy and assign.
+  WrapperBase(const WrapperBase&) = delete;
+  void operator=(const WrapperBase&) = delete;
+
+  /// Returns the wrapped C object. Does not affect ownership.
+  WrappedType* cobj() { return cobject_; }
+  const WrappedType* cobj() const { return cobject_; }
+
+  /// Returns the wrapped C object and transfers its ownership to the caller.
+  /// The wrapper becomes invalid and should not be used.
+  WrappedType* release() {
+    auto result = cobject_;
+    cobject_ = nullptr;
+    return result;
+  }
+
+  /// Returns true if the wrapper holds an object.
+  explicit operator bool() const {
+    return cobj() != nullptr;
+  }
+
+ protected:
+  WrappedType* cobject_;
+};
+
+// These typedefs convert the C-style names to C++-style names.
 const int32_t kControllerEnableOrientation =
     static_cast<int32_t>(GVR_CONTROLLER_ENABLE_ORIENTATION);
 const int32_t kControllerEnableTouch =
@@ -502,6 +859,12 @@ const ControllerButton kControllerButtonVolumeUp =
     static_cast<ControllerButton>(GVR_CONTROLLER_BUTTON_VOLUME_UP);
 const ControllerButton kControllerButtonVolumeDown =
     static_cast<ControllerButton>(GVR_CONTROLLER_BUTTON_VOLUME_DOWN);
+const ControllerButton kControllerButtonTrigger =
+    static_cast<ControllerButton>(GVR_CONTROLLER_BUTTON_TRIGGER);
+const ControllerButton kControllerButtonGrip =
+    static_cast<ControllerButton>(GVR_CONTROLLER_BUTTON_GRIP);
+const ControllerButton kControllerButtonReserved2 =
+    static_cast<ControllerButton>(GVR_CONTROLLER_BUTTON_RESERVED2);
 const ControllerButton kControllerButtonCount =
     static_cast<ControllerButton>(GVR_CONTROLLER_BUTTON_COUNT);
 
@@ -525,10 +888,20 @@ const ControllerBatteryLevel kControllerBatteryLevelFull =
     static_cast<ControllerBatteryLevel>(
         GVR_CONTROLLER_BATTERY_LEVEL_FULL);
 
+enum {
+  kTrackingStatusFlagInvalid = GVR_TRACKING_STATUS_FLAG_INVALID,
+  kTrackingStatusFlagInitializing = GVR_TRACKING_STATUS_FLAG_INITIALIZING,
+  kTrackingStatusFlagHas6Dof = GVR_TRACKING_STATUS_FLAG_HAS_6DOF
+};
+
 /// An uninitialized external surface ID.
 const int32_t kUninitializedExternalSurface = GVR_BUFFER_INDEX_EXTERNAL_SURFACE;
 /// The default source buffer index for viewports.
 const int32_t kDefaultBufferIndex = 0;
+/// Invalid source id that can be used to initialize source id variables
+/// during construction.
+typedef gvr_audio_source_id AudioSourceId;
+const AudioSourceId kInvalidSourceId = GVR_AUDIO_INVALID_SOURCE_ID;
 
 typedef gvr_eye Eye;
 
@@ -547,6 +920,9 @@ typedef gvr_vec3f Vec3f;
 typedef gvr_mat4f Mat4f;
 typedef gvr_quatf Quatf;
 typedef gvr_clock_time_point ClockTimePoint;
+typedef gvr_value Value;
+typedef gvr_event Event;
+typedef gvr_flags Flags;
 
 typedef gvr_vec2f ControllerVec2;
 typedef gvr_vec3f ControllerVec3;
@@ -555,7 +931,6 @@ typedef gvr_quatf ControllerQuat;
 typedef gvr_audio_rendering_mode AudioRenderingMode;
 typedef gvr_audio_material_type AudioMaterialName;
 typedef gvr_audio_distance_rolloff_type AudioRolloffMethod;
-typedef gvr_audio_source_id AudioSourceId;
 typedef gvr_audio_surround_format_type AudioSurroundFormat;
 
 typedef gvr_color_format_type ColorFormat;
@@ -588,6 +963,16 @@ const ControllerHandedness kControllerRightHanded =
 const ControllerHandedness kControllerLeftHanded =
     static_cast<ControllerHandedness>(GVR_CONTROLLER_LEFT_HANDED);
 
+typedef gvr_arm_model_behavior ArmModelBehavior;
+const ArmModelBehavior kArmModelBehaviorFollowGaze =
+    static_cast<ArmModelBehavior>(GVR_ARM_MODEL_FOLLOW_GAZE);
+const ArmModelBehavior kArmModelBehaviorSyncGaze =
+    static_cast<ArmModelBehavior>(GVR_ARM_MODEL_SYNC_GAZE);
+const ArmModelBehavior kArmModelBehaviorIgnoreGaze =
+    static_cast<ArmModelBehavior>(GVR_ARM_MODEL_IGNORE_GAZE);
+const ArmModelBehavior kArmModelBehaviorSyncGazeAndPosition =
+    static_cast<ArmModelBehavior>(GVR_ARM_MODEL_SYNC_GAZE_AND_POSITION);
+
 typedef gvr_error Error;
 const Error kErrorNone = static_cast<Error>(GVR_ERROR_NONE);
 const Error kErrorControllerCreateFailed =
@@ -599,7 +984,6 @@ class AudioApi;
 class BufferSpec;
 class ControllerApi;
 class ControllerState;
-class Frame;
 class GvrApi;
 class BufferViewport;
 class BufferViewportList;
@@ -608,7 +992,7 @@ class UserPrefs;
 
 }  // namespace gvr
 
-// Non-member equality operators for convenience. Since typedefs do not trigger
+// Non-member operators for convenience. Since typedefs do not trigger
 // argument-dependent lookup, these operators have to be defined for the
 // underlying types.
 inline bool operator==(const gvr_vec2f& lhs, const gvr_vec2f& rhs) {
@@ -651,6 +1035,30 @@ inline bool operator==(const gvr_sizei& lhs, const gvr_sizei& rhs) {
 
 inline bool operator!=(const gvr_sizei& lhs, const gvr_sizei& rhs) {
   return !(lhs == rhs);
+}
+
+inline bool operator==(gvr_clock_time_point lhs, gvr_clock_time_point rhs) {
+  return lhs.monotonic_system_time_nanos == rhs.monotonic_system_time_nanos;
+}
+
+inline bool operator!=(gvr_clock_time_point lhs, gvr_clock_time_point rhs) {
+  return lhs.monotonic_system_time_nanos != rhs.monotonic_system_time_nanos;
+}
+
+inline bool operator<(gvr_clock_time_point lhs, gvr_clock_time_point rhs) {
+  return lhs.monotonic_system_time_nanos < rhs.monotonic_system_time_nanos;
+}
+
+inline bool operator<=(gvr_clock_time_point lhs, gvr_clock_time_point rhs) {
+  return lhs.monotonic_system_time_nanos <= rhs.monotonic_system_time_nanos;
+}
+
+inline bool operator>(gvr_clock_time_point lhs, gvr_clock_time_point rhs) {
+  return lhs.monotonic_system_time_nanos > rhs.monotonic_system_time_nanos;
+}
+
+inline bool operator>=(gvr_clock_time_point lhs, gvr_clock_time_point rhs) {
+  return lhs.monotonic_system_time_nanos >= rhs.monotonic_system_time_nanos;
 }
 
 #endif  // #if defined(__cplusplus) && !defined(GVR_NO_CPP_WRAPPER)
