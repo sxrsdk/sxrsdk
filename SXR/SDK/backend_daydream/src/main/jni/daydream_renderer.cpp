@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
+#include <contrib/glm/gtx/matrix_decompose.hpp>
+#include <contrib/glm/ext.hpp>
 #include "daydream_renderer.h"
-#include "glm/gtc/matrix_inverse.hpp"
 
 namespace {
     static const uint64_t kPredictionTimeWithoutVsyncNanos = 50000000;
@@ -25,16 +26,6 @@ namespace {
     // TODO: Change this to read the values from the sxr.xml file
     static const float kZNear = 0.1f;
     static const float kZFar = 1000.0f;
-
-    static glm::mat4 MatrixToGLMMatrix(const gvr::Mat4f &matrix) {
-        glm::mat4 result;
-        for (int i = 0; i < 4; ++i) {
-            for (int j = 0; j < 4; ++j) {
-                result[i][j] = matrix.m[i][j];
-            }
-        }
-        return result;
-    }
 
     static gvr::Rectf ModulateRect(const gvr::Rectf &rect, float width,
                                    float height) {
@@ -125,13 +116,22 @@ void DaydreamRenderer::DrawFrame(JNIEnv &env) {
     gvr::ClockTimePoint target_time = gvr::GvrApi::GetTimePointNow();
     target_time.monotonic_system_time_nanos += kPredictionTimeWithoutVsyncNanos;
 
-    head_view_ = gvr_api_->GetHeadSpaceFromStartSpaceRotation(target_time);
+    gvr::Mat4f headSpace = gvr_api_->GetHeadSpaceFromStartSpaceTransform(target_time);
+    headSpace = gvr_api_->ApplyNeckModel(headSpace, 1);
 
-    sxr::Transform* t = cameraRig_->getHeadTransform();
-    if (nullptr == t) {
-        return;
-    }
-    t->setModelMatrix(MatrixToGLMMatrix(head_view_));
+    glm::mat4 mat = glm::make_mat4(&headSpace.m[0][0]);
+    mat = glm::transpose(mat);
+
+    glm::vec3 scale;
+    glm::quat rotation;
+    glm::vec3 translation;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::decompose(mat, scale, rotation, translation, skew, perspective);
+
+    cameraRig_->setRotationSensorData(0, rotation.w, rotation.x, rotation.y, rotation.z, 0, 0, 0);
+    cameraRig_->updateRotation();
+    cameraRig_->owner_object()->transform()->set_position(-translation.x, -translation.y, -translation.z);
 
     // Render the eye images.
     for (int eye = 0; eye < 2; eye++) {
@@ -143,7 +143,7 @@ void DaydreamRenderer::DrawFrame(JNIEnv &env) {
     }
 
     // Submit frame.
-    frame.Submit(*viewport_list_, head_view_);
+    frame.Submit(*viewport_list_, headSpace);
 
     checkGLError("onDrawFrame");
 }
