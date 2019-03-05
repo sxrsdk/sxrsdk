@@ -918,20 +918,35 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
      * original bones and all the bones in the new skeleton.
      *
      * @param newSkel skeleton to merge with this one
+     * @param startBone name of bone to start merging from.
+     *                 This bone must be in BOTH skeletons.
+     *                 If null, the first bone in the new skeleton is used.
+     * @return name of bone in this skeleton the new skeleton was attached to.
      */
-    public void merge(SXRSkeleton newSkel)
+    public String merge(SXRSkeleton newSkel, String startBone)
     {
         synchronized (this)
         {
             int numBones = getNumBones();
             int[] parentBoneIds = new int[newSkel.getNumBones()];
-            List<String> newBoneNames = new ArrayList<String>(newSkel.getNumBones());
-            List<Matrix4f> matrices = new ArrayList<Matrix4f>(numBones + newSkel.getNumBones());
-            List<SXRNode> bones = new ArrayList<SXRNode>(newSkel.getNumBones());
+            List<String> newBoneNames = new ArrayList<String>();
+            List<Matrix4f> matrices = new ArrayList<Matrix4f>();
+            List<SXRNode> bones = new ArrayList<SXRNode>();
             int numNewBones = 0;
             SXRPose curPose = getPose();
             SXRPose newPose = newSkel.getPose();
+            int startBoneId = 0;
+            String firstBone = null;
 
+            if (startBone != null)
+            {
+                int temp = newSkel.getBoneIndex(startBone);
+
+                if ((getBoneIndex(startBone) >= 0) && (temp >= 0))
+                {
+                    startBoneId = temp;
+                }
+            }
             /*
              * Accumulate the bind pose matrices and parent bone IDs
              * for the old skeleton
@@ -946,21 +961,22 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
              * Add bones in the new skeleton that are not in
              * the old skeleton.
              */
-            for (int j = 0; j < newSkel.getNumBones(); ++j)
+            for (int j = startBoneId; j < newSkel.getNumBones(); ++j)
             {
                 String boneName = newSkel.getBoneName(j);
                 int boneId = getBoneIndex(boneName);
                 Matrix4f m = new Matrix4f();
+                SXRNode newBone = newSkel.getBone(j);
                 int parentId;
 
                 newPose.getLocalMatrix(j, m);
                 parentId = newSkel.getParentBoneIndex(j);
-                bones.add(newSkel.getBone(j));
                 if (boneId < 0)            // source bone not in existing skeleton?
                 {
                     if (parentId >= 0)     // parent is found?
                     {
                         String parName = newSkel.getBoneName(parentId);
+                        firstBone = parName;
                         parentId = getBoneIndex(parName);
                         if (parentId < 0)  // parent is a new bone
                         {
@@ -976,58 +992,73 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
                         parentId = 0;
                     }
                     matrices.add(m);
+                    bones.add(newBone);
                     newBoneNames.add(boneName);
                     parentBoneIds[numNewBones] = parentId;
                     ++numNewBones;
                 }
-            }
-            if (numNewBones == 0)
-            {
-                return;
-            }
-            /*
-             * Enlarge arrays in this skeleton to accomodate
-             * the new bones added and copy the old data
-             */
-            int n = numBones + numNewBones;
-            int[] parentIds = Arrays.copyOf(mParentBones, n);
-            int[] boneOptions = Arrays.copyOf(mBoneOptions, n);
-            String[] boneNames = Arrays.copyOf(mBoneNames, n);
-
-            mBones = Arrays.copyOf(mBones, n);
-            mPoseMatrices = new float[n * 16];
-            /*
-             * Add bones from the new skeleton into this skeleton
-             */
-            for (int i = 0; i < numNewBones; ++i)
-            {
-                int m = numBones + i;
-                int pid = parentBoneIds[i];
-                SXRNode newBone = bones.get(i);
-                parentIds[m] = pid;
-                boneNames[m] = newBoneNames.get(i);
-                SXRNode parent = mBones[pid];
-                for (int c = 0; c < newBone.getChildrenCount(); ++c)
+                else if (startBone != null)
                 {
-                    SXRNode child = newBone.getChildByIndex(c);
-                    if (newSkel.getBoneIndex(child.getName()) < 0)
+                    parentId = getParentBoneIndex(boneId);
+                    if (j > startBoneId)
                     {
-                        newBone.removeChildObject(child);
-                        parent.addChildObject(child);
-                        --c;
+                        matrices.set(boneId, m);
+                    }
+                    if ((newBone != null) && (parentId >= 0))
+                    {
+                        SXRNode parent = getBone(parentId);
+                        for (int c = 0; c < newBone.getChildrenCount(); ++c)
+                        {
+                            SXRNode child = newBone.getChildByIndex(c);
+                            if (newSkel.getBoneIndex(child.getName()) < 0)
+                            {
+                                newBone.removeChildObject(child);
+                                parent.addChildObject(child);
+                                --c;
+                            }
+                        }
                     }
                 }
-                setBone(m, newBone);
             }
-            mBoneOptions = boneOptions;
-            mBoneNames = boneNames;
-            mParentBones = parentIds;
-            mPose = new SXRPose(this);
+            if (startBone == null)
+            {
+                startBone = firstBone;
+            }
+            int n = numBones + numNewBones;
+            if (numNewBones > 0)
+            {
+                /*
+                 * Enlarge arrays in this skeleton to accomodate
+                 * the new bones added and copy the old data
+                 */
+                int[] parentIds = Arrays.copyOf(mParentBones, n);
+                int[] boneOptions = Arrays.copyOf(mBoneOptions, n);
+                String[] boneNames = Arrays.copyOf(mBoneNames, n);
 
-            /*
-             * Update the native skeleton
-             */
-            NativeSkeleton.updateBones(getNative(), mParentBones, boneNames);
+                mBones = Arrays.copyOf(mBones, n);
+                mPoseMatrices = new float[n * 16];
+                /*
+                 * Add bones from the new skeleton into this skeleton
+                 */
+                for (int i = 0; i < newBoneNames.size(); ++i)
+                {
+                    int m = numBones + i;
+                    int pid = parentBoneIds[i];
+                    SXRNode newBone = bones.get(i);
+                    parentIds[m] = pid;
+                    boneNames[m] = newBoneNames.get(i);
+                    setBone(m, newBone);
+                }
+                mBoneOptions = boneOptions;
+                mBoneNames = boneNames;
+                mParentBones = parentIds;
+                mPose = new SXRPose(this);
+
+                /*
+                 * Update the native skeleton
+                 */
+                NativeSkeleton.updateBones(getNative(), mParentBones, boneNames);
+            }
             /*
              * Update the poses for this skeleton
              */
@@ -1038,6 +1069,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             mPose.sync();
             poseToBones();
         }
+        return startBone;
     }
 
     /**

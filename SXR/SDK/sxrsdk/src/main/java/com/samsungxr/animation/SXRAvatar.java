@@ -821,32 +821,18 @@ public class SXRAvatar implements IEventReceiver
 
     protected Attachment mergeSkeleton(SXRSkeleton skel, SXRNode modelRoot)
     {
-        String attachBone = skel.getBoneName(0);
+        String attachBone = null;
         Attachment a = findModel(modelRoot);
 
         if (a != null)
         {
-            String temp = a.getProperty("attachbone");
-            if (temp != null)
-            {
-                attachBone = temp;
-            }
-            skel.setBoneName(0, attachBone);
+            attachBone = a.getProperty("attachbone");
         }
         else
         {
-            a = addAttachment(attachBone);
-            a.setProperty("attachbone", attachBone);
-            a.setProperty("type", attachBone);
+            a = addAttachment(skel.getBoneName(0));
         }
-        int boneIndex = mSkeleton.getBoneIndex(attachBone);
-        if ((a == null) && (boneIndex < 0))
-        {
-            skel.setBoneName(0, attachBone);
-            a = addAttachment(attachBone);
-            a.setProperty("attachbone", attachBone);
-        }
-        mSkeleton.merge(skel);
+        mSkeleton.merge(skel, attachBone);
         List<SXRComponent> skins = modelRoot.getAllComponents(SXRSkin.getComponentType());
         for (SXRComponent c : skins)
         {
@@ -898,35 +884,39 @@ public class SXRAvatar implements IEventReceiver
     {
         public void onAssetLoaded(SXRContext context, SXRNode modelRoot, String filePath, String errors)
         {
-            List<SXRComponent> skeletons = modelRoot.getAllComponents(SXRSkeleton.getComponentType());
             String eventName = "onModelLoaded";
-            Attachment a;
 
             if ((errors != null) && !errors.isEmpty())
             {
                 Log.e(TAG, "Asset load errors: " + errors);
             }
-            if (skeletons.size() > 0)
+            else
             {
-                SXRSkeleton skel = (SXRSkeleton) skeletons.get(0);
-                if (mSkeleton != null)
+                List<SXRComponent> skeletons = modelRoot.getAllComponents(SXRSkeleton.getComponentType());
+
+                if (skeletons.size() > 0)
                 {
-                    onLoadModel(modelRoot, skel, filePath);
+                    SXRSkeleton skel = (SXRSkeleton) skeletons.get(0);
+                    if (mSkeleton != null)
+                    {
+                        onLoadModel(modelRoot, skel, filePath);
+                    }
+                    else
+                    {
+                        onLoadAvatar(modelRoot, skel, filePath);
+                        modelRoot = mAvatarRoot;
+                        eventName = "onAvatarLoaded";
+                    }
+                }
+                else if (mSkeleton != null)
+                {
+                    onLoadModel(modelRoot, null, filePath);
                 }
                 else
                 {
-                    onLoadAvatar(modelRoot, skel, filePath);
-                    modelRoot = mAvatarRoot;
-                    eventName = "onAvatarLoaded";
+                    errors += "  vatar skeleton not found";
+                    Log.e(TAG, "Avatar skeleton not found in asset file " + filePath);
                 }
-            }
-            else if (mSkeleton != null)
-            {
-                onLoadModel(modelRoot, null, filePath);
-            }
-            else
-            {
-                Log.e(TAG, "Avatar skeleton not found in asset file " + filePath);
             }
             context.getEventManager().sendEvent(SXRAvatar.this,
                                                 IAvatarEvents.class,
