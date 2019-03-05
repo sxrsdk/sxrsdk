@@ -12,7 +12,6 @@ import com.samsungxr.SXRImportSettings;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRResourceVolume;
 import com.samsungxr.SXRTexture;
-import com.samsungxr.SXRTransform;
 import com.samsungxr.animation.keyframe.BVHImporter;
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
@@ -20,6 +19,9 @@ import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.jar.Attributes;
 
 /**
  * Group of animations that can be collectively manipulated.
@@ -44,12 +47,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @see SXRAvatar
  * @see SXRAnimationEngine
  */
-public class SXRAvatar extends SXRBehavior implements IEventReceiver
+public class SXRAvatar implements IEventReceiver
 {
     private static final String TAG = Log.tag(SXRAvatar.class);
-    static private long TYPE_AVATAR = newComponentType(SXRAvatar.class);
     protected final List<SXRAnimator> mAnimations;
-    protected Map<String, SXRNode> mAttachments = new HashMap<String, SXRNode>();
+    protected Map<String, Attachment> mAttachments = new HashMap<String, Attachment>();
     protected SXRSkeleton mSkeleton;
     protected final SXRNode mAvatarRoot;
     protected boolean mIsRunning;
@@ -57,6 +59,123 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     protected final List<SXRAnimator> mAnimQueue = new ArrayList<SXRAnimator>();
     protected int mRepeatMode = SXRRepeatMode.ONCE;
     protected EnumSet<SXRImportSettings> mImportSettings;
+
+    protected class Attachment
+    {
+        protected final Map<String, String> mProperties = new HashMap<>();
+        protected SXRNode mModelRoot;
+        protected String[] mHidden;
+
+        public Attachment(String type)
+        {
+            setProperty("type", type);
+        }
+
+        public Attachment() { }
+
+        public String getProperty(String name)
+        {
+            return mProperties.get(name);
+        }
+
+        public void setProperty(String name, String value)
+        {
+            mProperties.put(name, value);
+        }
+
+        public SXRNode getModelRoot()
+        {
+            return mModelRoot;
+        }
+
+        public void setModelRoot(SXRNode modelRoot)
+        {
+            mModelRoot = modelRoot;
+        }
+
+        public boolean parseModelDescription(String jsonData)
+        {
+            if ((jsonData == null) || "".equals(jsonData))
+            {
+                return false;
+            }
+            try
+            {
+                JSONObject root = new JSONObject(jsonData);
+                parseModelDescription(root);
+                return true;
+            }
+            catch (JSONException ex)
+            {
+                return false;
+            }
+        }
+
+        public void show()
+        {
+            if (mModelRoot != null)
+            {
+                if (mModelRoot.getParent() == null)
+                {
+                    mAvatarRoot.addChildObject(mModelRoot);
+                }
+                else
+                {
+                    mModelRoot.setEnable(true);
+                }
+                if (mHidden != null)
+                {
+                    for (String s : mHidden)
+                    {
+                        SXRNode node = mAvatarRoot.getNodeByName(s);
+                        if (node != null)
+                        {
+                            node.setEnable(false);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void hide()
+        {
+            if (mModelRoot != null)
+            {
+                mModelRoot.setEnable(false);
+            }
+            if (mHidden != null)
+            {
+                for (String s : mHidden)
+                {
+                    SXRNode node = mAvatarRoot.getNodeByName(s);
+                    if (node != null)
+                    {
+                        node.setEnable(true);
+                    }
+                }
+            }
+        }
+
+        protected void parseModelDescription(JSONObject root) throws JSONException
+        {
+            for (String propName : new String[] { "type", "attachbone", "model", "bonemap" })
+            {
+                if (root.has(propName))
+                {
+                    setProperty(propName, root.getString(propName));
+                }
+            }
+            if (root.has("hideparts"))
+            {
+                JSONArray hideparts = root.getJSONArray("hideparts");
+                mHidden = new String[hideparts.length()];
+                for (int i = 0; i < hideparts.length(); ++i)
+                {
+                    mHidden[i] = hideparts.getString(i);
+                }
+            }
+        }
+    }
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -67,16 +186,14 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public SXRAvatar(SXRContext ctx, String name)
     {
-        super(ctx);
         mReceiver = new SXREventReceiver(this);
-        mType = getComponentType();
         mAvatarRoot = new SXRNode(ctx);
         mAvatarRoot.setName(name);
         mAnimations = new CopyOnWriteArrayList<>();
         mImportSettings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_ANIMATION));
+        Attachment avatarInfo = addAttachment("avatar");
+        avatarInfo.setProperty("type", "avatar");
     }
-
-    static public long getComponentType() { return TYPE_AVATAR; }
 
     /**
      * Get the event receiver for this avatar.
@@ -153,6 +270,18 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * @param animation {@link SXRAnimation} that finished..
      */
     public void onAnimationFinished(SXRAnimator animator, SXRAnimation animation) { }
+
+    protected Attachment addAttachment(String name)
+    {
+        Attachment a = mAttachments.get(name);
+        if (a != null)
+        {
+            return a;
+        }
+        a = new Attachment(name);
+        mAttachments.put(name, a);
+        return a;
+    }
 
     protected SXROnFinish mOnFinish = new SXROnFinish()
     {
@@ -261,20 +390,28 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * The skeleton of the attachment is merged with
      * the avatar skeleton so that a single skeleton drives
      * the avatar and all of its attachments.
-     * @param avatarResource    resource with avatar file.
-     * @param modelDesc         model descriptor (for subclasses, unused in SXRAvatar).
-     * @param attachBone        name of skeleton bone to attach this model to.
+     * @param modelResource    resource with avatar file.
+     * @param modelDesc        model descriptor (for subclasses, unused in SXRAvatar).
+     * @param modelName        name of model (used to refer to it later)
      * @see #removeModel(String)
      */
-    public void loadModel(SXRAndroidResource avatarResource, String modelDesc, String attachBone)
+    public void loadModel(SXRAndroidResource modelResource, String modelDesc, String modelName)
     {
         SXRContext ctx = mAvatarRoot.getSXRContext();
-        SXRResourceVolume volume = new SXRResourceVolume(ctx, avatarResource);
+        SXRResourceVolume volume = new SXRResourceVolume(ctx, modelResource);
         SXRNode modelRoot = new SXRNode(ctx);
-        if (attachBone != null)
+        Attachment modelInfo;
+        if (modelName != null)
         {
-            mAttachments.put(attachBone, modelRoot);
+            removeModel(modelName);
+            modelInfo = addAttachment(modelName);
+         }
+        else
+        {
+            modelInfo = mAttachments.get("avatar");
         }
+        modelInfo.setModelRoot(modelRoot);
+        modelInfo.parseModelDescription(modelDesc);
         ctx.getAssetLoader().loadModel(volume, modelRoot, mImportSettings, true, mLoadModelHandler);
     }
 
@@ -283,17 +420,86 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * <p>
      * The first model loaded is the avatar body. Subsequent models
      * are attachments.
-     * @param boneName  name of root skeleton bone in attachment skin.
+     * @param modelName  name of model to remove.
      * @see #loadModel(SXRAndroidResource)
      */
-    public void removeModel(String boneName)
+    public void removeModel(String modelName)
     {
-        SXRNode model = mAttachments.get(boneName);
-        if (model != null)
+        Attachment a = mAttachments.get(modelName);
+        if (a != null)
         {
-            mAvatarRoot.removeChildObject(model);
-            mAttachments.remove(boneName);
+            SXRNode root = a.getModelRoot();
+            if (root != null)
+            {
+                a.hide();
+                mAvatarRoot.removeChildObject(root);
+            }
+            mAttachments.remove(modelName);
         }
+    }
+
+    protected Attachment findModel(SXRNode modelRoot)
+    {
+        for (Attachment a : mAttachments.values())
+        {
+            if (a.getModelRoot() == modelRoot)
+            {
+                return a;
+            }
+        }
+        return null;
+    }
+
+    public String findModelName(SXRNode modelRoot)
+    {
+        if (modelRoot == null)
+        {
+            return null;
+        }
+        for (Map.Entry<String, Attachment> e : mAttachments.entrySet())
+        {
+            Attachment a = e.getValue();
+            if (a.getModelRoot() == modelRoot)
+            {
+                return e.getKey();
+            }
+        }
+        return null;
+    }
+
+    public void setProperty(String propName, String val)
+    {
+        Attachment a = mAttachments.get("avatar");
+        a.setProperty(propName, val);
+    }
+
+    public String getProperty(String propName)
+    {
+        Attachment a = mAttachments.get("avatar");
+        return a.getProperty(propName);
+    }
+
+
+    /**
+     * Scale the avatar uniformly.
+     * <p>
+     * This function modifies the inverse bind pose matrices
+     * in the {@link SXRSkin} components for the meshes
+     * as well as scaling the vertex positions.
+     * The {@link SXRSkeleton} pose is changed to match
+     * the new geometry.
+     * <p>
+     * One consequence of scaling the avatar is that
+     * animations which worked at the previous scale
+     * may no longer work as the positions will be
+     * incorrect.
+     * </p>
+     * @param sf    floating point scale factor
+     * @see SXRSkeleton#scaleSkin(SXRNode, float)
+     */
+    public void scaleAvatar(float sf)
+    {
+        mSkeleton.scaleSkin(mAvatarRoot, sf);
     }
 
     /**
@@ -616,46 +822,20 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         }
     }
 
-    protected String mergeSkeleton(SXRSkeleton skel, SXRNode modelRoot)
+    protected Attachment mergeSkeleton(SXRSkeleton skel, SXRNode modelRoot)
     {
-        String attachBone = skel.getBoneName(0);
-        for (Map.Entry<String, SXRNode> item : mAttachments.entrySet())
-        {
-            if (item.getValue() == modelRoot)
-            {
-                attachBone = item.getKey();
-                skel.setBoneName(0, item.getKey());
-                break;
-            }
-        }
-        int boneIndex = mSkeleton.getBoneIndex(attachBone);
-        if (boneIndex < 0)
-        {
-            boneIndex = 0;
-            attachBone = mSkeleton.getBoneName(0);
-            skel.setBoneName(0, attachBone);
-        }
-        SXRNode srcRootBone = skel.getBone(0);
-        if (srcRootBone != null)
-        {
-            SXRNode parent = mSkeleton.getBone(boneIndex);
-            if (parent != null)
-            {
-                int n = srcRootBone.getChildrenCount();
+        String attachBone = null;
+        Attachment a = findModel(modelRoot);
 
-                for (int i = 0; i < n; ++i)
-                {
-                    SXRNode child = srcRootBone.getChildByIndex(0);
-                    if (skel.getBoneIndex(child.getName()) >= 0)
-                    {
-                        srcRootBone.removeChildObject(child);
-                        parent.addChildObject(child);
-                    }
-                }
-            }
+        if (a != null)
+        {
+            attachBone = a.getProperty("attachbone");
         }
-        mAttachments.put(attachBone, modelRoot);
-        mSkeleton.merge(skel);
+        else
+        {
+            a = addAttachment(skel.getBoneName(0));
+        }
+        mSkeleton.merge(skel, attachBone);
         List<SXRComponent> skins = modelRoot.getAllComponents(SXRSkin.getComponentType());
         for (SXRComponent c : skins)
         {
@@ -663,45 +843,83 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             skin.setSkeleton(mSkeleton);
         }
         mAvatarRoot.addChildObject(modelRoot);
-        return attachBone;
+        return a;
+    }
+
+    protected Attachment onLoadAvatar(SXRNode modelRoot, SXRSkeleton skel, String filePath)
+    {
+        Attachment a = addAttachment("avatar");
+        a.setProperty("type", "avatar");
+        if (a.getProperty("model") == null)
+        {
+            a.setProperty("model", filePath);
+        }
+        mSkeleton = skel;
+        mSkeleton.poseFromBones();
+        mAvatarRoot.addChildObject(modelRoot);
+        return a;
+    }
+
+    protected Attachment onLoadModel(SXRNode modelRoot, SXRSkeleton skel, String filePath)
+    {
+        Attachment a = null;
+        if (skel != null)
+        {
+            a = mergeSkeleton(skel, modelRoot);
+            a.show();
+        }
+        else
+        {
+            a = findModel(modelRoot);
+            if (a != null)
+            {
+                a.show();
+            }
+            else if (modelRoot.getParent() == null)
+            {
+                mAvatarRoot.addChildObject(modelRoot);
+            }
+        }
+        return a;
     }
 
     protected IAssetEvents mLoadModelHandler = new IAssetEvents()
     {
         public void onAssetLoaded(SXRContext context, SXRNode modelRoot, String filePath, String errors)
         {
-            List<SXRComponent> skeletons = modelRoot.getAllComponents(SXRSkeleton.getComponentType());
             String eventName = "onModelLoaded";
+
             if ((errors != null) && !errors.isEmpty())
             {
                 Log.e(TAG, "Asset load errors: " + errors);
             }
-            if (skeletons.size() > 0)
+            else
             {
-                SXRSkeleton skel = (SXRSkeleton) skeletons.get(0);
-                if (mSkeleton != null)
+                List<SXRComponent> skeletons = modelRoot.getAllComponents(SXRSkeleton.getComponentType());
+
+                if (skeletons.size() > 0)
                 {
-                    mergeSkeleton(skel, modelRoot);
+                    SXRSkeleton skel = (SXRSkeleton) skeletons.get(0);
+                    if (mSkeleton != null)
+                    {
+                        onLoadModel(modelRoot, skel, filePath);
+                    }
+                    else
+                    {
+                        onLoadAvatar(modelRoot, skel, filePath);
+                        modelRoot = mAvatarRoot;
+                        eventName = "onAvatarLoaded";
+                    }
+                }
+                else if (mSkeleton != null)
+                {
+                    onLoadModel(modelRoot, null, filePath);
                 }
                 else
                 {
-                    mSkeleton = skel;
-                    mSkeleton.poseFromBones();
-                    mAvatarRoot.addChildObject(modelRoot);
-                    modelRoot = mAvatarRoot;
-                    eventName = "onAvatarLoaded";
+                    errors += "  vatar skeleton not found";
+                    Log.e(TAG, "Avatar skeleton not found in asset file " + filePath);
                 }
-            }
-            else if (mSkeleton != null)
-            {
-                if (modelRoot.getParent() == null)
-                {
-                    mAvatarRoot.addChildObject(modelRoot);
-                }
-            }
-            else
-            {
-                Log.e(TAG, "Avatar skeleton not found in asset file " + filePath);
             }
             context.getEventManager().sendEvent(SXRAvatar.this,
                                                 IAvatarEvents.class,

@@ -927,16 +927,20 @@ public class SXRPose implements PrettyPrint
         Vector3f v = new Vector3f();
 
         bone.getScale(v);
-        v.x /= sx;
-        v.y /= sy;
-        v.z /= sz;
-        bone.WorldMatrix.scale(v.x, v.y, v.z);
-        bone.LocalMatrix.scale(1 / v.x, 1 / v.y, 1 / v.z);
-        bone.Changed = WORLD_ROT | WORLD_POS;
-        for (int i = 1; i < mBones.length; ++i)
+        sx /= v.x;
+        sy /= v.y;
+        sz /= v.z;
+        bone.WorldMatrix.scale(sx, sy, sz);
+        bone.LocalMatrix.scale(1 / sx, 1 / sy, 1 / sz);
+        for (int i = 0; i < mBones.length; ++i)
         {
             bone = mBones[i];
-            bone.WorldMatrix.scale(v.x, v.y, v.z);
+            bone.WorldMatrix.scale(sx, sy, sz);
+            bone.WorldMatrix.getTranslation(v);
+            v.x *= sx;
+            v.y *= sy;
+            v.z *= sz;
+            bone.WorldMatrix.setTranslation(v);
             bone.Changed = WORLD_ROT | WORLD_POS;
         }
         if (sDebug)

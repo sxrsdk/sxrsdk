@@ -55,6 +55,21 @@ namespace sxr
         }
     }
 
+    void Skin::scalePositions(float sf)
+    {
+        std::lock_guard<std::mutex> lock(mLock);
+        if (mInverseBindPose == nullptr)
+        {
+            return;
+        }
+        for (int i = 0; i < mBoneMap.size(); ++i)
+        {
+            mInverseBindPose[i][3][0] *= sf;
+            mInverseBindPose[i][3][1] *= sf;
+            mInverseBindPose[i][3][2] *= sf;
+        }
+    }
+
     void Skin::setInverseBindPose(const float* inverseBindPose, int n)
     {
         std::lock_guard<std::mutex> lock(mLock);
@@ -69,6 +84,18 @@ namespace sxr
             mInverseBindPose = (glm::mat4*) malloc(n * sizeof(glm::mat4));
         }
         memcpy(mInverseBindPose, inverseBindPose, n * sizeof(glm::mat4));
+    }
+
+    void Skin::getInverseBindPose(float* inverseBindPose, int n)
+    {
+        std::lock_guard<std::mutex> lock(mLock);
+
+        if ((mInverseBindPose == nullptr) ||
+            (n != mBoneMap.size()))
+        {
+            return;
+        }
+        memcpy(inverseBindPose, mInverseBindPose, n * sizeof(glm::mat4));
     }
 
     void Skin::bindBuffer(Renderer* renderer, Shader* shader)

@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <engine/renderer/renderer.h>
+#include <glm/gtc/type_ptr.hpp>
 #include "objects/vertex_buffer.h"
 
 #include "util/sxr_log.h"
@@ -82,6 +83,9 @@ namespace sxr {
     JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeVertexBuffer_dump(JNIEnv* env, jobject obj,
                                                           jlong jvbuf, jstring attrName);
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_NativeVertexBuffer_transform(JNIEnv* env, jobject obj,
+                                               jlong jvbuf, jfloatArray trans, bool doNormals);
     };
 
 JNIEXPORT jlong JNICALL
@@ -312,6 +316,18 @@ Java_com_samsungxr_NativeVertexBuffer_getAttributeSize(JNIEnv* env, jobject obj,
     env->ReleaseStringUTFChars(attribName, char_key);
     return size;
 }
+
+JNIEXPORT void JNICALL
+Java_com_samsungxr_NativeVertexBuffer_transform(JNIEnv* env, jobject obj,
+                                                jlong jvbuf, jfloatArray jtrans, bool doNormals)
+{
+    VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvbuf);
+    jfloat* mtx = env->GetFloatArrayElements(jtrans, 0);
+    glm::mat4 m = glm::make_mat4(mtx);
+    vbuf->transform(m, doNormals);
+    env->ReleaseFloatArrayElements(jtrans, mtx, JNI_ABORT);
+}
+
 
 JNIEXPORT int JNICALL
 Java_com_samsungxr_NativeVertexBuffer_getBoundingVolume(JNIEnv* env, jobject,

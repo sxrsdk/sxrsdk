@@ -35,7 +35,9 @@ import org.joml.Vector3f;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -903,6 +905,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
      */
     public void updateBonePose()
     {
+        mPose.sync();
         mPose.getLocalMatrices(mPoseMatrices);
         NativeSkeleton.setPose(getNative(), mPoseMatrices);
         mPose.getWorldMatrices(mPoseMatrices);
@@ -915,20 +918,35 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
      * original bones and all the bones in the new skeleton.
      *
      * @param newSkel skeleton to merge with this one
+     * @param startBone name of bone to start merging from.
+     *                 This bone must be in BOTH skeletons.
+     *                 If null, the first bone in the new skeleton is used.
+     * @return name of bone in this skeleton the new skeleton was attached to.
      */
-    public void merge(SXRSkeleton newSkel)
+    public String merge(SXRSkeleton newSkel, String startBone)
     {
         synchronized (this)
         {
             int numBones = getNumBones();
             int[] parentBoneIds = new int[newSkel.getNumBones()];
-            List<String> newBoneNames = new ArrayList<String>(newSkel.getNumBones());
-            List<Matrix4f> matrices = new ArrayList<Matrix4f>(numBones + newSkel.getNumBones());
-            List<SXRNode> bones = new ArrayList<SXRNode>(newSkel.getNumBones());
+            List<String> newBoneNames = new ArrayList<String>();
+            List<Matrix4f> matrices = new ArrayList<Matrix4f>();
+            List<SXRNode> bones = new ArrayList<SXRNode>();
             int numNewBones = 0;
             SXRPose curPose = getPose();
             SXRPose newPose = newSkel.getPose();
+            int startBoneId = 0;
+            String firstBone = null;
 
+            if (startBone != null)
+            {
+                int temp = newSkel.getBoneIndex(startBone);
+
+                if ((getBoneIndex(startBone) >= 0) && (temp >= 0))
+                {
+                    startBoneId = temp;
+                }
+            }
             /*
              * Accumulate the bind pose matrices and parent bone IDs
              * for the old skeleton
@@ -943,21 +961,22 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
              * Add bones in the new skeleton that are not in
              * the old skeleton.
              */
-            for (int j = 0; j < newSkel.getNumBones(); ++j)
+            for (int j = startBoneId; j < newSkel.getNumBones(); ++j)
             {
                 String boneName = newSkel.getBoneName(j);
                 int boneId = getBoneIndex(boneName);
                 Matrix4f m = new Matrix4f();
+                SXRNode newBone = newSkel.getBone(j);
                 int parentId;
 
                 newPose.getLocalMatrix(j, m);
                 parentId = newSkel.getParentBoneIndex(j);
-                bones.add(newSkel.getBone(j));
                 if (boneId < 0)            // source bone not in existing skeleton?
                 {
                     if (parentId >= 0)     // parent is found?
                     {
                         String parName = newSkel.getBoneName(parentId);
+                        firstBone = parName;
                         parentId = getBoneIndex(parName);
                         if (parentId < 0)  // parent is a new bone
                         {
@@ -973,45 +992,73 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
                         parentId = 0;
                     }
                     matrices.add(m);
+                    bones.add(newBone);
                     newBoneNames.add(boneName);
                     parentBoneIds[numNewBones] = parentId;
                     ++numNewBones;
                 }
+                else if (startBone != null)
+                {
+                    parentId = getParentBoneIndex(boneId);
+                    if (j > startBoneId)
+                    {
+                        matrices.set(boneId, m);
+                    }
+                    if ((newBone != null) && (parentId >= 0))
+                    {
+                        SXRNode parent = getBone(parentId);
+                        for (int c = 0; c < newBone.getChildrenCount(); ++c)
+                        {
+                            SXRNode child = newBone.getChildByIndex(c);
+                            if (newSkel.getBoneIndex(child.getName()) < 0)
+                            {
+                                newBone.removeChildObject(child);
+                                parent.addChildObject(child);
+                                --c;
+                            }
+                        }
+                    }
+                }
             }
-            if (numNewBones == 0)
+            if (startBone == null)
             {
-                return;
+                startBone = firstBone;
             }
-            /*
-             * Enlarge arrays in this skeleton to accomodate
-             * the new bones added and copy the old data
-             */
             int n = numBones + numNewBones;
-            int[] parentIds = Arrays.copyOf(mParentBones, n);
-            int[] boneOptions = Arrays.copyOf(mBoneOptions, n);
-            String[] boneNames = Arrays.copyOf(mBoneNames, n);
-
-            mBones = Arrays.copyOf(mBones, n);
-            mPoseMatrices = new float[n * 16];
-            /*
-             * Add bones from the new skeleton into this skeleton
-             */
-            for (int i = 0; i < numNewBones; ++i)
+            if (numNewBones > 0)
             {
-                int m = numBones + i;
-                parentIds[m] = parentBoneIds[i];
-                boneNames[m] = newBoneNames.get(i);
-                setBone(m, bones.get(i));
-            }
-            mBoneOptions = boneOptions;
-            mBoneNames = boneNames;
-            mParentBones = parentIds;
-            mPose = new SXRPose(this);
+                /*
+                 * Enlarge arrays in this skeleton to accomodate
+                 * the new bones added and copy the old data
+                 */
+                int[] parentIds = Arrays.copyOf(mParentBones, n);
+                int[] boneOptions = Arrays.copyOf(mBoneOptions, n);
+                String[] boneNames = Arrays.copyOf(mBoneNames, n);
 
-            /*
-             * Update the native skeleton
-             */
-            NativeSkeleton.updateBones(getNative(), mParentBones, boneNames);
+                mBones = Arrays.copyOf(mBones, n);
+                mPoseMatrices = new float[n * 16];
+                /*
+                 * Add bones from the new skeleton into this skeleton
+                 */
+                for (int i = 0; i < newBoneNames.size(); ++i)
+                {
+                    int m = numBones + i;
+                    int pid = parentBoneIds[i];
+                    SXRNode newBone = bones.get(i);
+                    parentIds[m] = pid;
+                    boneNames[m] = newBoneNames.get(i);
+                    setBone(m, newBone);
+                }
+                mBoneOptions = boneOptions;
+                mBoneNames = boneNames;
+                mParentBones = parentIds;
+                mPose = new SXRPose(this);
+
+                /*
+                 * Update the native skeleton
+                 */
+                NativeSkeleton.updateBones(getNative(), mParentBones, boneNames);
+            }
             /*
              * Update the poses for this skeleton
              */
@@ -1021,6 +1068,83 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             }
             mPose.sync();
             poseToBones();
+        }
+        return startBone;
+    }
+
+    /**
+     * Scale the skeleton and associated geometry uniformly.
+     * <p>
+     * This function modifies the inverse bind pose matrices
+     * in the {@link SXRSkin} components for the meshes
+     * as well as scaling the vertex positions.
+     * The {@link SXRSkeleton} pose is changed to match
+     * the new geometry.
+     * <p>
+     * One consequence of scaling is that
+     * animations which worked at the previous scale
+     * may no longer work as the positions will be
+     * incorrect.
+     * </p>
+     * @param sf    floating point scale factor
+     */
+    public void scaleSkin(final SXRNode root, final float sf)
+    {
+        final Set<SXRVertexBuffer> meshes = new HashSet<SXRVertexBuffer>();
+
+        synchronized (this)
+        {
+            poseToBones();
+            setEnable(false);
+            /*
+             * scale the node and skin positions
+             */
+            root.forAllDescendants(new SXRNode.SceneVisitor()
+            {
+                @Override
+                public boolean visit(SXRNode node)
+                {
+                    SXRRenderData rd = node.getRenderData();
+                    SXRSkin skin = (SXRSkin) node.getComponent(SXRSkin.getComponentType());
+                    if (skin != null)
+                    {
+                        skin.scalePositions(sf);
+                    }
+                    else
+                    {
+                        SXRTransform t = node.getTransform();
+                        t.setPosition(t.getPositionX() * sf,
+                                      t.getPositionY() * sf,
+                                      t.getPositionZ() * sf);
+                    }
+                    if (rd != null)
+                    {
+                        float bbox[] = new float[6];
+                        rd.getMesh().getBoxBound(bbox);
+                        float cx = (bbox[3] + bbox[0]) / 2;
+                        float cy = (bbox[4] + bbox[1]) / 2;
+                        float cz = (bbox[5] + bbox[2]) / 2;
+                        Log.d("NOLA", "%s %f, %f, %f", node.getName(), cx, cy, cz);
+                        meshes.add(rd.getMesh().getVertexBuffer());
+                    }
+                    return true;
+                }
+            });
+            poseFromBones();
+
+            /*
+             * scale the mesh geometry
+             */
+            final Matrix4f scaleMtx = new Matrix4f();
+            final float[] scaleData = new float[16];
+            scaleMtx.scale(sf);
+            scaleMtx.get(scaleData);
+            for (SXRVertexBuffer vbuf : meshes)
+            {
+                vbuf.transform(scaleData, false);
+            }
+            updateBonePose();
+            setEnable(true);
         }
     }
 

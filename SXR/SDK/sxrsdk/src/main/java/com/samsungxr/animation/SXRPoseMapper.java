@@ -1,6 +1,7 @@
 package com.samsungxr.animation;
 
 import com.samsungxr.SXRHybridObject;
+import com.samsungxr.SXRVertexBuffer;
 import com.samsungxr.animation.SXRAnimation;
 import com.samsungxr.animation.SXRPose;
 import com.samsungxr.animation.SXRSkeleton;
@@ -17,6 +18,7 @@ public class SXRPoseMapper extends SXRAnimation
     protected SXRSkeleton mDestSkeleton;
     protected int[]       mBoneMap;
     protected SXRPose     mDestPose;
+    protected float       mScale = 1.0f;
 
     /**
      * Constructs an animation retargeting engine.
@@ -280,6 +282,7 @@ public class SXRPoseMapper extends SXRAnimation
 
             mDestPose.clearRotations();
             srcskel.getPosition(v);
+            v.mul(mScale);
             for (int i = 0; i < numsrcbones; ++i)
             {
                 int boneindex = mBoneMap[i];
@@ -337,6 +340,26 @@ public class SXRPoseMapper extends SXRAnimation
         }
         dstpose.sync();
         return true;
+    }
+
+    /**
+     * Scale the output pose by a given factor.
+     * <p>
+     * The scale factor is applied to the computed positions.
+     * For example, you can take an animation that is originally in
+     * centimeters and convert it to meters.
+     * </p>
+     * @param sf    positive scale factor
+     * @see SXRSkin#scalePositions(float)
+     * @see SXRVertexBuffer#transform(Matrix4f, boolean)
+     */
+    public void setScale(float sf)
+    {
+        if (sf <= 0)
+        {
+            throw new IllegalArgumentException("Scale factor must be positive");
+        }
+        mScale = sf;
     }
 
 }
