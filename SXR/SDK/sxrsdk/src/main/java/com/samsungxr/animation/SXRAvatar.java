@@ -110,6 +110,52 @@ public class SXRAvatar implements IEventReceiver
                 return false;
             }
         }
+
+        public void show()
+        {
+            if (mModelRoot != null)
+            {
+                if (mModelRoot.getParent() == null)
+                {
+                    mAvatarRoot.addChildObject(mModelRoot);
+                }
+                else
+                {
+                    mModelRoot.setEnable(true);
+                }
+                if (mHidden != null)
+                {
+                    for (String s : mHidden)
+                    {
+                        SXRNode node = mAvatarRoot.getNodeByName(s);
+                        if (node != null)
+                        {
+                            node.setEnable(false);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void hide()
+        {
+            if (mModelRoot != null)
+            {
+                mModelRoot.setEnable(false);
+            }
+            if (mHidden != null)
+            {
+                for (String s : mHidden)
+                {
+                    SXRNode node = mAvatarRoot.getNodeByName(s);
+                    if (node != null)
+                    {
+                        node.setEnable(true);
+                    }
+                }
+            }
+        }
+
         protected void parseModelDescription(JSONObject root) throws JSONException
         {
             for (String propName : new String[] { "type", "attachbone", "model", "bonemap" })
@@ -356,8 +402,9 @@ public class SXRAvatar implements IEventReceiver
         Attachment modelInfo;
         if (modelName != null)
         {
+            removeModel(modelName);
             modelInfo = addAttachment(modelName);
-        }
+         }
         else
         {
             modelInfo = mAttachments.get("avatar");
@@ -383,6 +430,7 @@ public class SXRAvatar implements IEventReceiver
             SXRNode root = a.getModelRoot();
             if (root != null)
             {
+                a.hide();
                 mAvatarRoot.removeChildObject(root);
             }
             mAttachments.remove(modelName);
@@ -403,6 +451,10 @@ public class SXRAvatar implements IEventReceiver
 
     public String findModelName(SXRNode modelRoot)
     {
+        if (modelRoot == null)
+        {
+            return null;
+        }
         for (Map.Entry<String, Attachment> e : mAttachments.entrySet())
         {
             Attachment a = e.getValue();
@@ -786,14 +838,12 @@ public class SXRAvatar implements IEventReceiver
             a = addAttachment(attachBone);
             a.setProperty("attachbone", attachBone);
             a.setProperty("type", attachBone);
-            a.setModelRoot(modelRoot);
         }
         int boneIndex = mSkeleton.getBoneIndex(attachBone);
         if ((a == null) && (boneIndex < 0))
         {
             skel.setBoneName(0, attachBone);
             a = addAttachment(attachBone);
-            a.setModelRoot(modelRoot);
             a.setProperty("attachbone", attachBone);
         }
         mSkeleton.merge(skel);
@@ -804,6 +854,43 @@ public class SXRAvatar implements IEventReceiver
             skin.setSkeleton(mSkeleton);
         }
         mAvatarRoot.addChildObject(modelRoot);
+        return a;
+    }
+
+    protected Attachment onLoadAvatar(SXRNode modelRoot, SXRSkeleton skel, String filePath)
+    {
+        Attachment a = addAttachment("avatar");
+        a.setProperty("type", "avatar");
+        if (a.getProperty("model") == null)
+        {
+            a.setProperty("model", filePath);
+        }
+        mSkeleton = skel;
+        mSkeleton.poseFromBones();
+        mAvatarRoot.addChildObject(modelRoot);
+        return a;
+    }
+
+    protected Attachment onLoadModel(SXRNode modelRoot, SXRSkeleton skel, String filePath)
+    {
+        Attachment a = null;
+        if (skel != null)
+        {
+            a = mergeSkeleton(skel, modelRoot);
+            a.show();
+        }
+        else
+        {
+            a = findModel(modelRoot);
+            if (a != null)
+            {
+                a.show();
+            }
+            else if (modelRoot.getParent() == null)
+            {
+                mAvatarRoot.addChildObject(modelRoot);
+            }
+        }
         return a;
     }
 
@@ -824,35 +911,18 @@ public class SXRAvatar implements IEventReceiver
                 SXRSkeleton skel = (SXRSkeleton) skeletons.get(0);
                 if (mSkeleton != null)
                 {
-                    a = mergeSkeleton(skel, modelRoot);
-                    if (a.getModelRoot() != null)
-                    {
-                        mAvatarRoot.removeChildObject(a.getModelRoot());
-                    }
-                    a.setModelRoot(modelRoot);
+                    onLoadModel(modelRoot, skel, filePath);
                 }
                 else
                 {
-                    a = addAttachment("avatar");
-                    a.setProperty("type", "avatar");
-                    if (a.getProperty("model") == null)
-                    {
-                        a.setProperty("model", filePath);
-                    }
-                    a.setModelRoot(modelRoot);
-                    mSkeleton = skel;
-                    mSkeleton.poseFromBones();
-                    mAvatarRoot.addChildObject(modelRoot);
+                    onLoadAvatar(modelRoot, skel, filePath);
                     modelRoot = mAvatarRoot;
                     eventName = "onAvatarLoaded";
                 }
             }
             else if (mSkeleton != null)
             {
-                if (modelRoot.getParent() == null)
-                {
-                    mAvatarRoot.addChildObject(modelRoot);
-                }
+                onLoadModel(modelRoot, null, filePath);
             }
             else
             {
