@@ -410,8 +410,9 @@ public class SXRAvatar extends SXRBehavior
                                                              SXRImportSettings.FLIP_UV,
                                                              SXRImportSettings.LIMIT_BONE_WEIGHT,
                                                              SXRImportSettings.CALCULATE_TANGENTS,
-                                                             SXRImportSettings.NO_ANIMATION,
+                                                             SXRImportSettings.NO_TEXTURING,
                                                              SXRImportSettings.SORTBY_PRIMITIVE_TYPE);
+
             SXRNode animRoot = new SXRNode(ctx);
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
         }
@@ -435,6 +436,7 @@ public class SXRAvatar extends SXRBehavior
      * @param index index of animation to get
      * @see SXRAvatar#addAnimation(SXRAnimator)
      */
+
     public SXRAnimator getAnimation(int index)
     {
         return mAnimsToPlay.get(index);
