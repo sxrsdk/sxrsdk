@@ -270,6 +270,10 @@ public class SXRPoseMapper extends SXRAnimation
         {
             return false;
         }
+        if (!dstskel.isEnabled() || !srcskel.isEnabled())
+        {
+            return false;
+        }
         if (mBoneMap == null)
         {
             mBoneMap = makeBoneMap(srcskel, dstskel);
