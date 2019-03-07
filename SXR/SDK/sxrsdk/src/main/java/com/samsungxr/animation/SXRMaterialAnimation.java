@@ -27,8 +27,7 @@ import com.samsungxr.SXRNode;
  */
 public abstract class SXRMaterialAnimation extends SXRAnimation {
 
-    private final static Class<?>[] SUPPORTED = { SXRMaterial.class,
-            SXRNode.class };
+    private final static Class<?>[] SUPPORTED = { SXRMaterial.class, SXRNode.class };
 
     protected final SXRMaterial mMaterial;
 
@@ -49,15 +48,24 @@ public abstract class SXRMaterialAnimation extends SXRAnimation {
      *             is more expensive <em>and</em> can miss errors in code if you
      *             don't test every path through your code.
      */
-    protected SXRMaterialAnimation(SXRHybridObject target, float duration) {
+    protected SXRMaterialAnimation(SXRHybridObject target, float duration)
+    {
         super(target, duration);
+        if (duration < 0)
+        {
+            throw new IllegalArgumentException("Duration cannot be negative");
+        }
         Class<?> type = checkTarget(target, SUPPORTED);
-        if (type == SXRMaterial.class) {
+        if (type == SXRMaterial.class)
+        {
             mMaterial = (SXRMaterial) target;
-        } else {
+        }
+        else
+         {
             SXRNode sceneObject = (SXRNode) target;
             mMaterial = sceneObject.getRenderData().getMaterial();
         }
+        mTarget = mMaterial;
     }
 
     /**
@@ -65,7 +73,8 @@ public abstract class SXRMaterialAnimation extends SXRAnimation {
      * inline code, and protects you from any changes (however unlikely) in the
      * object hierarchy.
      */
-    protected static SXRMaterial getMaterial(SXRNode sceneObject) {
+    protected static SXRMaterial getMaterial(SXRNode sceneObject)
+    {
         return sceneObject.getRenderData().getMaterial();
     }
 
@@ -78,7 +87,8 @@ public abstract class SXRMaterialAnimation extends SXRAnimation {
      * @param duration
      *            The animation duration, in seconds.
      */
-    protected SXRMaterialAnimation(SXRMaterial target, float duration) {
+    protected SXRMaterialAnimation(SXRMaterial target, float duration)
+    {
         super(target, duration);
         mMaterial = target;
     }
@@ -101,8 +111,10 @@ public abstract class SXRMaterialAnimation extends SXRAnimation {
      * @param duration
      *            The animation duration, in seconds.
      */
-    protected SXRMaterialAnimation(SXRNode target, float duration) {
+    protected SXRMaterialAnimation(SXRNode target, float duration)
+    {
         super(target, duration);
         mMaterial = getMaterial(target);
+        mTarget = mMaterial;
     }
 }

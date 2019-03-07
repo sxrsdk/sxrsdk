@@ -76,7 +76,7 @@ public class PositionAnimation extends TransformAnimation {
         }
 
         void superAnimate(Widget target, float ratio) {
-            super.animate(target.getTransform(), ratio);
+            super.animate(ratio * getDuration());
         }
     }
 

@@ -78,10 +78,4 @@ public class SXRNodeAnimation extends SXRTransformAnimation implements PrettyPri
         }
     }
 
-    @Override
-    protected void animate(SXRHybridObject target, float ratio)
-    {
-        animate(getDuration() * ratio);
-    }
-
 }

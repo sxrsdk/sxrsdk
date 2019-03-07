@@ -47,6 +47,10 @@ public class SXRAnimator extends SXRBehavior
     protected boolean mAutoStart;
     protected boolean mIsRunning;
     protected String mName;
+    protected int mRepeatMode = SXRRepeatMode.ONCE;
+    protected int mRepeatCount = 1;
+    protected boolean mReverse = false;
+
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -99,6 +103,24 @@ public class SXRAnimator extends SXRBehavior
      * @see #getName()
      */
     public void setName(String name) { mName = name; }
+
+
+    /**
+     * Get the longest duration of the animations in this animator.
+     * @return duration or 0 if no animations
+     */
+    public float getDuration()
+    {
+        float d = 0;
+        for (SXRAnimation anim : mAnimations)
+        {
+            if (anim.getDuration() > d)
+            {
+                d = anim.getDuration();
+            }
+        }
+        return d;
+    }
 
     /**
      * Determine if this animator is running (has been started).
@@ -213,25 +235,47 @@ public class SXRAnimator extends SXRBehavior
      */
     public void setRepeatMode(int repeatMode)
     {
+        mRepeatMode = repeatMode;
         for (SXRAnimation anim : mAnimations)
         {
             anim.setRepeatMode(repeatMode);
         }
     }
+
+    /**
+     * Sets the reverse flag either true or false.
+     * @param reverse true to play animation backwards.
+     */
+    public void setReverse(boolean reverse)
+    {
+        mReverse = reverse;
+        for (SXRAnimation anim : mAnimations)
+        {
+            anim.setReverse(reverse);
+        }
+    }
+
+    /**
+     * Determines if animator is running in reverse
+     * @return true if reversed, false if not
+     */
+    public boolean getReverse() { return mReverse; }
+
     /**
      * Sets the offset for the all animations in this animator.
      *
      * @param startOffset animation will start at the specified offset value
      *
-     * @see SXRAnimation#setOffset(float)
+     * @see SXRAnimation#setStartOffset(float)
      */
-    public void setOffset(float startOffset)
+    public void setStartOffset(float startOffset)
     {
         for (SXRAnimation anim : mAnimations)
         {
-            anim.setOffset(startOffset);
+            anim.setStartOffset(startOffset);
         }
     }
+
     /**
      * Sets the speed for the all animations in this animator.
      *
@@ -259,7 +303,7 @@ public class SXRAnimator extends SXRBehavior
     {
         for (SXRAnimation anim : mAnimations)
         {
-            anim.setDuration(start,end);
+            anim.setDuration(start, end);
         }
     }
 
@@ -276,6 +320,7 @@ public class SXRAnimator extends SXRBehavior
      */
     public void setRepeatCount(int repeatCount)
     {
+        mRepeatCount =  repeatCount;
         for (SXRAnimation anim : mAnimations)
         {
             anim.setRepeatCount(repeatCount);
@@ -296,48 +341,65 @@ public class SXRAnimator extends SXRBehavior
         mIsRunning = true;
         for (SXRAnimation anim : mAnimations)
         {
-            anim.start(getSXRContext().getAnimationEngine());
+            if (anim.getRepeatCount() != 0)
+            {
+                anim.reset();
+            }
+            anim.onStart();
         }
     }
+
 
     /**
      * Starts all of the animations in this animator.
      * @see SXRAnimator#reset()
      * @see SXRAnimationEngine#start(SXRAnimation)
      */
-    public void start(SXROnFinish finishCallback)
+    public void start(SXRAnimationEngine engine)
     {
         if (mAnimations.size() == 0)
         {
             return;
         }
         mIsRunning = true;
-        for (int i = 0; i < mAnimations.size(); ++i)
+        for (SXRAnimation anim : mAnimations)
         {
-            SXRAnimation anim = mAnimations.get(i);
-            anim.reset();
-            if (i == 0)
-            {
-                anim.setOnFinish(finishCallback);
-            }
-            else
-            {
-                anim.setOnFinish(null);
-            }
-            anim.start(getSXRContext().getAnimationEngine());
+            anim.start(engine);
         }
     }
 
     public void animate(float timeInSec)
     {
-        if (mAnimations.size() > 0)
+        for (SXRAnimation anim : mAnimations)
         {
-            for (int i = 0; i < mAnimations.size(); ++i)
+            anim.reset();
+            if (mAnimations.size() > 0)
             {
-                SXRAnimation anim = mAnimations.get(i);
-                anim.animate(timeInSec);
+                for (int i = 0; i < mAnimations.size(); ++i)
+                {
+                    SXRAnimation a = mAnimations.get(i);
+                    a.animate(timeInSec);
+                }
             }
         }
+    }
+
+    boolean update(float timeInSec)
+    {
+        if (!isEnabled())
+        {
+            return false;
+        }
+        boolean running = false;
+        for (SXRAnimation anim : mAnimations)
+        {
+            if (!anim.isFinished())
+            {
+                boolean r = anim.onDrawFrame(timeInSec);
+                running |= r;
+            }
+        }
+        return running;
     }
 
     /**
@@ -351,13 +413,11 @@ public class SXRAnimator extends SXRBehavior
         {
             return;
         }
-        SXRAnimation anim = mAnimations.get(0);
         mIsRunning = false;
-        anim.setOnFinish(null);
         for (int i = 0; i < mAnimations.size(); ++i)
         {
-            anim = mAnimations.get(i);
-            getSXRContext().getAnimationEngine().stop(anim);
+            SXRAnimation a = mAnimations.get(i);
+            getSXRContext().getAnimationEngine().stop(a);
         }
     }
 
@@ -378,8 +438,9 @@ public class SXRAnimator extends SXRBehavior
     }
 
     @Override
-    public void onDetach(SXRNode oldOwner) {
+    public void onDetach(SXRNode oldOwner)
+    {
         super.onDetach(oldOwner);
-        this.stop();
+        stop();
     }
 }

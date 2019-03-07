@@ -23,11 +23,13 @@ import org.joml.Vector4f;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 
 /**
  * Group of animations that can be collectively manipulated.
@@ -44,19 +46,20 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @see SXRAvatar
  * @see SXRAnimationEngine
  */
-public class SXRAvatar extends SXRBehavior implements IEventReceiver
+public class SXRAvatar extends SXRBehavior
+    implements IEventReceiver, SXRAnimationQueue.IAnimationQueueEvents
 {
     private static final String TAG = Log.tag(SXRAvatar.class);
     static private long TYPE_AVATAR = newComponentType(SXRAvatar.class);
-    protected final List<SXRAnimator> mAnimations;
+    protected final SXRAnimationQueue mAnimsToPlay;
     protected Map<String, SXRNode> mAttachments = new HashMap<String, SXRNode>();
     protected SXRSkeleton mSkeleton;
     protected final SXRNode mAvatarRoot;
-    protected boolean mIsRunning;
     protected SXREventReceiver mReceiver;
-    protected final List<SXRAnimator> mAnimQueue = new ArrayList<SXRAnimator>();
-    protected int mRepeatMode = SXRRepeatMode.ONCE;
     protected EnumSet<SXRImportSettings> mImportSettings;
+    private String mBoneMap = "";
+    private SXRContext mContext;
+
 
     /**
      * Make an instance of the SXRAnimator component.
@@ -68,11 +71,12 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     public SXRAvatar(SXRContext ctx, String name)
     {
         super(ctx);
+        mContext = ctx;
+        mAnimsToPlay = new SXRAnimationQueue(ctx, this);
         mReceiver = new SXREventReceiver(this);
         mType = getComponentType();
         mAvatarRoot = new SXRNode(ctx);
         mAvatarRoot.setName(name);
-        mAnimations = new CopyOnWriteArrayList<>();
         mImportSettings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_ANIMATION));
     }
 
@@ -116,8 +120,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     /**
      * Determine if this avatar is currently animating.
      */
-    public boolean isRunning() { return mIsRunning; }
-
+    public boolean isRunning() { return  mAnimsToPlay.isRunning(); }
 
     /**
      * Set the import settings for loading the avatar.
@@ -138,87 +141,122 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public int getAnimationCount()
     {
-        return mAnimations.size();
+        return mAnimsToPlay.getAnimationCount();
+    }
+
+    /**
+     * Sets the blend duration.
+     * @param blendFactor duration of blend.
+     */
+    public void setBlend(float blendFactor)
+    {
+        mAnimsToPlay.setBlend(blendFactor);
     }
 
     /**
      * Called when an animation on this avatar has started.
      * @param animator  {@link }SXRAnimator} containing the animation that started.
      */
-    public void onAnimationStarted(SXRAnimator animator) { }
+    public void onAnimationStarted(SXRAnimationQueue queue, SXRAnimator animator)
+    {
+        Log.d("ANIMATOR", "Start %s", animator.getName());
+        animator.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
+                                                             SXRAvatar.IAvatarEvents.class,
+                                                             "onAnimationStarted",
+                                                             SXRAvatar.this,
+                                                             animator);
+    }
 
     /**
      * Called when an animation on this avatar has completed a cycle.
-     * @param animator  {@link }SXRAnimator} containing the animation that finished.
-     * @param animation {@link SXRAnimation} that finished..
+     * @param animator  {@link SXRAnimator} containing the animation that finished.
      */
-    public void onAnimationFinished(SXRAnimator animator, SXRAnimation animation) { }
-
-    protected SXROnFinish mOnFinish = new SXROnFinish()
+    public void onAnimationFinished(SXRAnimationQueue queue, SXRAnimator animator)
     {
-        public void finished(SXRAnimation animation)
+        Log.d("ANIMATOR", "Stop %s", animator.getName());
+        animator.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
+                                                             SXRAvatar.IAvatarEvents.class,
+                                                             "onAnimationFinished",
+                                                             SXRAvatar.this,
+                                                             animator);
+    }
+
+    public SXRAnimation addBlendAnimation(SXRAnimationQueue queue, SXRAnimator dst, SXRAnimator src, float duration)
+    {
+        SXRSkeletonAnimation skelOne = (SXRSkeletonAnimation) src.getAnimation(0);
+        SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation) dst.getAnimation(0);;
+
+        for (int i = 0; i < src.getAnimationCount(); ++i)
         {
-            int numEvents = 0;
-            SXRAnimator animator = null;
-            synchronized (mAnimQueue)
+            SXRAnimation anim = src.getAnimation(i);
+            if (anim instanceof SXRPoseMapper)
             {
-                if (mAnimQueue.size() > 0)
-                {
-                    animator = mAnimQueue.get(0);
-                    if (animator.findAnimation(animation) >= 0)
-                    {
-                        mAnimQueue.remove(0);
-                        mIsRunning = false;
-                        if (mAnimQueue.size() > 0)
-                        {
-                            animator = mAnimQueue.get(0);
-                            animator.start(mOnFinish);
-                            numEvents = 2;
-                        }
-                        else
-                        {
-                            numEvents = 1;
-                        }
-                    }
-                }
-            }
-            switch (numEvents)
-            {
-                case 2:
-                onAnimationFinished(animator, animation);
-                mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
-                                                                        IAvatarEvents.class,
-                                                                        "onAnimationFinished",
-                                                                        SXRAvatar.this,
-                                                                        animator,
-                                                                        animation);
-                onAnimationStarted(animator);
-                mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
-                                                                        IAvatarEvents.class,
-                                                                        "onAnimationStarted",
-                                                                        SXRAvatar.this,
-                                                                        animator);
-                break;
-
-                case 1:
-                    onAnimationFinished(animator, animation);
-                    mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
-                            IAvatarEvents.class,
-                            "onAnimationFinished",
-                            SXRAvatar.this,
-                            animator,
-                            animation);
-                if (mRepeatMode == SXRRepeatMode.REPEATED)
-                {
-                    startAll(mRepeatMode);
-                }
-
-                default: break;
+                SXRAnimationEngine.getInstance(mContext).stop(anim);
             }
         }
-    };
+        for (int i = 0; i < dst.getAnimationCount(); ++i)
+        {
+            SXRAnimation anim  = dst.getAnimation(i);
+            if (anim instanceof SXRPoseInterpolator)
+            {
+                anim.reset();
+                return anim;
+            }
+            if (anim instanceof SXRPoseMapper)
+            {
+                SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(skelTwo.getSkeleton(), skelOne.getSkeleton(), duration);
+                dst.removeAnimation(anim);
+                dst.addAnimation(blendAnim);
+                dst.addAnimation(anim);
+                return blendAnim;
+            }
+        }
+        SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(skelTwo.getSkeleton(), skelOne.getSkeleton(), duration);
+        dst.addAnimation(blendAnim);
+        return blendAnim;
+    }
+
+    public void removeBlendAnimation(SXRAnimationQueue queue, SXRAnimator a)
+    {
+        for (int i = 0; i < a.getAnimationCount(); ++i)
+        {
+            SXRAnimation anim = a.getAnimation(i);
+            if (anim instanceof SXRPoseInterpolator)
+            {
+                a.removeAnimation(anim);
+            }
+        }
+    }
+
+    public boolean isBlending(SXRAnimationQueue queue, SXRAnimator a)
+    {
+        for (int i = 0; i < a.getAnimationCount(); ++i)
+        {
+            SXRAnimation anim = a.getAnimation(i);
+            if ((anim instanceof SXRPoseInterpolator) && !anim.isFinished())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void reverseBlendAnimation(SXRAnimationQueue queue, SXRAnimator a)
+    {
+        a.setReverse(!a.getReverse());
+        for (int i = 0; i < a.getAnimationCount(); ++i)
+        {
+            SXRAnimation anim = a.getAnimation(i);
+            if (anim instanceof SXRPoseInterpolator)
+            {
+                anim.setReverse(false);
+            }
+        }
+    }
 
     /**
+     * Load the avatar base model
+     * @param avatarResource    resource with avatar model
      * Load the avatar base model or an attachment.
      * <p>
      * The first model loaded is the avatar base model. It defines the
@@ -302,7 +340,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
     public void clearAvatar()
     {
         SXRNode previousAvatar = (mAvatarRoot.getChildrenCount() > 0) ?
-            mAvatarRoot.getChildByIndex(0) : null;
+                mAvatarRoot.getChildByIndex(0) : null;
 
         if (previousAvatar != null)
         {
@@ -317,6 +355,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public void loadAnimation(SXRAndroidResource animResource, String boneMap)
     {
+        mBoneMap = boneMap;
         String filePath = animResource.getResourcePath();
         SXRContext ctx = mAvatarRoot.getSXRContext();
         SXRResourceVolume volume = new SXRResourceVolume(ctx, animResource);
@@ -388,7 +427,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public void addAnimation(SXRAnimator anim)
     {
-        mAnimations.add(anim);
+        mAnimsToPlay.add(anim);
     }
 
     /**
@@ -400,7 +439,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
 
     public SXRAnimator getAnimation(int index)
     {
-        return mAnimations.get(index);
+        return mAnimsToPlay.get(index);
     }
 
     /**
@@ -412,7 +451,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public void removeAnimation(SXRAnimator anim)
     {
-        mAnimations.remove(anim);
+        mAnimsToPlay.remove(anim);
     }
 
     /**
@@ -426,7 +465,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public void clear()
     {
-        mAnimations.clear();
+        mAnimsToPlay.clear();
     }
 
     /**
@@ -436,13 +475,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public void start(String name)
     {
-        SXRAnimator anim = findAnimation(name);
-
-        if ((anim != null) && name.equals(anim.getName()))
-        {
-            start(anim);
-            return;
-        }
+        mAnimsToPlay.start(name);
     }
 
     /**
@@ -452,31 +485,18 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public SXRAnimator findAnimation(String name)
     {
-        for (SXRAnimator anim : mAnimations)
-        {
-            if (name.equals(anim.getName()))
-            {
-                return anim;
-            }
-        }
-        return null;
+        return mAnimsToPlay.findAnimation(name);
     }
 
     /**
      * Starts the animation with the given index.
      * @param animIndex 0-based index of {@link SXRAnimator} to start;
-     * @see SXRAvatar#stop()
      * @see #start(String)
+     * @see #stop(String)
      */
     public SXRAnimator start(int animIndex)
     {
-        if ((animIndex < 0) || (animIndex >= mAnimations.size()))
-        {
-            throw new IndexOutOfBoundsException("Animation index out of bounds");
-        }
-        SXRAnimator anim = mAnimations.get(animIndex);
-        start(anim);
-        return anim;
+        return mAnimsToPlay.start(animIndex);
     }
 
     /**
@@ -484,51 +504,11 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      * to play one at a time in succession.
      * @param repeatMode SXRRepeatMode.REPEATED to repeatedly play,
      *                   SXRRepeatMode.ONCE to play only once
+     *                   SXRRepeatMode.PINGPONG to play start to finish, finish to start;
      */
     public void startAll(int repeatMode)
     {
-        mRepeatMode = repeatMode;
-        for (SXRAnimator anim : mAnimations)
-        {
-            start(anim);
-        }
-    }
-
-    protected void start(SXRAnimator animator)
-    {
-        synchronized (mAnimQueue)
-        {
-            mAnimQueue.add(animator);
-            if (mAnimQueue.size() > 1)
-            {
-                return;
-            }
-        }
-        mIsRunning = true;
-        animator.start(mOnFinish);
-        mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
-                                                                IAvatarEvents.class,
-                                                                "onAnimationStarted",
-                                                                SXRAvatar.this,
-                                                                animator);
-    }
-
-    /**
-     * Evaluates the animation with the given index at the specified time.
-     * @param animIndex 0-based index of {@link SXRAnimator} to start
-     * @param timeInSec time to evaluate the animation at
-     * @see SXRAvatar#stop()
-     * @see #start(String)
-     */
-    public SXRAnimator animate(int animIndex, float timeInSec)
-    {
-        if ((animIndex < 0) || (animIndex >= mAnimations.size()))
-        {
-            throw new IndexOutOfBoundsException("Animation index out of bounds");
-        }
-        SXRAnimator anim = mAnimations.get(animIndex);
-        anim.animate(timeInSec);
-        return anim;
+        mAnimsToPlay.startAll(repeatMode);
     }
 
     /**
@@ -538,32 +518,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public void stop(String name)
     {
-        SXRAnimator anim = findAnimation(name);
-
-        if (anim != null)
-        {
-            mIsRunning = false;
-            anim.stop();
-        }
-    }
-
-    /**
-     * Stops the currently running animation, if any.
-     * @see SXRAvatar#start(String)
-     * @see SXRAnimationEngine#stop(SXRAnimation)
-     */
-    public void stop()
-    {
-        synchronized (mAnimQueue)
-        {
-            if (mIsRunning && (mAnimQueue.size() > 0))
-            {
-                mIsRunning = false;
-                SXRAnimator animator = mAnimQueue.get(0);
-                mAnimQueue.clear();
-                animator.stop();
-            }
-        }
+        mAnimsToPlay.stop(name);
     }
 
     /**
@@ -574,46 +529,13 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
      */
     public float centerModel(SXRNode model, Vector3f pos)
     {
-        if (mSkeleton != null)
-        {
-            SXRNode bone = mSkeleton.getBone(0);
-            Matrix4f mtx1 = bone.getTransform().getModelMatrix4f();
-            Matrix4f mtx2 = new Matrix4f();
-            float[] bv = mSkeleton.getBound();
-            Vector4f cmin = new Vector4f(bv[0], bv[1], bv[2], 1);
-            Vector4f cmax = new Vector4f(bv[3], bv[4], bv[5], 1);
-
-            mSkeleton.getPose().getLocalMatrix(0, mtx2);
-            mtx2.invert(mtx2);
-            mtx1.mul(mtx2, mtx2);
-            cmin.mul(mtx2);
-            cmax.mul(mtx2);
-
-            float cx = (cmax.x + cmin.x) / 2;
-            float cy = (cmax.y + cmin.y) / 2;
-            float cz = (cmax.z + cmin.z) / 2;
-            float r = Math.max(cmax.x - cmin.x,
-                               Math.max(cmax.y - cmin.y,
-                                        cmax.z - cmin.z));
-            float sf = 0.5f / r;
-            cx *= sf;
-            cy *= sf;
-            cz *= sf;
-            pos.x -= cx;
-            pos.y -= cy;
-            pos.z -= cz;
-            return sf;
-        }
-        else
-        {
-            SXRNode.BoundingVolume bv = model.getBoundingVolume();
-            float sf = 1 / bv.radius;
-            bv = model.getBoundingVolume();
-            pos.x -= bv.center.x;
-            pos.y -= bv.center.y;
-            pos.z -= bv.center.z;
-            return sf;
-        }
+        SXRNode.BoundingVolume bv = model.getBoundingVolume();
+        float sf = 1 / bv.radius;
+        bv = model.getBoundingVolume();
+        pos.x -= bv.center.x;
+        pos.y -= bv.center.y;
+        pos.z -= bv.center.z;
+        return sf;
     }
 
     protected String mergeSkeleton(SXRSkeleton skel, SXRNode modelRoot)
@@ -704,12 +626,12 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                 Log.e(TAG, "Avatar skeleton not found in asset file " + filePath);
             }
             context.getEventManager().sendEvent(SXRAvatar.this,
-                                                IAvatarEvents.class,
-                                                eventName,
-                                                SXRAvatar.this,
-                                                modelRoot,
-                                                filePath,
-                                                errors);
+                    IAvatarEvents.class,
+                    eventName,
+                    SXRAvatar.this,
+                    modelRoot,
+                    filePath,
+                    errors);
         }
 
         public void onModelLoaded(SXRContext context, SXRNode model, String filePath) { }
@@ -724,7 +646,7 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
         public void onModelLoaded(SXRAvatar avatar, SXRNode avatarRoot, String filePath, String errors);
         public void onAnimationLoaded(SXRAvatar avatar, SXRAnimator animator, String filePath, String errors);
         public void onAnimationStarted(SXRAvatar avatar, SXRAnimator animator);
-        public void onAnimationFinished(SXRAvatar avatar, SXRAnimator animator, SXRAnimation animation);
+        public void onAnimationFinished(SXRAvatar avatar, SXRAnimator animator);
     }
 
     protected IAssetEvents mLoadAnimHandler = new IAssetEvents()
@@ -739,12 +661,12 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
                     errors = "No animations found in " + filePath;
                 }
                 context.getEventManager().sendEvent(SXRAvatar.this,
-                                                    IAvatarEvents.class,
-                                                    "onAnimationLoaded",
-                                                    SXRAvatar.this,
-                                                    null,
-                                                    filePath,
-                                                    errors);
+                        IAvatarEvents.class,
+                        "onAnimationLoaded",
+                        SXRAvatar.this,
+                        null,
+                        filePath,
+                        errors);
                 return;
             }
 
@@ -758,12 +680,12 @@ public class SXRAvatar extends SXRBehavior implements IEventReceiver
             }
             addAnimation(animator);
             context.getEventManager().sendEvent(SXRAvatar.this,
-                                                IAvatarEvents.class,
-                                                "onAnimationLoaded",
-                                                SXRAvatar.this,
-                                                animator,
-                                                filePath,
-                                                errors);
+                    IAvatarEvents.class,
+                    "onAnimationLoaded",
+                    SXRAvatar.this,
+                    animator,
+                    filePath,
+                    errors);
         }
 
         public void onModelLoaded(SXRContext context, SXRNode model, String filePath) { }

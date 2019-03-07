@@ -52,11 +52,11 @@ public final class SXRMorphAnimation extends SXRAnimation implements PrettyPrint
      * Computes the blend weights for the given time and
      * updates them in the target.
      */
-    public void animate(SXRHybridObject object, float animationTime)
+    public void animate(float timeInSec)
     {
         SXRMeshMorph morph  = (SXRMeshMorph) mTarget;
 
-        mKeyInterpolator.animate(animationTime * mDuration, mCurrentValues);
+        mKeyInterpolator.animate(timeInSec, mCurrentValues);
         morph.setWeights(mCurrentValues);
 
     }
