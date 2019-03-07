@@ -61,6 +61,6 @@ public class SXRPhysicsAvatar extends SXRAvatar
      */
     public void loadPhysics(String filename, SXRScene scene) throws IOException
     {
-        SXRPhysicsLoader.loadPhysicsFile(getSXRContext(), filename, true, scene);
+        SXRPhysicsLoader.loadPhysicsFile(scene.getSXRContext(), filename, true, scene);
     }
 };
