@@ -936,7 +936,6 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             SXRPose curPose = getPose();
             SXRPose newPose = newSkel.getPose();
             int startBoneId = 0;
-            String firstBone = null;
 
             if (startBone != null)
             {
@@ -976,7 +975,6 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
                     if (parentId >= 0)     // parent is found?
                     {
                         String parName = newSkel.getBoneName(parentId);
-                        firstBone = parName;
                         parentId = getBoneIndex(parName);
                         if (parentId < 0)  // parent is a new bone
                         {
@@ -1022,7 +1020,11 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             }
             if (startBone == null)
             {
-                startBone = firstBone;
+                int parentId = getBoneIndex(newSkel.getBoneName(0));
+                if (parentId >= 0)
+                {
+                    startBone = getBoneName(parentId);
+                }
             }
             int n = numBones + numNewBones;
             if (numNewBones > 0)

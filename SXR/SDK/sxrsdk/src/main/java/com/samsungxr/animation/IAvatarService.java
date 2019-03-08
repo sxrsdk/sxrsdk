@@ -14,11 +14,6 @@
  */
 package com.samsungxr.animation;
 
-import com.samsungxr.IEvents;
-import com.samsungxr.SXRContext;
-import com.samsungxr.SXRNode;
-import com.samsungxr.SXRTexture;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -42,7 +37,7 @@ public interface IAvatarService
      * the avatar database and are not dictated by
      * this interface.
      */
-    public interface ReadHandler
+    public interface ReadArray
     {
         /**
          * Called when an avatar query is successful.
@@ -58,6 +53,30 @@ public interface IAvatarService
     };
 
     /**
+     * Callback for queries about properties.
+     */
+    public interface ReadObject
+    {
+        /**
+         * Called when a query for properties is successful.
+         * @param result JSON object with the results from the query.
+         */
+        public void loaded(JSONObject result);
+
+        /**
+         * Called when an avatar query fails.
+         * @param error String with the error message.
+         */
+        public void error(String error);
+    };
+
+    /**
+     * Get the base directory or URL for this service.
+     * @return string with base path
+     */
+    public String getBasePath();
+
+    /**
      * Request results from the avatar database.
      * <p>
      * The input properties are added to the existing
@@ -69,7 +88,16 @@ public interface IAvatarService
      * @param properties JSON object containing property keys and values.
      * @param handler    Handler to process results of query
      */
-    public void get(String path, JSONObject properties, ReadHandler handler);
+    public void get(String path, JSONObject properties, ReadArray handler);
+
+    /**
+     * Get the properties for an asset.
+     * @param category One of "avatar", "model" or "animation"
+     * @param assetName unique name identifying the asset.
+     * @param handler    Handler to process results of query
+     * @return JSONObject with asset properties or null if not found.
+     */
+    public void getProperties(String category, String assetName, ReadObject handler);
 
     /**
      * Load an avatar model with the given name.
