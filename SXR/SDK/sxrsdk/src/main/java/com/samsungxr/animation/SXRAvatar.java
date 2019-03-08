@@ -33,14 +33,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.jar.Attributes;
 
 /**
- * Group of animations that can be collectively manipulated.
- *
- * Typically the animations belong to a particular model and
- * represent a sequence of poses for the model over time.
- * This class allows you to start, stop and set animation modes
- * for all the animations in the group at once.
- * An asset which has animations will have this component
- * attached to collect the animations for the asset.
+ * Articulated character and associated animations.
  *
  * @see com.samsungxr.SXRAssetLoader
  * @see com.samsungxr.SXRExternalScene
@@ -235,7 +228,6 @@ public class SXRAvatar implements IEventReceiver
      */
     public boolean isRunning() { return mIsRunning; }
 
-
     /**
      * Set the import settings for loading the avatar.
      * Avatars are always imported without animation. You can use
@@ -330,12 +322,13 @@ public class SXRAvatar implements IEventReceiver
                 break;
 
                 case 1:
-                onAnimationStarted(animator);
-                mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
-                                                                        IAvatarEvents.class,
-                                                                        "onAnimationStarted",
-                                                                        SXRAvatar.this,
-                                                                        animator);
+                    onAnimationFinished(animator, animation);
+                    mAvatarRoot.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
+                            IAvatarEvents.class,
+                            "onAnimationFinished",
+                            SXRAvatar.this,
+                            animator,
+                            animation);
                 if (mRepeatMode == SXRRepeatMode.REPEATED)
                 {
                     startAll(mRepeatMode);
@@ -576,8 +569,9 @@ public class SXRAvatar implements IEventReceiver
                                                              SXRImportSettings.FLIP_UV,
                                                              SXRImportSettings.LIMIT_BONE_WEIGHT,
                                                              SXRImportSettings.CALCULATE_TANGENTS,
-                                                             SXRImportSettings.NO_ANIMATION,
+                                                             SXRImportSettings.NO_TEXTURING,
                                                              SXRImportSettings.SORTBY_PRIMITIVE_TYPE);
+
             SXRNode animRoot = new SXRNode(ctx);
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
         }
@@ -601,6 +595,7 @@ public class SXRAvatar implements IEventReceiver
      * @param index index of animation to get
      * @see SXRAvatar#addAnimation(SXRAnimator)
      */
+
     public SXRAnimator getAnimation(int index)
     {
         return mAnimations.get(index);
@@ -914,7 +909,7 @@ public class SXRAvatar implements IEventReceiver
                 }
                 else
                 {
-                    errors += "  vatar skeleton not found";
+                    errors += "Avatar skeleton not found";
                     Log.e(TAG, "Avatar skeleton not found in asset file " + filePath);
                 }
             }
