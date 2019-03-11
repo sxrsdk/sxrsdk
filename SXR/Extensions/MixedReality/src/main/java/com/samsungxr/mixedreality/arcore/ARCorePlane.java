@@ -81,6 +81,11 @@ class ARCorePlane extends SXRPlane {
     }
 
     @Override
+    public Pose getCenterPose() {
+        return mARPlane.getCenterPose();
+    }
+
+    @Override
     public float getWidth() {
         return mARPlane.getExtentX();
     }

@@ -17,6 +17,7 @@ package com.samsungxr.mixedreality;
 
 import android.support.annotation.NonNull;
 
+import com.google.ar.core.Pose;
 import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
 
@@ -52,6 +53,13 @@ public abstract class SXRPlane extends SXRBehavior
      * @param poseOut Array to export the pose to.
      */
     public abstract void getCenterPose(@NonNull float[] poseOut);
+
+    /**
+     * Gets the center pose.
+     *
+     * @return the pose of the center of the detected plane.
+     */
+    public abstract Pose getCenterPose();
 
     public Type getPlaneType()
     {
