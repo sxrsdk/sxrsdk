@@ -91,37 +91,30 @@ class OvrXMLParser {
                             if (attributeName.equals("showLoadingIcon")) {
                                 settings.setShowLoadingIcon(Boolean
                                         .parseBoolean(xpp.getAttributeValue(i)));
-                            } else if (attributeName
-                                    .equals("useGazeCursorController")) {
+                            } else if (attributeName.equals("useGazeCursorController")) {
                                 settings.setUseGazeCursorController(Boolean
                                         .parseBoolean(xpp.getAttributeValue(i)));
-                            }  else if (attributeName
-                                    .equals("useControllerTypes")) {
+                            }  else if (attributeName.equals("useControllerTypes")) {
                                 parseControllerTypes(settings, xpp.getAttributeValue(i));
-                            } else if (attributeName
-                                    .equals("useAndroidWearTouchpad")) {
+                            } else if (attributeName.equals("useAndroidWearTouchpad")) {
                                 settings.setUseAndroidWearTouchpad(Boolean
                                         .parseBoolean(xpp.getAttributeValue(i)));
-                            } else if (attributeName
-                                    .equals("useSrgbFramebuffer")) {
+                            } else if (attributeName.equals("useSrgbFramebuffer")) {
                                 settings.setUseSrgbFramebuffer(Boolean
                                         .parseBoolean(xpp.getAttributeValue(i)));
-                            } else if (attributeName
-                                    .equals("useProtectedFramebuffer")) {
+                            } else if (attributeName.equals("useProtectedFramebuffer")) {
                                 settings.setUseProtectedFramebuffer(Boolean
                                         .parseBoolean(xpp.getAttributeValue(i)));
-                            } else if (attributeName
-                                    .equals("framebufferPixelsWide")) {
+                            } else if (attributeName.equals("framebufferPixelsWide")) {
                                 settings.setFramebufferPixelsWide(Integer
                                         .parseInt(xpp.getAttributeValue(i)));
-                            } else if (attributeName
-                                    .equals("framebufferPixelsHigh")) {
+                            } else if (attributeName.equals("framebufferPixelsHigh")) {
                                 settings.setFramebufferPixelsHigh(Integer
                                         .parseInt(xpp.getAttributeValue(i)));
-                            } else if (attributeName
-                                    .equals("useMultiview")){                              
-                                settings.setUseMultiview(Boolean.
-                                        parseBoolean(xpp.getAttributeValue(i)));
+                            } else if (attributeName.equals("useMultiview")){
+                                settings.setUseMultiview(Boolean.parseBoolean(xpp.getAttributeValue(i)));
+                            } else if ("useCursorLayer".equals(attributeName)) {
+                                settings.mUseCursorLayer = Boolean.parseBoolean(xpp.getAttributeValue(i));
                             }
                         } else if (tagName.equals("mode-parms")
                                 || "mode-params".equals(tagName)) {

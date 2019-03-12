@@ -82,7 +82,7 @@ namespace sxr
         shadowMap->setMainScene(scene);
         shadowMap->cullFromCamera(scene, javaNode, shadowMap->getCamera(),renderer, shader_manager);
 
-        renderer->renderRenderTarget(scene, javaNode, shadowMap,shader_manager, nullptr, nullptr);
+        renderer->renderRenderTarget(scene, javaNode, shadowMap,shader_manager, nullptr, nullptr, shadowMap->getRenderDataVector());
 
         return true;
     }

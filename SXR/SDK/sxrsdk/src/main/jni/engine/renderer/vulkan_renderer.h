@@ -130,7 +130,7 @@ public:
                                  const char* vertexDescriptor, const char* vertexShader,
                                  const char* fragmentShader);
     virtual void renderRenderTarget(Scene*, jobject javaNode, RenderTarget* renderTarget, ShaderManager* shader_manager,
-                                    RenderTexture* post_effect_render_texture_a, RenderTexture* post_effect_render_texture_b);
+                                    RenderTexture* post_effect_render_texture_a, RenderTexture* post_effect_render_texture_b, std::vector<RenderData*>* render_data_vector);
 
     virtual Light* createLight(const char* uniformDescriptor, const char* textureDescriptor);
 
@@ -141,7 +141,7 @@ private:
     VulkanCore* vulkanCore_;
     void renderMesh(RenderState& rstate, RenderData* render_data){}
     void renderMaterialShader(RenderState& rstate, RenderData* render_data, ShaderData *material, Shader*){}
-    virtual void occlusion_cull(RenderState& rstate, std::vector<Node*>& nodes, std::vector<RenderData*>* render_data_vector) {
+    virtual void occlusion_cull(RenderState& rstate, std::vector<Node*>* nodes, std::vector<RenderData*>* render_data_vector) {
         occlusion_cull_init(rstate, nodes, render_data_vector);
 
     }
