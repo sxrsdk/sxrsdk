@@ -31,6 +31,7 @@ import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -997,36 +998,15 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
                 }
                 else if (startBone != null)
                 {
-                    parentId = getParentBoneIndex(boneId);
                     if (j > startBoneId)
                     {
                         matrices.set(boneId, m);
                     }
-                    if ((newBone != null) && (parentId >= 0))
-                    {
-                        SXRNode parent = getBone(parentId);
-                        for (int c = 0; c < newBone.getChildrenCount(); ++c)
-                        {
-                            SXRNode child = newBone.getChildByIndex(c);
-                            if (newSkel.getBoneIndex(child.getName()) < 0)
-                            {
-                                newBone.removeChildObject(child);
-                                parent.addChildObject(child);
-                                --c;
-                            }
-                        }
-                    }
                 }
             }
-            if (startBone == null)
-            {
-                int parentId = getBoneIndex(newSkel.getBoneName(0));
-                if (parentId >= 0)
-                {
-                    startBone = getBoneName(parentId);
-                }
-            }
+
             int n = numBones + numNewBones;
+            SXRNode[] oldBones = mBones;
             if (numNewBones > 0)
             {
                 /*
@@ -1061,6 +1041,28 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
                  */
                 NativeSkeleton.updateBones(getNative(), mParentBones, boneNames);
             }
+            if (startBone != null)
+            {
+                for (int i = 0; i < newBoneNames.size(); ++i)
+                {
+                    SXRNode newBone = getBone(i);
+                    int parentId = getParentBoneIndex(i);
+                    if ((newBone != null) && (parentId >= 0))
+                    {
+                        SXRNode parent = oldBones[parentId];
+                        for (int c = 0; c < newBone.getChildrenCount(); ++c)
+                        {
+                            SXRNode child = newBone.getChildByIndex(c);
+                            if (getBoneIndex(child.getName()) < 0)
+                            {
+                                newBone.removeChildObject(child);
+                                parent.addChildObject(child);
+                                --c;
+                            }
+                        }
+                    }
+                }
+            }
             /*
              * Update the poses for this skeleton
              */
@@ -1070,8 +1072,48 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             }
             mPose.sync();
             poseToBones();
+            if (startBone == null)
+            {
+                int parentId = getBoneIndex(newSkel.getBoneName(0));
+                if (parentId >= 0)
+                {
+                    startBone = getBoneName(parentId);
+                }
+            }
         }
         return startBone;
+    }
+
+    /**
+     * Get the center of this skeleton's bounding volume.
+     * @param center vector with center of skeleton
+     */
+    public float getCenter(Vector3f center)
+    {
+        SXRNode bone = getBone(0);
+        Matrix4f mtx1 = bone.getTransform().getModelMatrix4f();
+        Matrix4f mtx2 = new Matrix4f();
+        float[] bv = getBound();
+        Vector4f cmin = new Vector4f(bv[0], bv[1], bv[2], 1);
+        Vector4f cmax = new Vector4f(bv[3], bv[4], bv[5], 1);
+
+        getPose().getLocalMatrix(0, mtx2);
+        mtx2.invert(mtx2);
+        mtx1.mul(mtx2, mtx2);
+        cmin.mul(mtx2);
+        cmax.mul(mtx2);
+
+        center.x = (cmax.x + cmin.x) / 2;
+        center.y = (cmax.y + cmin.y) / 2;
+        center.z = (cmax.z + cmin.z) / 2;
+        float r = Math.max(cmax.x - cmin.x,
+                           Math.max(cmax.y - cmin.y,
+                                    cmax.z - cmin.z));
+        float sf = 0.5f / r;
+        center.x *= sf;
+        center.y *= sf;
+        center.z *= sf;
+        return r;
     }
 
     /**

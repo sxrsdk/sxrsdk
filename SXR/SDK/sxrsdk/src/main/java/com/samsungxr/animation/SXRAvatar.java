@@ -774,43 +774,20 @@ public class SXRAvatar implements IEventReceiver
     {
         if (mSkeleton != null)
         {
-            SXRNode bone = mSkeleton.getBone(0);
-            Matrix4f mtx1 = bone.getTransform().getModelMatrix4f();
-            Matrix4f mtx2 = new Matrix4f();
-            float[] bv = mSkeleton.getBound();
-            Vector4f cmin = new Vector4f(bv[0], bv[1], bv[2], 1);
-            Vector4f cmax = new Vector4f(bv[3], bv[4], bv[5], 1);
-
-            mSkeleton.getPose().getLocalMatrix(0, mtx2);
-            mtx2.invert(mtx2);
-            mtx1.mul(mtx2, mtx2);
-            cmin.mul(mtx2);
-            cmax.mul(mtx2);
-
-            float cx = (cmax.x + cmin.x) / 2;
-            float cy = (cmax.y + cmin.y) / 2;
-            float cz = (cmax.z + cmin.z) / 2;
-            float r = Math.max(cmax.x - cmin.x,
-                               Math.max(cmax.y - cmin.y,
-                                        cmax.z - cmin.z));
-            float sf = 0.5f / r;
-            cx *= sf;
-            cy *= sf;
-            cz *= sf;
-            pos.x -= cx;
-            pos.y -= cy;
-            pos.z -= cz;
-            return sf;
+            Vector3f center = new Vector3f();
+            float r = mSkeleton.getCenter(center);
+            pos.x -= center.x;
+            pos.y -= center.y;
+            pos.z -= center.z;
+            return r;
         }
         else
         {
             SXRNode.BoundingVolume bv = model.getBoundingVolume();
-            float sf = 1 / bv.radius;
-            bv = model.getBoundingVolume();
             pos.x -= bv.center.x;
             pos.y -= bv.center.y;
             pos.z -= bv.center.z;
-            return sf;
+            return bv.radius;
         }
     }
 
