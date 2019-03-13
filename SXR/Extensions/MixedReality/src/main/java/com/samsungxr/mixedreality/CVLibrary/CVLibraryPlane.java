@@ -16,6 +16,7 @@
 package com.samsungxr.mixedreality.CVLibrary;
 
 //import com.google.ar.core.Plane;
+import com.google.ar.core.Pose;
 import android.support.annotation.NonNull;
 
 import com.samsungxr.SXRContext;
@@ -48,6 +49,10 @@ class CVLibraryPlane extends SXRPlane {
     public void getCenterPose(@NonNull float[] poseOut)
     {
         System.arraycopy(mPose.getPoseMatrix(), 0, poseOut, 0, 16);
+    }
+
+    public Pose getCenterPose() {
+        return null;
     }
 
     /**

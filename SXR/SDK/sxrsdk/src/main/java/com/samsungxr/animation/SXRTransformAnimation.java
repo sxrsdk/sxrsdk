@@ -51,6 +51,10 @@ public class SXRTransformAnimation extends SXRAnimation implements PrettyPrint
         mPosition.set(target.getPositionX(), target.getPositionY(), target.getPositionZ());
         mRotation.set(target.getRotationX(), target.getRotationY(), target.getRotationZ(), target.getRotationW());
         mTransform = target;
+        if (duration < 0)
+        {
+            throw new IllegalArgumentException("Duration cannot be negative");
+        }
     }
 
     @Override
@@ -94,12 +98,6 @@ public class SXRTransformAnimation extends SXRAnimation implements PrettyPrint
     {
         mTempMtx.translationRotateScale(mPosition, mRotation, mScale);
         mTransform.setModelMatrix(mTempMtx);
-    }
-
-    @Override
-    protected void animate(SXRHybridObject target, float ratio)
-    {
-        animate(getDuration() * ratio);
     }
 
 }

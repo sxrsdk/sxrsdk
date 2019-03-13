@@ -139,6 +139,7 @@ public class SXRAnimationEngine {
      *            an animation
      */
     public void stop(SXRAnimation animation) {
+        animation.isFinished = true;
         mAnimations.remove(animation);
     }
 
@@ -148,6 +149,7 @@ public class SXRAnimationEngine {
         public void onDrawFrame(float frameTime) {
             for (SXRAnimation animation : mAnimations) {
                 if (animation.onDrawFrame(frameTime) == false) {
+                    animation.isFinished = true;
                     mAnimations.remove(animation);
                 }
             }

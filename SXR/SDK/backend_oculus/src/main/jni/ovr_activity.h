@@ -94,6 +94,8 @@ namespace sxr {
         void setGearController(GearController *controller){
             gearController = controller;
         }
+
+        void recenterPose() const;
     };
 
 }

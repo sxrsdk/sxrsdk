@@ -12,6 +12,7 @@ before_install:
   - echo yes | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2"
   - echo yes | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.2"
 #  - yes | sdkmanager --licenses
+
   # newest Android NDK
   - wget https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip -O ndk.zip
   - unzip ndk.zip  > /dev/null 2>&1

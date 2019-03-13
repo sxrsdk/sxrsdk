@@ -308,10 +308,15 @@ class OvrViewManager extends SXRViewManager {
 
         mRenderBundle.createRenderTargetChain(isMultiview);
     }
-    /*
-     * SXRF APIs
+
+    /**
+     * Reset the Oculus head & controller poses
      */
+    public void recenterPose() {
+        recenterPose(mApplication.getActivityNative().getNative());
+    }
 
     private native long getRenderTextureInfo(long ptr, int index, int eye );
     private native void drawEyes(long ptr);
+    private native void recenterPose(long ptr);
 }

@@ -28,7 +28,7 @@ import android.graphics.Color;
 
 /**
  * The root of the SXRF animation tree.
- * 
+ *
  * This class (and the {@linkplain SXRAnimationEngine engine}) supply the common
  * functionality: descendants are tiny classes that contain compiled (ie, no
  * runtime reflection is used) code to change individual properties. Most
@@ -37,7 +37,7 @@ import android.graphics.Color;
  * {@linkplain SXRShaderData "post effect":} accordingly, most actual animations
  * descend from {@link SXRTransformAnimation}, {@link SXRMaterialAnimation}, or
  * {@link SXRPostEffectAnimation} and not directly from {@link SXRAnimation}.
- * 
+ *
  * <p>
  * All animations have at least three or more required parameters: the object to
  * animate, the duration, and any animation parameters. In many cases, there are
@@ -46,7 +46,7 @@ import android.graphics.Color;
  * {@code float[3]} of GL-compatible 0 to 1 values. In addition, all the stock
  * animations that animate a type like, say, {@link SXRMaterial} 'know how' to
  * find the {@link SXRMaterial} inside a {@link SXRNode}.
- * 
+ *
  * <p>
  * This means that most animations have two or four overloaded constructors.
  * This is trouble for the animation developer - who must keep four sets of
@@ -54,22 +54,22 @@ import android.graphics.Color;
  * there are also four optional parameters: the interpolator, the repeat type,
  * the repeat count, and an on-finished callback. Adding these to an overload
  * tree would, well, overload both developers and users!
- * 
+ *
  * <p>
  * Thus, animations use a sort of Builder Pattern: you set the optional
  * parameters <i>via</i> set() methods that return {@code this}, so you can
  * chain them like
- * 
+ *
  * <pre>
- * 
+ *
  * new SXRScaleAnimation(sceneObject, 1.5f, 2f) //
  *         .setRepeatMode(SXRRepetitionType.PINGPONG) //
  *         .start({@linkplain SXRAnimationEngine animationEngine});
  * </pre>
- * 
+ *
  * which will 'pulse' the size of the {@code sceneObject} from its current level
  * to double size, and back.
- * 
+ *
  * <p>
  * Animations run in a {@link SXRDrawFrameListener}, so they happen before your
  * {@link SXRMain#onStep()} handler, which happens before SXRF
@@ -89,7 +89,7 @@ public abstract class SXRAnimation {
     /**
      * The default repeat count only applies to the two repeat modes, not to the
      * default run-once mode.
-     * 
+     *
      * The default repeat count is 2, so that a ping pong animation will return
      * to the start state, even if you don't
      * {@linkplain SXRAnimation#setRepeatCount(int) setRepeatCount(2).}
@@ -105,8 +105,8 @@ public abstract class SXRAnimation {
     protected SXRInterpolator mInterpolator = null;
     protected int mRepeatMode = SXRRepeatMode.ONCE;
     protected int mRepeatCount = DEFAULT_REPEAT_COUNT;
-    protected float animationOffset = 0;
-    protected float animationSpeed = 1;
+    protected float mStartOffset = 0;
+    protected float mSpeed = 1;
     protected SXROnFinish mOnFinish = null;
 
     /**
@@ -119,14 +119,14 @@ public abstract class SXRAnimation {
     // Running state
     protected float mElapsedTime = 0f;
     protected int mIterations = 0;
-
     protected boolean isFinished = false;
+    protected boolean mReverse = false;
 
     /**
      * Base constructor.
-     * 
+     *
      * Sets required fields, initializes optional fields to default values.
-     * 
+     *
      * @param target
      *            The object to animate. Note that this constructor makes a
      *            <em>private<em> copy of the {@code target}
@@ -152,7 +152,7 @@ public abstract class SXRAnimation {
      * exception if they get a type they can't handle; it also returns the
      * matched type (which may not be equal to {@code target.getClass()}) so
      * that calling code doesn't have to do {@code instanceof} tests.
-     * 
+     *
      * @param target
      *            A {@link SXRHybridObject} instance
      * @param supported
@@ -163,7 +163,7 @@ public abstract class SXRAnimation {
      *             {@code supported} types
      */
     protected static Class<?> checkTarget(SXRHybridObject target,
-            Class<?>... supported) {
+                                          Class<?>... supported) {
         for (Class<?> type : supported) {
             if (type.isInstance(target)) {
                 return type;
@@ -174,14 +174,23 @@ public abstract class SXRAnimation {
     }
 
     /**
+     * Get the target object modified by this animation.
+     * @return {@link SXRHybridObject} target object
+     */
+    public SXRHybridObject getTarget()
+    {
+        return mTarget;
+    }
+
+    /**
      * Set the interpolator.
-     * 
+     *
      * By default, animations proceed linearly: at X percent of the duration,
      * the animated property will be at X percent of the way from the start
      * state to the stop state. Specifying an explicit interpolator lets the
      * animation do other things, like accelerate and decelerate, overshoot,
      * bounce, and so on.
-     * 
+     *
      * @param interpolator
      *            An interpolator instance. {@code null} gives you the default,
      *            linear animation.
@@ -194,13 +203,13 @@ public abstract class SXRAnimation {
 
     /**
      * Set the repeat type.
-     * 
+     *
      * In the default {@linkplain SXRRepeatMode#ONCE run-once} mode, animations
      * run once, ignoring the {@linkplain #getRepeatCount() repeat count.} In
      * {@linkplain SXRRepeatMode#PINGPONG ping pong} and
      * {@linkplain SXRRepeatMode#REPEATED repeated} modes, animations do honor
      * the repeat count, which {@linkplain #DEFAULT_REPEAT_COUNT defaults} to 2.
-     * 
+     *
      * @param repeatMode
      *            One of the {@link SXRRepeatMode} constants
      * @return {@code this}, so you can chain setProperty() calls.
@@ -219,7 +228,7 @@ public abstract class SXRAnimation {
 
     /**
      * Set the repeat count.
-     * 
+     *
      * @param repeatCount
      *            <table border="none">
      *            <tr>
@@ -228,7 +237,7 @@ public abstract class SXRAnimation {
      *            notes on {@linkplain SXROnFinish#finished(SXRAnimation)
      *            stopping an animation.}</td>
      *            </tr>
-     * 
+     *
      *            <tr>
      *            <td>0</td>
      *            <td>After {@link #start(SXRAnimationEngine) start()}, 0 means
@@ -238,7 +247,7 @@ public abstract class SXRAnimation {
      *            special-cased so setting the repeat count to 0 will do what
      *            you expect.</td>
      *            </tr>
-     * 
+     *
      *            <tr>
      *            <td>A positive number</td>
      *            <td>Specifies a repeat count</td>
@@ -260,13 +269,13 @@ public abstract class SXRAnimation {
      *             If {@code startOffset} is either negative or greater than
      *             the animation duration
      */
-    public SXRAnimation setOffset(float startOffset)
+    public SXRAnimation setStartOffset(float startOffset)
     {
-        if(startOffset<0 || startOffset>mDuration){
+        if (startOffset < 0 || startOffset > mDuration){
             throw new IllegalArgumentException("offset should not be either negative or greater than duration");
         }
-        animationOffset = startOffset;
-        mDuration =  mDuration-animationOffset;
+        mStartOffset = startOffset;
+        mDuration = mDuration - mStartOffset;
         return this;
     }
     /**
@@ -284,7 +293,7 @@ public abstract class SXRAnimation {
         if(speed<=0){
             throw new IllegalArgumentException("speed should be greater than zero");
         }
-        animationSpeed =  speed;
+        mSpeed =  speed;
         return this;
     }
     /**
@@ -303,22 +312,22 @@ public abstract class SXRAnimation {
         if(start>end || start<0 || end>mDuration){
             throw new IllegalArgumentException("start and end values are wrong");
         }
-        animationOffset =  start;
+        mStartOffset =  start;
         mDuration = end-start;
         return this;
     }
     /**
      * Set the on-finish callback.
-     * 
+     *
      * The basic {@link SXROnFinish} callback will notify you when the animation
      * runs to completion. This is a good time to do things like removing
      * now-invisible objects from the scene graph.
-     * 
+     *
      * <p>
      * The extended {@link SXROnRepeat} callback will be called after every
      * iteration of an indefinite (repeat count less than 0) animation, giving
      * you a way to stop the animation when it's not longer appropriate.
-     * 
+     *
      * @param callback
      *            A {@link SXROnFinish} or {@link SXROnRepeat} implementation.
      *            <p>
@@ -343,8 +352,23 @@ public abstract class SXRAnimation {
     }
 
     /**
+     * Sets the reverse flag either true or false.
+     * @param reverse true to play animation backwards or vice versa.
+     */
+    public void setReverse(boolean reverse)
+    {
+        mReverse = reverse;
+    }
+
+    /**
+     * Determine whether animation is reversed or no.
+     * @return true if reversed, false if not.
+     */
+    public boolean getReverse() { return mReverse; }
+
+    /**
      * Start the animation.
-     * 
+     *
      * Changing properties once the animation is running can have unpredictable
      * results.
      * @param engine animation engine to start.
@@ -352,22 +376,22 @@ public abstract class SXRAnimation {
      * This method is exactly equivalent to
      * {@link SXRAnimationEngine#start(SXRAnimation)} and is provided as a
      * convenience so you can write code like
-     * 
+     *
      * <pre>
-     * 
+     *
      * SXRAnimation animation = new SXRAnimationDescendant(target, duration)
      *         .setOnFinish(callback).start(animationEngine);
      * </pre>
-     * 
+     *
      * instead of
-     * 
+     *
      * <pre>
-     * 
+     *
      * SXRAnimation animation = new SXRAnimationDescendant(target, duration)
      *         .setOnFinish(callback);
      * animationEngine.start(animation);
      * </pre>
-     * 
+     *
      * @return {@code this}, so you can save the instance at the end of a chain
      *         of calls
      */
@@ -378,7 +402,6 @@ public abstract class SXRAnimation {
 
     public void onStart()
     {
-       // mCurrentTime = 0;
         if (sDebug)
         {
             Log.d("ANIMATION", "%s started", getClass().getSimpleName());
@@ -401,11 +424,12 @@ public abstract class SXRAnimation {
         }
     }
 
+
     /**
      * Called by the animation engine. Uses the frame time, the interpolator,
      * and the repeat mode to generate a call to
-     * {@link #animate(SXRHybridObject, float)}.
-     * 
+     * {@link #animate(float)}.
+     *
      * @param frameTime
      *            elapsed time since the previous animation frame, in seconds
      * @return {@code true} to keep running the animation; {@code false} to shut
@@ -413,13 +437,12 @@ public abstract class SXRAnimation {
      */
 
     final boolean onDrawFrame(float frameTime) {
-
         final int previousCycleCount = (int) (mElapsedTime / mDuration);
 
-        mElapsedTime += (frameTime*animationSpeed);
+        mElapsedTime += (frameTime * mSpeed);
 
         final int currentCycleCount = (int) (mElapsedTime / mDuration);
-        final float cycleTime = (mElapsedTime % mDuration)+animationOffset;
+        final float cycleTime = (mElapsedTime % mDuration) + mStartOffset;
 
         final boolean cycled = previousCycleCount != currentCycleCount;
         boolean stillRunning = cycled != true;
@@ -441,50 +464,50 @@ public abstract class SXRAnimation {
                 }
             }
         }
-
+        final boolean countDown = mReverse ||
+                                 ((mRepeatMode == SXRRepeatMode.PINGPONG) &&
+                                 ((mIterations & 1) == 1));
         if (stillRunning) {
-            final boolean countDown = mRepeatMode == SXRRepeatMode.PINGPONG
-                    && (mIterations & 1) == 1;
 
-            float elapsedRatio = //
-            countDown != true ? interpolate(cycleTime, mDuration)
-                    : interpolate(mDuration - cycleTime, mDuration);
+            float elapsedRatio = countDown ? interpolate(mDuration - cycleTime, mDuration) :
+                                             interpolate(cycleTime, mDuration);
+            animate(elapsedRatio * mDuration);
 
-
-            animate(mTarget, elapsedRatio);
         } else {
-            float endRatio = mRepeatMode == SXRRepeatMode.ONCE ? 1f : 0f;
-
-            endRatio = interpolate(mDuration, mDuration);
-
-            animate(mTarget, endRatio);
-
+            if (countDown) {
+                animate(0);
+            }
+            else {
+                float endRatio = interpolate(mDuration, mDuration);
+                animate(endRatio * mDuration);
+            }
             onFinish();
+            isFinished = true;
             if (mOnFinish != null) {
                 mOnFinish.finished(this);
             }
-            
-            isFinished = true;
         }
 
         return stillRunning;
     }
 
-    private float interpolate(float cycleTime, float duration) {
+    private float interpolate(float cycleTime, float duration)
+    {
         float ratio = cycleTime / duration;
-        return mInterpolator == null ? ratio : mInterpolator.mapRatio(ratio);
+        float v = (mInterpolator == null) ? ratio : mInterpolator.mapRatio(ratio);
+        return v;
     }
 
     /**
      * Checks whether the animation has run to completion.
-     * 
+     *
      * For {@linkplain SXRRepeatMode#ONCE run-once} animations, this means only
      * that the animation has timed-out: generally, this means that the
      * (optional) onFinish callback has been invoked and the animation
      * 'unregistered' by the {@linkplain SXRAnimationEngine animation engine}
      * but it's not impossible that there is some lag between time-out and
      * finalization.
-     * 
+     *
      * <p>
      * For {@linkplain SXRRepeatMode#REPEATED repeated} or
      * {@linkplain SXRRepeatMode#PINGPONG ping pong} animations, this method can
@@ -496,9 +519,9 @@ public abstract class SXRAnimation {
      * to handle indeterminate animations is to use
      * {@link #setOnFinish(SXROnFinish)} to set an {@linkplain SXROnRepeat}
      * handler, before calling {@link #start(SXRAnimationEngine)}.
-     * 
+     *
      * @return {@code true} if done or repeating; {@code false} if on first run.
-     */ 
+     */
     public final boolean isFinished() {
         return isFinished;
     }
@@ -512,33 +535,30 @@ public abstract class SXRAnimation {
 
     /**
      * Get the current repeat count.
-     * 
+     *
      * A negative number means the animation will repeat indefinitely; zero
      * means the animation will stop after the current cycle; a positive number
      * is the number of cycles after the current cycle.
-     * 
+     *
      * @return The current repeat count
      */
     public int getRepeatCount() {
         return mRepeatCount;
     }
 
-    public float getAnimationOffset() {
-        return animationOffset;
-    }
 
-    public float getAnimationSpeed()
+    public float getSpeed()
     {
-        return animationSpeed;
+        return mSpeed;
     }
 
 
     /**
      * The duration passed to {@linkplain #SXRAnimation(SXRHybridObject, float)
      * the constructor.}
-     * 
+     *
      * This may be useful if you have to, say, 'undo' a running animation.
-     * 
+     *
      * @return The duration passed to the constructor.
      */
     public float getDuration() {
@@ -547,11 +567,11 @@ public abstract class SXRAnimation {
 
     /**
      * How long the animation has been running.
-     * 
+     *
      * This may be useful if you have to, say, 'undo' a running animation. With
      * {@linkplain #getRepeatCount() repeated animations,} this may be longer
      * than the {@linkplain #getDuration() duration.}
-     * 
+     *
      * @return How long the animation has been running.
      */
     public float getElapsedTime() {
@@ -570,19 +590,6 @@ public abstract class SXRAnimation {
      */
     public void animate(float timeInSec)
     {
-        float ratio = timeInSec / mDuration;
-        animate(mTarget, ratio);
     }
 
-    /**
-     * Override this to create a new animation. Generally, you do this by
-     * changing some property of the {@code mTarget}, and letting SXRF handle
-     * screen updates automatically.
-     * 
-     * @param target
-     *            The SXRF object to animate
-     * @param ratio
-     *            The start state is 0; the stop state is 1.
-     */
-    protected abstract void animate(SXRHybridObject target, float ratio);
 }

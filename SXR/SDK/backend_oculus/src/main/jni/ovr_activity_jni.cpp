@@ -27,8 +27,10 @@ namespace sxr {
         return reinterpret_cast<long>(sxrActivity);
     }
 
-    JNIEXPORT long JNICALL Java_com_samsungxr_OvrViewManager_getRenderTextureInfo(JNIEnv* jni, jclass clazz, jlong jactivity ,  jint index, jint eye){
-        SXRActivity* sxrActivity = reinterpret_cast<SXRActivity*>(jactivity);
+    JNIEXPORT jlong JNICALL
+    Java_com_samsungxr_OvrViewManager_getRenderTextureInfo(JNIEnv *, jobject, jlong jactivity,
+                                                           jint index, jint eye) {
+        SXRActivity *sxrActivity = reinterpret_cast<SXRActivity *>(jactivity);
         return reinterpret_cast<long>(sxrActivity->getRenderTextureInfo(eye, index));
     }
 
@@ -94,7 +96,14 @@ namespace sxr {
         const SXRActivity *activity = reinterpret_cast<SXRActivity*>(appPtr);
         return activity->usingMultiview();
     }
-    
+
+    extern "C"
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_OvrViewManager_recenterPose__J(JNIEnv*, jobject, jlong ptr) {
+        const SXRActivity *activity = reinterpret_cast<SXRActivity*>(ptr);
+        activity->recenterPose();
+    }
+
     } //extern "C" {
     
 } //namespace sxr

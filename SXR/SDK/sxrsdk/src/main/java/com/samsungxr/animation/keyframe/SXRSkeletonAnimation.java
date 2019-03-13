@@ -52,6 +52,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     protected String mName;
     private SXRSkeleton mSkeleton = null;
 
+
     /**
      * List of animation channels for each of the
      * animated bones.
@@ -67,7 +68,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
      */
     public SXRSkeletonAnimation(String name, SXRNode target, float duration)
     {
-    	super(target, duration);
+        super(target, duration);
         mName = name;
     }
 
@@ -89,6 +90,13 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
         }
         mBoneChannels = new SXRAnimationChannel[mSkeleton.getNumBones()];
     }
+
+    /**
+     * Get the name of this skeleton animation.
+     * This is the name provided in the constructor.
+     * @return string name of animation.
+     */
+    public String getName() { return mName; }
 
     /**
      * Get the skeleton for this animation.
@@ -210,16 +218,10 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     {
         mTarget = target;
         if ((mSkeleton != null) &&
-            target.getComponent(SXRSkeleton.getComponentType()) == null)
+                target.getComponent(SXRSkeleton.getComponentType()) == null)
         {
             target.attachComponent(mSkeleton);
         }
-    }
-
-    @Override
-    protected void animate(SXRHybridObject target, float ratio)
-    {
-        animate(getDuration() * ratio);
     }
 
     /**
@@ -264,7 +266,7 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
                 pose.setLocalMatrix(i, temp);
             }
         }
-     return pose;
+        return pose;
     }
 
     @Override
