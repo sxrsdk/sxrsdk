@@ -1006,7 +1006,6 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             }
 
             int n = numBones + numNewBones;
-            SXRNode[] oldBones = mBones;
             if (numNewBones > 0)
             {
                 /*
@@ -1043,22 +1042,21 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             }
             if (startBone != null)
             {
-                for (int i = 0; i < newBoneNames.size(); ++i)
+                for (int i = 0; i < newSkel.getNumBones(); ++i)
                 {
-                    SXRNode newBone = getBone(i);
-                    int parentId = getParentBoneIndex(i);
-                    if ((newBone != null) && (parentId >= 0))
+                    String boneName = newSkel.getBoneName(i);
+                    int boneIndex = getBoneIndex(boneName);
+                    SXRNode newBone = newSkel.getBone(i);
+                    SXRNode oldBone = getBone(boneIndex);
+
+                    if ((newBone != oldBone) && (newBone != null) && (oldBone != null))
                     {
-                        SXRNode parent = oldBones[parentId];
                         for (int c = 0; c < newBone.getChildrenCount(); ++c)
                         {
                             SXRNode child = newBone.getChildByIndex(c);
-                            if (getBoneIndex(child.getName()) < 0)
-                            {
-                                newBone.removeChildObject(child);
-                                parent.addChildObject(child);
-                                --c;
-                            }
+                            newBone.removeChildObject(child);
+                            oldBone.addChildObject(child);
+                            --c;
                         }
                     }
                 }

@@ -811,7 +811,10 @@ public class SXRAvatar implements IEventReceiver
             SXRSkin skin = (SXRSkin) c;
             skin.setSkeleton(mSkeleton);
         }
-        mAvatarRoot.addChildObject(modelRoot);
+        if (modelRoot.getParent() == null)
+        {
+            mAvatarRoot.addChildObject(modelRoot);
+        }
         return a;
     }
 
@@ -858,11 +861,7 @@ public class SXRAvatar implements IEventReceiver
         {
             String eventName = "onModelLoaded";
 
-            if ((errors != null) && !errors.isEmpty())
-            {
-                Log.e(TAG, "Asset load errors: " + errors);
-            }
-            else
+            if (modelRoot != null)
             {
                 List<SXRComponent> skeletons = modelRoot.getAllComponents(SXRSkeleton.getComponentType());
 
