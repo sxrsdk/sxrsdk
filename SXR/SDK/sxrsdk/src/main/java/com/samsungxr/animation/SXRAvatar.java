@@ -149,7 +149,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
 
         protected void parseModelDescription(JSONObject root) throws JSONException
         {
-            for (String propName : new String[] { "type", "attachbone", "model", "bonemap" })
+            for (String propName : new String[] { "name", "type", "attachbone", "model", "bonemap" })
             {
                 if (root.has(propName))
                 {
@@ -774,6 +774,10 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
         if (a.getProperty("model") == null)
         {
             a.setProperty("model", filePath);
+        }
+        if (a.getProperty("name") != null)
+        {
+            mAvatarRoot.setName(a.getProperty("name"));
         }
         mSkeleton = skel;
         mSkeleton.poseFromBones();
