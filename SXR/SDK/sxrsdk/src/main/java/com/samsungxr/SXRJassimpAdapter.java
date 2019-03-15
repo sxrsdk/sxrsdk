@@ -210,11 +210,14 @@ class  SXRJassimpAdapter
         }
 
         IntBuffer indices = aiMesh.getIndexBuffer();
-        int len = indices.capacity();
-        SXRIndexBuffer indexBuffer = new SXRIndexBuffer(ctx, 4, len);
+        if (indices != null)
+        {
+            int len = indices.capacity();
+            SXRIndexBuffer indexBuffer = new SXRIndexBuffer(ctx, 4, len);
 
-        indexBuffer.setIntVec(indices);
-        mesh.setIndexBuffer(indexBuffer);
+            indexBuffer.setIntVec(indices);
+            mesh.setIndexBuffer(indexBuffer);
+        }
 
         if (verticesArray != null)
         {
