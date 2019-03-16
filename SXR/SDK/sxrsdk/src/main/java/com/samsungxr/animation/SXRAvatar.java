@@ -706,13 +706,24 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
     }
 
     /**
-     * Stops all of the animations associated with this animator.
+     * Stops the named animation.
+     * @param name  name of animation to stop.
      * @see SXRAvatar#start(String)
      * @see SXRAnimationEngine#stop(SXRAnimation)
      */
     public void stop(String name)
     {
         mAnimsToPlay.stop(name);
+    }
+
+    /**
+     * Stops all of the animations associated with this animator.
+     * @see SXRAvatar#startAll()
+     * @see SXRAnimationEngine#stop(SXRAnimation)
+     */
+    public void stop()
+    {
+        mAnimsToPlay.stop();
     }
 
     /**
