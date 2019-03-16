@@ -448,7 +448,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
      * @param modelName  name of model to remove.
      * @see #loadModel(SXRAndroidResource)
      */
-    public void removeModel(String modelName)
+    public boolean removeModel(String modelName)
     {
         Attachment a = mAttachments.get(modelName);
         if (a != null)
@@ -460,7 +460,9 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
                 mAvatarRoot.removeChildObject(root);
             }
             mAttachments.remove(modelName);
+            return true;
         }
+        return false;
     }
 
     protected Attachment findModel(SXRNode modelRoot)
