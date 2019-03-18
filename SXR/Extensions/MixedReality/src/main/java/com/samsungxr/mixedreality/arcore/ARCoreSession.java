@@ -521,7 +521,11 @@ public class ARCoreSession extends MRCommon {
 
     @Override
     protected SXRLightEstimate onGetLightEstimate() {
-        return mArCoreHelper.getLightEstimate(mLastARFrame.getLightEstimate());
+        if (mLastARFrame != null)
+        {
+            return mArCoreHelper.getLightEstimate(mLastARFrame.getLightEstimate());
+        }
+        return null;
     }
 
     @Override

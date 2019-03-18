@@ -1,6 +1,5 @@
 package com.samsungxr.animation;
 
-import com.samsungxr.SXRHybridObject;
 import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -14,6 +13,7 @@ public class SXRPoseMapper extends SXRAnimation
     protected SXRSkeleton mDestSkeleton;
     protected int[]       mBoneMap;
     protected SXRPose     mDestPose;
+    protected float       mScale = 1.0f;
 
     /**
      * Constructs an animation retargeting engine.
@@ -271,6 +271,10 @@ public class SXRPoseMapper extends SXRAnimation
         {
             return false;
         }
+        if (!dstskel.isEnabled() || !srcskel.isEnabled())
+        {
+            return false;
+        }
         if (mBoneMap == null)
         {
             mBoneMap = makeBoneMap(srcskel, dstskel);
@@ -283,6 +287,7 @@ public class SXRPoseMapper extends SXRAnimation
 
             mDestPose.clearRotations();
             srcskel.getPosition(v);
+            v.mul(mScale);
             for (int i = 0; i < numsrcbones; ++i)
             {
                 int boneindex = mBoneMap[i];
@@ -340,6 +345,26 @@ public class SXRPoseMapper extends SXRAnimation
         }
         dstpose.sync();
         return true;
+    }
+
+    /**
+     * Scale the output pose by a given factor.
+     * <p>
+     * The scale factor is applied to the computed positions.
+     * For example, you can take an animation that is originally in
+     * centimeters and convert it to meters.
+     * </p>
+     * @param sf    positive scale factor
+     * @see SXRSkin#scalePositions(float)
+     * @see SXRVertexBuffer#transform(Matrix4f, boolean)
+     */
+    public void setScale(float sf)
+    {
+        if (sf <= 0)
+        {
+            throw new IllegalArgumentException("Scale factor must be positive");
+        }
+        mScale = sf;
     }
 
 }

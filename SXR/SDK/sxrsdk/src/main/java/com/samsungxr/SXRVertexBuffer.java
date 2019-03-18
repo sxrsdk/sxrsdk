@@ -17,6 +17,8 @@ package com.samsungxr;
 
 import com.samsungxr.utility.Log;
 
+import org.joml.Matrix4f;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -576,6 +578,40 @@ public class SXRVertexBuffer extends SXRHybridObject implements PrettyPrint
         return rc != 0;
     }
 
+    /**
+     * Apply the given transform to the mesh.
+     * <p>
+     * Multiplies the vertices by the matrix, multiplies the normals
+     * by the inverse transpose of the matrix.
+     * </p>
+     * @param mtx float array with 4x4 matrix to apply
+     * @param doNormals if true, transform the normals by the inverse transpose of the matrix
+     */
+    public void transform(float[] mtx, boolean doNormals)
+    {
+        if (mtx.length != 16)
+        {
+            throw new IllegalArgumentException("The argument to transform must be a 4x4 matrix");
+        }
+        NativeVertexBuffer.transform(getNative(), mtx, doNormals);
+    }
+
+    /**
+     * Apply the given transform to the mesh.
+     * <p>
+     * Multiplies the vertices by the matrix, multiplies the normals
+     * by the inverse transpose of the matrix.
+     * </p>
+     * @param mtx float array with 4x4 matrix to apply
+     * @param doNormals if true, transform the normals by the inverse transpose of the matrix
+     */
+    public void transform(Matrix4f mtx, boolean doNormals)
+    {
+        float[] temp = new float[16];
+        mtx.get(temp);
+        NativeVertexBuffer.transform(getNative(), temp, doNormals);
+    }
+
     @Override
     public void prettyPrint(StringBuffer sb, int indent) {
         Integer n = getVertexCount();
@@ -614,6 +650,8 @@ class NativeVertexBuffer {
     static native int  getAttributeSize(long vbuf, String name);
 
     static native int getBoundingVolume(long vbuf, float[] bv);
+
+    static native void transform(long vbuf, float[] trans, boolean doNormals);
 
     static native void dump(long vbuf, String attrName);
 }

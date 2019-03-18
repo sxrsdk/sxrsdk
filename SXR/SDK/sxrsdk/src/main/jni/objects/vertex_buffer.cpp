@@ -7,6 +7,7 @@
 #include "vertex_buffer.h"
 #include "util/sxr_log.h"
 #include <sstream>
+#include "glm/gtc/matrix_inverse.hpp"
 
 namespace sxr {
 
@@ -152,7 +153,7 @@ namespace sxr {
         dest = reinterpret_cast<float*>(mVertexData) + attr->Offset / sizeof(float);
         dstStride = getTotalSize() / sizeof(float);
         srcend = src + srcSize;
-
+        markDirty();
         for (int i = 0; i < mVertexCount; ++i)
         {
             for (int j = 0; j < attrStride; ++j)
@@ -283,6 +284,7 @@ namespace sxr {
                 return rc;
             }
         }
+        markDirty();
         dest = reinterpret_cast<int*>(mVertexData) + attr->Offset / sizeof(int);
         dstStride = getTotalSize() / sizeof(int);
         srcend = src + srcSize;
@@ -388,6 +390,52 @@ namespace sxr {
         }
         LOGE("VertexBuffer: ERROR: no vertex buffer allocated\n");
         return 0;
+    }
+
+    void VertexBuffer::transform(glm::mat4& mtx, bool doNormals)
+    {
+        const DataEntry* normEntry = find("a_normal");
+        float*    data = reinterpret_cast<float*>(mVertexData);
+        int       stride = getVertexSize();
+
+        if (data == NULL)
+        {
+            return;
+        }
+        markDirty();
+        if (doNormals && normEntry)
+        {
+            std::lock_guard<std::mutex> lock(mLock);
+            glm::mat4 invTranspose = glm::transpose(glm::inverse(mtx));
+            int normOfs = normEntry->Offset / sizeof(float);
+            for (int i = 0; i < mVertexCount; ++i)
+            {
+                glm::vec4 p(data[0], data[1], data[2], 1);
+                glm::vec4 n(data[normOfs], data[normOfs + 1], data[normOfs + 2], 1);
+                p = p * mtx;
+                data[0] = p.x;
+                data[1] = p.y;
+                data[2] = p.z;
+                n = n * invTranspose;
+                data[normOfs] = n.x;
+                data[normOfs + 1] = n.y;
+                data[normOfs + 2] = n.z;
+                data += stride;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < mVertexCount; ++i)
+            {
+                std::lock_guard<std::mutex> lock(mLock);
+                glm::vec4 p(data[0], data[1], data[2], 1);
+                p = p * mtx;
+                data[0] = p.x;
+                data[1] = p.y;
+                data[2] = p.z;
+                data += stride;
+            }
+        }
     }
 
     bool VertexBuffer::forAllVertices(std::function<void(int iter, const float* vertex)> func) const
