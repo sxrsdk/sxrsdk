@@ -54,7 +54,9 @@ SXRActivity::SXRActivity(JNIEnv &env, jobject activity, jobject vrAppSettings) :
         mCaptureLeftEyeMethod = GetMethodId(env, viewManagerClass, "captureLeftEye", "(IIZ)V");
         mCaptureRightEyeMethod = GetMethodId(env, viewManagerClass, "captureRightEye", "(IIZ)V");
         mCaptureFinishMethod = GetMethodId(env, viewManagerClass, "captureFinish", "()V");
-        mCapture3DScreenShot= GetMethodId(env, viewManagerClass, "capture3DScreenShot", "(IIZ)V");
+        mCapture3DScreenShot = GetMethodId(env, viewManagerClass, "capture3DScreenShot", "(IIZ)V");
+
+        mGetCaptureTargets = GetMethodId(env, viewManagerClass, "getCaptureTargets", "()I");
 
         mainThreadId_ = gettid();
     }
@@ -378,6 +380,13 @@ void SXRActivity::onDrawFrame(JNIEnv* env, jobject jViewManager, jobject javaMai
     parms.DisplayTime = predictedDisplayTime;
     parms.LayerCount = 1;
 
+    constexpr int SCREENSHOT_TARGET_CENTER = 0x01;
+    constexpr int SCREENSHOT_TARGET_LEFT = 0x02;
+    constexpr int SCREENSHOT_TARGET_RIGHT = 0x04;
+    constexpr int SCREENSHOT_TARGET_3D = 0x08;
+
+    const int captureTargets = env->CallIntMethod(jViewManager, mGetCaptureTargets);
+
     // Render the eye images; @todo fix this unwieldy loop
     for (int eye = 0; eye < eyeCount; eye++) {
         int textureSwapChainIndex = frameBuffer_[eye].mTextureSwapChainIndex;
@@ -385,7 +394,9 @@ void SXRActivity::onDrawFrame(JNIEnv* env, jobject jViewManager, jobject javaMai
         Camera *centerCamera = static_cast<Camera *>(cameraRig_->center_camera());
 
         if (0 == eye) {
-            env->CallVoidMethod(jViewManager, mCapture3DScreenShot, eye, textureSwapChainIndex, gUseMultiview);
+            if (SCREENSHOT_TARGET_3D & captureTargets) {
+                env->CallVoidMethod(jViewManager, mCapture3DScreenShot, eye, textureSwapChainIndex, gUseMultiview);
+            }
 
             renderer->cullFromCamera(mainScene, javaMainScene, centerCamera, mMaterialShaderManager, mRenderDataVector);
             if (!mUseCursorLayer) {
@@ -399,7 +410,15 @@ void SXRActivity::onDrawFrame(JNIEnv* env, jobject jViewManager, jobject javaMai
             renderer->state_sort(mRenderDataVector[Renderer::LAYER_NORMAL]);
             mainScene->getLights().shadersRebuilt();
 
-            env->CallVoidMethod(jViewManager, mCaptureCenterEyeMethod, eye, textureSwapChainIndex, gUseMultiview);
+            if (SCREENSHOT_TARGET_CENTER & captureTargets) {
+                renderTarget->setCamera(centerCamera);
+                renderer->renderRenderTarget(Scene::main_scene(), javaMainScene, renderTarget,
+                                             mMaterialShaderManager,
+                                             mPostEffectRenderTextureA, mPostEffectRenderTextureB,
+                                             &mRenderDataVector[Renderer::LAYER_NORMAL]);
+
+                env->CallVoidMethod(jViewManager, mCaptureCenterEyeMethod, eye, textureSwapChainIndex, gUseMultiview);
+            }
 
             Camera *leftCamera = cameraRig_->left_camera();
             renderTarget->setCamera(leftCamera);
@@ -407,8 +426,9 @@ void SXRActivity::onDrawFrame(JNIEnv* env, jobject jViewManager, jobject javaMai
                                          mMaterialShaderManager,
                                          mPostEffectRenderTextureA, mPostEffectRenderTextureB,
                                          &mRenderDataVector[Renderer::LAYER_NORMAL]);
-
-            env->CallVoidMethod(jViewManager, mCaptureLeftEyeMethod, eye, textureSwapChainIndex, gUseMultiview);
+            if (SCREENSHOT_TARGET_LEFT & captureTargets) {
+                env->CallVoidMethod(jViewManager, mCaptureLeftEyeMethod, eye, textureSwapChainIndex, gUseMultiview);
+            }
 
         } else if (1 == eye) {
             Camera *rightCamera = cameraRig_->right_camera();
@@ -418,8 +438,12 @@ void SXRActivity::onDrawFrame(JNIEnv* env, jobject jViewManager, jobject javaMai
                                          mPostEffectRenderTextureA, mPostEffectRenderTextureB,
                                          &mRenderDataVector[Renderer::LAYER_NORMAL]);
 
-            env->CallVoidMethod(jViewManager, mCaptureRightEyeMethod, eye, textureSwapChainIndex, gUseMultiview);
-            env->CallVoidMethod(jViewManager, mCaptureFinishMethod);
+            if (SCREENSHOT_TARGET_RIGHT & captureTargets) {
+                env->CallVoidMethod(jViewManager, mCaptureRightEyeMethod, eye, textureSwapChainIndex, gUseMultiview);
+            }
+            if (0 != captureTargets) {
+                env->CallVoidMethod(jViewManager, mCaptureFinishMethod);
+            }
         }
 
         if (gRenderer->isVulkanInstance()) {

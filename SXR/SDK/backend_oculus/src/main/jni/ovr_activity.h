@@ -96,6 +96,7 @@ class RenderTarget;
         jmethodID mCaptureRightEyeMethod;
         jmethodID mCaptureFinishMethod;
         jmethodID mCapture3DScreenShot;
+        jmethodID mGetCaptureTargets;
 
     public:
         void onSurfaceCreated(JNIEnv& env);
@@ -118,6 +119,7 @@ class RenderTarget;
 
         void initialize(sxr::ShaderManager *shaderManager, sxr::RenderTexture *textureA,
                     sxr::RenderTexture *textureB);
+
     };
 
 }
