@@ -118,6 +118,9 @@ public class SXRMixedReality implements IMixedReality
     public float getARToVRScale() { return mSession.getARToVRScale(); }
 
     @Override
+    public void setARToVRScale(float scale) { mSession.setARToVRScale(scale); }
+
+    @Override
     public float getScreenDepth() { return mSession.getScreenDepth(); }
 
     @Override
@@ -158,25 +161,13 @@ public class SXRMixedReality implements IMixedReality
     }
 
     @Override
-    public SXRAnchor createAnchor(float[] pose) {
+    public SXRAnchor createAnchor(float[] pose, SXRNode owner) {
         if (mState == SessionState.ON_PAUSE) {
             throw new UnsupportedOperationException("Session is not resumed");
         }
-        return mSession.createAnchor(pose);
+        return mSession.createAnchor(pose, owner);
     }
 
-    @Override
-    public SXRNode createAnchorNode(float[] pose)
-    {
-        SXRAnchor anchor = createAnchor(pose);
-        if (anchor != null)
-        {
-            SXRNode node = new SXRNode(anchor.getSXRContext());
-            node.attachComponent(anchor);
-            return node;
-        }
-        return null;
-    }
 
     @Override
     public void updateAnchorPose(SXRAnchor anchor, float[] pose) {

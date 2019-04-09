@@ -56,6 +56,12 @@ public interface IMixedReality extends IEventReceiver
      */
     float getARToVRScale();
 
+
+    /**
+     * Set the scale factor from AR to VR
+     */
+    void setARToVRScale(float scale);
+
     /**
      * Get the Z depth of the touch screen.
      * <p>
@@ -89,18 +95,12 @@ public interface IMixedReality extends IEventReceiver
      * Create an anchor with the specified pose.
      *
      * @param pose 4x4 matrix with real world position and orientation
+     * @param owner {@link SXRNode} to attach the anchor component to.
+     *                             This node will be moved and rotated by the anchor.
      * @return The anchor created
      */
-    SXRAnchor createAnchor(float[] pose);
+    SXRAnchor createAnchor(float[] pose, SXRNode owner);
 
-    /**
-     * Create an anchor with the specified pose and attach it
-     * to a newly created node.
-     *
-     * @param pose 4x4 matrix with real world position and orientation
-     * @return The node created with the SXRAnchor component attached.
-     */
-    SXRNode createAnchorNode(float[] pose);
 
     /**
      * Update the pose of an anchor.

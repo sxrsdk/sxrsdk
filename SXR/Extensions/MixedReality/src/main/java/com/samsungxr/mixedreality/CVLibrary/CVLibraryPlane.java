@@ -20,6 +20,8 @@ import com.google.ar.core.Pose;
 import android.support.annotation.NonNull;
 
 import com.samsungxr.SXRContext;
+import com.samsungxr.SXRNode;
+import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRPlane;
 import com.samsungxr.mixedreality.SXRTrackingState;
 
@@ -27,23 +29,14 @@ import java.nio.FloatBuffer;
 
 
 class CVLibraryPlane extends SXRPlane {
-    //private Plane mARPlane;
-    private CVLibraryPose mPose;
+    private final CVLibraryPose mPose;
+    private final CVLibrarySession mSession;
 
-    protected CVLibraryPlane(SXRContext gvrContext) {
+    protected CVLibraryPlane(SXRContext gvrContext, CVLibrarySession session) {
         super(gvrContext);
+        mSession = session;
         mPose = new CVLibraryPose();
         mPlaneType = Type.HORIZONTAL_UPWARD_FACING;
-
-//        if (mARPlane.getType() == Plane.Type.HORIZONTAL_DOWNWARD_FACING) {
-//            mType = Type.HORIZONTAL_DOWNWARD_FACING;
-//        }
-//        else if (mARPlane.getType() == Plane.Type.HORIZONTAL_UPWARD_FACING) {
-//            mType = Type.HORIZONTAL_UPWARD_FACING;
-//        }
-//        else {
-//            mType = Type.VERTICAL;
-//        }
     }
 
     public void getCenterPose(@NonNull float[] poseOut)
@@ -134,6 +127,12 @@ class CVLibraryPlane extends SXRPlane {
 //                    mARPlane.getExtentZ() * 0.95f, 1.0f);
 //        }
         return;
+    }
+
+    @Override
+    public SXRAnchor createAnchor(float[] pose, SXRNode owner)
+    {
+        return mSession.createAnchor(pose, owner);
     }
 
     public boolean isPoseInPolygon(float[] pose)

@@ -16,20 +16,28 @@
 package com.samsungxr.mixedreality.CVLibrary;
 
 //import com.google.ar.core.AugmentedImage;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRNode;
+import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRMarker;
 import com.samsungxr.mixedreality.SXRTrackingState;
 
 /**
  * Represents an ARCore Augmented Image
  */
-public class CVLibraryAugmentedImage extends SXRMarker
+public class CVLibrarayMarker extends SXRMarker
 {
+    private final CVLibrarySession mSession;
+
     //private AugmentedImage mAugmentedImage;
 
-    protected CVLibraryAugmentedImage() {
-        //mAugmentedImage = augmentedImage;
+    protected CVLibrarayMarker(SXRContext ctx, CVLibrarySession session) {
+        super(ctx);
+        mSession = session;
         mTrackingState = SXRTrackingState.PAUSED;
     }
+
+    public String getName() { return "unknown"; }
 
     /**
      * @return Returns the estimated width
@@ -58,6 +66,12 @@ public class CVLibraryAugmentedImage extends SXRMarker
         float[] centerPose = new float[16];
         //mAugmentedImage.getCenterPose().toMatrix(centerPose, 0);
         return centerPose;
+    }
+
+    @Override
+    public SXRAnchor createAnchor(SXRNode owner)
+    {
+        return mSession.createAnchor(getCenterPose(), owner);
     }
 
     /**

@@ -20,7 +20,6 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXRNode;
 import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRTrackingState;
-import com.samsungxr.mixedreality.arcore.ARCorePose;
 
 /**
  * Represents a ARCore anchor in the scene.
@@ -32,16 +31,6 @@ public class CVLibraryAnchor extends SXRAnchor {
         super(ctx);
     }
 
-    /**
-     * Sets ARCore anchor
-     *
-     *   ARCore Anchor instance
-     */
-    protected void setAnchorAR() {
-
-        //this.mAnchor = anchor;
-        return;
-    }
 
     /**
      * Set the anchor tracking state

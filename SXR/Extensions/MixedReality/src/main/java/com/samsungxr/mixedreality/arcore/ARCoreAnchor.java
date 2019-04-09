@@ -22,18 +22,24 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXRNode;
 import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRTrackingState;
+import com.samsungxr.utility.Log;
+
+import org.joml.Matrix4f;
 
 /**
  * Represents a ARCore anchor in the scene.
  *
  */
-public class ARCoreAnchor extends SXRAnchor {
+public class ARCoreAnchor extends SXRAnchor
+{
+    private final ARCoreSession mSession;
     private Anchor mAnchor;
-    private ARCorePose mPose;
+    private float[] mPose = new float[16];
 
-    protected ARCoreAnchor(SXRContext gvrContext) {
-        super(gvrContext);
-        mPose = new ARCorePose();
+    protected ARCoreAnchor(ARCoreSession session)
+    {
+        super(session.getSXRContext());
+        mSession = session;
     }
 
     /**
@@ -68,42 +74,35 @@ public class ARCoreAnchor extends SXRAnchor {
     public String getCloudAnchorId() {
         return mAnchor.getCloudAnchorId();
     }
-/*
-    @Override
-    public float[] makeTranslate(float x, float y, float z) {
-        float[] newPose = new float[16];
-        Pose pose = mAnchor.getPose().compose(Pose.makeTranslation(x, y, z));
-        pose.toMatrix(newPose, 0);
-        return newPose;
-    }
-*/
+
     /**
      * Update the anchor based on arcore best knowledge of the world
-     *
-     * @param scale
      */
-    protected void update(float scale) {
+    protected void update()
+    {
         // Updates only when the plane is in the scene
         SXRNode owner = getOwnerObject();
 
         if ((owner != null) && isEnabled() && owner.isEnabled())
         {
-            convertFromARtoVRSpace(scale);
+            float[] mtx = getPose();
+            Log.d("ARCORE", "SXRAnchor.update %f, %f, %f", mtx[11], mtx[12], mtx[13]);
+            getOwnerObject().getTransform().setModelMatrix(mtx);
         }
     }
 
-    /**
-     * Converts from ARCore world space to SXRf's world space.
-     *
-     * @param scale Scale from AR to SXRf world.
-     */
-    protected void convertFromARtoVRSpace(float scale) {
-        mPose.update(mAnchor.getPose(), scale);
-        getTransform().setModelMatrix(mPose.getPoseMatrix());
+    public final float[] getPose()
+    {
+        mAnchor.getPose().toMatrix(mPose, 0);
+        mSession.ar2gvr(mPose);
+        return mPose;
     }
 
-    public float[] getPose()
+    public void detach()
     {
-        return mPose.getPoseMatrix();
+        if (mAnchor != null)
+        {
+            mAnchor.detach();
+        }
     }
 }
