@@ -30,6 +30,14 @@
 #include "objects/scene.h"
 #include "objects/components/skin.h"
 
+#ifndef GL_TEXTURE_BORDER_COLOR
+#define GL_TEXTURE_BORDER_COLOR 0x1004
+#endif
+
+#ifndef GL_CLAMP_TO_BORDER
+#define GL_CLAMP_TO_BORDER 0x812D
+#endif
+
 namespace sxr
 {
     ShaderData *GLRenderer::createMaterial(const char* uniform_desc, const char* texture_desc)
@@ -236,7 +244,14 @@ namespace sxr
         std::vector<RenderData*>* render_data_vector = renderTarget->getRenderDataVector();
         LightList& lights = scene->getLights();
 
-        if (!rstate.is_shadow)
+        if (rstate.is_shadow)
+        {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+        }
+        else
         {
             rstate.render_mask = camera->render_mask();
             if (rstate.is_multiview)
@@ -250,6 +265,9 @@ namespace sxr
             GL(glBlendEquation (GL_FUNC_ADD));
             GL(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
             GL(glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE));
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
             rstate.lightsChanged = lights.isDirty();
 
             if (lights.usingUniformBlock())
