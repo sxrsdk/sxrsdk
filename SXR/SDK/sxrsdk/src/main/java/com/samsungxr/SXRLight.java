@@ -45,7 +45,7 @@ import org.joml.Vector3f;
  */
 public class SXRLight extends SXRJavaComponent implements SXRDrawFrameListener
 {
-    protected final static String UNIFORM_DESC = "float enabled float shadow_map_index float pad1 float pad2 float4 world_position float4 world_direction ";
+    protected final static String UNIFORM_DESC = "float enabled float shadow_map_index float shadow_level float pad2 float4 world_position float4 world_direction ";
     protected Matrix4f mLightRot;
     protected Vector3f mOldDir;
     protected Vector3f mOldPos;
@@ -69,6 +69,7 @@ public class SXRLight extends SXRJavaComponent implements SXRDrawFrameListener
         mNewPos = new Vector3f();
         mNewDir = new Vector3f(0.0f, 0.0f, -1.0f);
         setFloat("enabled", 1.0f);
+        setFloat("shadow_level", 0.5f);
         setVec4("world_position", 0.0f, 0.0f, 0.0f, 10.0f);
         setVec4("world_direction", 0.0f, 0.0f, 1.0f, 0.0f);
     }
