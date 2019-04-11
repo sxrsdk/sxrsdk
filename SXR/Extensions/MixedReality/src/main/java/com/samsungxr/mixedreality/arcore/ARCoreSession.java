@@ -271,7 +271,6 @@ public class ARCoreSession implements IMixedReality
 
         convertMatrixPoseToVector(arPose, translation, rotation);
 
-        Log.d(TAG, "updateAnchor %f, %f, %f", translation[0], translation[1], translation[2]);
         Anchor arAnchor = mSession.createAnchor(new Pose(translation, rotation));
         if (coreAnchor.getAnchorAR() != null)
         {
@@ -478,7 +477,6 @@ public class ARCoreSession implements IMixedReality
     {
         Pose arpose = makePose(pose);
         Anchor anchor = mSession.createAnchor(arpose);
-        Log.d(TAG, "createAnchor %f, %f, %f", arpose.tx(), arpose.ty(), arpose.tz());
         return addAnchor(anchor, owner);
     }
 
@@ -602,6 +600,7 @@ public class ARCoreSession implements IMixedReality
 
         mARPassThroughObject.getRenderData().setRenderingOrder(SXRRenderData.SXRRenderingOrder.BACKGROUND);
         mARPassThroughObject.getRenderData().setDepthTest(false);
+        mARPassThroughObject.getRenderData().setCastShadows(false);
         mARPassThroughObject.getTransform().setPosition(0, 0, mDisplayGeometry.z);
         mARPassThroughObject.attachComponent(new SXRMeshCollider(gvrContext, true));
         mARPassThroughObject.setName("ARPassThrough");
