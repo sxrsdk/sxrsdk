@@ -864,6 +864,10 @@ public class Widget implements Layout.WidgetContainer {
         mRenderDataCache.setRenderingOrder(renderingOrder);
     }
 
+    public void setAlphaBlend(final boolean alphaBlend) {
+        mRenderDataCache.setAlphaBlend(alphaBlend);
+    }
+
     /**
      * @return The order in which this {@link Widget} will be rendered.
      * @see SXRRenderingOrder
