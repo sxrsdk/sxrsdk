@@ -881,6 +881,7 @@ public class Widget implements Layout.WidgetContainer {
         mRenderDataCache.setCullFace(cullFace);
     }
 
+
     /**
      * Enable clipping for the Widget. Widget content including its children will be clipped by a
      * rectangular View Port. By default clipping is disabled.
@@ -3754,6 +3755,7 @@ public class Widget implements Layout.WidgetContainer {
                     SXRShaderType.Texture.ID);
             material.setMainTexture(sDefaultTexture);
             renderData.setMaterial(material);
+            renderData.setCastShadows(false);
         }
     }
 

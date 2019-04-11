@@ -21,6 +21,7 @@ class RenderDataCache {
         mExternalRenderData = sceneObject.getRenderData();
         if (mExternalRenderData != null) {
             mRenderData = new SXRRenderData(sceneObject.getSXRContext());
+            mRenderData.setCastShadows(false);
             mRenderData.setDepthTest(mExternalRenderData.getDepthTest());
             mRenderData.setMesh(mExternalRenderData.getMesh());
             mRenderData.setOffset(mExternalRenderData.getOffset());
