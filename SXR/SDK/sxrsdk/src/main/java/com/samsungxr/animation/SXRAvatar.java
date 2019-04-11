@@ -434,6 +434,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
         else
         {
             modelInfo = mAttachments.get("avatar");
+            mSkeleton = null;
         }
         modelInfo.setModelRoot(modelRoot);
         modelInfo.parseModelDescription(modelDesc);
@@ -791,6 +792,11 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
         if (a.getProperty("name") != null)
         {
             mAvatarRoot.setName(a.getProperty("name"));
+        }
+        while (mAvatarRoot.getChildrenCount() > 0)
+        {
+            SXRNode child = mAvatarRoot.getChildByIndex(0);
+            mAvatarRoot.removeChildObject(child);
         }
         mSkeleton = skel;
         mSkeleton.poseFromBones();

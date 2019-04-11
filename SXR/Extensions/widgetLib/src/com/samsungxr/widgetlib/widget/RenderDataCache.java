@@ -98,6 +98,13 @@ class RenderDataCache {
         }
     }
 
+    void setAlphaBlend(boolean flag) {
+        if (mRenderData != null) {
+            SET_ALPHA_BLEND.buffer(mExternalRenderData, flag);
+            mRenderData.setAlphaBlend(flag);
+        }
+    }
+
     void setRenderingOrder(int renderingOrder) {
         if (mRenderData != null) {
             SET_RENDERING_ORDER.buffer(mExternalRenderData, renderingOrder);
@@ -264,6 +271,21 @@ class RenderDataCache {
                 final SXRRenderData renderData = (SXRRenderData) params[0];
                 final boolean depthTest = (boolean) params[1];
                 renderData.setDepthTest(depthTest);
+            }
+        };
+    }
+
+    private static final class SET_ALPHA_BLEND {
+        static void buffer(SXRRenderData renderData, boolean alphaBlend) {
+            CommandBuffer.Command.buffer(sExecutor, renderData, alphaBlend);
+        }
+
+        private static final Command.Executor sExecutor = new Command.Executor() {
+            @Override
+            public void exec(Object... params) {
+                final SXRRenderData renderData = (SXRRenderData) params[0];
+                final boolean alphaBlend = (boolean) params[1];
+                renderData.setAlphaBlend(alphaBlend);
             }
         };
     }
