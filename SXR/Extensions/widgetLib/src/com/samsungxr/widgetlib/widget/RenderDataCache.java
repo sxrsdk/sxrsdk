@@ -21,6 +21,7 @@ class RenderDataCache {
         mExternalRenderData = sceneObject.getRenderData();
         if (mExternalRenderData != null) {
             mRenderData = new SXRRenderData(sceneObject.getSXRContext());
+            mRenderData.setCastShadows(false);
             mRenderData.setDepthTest(mExternalRenderData.getDepthTest());
             mRenderData.setMesh(mExternalRenderData.getMesh());
             mRenderData.setOffset(mExternalRenderData.getOffset());
@@ -95,6 +96,13 @@ class RenderDataCache {
         if (mRenderData != null) {
             SET_OFFSET_FACTOR.buffer(mExternalRenderData, offsetFactor);
             mRenderData.setOffsetFactor(offsetFactor);
+        }
+    }
+
+    void setAlphaBlend(boolean flag) {
+        if (mRenderData != null) {
+            SET_ALPHA_BLEND.buffer(mExternalRenderData, flag);
+            mRenderData.setAlphaBlend(flag);
         }
     }
 
@@ -264,6 +272,21 @@ class RenderDataCache {
                 final SXRRenderData renderData = (SXRRenderData) params[0];
                 final boolean depthTest = (boolean) params[1];
                 renderData.setDepthTest(depthTest);
+            }
+        };
+    }
+
+    private static final class SET_ALPHA_BLEND {
+        static void buffer(SXRRenderData renderData, boolean alphaBlend) {
+            CommandBuffer.Command.buffer(sExecutor, renderData, alphaBlend);
+        }
+
+        private static final Command.Executor sExecutor = new Command.Executor() {
+            @Override
+            public void exec(Object... params) {
+                final SXRRenderData renderData = (SXRRenderData) params[0];
+                final boolean alphaBlend = (boolean) params[1];
+                renderData.setAlphaBlend(alphaBlend);
             }
         };
     }
