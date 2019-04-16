@@ -204,13 +204,10 @@ namespace sxr
         transform_ubo_[0]->useGPUBuffer(false);
     }
 
-
-    void GLRenderer::renderRenderTarget(Scene* scene, jobject javaSceneObject, RenderTarget* renderTarget,
-                            ShaderManager* shader_manager,
-                            RenderTexture* post_effect_render_texture_a,
-                            RenderTexture* post_effect_render_texture_b)
+    void GLRenderer::renderRenderTarget(Scene* scene, jobject javaSceneObject, RenderTarget* renderTarget, ShaderManager* shader_manager,
+                                        RenderTexture* post_effect_render_texture_a, RenderTexture* post_effect_render_texture_b,
+                                        std::vector<RenderData*>* render_data_vector)
     {
-
         resetStats();
         renderTarget->beginRendering(this);
 
@@ -233,7 +230,6 @@ namespace sxr
         rstate.uniforms.u_view_inv = glm::inverse(camera->getViewMatrix());
         rstate.shadow_map = nullptr;
         rstate.lightsChanged = false;
-        std::vector<RenderData*>* render_data_vector = renderTarget->getRenderDataVector();
         LightList& lights = scene->getLights();
 
         if (!rstate.is_shadow)
@@ -323,6 +319,7 @@ namespace sxr
             renderPostEffectData(rstate, input_texture, post_effects, npost);
         }
         GL(glDisable(GL_BLEND));
+
         renderTarget->endRendering(this);
     }
 
@@ -466,89 +463,86 @@ namespace sxr
         }
     }
 
-    void GLRenderer::occlusion_cull(RenderState &rstate, std::vector<Node*> &scene_objects, std::vector<RenderData*>* render_data_vector)
+    void GLRenderer::occlusion_cull(RenderState &rstate, std::vector<Node*>* sceneObjectsArray, std::vector<RenderData*>* render_data_vector)
     {
-        if (!occlusion_cull_init(rstate, scene_objects, render_data_vector))
+        if (!occlusion_cull_init(rstate, sceneObjectsArray, render_data_vector))
             return;
 
-        for (auto it = scene_objects.begin(); it != scene_objects.end(); ++it)
-        {
-            Node* scene_object = (*it);
-            RenderData* render_data = scene_object->render_data();
+        for (int i = 0; i < Renderer::MAX_LAYERS; ++i) {
+            std::vector<Node*>& scene_objects = sceneObjectsArray[i];
+            for (auto it = scene_objects.begin(); it != scene_objects.end(); ++it) {
+                Node *scene_object = (*it);
+                RenderData *render_data = scene_object->render_data();
 
-            if (render_data == 0 || render_data->material(0) == 0)
-            {
-                continue;
-            }
-
-            //If a query was issued on an earlier or same frame and if results are
-            //available, then update the same. If results are unavailable, do nothing
-            if (!scene_object->is_query_issued())
-            {
-                continue;
-            }
-
-            //If a previous query is active, do not issue a new query.
-            //This avoids overloading the GPU with too many queries
-            //Queries may span multiple frames
-
-            bool is_query_issued = scene_object->is_query_issued();
-            if (!is_query_issued)
-            {
-                //Setup basic bounding box and material
-                RenderData *bounding_box_render_data(createRenderData());
-                Mesh *bounding_box_mesh = render_data->mesh()->createBoundingBox();
-                ShaderData *bbox_material = new GLMaterial("", "");
-                RenderPass *pass = Renderer::getInstance()->createRenderPass();
-                GLShader *bboxShader = static_cast<GLShader *>(rstate.shader_manager
-                        ->findShader("SXRBoundingBoxShader"));
-                pass->set_shader(bboxShader->getProgramId(), false);
-                pass->set_material(bbox_material);
-                bounding_box_render_data->set_mesh(bounding_box_mesh);
-                bounding_box_render_data->add_pass(pass);
-                if (bounding_box_render_data->isValid(this, rstate) >= 0)
-                {
-                    GLuint* query = scene_object->get_occlusion_array();
-
-                    glDepthFunc(GL_LEQUAL);
-                    glEnable(GL_DEPTH_TEST);
-                    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-                    rstate.uniforms.u_model = scene_object->transform()->getModelMatrix();
-                    rstate.uniforms.u_mv = rstate.uniforms.u_view * rstate.uniforms.u_model;
-                    rstate.uniforms.u_mv_it = glm::inverseTranspose(rstate.uniforms.u_mv);
-                    rstate.uniforms.u_mvp = rstate.uniforms.u_proj * rstate.uniforms.u_mv;
-
-                    //Issue the query only with a bounding box
-                    glBeginQuery(GL_ANY_SAMPLES_PASSED, query[0]);
-                    renderWithShader(rstate, bboxShader, bounding_box_render_data,
-                                     bounding_box_render_data->material(0), 0);
-                    glEndQuery(GL_ANY_SAMPLES_PASSED);
-                    scene_object->set_query_issued(true);
-
-                    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
-                    //Delete the generated bounding box mesh
-                    delete bounding_box_mesh;
-                    delete bbox_material;
-                    delete pass;
-                    delete bounding_box_render_data;
+                if (render_data == 0 || render_data->material(0) == 0) {
+                    continue;
                 }
-            }
 
-            GLuint query_result = GL_FALSE;
-            GLuint *query = (*it)->get_occlusion_array();
-            glGetQueryObjectuiv(query[0], GL_QUERY_RESULT_AVAILABLE, &query_result);
+                //If a query was issued on an earlier or same frame and if results are
+                //available, then update the same. If results are unavailable, do nothing
+                if (!scene_object->is_query_issued()) {
+                    continue;
+                }
 
-            if (query_result)
-            {
-                GLuint pixel_count;
-                glGetQueryObjectuiv(query[0], GL_QUERY_RESULT, &pixel_count);
-                bool visibility = ((pixel_count & GL_TRUE) == GL_TRUE);
+                //If a previous query is active, do not issue a new query.
+                //This avoids overloading the GPU with too many queries
+                //Queries may span multiple frames
 
-                (*it)->set_visible(visibility);
-                (*it)->set_query_issued(false);
-                addRenderData((*it)->render_data(), rstate, *render_data_vector);
+                bool is_query_issued = scene_object->is_query_issued();
+                if (!is_query_issued) {
+                    //Setup basic bounding box and material
+                    RenderData *bounding_box_render_data(createRenderData());
+                    Mesh *bounding_box_mesh = render_data->mesh()->createBoundingBox();
+                    ShaderData *bbox_material = new GLMaterial("", "");
+                    RenderPass *pass = Renderer::getInstance()->createRenderPass();
+                    GLShader *bboxShader = static_cast<GLShader *>(rstate.shader_manager
+                            ->findShader("SXRBoundingBoxShader"));
+                    pass->set_shader(bboxShader->getProgramId(), false);
+                    pass->set_material(bbox_material);
+                    bounding_box_render_data->set_mesh(bounding_box_mesh);
+                    bounding_box_render_data->add_pass(pass);
+                    if (bounding_box_render_data->isValid(this, rstate) >= 0) {
+                        GLuint *query = scene_object->get_occlusion_array();
+
+                        glDepthFunc(GL_LEQUAL);
+                        glEnable(GL_DEPTH_TEST);
+                        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+                        rstate.uniforms.u_model = scene_object->transform()->getModelMatrix();
+                        rstate.uniforms.u_mv = rstate.uniforms.u_view * rstate.uniforms.u_model;
+                        rstate.uniforms.u_mv_it = glm::inverseTranspose(rstate.uniforms.u_mv);
+                        rstate.uniforms.u_mvp = rstate.uniforms.u_proj * rstate.uniforms.u_mv;
+
+                        //Issue the query only with a bounding box
+                        glBeginQuery(GL_ANY_SAMPLES_PASSED, query[0]);
+                        renderWithShader(rstate, bboxShader, bounding_box_render_data,
+                                         bounding_box_render_data->material(0), 0);
+                        glEndQuery(GL_ANY_SAMPLES_PASSED);
+                        scene_object->set_query_issued(true);
+
+                        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+                        //Delete the generated bounding box mesh
+                        delete bounding_box_mesh;
+                        delete bbox_material;
+                        delete pass;
+                        delete bounding_box_render_data;
+                    }
+                }
+
+                GLuint query_result = GL_FALSE;
+                GLuint *query = (*it)->get_occlusion_array();
+                glGetQueryObjectuiv(query[0], GL_QUERY_RESULT_AVAILABLE, &query_result);
+
+                if (query_result) {
+                    GLuint pixel_count;
+                    glGetQueryObjectuiv(query[0], GL_QUERY_RESULT, &pixel_count);
+                    bool visibility = ((pixel_count & GL_TRUE) == GL_TRUE);
+
+                    (*it)->set_visible(visibility);
+                    (*it)->set_query_issued(false);
+                    addRenderData((*it)->render_data(), rstate, *render_data_vector);
+                }
             }
         }
         rstate.scene->unlockColliders();

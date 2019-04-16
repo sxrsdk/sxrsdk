@@ -44,15 +44,9 @@ public:
     explicit RenderTarget(RenderTexture*, bool is_multiview);
     explicit RenderTarget(Scene*);
     explicit RenderTarget(Scene*, int defaultViewportW, int defaultViewportH);
-    explicit RenderTarget(RenderTexture*, const RenderTarget* source);
     RenderTarget();
     virtual ~RenderTarget();
-    void attachNextRenderTarget(RenderTarget* renderTarget){
-        mNextRenderTarget = renderTarget;
-    }
-    RenderTarget*   getNextRenderTarget(){
-        return mNextRenderTarget;
-    }
+
     void            setMainScene(Scene* scene){mRenderState.scene = scene;}
     void            setCamera(Camera* cam) { mRenderState.camera= cam; }
     Camera*         getCamera() const { return mRenderState.camera; }
@@ -63,8 +57,8 @@ public:
     virtual void    beginRendering(Renderer* renderer);
     virtual void    endRendering(Renderer* renderer);
     static long long getComponentType() { return COMPONENT_TYPE_RENDER_TARGET; }
-    std::vector<RenderData*>* getRenderDataVector(){
-        return mRenderDataVector.get();
+    std::vector<RenderData*>* getRenderDataVector() {
+        return mRenderDataVector;
     }
     virtual void cullFromCamera(Scene*, jobject javaNode, Camera* camera, Renderer* renderer, ShaderManager* shader_manager);
 private:
@@ -74,10 +68,9 @@ private:
     RenderTarget& operator=(RenderTarget&& render_texture) = delete;
 
 protected:
-    RenderTarget*   mNextRenderTarget;
     RenderState     mRenderState;
     RenderTexture*  mRenderTexture = nullptr;
-    std::shared_ptr<std::vector<RenderData*>> mRenderDataVector;
+    std::vector<RenderData*> mRenderDataVector[Renderer::MAX_LAYERS];
 };
 
 }

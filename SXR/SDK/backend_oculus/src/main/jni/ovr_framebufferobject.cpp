@@ -32,7 +32,6 @@ typedef void (GL_APIENTRY* PFNGLFRAMEBUFFERTEXTUREMULTISAMPLEMULTIVIEWOVRPROC)(G
 void FrameBufferObject::clear() {
     mWidth = 0;
     mHeight = 0;
-    mMultisamples = 0;
     mTextureSwapChainLength = 0;
     mTextureSwapChainIndex = 0;
     mColorTextureSwapChain = NULL;
@@ -45,8 +44,7 @@ void FrameBufferObject::create(const ovrTextureFormat colorFormat, const int wid
 
     mWidth = width;
     mHeight = height;
-    mMultisamples = multisamples;
-    ovrTextureType tex_target = use_multiview ? VRAPI_TEXTURE_TYPE_2D_ARRAY : VRAPI_TEXTURE_TYPE_2D;
+    ovrTextureType tex_target = gUseMultiview ? VRAPI_TEXTURE_TYPE_2D_ARRAY : VRAPI_TEXTURE_TYPE_2D;
     mColorTextureSwapChain = vrapi_CreateTextureSwapChain(tex_target, colorFormat, mWidth, mHeight, 1, true);
 
     if (nullptr == mColorTextureSwapChain) {
@@ -75,7 +73,7 @@ void FrameBufferObject::create(const ovrTextureFormat colorFormat, const int wid
     } else {
         mMultisampleMode = MSAA_OFF;
     }
-    if(use_multiview)
+    if(gUseMultiview)
         LOGV("FrameBufferObject::create: multisampleMode: %d, glRenderbufferStorageMultisampleEXT: %p, glFramebufferTexture2DMultisampleEXT: %p",
                 mMultisampleMode, glFramebufferTextureMultisampleMultiviewOVR, glFramebufferTextureMultiviewOVR);
     else
@@ -85,7 +83,7 @@ void FrameBufferObject::create(const ovrTextureFormat colorFormat, const int wid
     if (MSAA_BLIT == mMultisampleMode) {
         GLenum internalFormat = translateVrapiFormatToInternal(colorFormat);
 
-        if(use_multiview){
+        if(gUseMultiview){
             GL( glGenTextures( 1, &mColorBuffer ) );
             GL( glBindTexture( GL_TEXTURE_2D_ARRAY, mColorBuffer ) );
             GL( glTexStorage3D( GL_TEXTURE_2D_ARRAY, 1, internalFormat, mWidth, mHeight, 2 ) );
@@ -104,17 +102,15 @@ void FrameBufferObject::create(const ovrTextureFormat colorFormat, const int wid
             if (nullptr == mDepthTextureSwapChain) {
                 FAIL("vrapi_CreateTextureSwapChain for mDepthTextureSwapChain failed");
             }
-            mDepthTextureSwapChainLength = vrapi_GetTextureSwapChainLength(mDepthTextureSwapChain);
         } else {
             mDepthTextureSwapChain = nullptr;
-            mDepthTextureSwapChainLength = 0;
         }
 
         if (!resolveDepth || MSAA_BLIT == mMultisampleMode) {
             GLenum internalFormat = translateVrapiFormatToInternal(depthFormat);
 
             mDepthBuffers = new GLuint[mTextureSwapChainLength];
-            if(use_multiview){
+            if(gUseMultiview){
                 for (int i = 0; i < mTextureSwapChainLength; ++i) {
                     GL( glGenTextures( 1, &mDepthBuffers[i] ) );
                     GL( glBindTexture( GL_TEXTURE_2D_ARRAY, mDepthBuffers[i] ) );
@@ -158,7 +154,7 @@ void FrameBufferObject::create(const ovrTextureFormat colorFormat, const int wid
 
         if (MSAA_RENDER_TO_TEXTURE == mMultisampleMode) {
 
-            if(use_multiview){
+            if(gUseMultiview){
                 GL(glFramebufferTextureMultisampleMultiviewOVR(GL_DRAW_FRAMEBUFFER,
                                                                GL_COLOR_ATTACHMENT0, colorTexture,
                                                                0, multisamples, 0, 2));
@@ -181,7 +177,7 @@ void FrameBufferObject::create(const ovrTextureFormat colorFormat, const int wid
         }
         else if (mMultisampleMode == MSAA_BLIT) {
 
-            if(use_multiview){
+            if(gUseMultiview){
                 GL( glFramebufferTextureMultisampleMultiviewOVR( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mColorBuffer, 0 , multisamples , 0 , 2  ) );
                 if (depthFormat != VRAPI_TEXTURE_FORMAT_NONE) {
                     GL( glFramebufferTextureMultisampleMultiviewOVR( GL_DRAW_FRAMEBUFFER, depthStencilAttachment, mDepthBuffers[i], 0 , multisamples , 0 , 2  ) );
@@ -202,7 +198,7 @@ void FrameBufferObject::create(const ovrTextureFormat colorFormat, const int wid
             GL( glGenFramebuffers(1, &mResolveFrameBuffers[i]) );
             GL( glBindFramebuffer(GL_FRAMEBUFFER, mResolveFrameBuffers[i]) );
 
-            if(use_multiview){
+            if(gUseMultiview){
                 GL( glFramebufferTextureMultiviewOVR( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorTexture, 0 , 0 , 2 ) );
                 if (depthFormat != VRAPI_TEXTURE_FORMAT_NONE && resolveDepth) {
                     GL( glFramebufferTextureMultiviewOVR( GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0, 0 , 2 ) );
@@ -219,7 +215,7 @@ void FrameBufferObject::create(const ovrTextureFormat colorFormat, const int wid
                 FAIL("fbo %i not complete: 0x%x", mResolveFrameBuffers[i], resolveStatus);
             }
         } else {
-            if(use_multiview){
+            if(gUseMultiview){
                 GL( glFramebufferTextureMultiviewOVR( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorTexture, 0 , 0 , 2 ) );
                 if (depthFormat != VRAPI_TEXTURE_FORMAT_NONE) {
                     const GLuint texture = resolveDepth ? depthTexture : mDepthBuffers[i];
@@ -262,7 +258,7 @@ void FrameBufferObject::destroy() {
     }
 
     if (nullptr != mDepthBuffers) {
-        if(use_multiview)
+        if(gUseMultiview)
             glDeleteTextures(mTextureSwapChainLength, mDepthBuffers);
         else
             glDeleteRenderbuffers(mTextureSwapChainLength, mDepthBuffers);
@@ -272,7 +268,7 @@ void FrameBufferObject::destroy() {
     }
 
     if (0 != mColorBuffer) {
-        if(use_multiview)
+        if(gUseMultiview)
             glDeleteTextures(1, &mColorBuffer);
         else
             glDeleteRenderbuffers(1, &mColorBuffer);

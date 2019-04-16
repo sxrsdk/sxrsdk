@@ -58,7 +58,7 @@ extern "C" {
         javaNode = jni->NewLocalRef(javaNode);
         renderTarget->cullFromCamera(scene, javaNode, renderTarget->getCamera(),gRenderer,shader_manager);
 
-        gRenderer->renderRenderTarget(scene, javaNode, renderTarget,shader_manager,post_effect_render_texture_a,post_effect_render_texture_b);
+        gRenderer->renderRenderTarget(scene, javaNode, renderTarget,shader_manager,post_effect_render_texture_a,post_effect_render_texture_b, renderTarget->getRenderDataVector());
 
         //unbind the fbo on which the drawing was done
         if(renderTarget->getTexture())

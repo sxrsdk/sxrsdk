@@ -25,6 +25,9 @@
 #include "objects/textures/texture.h"
 #include "objects/textures/render_texture.h"
 
+#undef LOGD
+#define LOGD(...)
+
 #define MAX_INDICES 500
 #define BATCH_SIZE 60
 bool do_batching = false;
@@ -32,11 +35,7 @@ bool do_batching = false;
 namespace sxr {
 
 Renderer* gRenderer = nullptr;
-bool use_multiview= false;
-
-void Renderer::initializeStats() {
-    // TODO: this function will be filled in once we add draw time stats
-}
+bool gUseMultiview = false;
 
 Renderer::Renderer() : numberDrawCalls(0),
                        numberTriangles(0),
@@ -48,10 +47,12 @@ Renderer::Renderer() : numberDrawCalls(0),
         batch_manager = new BatchManager(BATCH_SIZE, MAX_INDICES);
     }
 }
-void Renderer::frustum_cull(glm::vec3 camera_position, Scene* scene, Node* object,
-        float frustum[6][4], std::vector<Node*>& scene_objects,
-        bool need_cull, int planeMask) {
 
+void Renderer::frustum_cull(glm::vec3 camera_position, Scene* scene, Node* object,
+        float frustum[6][4], std::vector<Node*>* scene_objects,
+        bool need_cull, int planeMask)
+{
+    LOGD("Renderer::frustum_cull: object: %s", object->name().c_str());
     // frustumCull() return 3 possible values:
     // 0 when the HBV of the object is completely outside the frustum: cull itself and all its children out
     // 1 when the HBV of the object is intersecting the frustum but the object itself is not: cull it out and continue culling test with its children
@@ -66,6 +67,7 @@ void Renderer::frustum_cull(glm::vec3 camera_position, Scene* scene, Node* objec
     //allows for on demand calculation of the camera distance; usually matters
     //when transparent objects are in play
     RenderData* renderData = object->render_data();
+    int objectLayer;
     if (nullptr != renderData) {
         renderData->setCameraDistanceLambda([object, camera_position]() {
             // Transform the bounding volume
@@ -80,6 +82,10 @@ void Renderer::frustum_cull(glm::vec3 camera_position, Scene* scene, Node* objec
             // this distance will be used when sorting transparent objects
             return distance;
         });
+        objectLayer = renderData->layer();
+        LOGD("Renderer::frustum_cull: object's layer is %d", objectLayer);
+    } else {
+        objectLayer = Renderer::LAYER_NORMAL;
     }
 
     if (need_cull) {
@@ -91,7 +97,8 @@ void Renderer::frustum_cull(glm::vec3 camera_position, Scene* scene, Node* objec
 
         if (cullVal >= 2) {
             object->setCullStatus(false);
-            scene_objects.push_back(object);
+            LOGD("Renderer::frustum_cull: adding to layer %d", objectLayer);
+            scene_objects[objectLayer].push_back(object);
         }
 
         if (cullVal == 3) {
@@ -100,8 +107,10 @@ void Renderer::frustum_cull(glm::vec3 camera_position, Scene* scene, Node* objec
         }
     } else {
         object->setCullStatus(false);
-        scene_objects.push_back(object);
+        LOGD("Renderer::frustum_cull: adding to layer %d", objectLayer);
+        scene_objects[objectLayer].push_back(object);
     }
+
     scene->pick(object);
     const std::vector<Node*> children = object->children();
     for (auto it = children.begin(); it != children.end(); ++it) {
@@ -109,30 +118,27 @@ void Renderer::frustum_cull(glm::vec3 camera_position, Scene* scene, Node* objec
     }
 }
 
-void Renderer::state_sort(std::vector<RenderData*>* render_data_vector) {
+void Renderer::state_sort(std::vector<RenderData*>& render_data_vector) {
     // The current implementation of sorting is based on
     // 1. rendering order first to maintain specified order
     // 2. shader type second to minimize the gl cost of switching shader
     // 3. camera distance last to minimize overdraw
-    std::sort(render_data_vector->begin(), render_data_vector->end(),
-            compareRenderDataByOrderShaderDistance);
+    std::sort(render_data_vector.begin(), render_data_vector.end(), compareRenderDataByOrderShaderDistance);
 
     if (DEBUG_RENDERER) {
         LOGD("SORTING: After sorting");
 
-        for (int i = 0; i < render_data_vector->size(); ++i) {
-            RenderData* renderData = (*render_data_vector)[i];
-
-            if (DEBUG_RENDERER) {
-                LOGD(
-                        "SORTING: pass_count = %d, rendering order = %d, shader_type = %d, camera_distance = %f\n",
-                        renderData->pass_count(), renderData->rendering_order(),
-                        renderData->get_shader(0),
-                        renderData->camera_distance());
-            }
+        for (int i = 0; i < render_data_vector.size(); ++i) {
+            RenderData* renderData = render_data_vector[i];
+            LOGD(
+                    "SORTING: pass_count = %d, rendering order = %d, shader_type = %d, camera_distance = %f\n",
+                    renderData->pass_count(), renderData->rendering_order(),
+                    renderData->get_shader(0),
+                    renderData->camera_distance());
         }
     }
 }
+
 /**
     This function compares passes of render-data
     it checks whether no of passes are equal and then material and cull_status of each pass
@@ -157,21 +163,21 @@ bool isRenderPassEqual(RenderData* rdata1, RenderData* rdata2){
  * Perform view frustum culling from a specific camera viewpoint
  */
 void Renderer::cullFromCamera(Scene *scene, jobject javaNode, Camera* camera,
-        ShaderManager* shader_manager, std::vector<RenderData*>* render_data_vector, bool is_multiview)
+        ShaderManager* shader_manager, std::vector<RenderData*>* render_data_vector)
 {
-    std::vector<Node*> scene_objects;
+    std::vector<Node*> scene_objects[Renderer::MAX_LAYERS];
     LightList& lights = scene->getLights();
     RenderState rstate;
 
-    render_data_vector->clear();
-    scene_objects.clear();
-    rstate.is_multiview = is_multiview;
-    rstate.material_override = NULL;
+    render_data_vector[Renderer::LAYER_NORMAL].clear();
+    render_data_vector[Renderer::LAYER_CURSOR].clear();
+
     rstate.shader_manager = shader_manager;
     rstate.uniforms.u_view = camera->getViewMatrix();
     rstate.uniforms.u_proj = camera->getProjectionMatrix();
     rstate.shader_manager = shader_manager;
     rstate.scene = scene;
+    rstate.is_multiview = gUseMultiview;
     rstate.render_mask = camera->render_mask();
     rstate.uniforms.u_right = (rstate.render_mask & RenderData::RenderMaskBit::Right) ? 1 : 0;
     rstate.javaNode = javaNode;
@@ -189,41 +195,44 @@ void Renderer::cullFromCamera(Scene *scene, jobject javaNode, Camera* camera,
     if (DEBUG_RENDERER) {
         LOGD("FRUSTUM: start frustum culling for root %s\n", object->name().c_str());
     }
-    //    frustum_cull(camera->owner_object()->transform()->position(), object, frustum, scene_objects, scene->get_frustum_culling(), 0);
+
     rstate.scene->lockColliders();
     rstate.scene->clearVisibleColliders();
     frustum_cull(campos, scene, object, frustum, scene_objects, scene->get_frustum_culling(), 0);
     rstate.scene->unlockColliders();
+
     if (DEBUG_RENDERER) {
         LOGD("FRUSTUM: end frustum culling for root %s\n", object->name().c_str());
     }
     // 3. do occlusion culling, if enabled
     occlusion_cull(rstate, scene_objects, render_data_vector);
-
 }
 
 
-void Renderer::addRenderData(RenderData *render_data, RenderState& rstate, std::vector<RenderData*>& renderList)
-{
-    if (render_data && (render_data->isValid(this, rstate) >= 0))
-    {
-        renderList.push_back(render_data);
-    }
-}
-
-bool Renderer::occlusion_cull_init(RenderState& renderState, std::vector<Node*>& scene_objects,  std::vector<RenderData*>* render_data_vector){
+bool Renderer::occlusion_cull_init(RenderState& renderState, std::vector<Node*>* sceneObjectsArray,  std::vector<RenderData*>* render_data_vector){
 
     bool do_culling = renderState.scene->get_occlusion_culling();
     if (!do_culling) {
-        for (auto it = scene_objects.begin(); it != scene_objects.end(); ++it) {
-            Node *scene_object = (*it);
-            RenderData* render_data = scene_object->render_data();
-            addRenderData(render_data, renderState, *render_data_vector);
+        for (int i = 0; i < Renderer::MAX_LAYERS; ++i) {
+            std::vector<Node*>& scene_objects = sceneObjectsArray[i];
+            for (auto it = scene_objects.begin(); it != scene_objects.end(); ++it) {
+                Node *scene_object = (*it);
+                RenderData *render_data = scene_object->render_data();
+                addRenderData(render_data, renderState, render_data_vector[i]);
+            }
         }
         return false;
     }
     return true;
 }
+
+    void Renderer::addRenderData(RenderData *render_data, RenderState& rstate, std::vector<RenderData*>& renderList)
+    {
+        if (render_data && (render_data->isValid(this, rstate) >= 0))
+        {
+            renderList.push_back(render_data);
+        }
+    }
 
 
 void Renderer::build_frustum(float frustum[6][4], const float *vp_matrix) {
