@@ -227,7 +227,7 @@ public class SXRShaderTemplate extends SXRShader
                 if (!signature.contains(name))
                     signature += "$" + name;
                 if (name.contains("texcoord"))
-                    definedNames.put("HAS_TEXCOORDS", 1);
+                    definedNames.put("TEXCOORDS", 1);
             }
             else if (material.getTexture(name) != null)
             {
@@ -373,7 +373,7 @@ public class SXRShaderTemplate extends SXRShader
         combinedSource = combinedSource.replace("@LIGHTSOURCES", lightShaderSource);
         combinedSource = combinedSource.replace("@MATERIAL_UNIFORMS", material.makeShaderLayout());
         combinedSource = combinedSource.replace("@BONES_UNIFORMS", SXRShaderManager.makeLayout(sBonesDescriptor, "Bones_ubo", true));
-        if (type.equals("Vertex") && (definedNames.get("HAS_TEXCOORDS") != null))
+        if (type.equals("Vertex") && (definedNames.get("TEXCOORDS") != null))
         {
             String texcoordSource = assignTexcoords(material);
             combinedSource = combinedSource.replace("@TEXCOORDS", texcoordSource);
