@@ -49,7 +49,7 @@ vec2 poissonDisk[16] = vec2[](
    vec2( 0.14383161, -0.14100790 )
 );
 
-vec4 sampleShadowMap(sampler2DArray shadowMap, vec3 uv, ivec4 indices)
+vec4 sampleShadowMap(highp sampler2DArray shadowMap, vec3 uv, ivec4 indices)
 {
     vec4 depths = vec4(0);
     vec2 texcoord = uv.xy + poissonDisk[indices.x] / 700.0;
@@ -75,7 +75,7 @@ float random(vec3 seed, int i)
 	return fract(sin(dot_product) * 43758.5453);
 }
 
-float calculateShadow(vec4 shadowCoord, sampler2DArray shadowMap, float shadowMapIndex, float bias)
+float calculateShadow(vec4 shadowCoord, highp sampler2DArray shadowMap, float shadowMapIndex, float bias)
 {
     vec3 shadowMapPosition = shadowCoord.xyz / shadowCoord.w;
     float shadow = 1.0;
