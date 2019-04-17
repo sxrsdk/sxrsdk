@@ -350,4 +350,8 @@ void RenderData::setBindShaderObject(JNIEnv* env, jobject bindShaderObject)
     env->GetJavaVM(&javaVm_);
 }
 
+void RenderData::setLayer(int layer) {
+    mLayer = layer;
+}
+
 }

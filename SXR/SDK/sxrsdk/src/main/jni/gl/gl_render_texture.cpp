@@ -312,21 +312,19 @@ void GLRenderTexture::beginRendering(Renderer* renderer)
 
 void GLRenderTexture::endRendering(Renderer* renderer)
 {
-    Image* image = getImage();
-    const int width = image->getWidth();
-    const int height = image->getHeight();
-    int fbid = getFrameBufferId();
-
     const bool isFbo = 0 != renderTexture_gl_frame_buffer_->id();
     invalidateFrameBuffer(GL_DRAW_FRAMEBUFFER, isFbo, false, true);
 
     if (renderTexture_gl_resolve_buffer_ && mSampleCount > 1)
     {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbid);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, getFrameBufferId());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, renderTexture_gl_resolve_buffer_->id());
-        glBlitFramebuffer(0, 0, width, height,
-                          0, 0, width, height,
-                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+        Image* image = getImage();
+        const int width = image->getWidth();
+        const int height = image->getHeight();
+        glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
         invalidateFrameBuffer(GL_READ_FRAMEBUFFER, isFbo, true, false);
     }
 

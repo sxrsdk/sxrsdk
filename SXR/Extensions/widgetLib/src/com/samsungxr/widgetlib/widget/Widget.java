@@ -864,6 +864,10 @@ public class Widget implements Layout.WidgetContainer {
         mRenderDataCache.setRenderingOrder(renderingOrder);
     }
 
+    public void setAlphaBlend(final boolean alphaBlend) {
+        mRenderDataCache.setAlphaBlend(alphaBlend);
+    }
+
     /**
      * @return The order in which this {@link Widget} will be rendered.
      * @see SXRRenderingOrder
@@ -876,6 +880,7 @@ public class Widget implements Layout.WidgetContainer {
     public void setCullFace(final SXRRenderPass.SXRCullFaceEnum cullFace) {
         mRenderDataCache.setCullFace(cullFace);
     }
+
 
     /**
      * Enable clipping for the Widget. Widget content including its children will be clipped by a
@@ -3750,6 +3755,7 @@ public class Widget implements Layout.WidgetContainer {
                     SXRShaderType.Texture.ID);
             material.setMainTexture(sDefaultTexture);
             renderData.setMaterial(material);
+            renderData.setCastShadows(false);
         }
     }
 

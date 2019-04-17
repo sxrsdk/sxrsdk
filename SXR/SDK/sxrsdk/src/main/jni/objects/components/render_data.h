@@ -388,6 +388,8 @@ public:
         return *(reinterpret_cast<unsigned short*>(&render_data_flags));
     }
 
+    int layer() { return mLayer; }
+
 private:
     RenderData(RenderData&& render_data) = delete;
     RenderData& operator=(const RenderData& render_data) = delete;
@@ -445,9 +447,13 @@ protected:
     jobject bindShaderObject_ = nullptr;
     JavaVM* javaVm_ = nullptr;
 
+    int mLayer = 0;
+
 public:
     void setStencilTest(bool flag);
     void setBindShaderObject(JNIEnv* env, jobject bindShaderObject);
+
+    void setLayer(int layer);
 };
 
 bool compareRenderDataByOrderShaderDistance(RenderData* i, RenderData* j);

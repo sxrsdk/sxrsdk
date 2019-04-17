@@ -28,8 +28,6 @@ package com.samsungxr;
  */
 public class SXRRenderTarget extends SXRBehavior
 {
-
-    protected SXRMaterial mMaterial;
     protected SXRRenderTexture mTexture;
     protected SXRScene  mScene;
     protected SXRCamera mCamera;
@@ -72,14 +70,7 @@ public class SXRRenderTarget extends SXRBehavior
         mCamera = camera;
         NativeRenderTarget.setCamera(getNative(), camera.getNative());
     }
-    public SXRRenderTarget(SXRRenderTexture texture, SXRScene scene, SXRRenderTarget renderTarget)
-    {
-        super(texture.getSXRContext(), NativeRenderTarget.ctor(texture.getNative(), renderTarget.getNative()));
-        setEnable(false);
-        mTexture = texture;
-        mScene = scene;
-        setMainScene(scene);
-    }
+
     public SXRRenderTarget(SXRRenderTexture texture, SXRScene scene, boolean isMultiview)
     {
         super(texture.getSXRContext(), NativeRenderTarget.ctorMultiview(texture.getNative(),isMultiview));
@@ -90,9 +81,7 @@ public class SXRRenderTarget extends SXRBehavior
         setCamera(scene.getMainCameraRig().getCenterCamera());
 
     }
-    public void attachRenderTarget(SXRRenderTarget renderTarget){
-        NativeRenderTarget.attachRenderTarget(getNative(),renderTarget.getNative());
-    }
+
     public void beginRendering(SXRCamera camera){
         NativeRenderTarget.beginRendering(getNative(), camera.getNative());
     }
@@ -159,7 +148,6 @@ class NativeRenderTarget
     static native void endRendering(long rendertarget);
     static native long ctorMultiview(long texture, boolean isMultiview);
     static native void setCamera(long rendertarget, long camera);
-    static native long ctor(long texture, long sourceRendertarget);
     static native void cullFromCamera(long scene, SXRScene javaNode, long renderTarget,long camera, long shader_manager );
     static native void render(long renderTarget, long camera, long shader_manager, long posteffectrenderTextureA, long posteffectRenderTextureB, long scene, SXRScene javaNode);
     static native void setTexture(long rendertarget, long texture);

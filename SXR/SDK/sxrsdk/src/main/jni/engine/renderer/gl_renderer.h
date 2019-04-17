@@ -76,7 +76,7 @@ public:
     virtual VertexBuffer* createVertexBuffer(const char* descriptor, int vcount);
 
     virtual void renderRenderTarget(Scene*, jobject javaNode, RenderTarget* renderTarget, ShaderManager* shader_manager,
-            RenderTexture* post_effect_render_texture_a, RenderTexture* post_effect_render_texture_b);
+            RenderTexture* post_effect_render_texture_a, RenderTexture* post_effect_render_texture_b, std::vector<RenderData*>* render_data_vector);
     void makeShadowMaps(Scene* scene, jobject javaNode, ShaderManager* shader_manager);
 
     void set_face_culling(int cull_face);
@@ -108,7 +108,7 @@ public:
 private:
     virtual void renderMesh(RenderState& rstate, RenderData* render_data);
     virtual void renderMaterialShader(RenderState& rstate, RenderData* render_data, ShaderData *material, Shader* shader);
-    virtual void occlusion_cull(RenderState& rstate, std::vector<Node*>& nodes, std::vector<RenderData*>* render_data_vector);
+    virtual void occlusion_cull(RenderState& rstate, std::vector<Node*>* nodes, std::vector<RenderData*>* render_data_vector);
     void clearBuffers(const Camera& camera) const;
 
     GLUniformBlock* transform_ubo_[2];

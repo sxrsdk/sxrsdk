@@ -34,6 +34,9 @@ public:
     void getPerformanceConfiguration(JNIEnv& env, ovrPerformanceParms& parmsOut);
     void getSceneViewport(JNIEnv& env, int& viewport_x, int& viewport_y, int& viewport_width, int& viewport_height);
     void getMultiviewConfiguration(JNIEnv& env, bool& useMultiview);
+
+    const bool getUseCursorLayer(JNIEnv &env);
+
 private:
     JNIEnv& env_;
     jclass vrAppSettingsClass_;

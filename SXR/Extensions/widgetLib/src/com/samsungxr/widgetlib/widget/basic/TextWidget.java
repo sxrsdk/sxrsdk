@@ -242,6 +242,7 @@ public class TextWidget extends Widget implements TextContainer {
         String text = optString(properties, TextContainer.Properties.text);
         SXRTextViewNode textViewNode =
                 new SXRTextViewNode(context, size.x, size.y, text);
+        textViewNode.getRenderData().setCastShadows(false);
         put(properties, Widget.Properties.node, textViewNode);
         return properties;
     }
@@ -254,6 +255,7 @@ public class TextWidget extends Widget implements TextContainer {
                     .calculateGeometricDimensions(sceneObject);
             final SXRNode temp = new SXRTextViewNode(
                     sceneObject.getSXRContext(), sizes[0], sizes[1], "");
+            temp.getRenderData().setCastShadows(false);
             sceneObject.addChildObject(temp);
             return (SXRTextViewNode) temp;
         }

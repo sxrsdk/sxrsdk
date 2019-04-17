@@ -694,48 +694,7 @@ abstract class SXRViewManager extends SXRContext {
 
     // capture center eye
     protected void captureCenterEye(SXRRenderTarget renderTarget, boolean isMultiview) {
-        if (mScreenshotCenterCallback == null) {
-            return;
-        }
-
-        // TODO: when we will use multithreading, create new camera using centercamera as we are adding posteffects into it
-        final SXRCamera centerCamera = mMainScene.getMainCameraRig().getCenterCamera();
-        final SXRMaterial postEffect = new SXRMaterial(this, SXRMaterial.SXRShaderType.VerticalFlip.ID);
-
-        centerCamera.addPostEffect(postEffect);
-
-        SXRRenderTexture posteffectRenderTextureB = null;
-        SXRRenderTexture posteffectRenderTextureA = null;
-
-        if(isMultiview) {
-            posteffectRenderTextureA = mRenderBundle.getEyeCapturePostEffectRenderTextureA();
-            posteffectRenderTextureB = mRenderBundle.getEyeCapturePostEffectRenderTextureB();
-            renderTarget = mRenderBundle.getEyeCaptureRenderTarget();
-            renderTarget.cullFromCamera(mMainScene, centerCamera ,mRenderBundle.getShaderManager());
-            renderTarget.beginRendering(centerCamera);
-        }
-        else {
-            posteffectRenderTextureA = mRenderBundle.getPostEffectRenderTextureA();
-            posteffectRenderTextureB = mRenderBundle.getPostEffectRenderTextureB();
-        }
-
-        renderTarget.render(mMainScene,centerCamera, mRenderBundle.getShaderManager(), posteffectRenderTextureA, posteffectRenderTextureB);
-        centerCamera.removePostEffect(postEffect);
-        readRenderResult(renderTarget, EYE.MULTIVIEW, false);
-
-        if(isMultiview)
-            renderTarget.endRendering();
-
-        final Bitmap bitmap = Bitmap.createBitmap(mReadbackBufferWidth, mReadbackBufferHeight, Bitmap.Config.ARGB_8888);
-        mReadbackBuffer.rewind();
-        bitmap.copyPixelsFromBuffer(mReadbackBuffer);
-        final SXRScreenshotCallback callback = mScreenshotCenterCallback;
-        Threads.spawn(new Runnable() {
-            public void run() {
-                callback.onScreenCaptured(bitmap);
-            }
-        });
-
+        captureEye(mScreenshotCenterCallback, renderTarget, EYE.CENTER, isMultiview);
         mScreenshotCenterCallback = null;
     }
 
@@ -809,6 +768,31 @@ abstract class SXRViewManager extends SXRContext {
                 && mScreenshotCenterCallback == null && mScreenshot3DCallback == null) {
             mReadbackBuffer = null;
         }
+    }
+
+    @SuppressWarnings("unused") //called from C++
+    int getCaptureTargets() {
+        final int SCREENSHOT_TARGET_CENTER = 0x01;
+        final int SCREENSHOT_TARGET_LEFT = 0x02;
+        final int SCREENSHOT_TARGET_RIGHT = 0x04;
+        final int SCREENSHOT_TARGET_3D = 0x08;
+
+        int result = 0;
+
+        if (null != mScreenshotCenterCallback) {
+            result |= SCREENSHOT_TARGET_CENTER;
+        }
+        if (null != mScreenshotLeftCallback) {
+            result |= SCREENSHOT_TARGET_LEFT;
+        }
+        if (null != mScreenshotRightCallback) {
+            result |= SCREENSHOT_TARGET_RIGHT;
+        }
+        if (null != mScreenshot3DCallback) {
+            result |= SCREENSHOT_TARGET_3D;
+        }
+
+        return result;
     }
 
     private void initScriptManager() {

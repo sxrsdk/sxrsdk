@@ -163,11 +163,6 @@ abstract class SXRConfigurationManager {
      */
     private static native boolean nativeUsingMultiview(long ptr);
 
-    public boolean usingMultiview()
-    {
-        return nativeUsingMultiview(mApplication.get().getNative());
-    }
-
     private String getHmtModel() {
         return mHeadsetModel;
     }
