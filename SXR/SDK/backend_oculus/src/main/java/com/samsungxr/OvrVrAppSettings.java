@@ -30,4 +30,5 @@ final class OvrVrAppSettings extends VrAppSettings {
     }
 
     public final SceneParams sceneParams;
+    public boolean mUseCursorLayer;
 }

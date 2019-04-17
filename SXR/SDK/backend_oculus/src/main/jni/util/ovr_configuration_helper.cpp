@@ -181,4 +181,9 @@ void ConfigurationHelper::getSceneViewport(JNIEnv& env, int& viewport_x, int& vi
     }
 }
 
+const bool ConfigurationHelper::getUseCursorLayer(JNIEnv &env) {
+    jfieldID fid = env.GetFieldID(vrAppSettingsClass_, "mUseCursorLayer", "Z");
+    return env.GetBooleanField(vrAppSettings_, fid);
+}
+
 }

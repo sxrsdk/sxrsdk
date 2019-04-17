@@ -829,6 +829,22 @@ public final class SXRRenderData extends SXRComponent implements IRenderable, Pr
         NativeRenderData.setStencilTest(getNative(), flag);
         return this;
     }
+
+    public enum LayerType {
+        WorldLocked,
+        HeadLocked
+    }
+
+    /**
+     * Assign this render data to a layer. WorldLocked is the default; HeadLocked is for objects
+     * attached to the camera rig - like HUDs, cursor reticles. HeadLocked objects may not be
+     * subject to reprojection. "May not" because it depends on the backend and the backend adapter
+     * capabilities. HeadLocked objects are supported for the Oculus Mobile SDK.
+     * @param layer
+     */
+    public void setLayer(LayerType layer) {
+        NativeRenderData.setLayer(getNative(), LayerType.HeadLocked == layer ? 1 : 0);
+    }
 }
 
 class NativeRenderData {
@@ -917,4 +933,6 @@ class NativeRenderData {
     static native void setStencilTest(long renderData, boolean flag);
 
     static native void setBindShaderObject(long renderData, SXRRenderData.BindShaderFromNative object);
+
+    static native void setLayer(long aNative, int layer);
 }

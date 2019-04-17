@@ -131,7 +131,7 @@ void DaydreamRenderer::DrawFrame(JNIEnv &env) {
 
     cameraRig_->setRotationSensorData(0, rotation.w, rotation.x, rotation.y, rotation.z, 0, 0, 0);
     cameraRig_->updateRotation();
-    cameraRig_->owner_object()->transform()->set_position(-translation.x, -translation.y, -translation.z);
+    cameraRig_->getHeadTransform()->set_position(-translation.x, -translation.y, -translation.z);
 
     // Render the eye images.
     for (int eye = 0; eye < 2; eye++) {

@@ -28,8 +28,8 @@ class SXRRenderBundle {
     protected int  mSampleCount;
     protected int mWidth, mHeight;
     protected SXRRenderTarget[] mLeftEyeRenderTarget = new SXRRenderTarget[3];
-    protected SXRRenderTarget [] mRightEyeRenderTarget = new SXRRenderTarget[3];
-    protected SXRRenderTarget [] mMultiviewRenderTarget = new SXRRenderTarget[3];
+    protected SXRRenderTarget[] mRightEyeRenderTarget = new SXRRenderTarget[3];
+    protected SXRRenderTarget[] mMultiviewRenderTarget = new SXRRenderTarget[3];
 
 
     private SXRRenderTexture mEyeCapturePostEffectRenderTextureA = null;
@@ -59,7 +59,7 @@ class SXRRenderBundle {
         else if(eye == SXRViewManager.EYE.LEFT)
             mLeftEyeRenderTarget[index] = new SXRRenderTarget(renderTexture, mSXRContext.getMainScene());
         else
-            mRightEyeRenderTarget[index] = new SXRRenderTarget(renderTexture, mSXRContext.getMainScene(),mLeftEyeRenderTarget[index]);
+            mRightEyeRenderTarget[index] = new SXRRenderTarget(renderTexture, mSXRContext.getMainScene());
     }
 
 
@@ -75,16 +75,8 @@ class SXRRenderBundle {
             }
 
         }
-        for(int i=0; i< 3; i++){
-            int index = (i+1) % 3;
-            if(use_multiview)
-                mMultiviewRenderTarget[i].attachRenderTarget(mMultiviewRenderTarget[index]);
-            else {
-                mLeftEyeRenderTarget[i].attachRenderTarget(mLeftEyeRenderTarget[index]);
-                mRightEyeRenderTarget[i].attachRenderTarget(mRightEyeRenderTarget[index]);
-            }
-        }
     }
+
     public SXRRenderTarget getEyeCaptureRenderTarget() {
         if(mEyeCaptureRenderTarget == null){
             mEyeCaptureRenderTarget  = new SXRRenderTarget(new SXRRenderTexture(mSXRContext, mWidth, mHeight, mSampleCount), mSXRContext.getMainScene());

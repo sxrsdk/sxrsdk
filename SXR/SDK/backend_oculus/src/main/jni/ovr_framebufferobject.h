@@ -36,15 +36,12 @@ public:
     void advance();
     int getWidth(){ return  mWidth; }
     int getHeight() { return mHeight; }
-    int getSamples() { return mMultisamples; }
     GLuint getColorTexId(int index){   return vrapi_GetTextureSwapChainHandle( mColorTextureSwapChain, index); }
     GLuint getRenderBufferFBOId(int index) { return mRenderFrameBuffers[index]; }
 public:
     int mWidth = 0;
     int mHeight = 0;
-    int mMultisamples = 0;
     int mTextureSwapChainLength = 0;
-    int mDepthTextureSwapChainLength = 0;
     int mTextureSwapChainIndex = 0;
     ovrTextureSwapChain* mColorTextureSwapChain = nullptr;
     ovrTextureSwapChain* mDepthTextureSwapChain = nullptr;

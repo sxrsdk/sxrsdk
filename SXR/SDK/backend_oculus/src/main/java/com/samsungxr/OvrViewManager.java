@@ -45,25 +45,11 @@ import com.samsungxr.utility.VrAppSettings;
  * There are also SXRFrameListeners, SXRAnimationEngine, and Runnables but they aren't that special.
  */
 
-/**
- * This is the core internal class.
- *
- * It implements {@link SXRContext}. It handles Android application callbacks
- * like cycles such as the standard Android {@link Activity#onResume()},
- * {@link Activity#onPause()}, and {@link Activity#onDestroy()}.
- *
- * <p>
- * Most importantly, {@link #onDrawFrame()} does the actual rendering, using the
- * current orientation from
- * {@link #onRotationSensor(long, float, float, float, float, float, float, float)
- * onRotationSensor()} to draw the scene graph properly.
- */
 class OvrViewManager extends SXRViewManager {
 
     private static final String TAG = Log.tag(OvrViewManager.class);
 
     protected OvrLensInfo mLensInfo;
-    protected int mCurrentEye;
 
     // Statistic debug info
     private SXRStatsLine mStatsLine;
@@ -138,15 +124,37 @@ class OvrViewManager extends SXRViewManager {
         mControllerReader = new OvrControllerReader(application, mApplication.getActivityNative().getNative());
     }
 
-    /**
-     * Called when the surface is created or recreated. Avoided because this can
-     * be called twice at the beginning.
-     */
-    void onSurfaceChanged(int width, int height) {
+    void onSurfaceChanged(int w, int h) {
         Log.v(TAG, "onSurfaceChanged");
 
         final VrAppSettings.EyeBufferParams.DepthFormat depthFormat = mApplication.getAppSettings().getEyeBufferParams().getDepthFormat();
         mApplication.getConfigurationManager().configureRendering(VrAppSettings.EyeBufferParams.DepthFormat.DEPTH_24_STENCIL_8 == depthFormat);
+
+        boolean isMultiview = mApplication.getAppSettings().isMultiviewSet();
+        int width = mApplication.getAppSettings().getFramebufferPixelsWide();
+        int height= mApplication.getAppSettings().getFramebufferPixelsHigh();
+        for(int i=0;i < 3; i++) {
+            if(isMultiview){
+                long renderTextureInfo = getRenderTextureInfo(mApplication.getActivityNative().getNative(), i, EYE.MULTIVIEW.ordinal());
+                mRenderBundle.createRenderTarget(i, EYE.MULTIVIEW, new SXRRenderTexture(mApplication.getSXRContext(),  width , height,
+                        SXRRenderBundle.getRenderTextureNative(renderTextureInfo)));
+            }
+            else {
+                long renderTextureInfo = getRenderTextureInfo(mApplication.getActivityNative().getNative(), i, EYE.LEFT.ordinal());
+                mRenderBundle.createRenderTarget(i, EYE.LEFT, new SXRRenderTexture(mApplication.getSXRContext(),  width , height,
+                        SXRRenderBundle.getRenderTextureNative(renderTextureInfo)));
+                renderTextureInfo = getRenderTextureInfo(mApplication.getActivityNative().getNative(), i, EYE.RIGHT.ordinal());
+                mRenderBundle.createRenderTarget(i, EYE.RIGHT, new SXRRenderTexture(mApplication.getSXRContext(),  width , height,
+                        SXRRenderBundle.getRenderTextureNative(renderTextureInfo)));
+            }
+        }
+
+        mRenderBundle.createRenderTargetChain(isMultiview);
+
+        initialize(mApplication.getActivityNative().getNative(),
+                mRenderBundle.getShaderManager().getNative(),
+                mRenderBundle.getPostEffectRenderTextureA().getNative(),
+                mRenderBundle.getPostEffectRenderTextureB().getNative());
     }
 
     @Override
@@ -167,91 +175,9 @@ class OvrViewManager extends SXRViewManager {
         }
     }
 
-    /**
-     * Called from the native side
-     * @param eye
-     */
-    void onDrawEye(int eye, int swapChainIndex, boolean use_multiview) {
-        mCurrentEye = eye;
-        if (!(mSensoredScene == null || !mMainScene.equals(mSensoredScene))) {
-            SXRCameraRig mainCameraRig = mMainScene.getMainCameraRig();
-
-            if (use_multiview) {
-
-                if (DEBUG_STATS) {
-                    mTracerDrawEyes1.enter(); // this eye is drawn first
-                    mTracerDrawEyes2.enter();
-                }
-                 SXRRenderTarget renderTarget = mRenderBundle.getRenderTarget(EYE.MULTIVIEW, swapChainIndex);
-                 SXRCamera camera = mMainScene.getMainCameraRig().getCenterCamera();
-                 SXRCamera left_camera = mMainScene.getMainCameraRig().getLeftCamera();
-                 renderTarget.cullFromCamera(mMainScene, camera,mRenderBundle.getShaderManager());
-
-                captureCenterEye(renderTarget, true);
-                capture3DScreenShot(renderTarget, true);
-
-                renderTarget.render(mMainScene, left_camera, mRenderBundle.getShaderManager(),mRenderBundle.getPostEffectRenderTextureA(),
-                        mRenderBundle.getPostEffectRenderTextureB());
-
-                captureRightEye(renderTarget, true);
-                captureLeftEye(renderTarget, true);
-
-                captureFinish();
-
-                if (DEBUG_STATS) {
-                    mTracerDrawEyes1.leave();
-                    mTracerDrawEyes2.leave();
-                }
-
-
-            } else {
-
-                if (eye == 1) {
-                    if (DEBUG_STATS) {
-                        mTracerDrawEyes1.enter();
-                    }
-
-                     SXRCamera rightCamera = mainCameraRig.getRightCamera();
-                     SXRRenderTarget renderTarget = mRenderBundle.getRenderTarget(EYE.RIGHT, swapChainIndex);
-                     renderTarget.render(mMainScene, rightCamera, mRenderBundle.getShaderManager(), mRenderBundle.getPostEffectRenderTextureA(),
-                             mRenderBundle.getPostEffectRenderTextureB());
-                    captureRightEye(renderTarget, false);
-
-                    captureFinish();
-                    if (DEBUG_STATS) {
-                        mTracerDrawEyes1.leave();
-                        mTracerDrawEyes.leave();
-                    }
-                } else {
-                    if (DEBUG_STATS) {
-                        mTracerDrawEyes1.leave();
-                        mTracerDrawEyes.leave();
-                    }
-
-
-                    SXRRenderTarget renderTarget = mRenderBundle.getRenderTarget(EYE.LEFT, swapChainIndex);
-                    SXRCamera leftCamera = mainCameraRig.getLeftCamera();
-
-                    capture3DScreenShot(renderTarget, false);
-
-                    renderTarget.cullFromCamera(mMainScene, mainCameraRig.getCenterCamera(), mRenderBundle.getShaderManager());
-                    captureCenterEye(renderTarget, false);
-                    renderTarget.render(mMainScene, leftCamera, mRenderBundle.getShaderManager(), mRenderBundle.getPostEffectRenderTextureA(), mRenderBundle.getPostEffectRenderTextureB());
-
-                    captureLeftEye(renderTarget, false);
-
-                    if (DEBUG_STATS) {
-                        mTracerDrawEyes2.leave();
-                    }
-                }
-             }
-        }
-    }
-
-
     /** Called once per frame */
     protected void onDrawFrame() {
-        drawEyes(mApplication.getActivityNative().getNative());
+        drawEyes(mApplication.getActivityNative().getNative(), getMainScene());
         afterDrawEyes();
     }
 
@@ -285,28 +211,39 @@ class OvrViewManager extends SXRViewManager {
             gearController.attachReader(mControllerReader);
 
     }
-    void createSwapChain(){
-        boolean isMultiview = mApplication.getAppSettings().isMultiviewSet();
-        int width = mApplication.getAppSettings().getFramebufferPixelsWide();
-        int height= mApplication.getAppSettings().getFramebufferPixelsHigh();
-        for(int i=0;i < 3; i++){
 
-            if(isMultiview){
-                long renderTextureInfo = getRenderTextureInfo(mApplication.getActivityNative().getNative(), i, EYE.MULTIVIEW.ordinal());
-                mRenderBundle.createRenderTarget(i, EYE.MULTIVIEW, new SXRRenderTexture(mApplication.getSXRContext(),  width , height,
-                        SXRRenderBundle.getRenderTextureNative(renderTextureInfo)));
-            }
-            else {
-                long renderTextureInfo = getRenderTextureInfo(mApplication.getActivityNative().getNative(), i, EYE.LEFT.ordinal());
-                mRenderBundle.createRenderTarget(i, EYE.LEFT, new SXRRenderTexture(mApplication.getSXRContext(),  width , height,
-                        SXRRenderBundle.getRenderTextureNative(renderTextureInfo)));
-                renderTextureInfo = getRenderTextureInfo(mApplication.getActivityNative().getNative(), i, EYE.RIGHT.ordinal());
-                mRenderBundle.createRenderTarget(i, EYE.RIGHT, new SXRRenderTexture(mApplication.getSXRContext(),  width , height,
-                        SXRRenderBundle.getRenderTextureNative(renderTextureInfo)));
-            }
+    private SXRRenderTarget getRenderTarget(final int eye, final int swapChainIndex, final boolean isMultiview) {
+        final SXRViewManager.EYE rtEye;
+        if (isMultiview) {
+            rtEye = EYE.MULTIVIEW;
+        } else {
+            rtEye = 0 == eye ? EYE.LEFT : EYE.RIGHT;
         }
+        return mRenderBundle.getRenderTarget(rtEye, swapChainIndex);
+    }
 
-        mRenderBundle.createRenderTargetChain(isMultiview);
+    @SuppressWarnings("unused") //called from native
+    void captureCenterEye(final int eye, final int swapChainIndex, final boolean isMultiview) {
+        final SXRRenderTarget rt = getRenderTarget(eye, swapChainIndex, isMultiview);
+        super.captureCenterEye(rt, isMultiview);
+    }
+
+    @SuppressWarnings("unused") //called from native
+    void captureLeftEye(final int eye, final int swapChainIndex, final boolean isMultiview) {
+        final SXRRenderTarget rt = getRenderTarget(eye, swapChainIndex, isMultiview);
+        super.captureLeftEye(rt, isMultiview);
+    }
+
+    @SuppressWarnings("unused") //called from native
+    void captureRightEye(final int eye, final int swapChainIndex, final boolean isMultiview) {
+        final SXRRenderTarget rt = getRenderTarget(eye, swapChainIndex, isMultiview);
+        super.captureRightEye(rt, isMultiview);
+    }
+
+    @SuppressWarnings("unused") //called from native
+    void capture3DScreenShot(final int eye, final int swapChainIndex, final boolean isMultiview) {
+        final SXRRenderTarget rt = getRenderTarget(eye, swapChainIndex, isMultiview);
+        super.capture3DScreenShot(rt, isMultiview);
     }
 
     /**
@@ -316,7 +253,9 @@ class OvrViewManager extends SXRViewManager {
         recenterPose(mApplication.getActivityNative().getNative());
     }
 
+    private native void initialize(long aNative, long materialShaderManager,
+                                   long postEffectRenderTextureA, long postEffectRenderTextureB);
     private native long getRenderTextureInfo(long ptr, int index, int eye );
-    private native void drawEyes(long ptr);
+    private native void drawEyes(long ptr, SXRScene mainScene);
     private native void recenterPose(long ptr);
 }
