@@ -15,6 +15,7 @@
 
 package com.samsungxr;
 
+import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 
 import com.samsungxr.utility.VrAppSettings;
@@ -29,6 +30,7 @@ final class DaydreamActivityDelegate extends SXRApplication.ActivityDelegateStub
     @Override
     public void onCreate(SXRApplication application) {
         mApplication = application;
+        mApplication.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
     @Override
@@ -74,6 +76,9 @@ final class DaydreamActivityDelegate extends SXRApplication.ActivityDelegateStub
 
     @Override
     public boolean setMain(SXRMain sxrMain, String dataFileName) {
+        if (ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE != mApplication.getActivity().getRequestedOrientation()) {
+            throw new IllegalArgumentException("Portrait orientation not supported");
+        }
         return true;
     }
 

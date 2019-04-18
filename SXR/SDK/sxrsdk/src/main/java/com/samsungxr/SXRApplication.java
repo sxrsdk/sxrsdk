@@ -16,7 +16,6 @@
 package com.samsungxr;
 
 import android.app.Activity;
-import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.media.AudioManager;
@@ -123,7 +122,6 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
         activity.requestWindowFeature(Window.FEATURE_NO_TITLE);
         activity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         mRenderableViewGroup = (ViewGroup) activity.findViewById(android.R.id.content).getRootView();
         mActivityNative = mDelegate.getActivityNative();
@@ -627,43 +625,39 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
 
     public void setMain(SXRMain sxrMain, String dataFileName) {
         this.mSXRMain = sxrMain;
-        if (mActivity.getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            onConfigure(dataFileName);
-            if (!mDelegate.setMain(sxrMain, dataFileName)) {
-                Log.w(TAG, "delegate's setMain failed");
-                return;
-            }
 
-            mViewManager = mDelegate.makeViewManager();
-            mDelegate.setViewManager(mViewManager);
+        onConfigure(dataFileName);
+        if (!mDelegate.setMain(sxrMain, dataFileName)) {
+            Log.w(TAG, "delegate's setMain failed");
+            return;
+        }
 
-            if (mConfigurationManager.isDockListenerRequired()) {
-                startDockEventReceiver();
-            } else {
-                handleOnDock();
-            }
+        mViewManager = mDelegate.makeViewManager();
+        mDelegate.setViewManager(mViewManager);
 
-            mViewManager.getEventManager().sendEventWithMask(
-                    SEND_EVENT_MASK,
-                    this,
-                    IApplicationEvents.class,
-                    "onSetMain", sxrMain);
-
-            final SXRConfigurationManager localConfigurationManager = mConfigurationManager;
-            if (null != mDockEventReceiver && localConfigurationManager.isDockListenerRequired()) {
-                getSXRContext().registerDrawFrameListener(new SXRDrawFrameListener() {
-                    @Override
-                    public void onDrawFrame(float frameTime) {
-                        if (localConfigurationManager.isHmtConnected()) {
-                            handleOnDock();
-                            getSXRContext().unregisterDrawFrameListener(this);
-                        }
-                    }
-                });
-            }
+        if (mConfigurationManager.isDockListenerRequired()) {
+            startDockEventReceiver();
         } else {
-            throw new IllegalArgumentException(
-                    "You can not set orientation to portrait for SXRF apps.");
+            handleOnDock();
+        }
+
+        mViewManager.getEventManager().sendEventWithMask(
+                SEND_EVENT_MASK,
+                this,
+                IApplicationEvents.class,
+                "onSetMain", sxrMain);
+
+        final SXRConfigurationManager localConfigurationManager = mConfigurationManager;
+        if (null != mDockEventReceiver && localConfigurationManager.isDockListenerRequired()) {
+            getSXRContext().registerDrawFrameListener(new SXRDrawFrameListener() {
+                @Override
+                public void onDrawFrame(float frameTime) {
+                    if (localConfigurationManager.isHmtConnected()) {
+                        handleOnDock();
+                        getSXRContext().unregisterDrawFrameListener(this);
+                    }
+                }
+            });
         }
     }
 

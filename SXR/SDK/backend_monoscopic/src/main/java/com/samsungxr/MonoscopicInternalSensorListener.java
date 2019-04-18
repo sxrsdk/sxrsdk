@@ -18,23 +18,34 @@ package com.samsungxr;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.os.Build;
 
 import org.joml.Quaternionf;
 
 /** A listener for a TYPE_ROTATION_VECTOR type sensor. */
 class MonoscopicInternalSensorListener implements SensorEventListener {
     private static final float SQRT_OF_HALF = (float)Math.sqrt(0.5);
-    private static final Quaternionf COORDINATE_QUATERNION = new Quaternionf(0.0f, 0.0f, -SQRT_OF_HALF, SQRT_OF_HALF);
     private static final Quaternionf OFFSET_QUATERNION = new Quaternionf(0.0f, SQRT_OF_HALF, 0.0f, SQRT_OF_HALF);
-    private static final Quaternionf CONSTANT_EXPRESSION = new Quaternionf().set(COORDINATE_QUATERNION).invert()
-            .mul(OFFSET_QUATERNION);
+    private static final Quaternionf PORTRAIT_TRANSFORM1 = new Quaternionf(0, 0, -SQRT_OF_HALF, SQRT_OF_HALF);
+    private static final Quaternionf PORTRAIT_TRANSFORM2 = new Quaternionf(-SQRT_OF_HALF, 0, 0, SQRT_OF_HALF);
+
+    private final Quaternionf COORDINATE_QUATERNION;
+    private final Quaternionf CONSTANT_EXPRESSION;
 
     private MonoscopicRotationSensor mSensor;
-    private final Quaternionf mQuaternion = new Quaternionf(); 
+    private final Quaternionf mQuaternion = new Quaternionf();
+    private final boolean mRequestedLandscape;
 
-    public MonoscopicInternalSensorListener(MonoscopicRotationSensor sensor) {
+    public MonoscopicInternalSensorListener(MonoscopicRotationSensor sensor, final boolean requestedLandscape) {
         mSensor = sensor;
+        mRequestedLandscape = requestedLandscape;
+
+        if (mRequestedLandscape) {
+            COORDINATE_QUATERNION = new Quaternionf(0.0f, 0.0f, -SQRT_OF_HALF, SQRT_OF_HALF);
+        } else {
+            COORDINATE_QUATERNION = new Quaternionf(0.0f, 0.0f, SQRT_OF_HALF, SQRT_OF_HALF);
+        }
+
+        CONSTANT_EXPRESSION = new Quaternionf().set(COORDINATE_QUATERNION).invert().mul(OFFSET_QUATERNION);
     }
 
     @Override
@@ -43,30 +54,22 @@ class MonoscopicInternalSensorListener implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        float w;
+        float w = event.values[3];
         float x = event.values[0];
         float y = event.values[1];
         float z = event.values[2];
 
-        if (Build.VERSION.SDK_INT < 18) {
-            w = getQuaternionW(event.values[0], event.values[1], event.values[2]);
-        } else {
-            w = event.values[3];
-        }
-
         mQuaternion.set(x, y, z, w);
-        CONSTANT_EXPRESSION.mul(mQuaternion, mQuaternion);
-        mQuaternion.mul(COORDINATE_QUATERNION);
+
+        if (mRequestedLandscape) {
+            CONSTANT_EXPRESSION.mul(mQuaternion, mQuaternion);
+            mQuaternion.mul(COORDINATE_QUATERNION);
+        } else {
+            mQuaternion.premul(PORTRAIT_TRANSFORM1);
+            mQuaternion.premul(PORTRAIT_TRANSFORM2);
+        }
 
         mSensor.onInternalRotationSensor(SXRTime.getCurrentTime(), mQuaternion.w, mQuaternion.x, mQuaternion.y,
                 mQuaternion.z, 0.0f, 0.0f, 0.0f);
-    }
-
-    /**
-     * Finds the missing value. Seems to lose a degree of freedom, but it
-     * doesn't. That degree of freedom is already lost by the sensor.
-     */
-    private float getQuaternionW(float x, float y, float z) {
-        return (float) Math.cos(Math.asin(Math.sqrt(x * x + y * y + z * z)));
     }
 }

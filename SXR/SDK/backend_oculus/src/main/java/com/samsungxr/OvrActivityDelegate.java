@@ -15,6 +15,7 @@
 
 package com.samsungxr;
 
+import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 
 import com.samsungxr.utility.VrAppSettings;
@@ -33,6 +34,8 @@ final class OvrActivityDelegate extends SXRApplication.ActivityDelegateStubs {
 
         mActivityNative = new OvrActivityNative(mApplication);
         mActivityHandler = new OvrVrapiActivityHandler(application, mActivityNative);
+
+        application.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
     @Override
@@ -91,6 +94,10 @@ final class OvrActivityDelegate extends SXRApplication.ActivityDelegateStubs {
 
     @Override
     public boolean setMain(SXRMain gvrMain, String dataFileName) {
+        if (ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE != mApplication.getActivity().getRequestedOrientation()) {
+            throw new IllegalArgumentException("Portrait orientation not supported");
+        }
+
         if (null != mActivityHandler) {
             mActivityHandler.onSetScript();
         }

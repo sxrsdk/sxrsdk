@@ -16,6 +16,7 @@
 package com.samsungxr.nodes;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -48,54 +49,6 @@ public class SXRCameraNode extends SXRNode {
     private CameraApplicationEvents cameraApplicationEvents;
     private Camera.PreviewCallback previewCallback = null;
     private Parameters userDefinedParameters = null;
-    /**
-     * Create a {@linkplain SXRNode node} (with arbitrarily
-     * complex geometry) that shows live video from one of the device's cameras
-     *
-     * @param gvrContext current {@link SXRContext}
-     * @param mesh       an arbitrarily complex {@link SXRMesh} object - see
-     *                   {@link com.samsungxr.SXRAssetLoader#loadMesh(com.samsungxr.SXRAndroidResource)}
-     *                   and {@link SXRContext#createQuad(float, float)}
-     * @param camera     an Android {@link Camera}. <em>Note</em>: this constructor
-     *                   calls {@link Camera#setPreviewTexture(SurfaceTexture)} so you
-     *                   should be sure to call it before you call
-     *                   {@link Camera#startPreview()}.
-     * @deprecated This call does not ensure the activity lifecycle is correctly
-     * handled by the {@link SXRCameraNode}. Use
-     * {@link #SXRCameraNode(SXRContext, SXRMesh)} instead.
-     */
-    public SXRCameraNode(SXRContext gvrContext, SXRMesh mesh,
-                                Camera camera) {
-        super(gvrContext, mesh);
-        SXRTexture texture = new SXRExternalTexture(gvrContext);
-        SXRMaterial material = new SXRMaterial(gvrContext, SXRShaderType.OES.ID);
-        material.setMainTexture(texture);
-        getRenderData().setMaterial(material);
-
-        this.gvrContext = gvrContext;
-        this.camera = camera;
-        isCameraOpen = true;
-        mSurfaceTexture = new SurfaceTexture(texture.getId());
-        mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
-            Runnable onFrameAvailableGLCallback = new Runnable() {
-                @Override
-                public void run() {
-                    mSurfaceTexture.updateTexImage();
-                }
-            };
-
-            @Override
-            public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                SXRCameraNode.this.gvrContext.runOnGlThread(onFrameAvailableGLCallback);
-            }
-        });
-
-        try {
-            this.camera.setPreviewTexture(mSurfaceTexture);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Create a {@linkplain SXRNode node} (with arbitrarily
@@ -117,6 +70,10 @@ public class SXRCameraNode extends SXRNode {
         material.setMainTexture(texture);
         getRenderData().setMaterial(material);
         this.gvrContext = gvrContext;
+
+        if (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT == gvrContext.getActivity().getRequestedOrientation()) {
+            mesh.setTexCoords(new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f});
+        }
 
         mSurfaceTexture = new SurfaceTexture(texture.getId());
         mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
@@ -140,26 +97,6 @@ public class SXRCameraNode extends SXRNode {
 
         cameraApplicationEvents = new CameraApplicationEvents();
         gvrContext.getApplication().getEventReceiver().addListener(cameraApplicationEvents);
-    }
-
-    /**
-     * Create a 2D, rectangular {@linkplain SXRNode node} that
-     * shows live video from one of the device's cameras
-     *
-     * @param gvrContext current {@link SXRContext}
-     * @param width      the scene rectangle's width
-     * @param height     the rectangle's height
-     * @param camera     an Android {@link Camera}. <em>Note</em>: this constructor
-     *                   calls {@link Camera#setPreviewTexture(SurfaceTexture)} so you
-     *                   should be sure to call it before you call
-     *                   {@link Camera#startPreview()}.
-     * @deprecated This call does not ensure the activity lifecycle is correctly
-     * handled by the {@link SXRCameraNode}. Use
-     * {@link #SXRCameraNode(SXRContext, float, float)} instead.
-     */
-    public SXRCameraNode(SXRContext gvrContext, float width,
-                                float height, Camera camera) {
-        this(gvrContext, gvrContext.createQuad(width, height), camera);
     }
 
     /**

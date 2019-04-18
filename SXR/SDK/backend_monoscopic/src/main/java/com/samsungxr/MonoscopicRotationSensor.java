@@ -22,6 +22,8 @@ import android.hardware.SensorManager;
 
 import com.samsungxr.utility.Log;
 
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+
 /**
  * Wrapper class for rotation-related sensors. Combines handling a device's
  * internal {@link Sensor#TYPE_ROTATION_VECTOR rotation sensor} with the
@@ -35,6 +37,7 @@ class MonoscopicRotationSensor {
     private MonoscopicInternalSensorListener mInternalSensorListener;
     private final Context mApplicationContext;
     private boolean mUsingInternalSensor = true;
+    private boolean mRequestedLanscape;
 
     /**
      * Constructor.
@@ -48,9 +51,9 @@ class MonoscopicRotationSensor {
     MonoscopicRotationSensor(Activity activity, MonoscopicRotationSensorListener listener) {
         mListener = listener;
         mApplicationContext = activity.getApplicationContext();
+        mRequestedLanscape = SCREEN_ORIENTATION_PORTRAIT != activity.getRequestedOrientation();
 
         startInternalSensor();
-        mUsingInternalSensor = true;
     }
 
     /**
@@ -105,7 +108,7 @@ class MonoscopicRotationSensor {
             if (internalSensor == null) {
                 Log.e("MonoscopicRotationSensor", "This phone does not have a rotation sensor - it cannot run GearVRF applications");
             }
-            mInternalSensorListener = new MonoscopicInternalSensorListener(this);
+            mInternalSensorListener = new MonoscopicInternalSensorListener(this, mRequestedLanscape);
             sensorManager.registerListener(mInternalSensorListener, internalSensor, SensorManager.SENSOR_DELAY_FASTEST);
         }
     }
