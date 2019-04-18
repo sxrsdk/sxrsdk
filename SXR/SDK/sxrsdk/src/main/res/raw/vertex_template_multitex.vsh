@@ -15,8 +15,25 @@ precision lowp int;
 
 layout(location = 0) in vec3 a_position;
 
+//
+// The Phong vertex shader supports up to 4 sets of texture coordinates.
+// It also supports blending of two textures to compose ambient,
+// diffuse, specular, emissive or normal components.
+//
 #ifdef HAS_a_texcoord
 layout(location = 1) in vec2 a_texcoord;
+#endif
+
+#ifdef HAS_a_texcoord1
+layout(location = 2) in vec2 a_texcoord1;
+#endif
+
+#ifdef HAS_a_texcoord2
+layout(location = 3) in vec2 a_texcoord2;
+#endif
+
+#ifdef HAS_a_texcoord3
+layout(location = 4) in vec2 a_texcoord3;
 #endif
 
 #if defined(HAS_a_normal) && defined(HAS_LIGHTSOURCES)
@@ -68,22 +85,6 @@ layout(location = 22) out vec2 lightmap_coord1;
 layout (set = 0, binding = 17) uniform sampler2D blendshapeTexture;
 #endif
 
-//
-// The Phong vertex shader supports up to 4 sets of texture coordinates.
-// It also supports blending of two textures to compose ambient,
-// diffuse, specular, emissive or normal components.
-//
-#ifdef HAS_a_texcoord1
-layout(location = 2) in vec2 a_texcoord1;
-#endif
-
-#ifdef HAS_a_texcoord2
-layout(location = 3) in vec2 a_texcoord2;
-#endif
-
-#ifdef HAS_a_texcoord3
-layout(location = 4) in vec2 a_texcoord3;
-#endif
 
 
 struct Vertex

@@ -8,7 +8,7 @@
 #include "gl_index_buffer.h"
 #include "gl_shader.h"
 
-#define VERBOSE_LOGGING 0
+//#define VERBOSE_LOGGING 0
 #include "util/sxr_log.h"
 
 namespace sxr {
@@ -62,32 +62,20 @@ namespace sxr {
 
         shader->getVertexDescriptor().forEachEntry([this, programId](const DataDescriptor::DataEntry &e)
         {
-            GLint loc = glGetAttribLocation(programId, e.Name);
-
             if (!e.NotUsed)                             // shader uses this vertex attribute?
             {
                 const DataDescriptor::DataEntry* entry = find(e.Name);
+
                 if ((entry != nullptr) && entry->IsSet) // mesh uses this vertex attribute?
                 {
-                    if (loc >= 0)                       // attribute found in shader?
-                    {
-                        GL(glEnableVertexAttribArray(loc)); // enable this attribute in GL
-                        GL(glVertexAttribPointer(loc, entry->Size / sizeof(float),
-                                              entry->IsInt ? GL_INT : GL_FLOAT, GL_FALSE,
-                                              getTotalSize(), reinterpret_cast<GLvoid*>(entry->Offset)));
-                        LOGV("VertexBuffer: vertex attrib #%d %s loc %d ofs %d",
-                             e.Index, e.Name, loc, entry->Offset);
-                        checkGLError("VertexBuffer::bindToShader");
-                    }
-                    else                                // mesh uses attribute but shader does not
-                    {
-                        LOGV("SHADER: vertex attribute %s has no location in shader", e.Name);
-                    }
-                }
-                else if (loc >= 0)                      // shader uses attribute but mesh does not
-                {
-                    GL(glDisableVertexAttribArray(loc));
-                    LOGE("SHADER: shader needs vertex attribute %s but it is not found", e.Name);
+                    int loc = e.Index;                  // location from shader vertex descriptor
+                    GL(glEnableVertexAttribArray(loc)); // enable this attribute in GL
+                    GL(glVertexAttribPointer(loc, entry->Size / sizeof(float),
+                                             entry->IsInt ? GL_INT : GL_FLOAT, GL_FALSE,
+                                             getTotalSize(),
+                                             reinterpret_cast<GLvoid*>(entry->Offset)));
+                    LOGV("VertexBuffer: vertex attrib #%d %s ofs %d", e.Index, e.Name, entry->Offset);
+                    checkGLError("VertexBuffer::bindToShader");
                 }
             }
         });
