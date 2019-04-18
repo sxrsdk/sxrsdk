@@ -67,7 +67,12 @@ public class SXRShadowMap extends SXRRenderTarget
 
         if (sShadowMaps == null)
         {
+            SXRTextureParameters params = new SXRTextureParameters(ctx);
+
+            params.setWrapSType(SXRTextureParameters.TextureWrapType.GL_CLAMP_TO_EDGE);
+            params.setWrapTType(SXRTextureParameters.TextureWrapType.GL_CLAMP_TO_EDGE);
             sShadowMaps = new SXRRenderTextureArray(ctx, 1024, 1024, 2, 4);
+            sShadowMaps.updateTextureParameters(params);
             sBiasMatrix = new Matrix4f();
             sBiasMatrix.scale(0.5f);
             sBiasMatrix.setTranslation(0.5f, 0.5f, 0.5f);
