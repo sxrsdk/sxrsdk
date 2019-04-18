@@ -37,7 +37,6 @@
 #include "objects/eye_type.h"
 #include "objects/mesh.h"
 #include "objects/bounding_volume.h"
-#include "gl/gl_program.h"
 #include <unordered_map>
 #include "renderer.h"
 #include "gl/gl_uniform_block.h"

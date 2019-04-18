@@ -25,7 +25,6 @@
 #include <sstream>
 #include <engine/renderer/renderer.h>
 
-#include "gl/gl_program.h"
 #include "glm/glm.hpp"
 #include "java_component.h"
 #include "objects/shader_data.h"
