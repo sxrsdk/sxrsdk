@@ -505,14 +505,6 @@ public class ARCoreSession implements IMixedReality
                     break;
             }
 
-            // ARCore requires camera permissions to operate. If we did not yet obtain runtime
-            // permission on Android M and above, now is a good time to ask the user for it.
-            if (!CameraPermissionHelper.hasCameraPermission(activity))
-            {
-                CameraPermissionHelper.requestCameraPermission(activity);
-                return false;
-            }
-
             mSession = new Session(/* context= */ activity);
         }
         catch (UnavailableArcoreNotInstalledException |
