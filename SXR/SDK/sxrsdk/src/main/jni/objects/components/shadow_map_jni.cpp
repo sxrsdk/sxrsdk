@@ -8,11 +8,11 @@ namespace sxr
 {
     extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_NativeShadowMap_ctor(JNIEnv *env, jobject obj, jobject jmaterial);
+    Java_com_samsungxr_NativeShadowMap_ctor(JNIEnv *env, jobject obj, jlong jmaterial);
     };
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_NativeShadowMap_ctor(JNIEnv *env, jobject obj, jobject jmaterial)
+    Java_com_samsungxr_NativeShadowMap_ctor(JNIEnv *env, jobject obj, jlong jmaterial)
     {
         ShaderData* material = reinterpret_cast<ShaderData*>(jmaterial);
         return reinterpret_cast<jlong>(new ShadowMap(material));
