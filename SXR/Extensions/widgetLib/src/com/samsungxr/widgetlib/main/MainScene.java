@@ -118,7 +118,6 @@ public class MainScene {
         mRightCameraRootWidget.applyLayout(new AbsoluteLayout());
 
         mMainScene = mContext.getMainScene();
-        mMainScene.setFrustumCulling(true);
         mMainScene.addNode(mSceneRootObject);
 
         getMainCameraRig().addChildObject(mMainCameraRootObject);

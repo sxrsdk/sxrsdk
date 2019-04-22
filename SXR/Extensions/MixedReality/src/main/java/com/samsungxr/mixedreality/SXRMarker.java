@@ -15,11 +15,29 @@
 
 package com.samsungxr.mixedreality;
 
+import com.samsungxr.SXRBehavior;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRNode;
+
 /**
  * Represents a common Augmented Image in MixedReality
  */
-public abstract class SXRMarker {
+public abstract class SXRMarker extends SXRBehavior
+{
+    static private long TYPE_MARKER = newComponentType(SXRMarker.class);
     protected SXRTrackingState mTrackingState;
+
+    protected SXRMarker(SXRContext SXRContext)
+    {
+        super(SXRContext);
+        mType = getComponentType();
+    }
+
+    /**
+     * Return the marker's name.
+     * @return
+     */
+    public abstract String getName();
 
     /**
      * @return Returns the estimated width
@@ -42,4 +60,14 @@ public abstract class SXRMarker {
      * @return The tracking state
      */
     public abstract  SXRTrackingState getTrackingState();
+
+    /**
+     * Create an anchor attached to this image
+     * @return SXRAnchor
+     * @param owner {@link SXRNode} to attach the anchor component to.
+     */
+    public abstract SXRAnchor createAnchor(SXRNode owner);
+
+    static public long getComponentType() { return TYPE_MARKER; }
+
 }

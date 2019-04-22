@@ -19,7 +19,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 21
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
     }
@@ -45,7 +45,7 @@ dependencies {
 
     implementation "org.joml:joml-android:${jomlVersion}"
     implementation "com.google.ar:core:${arcoreVersion}"
-    implementation 'com.android.support:support-v4:27.0.2'
+    implementation 'com.android.support:support-v4:26.1.0'
 }
 
 clean {}.doLast {

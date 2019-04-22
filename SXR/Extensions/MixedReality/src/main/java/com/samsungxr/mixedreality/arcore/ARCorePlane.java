@@ -17,25 +17,32 @@ package com.samsungxr.mixedreality.arcore;
 
 import android.support.annotation.NonNull;
 
+import com.google.ar.core.Anchor;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRNode;
+import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRPlane;
 import com.samsungxr.mixedreality.SXRTrackingState;
+
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.nio.FloatBuffer;
 
 
 class ARCorePlane extends SXRPlane {
+    private final ARCoreSession mSession;
     private Plane mARPlane;
-    private ARCorePose mPose;
+    private final float[] mPose = new float[16];
     private FloatBuffer mLastPolygon;
 
-    protected ARCorePlane(SXRContext sxrContext, Plane plane) {
-        super(sxrContext);
-        mPose = new ARCorePose();
+    protected ARCorePlane(ARCoreSession session, Plane plane) {
+        super(session.getSXRContext());
+        mSession = session;
         mARPlane = plane;
 
         if (mARPlane.getType() == Plane.Type.HORIZONTAL_DOWNWARD_FACING) {
@@ -101,22 +108,31 @@ class ARCorePlane extends SXRPlane {
     }
 
     @Override
-    public float[] get3dPolygonAsArray() {
+    public SXRAnchor createAnchor(float[] pose, SXRNode owner)
+    {
+        Pose arpose = mSession.makePose(pose);
+        Anchor aranchor = mARPlane.createAnchor(arpose);
+        return mSession.addAnchor(aranchor, owner);
+    }
+
+    @Override
+    public float[] get3dPolygonAsArray()
+    {
         float[] verticesArray = getPolygon().array();
         int verticesArraySize = verticesArray.length;
+        float sf = mSession.getARToVRScale();
 
         // Vertices have two coordinates, so we have to divide for two
         // to get the number of vertices
         int vertexCount = verticesArraySize / 2;
-
         float[] meshVertices = new float[verticesArraySize + vertexCount];
 
-        for (int i = 0, j = 0; i < verticesArraySize; i += 2) {
-            meshVertices[j++] = verticesArray[i];
+        for (int i = 0, j = 0; i < verticesArraySize; i += 2)
+        {
+            meshVertices[j++] = verticesArray[i] * sf;
             meshVertices[j++] = 0;
-            meshVertices[j++] = verticesArray[i + 1];
+            meshVertices[j++] = verticesArray[i + 1] * sf;
         }
-
         return meshVertices;
     }
 
@@ -126,33 +142,38 @@ class ARCorePlane extends SXRPlane {
     }
 
     @Override
-    public boolean isPoseInPolygon(float[] pose) {
-
+    public boolean isPoseInPolygon(float[] pose)
+    {
         float[] translation = new float[3];
         float[] rotation = new float[4];
-        float[] arPose;
 
-        arPose = pose.clone();
-
-        ARCoreSession.gvr2ar(arPose);
-        ARCoreSession.convertMatrixPoseToVector(arPose, translation, rotation);
-
+        mSession.convertMatrixPoseToVector(pose.clone(), translation, rotation);
         return mARPlane.isPoseInPolygon(new Pose(translation, rotation));
     }
 
     /**
      * Update the plane based on arcore best knowledge of the world
-     *
-     * @param scale
      */
-    protected void update(float scale) {
+    protected void update()
+    {
         SXRNode owner = getOwnerObject();
-        if (isEnabled() && (owner != null) && owner.isEnabled()) {
-            convertFromARtoVRSpace(scale);
+        if (isEnabled() && (owner != null) && owner.isEnabled())
+        {
+            float[] mtx = getPose();
+            getOwnerObject().getTransform().setModelMatrix(mtx);
+
         }
     }
 
-    protected boolean geometryChange() {
+    public final float[] getPose()
+    {
+        mARPlane.getCenterPose().toMatrix(mPose, 0);
+        mSession.ar2gvr(mPose);
+        return mPose;
+    }
+
+    protected boolean geometryChange()
+    {
         if (mARPlane.getPolygon().compareTo(mLastPolygon) == 0) {
             return false;
         }
@@ -160,13 +181,4 @@ class ARCorePlane extends SXRPlane {
         return true;
     }
 
-    /**
-     * Converts from ARCore world space to SXRf's world space.
-     *
-     * @param scale Scale from AR to SXRf world
-     */
-    private void convertFromARtoVRSpace(float scale) {
-        mPose.update(mARPlane.getCenterPose(), scale);
-        getOwnerObject().getTransform().setModelMatrix(mPose.getPoseMatrix());
-    }
 }

@@ -22,4 +22,6 @@ public interface IMixedRealityEvents extends IEvents {
      * @param mr
      */
     void onMixedRealityUpdate(IMixedReality mr);
+
+    void onMixedRealityError(IMixedReality mr, String errmsg);
 }

@@ -15,21 +15,41 @@
 
 package com.samsungxr.mixedreality.arcore;
 
+import com.google.ar.core.Anchor;
 import com.google.ar.core.AugmentedImage;
 
+import com.google.ar.core.Pose;
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRNode;
+import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRMarker;
 import com.samsungxr.mixedreality.SXRTrackingState;
+
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /**
  * Represents an ARCore Augmented Image
  */
-public class ARCoreMarker extends SXRMarker {
-    private AugmentedImage mAugmentedImage;
+public class ARCoreMarker extends SXRMarker
+{
+    private final AugmentedImage mAugmentedImage;
+    private final ARCoreSession mSession;
 
-    protected ARCoreMarker(AugmentedImage augmentedImage) {
+    protected ARCoreMarker(ARCoreSession session, AugmentedImage augmentedImage)
+    {
+        super(session.getSXRContext());
+        mSession = session;
         mAugmentedImage = augmentedImage;
         mTrackingState = SXRTrackingState.PAUSED;
     }
+
+    /**
+     * @return the name of the marker
+     */
+    @Override
+    public String getName() { return mAugmentedImage.getName(); }
 
     /**
      * @return Returns the estimated width
@@ -55,6 +75,14 @@ public class ARCoreMarker extends SXRMarker {
         float[] centerPose = new float[16];
         mAugmentedImage.getCenterPose().toMatrix(centerPose, 0);
         return centerPose;
+    }
+
+    @Override
+    public SXRAnchor createAnchor(SXRNode owner)
+    {
+        Pose arpose = mSession.makePose(getCenterPose());
+        Anchor aranchor = mAugmentedImage.createAnchor(arpose);
+        return mSession.addAnchor(aranchor, owner);
     }
 
     /**
