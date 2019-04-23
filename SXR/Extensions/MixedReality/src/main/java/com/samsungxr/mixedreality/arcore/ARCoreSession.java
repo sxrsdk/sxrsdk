@@ -41,6 +41,7 @@ import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 
+import com.samsungxr.SXRCamera;
 import com.samsungxr.SXRCameraRig;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRDrawFrameListener;
@@ -753,8 +754,16 @@ public class ARCoreSession implements IMixedReality
     private static void setVRCameraFov(SXRCameraRig camRig, float degreesFov)
     {
         camRig.getCenterCamera().setFovY(degreesFov);
-        ((SXRPerspectiveCamera)camRig.getLeftCamera()).setFovY(degreesFov);
-        ((SXRPerspectiveCamera)camRig.getRightCamera()).setFovY(degreesFov);
+
+        final SXRCamera leftCamera = camRig.getLeftCamera();
+        if (leftCamera instanceof SXRPerspectiveCamera) {
+            ((SXRPerspectiveCamera)leftCamera).setFovY(degreesFov);
+        }
+
+        final SXRCamera rightCamera = camRig.getRightCamera();
+        if (rightCamera instanceof SXRPerspectiveCamera) {
+            ((SXRPerspectiveCamera)rightCamera).setFovY(degreesFov);
+        }
     }
 
     @Override
