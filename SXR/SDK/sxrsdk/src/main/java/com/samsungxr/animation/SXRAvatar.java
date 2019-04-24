@@ -15,6 +15,7 @@ import com.samsungxr.SXRTexture;
 import com.samsungxr.animation.keyframe.BVHImporter;
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
+import com.samsungxr.utility.Threads;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -549,55 +550,62 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
      * @param animResource resource with the animation
      * @param boneMap optional bone map to map animation skeleton to avatar
      */
-    public void loadAnimation(SXRAndroidResource animResource, String boneMap)
+    public void loadAnimation(final SXRAndroidResource animResource, final String boneMap)
     {
-        String filePath = animResource.getResourcePath();
-        SXRContext ctx = mAvatarRoot.getSXRContext();
+        final String filePath = animResource.getResourcePath();
+        final SXRContext ctx = mAvatarRoot.getSXRContext();
         SXRResourceVolume volume = new SXRResourceVolume(ctx, animResource);
 
         if (filePath.endsWith(".bvh"))
         {
-            SXRAnimator animator = new SXRAnimator(ctx);
-            animator.setName(filePath);
-            try
+            Threads.spawn(new Runnable()
             {
-                BVHImporter importer = new BVHImporter(ctx);
-                SXRSkeletonAnimation skelAnim;
-
-                if (boneMap != null)
+                public void run()
                 {
-                    SXRSkeleton skel = importer.importSkeleton(animResource);
-                    skelAnim = importer.readMotion(skel);
-                    animator.addAnimation(skelAnim);
+                    SXRAnimator animator = new SXRAnimator(ctx);
+                    animator.setName(filePath);
+                    try
+                    {
+                        BVHImporter importer = new BVHImporter(ctx);
+                        SXRSkeletonAnimation skelAnim;
 
-                    SXRPoseMapper retargeter = new SXRPoseMapper(mSkeleton, skel, skelAnim.getDuration());
-                    retargeter.setBoneMap(boneMap);
-                    animator.addAnimation(retargeter);
+                        if (boneMap != null)
+                        {
+                            SXRSkeleton skel = importer.importSkeleton(animResource);
+                            skelAnim = importer.readMotion(skel);
+                            animator.addAnimation(skelAnim);
+
+                            SXRPoseMapper retargeter =
+                                new SXRPoseMapper(mSkeleton, skel, skelAnim.getDuration());
+                            retargeter.setBoneMap(boneMap);
+                            animator.addAnimation(retargeter);
+                        }
+                        else
+                        {
+                            skelAnim = importer.importAnimation(animResource, mSkeleton);
+                            animator.addAnimation(skelAnim);
+                        }
+                        addAnimation(animator);
+                        ctx.getEventManager().sendEvent(SXRAvatar.this,
+                                                        IAvatarEvents.class,
+                                                        "onAnimationLoaded",
+                                                        SXRAvatar.this,
+                                                        animator,
+                                                        filePath,
+                                                        null);
+                    }
+                    catch (IOException ex)
+                    {
+                        ctx.getEventManager().sendEvent(SXRAvatar.this,
+                                                        IAvatarEvents.class,
+                                                        "onAnimationLoaded",
+                                                        SXRAvatar.this,
+                                                        null,
+                                                        filePath,
+                                                        ex.getMessage());
+                    }
                 }
-                else
-                {
-                    skelAnim = importer.importAnimation(animResource, mSkeleton);
-                    animator.addAnimation(skelAnim);
-                }
-                addAnimation(animator);
-                ctx.getEventManager().sendEvent(SXRAvatar.this,
-                                                IAvatarEvents.class,
-                                                "onAnimationLoaded",
-                                                SXRAvatar.this,
-                                                animator,
-                                                filePath,
-                                                null);
-            }
-            catch (IOException ex)
-            {
-                ctx.getEventManager().sendEvent(SXRAvatar.this,
-                                                IAvatarEvents.class,
-                                                "onAnimationLoaded",
-                                                SXRAvatar.this,
-                                                null,
-                                                filePath,
-                                                ex.getMessage());
-            }
+            });
         }
         else
         {
@@ -612,6 +620,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
             ctx.getAssetLoader().loadModel(volume, animRoot, settings, false, mLoadAnimHandler);
         }
     }
+
 
     /**
      * Adds an animation to this avatar.
@@ -664,13 +673,27 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
     }
 
     /**
-     * Starts the named animation.
+     * Starts the named animation at the end of the currently
+     * playing animation sequence.
      * @see SXRAvatar#stop(String)
+     * @see SXRAvatar#startNext(String)
      * @see SXRAnimationEngine#start(SXRAnimation)
      */
     public void start(String name)
     {
         mAnimsToPlay.start(name);
+    }
+
+    /**
+     * Add the given animation to this avatar and start it
+     * immediately after the currently playing animation.
+     * @param name  name of animation to start
+     * @see SXRAvatar#stop(String)
+     * @see SXRAnimationEngine#start(SXRAnimation)
+     */
+    public void startNext(String name)
+    {
+        mAnimsToPlay.startNext(name);
     }
 
     /**
@@ -695,15 +718,81 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
     }
 
     /**
-     * Start all of the avatar animations, causing them
-     * to play one at a time in succession.
-     * @param repeatMode SXRRepeatMode.REPEATED to repeatedly play,
-     *                   SXRRepeatMode.ONCE to play only once
-     *                   SXRRepeatMode.PINGPONG to play start to finish, finish to start;
+     * Start all of the avatar animations.
+     * The animations will play consecutively.
+     * They may overlap if blending is requested.
+     * @param repeatMode controls animation sequencing:
+     * <table>
+     *     <tr>
+     *         <td>SXRRepeatMode.ONCE</td>
+     *         <td>
+     *             Play the animations consecutively in the order they were added.
+     *             Stop after the last aniation.
+     *         </td>
+     *     </tr>
+     *     <tr>
+     *         <td>SXRRepeatMode.REPEATED</td>
+     *         <td>
+     *             Play the animations consecutively in the order they were added.
+     *             After the last aniation is played, start at the first
+     *             animation and play the sequence repeatedly.
+     *         </td>
+     *     </tr>
+     *     <tr>
+     *         <td>SXRRepeatMode.PINGPONG</td>
+     *         <td>
+     *             Play the animations consecutively in the order they were added.
+     *             After the last animation is played, start at the last
+     *             animation and play the backwards, running the animations
+     *             in reverse. Continue playing the sequence forward and
+     *             then backwards.
+     *         </td>
+     *     </tr>
+     * </table>
      */
     public void startAll(int repeatMode)
     {
         mAnimsToPlay.startAll(repeatMode);
+    }
+
+    /**
+     * Start all of the avatar animations
+     * whose name contains the pattern string.
+     * The animations will play consecutively.
+     * They may overlap if blending is requested.
+     * @param pattern String to match
+     * @param repeatMode controls animation sequencing:
+     * <table>
+     *     <tr>
+     *         <td>SXRRepeatMode.ONCE</td>
+     *         <td>
+     *             Play the animations consecutively in the order they were added.
+     *             Stop after the last aniation.
+     *         </td>
+     *     </tr>
+     *     <tr>
+     *         <td>SXRRepeatMode.REPEATED</td>
+     *         <td>
+     *             Play the animations consecutively in the order they were added.
+     *             After the last aniation is played, start at the first
+     *             animation and play the sequence repeatedly.
+     *         </td>
+     *     </tr>
+     *     <tr>
+     *         <td>SXRRepeatMode.PINGPONG</td>
+     *         <td>
+     *             Play the animations consecutively in the order they were added.
+     *             After the last animation is played, start at the last
+     *             animation and play the backwards, running the animations
+     *             in reverse. Continue playing the sequence forward and
+     *             then backwards.
+     *         </td>
+     *     </tr>
+     * </table>
+     */
+    public void startAll(String pattern, int repeatMode)
+    {
+        mAnimsToPlay.startAll(pattern, repeatMode);
     }
 
     /**
