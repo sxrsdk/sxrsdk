@@ -4,6 +4,7 @@ package com.samsungxr.animation;
 import com.samsungxr.SXRHybridObject;
 import com.samsungxr.SXRMeshMorph;
 import com.samsungxr.PrettyPrint;
+import com.samsungxr.SXRNode;
 import com.samsungxr.animation.keyframe.SXRFloatAnimation;
 import com.samsungxr.utility.Log;
 
@@ -37,12 +38,47 @@ public final class SXRMorphAnimation extends SXRAnimation implements PrettyPrint
      * The key frames are all stored in a single contiguous
      * floating point array. Each key frame has a time followed
      * by N blend weights (where N is the key size - 1).
+     * @param target  {@link SXRMeshMorph} component being animated.
      * @param keyData blend weight key data.
      * @param keySize number of floats per key.
      */
     public SXRMorphAnimation(SXRMeshMorph target, float[] keyData, int keySize)
     {
         super(target, keyData[keyData.length - keySize] - keyData[0]);
+        mKeys = keyData;
+        mKeyInterpolator = new SXRFloatAnimation(keyData, keySize);
+        mCurrentValues = new float[keySize - 1];
+
+        SXRNode meshOwner = target.getOwnerObject();
+
+        if ((mName == null) && (meshOwner != null))
+        {
+            String name = meshOwner.getName();
+            if (name != null)
+            {
+                setName(name + ".morph");
+            }
+        }
+    }
+
+    /**
+     * Creates a morph animation for a node with a given name.
+     * <p>
+     * This constructor is used when to create a morph
+     * animation that can be used later. The name identifies
+     * which node it should animate.
+     * <p>
+     * The key frames are all stored in a single contiguous
+     * floating point array. Each key frame has a time followed
+     * by N blend weights (where N is the key size - 1).
+     * @param name    name of morph animation.
+     * @param keyData blend weight key data.
+     * @param keySize number of floats per key.
+     */
+    public SXRMorphAnimation(String name, float[] keyData, int keySize)
+    {
+        super(null, keyData[keyData.length - keySize] - keyData[0]);
+        mName = name;
         mKeys = keyData;
         mKeyInterpolator = new SXRFloatAnimation(keyData, keySize);
         mCurrentValues = new float[keySize - 1];
@@ -56,9 +92,26 @@ public final class SXRMorphAnimation extends SXRAnimation implements PrettyPrint
     {
         SXRMeshMorph morph  = (SXRMeshMorph) mTarget;
 
-        mKeyInterpolator.animate(timeInSec, mCurrentValues);
-        morph.setWeights(mCurrentValues);
+        if (morph != null)
+        {
+            mKeyInterpolator.animate(timeInSec, mCurrentValues);
+            morph.setWeights(mCurrentValues);
+        }
+    }
 
+    /**
+     * Set the target morph being animated.
+     *
+     * @param morph {@SXRMeshMorph} with weights to animate.
+     */
+    public void setTarget(SXRMeshMorph morph)
+    {
+        int numweights = morph.getBlendShapeCount();
+        if (numweights != mKeyInterpolator.getKeySize() - 1)
+        {
+            throw new IllegalArgumentException("The number blend weights on the target morph must match the animation");
+        }
+        mTarget = morph;
     }
 
     @Override

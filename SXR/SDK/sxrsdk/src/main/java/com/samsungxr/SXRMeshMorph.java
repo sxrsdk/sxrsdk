@@ -133,13 +133,6 @@ public class SXRMeshMorph extends SXRBehavior
         copyBaseShape(mesh.getVertexBuffer());
     }
 
-    public void onDetach(SXRNode sceneObj)
-    {
-        mBlendShapeDiffs = null;
-        mBaseBlendShape = null;
-        mNumVerts = 0;
-    }
-
     protected void copyBaseShape(SXRVertexBuffer baseShape)
     {
         String baseDescriptor = baseShape.getDescriptor();
@@ -161,7 +154,7 @@ public class SXRMeshMorph extends SXRBehavior
         {
             throw new IllegalArgumentException("Base shape has no vertices");
         }
-        mTexWidth = mFloatsPerVertex*mNumBlendShapes;
+        mTexWidth = mFloatsPerVertex * mNumBlendShapes;
         mBaseBlendShape = new float[mFloatsPerVertex * mNumVerts];
         mWeights = new float[mNumBlendShapes];
         mBlendShapeDiffs = new float[mTexWidth * mNumVerts];

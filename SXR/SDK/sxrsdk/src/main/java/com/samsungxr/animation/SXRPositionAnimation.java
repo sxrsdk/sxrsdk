@@ -73,6 +73,11 @@ public class SXRPositionAnimation extends SXRTransformAnimation
             float positionX, float positionY, float positionZ)
     {
         this(target.getTransform(), duration, positionX, positionY, positionZ);
+        String name = target.getName();
+        if (name != null)
+        {
+            setName(name + ".position");
+        }
     }
 
     @Override

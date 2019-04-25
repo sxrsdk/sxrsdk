@@ -33,7 +33,6 @@ import org.joml.Matrix4f;
  */
 public class SXRNodeAnimation extends SXRTransformAnimation implements PrettyPrint
 {
-    protected final String mName;
     protected final SXRAnimationChannel mChannel;
 
     /**

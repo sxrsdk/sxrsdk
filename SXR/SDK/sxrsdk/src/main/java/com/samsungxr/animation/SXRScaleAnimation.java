@@ -103,6 +103,11 @@ public class SXRScaleAnimation extends SXRTransformAnimation
             float scaleX, float scaleY, float scaleZ)
     {
         this(target.getTransform(), duration, scaleX, scaleY, scaleZ);
+        String name = target.getName();
+        if ((name != null) && (mName == null))
+        {
+            setName(name + ".scale");
+        }
     }
 
     /**

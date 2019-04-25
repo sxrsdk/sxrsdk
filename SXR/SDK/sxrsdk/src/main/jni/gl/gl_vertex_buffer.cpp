@@ -8,7 +8,7 @@
 #include "gl_index_buffer.h"
 #include "gl_shader.h"
 
-#define VERBOSE_LOGGING 0
+#define NO_LOGGING
 #include "util/sxr_log.h"
 
 namespace sxr {
@@ -93,7 +93,7 @@ namespace sxr {
         if (mVArrayID == -1)
         {
             GL(glGenVertexArrays(1, &mVArrayID));
-            LOGD("VertexBuffer::updateGPU creating vertex array %d", mVArrayID);
+            LOGV("VertexBuffer::updateGPU creating vertex array %d", mVArrayID);
         }
         if (ibuf)
         {
