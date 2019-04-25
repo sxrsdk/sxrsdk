@@ -116,5 +116,10 @@ public abstract class SXRMaterialAnimation extends SXRAnimation {
         super(target, duration);
         mMaterial = getMaterial(target);
         mTarget = mMaterial;
+        String name = target.getName();
+        if ((name != null) && (mName == null))
+        {
+            setName(name + ".material");
+        }
     }
 }

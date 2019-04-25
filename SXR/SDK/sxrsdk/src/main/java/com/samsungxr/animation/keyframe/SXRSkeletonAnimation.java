@@ -49,7 +49,6 @@ import java.util.List;
  * @see SXRPose
  */
 public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
-    protected String mName;
     private SXRSkeleton mSkeleton = null;
 
 
@@ -90,13 +89,6 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
         }
         mBoneChannels = new SXRAnimationChannel[mSkeleton.getNumBones()];
     }
-
-    /**
-     * Get the name of this skeleton animation.
-     * This is the name provided in the constructor.
-     * @return string name of animation.
-     */
-    public String getName() { return mName; }
 
     /**
      * Get the skeleton for this animation.

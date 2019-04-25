@@ -300,12 +300,17 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
 
     public SXRAnimation addBlendAnimation(SXRAnimationQueue queue, SXRAnimator dst, SXRAnimator src, float duration)
     {
-        SXRSkeletonAnimation skelOne = (SXRSkeletonAnimation) src.getAnimation(0);
-        SXRSkeletonAnimation skelTwo = (SXRSkeletonAnimation) dst.getAnimation(0);;
+        SXRSkeletonAnimation skelOne = null;
+        SXRSkeletonAnimation skelTwo = null;
 
         for (int i = 0; i < src.getAnimationCount(); ++i)
         {
             SXRAnimation anim = src.getAnimation(i);
+
+            if (anim instanceof SXRSkeletonAnimation)
+            {
+                skelOne = (SXRSkeletonAnimation) anim;
+            }
             if (anim instanceof SXRPoseMapper)
             {
                 SXRAnimationEngine.getInstance(dst.getSXRContext()).stop(anim);
@@ -314,6 +319,10 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
         for (int i = 0; i < dst.getAnimationCount(); ++i)
         {
             SXRAnimation anim  = dst.getAnimation(i);
+            if (anim instanceof SXRSkeletonAnimation)
+            {
+                skelTwo = (SXRSkeletonAnimation) anim;
+            }
             if (anim instanceof SXRPoseInterpolator)
             {
                 anim.reset();
@@ -328,9 +337,13 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
                 return blendAnim;
             }
         }
-        SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(skelTwo.getSkeleton(), skelOne.getSkeleton(), duration);
-        dst.addAnimation(blendAnim);
-        return blendAnim;
+        if ((skelOne != null) && (skelTwo != null))
+        {
+            SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(skelTwo.getSkeleton(), skelOne.getSkeleton(), duration);
+            dst.addAnimation(blendAnim);
+            return blendAnim;
+        }
+        return null;
     }
 
     public void removeBlendAnimation(SXRAnimationQueue queue, SXRAnimator a)

@@ -121,6 +121,7 @@ public abstract class SXRAnimation {
     protected int mIterations = 0;
     protected boolean isFinished = false;
     protected boolean mReverse = false;
+    protected String mName = null;
 
     /**
      * Base constructor.
@@ -138,7 +139,6 @@ public abstract class SXRAnimation {
     protected SXRAnimation(SXRHybridObject target, float duration) {
         mTarget = target;
         mDuration = duration;
-
     }
 
     /**
@@ -181,6 +181,20 @@ public abstract class SXRAnimation {
     {
         return mTarget;
     }
+
+    /**
+     * Get the name assigned to his animation, if any.
+     * @return String with animation name
+     * @see #setName(String)
+     */
+    public String getName() { return mName; }
+
+    /**
+     * Set the name of this animation.
+     * @param name String with name of animation.
+     * @see #getName()
+     */
+    public void setName(String name) { mName = name; }
 
     /**
      * Set the interpolator.
@@ -404,7 +418,7 @@ public abstract class SXRAnimation {
     {
         if (sDebug)
         {
-            Log.d("ANIMATION", "%s started", getClass().getSimpleName());
+            Log.d("ANIMATION", "%s %s started", getClass().getSimpleName(), mName);
         }
     }
 
@@ -412,7 +426,7 @@ public abstract class SXRAnimation {
     {
         if (sDebug)
         {
-            Log.d("ANIMATION", "%s finished", getClass().getSimpleName());
+            Log.d("ANIMATION", "%s %s finished", getClass().getSimpleName(), mName);
         }
     }
 
@@ -420,7 +434,7 @@ public abstract class SXRAnimation {
     {
         if (sDebug)
         {
-            Log.d("ANIMATION", "%s repeated %d", getClass().getSimpleName(), count);
+            Log.d("ANIMATION", "%s %s repeated %d", getClass().getSimpleName(), mName, count);
         }
     }
 

@@ -80,6 +80,11 @@ public class SXRRotationByAxisAnimation extends SXRTransformAnimation
                                       float angle, float x, float y, float z)
     {
         this(target.getTransform(), duration, angle, x, y, z);
+        String name = target.getName();
+        if ((name != null) && (mName == null))
+        {
+            setName(name + ".rotation");
+        }
     }
 
     @Override

@@ -84,6 +84,11 @@ public class SXRColorAnimation extends SXRMaterialAnimation {
      */
     public SXRColorAnimation(SXRNode target, float duration, float[] rgb) {
         this(getMaterial(target), duration, rgb);
+        String name = target.getName();
+        if ((name != null) && (mName == null))
+        {
+            setName(name + ".material");
+        }
     }
 
     /**
@@ -100,6 +105,11 @@ public class SXRColorAnimation extends SXRMaterialAnimation {
      */
     public SXRColorAnimation(SXRNode target, float duration, int color) {
         this(target, duration, Colors.toColors(color));
+        String name = target.getName();
+        if ((name != null) && (mName == null))
+        {
+            setName(name + ".material");
+        }
     }
 
     @Override

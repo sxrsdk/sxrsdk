@@ -303,6 +303,16 @@ public class SXRFloatAnimation implements PrettyPrint
         return mKeys.length / mFloatsPerKey;
     }
 
+    /**
+     * Gets the number of floats per key.
+     * @return key size in number of floats
+     */
+    public int getKeySize() { return mFloatsPerKey; }
+
+    /**
+     * Get the duration of the animation in seconds.
+     * @return time stamp on the last key.
+     */
     public float getDuration()
     {
         if (mKeys.length > mFloatsPerKey)

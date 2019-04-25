@@ -5,9 +5,11 @@
  *
  ****/
 #include "vertex_buffer.h"
-#include "util/sxr_log.h"
 #include <sstream>
 #include "glm/gtc/matrix_inverse.hpp"
+
+#define NO_LOGGING
+#include "util/sxr_log.h"
 
 namespace sxr {
 
@@ -239,7 +241,7 @@ namespace sxr {
         int             nverts = mVertexCount;
         int             attrStride;
 
-        LOGD("VertexBuffer::setIntVec %s %d", attributeName, srcSize);
+        LOGV("VertexBuffer::setIntVec %s %d", attributeName, srcSize);
         if (attr == NULL)
         {
             LOGE("VertexBuffer: ERROR attribute %s not found in vertex buffer", attributeName);
