@@ -23,6 +23,8 @@
 #include <sys/system_properties.h>
 #include <cstring>
 
+#include "util/sxr_log.h"
+
 namespace sxr {
 Renderer* Renderer::instance = nullptr;
 bool Renderer::isVulkan_ = false;

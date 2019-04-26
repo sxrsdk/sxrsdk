@@ -12,13 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <jni.h>
 
-/***************************************************************************
- * JNI
- ***************************************************************************/
-
-
-#include "util/sxr_jni.h"
 #include "ovr_gear_controller.h"
 #include "ovr_activity.h"
 

@@ -12,16 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/***************************************************************************
- * JNI
- ***************************************************************************/
+#include <jni.h>
 
 #include "glm/gtc/type_ptr.hpp"
-
 #include "objects/components/camera_rig.h"
-#include "util/sxr_jni.h"
 #include "util/sxr_java_stack_trace.h"
+
+#include "util/sxr_log.h"
 
 namespace sxr {
 extern "C" {

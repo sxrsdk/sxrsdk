@@ -18,12 +18,13 @@
  * JNI
  ***************************************************************************/
 
+#include <jni.h>
 #include <objects/components/mesh_collider.h>
 #include "picker.h"
 #include "objects/scene.h"
-
-#include "util/sxr_jni.h"
 #include "glm/gtc/type_ptr.hpp"
+
+#include "util/sxr_log.h"
 
 namespace sxr {
 extern "C" {

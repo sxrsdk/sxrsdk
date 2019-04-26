@@ -24,9 +24,7 @@
 #include "objects/scene.h"
 #include "objects/textures/texture.h"
 #include "objects/textures/render_texture.h"
-
-#undef LOGD
-#define LOGD(...)
+#include "util/sxr_log.h"
 
 #define MAX_INDICES 500
 #define BATCH_SIZE 60
@@ -426,6 +424,36 @@ bool Renderer::renderPostEffectData(RenderState& rstate, RenderTexture* input_te
     renderWithShader(rstate, shader, post_effect, material, pass);
     post_effect->clearDirty();
     return true;
+}
+
+void Renderer::addRenderTarget(RenderTarget *renderTarget, EYE eye, int index) {
+    switch (eye) {
+        case LEFT:
+            mLeftRenderTarget[index] = renderTarget;
+            break;
+        case RIGHT:
+            mRightRenderTarget[index] = renderTarget;
+            break;
+        case MULTIVIEW:
+            mMultiviewRenderTarget[index] = renderTarget;
+            break;
+        default:
+            LOGE("invalid Eye");
+    }
+}
+
+RenderTarget *Renderer::getRenderTarget(int index, int eye) {
+    switch (eye) {
+        case LEFT:
+            return mLeftRenderTarget[index];
+        case RIGHT:
+            return mRightRenderTarget[index];
+        case MULTIVIEW:
+            return mMultiviewRenderTarget[index];
+        default:
+            FAIL("invalid eye");
+    }
+    return nullptr;
 }
 
 }

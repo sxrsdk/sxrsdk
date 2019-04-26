@@ -30,6 +30,8 @@
 #include "objects/scene.h"
 #include "objects/components/skin.h"
 
+#include "util/sxr_log.h"
+
 #ifndef GL_TEXTURE_BORDER_COLOR
 #define GL_TEXTURE_BORDER_COLOR 0x1004
 #endif

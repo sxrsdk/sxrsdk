@@ -15,8 +15,7 @@
 
 
 #include "hybrid_object.h"
-
-#include "util/sxr_jni.h"
+#include <jni.h>
 
 namespace sxr {
 extern "C" {

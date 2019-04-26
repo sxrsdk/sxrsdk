@@ -22,7 +22,6 @@
 #define GL_RENDER_BUFFER_H_
 
 #include "gl/gl_headers.h"
-#include "util/sxr_log.h"
 
 namespace sxr {
 
@@ -33,7 +32,7 @@ public:
     }
 
     ~GLRenderBuffer() {
-        GL(glDeleteRenderbuffers(1, &id_));
+        glDeleteRenderbuffers(1, &id_);
     }
 
     GLuint id() const {

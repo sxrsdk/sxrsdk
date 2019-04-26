@@ -25,6 +25,9 @@
 
 #include "astc_transparency.h"
 
+#include "util/sxr_log.h"
+
+
 namespace sxr {
 
 /*

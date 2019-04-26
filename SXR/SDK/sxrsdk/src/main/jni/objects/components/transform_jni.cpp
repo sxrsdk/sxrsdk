@@ -12,17 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
-/***************************************************************************
- * JNI
- ***************************************************************************/
+#include <jni.h>
 
 #include "transform.h"
-
-#include "util/sxr_jni.h"
-#include "util/sxr_log.h"
 #include "glm/gtc/type_ptr.hpp"
+
+#include "util/sxr_log.h"
 
 namespace sxr {
 extern "C" {

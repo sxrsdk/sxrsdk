@@ -20,9 +20,9 @@
 #ifndef JAVA_COMPONENT_H_
 #define JAVA_COMPONENT_H_
 
+#include <jni.h>
 #include "component.h"
 #include "util/jni_utils.h"
-#include "util/sxr_log.h"
 
 namespace sxr {
     class Node;

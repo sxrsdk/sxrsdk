@@ -23,6 +23,8 @@
 #include "vulkan_index_buffer.h"
 #include "vulkan_shader.h"
 
+#include "util/sxr_log.h"
+
 namespace sxr {
     VulkanIndexBuffer::VulkanIndexBuffer(int bytesPerIndex, int vertexCount)
     : IndexBuffer(bytesPerIndex, vertexCount)

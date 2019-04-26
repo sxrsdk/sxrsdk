@@ -21,7 +21,6 @@
 #include "mesh.h"
 
 #include "util/sxr_log.h"
-#include "util/sxr_jni.h"
 #include "android/asset_manager_jni.h"
 
 namespace sxr {

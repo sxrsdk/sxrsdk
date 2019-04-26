@@ -5,7 +5,6 @@
 #ifndef GL_ES_VERSION_3_0
 #include "GLES3/gl3.h"
 #endif
-#include "util/sxr_gl.h"
 
 #include "../objects/index_buffer.h"
 

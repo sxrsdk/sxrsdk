@@ -16,10 +16,8 @@
 /***************************************************************************
  * JNI
  ***************************************************************************/
-
+#include <jni.h>
 #include "light.h"
-
-#include "util/sxr_jni.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "scene.h"
 #include "lightlist.h"

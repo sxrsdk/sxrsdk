@@ -37,6 +37,8 @@
 
 #include <glslang/Include/Common.h>
 
+#include "util/sxr_log.h"
+
 namespace sxr {
 ShaderData* VulkanRenderer::createMaterial(const char* uniform_desc, const char* texture_desc)
 {
