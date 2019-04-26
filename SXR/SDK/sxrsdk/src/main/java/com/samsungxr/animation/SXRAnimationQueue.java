@@ -116,7 +116,7 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
     protected final List<SXRAnimator> mAnimations = new ArrayList<>();
     protected final List<SXRAnimator> mAnimQueue = new ArrayList<SXRAnimator>();
     protected int mRepeatMode = SXRRepeatMode.ONCE;
-    protected float mBlendFactor = 0.5f;
+    protected float mBlendFactor = 0;
     protected boolean mIsRunning = false;
     protected int mCurIndex = 0;
     private boolean reverse = false;
@@ -400,7 +400,7 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
         synchronized (mAnimQueue)
         {
             mAnimQueue.add(animator);
-            Log.d("ANIMATION", "Started " + animator.getName());
+            Log.d("ANIMATION", "Added " + animator.getName());
         }
         onStart();
     }
@@ -426,7 +426,7 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
                 }
             }
             mAnimQueue.add(index, a);
-            Log.d("ANIMATION", "Started " + name);
+            Log.d("ANIMATION", "Added " + name);
         }
         onStart();
     }
@@ -528,9 +528,11 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
                 float timeleft = a.getDuration() - a.getElapsedTime();
                 if (mBlendFactor >= timeleft)
                 {
-                    mQueueListener.addBlendAnimation(this, animator2, animator, timeleft);
-                    animator2.start();
-                    mQueueListener.onAnimationStarted(this, animator2);
+                    if (mQueueListener.addBlendAnimation(this, animator2, animator, timeleft) != null)
+                    {
+                        animator2.start();
+                        mQueueListener.onAnimationStarted(this, animator2);
+                    }
                 }
             }
             nextIndex = mCurIndex;

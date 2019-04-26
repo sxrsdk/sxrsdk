@@ -546,15 +546,27 @@ class  SXRJassimpAdapter
 
 
         //add morph animations
-        if(aiAnim.getNumMeshChannels() > 0 ) {
-            for (AiMeshAnim aiMeshMorphAnim : aiAnim.getMeshChannels()) {
+        if (aiAnim.getNumMeshChannels() > 0 )
+        {
+            for (AiMeshAnim aiMeshMorphAnim : aiAnim.getMeshChannels())
+            {
                 SXRNode baseObject = target.getNodeByName(aiMeshMorphAnim.getNodeName());
-                SXRMeshMorph morph = (SXRMeshMorph)baseObject.getComponent(SXRMeshMorph.getComponentType());
-                SXRMorphAnimation morphAnim = new SXRMorphAnimation(morph,
-                        aiMeshMorphAnim.getMorphAnimationKeys(), aiMeshMorphAnim.getNumMorphTargets() + 1);
-                if (morphAnim != null) {
-                    animator.addAnimation(morphAnim);
+                SXRMeshMorph morph = (SXRMeshMorph) baseObject.getComponent(SXRMeshMorph.getComponentType());
+                SXRMorphAnimation morphanim;
+
+                if (morph != null)
+                {
+                    morphanim = new SXRMorphAnimation(morph,
+                            aiMeshMorphAnim.getMorphAnimationKeys(),
+                            aiMeshMorphAnim.getNumMorphTargets() + 1);
                 }
+                else
+                {
+                    morphanim = new SXRMorphAnimation(aiMeshMorphAnim.getNodeName(),
+                            aiMeshMorphAnim.getMorphAnimationKeys(),
+                            aiMeshMorphAnim.getNumMorphTargets() + 1);
+                }
+                animator.addAnimation(morphanim);
             }
         }
     }

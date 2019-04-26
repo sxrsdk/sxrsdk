@@ -76,6 +76,11 @@ public class SXROpacityAnimation extends SXRMaterialAnimation {
     public SXROpacityAnimation(SXRNode target, float duration,
             float opacity) {
         this(getMaterial(target), duration, opacity);
+        String name = target.getName();
+        if ((name != null) && (mName == null))
+        {
+            setName(name + ".material");
+        }
     }
 
     @Override

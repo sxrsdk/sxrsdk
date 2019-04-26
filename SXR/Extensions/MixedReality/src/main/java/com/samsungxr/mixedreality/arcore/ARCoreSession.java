@@ -56,7 +56,6 @@ import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRScene;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
-import com.samsungxr.mixedreality.CameraPermissionHelper;
 import com.samsungxr.mixedreality.IMarkerEvents;
 import com.samsungxr.mixedreality.IMixedReality;
 import com.samsungxr.mixedreality.IMixedRealityEvents;

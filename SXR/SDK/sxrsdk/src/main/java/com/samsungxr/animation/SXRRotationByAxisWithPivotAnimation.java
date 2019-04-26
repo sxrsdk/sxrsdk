@@ -107,6 +107,11 @@ public class SXRRotationByAxisWithPivotAnimation extends SXRTransformAnimation {
                                                float pivotX, float pivotY, float pivotZ) {
         this(target.getTransform(), duration, angle, axisX, axisY, axisZ,
              pivotX, pivotY, pivotZ);
+        String name = target.getName();
+        if ((name != null) && (mName == null))
+        {
+            setName(name + ".rotation");
+        }
     }
 
     @Override

@@ -72,6 +72,11 @@ public class SXRRelativeMotionAnimation extends SXRTransformAnimation
     public SXRRelativeMotionAnimation(SXRNode target, float duration,
             float deltaX, float deltaY, float deltaZ) {
         this(target.getTransform(), duration, deltaX, deltaY, deltaZ);
+        String name = target.getName();
+        if ((name != null) && (mName == null))
+        {
+            setName(name + ".position");
+        }
     }
 
     @Override
