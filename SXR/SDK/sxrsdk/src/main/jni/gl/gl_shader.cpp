@@ -23,6 +23,7 @@
 #include "engine/renderer/renderer.h"
 #include "gl_light.h"
 #include <GLES3/gl3.h>
+#include "util/sxr_log.h"
 
 namespace sxr {
 

@@ -12,12 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 #include "../engine/renderer/renderer.h"
 #include "vk_render_to_texture.h"
 #include "../engine/renderer/vulkan_renderer.h"
 #include "vk_texture.h"
+
+#include "util/sxr_log.h"
+
 namespace sxr{
 VkRenderTexture::VkRenderTexture(int width, int height, int fboType, int layers, int sample_count):RenderTexture(sample_count), fbo(nullptr),mWidth(width), mHeight(height), mFboType(fboType), mLayers(layers), mSamples(sample_count){
     initVkData();

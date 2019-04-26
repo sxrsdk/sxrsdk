@@ -16,6 +16,7 @@
 /***************************************************************************
  * Represents a physics 3D world
  ***************************************************************************/
+#include <jni.h>
 
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
@@ -24,8 +25,6 @@
 #include "physics_world.h"
 #include "physics_rigidbody.h"
 #include "physics_constraint.h"
-
-#include "util/sxr_jni.h"
 
 static char tag[] = "PhysWorldJNI";
 

@@ -16,9 +16,8 @@
 /***************************************************************************
  * JNI
  ***************************************************************************/
-
+#include <jni.h>
 #include <engine/renderer/renderer.h>
-#include "util/sxr_jni.h"
 #include "util/sxr_log.h"
 #include "render_pass.h"
 #include "objects/shader_data.h"

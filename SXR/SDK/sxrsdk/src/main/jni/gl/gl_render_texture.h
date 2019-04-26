@@ -26,7 +26,7 @@
 #include "gl/gl_frame_buffer.h"
 #include "gl/gl_image.h"
 #include "eglextension/msaa/msaa.h"
-#include "util/sxr_gl.h"
+
 
 namespace sxr {
 class GLRenderImage;

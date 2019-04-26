@@ -22,6 +22,8 @@
 #include "gl_imagetex.h"
 #include "gl_headers.h"
 
+#include "util/sxr_log.h"
+
 namespace sxr {
 
 GLRenderImage::GLRenderImage(int width, int height, int layers, GLuint texId, bool marktexParamsDirty)

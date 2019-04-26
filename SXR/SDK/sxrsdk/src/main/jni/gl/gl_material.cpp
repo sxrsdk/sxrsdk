@@ -17,6 +17,8 @@
 #include "gl/gl_shader.h"
 #include "gl/gl_imagetex.h"
 
+#include "util/sxr_log.h"
+
 namespace sxr
 {
 /**

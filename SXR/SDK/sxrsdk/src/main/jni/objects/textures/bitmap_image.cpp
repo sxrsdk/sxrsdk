@@ -17,6 +17,9 @@
 #include "bitmap_transparency.h"
 #include "astc_transparency.h"
 
+#include "util/jni_utils.h"
+#include "util/sxr_log.h"
+
 namespace sxr {
 BitmapImage::BitmapImage(int format) :
             Image(Image::BITMAP, format),mData(NULL),

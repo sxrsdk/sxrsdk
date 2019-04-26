@@ -22,7 +22,6 @@
 #define SXR_TIME_H_
 
 #include "time.h"
-#include "util/sxr_log.h"
 
 namespace sxr {
 

@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 #include "vulkan/vulkan_render_data.h"
 #include "vulkan/vulkan_material.h"
+
+#include "util/sxr_log.h"
+
 #define VERTEX_BUFFER_BIND_ID 0
 namespace sxr
 {

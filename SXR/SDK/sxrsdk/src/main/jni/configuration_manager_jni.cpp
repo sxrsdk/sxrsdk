@@ -19,7 +19,6 @@
 
 #include <engine/renderer/renderer.h>
 #include "configuration_manager.h"
-#include "util/sxr_jni.h"
 
 namespace sxr {
     extern "C" {

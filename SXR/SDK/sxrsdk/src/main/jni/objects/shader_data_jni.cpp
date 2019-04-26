@@ -18,9 +18,9 @@
  * JNI
  ***************************************************************************/
 
+#include <jni.h>
 #include "shader_data.h"
 #include "engine/renderer/renderer.h"
-#include "util/sxr_jni.h"
 
 namespace sxr
 {

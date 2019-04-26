@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-
+#include <jni.h>
 #include "component.h"
 #include "component.inl"
-#include "util/sxr_jni.h"
 
 namespace sxr {
 extern "C" {

@@ -17,10 +17,7 @@
  * JNI
  ***************************************************************************/
 
-#include "android/bitmap.h"
-#include "util/sxr_jni.h"
-#include "util/sxr_log.h"
-
+#include <jni.h>
 
 namespace sxr {
 

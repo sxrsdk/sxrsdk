@@ -32,7 +32,7 @@ public:
     }
     GLFrameBuffer(GLuint id): id_(id){}
     ~GLFrameBuffer() {
-        GL(glDeleteFramebuffers(1, &id_));
+        glDeleteFramebuffers(1, &id_);
     }
 
     GLuint id() const {

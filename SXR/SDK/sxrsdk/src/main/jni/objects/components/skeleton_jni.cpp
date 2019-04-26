@@ -1,11 +1,11 @@
 /***************************************************************************
  * JNI
  ***************************************************************************/
+#include <jni.h>
 
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "objects/components/skeleton.h"
-#include "util/sxr_jni.h"
 
 namespace sxr {
 extern "C" {

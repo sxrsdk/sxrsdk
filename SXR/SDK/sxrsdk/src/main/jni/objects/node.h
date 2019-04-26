@@ -31,7 +31,6 @@
 #include "objects/components/camera_rig.h"
 #include "objects/components/collider.h"
 #include "objects/bounding_volume.h"
-#include "util/sxr_gl.h"
 
 namespace sxr {
 class Camera;

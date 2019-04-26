@@ -17,6 +17,8 @@
 #include "shaders/shader.h"
 #include "objects/components/render_data.h"
 
+#include "util/sxr_log.h"
+
 namespace sxr {
 /**
  * Constructs a base material.

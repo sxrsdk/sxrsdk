@@ -16,6 +16,8 @@
 #include "vulkan/vk_imagebase.h"
 #include "engine/renderer/vulkan_renderer.h"
 
+#include "util/sxr_log.h"
+
 namespace sxr {
     VkImageAspectFlagBits getAspectFlagForFormat(VkFormat format){
         switch (format){

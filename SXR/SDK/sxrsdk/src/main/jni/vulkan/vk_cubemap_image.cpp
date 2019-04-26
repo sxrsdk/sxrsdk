@@ -24,6 +24,8 @@
 #include "util/jni_utils.h"
 #include "util/scope_exit.h"
 
+#include "util/sxr_log.h"
+
 namespace sxr {
 extern std::map<int, VkFormat> compressed_formats;
     VkCubemapImage::VkCubemapImage(int format) :
