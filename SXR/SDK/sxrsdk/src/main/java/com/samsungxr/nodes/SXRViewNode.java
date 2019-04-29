@@ -16,15 +16,16 @@
 package com.samsungxr.nodes;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.os.Handler;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Looper;
-import android.os.Message;
 import android.os.SystemClock;
 import android.view.ActionMode;
 import android.view.GestureDetector;
@@ -36,31 +37,30 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.ViewTreeObserver;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.samsungxr.ITouchEvents;
+import com.samsungxr.IViewEvents;
 import com.samsungxr.SXRApplication;
-import com.samsungxr.SXRCollider;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRExternalTexture;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRMeshCollider;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRNode;
 import com.samsungxr.SXRShaderId;
 import com.samsungxr.SXRTexture;
-import com.samsungxr.ITouchEvents;
-import com.samsungxr.IViewEvents;
 import com.samsungxr.io.SXRControllerType;
 import com.samsungxr.shaders.SXROESConvolutionShader;
-import com.samsungxr.utility.Log;
+
+import org.joml.Vector2f;
+
+import static android.content.Context.SENSOR_SERVICE;
 
 /**
  * This class represents a {@linkplain SXRNode Scene object} that shows a {@link View}
@@ -220,6 +220,10 @@ public class SXRViewNode extends SXRNode {
                 }
             }
         });
+
+        final Activity activity = gvrContext.getActivity();
+        SensorManager sensorManager=(SensorManager)activity.getSystemService(SENSOR_SERVICE);
+        sensorManager.registerListener(mSensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private void createRenderData(SXRContext gvrContext) {
@@ -445,6 +449,22 @@ public class SXRViewNode extends SXRNode {
             return false;
         }
     }
+
+    float ax,ay,az;
+    private final SensorEventListener mSensorEventListener = new SensorEventListener() {
+        @Override
+        public void onAccuracyChanged(Sensor arg0, int arg1) {
+        }
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (event.sensor.getType()==Sensor.TYPE_ACCELEROMETER){
+                ax=event.values[0];
+                ay=event.values[1];
+                az=event.values[2];
+            }
+        }
+    };
 
     /**
      * Internal class to draw the Android view into canvas at UI thread and
@@ -735,14 +755,23 @@ public class SXRViewNode extends SXRNode {
             }
         }
 
+        final Vector2f up = new Vector2f(0.0f, 9.8f).normalize();
+        final Vector2f v = new Vector2f();
         public void onDrag(SXRPicker.SXRPickedObject pickInfo)
         {
-            if ((pickInfo.motionEvent != null) && (pickInfo.hitObject == mSelected))
-            {
+            if ((pickInfo.motionEvent != null) && (pickInfo.hitObject == mSelected)) {
                 final MotionEvent event = pickInfo.motionEvent;
                 final float[] texCoords = pickInfo.getTextureCoords();
-                float x = event.getRawX() - getTop();
-                float y = event.getRawY() - getLeft();
+                float xx = event.getRawX() - getTop();
+                float yy = event.getRawY() - getLeft();
+
+                v.set(ax, ay).normalize();
+                final float phi = -(float) Math.acos(up.dot(v));
+                float cosphi = (float)Math.cos(phi);
+                float sinphi = (float)Math.sin(phi);
+
+                float x = cosphi*xx - sinphi*yy;
+                float y = sinphi*xx + cosphi*yy;
 
                 /*
                  * When we get events from the Gear controller we replace the location
@@ -750,8 +779,7 @@ public class SXRViewNode extends SXRNode {
                  * these events are all zero.
                  */
                 if ((pickInfo.getPicker().getController().getControllerType() == SXRControllerType.CONTROLLER) &&
-                    (event.getButtonState() == MotionEvent.BUTTON_SECONDARY))
-                {
+                        (event.getButtonState() == MotionEvent.BUTTON_SECONDARY)) {
                     x = texCoords[0] * getWidth();
                     y = texCoords[1] * getHeight();
                 }
@@ -760,11 +788,17 @@ public class SXRViewNode extends SXRNode {
                  * Here we make the event location relative to the hit point where
                  * the button went down.
                  */
-                else
-                {
-                    x += mHitX - mActionDownX;
-                    y += mHitY - mActionDownY;
+                else {
+                    final float actionDownX = cosphi*mActionDownX - sinphi*mActionDownY;
+                    final float actionDownY = sinphi*mActionDownX + cosphi*mActionDownY;
+
+                    float hitX = cosphi*mHitX - sinphi*mHitY;
+                    float hitY = sinphi*mHitX + cosphi*mHitY;
+
+                    x += hitX - actionDownX;
+                    y += hitY - actionDownY;
                 }
+
                 dispatchPickerInputEvent(event, x, y);
             }
         }
