@@ -17,6 +17,7 @@ package com.samsungxr.mixedreality.arcore;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.opengl.Matrix;
 import android.util.DisplayMetrics;
 import android.view.Surface;
@@ -36,6 +37,7 @@ import com.google.ar.core.Session;
 import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.exceptions.CameraNotAvailableException;
+import com.google.ar.core.exceptions.NotYetAvailableException;
 import com.google.ar.core.exceptions.UnavailableApkTooOldException;
 import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
@@ -305,6 +307,11 @@ public class ARCoreSession implements IMixedReality
         pointCloud.setARPointCloud(mLastARFrame.acquirePointCloud());
 
         return pointCloud;
+    }
+
+    @Override
+    public Image acquireCameraImage() throws NotYetAvailableException {
+        return mLastARFrame.acquireCameraImage();
     }
 
     @Override
