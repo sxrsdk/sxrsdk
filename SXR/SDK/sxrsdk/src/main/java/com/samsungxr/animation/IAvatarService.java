@@ -77,6 +77,12 @@ public interface IAvatarService
     public String getBasePath();
 
     /**
+     * Connect to the avatar database
+     * @return -1 cannot connect, 0 connection pending, 1 connected
+     */
+    public int connect();
+
+    /**
      * Request results from the avatar database.
      * <p>
      * The input properties are added to the existing
