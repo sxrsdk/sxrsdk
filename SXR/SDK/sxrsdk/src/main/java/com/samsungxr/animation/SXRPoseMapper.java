@@ -285,7 +285,14 @@ public class SXRPoseMapper extends SXRAnimation
             Quaternionf q = new Quaternionf();
             int numsrcbones = srcskel.getNumBones();
 
-            mDestPose.clearRotations();
+            if (mDestPose.getNumBones() != dstskel.getNumBones())
+            {
+                mDestPose = new SXRPose(dstskel);
+            }
+            else
+            {
+                mDestPose.clearRotations();
+            }
             srcskel.getPosition(v);
             v.mul(mScale);
             for (int i = 0; i < numsrcbones; ++i)
