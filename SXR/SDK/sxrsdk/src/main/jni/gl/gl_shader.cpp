@@ -300,17 +300,6 @@ void GLShader::findUniforms(const DataDescriptor& desc, int bindingPoint)
 #endif
         }
     });
-    char buffer[128];
-    GLsizei length;
-    GLsizei size;
-    GLenum type;
-    GLint numAttribs;
-    glGetProgramiv(mProgramId, GL_ACTIVE_ATTRIBUTES, &numAttribs);
-    for (int i = 0; i < numAttribs; ++i)
-    {
-        glGetActiveAttrib(mProgramId, i, 128, &length, &size, &type, buffer);
-        LOGV("SHADER: active attrib %d %s %d", i, buffer, size);
-    }
     checkGLError("GLShader::findUniforms");
 }
 
