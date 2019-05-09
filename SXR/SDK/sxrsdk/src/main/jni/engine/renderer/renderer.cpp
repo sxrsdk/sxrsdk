@@ -24,6 +24,8 @@
 #include "objects/scene.h"
 #include "objects/textures/texture.h"
 #include "objects/textures/render_texture.h"
+
+#define VERBOSE_LOGGING 0
 #include "util/sxr_log.h"
 
 #define MAX_INDICES 500
@@ -50,7 +52,7 @@ void Renderer::frustum_cull(glm::vec3 camera_position, Scene* scene, Node* objec
         float frustum[6][4], std::vector<Node*>* scene_objects,
         bool need_cull, int planeMask)
 {
-    LOGD("Renderer::frustum_cull: object: %s", object->name().c_str());
+    LOGV("Renderer::frustum_cull: object: %s", object->name().c_str());
     // frustumCull() return 3 possible values:
     // 0 when the HBV of the object is completely outside the frustum: cull itself and all its children out
     // 1 when the HBV of the object is intersecting the frustum but the object itself is not: cull it out and continue culling test with its children
@@ -81,7 +83,7 @@ void Renderer::frustum_cull(glm::vec3 camera_position, Scene* scene, Node* objec
             return distance;
         });
         objectLayer = renderData->layer();
-        LOGD("Renderer::frustum_cull: object's layer is %d", objectLayer);
+        LOGV("Renderer::frustum_cull: object's layer is %d", objectLayer);
     } else {
         objectLayer = Renderer::LAYER_NORMAL;
     }
@@ -95,7 +97,7 @@ void Renderer::frustum_cull(glm::vec3 camera_position, Scene* scene, Node* objec
 
         if (cullVal >= 2) {
             object->setCullStatus(false);
-            LOGD("Renderer::frustum_cull: adding to layer %d", objectLayer);
+            LOGV("Renderer::frustum_cull: adding to layer %d", objectLayer);
             scene_objects[objectLayer].push_back(object);
         }
 
@@ -105,7 +107,7 @@ void Renderer::frustum_cull(glm::vec3 camera_position, Scene* scene, Node* objec
         }
     } else {
         object->setCullStatus(false);
-        LOGD("Renderer::frustum_cull: adding to layer %d", objectLayer);
+        LOGV("Renderer::frustum_cull: adding to layer %d", objectLayer);
         scene_objects[objectLayer].push_back(object);
     }
 
