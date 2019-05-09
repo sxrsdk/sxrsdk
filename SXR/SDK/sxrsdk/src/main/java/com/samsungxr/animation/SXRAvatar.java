@@ -331,6 +331,9 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
             if (anim instanceof SXRPoseMapper)
             {
                 SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(skelTwo.getSkeleton(), skelOne.getSkeleton(), duration);
+                String name = skelOne.getName() + "-" + skelTwo.getName();
+
+                blendAnim.setName(name);
                 dst.removeAnimation(anim);
                 dst.addAnimation(blendAnim);
                 dst.addAnimation(anim);
@@ -340,6 +343,9 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
         if ((skelOne != null) && (skelTwo != null))
         {
             SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(skelTwo.getSkeleton(), skelOne.getSkeleton(), duration);
+            String name = skelOne.getName() + "-" + skelTwo.getName();
+
+            blendAnim.setName(name);
             dst.addAnimation(blendAnim);
             return blendAnim;
         }
@@ -549,13 +555,14 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
      */
     public void clearAvatar()
     {
-        SXRNode previousAvatar = (mAvatarRoot.getChildrenCount() > 0) ?
-                mAvatarRoot.getChildByIndex(0) : null;
-
-        if (previousAvatar != null)
+        stop();
+        while (mAvatarRoot.getChildrenCount() > 0)
         {
-            mAvatarRoot.removeChildObject(previousAvatar);
+            mAvatarRoot.removeChildObject(mAvatarRoot.getChildByIndex(0));
         }
+        mAttachments.clear();
+        Attachment avatarInfo = addAttachment("avatar");
+        avatarInfo.setProperty("type", "avatar");
     }
 
     /**
@@ -640,7 +647,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
      *
      * @param anim animation to add
      * @see SXRAvatar#removeAnimation(SXRAnimator)
-     * @see SXRAvatar#clear()
+     * @see SXRAvatar#clearAvatar()
      */
     public void addAnimation(SXRAnimator anim)
     {
@@ -664,7 +671,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
      *
      * @param anim animation to remove
      * @see SXRAvatar#addAnimation(SXRAnimator)
-     * @see SXRAvatar#clear()
+     * @see SXRAvatar#clearAvatar()
      */
     public void removeAnimation(SXRAnimator anim)
     {
@@ -680,7 +687,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
      * @see SXRAvatar#removeAnimation(SXRAnimator)
      * @see SXRAvatar#addAnimation(SXRAnimator)
      */
-    public void clear()
+    public void clearAnimations()
     {
         mAnimsToPlay.clear();
     }
@@ -821,7 +828,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
 
     /**
      * Stops all of the animations associated with this animator.
-     * @see SXRAvatar#startAll()
+     * @see SXRAvatar#startAll(int)
      * @see SXRAnimationEngine#stop(SXRAnimation)
      */
     public void stop()

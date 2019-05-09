@@ -92,7 +92,7 @@ public class ARCoreSession implements IMixedReality
 {
     private final SXRContext mContext;
     private static final String TAG = "ARCORE";
-    private static float mARtoVRScale = 100.0f;
+    private static float mARtoVRScale = 1.0f;
     protected SXREventReceiver mListeners;
     private Session mSession;
     private boolean mInstallRequested;
@@ -109,6 +109,7 @@ public class ARCoreSession implements IMixedReality
     private Map<Plane, ARCorePlane> mArPlanes;
     private Map<AugmentedImage, ARCoreMarker> mArAugmentedImages;
     private List<ARCoreAnchor> mArAnchors;
+    private boolean mIsMono;
 
     private Camera mCamera;// ARCore camera
     private final Map<Anchor, CloudAnchorCallback> pendingAnchors = new HashMap<>();
@@ -562,21 +563,25 @@ public class ARCoreSession implements IMixedReality
     private void onInitARCoreSession(SXRContext gvrContext) throws CameraNotAvailableException
     {
         SXRTexture passThroughTexture = new SXRExternalTexture(gvrContext);
+        final SXRCameraRig cameraRig = mVRScene.getMainCameraRig();
+        final SXRPerspectiveCamera centerCam = cameraRig.getCenterCamera();
+        final SXRMesh mesh;
+        final float aspect = centerCam.getAspectRatio();
 
+        mIsMono = Math.abs(1.0f - aspect) > 0.0001f;
         mSession.setCameraTextureName(passThroughTexture.getId());
 
         configDisplayAspectRatio(mContext.getActivity());
 
         mLastARFrame = mSession.update();
-        final SXRCameraRig cameraRig = mVRScene.getMainCameraRig();
-
-        mDisplayGeometry = configDisplayGeometry(mLastARFrame.getCamera(), cameraRig);
-        mSession.setDisplayGeometry(Surface.ROTATION_90,
-                                    (int) mDisplayGeometry.x, (int) mDisplayGeometry.y);
-
-        final SXRMesh mesh = SXRMesh.createQuad(mContext, "float3 a_position float2 a_texcoord",
-                                                mDisplayGeometry.x, mDisplayGeometry.y);
-
+        if (mIsMono)
+        {
+            mesh = configMonoDisplay(mLastARFrame.getCamera(), cameraRig);
+        }
+        else
+        {
+            mesh = configVRDisplay(mLastARFrame.getCamera(), cameraRig);
+        }
         final FloatBuffer texCoords = mesh.getTexCoordsAsFloatBuffer();
         final int capacity = texCoords.capacity();
         final int FLOAT_SIZE = 4;
@@ -708,45 +713,81 @@ public class ARCoreSession implements IMixedReality
     {
         final DisplayMetrics metrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
-        mScreenToCamera.x = metrics.widthPixels;
+        int width = mIsMono ? metrics.widthPixels : metrics.widthPixels / 2;
+        mScreenToCamera.x = width;
         mScreenToCamera.y = metrics.heightPixels;
-        mSession.setDisplayGeometry(Surface.ROTATION_90, metrics.widthPixels, metrics.heightPixels);
+        mSession.setDisplayGeometry(Surface.ROTATION_90, width, metrics.heightPixels);
     }
 
-    private Vector3f configDisplayGeometry(Camera arCamera, SXRCameraRig cameraRig)
+    private SXRMesh configMonoDisplay(Camera arCamera, SXRCameraRig cameraRig)
     {
+        float[] m = new float[16];
+        Matrix4f projmtx = new Matrix4f();
         SXRPerspectiveCamera centerCamera = cameraRig.getCenterCamera();
         float near = centerCamera.getNearClippingDistance();
         float far = centerCamera.getFarClippingDistance();
 
         // Get phones' cam projection matrix.
-        float[] m = new float[16];
         arCamera.getProjectionMatrix(m, 0, near, far);
-        Matrix4f projmtx = new Matrix4f();
         projmtx.set(m);
+        cameraRig.getHeadTransform().setRotation(1, 0, 0, 0);
+        cameraRig.setCameraRigType(SXRCameraRig.SXRCameraRigType.Freeze.ID);
 
         float aspectRatio = projmtx.m11() / projmtx.m00();
         float arCamFOV = projmtx.perspectiveFov();
         float tanfov =  (float) Math.tan(arCamFOV * 0.5f);
-        float quadDistance = far - 1;
+        float quadDistance = far - near;
         float quadHeight = quadDistance * tanfov * 2;
         float quadWidth = quadHeight * aspectRatio;
 
         // Use the same fov from AR to VR Camera as default value.
-        float vrFov = (float) Math.toDegrees(arCamFOV);
-        setVRCameraFov(cameraRig, vrFov);
-
-        // VR Camera will be updated by AR pose, not by internal sensors.
-        cameraRig.getHeadTransform().setRotation(1, 0, 0, 0);
-        cameraRig.setCameraRigType(SXRCameraRig.SXRCameraRigType.Freeze.ID);
-
-        android.util.Log.d(TAG, "ARCore configured to: passthrough[w: "
-                + quadWidth + ", h: " + quadHeight +", z: " + quadDistance
-                + "], cam fov: " +vrFov + ", aspect ratio: " + aspectRatio);
-        mScreenToCamera.x = quadWidth / mScreenToCamera.x;    // map [0, ScreenSize] to [-Display, +Display]
+        setVRCameraFov(cameraRig, (float) Math.toDegrees(arCamFOV));
+        mScreenToCamera.x = quadWidth / mScreenToCamera.x;
         mScreenToCamera.y = quadHeight / mScreenToCamera.y;
         mScreenDepth = quadHeight / tanfov;
-        return new Vector3f(quadWidth, quadHeight, -quadDistance);
+        android.util.Log.d(TAG, "ARCore configured to: passthrough[w: "
+                + quadWidth + ", h: " + quadHeight +", z: " + quadDistance
+                + "], cam fov: " + arCamFOV + ", aspect ratio: " + aspectRatio);
+        mDisplayGeometry = new Vector3f(quadWidth, quadHeight, -quadDistance);
+        mSession.setDisplayGeometry(Surface.ROTATION_90, (int) quadWidth, (int) quadHeight);
+        return SXRMesh.createQuad(mContext, "float3 a_position float2 a_texcoord",
+                quadWidth, quadHeight);
+    }
+
+    private SXRMesh configVRDisplay(Camera arCamera, SXRCameraRig cameraRig)
+    {
+        float[] m = new float[16];
+        Matrix4f projmtx = new Matrix4f();
+        SXRPerspectiveCamera leftCamera = (SXRPerspectiveCamera) cameraRig.getLeftCamera();
+
+        cameraRig.getHeadTransform().setRotation(1, 0, 0, 0);
+        cameraRig.setCameraRigType(SXRCameraRig.SXRCameraRigType.Freeze.ID);
+        float near = leftCamera.getNearClippingDistance();
+        float far = leftCamera.getFarClippingDistance();
+        float vrFov = (float) Math.toRadians(leftCamera.getFovY());
+        // Get phones' cam projection matrix.
+        arCamera.getProjectionMatrix(m, 0, near, far);
+        projmtx.set(m);
+
+        float arDist = far - near;
+        float aspectRatio = projmtx.m11() / projmtx.m00();
+        float arFov = projmtx.perspectiveFov();
+        float arTanfov =  (float) Math.tan(arFov * 0.5f);
+        float vrTanfov =  (float) Math.tan(vrFov * 0.5f);
+        float arHeight = arDist * arTanfov * 2;
+        float arWidth = arHeight * aspectRatio;
+
+        mScreenToCamera.x = arWidth / mScreenToCamera.x;
+        mScreenToCamera.y = arHeight / mScreenToCamera.y;
+        mScreenDepth = arDist;
+        android.util.Log.d(TAG, "ARCore configured to: passthrough[w: "
+                + arWidth + ", h: " + arHeight +", z: " + arDist
+                + "], cam fov: " + arFov + ", aspect ratio: " + aspectRatio);
+        mDisplayGeometry = new Vector3f(arWidth, arHeight, -arDist);
+        mSession.setDisplayGeometry(Surface.ROTATION_90, (int) arWidth, (int) arHeight);
+        return SXRMesh.createQuad(mContext,
+                                 "float3 a_position float2 a_texcoord",
+                                  arHeight, arWidth);
     }
 
     private static void setVRCameraFov(SXRCameraRig camRig, float degreesFov)
