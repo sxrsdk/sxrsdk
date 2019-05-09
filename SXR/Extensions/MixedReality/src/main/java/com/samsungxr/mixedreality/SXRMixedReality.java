@@ -32,6 +32,7 @@ import com.samsungxr.mixedreality.CVLibrary.CVLibrarySession;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Component to enable AR functionalities on SXRf.
@@ -242,13 +243,13 @@ public class SXRMixedReality implements IMixedReality
     }
 
     @Override
-    public void setMarker(Bitmap image) {
-        mSession.setMarker(image);
+    public void addMarker(String name, Bitmap image) {
+        mSession.addMarker(name, image);
     }
 
     @Override
-    public void setMarkers(ArrayList<Bitmap> imagesList) {
-        mSession.setMarkers(imagesList);
+    public void addMarkers(Map<String, Bitmap> imagesList) {
+        mSession.addMarkers(imagesList);
     }
 
     @Override

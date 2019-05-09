@@ -82,6 +82,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
@@ -214,12 +215,12 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
     }
 
     @Override
-    public void setMarker(Bitmap image)
+    public void addMarker(String name, Bitmap image)
     {
     }
 
     @Override
-    public void setMarkers(ArrayList<Bitmap> imagesList)
+    public void addMarkers(Map<String, Bitmap> imagesList)
     {
     }
 
