@@ -16,7 +16,9 @@
 package com.samsungxr.mixedreality;
 
 import android.graphics.Bitmap;
+import android.media.Image;
 
+import com.google.ar.core.exceptions.NotYetAvailableException;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventListeners;
 import com.samsungxr.SXREventReceiver;
@@ -262,6 +264,11 @@ public class SXRMixedReality implements IMixedReality
     @Override
     public SXRPointCloud acquirePointCloud() {
         return mSession.acquirePointCloud();
+    }
+
+    @Override
+    public Image acquireCameraImage() throws NotYetAvailableException {
+        return mSession.acquireCameraImage();
     }
 
     @Override

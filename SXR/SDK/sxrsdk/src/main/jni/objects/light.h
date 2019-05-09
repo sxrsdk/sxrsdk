@@ -29,7 +29,6 @@
 #include "engine/renderer/renderer.h"
 #include "objects/node.h"
 #include "objects/components/shadow_map.h"
-#include "util/sxr_jni.h"
 #include "engine/renderer/renderer.h"
 
 namespace sxr {

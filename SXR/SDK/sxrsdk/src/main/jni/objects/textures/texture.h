@@ -22,7 +22,6 @@
 
 #include <atomic>
 #include "image.h"
-#include "util/sxr_jni.h"
 
 #define MAX_TEXTURE_PARAM_NUM 10
 

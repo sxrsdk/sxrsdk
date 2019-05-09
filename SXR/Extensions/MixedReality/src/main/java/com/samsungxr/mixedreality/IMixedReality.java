@@ -17,7 +17,9 @@ package com.samsungxr.mixedreality;
 
 
 import android.graphics.Bitmap;
+import android.media.Image;
 
+import com.google.ar.core.exceptions.NotYetAvailableException;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRNode;
 import com.samsungxr.IEventReceiver;
@@ -193,6 +195,12 @@ public interface IMixedReality extends IEventReceiver
      * @return SXRPointCloud with points info
      */
     SXRPointCloud acquirePointCloud();
+
+    /**
+     * Acquires an image from the camera that corresponds to the current frame
+     * @return an Android image object that contains the image data from the camera
+     */
+    Image acquireCameraImage() throws NotYetAvailableException;
 
     /**
      * Set the behavior of the plane detection subsystem.

@@ -24,6 +24,9 @@
 #include "gl/gl_material.h"
 #include "objects/components/shadow_map.h"
 
+#include "util/jni_utils.h"
+#include "util/sxr_log.h"
+
 namespace sxr {
 
 Scene* Scene::main_scene_ = NULL;

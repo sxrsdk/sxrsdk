@@ -15,6 +15,8 @@
 #include "gl/gl_material.h"
 #include "gl/gl_shader.h"
 
+#include "util/sxr_log.h"
+
 namespace sxr {
     GLUniformBlock::GLUniformBlock(const char* descriptor, int bindingPoint, const char* blockName)
       : UniformBlock(descriptor, bindingPoint, blockName),

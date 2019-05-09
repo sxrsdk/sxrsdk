@@ -8,7 +8,6 @@
 #include "GLES3/gl3.h"
 #endif
 #include "glm/glm.hpp"
-#include "util/sxr_gl.h"
 
 #include "objects/vertex_buffer.h"
 

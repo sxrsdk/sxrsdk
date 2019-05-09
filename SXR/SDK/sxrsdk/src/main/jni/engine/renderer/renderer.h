@@ -175,34 +175,8 @@ public:
     virtual void occlusion_cull(RenderState& rstate, std::vector<Node*>* scene_objects, std::vector<RenderData*>* render_data_vector) = 0;
     virtual void updatePostEffectMesh(Mesh*) = 0;
     void addRenderData(RenderData *render_data, RenderState& rstate, std::vector<RenderData*>& renderList);
-    void addRenderTarget(RenderTarget* renderTarget, EYE eye, int index){
-        switch (eye) {
-            case LEFT:
-                mLeftRenderTarget[index] = renderTarget;
-                break;
-            case RIGHT:
-                mRightRenderTarget[index] = renderTarget;
-                break;
-            case MULTIVIEW:
-                mMultiviewRenderTarget[index] = renderTarget;
-                break;
-            default:
-                LOGE("invalid Eye");
-        }
-    }
-    RenderTarget* getRenderTarget(int index, int eye){
-        switch (eye) {
-            case LEFT:
-                return mLeftRenderTarget[index];
-            case RIGHT:
-                return mRightRenderTarget[index];
-            case MULTIVIEW:
-                return mMultiviewRenderTarget[index];
-            default:
-                FAIL("invalid eye");
-        }
-        return nullptr;
-    }
+    void addRenderTarget(RenderTarget* renderTarget, EYE eye, int index);
+    RenderTarget* getRenderTarget(int index, int eye);
 private:
     RenderTarget* mLeftRenderTarget[3];
     RenderTarget* mRightRenderTarget[3];

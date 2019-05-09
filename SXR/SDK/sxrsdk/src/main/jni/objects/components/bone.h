@@ -10,10 +10,8 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-
 #include "objects/components/component.h"
 
-#include "util/sxr_log.h"
 
 namespace sxr {
 class Bone: public Component {

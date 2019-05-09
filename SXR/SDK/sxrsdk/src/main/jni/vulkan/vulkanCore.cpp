@@ -31,6 +31,8 @@
 #include <array>
 #include "vk_device_component.h"
 
+#include "util/sxr_log.h"
+
 #define TEXTURE_BIND_START 5
 #define QUEUE_INDEX_MAX 99999
 #define VERTEX_BUFFER_BIND_ID 0

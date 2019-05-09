@@ -15,7 +15,8 @@
 #include "objects/uniform_block.h"
 #include "glm/gtc/type_ptr.hpp"
 #include <sstream>
-#include "util/sxr_gl.h"
+
+#include "util/sxr_log.h"
 
 namespace sxr
 {

@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /***************************************************************************
  * Texture from a (Java-loaded) byte stream containing a compressed texture
  ***************************************************************************/
@@ -21,6 +20,10 @@
 #include "engine/renderer/renderer.h"
 #include "engine/renderer/vulkan_renderer.h"
 #include "vk_bitmap_image.h"
+
+#include "util/sxr_log.h"
+
+
 namespace sxr {
 std::map<int, VkFormat> compressed_formats = {
         {0x93B0,                        VK_FORMAT_ASTC_4x4_UNORM_BLOCK},

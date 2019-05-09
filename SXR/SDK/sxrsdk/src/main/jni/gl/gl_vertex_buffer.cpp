@@ -5,7 +5,6 @@
  *
  ****/
 #include "gl_vertex_buffer.h"
-#include "gl_index_buffer.h"
 #include "gl_shader.h"
 
 #define NO_LOGGING

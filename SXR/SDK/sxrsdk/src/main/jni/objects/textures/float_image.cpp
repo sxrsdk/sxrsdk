@@ -14,6 +14,7 @@
  */
 
 #include "float_image.h"
+#include "util/jni_utils.h"
 
 namespace sxr {
     FloatImage::FloatImage(int pixelFormat) : Image(ImageType::FLOAT_BITMAP, pixelFormat),

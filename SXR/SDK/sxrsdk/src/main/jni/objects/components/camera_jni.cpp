@@ -18,10 +18,10 @@
  * JNI
  ***************************************************************************/
 
+#include <jni.h>
 #include <glm/gtc/type_ptr.hpp>
 #include "camera.h"
 
-#include "util/sxr_jni.h"
 
 namespace sxr {
 extern "C" {

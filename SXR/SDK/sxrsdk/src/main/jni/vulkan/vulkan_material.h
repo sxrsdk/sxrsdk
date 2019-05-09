@@ -18,7 +18,6 @@
 
 #include "objects/shader_data.h"
 #include "vulkan/vulkan_headers.h"
-#include "util/sxr_log.h"
 
 /**
  * Vulkan implementation of Material which keeps uniform data

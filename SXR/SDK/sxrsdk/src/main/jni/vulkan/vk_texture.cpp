@@ -22,6 +22,8 @@
 #include "vk_bitmap_image.h"
 #include "vk_cubemap_image.h"
 
+#include "util/sxr_log.h"
+
 namespace sxr {
 
 VkSamplerAddressMode VkTexture::MapWrap[3] = { VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_REPEAT, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT };

@@ -17,10 +17,6 @@
  * JNI
  ***************************************************************************/
 
-#include "util/sxr_jni.h"
-#include "util/sxr_log.h"
-
-
 namespace sxr {
 
 bool astc_has_transparency(void *data, int datasize);

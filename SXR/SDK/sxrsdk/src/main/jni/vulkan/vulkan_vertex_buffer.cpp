@@ -21,6 +21,7 @@
 #include <engine/renderer/vulkan_renderer.h>
 #include "vulkan_vertex_buffer.h"
 #include "vulkan_shader.h"
+#include "util/sxr_log.h"
 
 namespace sxr {
     VulkanVertexBuffer::VulkanVertexBuffer(const char* layout_desc, int vertexCount)

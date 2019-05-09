@@ -23,9 +23,8 @@
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 #endif /* GL_EXT_texture_filter_anisotropic */
 
+#include <jni.h>
 #include "gl/gl_headers.h"
-
-#include "util/sxr_jni.h"
 
 namespace sxr {
 extern "C" {

@@ -18,8 +18,11 @@
  ***************************************************************************/
 
 #include <android/bitmap.h>
-#include <sxr_gl.h>
 #include "gl/gl_bitmap_image.h"
+#include "util/jni_utils.h"
+
+#include "util/sxr_log.h"
+
 namespace sxr {
 
 int GLBitmapImage::updateFromBitmap(JNIEnv *env, int target, jobject bitmap, bool mipmap, int internalFormat)

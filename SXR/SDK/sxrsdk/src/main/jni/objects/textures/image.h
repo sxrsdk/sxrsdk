@@ -22,10 +22,7 @@
 #include <vector>
 #include <jni.h>
 #include "objects/hybrid_object.h"
-#include "util/sxr_log.h"
-#include "util/sxr_jni.h"
 #include "gl/gl_headers.h"  // for GL_TEXTURE_xxx
-#include "util/jni_utils.h"
 
 
 namespace sxr {

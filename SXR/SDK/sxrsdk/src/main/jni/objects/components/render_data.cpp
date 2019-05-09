@@ -23,6 +23,8 @@
 #include "objects/components/skin.h"
 #include <glslang/Include/Common.h> //@todo remove; for to_string
 
+#include "util/sxr_log.h"
+
 namespace sxr {
 
 RenderData::~RenderData() {

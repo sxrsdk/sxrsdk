@@ -28,7 +28,6 @@
 #include <unordered_set>
 #include "glm/glm.hpp"
 
-#include "util/sxr_gl.h"
 #include "objects/hybrid_object.h"
 #include "objects/shader_data.h"
 #include "objects/bounding_volume.h"

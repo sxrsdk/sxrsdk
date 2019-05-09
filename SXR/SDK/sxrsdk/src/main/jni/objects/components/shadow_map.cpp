@@ -15,6 +15,8 @@
 #include "shadow_map.h"
 #include "gl/gl_render_texture.h"
 
+#include "util/sxr_log.h"
+
 namespace sxr {
 class Renderer;
     ShadowMap::ShadowMap(ShaderData* mtl)

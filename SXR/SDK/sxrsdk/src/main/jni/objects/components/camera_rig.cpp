@@ -27,6 +27,8 @@
 #include "objects/components/perspective_camera.h"
 #include "util/sxr_time.h"
 
+#include "util/sxr_log.h"
+
 namespace sxr {
 
 float CameraRig::default_camera_separation_distance_ = 0.062f;
