@@ -228,6 +228,15 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
     public boolean isRunning() { return  mAnimsToPlay.isRunning(); }
 
     /**
+     * Get the animation queue owned by this avatar.
+     * <p>
+     * The animation queue controls the avatar's animations.
+     * It is responsible for animation sequencing and notification.
+     * @returns {@link SXRAnimationQueue} containing this avatar's animations.
+     */
+    public SXRAnimationQueue getAnimationQueue() { return mAnimsToPlay; }
+
+    /**
      * Set the import settings for loading the avatar.
      * Avatars are always imported without animation. You can use
      * the import settings to determine whether or not you want

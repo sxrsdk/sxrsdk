@@ -1,8 +1,10 @@
 package com.samsungxr.animation;
 
+import com.samsungxr.IEventReceiver;
 import com.samsungxr.IEvents;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRDrawFrameListener;
+import com.samsungxr.SXREventReceiver;
 import com.samsungxr.utility.Log;
 
 import java.util.ArrayList;
@@ -51,7 +53,7 @@ import java.util.List;
  * @see SXRAnimator
  * @see SXRRepeatMode
  */
-public class SXRAnimationQueue implements SXRDrawFrameListener
+public class SXRAnimationQueue implements SXRDrawFrameListener, IEventReceiver
 {
     /**
      * Callbacks for the handler which controls blending.
@@ -120,6 +122,7 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
     protected boolean mIsRunning = false;
     protected int mCurIndex = 0;
     private boolean reverse = false;
+    protected SXREventReceiver mListeners;
     protected IAnimationQueueEvents mQueueListener;
 
     /**
@@ -132,8 +135,12 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
     public SXRAnimationQueue(SXRContext ctx, IAnimationQueueEvents listener)
     {
         mContext = ctx;
+        mListeners = new SXREventReceiver(this);
         mQueueListener = listener;
+        mListeners.addListener(listener);
     }
+
+    public SXREventReceiver getEventReceiver() { return mListeners; }
 
     /**
      * Start all of the animations in the queue.
@@ -262,7 +269,7 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
      *
      * @param anim animation to add
      * @see SXRAvatar#removeAnimation(SXRAnimator)
-     * @see SXRAvatar#clear()
+     * @see SXRAvatar#clearAnimations()
      */
     public void add(SXRAnimator anim)
     {
@@ -291,7 +298,7 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
      *
      * @param anim animation to remove
      * @see SXRAvatar#addAnimation(SXRAnimator)
-     * @see SXRAvatar#clear()
+     * @see SXRAvatar#clearAnimations()
      */
     public void remove(SXRAnimator anim)
     {
@@ -469,7 +476,8 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
         {
             anim.stop();
             mAnimQueue.remove(anim);
-            mQueueListener.removeBlendAnimation(this, anim);
+            mContext.getEventManager().sendEvent(this, IAnimationQueueEvents.class,
+                                                 "removeBlendAnimation", this, anim);
             Log.d("ANIMATION", "Removed from queue " + anim.getName());
         }
     }
@@ -508,7 +516,8 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
             if (!animator.isRunning())
             {
                 animator.start();
-                mQueueListener.onAnimationStarted(this, animator);
+                mContext.getEventManager().sendEvent(this, IAnimationQueueEvents.class,
+                                                     "onAnimationStarted", this, animator);
             }
             int nextIndex = NextAnimIndex(mCurIndex);
             if (nextIndex < 0)
@@ -531,7 +540,8 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
                     if (mQueueListener.addBlendAnimation(this, animator2, animator, timeleft) != null)
                     {
                         animator2.start();
-                        mQueueListener.onAnimationStarted(this, animator2);
+                        mContext.getEventManager().sendEvent(this, IAnimationQueueEvents.class,
+                                                             "onAnimationStarted", this, animator2);
                     }
                 }
             }
@@ -570,11 +580,13 @@ public class SXRAnimationQueue implements SXRDrawFrameListener
         SXRAnimator oldAnimator = animator;
         int nextIndex = NextAnimIndex(mCurIndex);
 
-        mQueueListener.onAnimationFinished(this, oldAnimator);
+        mContext.getEventManager().sendEvent(this, IAnimationQueueEvents.class,
+                                             "onAnimationFinished", this, animator);
         if (mRepeatMode == SXRRepeatMode.PINGPONG)
         {
             animator.stop();
-            mQueueListener.removeBlendAnimation(this, animator);
+            mContext.getEventManager().sendEvent(this, IAnimationQueueEvents.class,
+                                                 "removeBlendAnimation", this, animator);
             animator.setReverse(!animator.getReverse());
             if (nextIndex < 0)
             {
