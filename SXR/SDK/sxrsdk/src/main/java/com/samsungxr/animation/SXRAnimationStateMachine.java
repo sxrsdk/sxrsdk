@@ -90,8 +90,23 @@ public class SXRAnimationStateMachine extends SXRStateMachine implements SXRAnim
 
         public void run()
         {
-            int index = (int) (Math.random() * mAnimNames.size());
-            ((SXRAnimationStateMachine) mStateMachine).getAnimationQueue().start(mAnimNames.get(index));
+            SXRAnimationQueue q = ((SXRAnimationStateMachine) mStateMachine).getAnimationQueue();
+            SXRAnimator a = null;
+            int index = 0;
+            String name;
+
+            if (mAnimNames.size() == 0)
+            {
+                return;
+            }
+            do
+            {
+                index = (int) (Math.random() * mAnimNames.size());
+                name = mAnimNames.get(index);
+                a = q.findAnimation(name);
+            }
+            while (a.isRunning());
+            q.start(name);
         }
 
         public String asJSON()
