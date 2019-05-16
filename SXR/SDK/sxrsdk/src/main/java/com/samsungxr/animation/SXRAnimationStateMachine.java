@@ -48,7 +48,7 @@ public class SXRAnimationStateMachine extends SXRStateMachine implements SXRAnim
 
         public void run()
         {
-            ((SXRAnimationStateMachine) mStateMachine).getAnimationQueue().start(mAnimName);
+            ((SXRAnimationStateMachine) mStateMachine).getAnimationQueue().startNext(mAnimName);
         }
 
         public String asJSON()
@@ -111,7 +111,7 @@ public class SXRAnimationStateMachine extends SXRStateMachine implements SXRAnim
                 a.setName(name);
                 q.add(a);
             }
-            q.start(name);
+            q.startNext(name);
         }
 
         public String asJSON()
