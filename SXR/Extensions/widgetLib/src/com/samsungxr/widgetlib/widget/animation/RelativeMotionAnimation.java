@@ -1,9 +1,10 @@
 package com.samsungxr.widgetlib.widget.animation;
 
+import com.samsungxr.animation.SXRPositionAnimation;
 import com.samsungxr.widgetlib.widget.Widget;
 
 import com.samsungxr.SXRHybridObject;
-import com.samsungxr.animation.SXRRelativeMotionAnimation;
+
 import org.joml.Vector3f;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,7 +71,7 @@ public class RelativeMotionAnimation extends TransformAnimation {
         return mAdapter;
     }
 
-    private class Adapter extends SXRRelativeMotionAnimation implements Animation.AnimationAdapter{
+    private class Adapter extends SXRPositionAnimation implements Animation.AnimationAdapter{
         Adapter(Widget widget, float duration, float deltaX, float deltaY, float deltaZ) {
             super(widget.getNode(), duration, deltaX, deltaY, deltaZ);
         }

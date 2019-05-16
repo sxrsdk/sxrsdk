@@ -276,6 +276,7 @@ public class SXRAnimationQueue implements SXRDrawFrameListener, IEventReceiver
         synchronized (mAnimations)
         {
             mAnimations.add(anim);
+            Log.d("ANIMATION", "Adding " + anim.getName());
         }
     }
 
@@ -305,6 +306,7 @@ public class SXRAnimationQueue implements SXRDrawFrameListener, IEventReceiver
         synchronized (mAnimations)
         {
             mAnimations.remove(anim);
+            Log.d("ANIMATION", "Removing " + anim.getName());
         }
     }
 
@@ -407,7 +409,7 @@ public class SXRAnimationQueue implements SXRDrawFrameListener, IEventReceiver
         synchronized (mAnimQueue)
         {
             mAnimQueue.add(animator);
-            Log.d("ANIMATION", "Added " + animator.getName());
+            Log.d("ANIMATION", "%s added to run queue ", animator.getName());
         }
         onStart();
     }
@@ -433,7 +435,7 @@ public class SXRAnimationQueue implements SXRDrawFrameListener, IEventReceiver
                 }
             }
             mAnimQueue.add(index, a);
-            Log.d("ANIMATION", "Added " + name);
+            Log.d("ANIMATION", "%s added to run queue ", a.getName());
         }
         onStart();
     }
@@ -478,7 +480,7 @@ public class SXRAnimationQueue implements SXRDrawFrameListener, IEventReceiver
             mAnimQueue.remove(anim);
             mContext.getEventManager().sendEvent(this, IAnimationQueueEvents.class,
                                                  "removeBlendAnimation", this, anim);
-            Log.d("ANIMATION", "Removed from queue " + anim.getName());
+            Log.d("ANIMATION", "Removed from run queue " + anim.getName());
         }
     }
 
@@ -503,15 +505,30 @@ public class SXRAnimationQueue implements SXRDrawFrameListener, IEventReceiver
         }
     }
 
+    /**
+     * Get the animation currently running.
+     * @return {@link SXRAnimator} running now, null if none.
+     */
+    public SXRAnimator getCurrentAnimation()
+    {
+        synchronized (mAnimQueue)
+        {
+            if (mAnimQueue.size() > 0)
+            {
+               return mAnimQueue.get(mCurIndex);
+            }
+            return null;
+        }
+    }
 
     public void onDrawFrame(float timeInSec)
     {
-        if (mAnimQueue.size() == 0)
-        {
-            return;
-        }
         synchronized (mAnimQueue)
         {
+            if (mAnimQueue.size() == 0)
+            {
+                return;
+            }
             SXRAnimator animator = mAnimQueue.get(mCurIndex);
             if (!animator.isRunning())
             {
@@ -577,38 +594,39 @@ public class SXRAnimationQueue implements SXRDrawFrameListener, IEventReceiver
 
     public void onFinish(SXRAnimator animator)
     {
-        SXRAnimator oldAnimator = animator;
-        int nextIndex = NextAnimIndex(mCurIndex);
-
-        mContext.getEventManager().sendEvent(this, IAnimationQueueEvents.class,
-                                             "onAnimationFinished", this, animator);
+        int nextIndex;
         if (mRepeatMode == SXRRepeatMode.PINGPONG)
         {
             animator.stop();
             mContext.getEventManager().sendEvent(this, IAnimationQueueEvents.class,
+                    "onAnimationFinished", this, animator);
+            mContext.getEventManager().sendEvent(this, IAnimationQueueEvents.class,
                                                  "removeBlendAnimation", this, animator);
             animator.setReverse(!animator.getReverse());
+            nextIndex = NextAnimIndex(mCurIndex);
             if (nextIndex < 0)
             {
                 reverse = !reverse;
-                return;
+            }
+            else
+            {
+                mCurIndex = nextIndex;
             }
         }
         else
         {
             stop(animator);
+            mContext.getEventManager().sendEvent(this, IAnimationQueueEvents.class,
+                    "onAnimationFinished", this, animator);
             if (mRepeatMode == SXRRepeatMode.REPEATED)
             {
                 start(animator);
-                return;
             }
-            else if (nextIndex < 0)
+            else if (mCurIndex > mAnimQueue.size())
             {
                 onStop();
-                return;
             }
         }
-        mCurIndex = nextIndex;
     }
 
 }

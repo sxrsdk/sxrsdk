@@ -67,17 +67,7 @@ public class SXRAnimationStateMachine extends SXRStateMachine implements SXRAnim
         public PlayRandom(SXRStateMachine sm, String animName)
         {
             super(sm, "playrandom");
-            SXRAnimationQueue queue = ((SXRAnimationStateMachine) mStateMachine).getAnimationQueue();
             mAnimName = animName;
-            int n = queue.getAnimationCount();
-            for (int i = 0; i < n; ++i)
-            {
-                SXRAnimator a = queue.get(i);
-                if (a.getName().contains(mAnimName))
-                {
-                    mAnimNames.add(a.getName());
-                }
-            }
         }
 
         public PlayRandom(SXRStateMachine sm, JSONObject json) throws JSONException
@@ -97,7 +87,15 @@ public class SXRAnimationStateMachine extends SXRStateMachine implements SXRAnim
 
             if (mAnimNames.size() == 0)
             {
-                return;
+                int n = q.getAnimationCount();
+                for (int i = 0; i < n; ++i)
+                {
+                    a = q.get(i);
+                    if (a.getName().contains(mAnimName))
+                    {
+                        mAnimNames.add(a.getName());
+                    }
+                }
             }
             do
             {
@@ -105,7 +103,14 @@ public class SXRAnimationStateMachine extends SXRStateMachine implements SXRAnim
                 name = mAnimNames.get(index);
                 a = q.findAnimation(name);
             }
-            while (a.isRunning());
+            while (name.startsWith("Copy-"));
+            if (a.isRunning())
+            {
+                a = new SXRAnimator(a);
+                name = "Copy-" + name;
+                a.setName(name);
+                q.add(a);
+            }
             q.start(name);
         }
 
@@ -159,11 +164,21 @@ public class SXRAnimationStateMachine extends SXRStateMachine implements SXRAnim
 
     public void start()
     {
-        mAnimQueue.getEventReceiver().addListener(this);
-        mAnimQueue.startAll(SXRRepeatMode.REPEATED);
+        if (!mIsRunning)
+        {
+            mAnimQueue.getEventReceiver().addListener(this);
+            super.start();
+        }
+    }
+
+    public void stop()
+    {
+        mAnimQueue.getEventReceiver().removeListener(this);
+        super.stop();
     }
 
     public SXRAnimationQueue getAnimationQueue() { return mAnimQueue; }
+
 
     public void onAnimationStarted(SXRAnimationQueue queue, SXRAnimator animator)
     {
@@ -172,6 +187,10 @@ public class SXRAnimationStateMachine extends SXRStateMachine implements SXRAnim
 
     public void onAnimationFinished(SXRAnimationQueue queue, SXRAnimator animator)
     {
+        if (animator.getName().startsWith("Copy-"))
+        {
+            queue.remove(animator);
+        }
         mCurrentState.onEvent("finish");
     }
 

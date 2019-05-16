@@ -35,8 +35,8 @@ import android.graphics.Color;
  * animations involve a {@linkplain SXRTransform node's position,}
  * {@linkplain SXRMaterial a node's surface appearance,} or an optional
  * {@linkplain SXRShaderData "post effect":} accordingly, most actual animations
- * descend from {@link SXRTransformAnimation}, {@link SXRMaterialAnimation}, or
- * {@link SXRPostEffectAnimation} and not directly from {@link SXRAnimation}.
+ * descend from {@link SXRTransformAnimation}, {@link SXRMaterialAnimation}
+ * and not directly from {@link SXRAnimation}.
  *
  * <p>
  * All animations have at least three or more required parameters: the object to
@@ -593,17 +593,22 @@ public abstract class SXRAnimation {
     }
 
 
-    /*
+    /**
      * Evaluates the animation at the specific time.
      * This allows the user to step the animation under program control
      * as opposed to having it run at the current frame rate.
-     * Subclasses can override this function when creating new
-     * types of animation. The default behavior is to call
-     * {@link #animate(SXRHybridObject, float)}.
+     * Subclasses must override this function when creating new
+     * types of animation.
      * @param timeInSec elapsed time from animation start (seconds)
      */
-    public void animate(float timeInSec)
-    {
-    }
+    abstract public void animate(float timeInSec);
 
+    /**
+     * Makes a copy of this animation.
+     * <p>
+     * Subclasses must override this function so animations
+     * may be copied.
+     * </p>
+     */
+    abstract public SXRAnimation copy();
 }

@@ -241,17 +241,17 @@ public class SXRFloatAnimation implements PrettyPrint
         }
     };
 
-    final protected int mFloatsPerKey;
-    protected float[] mKeys;
+    protected final int mFloatsPerKey;
     protected LinearInterpolator mFloatInterpolator;
+    protected float[] mKeys;
 
     /**
-     * Constructor.
+     * Create a float animation using the supplied data.
      *
      * @param keyData animation key data
      * @param keySize number of floats per key
      */
-    public SXRFloatAnimation(float[] keyData, int keySize)
+    public SXRFloatAnimation(final float[] keyData, int keySize)
     {
         if (keySize <= 2)
         {
@@ -267,17 +267,13 @@ public class SXRFloatAnimation implements PrettyPrint
     }
 
     /**
-     * Constructor.
+     * Create a float animation using the supplied data.
      *
-     * @param numKeys number of keys
+     * @param numKeys animation key data
      * @param keySize number of floats per key
      */
     public SXRFloatAnimation(int numKeys, int keySize)
     {
-        if (keySize <= 2)
-        {
-            throw new IllegalArgumentException("The number of floats per key must be > 1, the key includes time");
-        }
         mFloatsPerKey = keySize;
         mKeys = new float[numKeys * keySize];
         mFloatInterpolator = new LinearInterpolator(mKeys, keySize);
@@ -398,7 +394,8 @@ public class SXRFloatAnimation implements PrettyPrint
     }
 
     @Override
-    public void prettyPrint(StringBuffer sb, int indent) {
+    public void prettyPrint(StringBuffer sb, int indent)
+    {
         sb.append(Log.getSpaces(indent));
         sb.append(SXRFloatAnimation.class.getSimpleName());
         sb.append(" [ Keys=" + mKeys.length + "]");
@@ -406,7 +403,8 @@ public class SXRFloatAnimation implements PrettyPrint
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         StringBuffer sb = new StringBuffer();
         prettyPrint(sb, 0);
         return sb.toString();

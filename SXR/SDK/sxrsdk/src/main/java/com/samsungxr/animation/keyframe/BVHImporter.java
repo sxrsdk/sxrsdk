@@ -226,7 +226,7 @@ public class BVHImporter
 
         public SXRAnimationChannel makeAnimationChannel(String boneName, float[] posKeys, float[] rotKeys)
         {
-            return new SXRAnimationChannel(boneName, posKeys, rotKeys, null, SXRAnimationBehavior.DEFAULT, SXRAnimationBehavior.DEFAULT);
+            return new SXRAnimationChannel(boneName, posKeys, rotKeys, null);
         }
     };
 

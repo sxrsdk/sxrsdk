@@ -33,7 +33,7 @@ public abstract class MaterialAnimation extends Animation {
     private class Adapter extends SXRMaterialAnimation implements
             Animation.AnimationAdapter {
         public Adapter(final Widget target, float duration) {
-            super(target.getTransform(), duration);
+            super(target.getNode(), duration);
         }
 
         @Override

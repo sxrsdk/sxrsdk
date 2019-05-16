@@ -20,8 +20,19 @@ import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRNode;
 import org.joml.Vector4f;
 
-/** Animate the opacity. */
-public class SXROpacityAnimation extends SXRMaterialAnimation {
+/**
+ * Animate the opacity of a material over time.
+ * <p>
+ * This class assumes the naming conventions of the SXR
+ * built-in shaders. The opacity is either is a separate
+ * uniform called <b>u_opacity</b> or it is the <b>w</b>
+ * component of a color uniform called <b>diffuse_color</b>.
+ * </p>
+ * @see com.samsungxr.shaders.SXRPhongLayeredShader
+ * @see com.samsungxr.shaders.SXRTextureShader
+ */
+public class SXROpacityAnimation extends SXRMaterialAnimation
+{
 
     private final float mInitialOpacity;
     private final float mDeltaOpacity;
@@ -59,12 +70,23 @@ public class SXROpacityAnimation extends SXRMaterialAnimation {
         {
             throw new UnsupportedOperationException("Material must have u_opacity or diffuse_color to animate opacity");
         }
+    }
 
+    /**
+     * Construct one opacity animation that is a copy of another.
+     * @param src   {@link SXROpacityAnimation} to copy.
+     */
+    public SXROpacityAnimation(final SXROpacityAnimation src)
+    {
+        super(src.mMaterial, src.mDuration);
+        mInitialOpacity = src.mInitialOpacity;
+        mDeltaOpacity = src.mDeltaOpacity;
+        mInitialColor = src.mInitialColor;
     }
 
     /**
      * Animate the {@link SXRMaterial#setOpacity(float) opacity} property.
-     * 
+     *
      * @param target
      *            {@link SXRNode} containing a {@link SXRMaterial} to
      *            animate.
@@ -81,6 +103,12 @@ public class SXROpacityAnimation extends SXRMaterialAnimation {
         {
             setName(name + ".material");
         }
+    }
+
+    @Override
+    public SXRAnimation copy()
+    {
+        return new SXROpacityAnimation(this);
     }
 
     @Override

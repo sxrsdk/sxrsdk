@@ -41,6 +41,7 @@ public class SXRStateMachine
     protected State mCurrentState = null;
     protected Map<String, Class<? extends Action>> mActions;
     protected List<State> mStates;
+    protected boolean mIsRunning = false;
 
     public static abstract class Action implements Runnable
     {
@@ -166,6 +167,7 @@ public class SXRStateMachine
             Action a = mActions.get(event);
             if (a != null)
             {
+                Log.d("STATE", "State %s: %s %s", getName(), event, a.asJSON());
                 a.run();
             }
         }
@@ -176,6 +178,7 @@ public class SXRStateMachine
 
             if (action != null)
             {
+                Log.d("STATE", "State %s: %s goto %s", getName(), nextState);
                 action.runIf(nextState);
             }
         }
@@ -250,14 +253,28 @@ public class SXRStateMachine
         }
     }
 
+    public boolean isRunning() { return mIsRunning; }
+
     public void start()
     {
         if (mStates.size() == 0)
         {
             throw new UnsupportedOperationException("Cannot start if there are not states");
         }
+        mIsRunning = true;
         mCurrentState = mStates.get(0);
         mCurrentState.enter();
+    }
+
+    public void stop()
+    {
+        if (mStates.size() == 0)
+        {
+            throw new UnsupportedOperationException("Cannot start if there are not states");
+        }
+        mCurrentState = mStates.get(0);
+        mCurrentState.leave();
+        mIsRunning = false;
     }
 
     public void gotoState(String nextState)
