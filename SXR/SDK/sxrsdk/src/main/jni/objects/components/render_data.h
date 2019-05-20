@@ -37,7 +37,6 @@ class Mesh;
 class ShaderData;
 class Light;
 class Batch;
-class TextureCapturer;
 class RenderPass;
 struct RenderState;
 
@@ -61,8 +60,7 @@ public:
             rendering_order_(DEFAULT_RENDERING_ORDER),
             offset_factor_(0.0f), offset_units_(0.0f),
             sample_coverage_(1.0f),
-            source_alpha_blend_func_(GL_ONE), dest_alpha_blend_func_(GL_ONE_MINUS_SRC_ALPHA),
-            texture_capturer(0)
+            source_alpha_blend_func_(GL_ONE), dest_alpha_blend_func_(GL_ONE_MINUS_SRC_ALPHA)
     {
         render_data_flags.use_light_ = true;
         render_data_flags.use_lightmap_ = false;
@@ -109,7 +107,6 @@ public:
         sample_coverage_ = rdata.sample_coverage_;
         render_data_flags.invert_coverage_mask_ = rdata.render_data_flags.invert_coverage_mask_;
         render_data_flags.draw_mode_ = rdata.render_data_flags.draw_mode_;
-        texture_capturer = rdata.texture_capturer;
 
         render_data_flags.stencilTestFlag_ = rdata.render_data_flags.stencilTestFlag_;
         stencilMaskMask_ = rdata.stencilMaskMask_;
@@ -354,10 +351,6 @@ public:
         hash_code_dirty_ = true;
     }
     bool isHashCodeDirty()  { return hash_code_dirty_; }
-    void set_texture_capturer(TextureCapturer *capturer) { texture_capturer = capturer; }
-
-    // TODO: need to consider texture_capturer in hash_code ?
-    TextureCapturer *get_texture_capturer() { return texture_capturer; }
 
     int isValid(Renderer* renderer, const RenderState& scene);
 
@@ -411,7 +404,6 @@ protected:
     float sample_coverage_;
 
     float camera_distance_;
-    TextureCapturer *texture_capturer;
     std::function<float()> cameraDistanceLambda_ = nullptr;
 
     int stencilFuncFunc_ = 0;

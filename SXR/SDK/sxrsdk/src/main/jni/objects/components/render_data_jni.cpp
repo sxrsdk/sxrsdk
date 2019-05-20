@@ -154,10 +154,6 @@ extern "C" {
             JNIEnv * env, jobject obj, jlong jrender_data, jint draw_mode);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_NativeRenderData_setTextureCapturer(JNIEnv * env, jobject obj,
-                                                         jlong jrender_data, jlong jtexture_capturer);
-
-    JNIEXPORT void JNICALL
     Java_com_samsungxr_NativeRenderData_setStencilFunc(JNIEnv *env, jclass type, jlong renderData,
                                                      jint func, jint ref, jint mask);
 
@@ -440,14 +436,6 @@ Java_com_samsungxr_NativeRenderData_getDrawMode(
         JNIEnv * env, jobject obj, jlong jrender_data) {
     RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
     return render_data->draw_mode();
-}
-
-JNIEXPORT void JNICALL
-Java_com_samsungxr_NativeRenderData_setTextureCapturer(JNIEnv * env, jobject obj,
-                                                     jlong jrender_data, jlong jtexture_capturer) {
-    RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
-    render_data->set_texture_capturer(
-            reinterpret_cast<TextureCapturer*>(jtexture_capturer));
 }
 
 JNIEXPORT void JNICALL
