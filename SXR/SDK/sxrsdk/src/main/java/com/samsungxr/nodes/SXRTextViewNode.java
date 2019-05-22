@@ -33,7 +33,8 @@ import android.widget.TextView;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRDrawFrameListener;
-import com.samsungxr.SXRExternalTexture;
+import com.samsungxr.SXRExternalImage;
+import com.samsungxr.SXRImage;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMaterial.SXRShaderType;
 import com.samsungxr.SXRMesh;
@@ -162,7 +163,9 @@ public class SXRTextViewNode extends SXRNode {
         mFrameListener = new SXRDrawFrameListenerImpl(this);
         gvrContext.registerDrawFrameListener(mFrameListener);
 
-        SXRTexture texture = new SXRExternalTexture(gvrContext);
+        final SXRImage image = new SXRExternalImage(gvrContext);
+        final SXRTexture texture = new SXRTexture(image);
+
         SXRMaterial material = new SXRMaterial(gvrContext, SXRShaderType.OES.ID);
         material.setMainTexture(texture);
         getRenderData().setMaterial(material);
@@ -239,7 +242,8 @@ public class SXRTextViewNode extends SXRNode {
         mTextViewContainer = new LinearLayout(activity);
         mFrameListener = new SXRDrawFrameListenerImpl(this);
 
-        SXRTexture texture = new SXRExternalTexture(gvrContext);
+        final SXRImage image = new SXRExternalImage(gvrContext);
+        final SXRTexture texture = new SXRTexture(image);
 
         SXRMaterial gvrMaterial = new SXRMaterial(gvrContext, SXRShaderType.OES.ID);
         gvrMaterial.setMainTexture(texture);
