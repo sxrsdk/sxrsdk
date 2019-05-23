@@ -17,8 +17,9 @@
 
 namespace sxr {
 
-extern "C" JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeExternalImage_ctor(JNIEnv * env, jclass) {
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_samsungxr_NativeExternalImage_ctor(JNIEnv* env, jclass) {
     return reinterpret_cast<jlong>(Renderer::getInstance()->createImage(Image::ImageType::EXTERNAL, 0));
 }
 
