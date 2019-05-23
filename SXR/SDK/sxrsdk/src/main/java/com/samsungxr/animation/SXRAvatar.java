@@ -511,6 +511,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
      * <p>
      * The first model loaded is the avatar body. Subsequent models
      * are attachments.
+     * @return true if model was actually removed, else false
      * @param modelName  name of model to remove.
      * @see #loadModel(SXRAndroidResource)
      */
@@ -520,13 +521,13 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
         if (a != null)
         {
             SXRNode root = a.getModelRoot();
+            mAttachments.remove(modelName);
             if (root != null)
             {
                 a.hide();
                 mAvatarRoot.removeChildObject(root);
+                return true;
             }
-            mAttachments.remove(modelName);
-            return true;
         }
         return false;
     }
