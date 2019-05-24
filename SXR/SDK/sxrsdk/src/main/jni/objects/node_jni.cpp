@@ -20,7 +20,6 @@
 #include "node.h"
 
 #include "util/sxr_log.h"
-#include "util/sxr_jni.h"
 
 namespace sxr {
 extern "C" {

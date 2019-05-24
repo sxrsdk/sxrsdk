@@ -28,6 +28,8 @@
 #include "objects/components/skin.h"
 #include "objects/node.h"
 
+#include "util/sxr_log.h"
+
 namespace sxr {
 
 VulkanShader::VulkanShader(int id,

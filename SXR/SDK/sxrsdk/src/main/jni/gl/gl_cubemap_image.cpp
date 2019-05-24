@@ -17,9 +17,12 @@
  * Cube map texture made by six bitmaps.
  ***************************************************************************/
 
-#include <sxr_gl.h>
 #include "gl/gl_cubemap_image.h"
 #include "gl_bitmap_image.h"
+#include "util/jni_utils.h"
+
+#include "util/sxr_log.h"
+
 namespace sxr {
 class TextureParameters;
 void GLCubemapImage::update(int texid)

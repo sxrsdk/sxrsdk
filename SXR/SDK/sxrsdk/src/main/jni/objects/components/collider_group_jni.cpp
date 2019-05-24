@@ -12,15 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
-/***************************************************************************
- * JNI
- ***************************************************************************/
+#include <jni.h>
 
 #include "collider.h"
 #include "collider_group.h"
-#include "util/sxr_jni.h"
 
 namespace sxr {
 extern "C" {

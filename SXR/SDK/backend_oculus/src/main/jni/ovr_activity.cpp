@@ -29,6 +29,8 @@
 #include <objects/components/perspective_camera.h>
 #include <objects/components/render_target.h>
 
+#include "util/sxr_log.h"
+
 static const char* activityClassName = "android/app/Activity";
 static const char* applicationClassName = "com/samsungxr/SXRApplication";
 static const char* viewManagerClassName = "com/samsungxr/OvrViewManager";

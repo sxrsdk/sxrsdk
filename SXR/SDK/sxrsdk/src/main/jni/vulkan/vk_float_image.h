@@ -21,7 +21,7 @@
 
 #include "vulkan_headers.h"
 #include "objects/textures/float_image.h"
-#include "../util/jni_utils.h"
+
 
 namespace sxr {
     class VkFloatImage : public vkImageBase, public FloatImage

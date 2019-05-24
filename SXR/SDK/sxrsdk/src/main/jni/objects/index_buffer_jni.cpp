@@ -21,8 +21,8 @@
 #include <engine/renderer/renderer.h>
 #include "objects/index_buffer.h"
 
+#include "util/jni_utils.h"
 #include "util/sxr_log.h"
-#include "util/sxr_jni.h"
 
 namespace sxr {
     extern "C" {

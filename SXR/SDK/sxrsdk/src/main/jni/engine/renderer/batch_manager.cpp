@@ -17,6 +17,8 @@
 #include "objects/scene.h"
 #include "shaders/shader.h"
 
+#include "util/sxr_log.h"
+
 #define BATCH_SIZE 60
 namespace sxr {
 

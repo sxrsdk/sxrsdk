@@ -23,6 +23,8 @@
 #include "gl_render_image.h"
 #include "objects/light.h" // for DEBUG_LIGHT
 
+#include "util/sxr_log.h"
+
 namespace sxr {
 extern void texImage3D(int color_format, int width, int height, int depth , GLenum target);
 typedef void (GL_APIENTRY *PFNGLFRAMEBUFFERTEXTUREMULTIVIEWOVRPROC)(GLenum target,

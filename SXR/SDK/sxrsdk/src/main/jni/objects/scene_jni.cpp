@@ -19,7 +19,6 @@
 
 #include "scene.h"
 #include "objects/light.h"
-#include "util/sxr_jni.h"
 
 namespace sxr {
 extern "C" {

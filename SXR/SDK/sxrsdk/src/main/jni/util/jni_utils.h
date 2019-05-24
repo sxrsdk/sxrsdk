@@ -16,66 +16,30 @@
 #ifndef JNI_UTILS_H
 #define JNI_UTILS_H
 
-#include "util/sxr_log.h"
 #include <jni.h>
+
 
 namespace sxr {
 
-static jmethodID GetStaticMethodID(JNIEnv& env, jclass clazz, const char * name,
-        const char * signature) {
-    jmethodID mid = env.GetStaticMethodID(clazz, name, signature);
-    if (!mid) {
-        FAIL("unable to find static method %s", name);
-    }
-    return mid;
-}
+jmethodID GetStaticMethodID(JNIEnv& env, jclass clazz, const char * name,
+        const char * signature);
 
-static jmethodID GetMethodId(JNIEnv& env, const jclass clazz, const char* name, const char* signature) {
-    const jmethodID mid = env.GetMethodID(clazz, name, signature);
-    if (nullptr == mid) {
-        FAIL("unable to find method %s", name);
-    }
-    return mid;
-}
+jmethodID GetMethodId(JNIEnv& env, const jclass clazz, const char* name, const char* signature);
 
 /**
  * @return global reference; caller must delete the global reference
  */
-static jclass GetGlobalClassReference(JNIEnv& env, const char * className) {
-    jclass lc = env.FindClass(className);
-    if (0 == lc) {
-        FAIL("unable to find class %s", className);
-    }
-    // Turn it into a global ref, so we can safely use it in the VR thread
-    jclass gc = static_cast<jclass>(env.NewGlobalRef(lc));
-    env.DeleteLocalRef(lc);
-
-    return gc;
-}
+jclass GetGlobalClassReference(JNIEnv& env, const char * className);
 
 /**
  * Assuming this is called only by threads that are already attached to jni; it is the
  * responsibility of the caller to ensure that.
  */
-static JNIEnv* getCurrentEnv(JavaVM* javaVm) {
-    JNIEnv* result;
-    if (JNI_OK != javaVm->GetEnv(reinterpret_cast<void**>(&result), JNI_VERSION_1_6)) {
-        FAIL("GetEnv failed");
-    }
-    return result;
+JNIEnv* getCurrentEnv(JavaVM* javaVm);
+
+jint throwOutOfMemoryError(JNIEnv* env, const char *message);
+
+constexpr int SUPPORTED_JNI_VERSION = JNI_VERSION_1_6;
 }
 
-static const int SUPPORTED_JNI_VERSION = JNI_VERSION_1_6;
-}
-
-static jint throwOutOfMemoryError(JNIEnv* env, const char *message)
-{
-    jclass exClass = env->FindClass("java/lang/OutOfMemoryError");
-
-    if (exClass != NULL)
-    {
-        return env->ThrowNew(exClass, message);
-    }
-    return -1;
-}
 #endif

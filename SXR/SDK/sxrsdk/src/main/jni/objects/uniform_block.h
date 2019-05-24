@@ -20,7 +20,6 @@
 #include<unordered_map>
 #include "data_descriptor.h"
 #include "glm/glm.hpp"
-#include "util/sxr_log.h"
 #include <map>
 #include <vector>
 

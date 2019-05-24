@@ -12,17 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/***************************************************************************
- * JNI
- ***************************************************************************/
+#include <jni.h>
 
 #include <engine/renderer/renderer.h>
 #include "bitmap_image.h"
-#include "util/sxr_jni.h"
 #include "util/sxr_java_stack_trace.h"
 #include "android/asset_manager_jni.h"
 
+#include "util/sxr_log.h"
 
 namespace sxr
 {

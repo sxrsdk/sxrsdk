@@ -18,6 +18,7 @@
  ***************************************************************************/
 
 #include "gl/gl_image.h"
+#include "util/sxr_log.h"
 
 namespace sxr {
 GLenum GLImage::MapWrap[3] = { GL_CLAMP_TO_EDGE, GL_REPEAT, GL_MIRRORED_REPEAT };

@@ -18,6 +18,8 @@
  ***************************************************************************/
 
 #include "bitmap_transparency.h"
+#include <android/bitmap.h>
+#include "util/sxr_log.h"
 
 namespace sxr {
 

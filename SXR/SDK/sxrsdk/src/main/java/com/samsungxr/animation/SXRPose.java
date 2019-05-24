@@ -121,9 +121,7 @@ public class SXRPose implements PrettyPrint
     * @return number of bones in the skeleton associated with this pose.
     * If there is no skeleton associated with the pose, 0 is returned.
     */
-
-    public int          getNumBones() { return mSkeleton.getNumBones(); }
-
+    public int          getNumBones() { return mBones.length; }
 
     /**
      * Get the skeleton for this pose.
@@ -135,7 +133,7 @@ public class SXRPose implements PrettyPrint
     public SXRSkeleton	getSkeleton() { return mSkeleton; }
 
 
-    public Bone		getBone(int boneindex) { return mBones[boneindex]; }
+    Bone	getBone(int boneindex) { return mBones[boneindex]; }
 
 
     /**
@@ -848,6 +846,11 @@ public class SXRPose implements PrettyPrint
     public void  clearRotations()
     {
         int numbones = getNumBones();
+
+        if (numbones != mBones.length)
+        {
+            Log.e("ANIMATION", "pose and skeleton do not match");
+        }
 
         mNeedSync = true;
         for (int i = 0; i < numbones; ++i)

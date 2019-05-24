@@ -1008,13 +1008,17 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
                 return;
             }
 
-            SXRSkeletonAnimation skelAnim = (SXRSkeletonAnimation) animator.getAnimation(0);
-            SXRSkeleton skel = skelAnim.getSkeleton();
-            if (skel != mSkeleton)
+            SXRAnimation a = animator.getAnimation(0);
+            if (a instanceof SXRSkeletonAnimation)
             {
-                SXRPoseMapper poseMapper = new SXRPoseMapper(mSkeleton, skel, skelAnim.getDuration());
+                SXRSkeletonAnimation skelAnim = (SXRSkeletonAnimation) animator.getAnimation(0);
+                SXRSkeleton skel = skelAnim.getSkeleton();
+                if (skel != mSkeleton)
+                {
+                    SXRPoseMapper poseMapper = new SXRPoseMapper(mSkeleton, skel, skelAnim.getDuration());
 
-                animator.addAnimation(poseMapper);
+                    animator.addAnimation(poseMapper);
+                }
             }
             addAnimation(animator);
             context.getEventManager().sendEvent(SXRAvatar.this,

@@ -20,6 +20,8 @@
 #include <jni_utils.h>
 #include "shader.h"
 
+#include "util/sxr_log.h"
+
 namespace sxr {
     
 Shader::Shader(int id,

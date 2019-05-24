@@ -17,6 +17,8 @@
 #include <contrib/glm/ext.hpp>
 #include "daydream_renderer.h"
 
+#include "util/sxr_log.h"
+
 namespace {
     static const uint64_t kPredictionTimeWithoutVsyncNanos = 50000000;
     static const int kDefaultFboResolution = 1024;

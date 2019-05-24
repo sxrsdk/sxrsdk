@@ -18,6 +18,8 @@
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 
+#include "util/sxr_log.h"
+
 namespace sxr {
 
 btCollisionShape *convertCollider2CollisionShape(Collider *collider) {

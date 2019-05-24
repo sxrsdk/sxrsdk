@@ -151,4 +151,6 @@ static const char* frameBufferStatusString(GLenum status) {
 //#define FAIL(...)
 #define FAIL(msg, ...) do { LOGE(msg, ##__VA_ARGS__); std::terminate(); } while(0)
 
+#define SXR_VK_CHECK(X) if (!(X)) { FAIL("VK_CHECK Failure"); }
+
 #endif

@@ -17,7 +17,6 @@
 #ifndef FRAMEWORK_VULKANCORE_H
 #define FRAMEWORK_VULKANCORE_H
 
-#include "util/sxr_log.h"
 #include <android/native_window_jni.h>	// for native window JNI
 #include <string>
 #include <unordered_map>
@@ -25,7 +24,6 @@
 #include "vk_texture.h"
 #include "vulkan_flags.h"
 
-#define SXR_VK_CHECK(X) if (!(X)) { FAIL("VK_CHECK Failure"); }
 #define SXR_VK_VERTEX_BUFFER_BIND_ID 0
 #define SXR_VK_SAMPLE_NAME "SXR Vulkan"
 #define VK_KHR_ANDROID_SURFACE_EXTENSION_NAME "VK_KHR_android_surface"

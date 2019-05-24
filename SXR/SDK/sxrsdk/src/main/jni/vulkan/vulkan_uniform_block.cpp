@@ -14,7 +14,6 @@
  */
 #include <engine/renderer/vulkan_renderer.h>
 #include "vulkan_headers.h"
-#include "util/sxr_gl.h"
 #include "vulkan_shader.h"
 
 namespace sxr {
