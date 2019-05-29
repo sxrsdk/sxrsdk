@@ -13,26 +13,27 @@
  * limitations under the License.
  */
 
+package com.samsungxr;
 
-/***************************************************************************
- * JNI
- ***************************************************************************/
+/**
+ * Wrapper for a {@code GL_TEXTURE_EXTERNAL_OES} texture. This is typically used
+ * to work with textures that are backed by cameras or video buffers.
+ */
+public class SXRExternalImage extends SXRImage {
+    /**
+     * 
+     * @param gvrContext
+     *            Current gvrContext
+     */
+    public SXRExternalImage(SXRContext gvrContext) {
+        super(gvrContext, NativeExternalImage.ctor());
+    }
 
-#include "objects/textures/texture.h"
-#include "engine/renderer/renderer.h"
-
-namespace sxr {
-extern "C" {
-JNIEXPORT jlong JNICALL
-Java_com_samsungxr_NativeExternalTexture_ctor(JNIEnv * env,
-        jobject obj);
+    SXRExternalImage(SXRContext gvrContext, long ptr) {
+        super(gvrContext, ptr);
+    }
 }
-;
 
-JNIEXPORT jlong JNICALL
-Java_com_samsungxr_NativeExternalTexture_ctor(JNIEnv * env,
-        jobject obj) {
-    return reinterpret_cast<jlong>(Renderer::getInstance()->createTexture(Texture::TextureType::TEXTURE_EXTERNAL));
-}
-
+class NativeExternalImage {
+    static native long ctor();
 }
