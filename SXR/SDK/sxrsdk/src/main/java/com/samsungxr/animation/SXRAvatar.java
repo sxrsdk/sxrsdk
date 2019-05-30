@@ -9,6 +9,7 @@ import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRImportSettings;
+import com.samsungxr.SXRMeshMorph;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRResourceVolume;
 import com.samsungxr.SXRTexture;
@@ -166,7 +167,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
 
         protected void parseModelDescription(JSONObject root) throws JSONException
         {
-            for (String propName : new String[] { "name", "type", "attachbone", "model", "bonemap" })
+            for (String propName : new String[] { "name", "type", "attachbone", "model", "bonemap", "source" })
             {
                 if (root.has(propName))
                 {
@@ -199,7 +200,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
         mReceiver = new SXREventReceiver(this);
         mAvatarRoot = new SXRNode(ctx);
         mAvatarRoot.setName(name);
-        mImportSettings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_ANIMATION));
+        mImportSettings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.NO_ANIMATION));
         Attachment avatarInfo = addAttachment("avatar");
         avatarInfo.setProperty("type", "avatar");
     }
@@ -959,6 +960,56 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
         return a;
     }
 
+    protected String onLoadAnimation(SXRAnimator animator, String filePath)
+    {
+        try
+        {
+            for (int i = 0; i < animator.getAnimationCount(); ++i)
+            {
+                SXRAnimation a = animator.getAnimation(i);
+                if (a instanceof SXRSkeletonAnimation)
+                {
+                    SXRSkeletonAnimation skelAnim = (SXRSkeletonAnimation) animator.getAnimation(0);
+                    SXRSkeleton skel = skelAnim.getSkeleton();
+                    if (skel != mSkeleton)
+                    {
+                        SXRPoseMapper poseMapper = new SXRPoseMapper(mSkeleton, skel, skelAnim.getDuration());
+
+                        animator.addAnimation(poseMapper);
+                    }
+                }
+                if (a instanceof SXRMorphAnimation)
+                {
+                    String nodename = a.getName();
+                    SXRNode target = mAvatarRoot.getNodeByName(nodename);
+
+                    if (target != null)
+                    {
+                        SXRMeshMorph morph = (SXRMeshMorph) target.getComponent(SXRMeshMorph.getComponentType());
+                        if (morph != null)
+                        {
+                            ((SXRMorphAnimation) a).setTarget(morph);
+                        }
+                        else
+                        {
+                            return "Cannot apply morph animation, morph not found on " + a.getName();
+                        }
+                    }
+                    else
+                    {
+                        return "Cannot apply morph animation, target node not found " + nodename;
+                    }
+                }
+            }
+            addAnimation(animator);
+            return null;
+        }
+        catch (IllegalArgumentException | IndexOutOfBoundsException ex)
+        {
+            return ex.getMessage();
+        }
+    }
+
     protected Attachment onLoadModel(SXRNode modelRoot, SXRSkeleton skel, String filePath)
     {
         Attachment a = null;
@@ -1060,27 +1111,13 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
                         errors);
                 return;
             }
-
-            SXRAnimation a = animator.getAnimation(0);
-            if (a instanceof SXRSkeletonAnimation)
+            errors = onLoadAnimation(animator, filePath);
+            if (errors != null)
             {
-                SXRSkeletonAnimation skelAnim = (SXRSkeletonAnimation) animator.getAnimation(0);
-                SXRSkeleton skel = skelAnim.getSkeleton();
-                if (skel != mSkeleton)
-                {
-                    SXRPoseMapper poseMapper = new SXRPoseMapper(mSkeleton, skel, skelAnim.getDuration());
-
-                    animator.addAnimation(poseMapper);
-                }
+                animator = null;
+                Log.e(TAG, errors);
             }
-            addAnimation(animator);
-            context.getEventManager().sendEvent(SXRAvatar.this,
-                    IAvatarEvents.class,
-                    "onAnimationLoaded",
-                    SXRAvatar.this,
-                    animator,
-                    filePath,
-                    errors);
+            mContext.getEventManager().sendEvent(SXRAvatar.this, IAvatarEvents.class, "onAnimationLoaded", SXRAvatar.this, animator, filePath, errors);
         }
 
         public void onModelLoaded(SXRContext context, SXRNode model, String filePath) { }
