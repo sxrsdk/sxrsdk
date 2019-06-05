@@ -44,7 +44,7 @@ dependencies {
 
     implementation "org.joml:joml-android:${jomlVersion}"
     implementation "com.google.ar:core:${arcoreVersion}"
-    implementation 'com.android.support:support-v4:26.1.0'
+    implementation 'com.android.support:support-v4:26.0.1'
 }
 
 clean {}.doLast {

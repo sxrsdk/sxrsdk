@@ -89,7 +89,7 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
 {
 
     private SXRContext mContext;
-    private float mARtoVRScale = 100;
+    private float mARtoVRScale = 1;
     private SXREventReceiver    mListeners;
     private SXRScene mVRScene;
     private ArrayList<SXRAnchor> mAnchors = new ArrayList<>();
