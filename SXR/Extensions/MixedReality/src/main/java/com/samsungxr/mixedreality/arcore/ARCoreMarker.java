@@ -63,7 +63,7 @@ public class ARCoreMarker extends SXRMarker
      */
     @Override
     public float getExtentX() {
-        return mAugmentedImage.getExtentX();
+        return mAugmentedImage.getExtentX() * mSession.getARToVRScale();
     }
 
     /**
@@ -71,7 +71,7 @@ public class ARCoreMarker extends SXRMarker
      */
     @Override
     public float getExtentZ() {
-        return mAugmentedImage.getExtentZ();
+        return mAugmentedImage.getExtentZ() * mSession.getARToVRScale();
     }
 
     /**

@@ -90,12 +90,6 @@ class CVLibraryPlane extends SXRPlane {
         return 0.1f;
     }
 
-    @Override
-    public FloatBuffer getPolygon() {
-
-        //return mARPlane.getPolygon();
-        return null;
-    }
 
     @Override
     public float[] get3dPolygonAsArray() {

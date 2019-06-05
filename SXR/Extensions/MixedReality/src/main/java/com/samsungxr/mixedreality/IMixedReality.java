@@ -54,6 +54,11 @@ public interface IMixedReality extends IEventReceiver
     void pause();
 
     /**
+     * Returns true if the session is paused, else false.
+     */
+    boolean isPaused();
+
+    /**
      *
      * @return the scale factor from AR to VR
      */
@@ -61,7 +66,8 @@ public interface IMixedReality extends IEventReceiver
 
 
     /**
-     * Set the scale factor from AR to VR
+     * Set the scale factor from AR to VR.
+     *
      */
     void setARToVRScale(float scale);
 

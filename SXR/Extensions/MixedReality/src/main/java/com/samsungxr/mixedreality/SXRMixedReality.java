@@ -130,6 +130,12 @@ public class SXRMixedReality implements IMixedReality
     public SXREventReceiver getEventReceiver() { return mSession.getEventReceiver(); }
 
     @Override
+    public boolean isPaused()
+    {
+        return mSession.isPaused();
+    }
+
+    @Override
     public void resume() {
         if (mState == SessionState.ON_RESUME) {
             return;

@@ -86,7 +86,6 @@ public class ARCoreAnchor extends SXRAnchor
         if ((owner != null) && isEnabled() && owner.isEnabled())
         {
             float[] mtx = getPose();
-            Log.v("NOLA", "anchor %f, %f, %f", mtx[12], mtx[13], mtx[14]);
             getOwnerObject().getTransform().setModelMatrix(mtx);
         }
     }
@@ -94,7 +93,7 @@ public class ARCoreAnchor extends SXRAnchor
     public final float[] getPose()
     {
         mAnchor.getPose().toMatrix(mPose, 0);
-        //mSession.ar2gvr(mPose);
+        mSession.ar2gvr(mPose);
         return mPose;
     }
 

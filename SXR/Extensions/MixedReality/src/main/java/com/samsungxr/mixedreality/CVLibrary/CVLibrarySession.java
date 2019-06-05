@@ -110,6 +110,7 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
     private Vector2f mScreenToCamera = new Vector2f(1, 1);
     private Vector3f mDisplayGeometry;
     private float mScreenDepth;
+    private boolean mIsRunning = false;
 
     //private final HashMap<Anchor, ICloudAnchorListener> pendingAnchors = new HashMap<>();
 
@@ -137,11 +138,13 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
     public void pause()
     {
         mContext.unregisterDrawFrameListener(this);
+        mIsRunning = false;
     }
 
     public void resume()
     {
         mContext.registerDrawFrameListener(this);
+        mIsRunning = true;
     }
 
     public float getScreenDepth() { return mScreenDepth; }
@@ -149,6 +152,11 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
     public float getARToVRScale() { return mARtoVRScale; }
 
     public void setARToVRScale(float scale) { mARtoVRScale = scale; }
+
+    public boolean isPaused()
+    {
+        return !mIsRunning;
+    }
 
     public void onDrawFrame(float time)
     {

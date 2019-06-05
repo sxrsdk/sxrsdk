@@ -90,7 +90,7 @@ import java.util.Map;
 public class ARCoreSession implements IMixedReality
 {
     private final SXRContext mContext;
-    private static final String TAG = "NOLA"; // "ARCORE";
+    private static final String TAG = "ARCORE"; // "ARCORE";
     private static float mARtoVRScale = 1.0f;
     protected SXREventReceiver mListeners;
     private Session mSession;
@@ -103,13 +103,16 @@ public class ARCoreSession implements IMixedReality
     private boolean mEnableCloudAnchor;
     private Vector2f mScreenToCamera = new Vector2f(1, 1);
     private float[] mSXRCamMatrix = new float[16]; /* From AR to SXR space matrices */
-    private Vector3f mDisplayGeometry;
+    private Vector3f mDisplayGeometry = new Vector3f();
+    private float mScreenWidth;
+    private float mScreenHeight;
     private float mScreenDepth;
     private Map<Plane, ARCorePlane> mPlanes;
     private ArrayList<SXRMarker> mMarkers;
     private List<ARCoreAnchor> mAnchors;
     private boolean mIsMono;
     private AugmentedImageDatabase mMarkerDB;
+    private boolean mIsRunning = false;
 
     private Camera mCamera;// ARCore camera
     private final Map<Anchor, CloudAnchorCallback> pendingAnchors = new HashMap<>();
@@ -185,6 +188,7 @@ public class ARCoreSession implements IMixedReality
                 try
                 {
                     onInitARCoreSession(mContext);
+                    mIsRunning = true;
                 }
                 catch (CameraNotAvailableException e)
                 {
@@ -201,6 +205,13 @@ public class ARCoreSession implements IMixedReality
         if (mSession != null) {
             mSession.pause();
         }
+        mIsRunning = false;
+    }
+
+    @Override
+    public boolean isPaused()
+    {
+        return !mIsRunning;
     }
 
 
@@ -213,18 +224,32 @@ public class ARCoreSession implements IMixedReality
     @Override
     public SXRHitResult hitTest(SXRPicker.SXRPickedObject collision)
     {
-        Vector2f tapPosition = convertToDisplayGeometrySpace(collision.hitLocation[0], collision.hitLocation[1]);
-        List<HitResult> hitResult = mLastARFrame.hitTest(tapPosition.x, tapPosition.y);
+        float x;
+        float y
+                ;
+        if (collision.barycentricCoords != null)
+        {
+            x = collision.barycentricCoords[0];
+            y = collision.barycentricCoords[1];
+            x *= mScreenWidth;
+            y *= mScreenHeight;
+        }
+        else
+        {
+            x = collision.hitLocation[0] / mDisplayGeometry.x;
+            y = collision.hitLocation[1] / mDisplayGeometry.y;
+            x = (x + 0.5f) * mScreenWidth;
+            y = (0.5f - y) * mScreenHeight;
+        }
+        List<HitResult> hitResult = mLastARFrame.hitTest(x, y);
         return hitTest(hitResult);
     }
 
     @Override
     public SXRHitResult hitTest(float x, float y)
     {
-        Log.d("NOLA", "Screen %f, %f", x, y);
         x *= mScreenToCamera.x;
         y *= mScreenToCamera.y;
-        Log.d("NOLA", "Camera %f, %f", x, y);
         List<HitResult> hitResult = mLastARFrame.hitTest(x, y);
         return hitTest(hitResult);
     }
@@ -276,8 +301,8 @@ public class ARCoreSession implements IMixedReality
         final float[] arPose = pose.clone();
         ARCoreAnchor coreAnchor = (ARCoreAnchor) anchor;
 
+        gvr2ar(arPose);
         convertMatrixPoseToVector(arPose, translation, rotation);
-
         Anchor arAnchor = mSession.createAnchor(new Pose(translation, rotation));
         if (coreAnchor.getAnchorAR() != null)
         {
@@ -629,17 +654,17 @@ public class ARCoreSession implements IMixedReality
 
             hitPose.toMatrix(hitPoseMtx, 0);
             Log.d(TAG, "ARCORE hit %f, %f, %f", hitPoseMtx[12], hitPoseMtx[13], hitPoseMtx[14]);
+            ar2gvr(hitPoseMtx);
             // Check if any plane was hit, and if it was hit inside the plane polygon
             // Creates an anchor if a plane or an oriented point was hit.
             if (trackable instanceof Plane)
             {
                 Plane plane = (Plane) trackable;
-                if (plane.isPoseInPolygon(hitPose) && (plane.getSubsumedBy() == null))
+                if ((plane.getSubsumedBy() == null) && plane.isPoseInPolygon(hitPose))
                 {
                     SXRHitResult gvrHitResult = new SXRHitResult();
                     SXRPlane sxrPlane = mPlanes.get(plane);
                     SXRNode owner = sxrPlane.getOwnerObject();
-                    ar2gvr(hitPoseMtx);
                     if (owner != null)
                     {
                         Log.d(TAG, "SXR hit %f, %f, %f  plane = %s",
@@ -716,8 +741,8 @@ public class ARCoreSession implements IMixedReality
         final DisplayMetrics metrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
         int width = mIsMono ? metrics.widthPixels : metrics.heightPixels;
-        mScreenToCamera.x = width;
-        mScreenToCamera.y = metrics.heightPixels;
+        mScreenToCamera.x = mScreenWidth = width;
+        mScreenToCamera.y = mScreenHeight = metrics.heightPixels;
         mSession.setDisplayGeometry(Surface.ROTATION_90, width, metrics.heightPixels);
     }
 
@@ -870,8 +895,10 @@ public class ARCoreSession implements IMixedReality
     {
         final float[] translation = new float[3];
         final float[] rotation = new float[4];
+        final float[] newPose = pose.clone();
 
-        convertMatrixPoseToVector(pose, translation, rotation);
+        gvr2ar(newPose);
+        convertMatrixPoseToVector(newPose, translation, rotation);
         return new Pose(translation, rotation);
     }
 
@@ -946,14 +973,6 @@ public class ARCoreSession implements IMixedReality
                                              "onMarkerStateChange",
                                              image,
                                              trackingState);
-    }
-
-    private Vector2f convertToDisplayGeometrySpace(float x, float y)
-    {
-        final float hitX = x + 0.5f * mDisplayGeometry.x;
-        final float hitY = 0.5f * mDisplayGeometry.y - y;
-
-        return new Vector2f(hitX, hitY);
     }
 
     /**
