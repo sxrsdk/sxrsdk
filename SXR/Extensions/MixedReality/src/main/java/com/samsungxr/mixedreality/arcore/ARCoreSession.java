@@ -90,7 +90,7 @@ import java.util.Map;
 public class ARCoreSession implements IMixedReality
 {
     private final SXRContext mContext;
-    private static final String TAG = "ARCORE";
+    private static final String TAG = "NOLA"; // "ARCORE";
     private static float mARtoVRScale = 1.0f;
     protected SXREventReceiver mListeners;
     private Session mSession;
@@ -221,8 +221,10 @@ public class ARCoreSession implements IMixedReality
     @Override
     public SXRHitResult hitTest(float x, float y)
     {
+        Log.d("NOLA", "Screen %f, %f", x, y);
         x *= mScreenToCamera.x;
         y *= mScreenToCamera.y;
+        Log.d("NOLA", "Camera %f, %f", x, y);
         List<HitResult> hitResult = mLastARFrame.hitTest(x, y);
         return hitTest(hitResult);
     }
@@ -349,7 +351,6 @@ public class ARCoreSession implements IMixedReality
     {
         // Don't update planes (or notify) when the plane listener is empty, i.e., there is
         // no listener registered.
-        float scale = mARtoVRScale;
         ARCorePlane arCorePlane;
         for (Plane plane: allPlanes)
         {
@@ -622,22 +623,34 @@ public class ARCoreSession implements IMixedReality
     {
         for (HitResult hit : hitResult)
         {
-            // Check if any plane was hit, and if it was hit inside the plane polygon
+            float[] hitPoseMtx = new float[16];
+            Pose hitPose = hit.getHitPose();
             Trackable trackable = hit.getTrackable();
-            // Creates an anchor if a plane or an oriented point was hit.
-            if ((trackable instanceof Plane &&
-                ((Plane) trackable).isPoseInPolygon(hit.getHitPose())) &&
-                ((Plane) trackable).getSubsumedBy() == null)
-            {
-                SXRHitResult gvrHitResult = new SXRHitResult();
-                float[] hitPose = new float[16];
 
-                hit.getHitPose().toMatrix(hitPose, 0);
-                ar2gvr(hitPose);
-                gvrHitResult.setPose(hitPose);
-                gvrHitResult.setDistance(hit.getDistance() * mARtoVRScale);
-                gvrHitResult.setPlane(mPlanes.get(trackable));
-                return gvrHitResult;
+            hitPose.toMatrix(hitPoseMtx, 0);
+            Log.d(TAG, "ARCORE hit %f, %f, %f", hitPoseMtx[12], hitPoseMtx[13], hitPoseMtx[14]);
+            // Check if any plane was hit, and if it was hit inside the plane polygon
+            // Creates an anchor if a plane or an oriented point was hit.
+            if (trackable instanceof Plane)
+            {
+                Plane plane = (Plane) trackable;
+                if (plane.isPoseInPolygon(hitPose) && (plane.getSubsumedBy() == null))
+                {
+                    SXRHitResult gvrHitResult = new SXRHitResult();
+                    SXRPlane sxrPlane = mPlanes.get(plane);
+                    SXRNode owner = sxrPlane.getOwnerObject();
+                    ar2gvr(hitPoseMtx);
+                    if (owner != null)
+                    {
+                        Log.d(TAG, "SXR hit %f, %f, %f  plane = %s",
+                              hitPoseMtx[12], hitPoseMtx[13], hitPoseMtx[14],
+                              owner.getName());
+                    }
+                    gvrHitResult.setPose(hitPoseMtx);
+                    gvrHitResult.setDistance(hit.getDistance() * mARtoVRScale);
+                    gvrHitResult.setPlane(sxrPlane);
+                    return gvrHitResult;
+                }
             }
         }
         return null;
@@ -714,8 +727,8 @@ public class ARCoreSession implements IMixedReality
         float[] m = new float[16];
         Matrix4f projmtx = new Matrix4f();
         SXRPerspectiveCamera centerCamera = cameraRig.getCenterCamera();
-        float near = centerCamera.getNearClippingDistance();
-        float far = centerCamera.getFarClippingDistance();
+        float near = centerCamera.getNearClippingDistance() / mARtoVRScale;
+        float far = centerCamera.getFarClippingDistance() / mARtoVRScale;
 
         // Get phones' cam projection matrix.
         arCamera.getProjectionMatrix(m, 0, near, far);
@@ -723,7 +736,6 @@ public class ARCoreSession implements IMixedReality
         cameraRig.getHeadTransform().reset();
         cameraRig.getTransform().reset();
         cameraRig.setCameraRigType(SXRCameraRig.SXRCameraRigType.Freeze.ID);
-
 
         float aspectRatio = projmtx.m11() / projmtx.m00();
         float arCamFOV = projmtx.perspectiveFov();
@@ -735,15 +747,16 @@ public class ARCoreSession implements IMixedReality
         // Use the same fov from AR to VR Camera as default value.
         centerCamera.setFovY((float) Math.toDegrees(arCamFOV));
         centerCamera.setAspectRatio(aspectRatio);
-        mScreenToCamera.x = quadWidth / mScreenToCamera.x;
-        mScreenToCamera.y = quadHeight / mScreenToCamera.y;
+        mScreenToCamera.x = 1.0f;
+        mScreenToCamera.y = 1.0f;
         mScreenDepth = quadDistance;
         android.util.Log.d(TAG, "ARCore configured to: passthrough[w: "
                 + quadWidth + ", h: " + quadHeight +", z: " + quadDistance
                 + "], cam fov: " + arCamFOV + ", aspect ratio: " + aspectRatio);
         mDisplayGeometry = new Vector3f(quadWidth, quadHeight, -quadDistance);
-        return SXRMesh.createQuad(mContext, "float3 a_position float2 a_texcoord",
-                quadWidth, quadHeight);
+        return SXRMesh.createQuad(mContext,
+                                  "float3 a_position float2 a_texcoord",
+                                  quadWidth, quadHeight);
     }
 
     private SXRMesh configVRDisplay(Frame frame, SXRCameraRig cameraRig)
@@ -755,8 +768,8 @@ public class ARCoreSession implements IMixedReality
 
         cameraRig.getHeadTransform().setRotation(1, 0, 0, 0);
         cameraRig.setCameraRigType(SXRCameraRig.SXRCameraRigType.Freeze.ID);
-        float near = leftCamera.getNearClippingDistance();
-        float far = leftCamera.getFarClippingDistance();
+        float near = leftCamera.getNearClippingDistance() / mARtoVRScale;
+        float far = leftCamera.getFarClippingDistance() / mARtoVRScale;
 
         arCamera.getProjectionMatrix(m, 0, near, far);
         projmtx.set(m);
