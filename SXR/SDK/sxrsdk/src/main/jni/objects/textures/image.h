@@ -47,7 +47,8 @@ public:
         BITMAP = 1,
         CUBEMAP,
         FLOAT_BITMAP,
-        ARRAY
+        ARRAY,
+        EXTERNAL
     };
 
     enum ImageState

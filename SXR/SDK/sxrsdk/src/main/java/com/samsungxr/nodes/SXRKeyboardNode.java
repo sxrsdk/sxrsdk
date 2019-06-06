@@ -37,21 +37,22 @@ import android.view.ViewConfiguration;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 
+import com.samsungxr.IKeyboardEvents;
+import com.samsungxr.ITouchEvents;
+import com.samsungxr.R;
 import com.samsungxr.SXRApplication;
 import com.samsungxr.SXRCollider;
 import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventListeners;
-import com.samsungxr.SXRExternalTexture;
+import com.samsungxr.SXRExternalImage;
+import com.samsungxr.SXRImage;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRMeshCollider;
-import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRNode;
+import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRTexture;
-import com.samsungxr.IKeyboardEvents;
-import com.samsungxr.ITouchEvents;
-import com.samsungxr.R;
 import com.samsungxr.io.SXRCursorController;
 import com.samsungxr.utility.MeshUtils;
 
@@ -624,7 +625,9 @@ public class SXRKeyboardNode extends SXRNode {
         public SXRKey(final SXRContext gvrContext, Keyboard.Key key, SXRMesh mesh,
                       Drawable background, int textColor) {
             super(gvrContext, mesh);
-            final SXRTexture texture = new SXRExternalTexture(gvrContext);
+
+            final SXRImage image = new SXRExternalImage(gvrContext);
+            final SXRTexture texture = new SXRTexture(image);
             final SXRMaterial material = new SXRMaterial(gvrContext, SXRMaterial.SXRShaderType.OES.ID);
 
             mKey = key;
