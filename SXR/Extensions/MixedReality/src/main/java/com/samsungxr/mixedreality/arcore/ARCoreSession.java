@@ -92,7 +92,7 @@ import java.util.Map;
 public class ARCoreSession implements IMixedReality
 {
     private final SXRContext mContext;
-    private static final String TAG = "ARCORE"; // "ARCORE";
+    private static final String TAG = "ARCORE";
     private static float mARtoVRScale = 1.0f;
     protected SXREventReceiver mListeners;
     private Session mSession;
@@ -227,22 +227,12 @@ public class ARCoreSession implements IMixedReality
     public SXRHitResult hitTest(SXRPicker.SXRPickedObject collision)
     {
         float x;
-        float y
-                ;
-        if (collision.barycentricCoords != null)
-        {
-            x = collision.barycentricCoords[0];
-            y = collision.barycentricCoords[1];
-            x *= mScreenWidth;
-            y *= mScreenHeight;
-        }
-        else
-        {
-            x = collision.hitLocation[0] / mDisplayGeometry.x;
-            y = collision.hitLocation[1] / mDisplayGeometry.y;
-            x = (x + 0.5f) * mScreenWidth;
-            y = (0.5f - y) * mScreenHeight;
-        }
+        float y;
+
+        x = collision.hitLocation[0] / mDisplayGeometry.x;
+        y = collision.hitLocation[1] / mDisplayGeometry.y;
+        x = (x + 0.5f) * mScreenWidth;
+        y = (0.5f - y) * mScreenHeight;
         List<HitResult> hitResult = mLastARFrame.hitTest(x, y);
         return hitTest(hitResult);
     }
