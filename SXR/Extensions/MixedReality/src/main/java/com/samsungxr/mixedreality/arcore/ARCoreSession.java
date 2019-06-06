@@ -597,7 +597,7 @@ public class ARCoreSession implements IMixedReality
 
     private void onInitARCoreSession(SXRContext gvrContext) throws CameraNotAvailableException
     {
-        SXRTexture passThroughTexture = new SXRExternalTexture(gvrContext);
+        final SXRTexture passThroughTexture = new SXRTexture(new SXRExternalImage(gvrContext));
         final SXRCameraRig cameraRig = mVRScene.getMainCameraRig();
         final SXRPerspectiveCamera centerCam = cameraRig.getCenterCamera();
         final SXRMesh mesh;
