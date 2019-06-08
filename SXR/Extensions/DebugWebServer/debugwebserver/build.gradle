@@ -26,7 +26,12 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'src/main/libs')
-    implementation(name: 'sxrsdk-debug', ext: 'aar')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    if (findProject(':sxrsdk')) {
+        implementation project (':sxrsdk')
+    } else {
+        implementation(name: 'sxrsdk-debug', ext: 'aar')
+    }
 }
 
 clean {}.doLast {
