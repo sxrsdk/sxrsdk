@@ -41,7 +41,6 @@ namespace sxr {
     {
         VertexBuffer* vbuf = reinterpret_cast<VertexBuffer*>(jvertices);
         IndexBuffer* ibuf = reinterpret_cast<IndexBuffer*>(jindices);
-        LOGD("Mesh::ctorBuffer vertices = %p, indices = %p", vbuf, ibuf);
         Mesh* mesh = new Mesh(*vbuf);
         if (ibuf)
         {
