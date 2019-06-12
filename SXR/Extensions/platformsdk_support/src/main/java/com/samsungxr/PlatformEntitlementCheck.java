@@ -96,7 +96,7 @@ public final class PlatformEntitlementCheck {
     private static native int processEntitlementCheckResponse();
 
     static {
-        System.loadLibrary("gvrf-platformsdk");
+        System.loadLibrary("sxr-platformsdk");
     }
     private static final String TAG = "PlatformEntitlementCheck";
 }

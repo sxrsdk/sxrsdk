@@ -23,7 +23,8 @@ import android.hardware.Camera.Parameters;
 
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventListeners;
-import com.samsungxr.SXRExternalTexture;
+import com.samsungxr.SXRExternalImage;
+import com.samsungxr.SXRImage;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMaterial.SXRShaderType;
 import com.samsungxr.SXRMesh;
@@ -67,7 +68,8 @@ public class SXRCameraNode extends SXRNode {
     public SXRCameraNode(SXRContext gvrContext, SXRMesh mesh,
                                 Camera camera) {
         super(gvrContext, mesh);
-        SXRTexture texture = new SXRExternalTexture(gvrContext);
+        final SXRImage image = new SXRExternalImage(gvrContext);
+        final SXRTexture texture = new SXRTexture(image);
         SXRMaterial material = new SXRMaterial(gvrContext, SXRShaderType.OES.ID);
         material.setMainTexture(texture);
         getRenderData().setMaterial(material);
@@ -112,7 +114,9 @@ public class SXRCameraNode extends SXRNode {
             SXRCameraAccessException {
         super(gvrContext, mesh);
 
-        SXRTexture texture = new SXRExternalTexture(gvrContext);
+        final SXRImage image = new SXRExternalImage(gvrContext);
+        final SXRTexture texture = new SXRTexture(image);
+
         SXRMaterial material = new SXRMaterial(gvrContext, SXRShaderType.OES.ID);
         material.setMainTexture(texture);
         getRenderData().setMaterial(material);

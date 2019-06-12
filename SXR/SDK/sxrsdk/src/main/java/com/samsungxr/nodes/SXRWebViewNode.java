@@ -15,20 +15,21 @@
 
 package com.samsungxr.nodes;
 
-import com.samsungxr.SXRContext;
-import com.samsungxr.SXRDrawFrameListener;
-import com.samsungxr.SXRExternalTexture;
-import com.samsungxr.SXRMaterial;
-import com.samsungxr.SXRMesh;
-import com.samsungxr.SXRNode;
-import com.samsungxr.SXRTexture;
-import com.samsungxr.SXRMaterial.SXRShaderType;
-
 import android.graphics.Canvas;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.view.Surface;
 import android.webkit.WebView;
+
+import com.samsungxr.SXRContext;
+import com.samsungxr.SXRDrawFrameListener;
+import com.samsungxr.SXRExternalImage;
+import com.samsungxr.SXRImage;
+import com.samsungxr.SXRMaterial;
+import com.samsungxr.SXRMaterial.SXRShaderType;
+import com.samsungxr.SXRMesh;
+import com.samsungxr.SXRNode;
+import com.samsungxr.SXRTexture;
 
 /**
  * {@linkplain SXRNode Scene object} that shows a web page, using the
@@ -53,17 +54,20 @@ public class SXRWebViewNode extends SXRNode implements
      *            current {@link SXRContext}
      * @param mesh
      *            a {@link SXRMesh} - see
-     *            {@link SXRContext#loadMesh(com.samsungxr.SXRAndroidResource)}
+     *            {@link com.samsungxr.SXRAssetLoader#loadMesh(com.samsungxr.SXRAndroidResource)}
      *            and {@link SXRContext#createQuad(float, float)}
      * @param webView
      *            an Android {@link WebView}
      */
-    public SXRWebViewNode(SXRContext gvrContext, SXRMesh mesh,
-            WebView webView) {
+    public SXRWebViewNode(SXRContext gvrContext, SXRMesh mesh, WebView webView)
+    {
         super(gvrContext, mesh);
         mWebView = webView;
         gvrContext.registerDrawFrameListener(this);
-        SXRTexture texture = new SXRExternalTexture(gvrContext);
+
+        final SXRImage image = new SXRExternalImage(gvrContext);
+        final SXRTexture texture = new SXRTexture(image);
+
         SXRMaterial material = new SXRMaterial(gvrContext, SXRShaderType.OES.ID);
         material.setMainTexture(texture);
         getRenderData().setMaterial(material);

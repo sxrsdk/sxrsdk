@@ -16,15 +16,12 @@
 package com.samsungxr.nodes;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.SystemClock;
 import android.view.ActionMode;
 import android.view.GestureDetector;
@@ -36,31 +33,29 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.ViewTreeObserver;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.samsungxr.ITouchEvents;
+import com.samsungxr.IViewEvents;
 import com.samsungxr.SXRApplication;
-import com.samsungxr.SXRCollider;
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRExternalTexture;
+import com.samsungxr.SXRExternalImage;
+import com.samsungxr.SXRImage;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRMeshCollider;
+import com.samsungxr.SXRNode;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRRenderData;
-import com.samsungxr.SXRNode;
 import com.samsungxr.SXRShaderId;
 import com.samsungxr.SXRTexture;
-import com.samsungxr.ITouchEvents;
-import com.samsungxr.IViewEvents;
 import com.samsungxr.io.SXRControllerType;
 import com.samsungxr.shaders.SXROESConvolutionShader;
-import com.samsungxr.utility.Log;
+
+import java.lang.ref.WeakReference;
 
 /**
  * This class represents a {@linkplain SXRNode Scene object} that shows a {@link View}
@@ -222,16 +217,18 @@ public class SXRViewNode extends SXRNode {
         });
     }
 
-    private void createRenderData(SXRContext gvrContext) {
-        final SXRTexture texture = new SXRExternalTexture(gvrContext);
-        final SXRMaterial material = new SXRMaterial(gvrContext,
+    private void createRenderData(SXRContext sxrContext) {
+        final SXRImage image = new SXRExternalImage(sxrContext);
+        final SXRTexture texture = new SXRTexture(image);
+
+        final SXRMaterial material = new SXRMaterial(sxrContext,
                 new SXRShaderId(SXROESConvolutionShader.class));
         SXRRenderData renderData = getRenderData();
 
         if (renderData == null) {
-            renderData = new SXRRenderData(gvrContext);
+            renderData = new SXRRenderData(sxrContext);
             renderData.setMesh(
-                    SXRMesh.createQuad(gvrContext,
+                    SXRMesh.createQuad(sxrContext,
                             "float3 a_position float2 a_texcoord",
                             1.0f, 1.0f));
             attachComponent(renderData);
@@ -242,7 +239,7 @@ public class SXRViewNode extends SXRNode {
         material.setMainTexture(texture);
         renderData.setMaterial(material);
 
-        attachComponent(new SXRMeshCollider(gvrContext, renderData.getMesh(),true));
+        attachComponent(new SXRMeshCollider(sxrContext, renderData.getMesh(),true));
     }
 
     private void adjustQuadAspectRatio() {
@@ -650,19 +647,7 @@ public class SXRViewNode extends SXRNode {
         public void createSurfaceTexture(int textureId) {
             mSurfaceTexture = new SurfaceTexture(textureId);
             mSurface = new Surface(mSurfaceTexture);
-            mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
-                Runnable onFrameAvailableGLCallback = new Runnable() {
-                    @Override
-                    public void run() {
-                        mSurfaceTexture.updateTexImage();
-                    }
-                };
-
-                @Override
-                public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                    mSXRContext.runOnGlThread(onFrameAvailableGLCallback);
-                }
-            });
+            mSurfaceTexture.setOnFrameAvailableListener(new OnFrameAvailableListenerImpl(mSXRContext, mSurfaceTexture));
         }
 
         private MotionEvent createMotionEvent(SXRPicker.SXRPickedObject pickInfo, int action) {
@@ -783,4 +768,28 @@ public class SXRViewNode extends SXRNode {
             dispatchPickerInputEvent(event, event.getX(), event.getY());
         }
     }
+
+    private final static class OnFrameAvailableListenerImpl implements SurfaceTexture.OnFrameAvailableListener, Runnable {
+        private final SXRContext mContext;
+        private final WeakReference<SurfaceTexture> mSurfaceTexture;
+
+        OnFrameAvailableListenerImpl(SXRContext context, SurfaceTexture surfaceTexture) {
+            mContext = context;
+            mSurfaceTexture = new WeakReference<>(surfaceTexture);
+        }
+
+        @Override
+        public void onFrameAvailable(SurfaceTexture ignored) {
+            mContext.runOnGlThread(this);
+        }
+
+        @Override
+        public void run() {
+            final SurfaceTexture surfaceTexture = mSurfaceTexture.get();
+            if (null != surfaceTexture) {
+                surfaceTexture.updateTexImage();
+            }
+        }
+    };
+
 }
