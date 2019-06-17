@@ -41,6 +41,7 @@ public class SXRMixedReality implements IMixedReality
 {
     private IMixedReality mSession;
     private SessionState mState;
+    private String mPlatform;
     private Vector3f mTempVec1 = new Vector3f();
     private Vector3f mTempVec2 = new Vector3f();
 
@@ -114,8 +115,24 @@ public class SXRMixedReality implements IMixedReality
         {
             mSession = new CVLibrarySession(scene, enableCloudAnchor);
         }
+        else
+        {
+            throw new IllegalArgumentException("The " + arPlatform + " platform is not supported");
+        }
+        mPlatform = arPlatform;
         mState = SessionState.ON_PAUSE;
     }
+
+    /**
+     * Get the underlying augmented reality platform.
+     * <p>
+     * This will either by "arcore" or "ar-drop-in2".
+     * It is the argument passed to the constructor or the value
+     * of property "debug.samsungxr.hmt"
+     * </p>
+     * @return name of AR platform
+     */
+    public String getPlatform() { return mPlatform; }
 
     @Override
     public float getARToVRScale() { return mSession.getARToVRScale(); }
