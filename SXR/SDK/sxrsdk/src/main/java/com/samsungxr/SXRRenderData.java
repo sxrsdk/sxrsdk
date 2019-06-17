@@ -918,8 +918,6 @@ class NativeRenderData {
 
     static native void setDrawMode(long renderData, int draw_mode);
 
-    static native void setTextureCapturer(long renderData, long texture_capturer);
-
     static native void setCastShadows(long renderData, boolean castShadows);
 
     static native boolean getCastShadows(long renderData);

@@ -115,6 +115,7 @@ namespace sxr
             case Image::ImageType::BITMAP: return new GLBitmapImage(format);
             case Image::ImageType::CUBEMAP: return new GLCubemapImage(format);
             case Image::ImageType::FLOAT_BITMAP: return new GLFloatImage(format);
+            case Image::ImageType::EXTERNAL: return new GLExternalImage();
         }
         return NULL;
     }

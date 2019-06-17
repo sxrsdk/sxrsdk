@@ -23,12 +23,13 @@ import com.samsungxr.SXRAssetLoader;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRDrawFrameListener;
 import com.samsungxr.SXREventListeners;
-import com.samsungxr.SXRExternalTexture;
+import com.samsungxr.SXRExternalImage;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMaterial.SXRShaderType;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRShaderId;
+import com.samsungxr.SXRTexture;
 
 /**
  * A {@linkplain SXRNode node} that shows video, using the
@@ -80,17 +81,17 @@ public class SXRVideoNode extends SXRNode {
      *            and {@link SXRContext#createQuad(float, float)}
      * @param mediaPlayer
      *            an Android {@link MediaPlayer}
-     * @param texture
-     *            a {@link SXRExternalTexture} to link with {@link MediaPlayer}
+     * @param image
+     *            a {@link SXRExternalImage} to link with {@link MediaPlayer}
      * @param videoType
      *            One of the {@linkplain SXRVideoType video type constants}
      * @throws IllegalArgumentException
      *             on an invalid {@code videoType} parameter
      */
     public SXRVideoNode(final SXRContext gvrContext, SXRMesh mesh,
-                               final MediaPlayer mediaPlayer, final SXRExternalTexture texture,
+                               final MediaPlayer mediaPlayer, final SXRExternalImage image,
                                int videoType) {
-        this(gvrContext, mesh, makePlayerInstance(mediaPlayer), texture, videoType);
+        this(gvrContext, mesh, makePlayerInstance(mediaPlayer), new SXRTexture(image), videoType);
     }
 
     /**
@@ -150,12 +151,12 @@ public class SXRVideoNode extends SXRNode {
      * @param mediaPlayer
      *            a wrapper for a media player
      * @param texture
-     *            a {@link SXRExternalTexture} to link with {@link MediaPlayer}
+     *            a {@link SXRTexture} to link with {@link MediaPlayer}
      * @param videoType
      *            One of the {@linkplain SXRVideoType video type constants}
      */
     public SXRVideoNode(final SXRContext gvrContext, SXRMesh mesh,
-                               final SXRVideoNodePlayer mediaPlayer, final SXRExternalTexture texture,
+                               final SXRVideoNodePlayer mediaPlayer, final SXRTexture texture,
                                int videoType) {
         super(gvrContext, mesh);
         SXRShaderId materialType;
@@ -194,7 +195,7 @@ public class SXRVideoNode extends SXRNode {
      * Play a video on a {@linkplain SXRNode node} with an
      * arbitrarily complex geometry, using the Android {@link MediaPlayer}
      * 
-     * @param gvrContext
+     * @param sxrContext
      *            current {@link SXRContext}
      * @param mesh
      *            a {@link SXRMesh} - see
@@ -207,9 +208,9 @@ public class SXRVideoNode extends SXRNode {
      * @throws IllegalArgumentException
      *             on an invalid {@code videoType} parameter
      */
-    public SXRVideoNode(final SXRContext gvrContext, SXRMesh mesh,
+    public SXRVideoNode(final SXRContext sxrContext, SXRMesh mesh,
             final SXRVideoNodePlayer mediaPlayer, int videoType) {
-        this(gvrContext, mesh, mediaPlayer, new SXRExternalTexture(gvrContext), videoType);
+        this(sxrContext, mesh, mediaPlayer, new SXRTexture(new SXRExternalImage(sxrContext)), videoType);
     }
 
     /**
@@ -359,16 +360,16 @@ public class SXRVideoNode extends SXRNode {
 
         /**
          * Constructs a SXRVideo with a {@link MediaPlayer} and a
-         * {@link SXRExternalTexture} to be used
+         * {@link SXRTexture} to be used
          * 
          * @param mediaPlayer
          *            the {@link MediaPlayer} type object to be used in the
          *            class
          * @param texture
-         *            the {@link SXRExternalTexture} type object to be used in
+         *            the {@link SXRTexture} type object to be used in
          *            the class
          */
-        public SXRVideo(SXRContext gvrContext, SXRVideoNodePlayer mediaPlayer, SXRExternalTexture texture) {
+        public SXRVideo(SXRContext gvrContext, SXRVideoNodePlayer mediaPlayer, SXRTexture texture) {
             mContext = gvrContext;
             mSurfaceTexture = new SurfaceTexture(texture.getId());
             if (mediaPlayer != null) {

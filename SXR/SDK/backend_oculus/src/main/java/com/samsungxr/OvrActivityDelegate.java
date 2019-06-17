@@ -107,8 +107,6 @@ final class OvrActivityDelegate extends SXRApplication.ActivityDelegateStubs {
     public VrAppSettings makeVrAppSettings() {
         final VrAppSettings settings = new OvrVrAppSettings();
         final VrAppSettings.EyeBufferParams params = settings.getEyeBufferParams();
-        params.setResolutionHeight(VrAppSettings.DEFAULT_FBO_RESOLUTION);
-        params.setResolutionWidth(VrAppSettings.DEFAULT_FBO_RESOLUTION);
         return settings;
     }
 

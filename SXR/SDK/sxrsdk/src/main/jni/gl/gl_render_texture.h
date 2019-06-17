@@ -78,7 +78,6 @@ private:
 protected:
     int layer_index_;
     int viewport_[4];
-    void initialize();
     void generateRenderTextureNoMultiSampling(int jdepth_format,GLenum depth_format, int width, int height);
     void generateRenderTextureEXT(int sample_count,int jdepth_format,GLenum depth_format, int width, int height);
     void generateRenderTexture(int sample_count, int jdepth_format, GLenum depth_format, int width,
@@ -89,7 +88,6 @@ protected:
     GLFrameBuffer* renderTexture_gl_resolve_buffer_ = nullptr;
     GLRenderBuffer* renderTexture_gl_color_buffer_ = nullptr;// This is only for multisampling case
                                      // when resolveDepth is on.
-    GLuint renderTexture_gl_pbo_ = 0;
 };
 
 
