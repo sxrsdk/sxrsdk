@@ -197,28 +197,6 @@ public class WidgetLib {
         return get().mCommandBuffer;
     }
 
-    private WidgetLib(SXRContext sxrContext, String customPropertiesAsset)
-            throws InterruptedException, JSONException, NoSuchMethodException {
-        mInstance = new WeakReference<>(this);
-
-        mSXRContext = sxrContext;
-        mTextureHelper = new TextureFutureHelper(sxrContext);
-        mTextureFactory = new TextureFactory(sxrContext);
-        mMainThread = new MainThread(sxrContext);
-        mTypefaceManager = new TypefaceManager(sxrContext);
-        mSimpleAnimationTracker = new SimpleAnimationTracker(sxrContext);
-        mPropertyManager = new PropertyManager(sxrContext.getContext(), "default_metadata.json",
-                customPropertiesAsset);
-        mCommandBuffer = new CommandBuffer(sxrContext);
-
-        mFocusManager = new FocusManager(sxrContext);
-        mTouchManager = new TouchManager(sxrContext);
-        mContentSceneController = new ContentSceneController(sxrContext);
-        mMainScene = new MainScene(sxrContext);
-
-        Widget.init(sxrContext);
-    }
-
     private WidgetLib(SXRNode root, String customPropertiesAsset)
         throws InterruptedException, JSONException, NoSuchMethodException {
         mInstance = new WeakReference<>(this);
