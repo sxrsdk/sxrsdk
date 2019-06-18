@@ -9,6 +9,7 @@ import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRImportSettings;
+import com.samsungxr.SXRMeshMorph;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRResourceVolume;
 import com.samsungxr.SXRTexture;
@@ -45,11 +46,12 @@ import java.util.jar.Attributes;
 public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQueueEvents
 {
     private static final String TAG = Log.tag(SXRAvatar.class);
-    protected Map<String, Attachment> mAttachments = new HashMap<String, Attachment>();
-    protected final SXRAnimationQueue mAnimsToPlay;
-    protected SXRSkeleton mSkeleton;
-    protected final SXRNode mAvatarRoot;
-    protected SXREventReceiver mReceiver;
+    protected final Map<String, Attachment> mAttachments = new HashMap<String, Attachment>();
+    protected final SXRContext          mContext;
+    protected SXRAnimationQueue         mAnimsToPlay;
+    protected SXRNode                   mAvatarRoot;
+    protected SXREventReceiver          mReceiver;
+    protected SXRSkeleton               mSkeleton;
     protected EnumSet<SXRImportSettings> mImportSettings;
 
     protected class Attachment
@@ -73,6 +75,21 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
         public void setProperty(String name, String value)
         {
             mProperties.put(name, value);
+        }
+
+        public String toString()
+        {
+            String s = "{";
+            for (Map.Entry<String, String> entry : mProperties.entrySet())
+            {
+                if (s.length() > 2)
+                {
+                    s += ",";
+                }
+                s += "\n    \"" + entry.getKey() + "\" : \"" + entry.getValue() + "\"";
+            }
+            s += "\n}";
+            return s;
         }
 
         public SXRNode getModelRoot()
@@ -150,7 +167,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
 
         protected void parseModelDescription(JSONObject root) throws JSONException
         {
-            for (String propName : new String[] { "name", "type", "attachbone", "model", "bonemap" })
+            for (String propName : new String[] { "name", "type", "attachbone", "model", "bonemap", "source" })
             {
                 if (root.has(propName))
                 {
@@ -178,14 +195,20 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
      */
     public SXRAvatar(SXRContext ctx, String name)
     {
+        mContext = ctx;
         mAnimsToPlay = new SXRAnimationQueue(ctx, this);
         mReceiver = new SXREventReceiver(this);
         mAvatarRoot = new SXRNode(ctx);
         mAvatarRoot.setName(name);
-        mImportSettings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.OPTIMIZE_GRAPH, SXRImportSettings.NO_ANIMATION));
+        mImportSettings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.NO_ANIMATION));
         Attachment avatarInfo = addAttachment("avatar");
         avatarInfo.setProperty("type", "avatar");
     }
+
+    /**
+     * Get the {@link SXRContext} this avatar was created with.
+     */
+    public SXRContext getSXRContext() { return mContext; }
 
     /**
      * Get the event receiver for this avatar.
@@ -228,6 +251,15 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
     public boolean isRunning() { return  mAnimsToPlay.isRunning(); }
 
     /**
+     * Get the animation queue owned by this avatar.
+     * <p>
+     * The animation queue controls the avatar's animations.
+     * It is responsible for animation sequencing and notification.
+     * @returns {@link SXRAnimationQueue} containing this avatar's animations.
+     */
+    public SXRAnimationQueue getAnimationQueue() { return mAnimsToPlay; }
+
+    /**
      * Set the import settings for loading the avatar.
      * Avatars are always imported without animation. You can use
      * the import settings to determine whether or not you want
@@ -265,7 +297,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
     public void onAnimationStarted(SXRAnimationQueue queue, SXRAnimator animator)
     {
         Log.d("ANIMATOR", "Start %s", animator.getName());
-        animator.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
+        getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
                                                              SXRAvatar.IAvatarEvents.class,
                                                              "onAnimationStarted",
                                                              SXRAvatar.this,
@@ -279,7 +311,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
     public void onAnimationFinished(SXRAnimationQueue queue, SXRAnimator animator)
     {
         Log.d("ANIMATOR", "Stop %s", animator.getName());
-        animator.getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
+        getSXRContext().getEventManager().sendEvent(SXRAvatar.this,
                                                              SXRAvatar.IAvatarEvents.class,
                                                              "onAnimationFinished",
                                                              SXRAvatar.this,
@@ -313,7 +345,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
             }
             if (anim instanceof SXRPoseMapper)
             {
-                SXRAnimationEngine.getInstance(dst.getSXRContext()).stop(anim);
+                SXRAnimationEngine.getInstance(getSXRContext()).stop(anim);
             }
         }
         for (int i = 0; i < dst.getAnimationCount(); ++i)
@@ -331,6 +363,9 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
             if (anim instanceof SXRPoseMapper)
             {
                 SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(skelTwo.getSkeleton(), skelOne.getSkeleton(), duration);
+                String name = skelOne.getName() + "-" + skelTwo.getName();
+
+                blendAnim.setName(name);
                 dst.removeAnimation(anim);
                 dst.addAnimation(blendAnim);
                 dst.addAnimation(anim);
@@ -340,6 +375,9 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
         if ((skelOne != null) && (skelTwo != null))
         {
             SXRPoseInterpolator blendAnim = new SXRPoseInterpolator(skelTwo.getSkeleton(), skelOne.getSkeleton(), duration);
+            String name = skelOne.getName() + "-" + skelTwo.getName();
+
+            blendAnim.setName(name);
             dst.addAnimation(blendAnim);
             return blendAnim;
         }
@@ -436,7 +474,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
      */
     public void loadModel(SXRAndroidResource modelResource, String modelDesc, String modelName)
     {
-        SXRContext ctx = mAvatarRoot.getSXRContext();
+        SXRContext ctx = getSXRContext();
         SXRResourceVolume volume = new SXRResourceVolume(ctx, modelResource);
         SXRNode modelRoot = new SXRNode(ctx);
         Attachment modelInfo;
@@ -456,10 +494,25 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
     }
 
     /**
+     * Load an attachment onto the avatar.
+     * <p>
+     * The base avatar class cannot load models without actual filenames.
+     * Subclasses of {@link SXRAvatar} find this override useful.
+     *
+     * @param modelName        name of model (used to refer to it later)
+     * @see #removeModel(String)
+     */
+    public void loadModel(String modelName)
+    {
+        throw new UnsupportedOperationException("This form of loadModel is not supported by SXRAvatar");
+    }
+
+    /**
      * Remove a model that was added as an attachment.
      * <p>
      * The first model loaded is the avatar body. Subsequent models
      * are attachments.
+     * @return true if model was actually removed, else false
      * @param modelName  name of model to remove.
      * @see #loadModel(SXRAndroidResource)
      */
@@ -469,13 +522,13 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
         if (a != null)
         {
             SXRNode root = a.getModelRoot();
+            mAttachments.remove(modelName);
             if (root != null)
             {
                 a.hide();
                 mAvatarRoot.removeChildObject(root);
+                return true;
             }
-            mAttachments.remove(modelName);
-            return true;
         }
         return false;
     }
@@ -549,13 +602,14 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
      */
     public void clearAvatar()
     {
-        SXRNode previousAvatar = (mAvatarRoot.getChildrenCount() > 0) ?
-                mAvatarRoot.getChildByIndex(0) : null;
-
-        if (previousAvatar != null)
+        stop();
+        while (mAvatarRoot.getChildrenCount() > 0)
         {
-            mAvatarRoot.removeChildObject(previousAvatar);
+            mAvatarRoot.removeChildObject(mAvatarRoot.getChildByIndex(0));
         }
+        mAttachments.clear();
+        Attachment avatarInfo = addAttachment("avatar");
+        avatarInfo.setProperty("type", "avatar");
     }
 
     /**
@@ -566,7 +620,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
     public void loadAnimation(final SXRAndroidResource animResource, final String boneMap)
     {
         final String filePath = animResource.getResourcePath();
-        final SXRContext ctx = mAvatarRoot.getSXRContext();
+        final SXRContext ctx = getSXRContext();
         SXRResourceVolume volume = new SXRResourceVolume(ctx, animResource);
 
         if (filePath.endsWith(".bvh"))
@@ -640,7 +694,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
      *
      * @param anim animation to add
      * @see SXRAvatar#removeAnimation(SXRAnimator)
-     * @see SXRAvatar#clear()
+     * @see SXRAvatar#clearAvatar()
      */
     public void addAnimation(SXRAnimator anim)
     {
@@ -664,7 +718,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
      *
      * @param anim animation to remove
      * @see SXRAvatar#addAnimation(SXRAnimator)
-     * @see SXRAvatar#clear()
+     * @see SXRAvatar#clearAvatar()
      */
     public void removeAnimation(SXRAnimator anim)
     {
@@ -680,7 +734,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
      * @see SXRAvatar#removeAnimation(SXRAnimator)
      * @see SXRAvatar#addAnimation(SXRAnimator)
      */
-    public void clear()
+    public void clearAnimations()
     {
         mAnimsToPlay.clear();
     }
@@ -821,7 +875,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
 
     /**
      * Stops all of the animations associated with this animator.
-     * @see SXRAvatar#startAll()
+     * @see SXRAvatar#startAll(int)
      * @see SXRAnimationEngine#stop(SXRAnimation)
      */
     public void stop()
@@ -904,6 +958,56 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
         mSkeleton.poseFromBones();
         mAvatarRoot.addChildObject(modelRoot);
         return a;
+    }
+
+    protected String onLoadAnimation(SXRAnimator animator, String filePath)
+    {
+        try
+        {
+            for (int i = 0; i < animator.getAnimationCount(); ++i)
+            {
+                SXRAnimation a = animator.getAnimation(i);
+                if (a instanceof SXRSkeletonAnimation)
+                {
+                    SXRSkeletonAnimation skelAnim = (SXRSkeletonAnimation) animator.getAnimation(0);
+                    SXRSkeleton skel = skelAnim.getSkeleton();
+                    if (skel != mSkeleton)
+                    {
+                        SXRPoseMapper poseMapper = new SXRPoseMapper(mSkeleton, skel, skelAnim.getDuration());
+
+                        animator.addAnimation(poseMapper);
+                    }
+                }
+                if (a instanceof SXRMorphAnimation)
+                {
+                    String nodename = a.getName();
+                    SXRNode target = mAvatarRoot.getNodeByName(nodename);
+
+                    if (target != null)
+                    {
+                        SXRMeshMorph morph = (SXRMeshMorph) target.getComponent(SXRMeshMorph.getComponentType());
+                        if (morph != null)
+                        {
+                            ((SXRMorphAnimation) a).setTarget(morph);
+                        }
+                        else
+                        {
+                            return "Cannot apply morph animation, morph not found on " + a.getName();
+                        }
+                    }
+                    else
+                    {
+                        return "Cannot apply morph animation, target node not found " + nodename;
+                    }
+                }
+            }
+            addAnimation(animator);
+            return null;
+        }
+        catch (IllegalArgumentException | IndexOutOfBoundsException ex)
+        {
+            return ex.getMessage();
+        }
     }
 
     protected Attachment onLoadModel(SXRNode modelRoot, SXRSkeleton skel, String filePath)
@@ -1007,27 +1111,13 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
                         errors);
                 return;
             }
-
-            SXRAnimation a = animator.getAnimation(0);
-            if (a instanceof SXRSkeletonAnimation)
+            errors = onLoadAnimation(animator, filePath);
+            if (errors != null)
             {
-                SXRSkeletonAnimation skelAnim = (SXRSkeletonAnimation) animator.getAnimation(0);
-                SXRSkeleton skel = skelAnim.getSkeleton();
-                if (skel != mSkeleton)
-                {
-                    SXRPoseMapper poseMapper = new SXRPoseMapper(mSkeleton, skel, skelAnim.getDuration());
-
-                    animator.addAnimation(poseMapper);
-                }
+                animator = null;
+                Log.e(TAG, errors);
             }
-            addAnimation(animator);
-            context.getEventManager().sendEvent(SXRAvatar.this,
-                    IAvatarEvents.class,
-                    "onAnimationLoaded",
-                    SXRAvatar.this,
-                    animator,
-                    filePath,
-                    errors);
+            mContext.getEventManager().sendEvent(SXRAvatar.this, IAvatarEvents.class, "onAnimationLoaded", SXRAvatar.this, animator, filePath, errors);
         }
 
         public void onModelLoaded(SXRContext context, SXRNode model, String filePath) { }

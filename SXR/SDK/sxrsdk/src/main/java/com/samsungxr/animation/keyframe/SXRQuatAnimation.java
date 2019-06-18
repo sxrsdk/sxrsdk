@@ -5,7 +5,9 @@ import com.samsungxr.utility.Log;
 import org.joml.Quaternionf;
 
 /**
- * Describes the animation of a set of floating point values.
+ * Describes the animation of a set of quaternions.
+ * <p>
+ * This type of animation is used for rotations.
  */
 public final class SXRQuatAnimation extends SXRFloatAnimation
 {
@@ -52,7 +54,7 @@ public final class SXRQuatAnimation extends SXRFloatAnimation
     };
 
     /**
-     * Constructor.
+     * Constructs a quaternion animation from the supplied data.
      *
      * @param keyData animation key data, must be x,y,z,w (Quaterions)
      */
@@ -63,7 +65,8 @@ public final class SXRQuatAnimation extends SXRFloatAnimation
     }
 
     /**
-     * Constructor.
+     * Constructs a quaternion animation with room for the
+     * given number of keys.
      *
      * @param numKeys expected number of animation keys
      */
@@ -74,7 +77,21 @@ public final class SXRQuatAnimation extends SXRFloatAnimation
     }
 
     /**
-     * Returns the scaling factor as vector.<p>
+     * Clone a given quaternion animation.
+     * This is a shallow copy and both animations share
+     * the same data.
+     *
+     * @param src animation to clone
+     */
+    public SXRQuatAnimation(final SXRQuatAnimation src)
+    {
+        super(src.getNumKeys(), src.mFloatsPerKey);
+        mKeys = src.mKeys;
+        mFloatInterpolator = src.mFloatInterpolator;
+    }
+
+    /**
+     * Returns the scaling factor as vector.
      *
      * @param keyIndex the index of the scale key
      *
@@ -89,6 +106,13 @@ public final class SXRQuatAnimation extends SXRFloatAnimation
         q.w = mKeys[index + 4];
     }
 
+    /**
+     * Set the value of a quaternion key.
+     * @param keyIndex  0-based index of key to set
+     * @param time      time (in seconds) for this key
+     * @param q         quaternion value for this key
+     * @see SXRFloatAnimation#setKey(int, float, float[])
+     */
     public void setKey(int keyIndex, float time, final Quaternionf q)
     {
         int index = keyIndex * mFloatsPerKey;

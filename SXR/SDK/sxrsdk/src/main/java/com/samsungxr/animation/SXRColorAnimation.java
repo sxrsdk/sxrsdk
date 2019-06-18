@@ -20,8 +20,19 @@ import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRNode;
 import com.samsungxr.utility.Colors;
 
-/** Animate the overlay color. */
-public class SXRColorAnimation extends SXRMaterialAnimation {
+/**
+ * Animates the color of a material over time.
+ * <p>
+ * This class assumes the naming conventions of the SXR
+ * built-in shaders. The color is either is a 3 float
+ * uniform called <b>u_color</b> or it is the <b>x, y, z</b>
+ * components of a 4 float uniform called <b>diffuse_color</b>.
+ * </p>
+ * @see com.samsungxr.shaders.SXRPhongLayeredShader
+ * @see com.samsungxr.shaders.SXRTextureShader
+ */
+public class SXRColorAnimation extends SXRMaterialAnimation
+{
 
     private final float mStartR, mStartG, mStartB;
     private final float mDeltaR, mDeltaG, mDeltaB;
@@ -110,6 +121,27 @@ public class SXRColorAnimation extends SXRMaterialAnimation {
         {
             setName(name + ".material");
         }
+    }
+
+    @Override
+    public SXRAnimation copy()
+    {
+        return new SXRColorAnimation(this);
+    }
+
+    /**
+     * Construct one color animation that is a copy of another.
+     * @param src   {@link SXRColorAnimation} to copy.
+     */
+    public SXRColorAnimation(final SXRColorAnimation src)
+    {
+        super(src.mMaterial, src.mDuration);
+        mStartR = src.mStartR;
+        mStartG = src.mStartG;
+        mStartB = src.mStartB;
+        mDeltaR = src.mDeltaR;
+        mDeltaG = src.mDeltaG;
+        mDeltaB = src.mDeltaB;
     }
 
     @Override

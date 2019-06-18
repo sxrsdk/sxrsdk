@@ -1190,6 +1190,11 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         }
     }
 
+    public void updateNative()
+    {
+        NativeSkeleton.updateBones(getNative(), mParentBones, mBoneNames);
+    }
+
     public SXRNode createSkeletonGeometry(SXRNode parent, float boneScale)
     {
         GeometryHelper helper = new GeometryHelper(this);

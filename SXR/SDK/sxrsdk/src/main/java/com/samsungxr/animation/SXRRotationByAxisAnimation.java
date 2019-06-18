@@ -21,11 +21,19 @@ import com.samsungxr.SXRTransform;
 import com.samsungxr.utility.Log;
 import org.joml.Quaternionf;
 
-/** Rotation animation. */
+/**
+ * Animates the rotation about a specified axis.
+ * <p>
+ * Only the rotation component of the transform
+ * are affected. he position and scale components are
+ * unchanged and may be simultaneously updated by another animation.
+ * @see SXRTransformAnimation
+ * @see SXRRotationByAxisWithPivotAnimation
+ */
 public class SXRRotationByAxisAnimation extends SXRTransformAnimation
 {
     private final float mAngle, mAxisX, mAxisY, mAxisZ;
-    private final Quaternionf mStartRotation = new Quaternionf();
+    private final Quaternionf mStartRotation;
 
     /**
      * Use {@link SXRTransform#rotateByAxis(float, float, float, float)} to do
@@ -52,6 +60,7 @@ public class SXRRotationByAxisAnimation extends SXRTransformAnimation
         mAxisX = x;
         mAxisY = y;
         mAxisZ = z;
+        mStartRotation = new Quaternionf();
         mStartRotation.set(mRotation);
         if (duration < 0)
         {
@@ -60,9 +69,11 @@ public class SXRRotationByAxisAnimation extends SXRTransformAnimation
     }
 
     /**
-     * Use {@link SXRTransform#rotateByAxis(float, float, float, float)} to do
-     * an animated rotation about a specific axis.
-     *
+     * Construct a rotation animation to rotate about the given axis.
+     * <p>
+     * This will rotate about (0, 0, 0) in the local coordinate
+     * system of the object. To rotate about a different point,
+     * use {@link SXRRotationByAxisWithPivotAnimation}.
      * @param target
      *            {@link SXRNode} containing a {@link SXRTransform}
      * @param duration
@@ -85,6 +96,26 @@ public class SXRRotationByAxisAnimation extends SXRTransformAnimation
         {
             setName(name + ".rotation");
         }
+    }
+
+    /**
+     * Construct a copy of another rotation animation.
+     * @param src rotation animation to copy.
+     */
+    public SXRRotationByAxisAnimation(final SXRRotationByAxisAnimation src)
+    {
+        super(src.mTransform, src.mDuration);
+        mAngle = src.mAngle;
+        mAxisX = src.mAxisX;
+        mAxisY = src.mAxisY;
+        mAxisZ = src.mAxisZ;
+        mStartRotation = src.mStartRotation;
+    }
+
+    @Override
+    public SXRAnimation copy()
+    {
+        return new SXRRotationByAxisAnimation(this);
     }
 
     @Override
