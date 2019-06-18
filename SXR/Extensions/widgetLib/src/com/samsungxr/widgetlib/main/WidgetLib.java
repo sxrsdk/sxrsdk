@@ -52,12 +52,34 @@ public class WidgetLib {
     public static WidgetLib init(SXRContext sxrContext, String customPropertiesAsset)
             throws InterruptedException, JSONException, NoSuchMethodException {
         if (mInstance == null) {
+            SXRNode rootNode = new SXRNode(sxrContext);
+            sxrContext.getMainScene().addNode(rootNode);
             // Constructor sets mInstance to ensure the initialization order
-            new WidgetLib(sxrContext, customPropertiesAsset);
+            new WidgetLib(rootNode, customPropertiesAsset);
         }
         return mInstance.get();
     }
 
+    /**
+     * Initialize an instance of Widget Lib. It has to be done before any usage of library.
+     * The application needs to hold onto the returned WidgetLib reference for as long as the
+     * library is going to be used.
+     * @param node {@link SXRNode} to put the widget
+     * @param customPropertiesAsset An optional asset JSON file containing custom and overridden
+     *                              properties for the application
+     * @return Instance of Widget library
+     * @throws InterruptedException
+     * @throws JSONException
+     * @throws NoSuchMethodException
+     */
+    public static WidgetLib init(SXRNode node, String customPropertiesAsset)
+        throws InterruptedException, JSONException, NoSuchMethodException {
+        if (mInstance == null) {
+            // Constructor sets mInstance to ensure the initialization order
+            new WidgetLib(node, customPropertiesAsset);
+        }
+        return mInstance.get();
+    }
 
     public static void pause() {
         if (mInstance != null) {
@@ -216,7 +238,7 @@ public class WidgetLib {
         mContentSceneController = new ContentSceneController(sxrContext);
         mMainScene = new MainScene(root);
 
-        Widget.init(sxrContext);
+        Widget.init(root);
     }
 
     private static WidgetLib get() {

@@ -89,43 +89,6 @@ public class MainScene {
         public void onFrontRotationChanged(MainScene mainScene, float newRotation, float oldRotation);
     }
 
-    /**
-     * Construct a MainScene instance.
-     * <p>
-     * The underlying SXRScene is obtained using
-     * {@link SXRContext#getMainScene()} and frustum culling is
-     * {@linkplain SXRScene#setFrustumCulling(boolean) enabled}.
-     *
-     * @param sxrContext A valid SXRContext instance.
-     */
-    public MainScene(final SXRContext sxrContext) {
-        mContext = sxrContext;
-        mSceneRootObject = new SXRNode(sxrContext);
-        mMainCameraRootObject = new SXRNode(sxrContext);
-        mLeftCameraRootObject = new SXRNode(sxrContext);
-        mRightCameraRootObject = new SXRNode(sxrContext);
-
-        mSceneRootWidget = new RootWidget(mSceneRootObject);
-        mSceneRootWidget.setName(TAG);
-        mMainCameraRootWidget = new GroupWidget(sxrContext,
-                mMainCameraRootObject);
-        mMainCameraRootWidget.applyLayout(new AbsoluteLayout());
-        mLeftCameraRootWidget = new GroupWidget(sxrContext,
-                mLeftCameraRootObject);
-        mLeftCameraRootWidget.applyLayout(new AbsoluteLayout());
-        mRightCameraRootWidget = new GroupWidget(sxrContext,
-                mRightCameraRootObject);
-        mRightCameraRootWidget.applyLayout(new AbsoluteLayout());
-
-        mMainScene = mContext.getMainScene();
-        mMainScene.addNode(mSceneRootObject);
-
-        getMainCameraRig().addChildObject(mMainCameraRootObject);
-        getLeftCamera().addChildObject(mLeftCameraRootObject);
-        getRightCamera().addChildObject(mRightCameraRootObject);
-        mSceneRootObject.setName(TAG);
-        onFirstStep();
-    }
 
     /**
      * Construct a MainScene instance.
@@ -134,7 +97,7 @@ public class MainScene {
      * {@link SXRContext#getMainScene()} and frustum culling is
      * {@linkplain SXRScene#setFrustumCulling(boolean) enabled}.
      *
-     * @param sxrContext A valid SXRContext instance.
+     * @param root root node widgets are put under
      */
     public MainScene(final SXRNode root) {
         SXRContext sxrContext = root.getSXRContext();

@@ -66,35 +66,6 @@ public class Widget implements Layout.WidgetContainer {
      * to load metadata for {@code Widgets}, as well as animation and material
      * specs.
      *
-     * @param sxrContext
-     *            A valid {@link SXRContext}.
-     * @throws JSONException
-     *             if the {@code objects.json} file is invalid JSON
-     * @throws NoSuchMethodException
-     *             if a constructor can't be found for an animation type
-     *             specified in {@code objects.json}.
-     */
-    static public void init(SXRContext sxrContext) throws JSONException,
-            NoSuchMethodException {
-        loadAnimations(sxrContext.getContext());
-
-        sxrContext.runOnGlThread(new Runnable() {
-            @Override
-            public void run() {
-                sGLThread = new WeakReference<>(Thread.currentThread());
-            }
-        });
-        SXRAssetLoader assetLoader = new SXRAssetLoader(sxrContext);
-        sDefaultTexture = assetLoader.loadTexture(new SXRAndroidResource(
-                sxrContext, R.raw.default_bkgd));
-        Log.d(TAG, "onInit(): default texture: %s", sDefaultTexture);
-    }
-
-    /**
-     * Call to initialize the Widget infrastructure. Parses {@code objects.json}
-     * to load metadata for {@code Widgets}, as well as animation and material
-     * specs.
-     *
      * @param widgetRoot
      *            {@link SXRNode} to put the widgets under.
      * @throws JSONException
