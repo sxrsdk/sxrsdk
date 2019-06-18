@@ -128,6 +128,45 @@ public class MainScene {
     }
 
     /**
+     * Construct a MainScene instance.
+     * <p>
+     * The underlying SXRScene is obtained using
+     * {@link SXRContext#getMainScene()} and frustum culling is
+     * {@linkplain SXRScene#setFrustumCulling(boolean) enabled}.
+     *
+     * @param sxrContext A valid SXRContext instance.
+     */
+    public MainScene(final SXRNode root) {
+        SXRContext sxrContext = root.getSXRContext();
+        mContext = sxrContext;
+        mSceneRootObject = root;
+        mMainCameraRootObject = new SXRNode(sxrContext);
+        mLeftCameraRootObject = new SXRNode(sxrContext);
+        mRightCameraRootObject = new SXRNode(sxrContext);
+
+        mSceneRootWidget = new RootWidget(mSceneRootObject);
+        mSceneRootWidget.setName(TAG);
+        mMainCameraRootWidget = new GroupWidget(sxrContext,
+                                                mMainCameraRootObject);
+        mMainCameraRootWidget.applyLayout(new AbsoluteLayout());
+        mLeftCameraRootWidget = new GroupWidget(sxrContext,
+                                                mLeftCameraRootObject);
+        mLeftCameraRootWidget.applyLayout(new AbsoluteLayout());
+        mRightCameraRootWidget = new GroupWidget(sxrContext,
+                                                 mRightCameraRootObject);
+        mRightCameraRootWidget.applyLayout(new AbsoluteLayout());
+
+        mMainScene = mContext.getMainScene();
+        mMainScene.addNode(mSceneRootObject);
+
+        getMainCameraRig().addChildObject(mMainCameraRootObject);
+        getLeftCamera().addChildObject(mLeftCameraRootObject);
+        getRightCamera().addChildObject(mRightCameraRootObject);
+        mSceneRootObject.setName(TAG);
+        onFirstStep();
+    }
+
+    /**
      * Calling on first {@link com.samsungxr.SXRMain#onStep} to process first rendering
      * @return true if it is first rendering, otherwise - false
      */

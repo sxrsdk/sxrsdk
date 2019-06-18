@@ -12,6 +12,7 @@ import com.samsungxr.widgetlib.widget.properties.TextureFactory;
 import com.samsungxr.widgetlib.widget.properties.TypefaceManager;
 
 import com.samsungxr.SXRContext;
+import com.samsungxr.SXRNode;
 import org.json.JSONException;
 
 import java.lang.ref.WeakReference;
@@ -192,6 +193,28 @@ public class WidgetLib {
         mTouchManager = new TouchManager(sxrContext);
         mContentSceneController = new ContentSceneController(sxrContext);
         mMainScene = new MainScene(sxrContext);
+
+        Widget.init(sxrContext);
+    }
+
+    private WidgetLib(SXRNode root, String customPropertiesAsset)
+        throws InterruptedException, JSONException, NoSuchMethodException {
+        mInstance = new WeakReference<>(this);
+        SXRContext sxrContext = root.getSXRContext();
+        mSXRContext = sxrContext;
+        mTextureHelper = new TextureFutureHelper(sxrContext);
+        mTextureFactory = new TextureFactory(sxrContext);
+        mMainThread = new MainThread(sxrContext);
+        mTypefaceManager = new TypefaceManager(sxrContext);
+        mSimpleAnimationTracker = new SimpleAnimationTracker(sxrContext);
+        mPropertyManager = new PropertyManager(sxrContext.getContext(), "default_metadata.json",
+                                               customPropertiesAsset);
+        mCommandBuffer = new CommandBuffer(sxrContext);
+
+        mFocusManager = new FocusManager(sxrContext);
+        mTouchManager = new TouchManager(sxrContext);
+        mContentSceneController = new ContentSceneController(sxrContext);
+        mMainScene = new MainScene(root);
 
         Widget.init(sxrContext);
     }
