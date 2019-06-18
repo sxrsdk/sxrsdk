@@ -85,6 +85,26 @@ void BulletWorld::finalize() {
     delete mCollisionConfiguration;
 }
 
+btDynamicsWorld* BulletWorld::getPhysicsWorld() const {
+    return mPhysicsWorld;
+}
+
+int BulletWorld::getUpdated(std::vector<PhysicsRigidBody*>& updated) {
+    int n = mBodiesChanged.size();
+
+    if (n > 0)
+    {
+        copy(mBodiesChanged.begin(), mBodiesChanged.end(), back_inserter(updated));
+        mBodiesChanged.clear();
+    }
+    return n;
+}
+
+void BulletWorld::markUpdated(PhysicsRigidBody* body) {
+    mBodiesChanged.push_back(body);
+}
+
+
 void BulletWorld::addConstraint(PhysicsConstraint *constraint) {
     constraint->updateConstructionInfo();
     btTypedConstraint *_constr = reinterpret_cast<btTypedConstraint*>(constraint->getUnderlying());
@@ -123,14 +143,14 @@ void BulletWorld::addRigidBody(PhysicsRigidBody *body) {
     BulletRigidBody *rb = static_cast<BulletRigidBody *>(body);
     body->updateConstructionInfo();
     mPhysicsWorld->addRigidBody(rb->getRigidBody());
-    rb->mWorld = mPhysicsWorld;
+    rb->mWorld = this;
 }
 
 void BulletWorld::addRigidBody(PhysicsRigidBody *body, int collisiontype, int collidesWith) {
     BulletRigidBody *rb = static_cast<BulletRigidBody *>(body);
     body->updateConstructionInfo();
     mPhysicsWorld->addRigidBody(rb->getRigidBody(), collidesWith, collisiontype);
-    rb->mWorld = mPhysicsWorld;
+    rb->mWorld = this;
 }
 
 void BulletWorld::removeRigidBody(PhysicsRigidBody *body) {

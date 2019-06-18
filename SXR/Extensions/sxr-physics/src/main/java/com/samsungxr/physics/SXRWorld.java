@@ -77,6 +77,18 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         public void onRemoveRigidBody(SXRWorld world, SXRRigidBody body);
 
         /**
+         * called when a constraint is added to a physics world.
+         * @param constraint {@link SXRConstraint} that was added.
+         */
+        public void onAddConstraint(final SXRConstraint constraint);
+
+        /**
+         * called when a constraint is removed from a physics world.
+         * @param constraint {@link SXRConstraint} that was removed.
+         */
+        public void onRemoveConstraint(final SXRConstraint constraint);
+
+        /**
          * Called after each iteration of the physics simulation.
          * @param world physics world being simulated
          */
@@ -155,6 +167,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
 
                 NativePhysics3DWorld.addConstraint(getNative(), gvrConstraint.getNative());
                 mPhysicsObject.put(gvrConstraint.getNative(), gvrConstraint);
+                getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onAddConstraint", SXRWorld.this, gvrConstraint);
             }
         });
     }
@@ -171,6 +184,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
                 if (contains(gvrConstraint)) {
                     NativePhysics3DWorld.removeConstraint(getNative(), gvrConstraint.getNative());
                     mPhysicsObject.remove(gvrConstraint.getNative());
+                    getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onRemoveConstraint", SXRWorld.this, gvrConstraint);
                 }
             }
         });
@@ -390,6 +404,22 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         NativePhysics3DWorld.getGravity(getNative(), gravity);
     }
 
+    SXRRigidBody[] getUpdated() {
+        long[] pointers = NativePhysics3DWorld.getUpdated(getNative());
+        if (pointers != null)
+        {
+            SXRRigidBody[] bodies = new SXRRigidBody[pointers.length];
+            for (int i = 0; i < pointers.length; ++i)
+            {
+                SXRPhysicsWorldObject obj = mPhysicsObject.get(pointers[i]);
+                SXRRigidBody body = (SXRRigidBody) obj;
+                bodies[i] = body;
+            }
+            return bodies;
+        }
+        return null;
+    }
+
     private class SXRWorldTask implements Runnable {
         private boolean running = false;
         private final long intervalMillis;
@@ -425,6 +455,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
             generateCollisionEvents();
             getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onStepPhysics", SXRWorld.this);
 
+            SXRRigidBody[] bodies = getUpdated();
             lastSimulTime = simulationTime;
 
             simulationTime = intervalMillis + simulationTime - SystemClock.uptimeMillis();
@@ -517,18 +548,18 @@ class NativePhysics3DWorld {
 
     static native long getComponentType();
 
-    static native boolean addConstraint(long jphysics_world, long jconstraint);
+    static native void addConstraint(long jphysics_world, long jconstraint);
 
-    static native boolean removeConstraint(long jphysics_world, long jconstraint);
+    static native void removeConstraint(long jphysics_world, long jconstraint);
 
     static native void startDrag(long jphysics_world, long jdragger, long jtarget,
                                  float relX, float relY, float relZ);
 
     static native void stopDrag(long jphysics_world);
 
-    static native boolean addRigidBody(long jphysics_world, long jrigid_body);
+    static native void addRigidBody(long jphysics_world, long jrigid_body);
 
-    static native boolean addRigidBodyWithMask(long jphysics_world, long jrigid_body, long collisionType, long collidesWith);
+    static native void addRigidBodyWithMask(long jphysics_world, long jrigid_body, long collisionType, long collidesWith);
 
     static native void removeRigidBody(long jphysics_world, long jrigid_body);
 
@@ -539,4 +570,6 @@ class NativePhysics3DWorld {
     static native void setGravity(long jworld, float x, float y, float z);
 
     static native SXRCollisionInfo[] listCollisions(long jphysics_world);
+
+    static native long[] getUpdated(long jphysics_world);
 }

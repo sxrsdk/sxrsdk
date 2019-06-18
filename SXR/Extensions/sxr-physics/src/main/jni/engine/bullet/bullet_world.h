@@ -63,11 +63,17 @@ class BulletWorld : public PhysicsWorld {
 
     void listCollisions(std::list <ContactPoint> &contactPoints);
 
+    int getUpdated(std::vector<PhysicsRigidBody*>& bodies);
+
     void setGravity(float x, float y, float z);
 
     void setGravity(glm::vec3 gravity);
 
+    void markUpdated(PhysicsRigidBody* body);
+
     PhysicsVec3 getGravity() const;
+
+    btDynamicsWorld* getPhysicsWorld() const;
 
  private:
     void initialize();
@@ -81,10 +87,10 @@ class BulletWorld : public PhysicsWorld {
     btCollisionDispatcher *mDispatcher;
     btSequentialImpulseConstraintSolver *mSolver;
     btBroadphaseInterface *mOverlappingPairCache;
-
     btPoint2PointConstraint *mDraggingConstraint;
     Node *mPivotObject;
     int mActivationState;
+    std::vector<PhysicsRigidBody*> mBodiesChanged;
 
     //void (*gTmpFilter)(); // btNearCallback
     //int gNearCallbackCount = 0;

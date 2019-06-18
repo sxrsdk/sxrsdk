@@ -23,6 +23,7 @@
 #include <LinearMath/btMotionState.h>
 
 class btDynamicsWorld;
+class BulletWorld;
 
 namespace sxr {
 class Node;
@@ -168,8 +169,7 @@ private:
     btTransform prevPos;
     btVector3 mScale;
     SimulationType mSimType;
-
-    btDynamicsWorld *mWorld;
+    BulletWorld *mWorld;
 
     friend class BulletWorld;
 };

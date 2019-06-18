@@ -203,11 +203,14 @@ void BulletRigidBody::setWorldTransform(const btTransform &centerOfMassWorldTran
     }
     else
     {
-        btTransform physicBody = (centerOfMassWorldTrans  * m_centerOfMassOffset);
+        btTransform physicBody = (centerOfMassWorldTrans * m_centerOfMassOffset);
         convertBtTransform2Transform(physicBody, trans);
         prevPos = physicBody;
     }
-    //convertBtTransform2Transform(centerOfMassWorldTrans * m_centerOfMassOffset, trans);
+    if (mSimType == DYNAMIC)
+    {
+        mWorld->markUpdated(this);
+    }
 }
 
 void BulletRigidBody::applyCentralForce(float x, float y, float z) {
@@ -450,7 +453,7 @@ void BulletRigidBody::reset(bool rebuildCollider)
 
     int collisionFilterGroup = mRigidBody->getBroadphaseProxy()->m_collisionFilterGroup;
     int collisionFilterMask = mRigidBody->getBroadphaseProxy()->m_collisionFilterMask;
-    mWorld->removeRigidBody(mRigidBody);
+    mWorld->getPhysicsWorld()->removeRigidBody(mRigidBody);
 
     if (rebuildCollider)
     {
@@ -475,7 +478,7 @@ void BulletRigidBody::reset(bool rebuildCollider)
     updateColisionShapeLocalScaling();
     mRigidBody->setMotionState(this);
     getWorldTransform(prevPos);
-    mWorld->addRigidBody(mRigidBody, collisionFilterGroup, collisionFilterMask);
+    mWorld->getPhysicsWorld()->addRigidBody(mRigidBody, collisionFilterGroup, collisionFilterMask);
 }
 
 }

@@ -67,6 +67,8 @@ public:
 
     virtual void setGravity(float gx, float gy, float gz) = 0;
 
+    virtual int getUpdated(std::vector<PhysicsRigidBody*>& bodies) = 0;
+
     virtual PhysicsVec3 getGravity() const = 0;
 };
 

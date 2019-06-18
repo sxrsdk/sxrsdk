@@ -39,6 +39,18 @@ public class SXRPhysicsAvatar extends SXRAvatar
         }
 
         @Override
+        public void onAddConstraint(SXRConstraint constraint)
+        {
+
+        }
+
+        @Override
+        public void onRemoveConstraint(SXRConstraint constraint)
+        {
+
+        }
+
+        @Override
         public void onStepPhysics(SXRWorld world)
         {
             if (mSkeleton != null)

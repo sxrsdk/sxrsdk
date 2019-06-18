@@ -59,7 +59,7 @@ extern "C" {
             jlong jworld, jlong jrigid_body);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysics3DWorld_addRigidBodyWithMask(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_NativePhysics3DWorld_addRigidBodyWithMask(JNIEnv* env, jobject obj,
             jlong jworld, jlong jrigid_body, jlong collisionType, jlong collidesWith);
 
     JNIEXPORT void JNICALL
@@ -68,7 +68,7 @@ extern "C" {
 
     JNIEXPORT void JNICALL
     Java_com_samsungxr_physics_NativePhysics3DWorld_step(JNIEnv * env, jobject obj,
-            jlong jworld, jfloat jtime_step, int maxSubSteps);
+            jlong jworld, jfloat jtime_step, jint maxSubSteps);
 
     JNIEXPORT jobjectArray JNICALL
     Java_com_samsungxr_physics_NativePhysics3DWorld_listCollisions(JNIEnv * env, jobject obj,
@@ -76,11 +76,15 @@ extern "C" {
 
     JNIEXPORT void JNICALL
     Java_com_samsungxr_physics_NativePhysics3DWorld_setGravity(JNIEnv* env, jobject obj,
-            jlong jworld, float gx, float gy, float gz);
+            jlong jworld, jfloat gx, jfloat gy, jfloat gz);
 
     JNIEXPORT void JNICALL
     Java_com_samsungxr_physics_NativePhysics3DWorld_getGravity(JNIEnv* env, jobject obj,
             jlong jworld, jfloatArray jgravity);
+
+    JNIEXPORT jlongArray JNICALL
+    Java_com_samsungxr_physics_NativePhysics3DWorld_getUpdated(JNIEnv* env, jobject obj,
+                                                               jlong jworld);
 }
 
 JNIEXPORT jlong JNICALL
@@ -202,7 +206,7 @@ Java_com_samsungxr_physics_NativePhysics3DWorld_listCollisions(JNIEnv * env, job
 
 JNIEXPORT void JNICALL
 Java_com_samsungxr_physics_NativePhysics3DWorld_setGravity(JNIEnv* env, jobject obj,
-        jlong jworld, float gx, float gy, float gz)
+        jlong jworld, jfloat gx, jfloat gy, jfloat gz)
 {
     PhysicsWorld* world = reinterpret_cast <PhysicsWorld*> (jworld);
     world->setGravity(gx, gy, gz);
@@ -216,4 +220,24 @@ Java_com_samsungxr_physics_NativePhysics3DWorld_getGravity(JNIEnv* env, jobject 
     PhysicsVec3 gravity = world->getGravity();
     env->SetFloatArrayRegion(jgravity, 0, 3, gravity.vec);
 }
+
+JNIEXPORT jlongArray JNICALL
+Java_com_samsungxr_physics_NativePhysics3DWorld_getUpdated(JNIEnv* env, jobject obj,
+                                                           jlong jworld)
+{
+    PhysicsWorld* world = reinterpret_cast <PhysicsWorld*>(jworld);
+    std::vector<PhysicsRigidBody*> updated;
+    int n = world->getUpdated(updated);
+    if (n > 0)
+    {
+        jlongArray jbodies = env->NewLongArray(n);
+        jlong* bodies = env->GetLongArrayElements(jbodies, 0);
+
+        memcpy(bodies, updated.data(), n * sizeof(long));
+        env->ReleaseLongArrayElements(jbodies, bodies, 0);
+        return jbodies;
+    }
+    return nullptr;
 }
+}
+

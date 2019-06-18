@@ -352,7 +352,7 @@ Java_com_samsungxr_physics_Native3DRigidBody_setIgnoreCollisionCheck(JNIEnv * en
         jlong jrigid_body, jobject collisionObj, jboolean ignore) {
     PhysicsRigidBody* rigid_body = reinterpret_cast<PhysicsRigidBody*>(jrigid_body);
 
-    rigid_body->setIgnoreCollisionCheck(reinterpret_cast<PhysicsRigidBody*>(jrigid_body), ignore);
+    rigid_body->setIgnoreCollisionCheck(reinterpret_cast<PhysicsRigidBody*>(collisionObj), ignore);
 }
 
 JNIEXPORT jfloatArray   JNICALL
