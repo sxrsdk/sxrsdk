@@ -240,16 +240,6 @@ public class SXRStateMachine
             }
         }
 
-        public void gotoState(String nextState)
-        {
-            Action action = mActions.get("goto");
-
-            if (action != null)
-            {
-                Log.d("STATE", "State %s: %s goto %s", getName(), nextState);
-                action.runIf(nextState);
-            }
-        }
 
         public void addAction(String event, Action action)
         {
@@ -390,7 +380,6 @@ public class SXRStateMachine
         }
         mCurrentState.leave();
         mCurrentState = state;
-        state.gotoState(nextState);
         state.enter();
     }
 
