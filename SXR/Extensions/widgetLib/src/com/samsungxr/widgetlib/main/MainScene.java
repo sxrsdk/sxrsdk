@@ -89,7 +89,6 @@ public class MainScene {
         public void onFrontRotationChanged(MainScene mainScene, float newRotation, float oldRotation);
     }
 
-
     /**
      * Construct a MainScene instance.
      * <p>
@@ -120,7 +119,6 @@ public class MainScene {
         mRightCameraRootWidget.applyLayout(new AbsoluteLayout());
 
         mMainScene = mContext.getMainScene();
-        mMainScene.addNode(mSceneRootObject);
 
         getMainCameraRig().addChildObject(mMainCameraRootObject);
         getLeftCamera().addChildObject(mLeftCameraRootObject);
