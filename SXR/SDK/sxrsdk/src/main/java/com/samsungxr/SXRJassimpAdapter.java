@@ -641,7 +641,7 @@ class  SXRJassimpAdapter
             delta = 3.0f - delta;
             if (Math.abs(delta) > EPSILON)
             {
-                fixKeys(channel, vec);
+                channel.scaleKeys(vec.x);
             }
         }
         for (int boneId = 1; boneId < mSkeleton.getNumBones(); ++boneId)

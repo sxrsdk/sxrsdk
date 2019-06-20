@@ -28,6 +28,8 @@ import com.samsungxr.SXRTransform;
 import com.samsungxr.IEventReceiver;
 import com.samsungxr.IEvents;
 import com.samsungxr.INodeEvents;
+import com.samsungxr.animation.SXRSkeleton;
+
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -67,26 +69,26 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
          * @param world physics world the body is added to.
          * @param body  rigid body added.
          */
-        public void onAddRigidBody(SXRWorld world, SXRRigidBody body);
+        public void onAddRigidBody(final SXRWorld world, final SXRRigidBody body);
 
         /**
          * Called when a rigid body is removed from a physics world.
          * @param world physics world the body is removed from.
          * @param body  rigid body removed.
          */
-        public void onRemoveRigidBody(SXRWorld world, SXRRigidBody body);
+        public void onRemoveRigidBody(final SXRWorld world, final SXRRigidBody body);
 
         /**
          * called when a constraint is added to a physics world.
          * @param constraint {@link SXRConstraint} that was added.
          */
-        public void onAddConstraint(final SXRConstraint constraint);
+        public void onAddConstraint(final SXRWorld world, final SXRConstraint constraint);
 
         /**
          * called when a constraint is removed from a physics world.
          * @param constraint {@link SXRConstraint} that was removed.
          */
-        public void onRemoveConstraint(final SXRConstraint constraint);
+        public void onRemoveConstraint(final SXRWorld world, final SXRConstraint constraint);
 
         /**
          * Called after each iteration of the physics simulation.
@@ -159,12 +161,10 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
                 if (contains(gvrConstraint)) {
                     return;
                 }
-
-                if (!contains(gvrConstraint.mBodyA)
-                        || (gvrConstraint.mBodyB != null && !contains(gvrConstraint.mBodyB))) {
+                if (((gvrConstraint.mBodyA != null) && !contains(gvrConstraint.mBodyA)) ||
+                    ((gvrConstraint.mBodyB != null && !contains(gvrConstraint.mBodyB)))) {
                     throw new UnsupportedOperationException("Rigid body not found in the physics world.");
                 }
-
                 NativePhysics3DWorld.addConstraint(getNative(), gvrConstraint.getNative());
                 mPhysicsObject.put(gvrConstraint.getNative(), gvrConstraint);
                 getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onAddConstraint", SXRWorld.this, gvrConstraint);
@@ -252,7 +252,11 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
      * @return true if the world contains the specified object.
      */
     private boolean contains(SXRPhysicsWorldObject physicsObject) {
-        return mPhysicsObject.get(physicsObject.getNative()) != null;
+        if (physicsObject != null)
+        {
+            return mPhysicsObject.get(physicsObject.getNative()) != null;
+        }
+        return false;
     }
 
     /**
@@ -456,6 +460,16 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
             getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onStepPhysics", SXRWorld.this);
 
             SXRRigidBody[] bodies = getUpdated();
+            for (SXRRigidBody body : bodies)
+            {
+                SXRSkeleton skel = (SXRSkeleton) body.getComponent(SXRSkeleton.getComponentType());
+
+                if (skel != null)
+                {
+                    skel.poseFromBones(SXRSkeleton.BONE_PHYSICS);
+                    skel.getPose().sync();
+                }
+            }
             lastSimulTime = simulationTime;
 
             simulationTime = intervalMillis + simulationTime - SystemClock.uptimeMillis();

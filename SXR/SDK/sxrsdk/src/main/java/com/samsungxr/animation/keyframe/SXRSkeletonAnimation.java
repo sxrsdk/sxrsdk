@@ -261,6 +261,24 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
         return pose;
     }
 
+    /*
+     * Scale the position keys and the scale keys for this animation
+     * (all channels).
+     * @param scaleFactor   amount to scale the keys
+     * @see SXRAnimationChannel#scaleKeys
+     */
+    public void scaleKeys(float scaleFactor)
+    {
+        for (int i = 0; i < mSkeleton.getNumBones(); ++i)
+        {
+            SXRAnimationChannel channel = mBoneChannels[i];
+            if (channel != null)
+            {
+                channel.scaleKeys(scaleFactor);
+            }
+        }
+    }
+
     @Override
     public void prettyPrint(StringBuffer sb, int indent) {
         sb.append(Log.getSpaces(indent));

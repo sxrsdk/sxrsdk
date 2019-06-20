@@ -297,6 +297,33 @@ public class SXRAnimationChannel implements PrettyPrint {
 
     }
 
+    /*
+     * Scale the position keys and the scale keys for this animation channel.
+     * @param scaleFactor   amount to scale the keys
+    */
+    public void scaleKeys(float scaleFactor)
+    {
+        float[] temp = new float[3];
+        for (int i = 0; i < getNumPosKeys(); ++i)
+        {
+            float time = (float) getPosKeyTime(i);
+            getPosKeyVector(i, temp);
+            temp[0] *= scaleFactor;
+            temp[1] *= scaleFactor;
+            temp[2] *= scaleFactor;
+            setPosKeyVector(i, time, temp);
+        }
+        for (int i = 0; i < getNumScaleKeys(); ++i)
+        {
+            float time = (float) getScaleKeyTime(i);
+            getScaleKeyVector(i, temp);
+            temp[0] *= scaleFactor;
+            temp[1] *= scaleFactor;
+            temp[2] *= scaleFactor;
+            setScaleKeyVector(i, time, temp);
+        }
+    }
+
     @Override
     public void prettyPrint(StringBuffer sb, int indent) {
         sb.append(Log.getSpaces(indent));

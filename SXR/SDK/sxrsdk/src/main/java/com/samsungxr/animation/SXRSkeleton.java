@@ -886,6 +886,37 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
         }
     }
 
+    /**
+     * Applies the matrices from the skeleton's current pose
+     * to the nodes associated with bones that have the
+     * specified options.
+     * <p>
+     * The {@link com.samsungxr.animation.keyframe.SXRSkeletonAnimation} class
+     * does this as a part of skeletal animation. It does not occur
+     * automatically when the current pose is updated.
+     * @param boneOptions   Only update bones with the given options
+     *                      (BONE_PHYSICS or BONE_ANIMATE)
+     * @see #applyPose(SXRPose, int)
+     * @see #setPose(SXRPose)
+     */
+    public void poseToBones(int boneOptions)
+    {
+        synchronized (this)
+        {
+            mPose.sync();
+            for (int i = 0; i < getNumBones(); ++i)
+            {
+                SXRNode bone = mBones[i];
+                if ((bone != null) && ((mBoneOptions[i] & boneOptions) != 0))
+                {
+                    mPose.getLocalMatrix(i, mTempMtx);
+                    bone.getTransform().setModelMatrix(mTempMtx);
+                }
+            }
+            updateBonePose();
+        }
+    }
+
     /*
      * Update the C++ skeleton with the current pose.
      * <p>

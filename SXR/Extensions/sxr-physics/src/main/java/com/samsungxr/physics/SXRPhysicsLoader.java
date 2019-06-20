@@ -42,13 +42,12 @@ public class SXRPhysicsLoader {
     /**
      * Loads a physics settings file.
      *
-     * @param gvrContext The context of the app.
      * @param fileName Physics settings file name.
      * @param scene The scene containing the objects to attach physics components.
      */
-    public static void loadPhysicsFile(SXRContext gvrContext, String fileName, SXRScene scene) throws IOException
+    public static void loadPhysicsFile(SXRScene scene, String fileName) throws IOException
     {
-        loadPhysicsFile(gvrContext, fileName, false, scene);
+        loadPhysicsFile(scene, fileName, false);
     }
 
     /**
@@ -56,22 +55,21 @@ public class SXRPhysicsLoader {
      *
      * Use this if you want the up-axis information from physics file to be ignored.
      *
-     * @param gvrContext The context of the app.
      * @param fileName Physics settings file name.
      * @param ignoreUpAxis Set to true if up-axis information from file must be ignored.
      * @param scene The scene containing the objects to attach physics components.
      */
-    public static void loadPhysicsFile(SXRContext gvrContext, String fileName, boolean ignoreUpAxis, SXRScene scene) throws IOException
+    public static void loadPhysicsFile(SXRScene scene, String fileName, boolean ignoreUpAxis) throws IOException
     {
-        SXRAndroidResource resource = toAndroidResource(gvrContext, fileName);
-        loadPhysicsFile(resource, scene, null, ignoreUpAxis);
+        SXRAndroidResource resource = toAndroidResource(scene.getSXRContext(), fileName);
+        loadPhysicsFile(resource, scene.getRoot(), null, ignoreUpAxis);
     }
 
-    public static void loadPhysicsFile(SXRAndroidResource resource, SXRScene scene, SXRWorld world, boolean ignoreUpAxis) throws IOException
+    public static void loadPhysicsFile(SXRAndroidResource resource, SXRNode sceneRoot, SXRWorld world, boolean ignoreUpAxis) throws IOException
     {
         String filename = resource.getResourceFilename();
         int i = filename.lastIndexOf('.');
-        byte[] inputData =toByteArray(resource);
+        byte[] inputData = toByteArray(resource);
 
         if (inputData == null || inputData.length == 0)
         {
@@ -82,15 +80,15 @@ public class SXRPhysicsLoader {
             String ext = filename.substring(i);
             if (ext.toLowerCase().equals(".bullet"))
             {
-                loadBulletFile(inputData, scene, false);
+                loadBulletFile(inputData, sceneRoot, ignoreUpAxis);
             }
             else if (ext.equals(".avt"))
             {
                 if (world == null)
                 {
-                    world = new SXRWorld(scene.getSXRContext());
+                    world = new SXRWorld(sceneRoot.getSXRContext());
                 }
-                PhysicsAVTLoader loader = new PhysicsAVTLoader(scene, world);
+                PhysicsAVTLoader loader = new PhysicsAVTLoader(sceneRoot, world);
                 loader.parse(inputData);
             }
             else
@@ -104,7 +102,7 @@ public class SXRPhysicsLoader {
         }
     }
 
-    private static void loadBulletFile(byte[] inputData, SXRScene scene, boolean ignoreUpAxis) throws IOException
+    private static void loadBulletFile(byte[] inputData, SXRNode sceneRoot, boolean ignoreUpAxis) throws IOException
     {
         long loader = NativePhysics3DLoader.ctor(inputData, inputData.length, ignoreUpAxis);
 
@@ -112,8 +110,7 @@ public class SXRPhysicsLoader {
         {
             throw new IOException("Failed to parse bullet file");
         }
-        SXRContext ctx = scene.getSXRContext();
-        SXRNode sceneRoot = scene.getRoot();
+        SXRContext ctx = sceneRoot.getSXRContext();
         ArrayMap<Long, SXRNode> rbObjects = new ArrayMap<>();
 
         long nativeRigidBody;
@@ -130,15 +127,6 @@ public class SXRPhysicsLoader {
                 // Collider for picking.
                 sceneObject.attachComponent(collider);
             }
-
-            if (sceneObject.getParent() != sceneRoot) {
-                // Rigid bodies must be at scene root.
-                float[] modelmtx = sceneObject.getTransform().getModelMatrix();
-                sceneObject.getParent().removeChildObject(sceneObject);
-                sceneObject.getTransform().setModelMatrix(modelmtx);
-                sceneRoot.addChildObject(sceneObject);
-            }
-
             SXRRigidBody rigidBody = new SXRRigidBody(ctx, nativeRigidBody);
             sceneObject.attachComponent(rigidBody);
             rbObjects.put(nativeRigidBody, sceneObject);

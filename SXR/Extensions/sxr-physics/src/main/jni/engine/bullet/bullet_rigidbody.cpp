@@ -25,6 +25,10 @@
 #include <LinearMath/btDefaultMotionState.h>
 #include <LinearMath/btTransform.h>
 #include <math.h>
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_inverse.hpp"
+#include <glm/gtx/quaternion.hpp>
+#include <contrib/glm/gtc/type_ptr.hpp>
 
 namespace sxr {
 
@@ -190,7 +194,8 @@ void BulletRigidBody::getWorldTransform(btTransform &centerOfMassWorldTrans) con
 }
 
 void BulletRigidBody::setWorldTransform(const btTransform &centerOfMassWorldTrans) {
-    Transform* trans = owner_object()->transform();
+    Node* owner = owner_object();
+    Transform* trans = owner->transform();
     btTransform aux; getWorldTransform(aux);
 
     if(std::abs(aux.getOrigin().getX() - prevPos.getOrigin().getX()) >= 0.1f ||
@@ -204,7 +209,25 @@ void BulletRigidBody::setWorldTransform(const btTransform &centerOfMassWorldTran
     else
     {
         btTransform physicBody = (centerOfMassWorldTrans * m_centerOfMassOffset);
-        convertBtTransform2Transform(physicBody, trans);
+        btVector3 pos = physicBody.getOrigin();
+        btQuaternion rot = physicBody.getRotation();
+        Node* parent = owner->parent();
+        glm::vec4 p(pos.getX(), pos.getY(), pos.getZ(), 1);
+        glm::quat q(rot.getW(), rot.getX(), rot.getY(), rot.getZ());
+
+        if ((parent != nullptr) && (parent->parent() != nullptr))
+        {
+            glm::mat4 parentInverseWorld(glm::inverse(parent->transform()->getModelMatrix()));
+            glm::mat4 worldMatrix(glm::toMat4(q));
+            glm::mat4 localMatrix;
+
+            worldMatrix[3] = p;
+            localMatrix = parentInverseWorld * worldMatrix;
+            q = glm::toQuat(localMatrix);
+            p = localMatrix[3];
+        }
+        trans->set_rotation(q);
+        trans->set_position(p.x, p.y, p.z);
         prevPos = physicBody;
     }
     if (mSimType == DYNAMIC)
