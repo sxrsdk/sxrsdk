@@ -94,7 +94,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
          * Called after each iteration of the physics simulation.
          * @param world physics world being simulated
          */
-        public void onStepPhysics(SXRWorld world);
+        public void onStepPhysics(final SXRWorld world);
     }
 
     /**
@@ -460,14 +460,18 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
             getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onStepPhysics", SXRWorld.this);
 
             SXRRigidBody[] bodies = getUpdated();
-            for (SXRRigidBody body : bodies)
+            if (bodies != null)
             {
-                SXRSkeleton skel = (SXRSkeleton) body.getComponent(SXRSkeleton.getComponentType());
-
-                if (skel != null)
+                for (SXRRigidBody body : bodies)
                 {
-                    skel.poseFromBones(SXRSkeleton.BONE_PHYSICS);
-                    skel.getPose().sync();
+                    SXRSkeleton skel =
+                        (SXRSkeleton) body.getComponent(SXRSkeleton.getComponentType());
+
+                    if (skel != null)
+                    {
+                        skel.poseFromBones(SXRSkeleton.BONE_PHYSICS);
+                        skel.getPose().sync();
+                    }
                 }
             }
             lastSimulTime = simulationTime;

@@ -20,7 +20,6 @@ import android.util.Log;
 
 import com.samsungxr.SXRAndroidResource;
 import com.samsungxr.SXRCollider;
-import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRComponentGroup;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMeshCollider;
@@ -62,10 +61,10 @@ public class SXRPhysicsLoader {
     public static void loadPhysicsFile(SXRScene scene, String fileName, boolean ignoreUpAxis) throws IOException
     {
         SXRAndroidResource resource = toAndroidResource(scene.getSXRContext(), fileName);
-        loadPhysicsFile(resource, scene.getRoot(), null, ignoreUpAxis);
+        loadPhysicsFile(resource, scene.getRoot(), ignoreUpAxis);
     }
 
-    public static void loadPhysicsFile(SXRAndroidResource resource, SXRNode sceneRoot, SXRWorld world, boolean ignoreUpAxis) throws IOException
+    public static void loadPhysicsFile(SXRAndroidResource resource, SXRNode sceneRoot, boolean ignoreUpAxis) throws IOException
     {
         String filename = resource.getResourceFilename();
         int i = filename.lastIndexOf('.');
@@ -84,11 +83,7 @@ public class SXRPhysicsLoader {
             }
             else if (ext.equals(".avt"))
             {
-                if (world == null)
-                {
-                    world = new SXRWorld(sceneRoot.getSXRContext());
-                }
-                PhysicsAVTLoader loader = new PhysicsAVTLoader(sceneRoot, world);
+                PhysicsAVTLoader loader = new PhysicsAVTLoader(sceneRoot);
                 loader.parse(inputData);
             }
             else

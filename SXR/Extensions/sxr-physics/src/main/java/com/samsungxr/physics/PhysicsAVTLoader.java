@@ -35,12 +35,10 @@ class PhysicsAVTLoader
 {
     private final SXRNode mRoot;
     private final SXRContext mContext;
-    private final SXRWorld mWorld;
     private final Map<String, JSONObject> mTargetBones = new HashMap<String, JSONObject>();
 
-    public PhysicsAVTLoader(SXRNode root, SXRWorld world)
+    public PhysicsAVTLoader(SXRNode root)
     {
-        mWorld = world;
         mRoot = root;
         mContext = root.getSXRContext();
     }
@@ -258,7 +256,6 @@ class PhysicsAVTLoader
             constraint.setBreakingImpulse((float) link.getDouble("Breaking Reaction Impulse"));
         }
         owner.attachComponent(constraint);
-        mWorld.addConstraint(constraint);
     }
 
     private SXRRigidBody parseRigidBody(JSONObject link) throws JSONException
@@ -278,7 +275,6 @@ class PhysicsAVTLoader
         Log.e("PHYSICS", "rigidbody %s mass = %f",
                 link.getString("Name"), mass);
         node.attachComponent(body);
-        mWorld.addBody(body);
         return body;
     }
 
