@@ -182,7 +182,7 @@ void BulletRigidBody::getTranslation(float &x, float &y, float &z) {
     x = pos.getX();
 }
 
-void BulletRigidBody::setCenterOfMass(const Transform *t) {
+void BulletRigidBody::setCenterOfMass(Transform *t) {
     mRigidBody->setCenterOfMassTransform(convertTransform2btTransform(t));
 }
 
@@ -212,22 +212,23 @@ void BulletRigidBody::setWorldTransform(const btTransform &centerOfMassWorldTran
         btVector3 pos = physicBody.getOrigin();
         btQuaternion rot = physicBody.getRotation();
         Node* parent = owner->parent();
-        glm::vec4 p(pos.getX(), pos.getY(), pos.getZ(), 1);
-        glm::quat q(rot.getW(), rot.getX(), rot.getY(), rot.getZ());
+        float matrixData[16];
 
+        physicBody.getOpenGLMatrix(matrixData);
+        glm::mat4 worldMatrix(glm::make_mat4(matrixData));
         if ((parent != nullptr) && (parent->parent() != nullptr))
         {
-            glm::mat4 parentInverseWorld(glm::inverse(parent->transform()->getModelMatrix()));
-            glm::mat4 worldMatrix(glm::toMat4(q));
+            glm::mat4 parentWorld(parent->transform()->getModelMatrix(true));
+            glm::mat4 parentInverseWorld(glm::inverse(parentWorld));
             glm::mat4 localMatrix;
 
-            worldMatrix[3] = p;
             localMatrix = parentInverseWorld * worldMatrix;
-            q = glm::toQuat(localMatrix);
-            p = localMatrix[3];
+            trans->setModelMatrix(localMatrix);
         }
-        trans->set_rotation(q);
-        trans->set_position(p.x, p.y, p.z);
+        else
+        {
+            trans->setModelMatrix(worldMatrix);
+        }
         prevPos = physicBody;
     }
     if (mSimType == DYNAMIC)

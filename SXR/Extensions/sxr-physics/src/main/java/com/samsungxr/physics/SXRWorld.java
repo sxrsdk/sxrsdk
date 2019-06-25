@@ -24,6 +24,7 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRNode.ComponentVisitor;
+import com.samsungxr.SXRScene;
 import com.samsungxr.SXRTransform;
 import com.samsungxr.IEventReceiver;
 import com.samsungxr.IEvents;
@@ -100,48 +101,50 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     /**
      * Constructs new instance to simulate the Physics World of the Scene.
      *
-     * @param gvrContext The context of the app.
+     * @param scene The {@link SXRScene} this world belongs to.
      */
-    public SXRWorld(SXRContext gvrContext) {
-        this(gvrContext, null);
+    public SXRWorld(SXRScene scene) {
+        this(scene, null);
     }
 
     /**
      * Constructs new instance to simulate the Physics World of the Scene.
      *
-     * @param gvrContext The context of the app.
+     * @param scene The {@link SXRScene} this world belongs to.
      * @param interval interval (in milliseconds) at which the collisions will be updated.
      */
-    public SXRWorld(SXRContext gvrContext, long interval) {
-        this(gvrContext, null, interval);
+    public SXRWorld(SXRScene scene, long interval) {
+        this(scene, null, interval);
     }
 
     /**
      * Constructs new instance to simulate the Physics World of the Scene. Defaults to a 15ms
      * update interval.
      *
-     * @param gvrContext The context of the app.
+     * @param scene The {@link SXRScene} this world belongs to.
      * @param collisionMatrix a matrix that represents the collision relations of the bodies on the scene
      */
-    public SXRWorld(SXRContext gvrContext, SXRCollisionMatrix collisionMatrix) {
-        this(gvrContext, collisionMatrix, DEFAULT_INTERVAL);
+    public SXRWorld(SXRScene scene, SXRCollisionMatrix collisionMatrix) {
+        this(scene, collisionMatrix, DEFAULT_INTERVAL);
     }
 
     /**
      * Constructs new instance to simulate the Physics World of the Scene.
      *
-     * @param gvrContext The context of the app.
+     * @param scene The {@link SXRScene} this world belongs to.
      * @param collisionMatrix a matrix that represents the collision relations of the bodies on the scene
      * @param interval interval (in milliseconds) at which the collisions will be updated.
      */
-    public SXRWorld(SXRContext gvrContext, SXRCollisionMatrix collisionMatrix, long interval) {
-        super(gvrContext, NativePhysics3DWorld.ctor());
+    public SXRWorld(SXRScene scene, SXRCollisionMatrix collisionMatrix, long interval) {
+        super(scene.getSXRContext(), NativePhysics3DWorld.ctor());
         mListeners = new SXREventReceiver(this);
-        mPhysicsDragger = new PhysicsDragger(gvrContext);
+        mPhysicsDragger = new PhysicsDragger(scene.getSXRContext());
         mCollisionMatrix = collisionMatrix;
         mWorldTask = new SXRWorldTask(interval);
         mPhysicsContext = SXRPhysicsContext.getInstance();
+        scene.getRoot().attachComponent(this);
     }
+
 
     static public long getComponentType() {
         return NativePhysics3DWorld.getComponentType();

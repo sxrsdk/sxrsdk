@@ -272,6 +272,7 @@ class PhysicsAVTLoader
         JSONObject props = link.getJSONObject("Physic Material");
         body.setFriction((float) props.getDouble("Friction"));
         body.setRestitution((float) props.getDouble("Restitution"));
+        body.setSimulationType(SXRRigidBody.DYNAMIC);
         Log.e("PHYSICS", "rigidbody %s mass = %f",
                 link.getString("Name"), mass);
         node.attachComponent(body);

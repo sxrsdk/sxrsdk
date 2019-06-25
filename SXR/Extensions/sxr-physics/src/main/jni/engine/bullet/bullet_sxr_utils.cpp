@@ -17,6 +17,7 @@
 
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
+#include <contrib/glm/gtc/type_ptr.hpp>
 
 #include "util/sxr_log.h"
 
@@ -134,13 +135,11 @@ btConvexHullShape *createConvexHullShapeFromMesh(Mesh *mesh) {
     return hull_shape;
 }
 
-btTransform convertTransform2btTransform(const Transform *t) {
-    btQuaternion rotation(t->rotation_x(), t->rotation_y(), t->rotation_z(), t->rotation_w());
+btTransform convertTransform2btTransform(Transform *t) {
+    btTransform transform;
 
-    btVector3 position(t->position_x(), t->position_y(), t->position_z());
-
-    btTransform transform(rotation, position);
-
+    glm::mat4 modelMatrix(t->getModelMatrix());
+    transform.setFromOpenGLMatrix(glm::value_ptr(modelMatrix));
     return transform;
 }
 

@@ -53,7 +53,7 @@ class BulletRigidBody : public PhysicsRigidBody,
         return mConstructionInfo.m_mass;
     }
 
-    void setCenterOfMass(const Transform *t);
+    void setCenterOfMass(Transform *t);
 
     void getRotation(float &w, float &x, float &y, float &z);
 

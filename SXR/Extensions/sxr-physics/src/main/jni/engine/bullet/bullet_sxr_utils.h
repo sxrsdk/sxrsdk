@@ -41,7 +41,7 @@ namespace sxr {
 
     btConvexHullShape *createConvexHullShapeFromMesh(Mesh *mesh);
 
-    btTransform convertTransform2btTransform(const Transform *t);
+    btTransform convertTransform2btTransform(Transform *t);
 
     void convertBtTransform2Transform(btTransform bulletTransform, Transform *transform);
 
