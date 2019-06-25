@@ -33,15 +33,14 @@ public:
     void scalePositions(float sf);
     void bindBuffer(Renderer* renderer, Shader* shader);
     bool updateGPU(Renderer* renderer, Shader* shader);
-    UniformBlock* getUniformBlock(){
-        return mBonesBuffer;
-    }
+    UniformBlock* getUniformBlock() { return mBonesBuffer; }
 
 private:
     Skin(const Skin& sksel) = delete;
     Skin(Skin&& s) = delete;
     Skin& operator=(const Skin& s) = delete;
     Skin& operator=(Skin&& s) = delete;
+    Node* findCommonParent(Node* node1, Node* node2) const;
 
 private:
     std::mutex  mLock;

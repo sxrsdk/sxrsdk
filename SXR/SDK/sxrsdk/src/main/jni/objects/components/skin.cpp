@@ -3,6 +3,7 @@
 #include "skeleton.h"
 #include "component.inl"
 #include "engine/renderer/renderer.h"
+#include "objects/node.h"
 
 namespace sxr
 {
@@ -117,23 +118,67 @@ namespace sxr
         if (mBonesBuffer == NULL)
         {
             mBonesBuffer = renderer->createUniformBlock("mat4 u_bone_matrix", BONES_UBO_INDEX,
-                                                        "Bones_ubo", numBones);
-            mBonesBuffer->setNumElems(numBones);
+                                                        "Bones_ubo", numBones + 1);
+            mBonesBuffer->setNumElems(numBones + 1);
         }
         {
             std::lock_guard<std::mutex> lock(mLock);
             const glm::mat4* inverseBind = mInverseBindPose;
+            Node* skelOwner = mSkeleton->owner_object();
+            Node* skinOwner = owner_object();
+            glm::mat4 identity(1.0f);
+
+            if ((skelOwner != nullptr) && (skinOwner != nullptr))
+            {
+                Node* skelParent = skelOwner->parent();
+
+                if (skelParent != nullptr)
+                {
+                    glm::mat4 skelMtx(skelParent->transform()->getModelMatrix(true));
+                    Node* parent = findCommonParent(skelOwner, skinOwner);
+                    glm::mat4 parentMtx(parent->transform()->getModelMatrix(true));
+                    skelMtx = glm::inverse(parentMtx) * skelMtx;
+                    mBonesBuffer->setRange(0, &skelMtx, 1);
+                }
+                else
+                {
+                    mBonesBuffer->setRange(0, &identity, 1);
+                }
+            }
+            else
+            {
+                mBonesBuffer->setRange(0, &identity, 1);
+            }
             for (int i = 0; i < numBones; ++i)
             {
                 int boneId = mBoneMap.at(i);
                 glm::mat4 m(*mSkeleton->getWorldBoneMatrix(boneId));
 
                 m *= inverseBind[i];
-                mBonesBuffer->setRange(i, &m, 1);
+                mBonesBuffer->setRange(i + 1, &m, 1);
             }
         }
         mBonesBuffer->updateGPU(renderer);
         return true;
     }
+
+    Node* Skin::findCommonParent(Node* node1, Node* node2) const
+    {
+        Node* par1 = node1;
+
+        while ((par1 = par1->parent()) != nullptr)
+        {
+            Node* par2 = node2;
+            while ((par2 = par2->parent()) != nullptr)
+            {
+                if (par1 == par2)
+                {
+                    return par1;
+                }
+            }
+        }
+        return nullptr;
+    }
+
 
 }

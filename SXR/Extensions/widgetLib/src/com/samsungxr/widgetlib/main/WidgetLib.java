@@ -12,6 +12,7 @@ import com.samsungxr.widgetlib.widget.properties.TextureFactory;
 import com.samsungxr.widgetlib.widget.properties.TypefaceManager;
 
 import com.samsungxr.SXRContext;
+import com.samsungxr.SXRNode;
 import org.json.JSONException;
 
 import java.lang.ref.WeakReference;
@@ -51,12 +52,34 @@ public class WidgetLib {
     public static WidgetLib init(SXRContext sxrContext, String customPropertiesAsset)
             throws InterruptedException, JSONException, NoSuchMethodException {
         if (mInstance == null) {
+            SXRNode rootNode = new SXRNode(sxrContext);
+            sxrContext.getMainScene().addNode(rootNode);
             // Constructor sets mInstance to ensure the initialization order
-            new WidgetLib(sxrContext, customPropertiesAsset);
+            new WidgetLib(rootNode, customPropertiesAsset);
         }
         return mInstance.get();
     }
 
+    /**
+     * Initialize an instance of Widget Lib. It has to be done before any usage of library.
+     * The application needs to hold onto the returned WidgetLib reference for as long as the
+     * library is going to be used.
+     * @param node {@link SXRNode} to put the widget
+     * @param customPropertiesAsset An optional asset JSON file containing custom and overridden
+     *                              properties for the application
+     * @return Instance of Widget library
+     * @throws InterruptedException
+     * @throws JSONException
+     * @throws NoSuchMethodException
+     */
+    public static WidgetLib init(SXRNode node, String customPropertiesAsset)
+        throws InterruptedException, JSONException, NoSuchMethodException {
+        if (mInstance == null) {
+            // Constructor sets mInstance to ensure the initialization order
+            new WidgetLib(node, customPropertiesAsset);
+        }
+        return mInstance.get();
+    }
 
     public static void pause() {
         if (mInstance != null) {
@@ -174,10 +197,10 @@ public class WidgetLib {
         return get().mCommandBuffer;
     }
 
-    private WidgetLib(SXRContext sxrContext, String customPropertiesAsset)
-            throws InterruptedException, JSONException, NoSuchMethodException {
+    private WidgetLib(SXRNode root, String customPropertiesAsset)
+        throws InterruptedException, JSONException, NoSuchMethodException {
         mInstance = new WeakReference<>(this);
-
+        SXRContext sxrContext = root.getSXRContext();
         mSXRContext = sxrContext;
         mTextureHelper = new TextureFutureHelper(sxrContext);
         mTextureFactory = new TextureFactory(sxrContext);
@@ -185,15 +208,15 @@ public class WidgetLib {
         mTypefaceManager = new TypefaceManager(sxrContext);
         mSimpleAnimationTracker = new SimpleAnimationTracker(sxrContext);
         mPropertyManager = new PropertyManager(sxrContext.getContext(), "default_metadata.json",
-                customPropertiesAsset);
+                                               customPropertiesAsset);
         mCommandBuffer = new CommandBuffer(sxrContext);
 
         mFocusManager = new FocusManager(sxrContext);
         mTouchManager = new TouchManager(sxrContext);
         mContentSceneController = new ContentSceneController(sxrContext);
-        mMainScene = new MainScene(sxrContext);
+        mMainScene = new MainScene(root);
 
-        Widget.init(sxrContext);
+        Widget.init(root);
     }
 
     private static WidgetLib get() {
