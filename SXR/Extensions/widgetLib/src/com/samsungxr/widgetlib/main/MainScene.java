@@ -96,11 +96,12 @@ public class MainScene {
      * {@link SXRContext#getMainScene()} and frustum culling is
      * {@linkplain SXRScene#setFrustumCulling(boolean) enabled}.
      *
-     * @param sxrContext A valid SXRContext instance.
+     * @param root root node widgets are put under
      */
-    public MainScene(final SXRContext sxrContext) {
+    public MainScene(final SXRNode root) {
+        SXRContext sxrContext = root.getSXRContext();
         mContext = sxrContext;
-        mSceneRootObject = new SXRNode(sxrContext);
+        mSceneRootObject = root;
         mMainCameraRootObject = new SXRNode(sxrContext);
         mLeftCameraRootObject = new SXRNode(sxrContext);
         mRightCameraRootObject = new SXRNode(sxrContext);
@@ -108,17 +109,16 @@ public class MainScene {
         mSceneRootWidget = new RootWidget(mSceneRootObject);
         mSceneRootWidget.setName(TAG);
         mMainCameraRootWidget = new GroupWidget(sxrContext,
-                mMainCameraRootObject);
+                                                mMainCameraRootObject);
         mMainCameraRootWidget.applyLayout(new AbsoluteLayout());
         mLeftCameraRootWidget = new GroupWidget(sxrContext,
-                mLeftCameraRootObject);
+                                                mLeftCameraRootObject);
         mLeftCameraRootWidget.applyLayout(new AbsoluteLayout());
         mRightCameraRootWidget = new GroupWidget(sxrContext,
-                mRightCameraRootObject);
+                                                 mRightCameraRootObject);
         mRightCameraRootWidget.applyLayout(new AbsoluteLayout());
 
         mMainScene = mContext.getMainScene();
-        mMainScene.addNode(mSceneRootObject);
 
         getMainCameraRig().addChildObject(mMainCameraRootObject);
         getLeftCamera().addChildObject(mLeftCameraRootObject);

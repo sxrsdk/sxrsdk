@@ -127,20 +127,27 @@ namespace sxr
             Node* skelOwner = mSkeleton->owner_object();
             Node* skinOwner = owner_object();
 
-            if (skelOwner != nullptr)
+            glm::mat4 identity(1.0f);
+
+            if ((skelOwner != nullptr) && (skinOwner != nullptr))
             {
-                glm::mat4 skelMtx(skelOwner->parent()->transform()->getModelMatrix(true));
-                if (skinOwner != nullptr)
+                Node* skelParent = skelOwner->parent();
+
+                if (skelParent != nullptr)
                 {
+                    glm::mat4 skelMtx(skelParent->transform()->getModelMatrix(true));
                     Node* parent = findCommonParent(skelOwner, skinOwner);
                     glm::mat4 parentMtx(parent->transform()->getModelMatrix(true));
                     skelMtx = glm::inverse(parentMtx) * skelMtx;
+                    mBonesBuffer->setRange(0, &skelMtx, 1);
                 }
-                mBonesBuffer->setRange(0, &skelMtx, 1);
+                else
+                {
+                    mBonesBuffer->setRange(0, &identity, 1);
+                }
             }
             else
             {
-                glm::mat4 identity(1.0f);
                 mBonesBuffer->setRange(0, &identity, 1);
             }
             for (int i = 0; i < numBones; ++i)

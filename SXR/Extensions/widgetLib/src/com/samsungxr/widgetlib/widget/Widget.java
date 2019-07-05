@@ -66,16 +66,17 @@ public class Widget implements Layout.WidgetContainer {
      * to load metadata for {@code Widgets}, as well as animation and material
      * specs.
      *
-     * @param sxrContext
-     *            A valid {@link SXRContext}.
+     * @param widgetRoot
+     *            {@link SXRNode} to put the widgets under.
      * @throws JSONException
      *             if the {@code objects.json} file is invalid JSON
      * @throws NoSuchMethodException
      *             if a constructor can't be found for an animation type
      *             specified in {@code objects.json}.
      */
-    static public void init(SXRContext sxrContext) throws JSONException,
-            NoSuchMethodException {
+    static public void init(SXRNode widgetRoot) throws JSONException,
+        NoSuchMethodException {
+        SXRContext sxrContext = widgetRoot.getSXRContext();
         loadAnimations(sxrContext.getContext());
 
         sxrContext.runOnGlThread(new Runnable() {
@@ -86,7 +87,7 @@ public class Widget implements Layout.WidgetContainer {
         });
         SXRAssetLoader assetLoader = new SXRAssetLoader(sxrContext);
         sDefaultTexture = assetLoader.loadTexture(new SXRAndroidResource(
-                sxrContext, R.raw.default_bkgd));
+            sxrContext, R.raw.default_bkgd));
         Log.d(TAG, "onInit(): default texture: %s", sDefaultTexture);
     }
 
