@@ -136,11 +136,11 @@ btConvexHullShape *createConvexHullShapeFromMesh(Mesh *mesh) {
 }
 
 btTransform convertTransform2btTransform(Transform *t) {
-    btTransform transform;
+    btVector3 pos(t->position_x(), t->position_y(), t->position_z());
+    btQuaternion rot(t->rotation_x(), t->rotation_y(), t->rotation_z(), t->rotation_w());
 
-    glm::mat4 modelMatrix(t->getModelMatrix());
-    transform.setFromOpenGLMatrix(glm::value_ptr(modelMatrix));
-    return transform;
+    return btTransform(rot, pos);
+
 }
 
 void convertBtTransform2Transform(btTransform bulletTransform, Transform *transform) {

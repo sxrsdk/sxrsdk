@@ -227,7 +227,8 @@ void BulletRigidBody::setWorldTransform(const btTransform &centerOfMassWorldTran
         }
         else
         {
-            trans->setModelMatrix(worldMatrix);
+            trans->set_position(pos.getX(), pos.getY(), pos.getZ());
+            trans->set_rotation(rot.getW(), rot.getX(), rot.getY(), rot.getZ());
         }
         prevPos = physicBody;
     }
