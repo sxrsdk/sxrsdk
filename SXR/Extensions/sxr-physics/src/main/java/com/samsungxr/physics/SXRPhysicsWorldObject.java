@@ -98,5 +98,11 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
 
     abstract protected void removeFromWorld(SXRWorld world);
 
-    abstract protected void addToWorld(SXRWorld world);
+    protected void addToWorld(SXRWorld world)
+    {
+        if (world == null)
+        {
+            throw new UnsupportedOperationException("Add your node to the scene before attaching physics conponents");
+        }
+    }
 }
