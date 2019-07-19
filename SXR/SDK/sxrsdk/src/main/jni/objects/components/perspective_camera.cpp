@@ -27,7 +27,17 @@ float PerspectiveCamera::default_fov_y_ = glm::radians(95.0f);
 float PerspectiveCamera::default_aspect_ratio_ = 1.0f;
 
 glm::mat4 PerspectiveCamera::getProjectionMatrix() const {
+    if(is_custom) {
+        return projection_matrix_;
+    }
+
     return glm::perspective(fov_y_, aspect_ratio(), near_clipping_distance(),
             far_clipping_distance());
 }
+
+void PerspectiveCamera::setProjectionMatrix(const glm::mat4& matrix) {
+        projection_matrix_ = matrix;
+        is_custom = true;
+}
+
 }

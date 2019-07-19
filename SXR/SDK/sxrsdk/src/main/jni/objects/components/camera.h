@@ -82,6 +82,7 @@ public:
 
     void setPostEffect(RenderData* post_effects);
     virtual glm::mat4 getProjectionMatrix() const = 0;
+    virtual void setProjectionMatrix(const glm::mat4& matrix) = 0;
     virtual const glm::mat4& getViewMatrix();
     virtual void setViewMatrix(const glm::mat4& viewMtx);
     static long long getComponentType() {
