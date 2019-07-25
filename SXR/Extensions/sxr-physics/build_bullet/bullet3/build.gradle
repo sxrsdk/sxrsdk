@@ -1,0 +1,101 @@
+apply plugin: 'com.android.library'
+
+buildscript {
+    repositories {
+        jcenter()
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.2.1'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def sdkDir = properties.getProperty('sdk.dir')
+def ndkDir = properties.getProperty('ndk.dir')
+def buildRoot = project.getRootDir()
+def buildType = gradle.startParameter.taskNames.any {it.toLowerCase().contains("debug") ? "debug" : "release"}
+
+android {
+    compileSdkVersion 26
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+
+        externalNativeBuild
+        {
+            cmake
+            {
+                arguments '-DANDROID_PLATFORM=android-21',
+                          '-DANDROID_TOOLCHAIN=clang',
+						  '-DANDROID_STL=c++_shared',
+                          '-DOPENGL_INCLUDE_DIR=' + ndkDir + '/sysroot/usr/include/GLES3',
+                          '-DOPENGL_gl_LIBRARY=' + ndkDir + '/platforms/android-21/arch-arm64/usr/lib/libGLESv3.so',
+                          '-DBUILD_BULLET3=ON',
+						  '-DBUILD_PYBULLET=OFF',
+						  '-DBUILD_OPENGL3_DEMOS=OFF',
+						  '-DBUILD_BULLET2_DEMOS=OFF',
+						  '-DBUILD_EXTRAS=ON',
+                          '-DINSTALL_LIBS=OFF',
+                          '-DINSTALL_EXTRA_LIBS=OFF',
+                          '-DBUILD_UNIT_TESTS=OFF',
+                          '-DBUILD_SHARED_LIBS=ON',
+                          '-DUSE_DOUBLE_PRECISION=OFF',
+                          '-DUSE_SOFT_BODY_MULTI_BODY_DYNAMICS_WORLD=OFF',
+                          '-DPKGCONFIG_INSTALL_PREFIX=' + buildRoot + '/jni/libs'
+            }
+        }
+    }
+    buildTypes
+    {
+        debug
+        {
+            debuggable true
+            minifyEnabled false
+            packagingOptions
+            {
+                doNotStrip "**/*/*.so"
+            }
+            externalNativeBuild
+            {
+                cmake
+                {
+                    arguments.add('-DCMAKE_BUILD_TYPE=Debug')
+                }
+            }
+        }
+        release
+        {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            externalNativeBuild
+            {
+                cmake
+                {
+                    arguments.add('-DCMAKE_BUILD_TYPE=Release')
+                }
+            }
+        }
+    }
+    externalNativeBuild
+    {
+        cmake
+        {
+            path 'CMakeLists.txt'
+        }
+    }
+}
+
+dependencies {
+}

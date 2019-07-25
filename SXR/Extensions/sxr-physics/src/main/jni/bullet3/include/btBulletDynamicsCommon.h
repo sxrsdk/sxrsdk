@@ -13,55 +13,31 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef BULLET_COLLISION_COMMON_H
-#define BULLET_COLLISION_COMMON_H
+#ifndef BULLET_DYNAMICS_COMMON_H
+#define BULLET_DYNAMICS_COMMON_H
 
-///Common headerfile includes for Bullet Collision Detection
+///Common headerfile includes for Bullet Dynamics, including Collision Detection
+#include "btBulletCollisionCommon.h"
 
-///Bullet's btCollisionWorld and btCollisionObject definitions
-#include "BulletCollision/CollisionDispatch/btCollisionWorld.h"
-#include "BulletCollision/CollisionDispatch/btCollisionObject.h"
+#include "BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h"
 
-///Collision Shapes
-#include "BulletCollision/CollisionShapes/btBoxShape.h"
-#include "BulletCollision/CollisionShapes/btSphereShape.h"
-#include "BulletCollision/CollisionShapes/btCapsuleShape.h"
-#include "BulletCollision/CollisionShapes/btCylinderShape.h"
-#include "BulletCollision/CollisionShapes/btConeShape.h"
-#include "BulletCollision/CollisionShapes/btStaticPlaneShape.h"
-#include "BulletCollision/CollisionShapes/btConvexHullShape.h"
-#include "BulletCollision/CollisionShapes/btTriangleMesh.h"
-#include "BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h"
-#include "BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h"
-#include "BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h"
-#include "BulletCollision/CollisionShapes/btTriangleMeshShape.h"
-#include "BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h"
-#include "BulletCollision/CollisionShapes/btCompoundShape.h"
-#include "BulletCollision/CollisionShapes/btTetrahedronShape.h"
-#include "BulletCollision/CollisionShapes/btEmptyShape.h"
-#include "BulletCollision/CollisionShapes/btMultiSphereShape.h"
-#include "BulletCollision/CollisionShapes/btUniformScalingShape.h"
+#include "BulletDynamics/Dynamics/btSimpleDynamicsWorld.h"
+#include "BulletDynamics/Dynamics/btRigidBody.h"
 
-///Narrowphase Collision Detector
-#include "BulletCollision/CollisionDispatch/btSphereSphereCollisionAlgorithm.h"
+#include "BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h"
+#include "BulletDynamics/ConstraintSolver/btHingeConstraint.h"
+#include "BulletDynamics/ConstraintSolver/btConeTwistConstraint.h"
+#include "BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h"
+#include "BulletDynamics/ConstraintSolver/btSliderConstraint.h"
+#include "BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h"
+#include "BulletDynamics/ConstraintSolver/btUniversalConstraint.h"
+#include "BulletDynamics/ConstraintSolver/btHinge2Constraint.h"
+#include "BulletDynamics/ConstraintSolver/btGearConstraint.h"
+#include "BulletDynamics/ConstraintSolver/btFixedConstraint.h"
 
-//#include "BulletCollision/CollisionDispatch/btSphereBoxCollisionAlgorithm.h"
-#include "BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h"
+#include "BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h"
 
-///Dispatching and generation of collision pairs (broadphase)
-#include "BulletCollision/CollisionDispatch/btCollisionDispatcher.h"
-#include "BulletCollision/BroadphaseCollision/btSimpleBroadphase.h"
-#include "BulletCollision/BroadphaseCollision/btAxisSweep3.h"
-#include "BulletCollision/BroadphaseCollision/btDbvtBroadphase.h"
+///Vehicle simulation, with wheel contact simulated by raycasts
+#include "BulletDynamics/Vehicle/btRaycastVehicle.h"
 
-///Math library & Utils
-#include "LinearMath/btQuaternion.h"
-#include "LinearMath/btTransform.h"
-#include "LinearMath/btDefaultMotionState.h"
-#include "LinearMath/btQuickprof.h"
-#include "LinearMath/btIDebugDraw.h"
-#include "LinearMath/btSerializer.h"
-
-
-#endif //BULLET_COLLISION_COMMON_H
-
+#endif  //BULLET_DYNAMICS_COMMON_H
