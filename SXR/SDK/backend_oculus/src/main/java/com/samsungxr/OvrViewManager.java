@@ -213,6 +213,19 @@ class OvrViewManager extends SXRViewManager {
         }
     }
 
+    @Override
+    void onSurfaceCreated() {
+        super.onSurfaceCreated();
+        SXRGearCursorController gearController0 = mInputManager.getGearController(0);
+        SXRGearCursorController gearController1 = mInputManager.getGearController(1);
+        if (gearController0 != null)
+            gearController0.attachReader(mControllerReader);
+
+        if (gearController1 != null)
+            gearController1.attachReader(mControllerReader);
+
+    }
+
     private SXRRenderTarget getRenderTarget(final int eye, final int swapChainIndex, final boolean isMultiview) {
         final SXRViewManager.EYE rtEye;
         if (isMultiview) {
