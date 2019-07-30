@@ -23,16 +23,18 @@ namespace sxr {
     class GearController {
 
     private:
-        ovrDeviceID mRemoteDeviceId = ovrDeviceIdType_Invalid;
+        ovrDeviceID mRemoteDeviceId[2] = { ovrDeviceIdType_Invalid, ovrDeviceIdType_Invalid };
         ovrMobile *mOvrMobile;
-        float *mOrientationTrackingReadbackBuffer;
+        float *mOrientationTrackingReadbackBuffer[2];
         static const int CONNECTED = 1;
         static const int DISCONNECTED = 0;
+        static const int MAX_CONTROLLERS = 2;
 
     public :
 
-        GearController(float *orientationTrackingReadbackBuffer) {
-            this->mOrientationTrackingReadbackBuffer = orientationTrackingReadbackBuffer;
+        GearController(float *orientationTrackingReadbackBuffer0, float *orientationTrackingReadbackBuffer1) {
+            this->mOrientationTrackingReadbackBuffer[0] = orientationTrackingReadbackBuffer0;
+            this->mOrientationTrackingReadbackBuffer[1] = orientationTrackingReadbackBuffer1;
         }
 
 

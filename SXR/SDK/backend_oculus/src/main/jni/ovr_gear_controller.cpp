@@ -35,10 +35,10 @@ namespace sxr {
                 case ovrControllerType_TrackedRemote:
                     if (!foundRemote) {
                         foundRemote = true;
-                        if (mRemoteDeviceId != curCaps.DeviceID) {
-                            mRemoteDeviceId = curCaps.DeviceID;
-                            onControllerConnected(mRemoteDeviceId);
-                        }
+                    }
+                    if (mRemoteDeviceId[deviceIndex] != curCaps.DeviceID) {
+                        mRemoteDeviceId[deviceIndex] = curCaps.DeviceID;
+                        onControllerConnected(deviceIndex);
                     }
                     break;
                 default:
@@ -46,8 +46,13 @@ namespace sxr {
             }
         }
 
-        if (!foundRemote && mRemoteDeviceId != ovrDeviceIdType_Invalid) {
-            mRemoteDeviceId = ovrDeviceIdType_Invalid;
+        if (!foundRemote && mRemoteDeviceId[0] != ovrDeviceIdType_Invalid) {
+            mRemoteDeviceId[0] = ovrDeviceIdType_Invalid;
+            return false;
+        }
+
+        if (!foundRemote && mRemoteDeviceId[1] != ovrDeviceIdType_Invalid) {
+            mRemoteDeviceId[1] = ovrDeviceIdType_Invalid;
             return false;
         }
 
@@ -57,65 +62,65 @@ namespace sxr {
     void GearController::onControllerConnected(const ovrDeviceID deviceID) {
         ovrInputTrackedRemoteCapabilities remoteCapabilities;
         remoteCapabilities.Header.Type = ovrControllerType_TrackedRemote;
-        remoteCapabilities.Header.DeviceID = deviceID;
+        remoteCapabilities.Header.DeviceID = mRemoteDeviceId[deviceID];
         ovrResult result = vrapi_GetInputDeviceCapabilities(mOvrMobile, &remoteCapabilities.Header);
         if (result == ovrSuccess) {
-            handedness = (remoteCapabilities.ControllerCapabilities & ovrControllerCaps_LeftHand
-                         ) ? 0 : 1;
+            handedness = (remoteCapabilities.ControllerCapabilities & ovrControllerCaps_LeftHand) ? 0 : 1;
 
             ovrInputStateTrackedRemote remoteInputState;
             remoteInputState.Header.ControllerType = ovrControllerType_TrackedRemote;
-            result = vrapi_GetCurrentInputState(mOvrMobile, mRemoteDeviceId, &remoteInputState
-                    .Header);
+            result = vrapi_GetCurrentInputState(mOvrMobile, mRemoteDeviceId[deviceID], &remoteInputState.Header);
         }
         vrapi_SetRemoteEmulation(mOvrMobile, false);
     }
 
     void GearController::onFrame(double predictedDisplayTime) {
         ovrTracking tracking;
-        if (mRemoteDeviceId != ovrDeviceIdType_Invalid) {
-            mOrientationTrackingReadbackBuffer[0] = CONNECTED;
+        for(int i=0; i<MAX_CONTROLLERS; i++) {
+            if (mRemoteDeviceId[i] != ovrDeviceIdType_Invalid) {
+                mOrientationTrackingReadbackBuffer[i][0] = CONNECTED;
 
-            mOrientationTrackingReadbackBuffer[1] = handedness;
-            ovrResult result = vrapi_GetInputTrackingState(mOvrMobile, mRemoteDeviceId,
-                                                           predictedDisplayTime, &tracking);
-            if (ovrSuccess != result) {
-                LOGW("GearController::onFrame: vrapi_GetInputTrackingState failed with %d", result);
-                return;
+                mOrientationTrackingReadbackBuffer[i][1] = handedness;
+                ovrResult result = vrapi_GetInputTrackingState(mOvrMobile, mRemoteDeviceId[i], predictedDisplayTime, &tracking);
+                if (ovrSuccess != result) {
+                    LOGW("GearController::onFrame: vrapi_GetInputTrackingState failed with %d", result);
+                    return;
+                }
+                ovrQuatf orientation = tracking.HeadPose.Pose.Orientation;
+                const glm::quat tmp(orientation.w, orientation.x, orientation.y, orientation.z);
+                const glm::quat quat = glm::conjugate(glm::inverse(tmp));
+                mOrientationTrackingReadbackBuffer[i][6] = quat.w;
+                mOrientationTrackingReadbackBuffer[i][7] = quat.x;
+                mOrientationTrackingReadbackBuffer[i][8] = quat.y;
+                mOrientationTrackingReadbackBuffer[i][9] = quat.z;
+
+                ovrInputStateTrackedRemote state;
+                state.Header.ControllerType = ovrControllerType_TrackedRemote;
+                vrapi_GetCurrentInputState(mOvrMobile, mRemoteDeviceId[i], &state.Header);
+
+                mOrientationTrackingReadbackBuffer[i][2] = state.TrackpadStatus;
+
+                if (0x20000001 == state.Buttons) {
+                    state.Buttons = ovrButton_Enter;
+                }
+                mOrientationTrackingReadbackBuffer[i][10] = state.Buttons;
+                mOrientationTrackingReadbackBuffer[i][11] = state.TrackpadPosition.x;
+                mOrientationTrackingReadbackBuffer[i][12] = state.TrackpadPosition.y;
+
+                ovrVector3f position = tracking.HeadPose.Pose.Position;
+                mOrientationTrackingReadbackBuffer[i][3] = position.x;
+                mOrientationTrackingReadbackBuffer[i][4] = position.y;
+                mOrientationTrackingReadbackBuffer[i][5] = position.z;
+
+            } else {
+                // set disconnected
+                mOrientationTrackingReadbackBuffer[i][0] = DISCONNECTED;
             }
-            ovrQuatf orientation = tracking.HeadPose.Pose.Orientation;
-            const glm::quat tmp(orientation.w, orientation.x, orientation.y, orientation.z);
-            const glm::quat quat = glm::conjugate(glm::inverse(tmp));
-            mOrientationTrackingReadbackBuffer[6] = quat.w;
-            mOrientationTrackingReadbackBuffer[7] = quat.x;
-            mOrientationTrackingReadbackBuffer[8] = quat.y;
-            mOrientationTrackingReadbackBuffer[9] = quat.z;
-
-            ovrInputStateTrackedRemote state;
-            state.Header.ControllerType = ovrControllerType_TrackedRemote;
-            vrapi_GetCurrentInputState(mOvrMobile, mRemoteDeviceId, &state.Header);
-
-            mOrientationTrackingReadbackBuffer[2] = state.TrackpadStatus;
-
-            if (0x20000001 == state.Buttons) {
-                state.Buttons = ovrButton_Enter;
-            }
-            mOrientationTrackingReadbackBuffer[10] = state.Buttons;
-            mOrientationTrackingReadbackBuffer[11] = state.TrackpadPosition.x;
-            mOrientationTrackingReadbackBuffer[12] = state.TrackpadPosition.y;
-
-            ovrVector3f position = tracking.HeadPose.Pose.Position;
-            mOrientationTrackingReadbackBuffer[3] = position.x;
-            mOrientationTrackingReadbackBuffer[4] = position.y;
-            mOrientationTrackingReadbackBuffer[5] = position.z;
-
-        } else {
-            // set disconnected
-            mOrientationTrackingReadbackBuffer[0] = DISCONNECTED;
         }
     }
 
     void GearController::reset() {
-        mRemoteDeviceId = ovrDeviceIdType_Invalid;
+        mRemoteDeviceId[0] = ovrDeviceIdType_Invalid;
+        mRemoteDeviceId[1] = ovrDeviceIdType_Invalid;
     }
 }

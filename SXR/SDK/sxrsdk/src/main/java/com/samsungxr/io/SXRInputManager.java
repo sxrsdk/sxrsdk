@@ -94,6 +94,7 @@ public class SXRInputManager implements IEventReceiver
     private SXRMouseDeviceManager mouseDeviceManager;
     private final List<SXRGearCursorController> gearCursorControllers = new ArrayList();
     private SXREventReceiver mListeners;
+    private int mNumControllers = 1;
     private ArrayList<SXRControllerType> mEnabledControllerTypes;
 
     // maintain one instance of the gazeCursorController
@@ -150,6 +151,7 @@ public class SXRInputManager implements IEventReceiver
         cache = new SparseArray<SXRCursorController>();
         mouseDeviceManager = new SXRMouseDeviceManager(context);
         gamepadDeviceManager = new SXRGamepadDeviceManager();
+        mNumControllers = numControllers;
         for (int i = 0; i < numControllers; ++i)
         {
             gearCursorControllers.add(new SXRGearCursorController(context, i));
@@ -224,9 +226,12 @@ public class SXRInputManager implements IEventReceiver
             mEnabledControllerTypes = new ArrayList<SXRControllerType> (Arrays.asList(SXRControllerType.GAZE, SXRControllerType.CONTROLLER));
             scanDevices();
         }
-        SXRInputManager.SingleControllerSelector
-                selector = new SXRInputManager.SingleControllerSelector(context, mEnabledControllerTypes);
-        getEventReceiver().addListener(selector);
+        if (mNumControllers < 2)
+        {
+            SXRInputManager.SingleControllerSelector
+                    selector = new SXRInputManager.SingleControllerSelector(context, mEnabledControllerTypes);
+            getEventReceiver().addListener(selector);
+        }
         getEventReceiver().addListener(listener);
         scanControllers();
     }
@@ -260,9 +265,12 @@ public class SXRInputManager implements IEventReceiver
             mEnabledControllerTypes = new ArrayList<SXRControllerType> (Arrays.asList(SXRControllerType.GAZE, SXRControllerType.CONTROLLER));
             scanDevices();
         }
-        SXRInputManager.SingleControllerSelector
-                selector = new SXRInputManager.SingleControllerSelector(context, mEnabledControllerTypes);
-        mListeners.addListener(selector);
+        if (mNumControllers < 2)
+        {
+            SXRInputManager.SingleControllerSelector
+                    selector = new SXRInputManager.SingleControllerSelector(context, mEnabledControllerTypes);
+            mListeners.addListener(selector);
+        }
         scanControllers();
     }
 
