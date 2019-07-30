@@ -251,7 +251,6 @@ public final class SXRGearCursorController extends SXRCursorController
             mControllerModel.setEnable(show);
             mControllerGroup.setEnable(show);
         }
-        // else if (show)  XXX taf
         else if (flag)
         {
             createControllerModel();
