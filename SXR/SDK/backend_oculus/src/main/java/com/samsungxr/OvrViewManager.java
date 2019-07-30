@@ -206,9 +206,13 @@ class OvrViewManager extends SXRViewManager {
     @Override
     void onSurfaceCreated() {
         super.onSurfaceCreated();
-        SXRGearCursorController gearController = mInputManager.getGearController();
-        if (gearController != null)
-            gearController.attachReader(mControllerReader);
+        SXRGearCursorController gearController0 = mInputManager.getGearController(0);
+        SXRGearCursorController gearController1 = mInputManager.getGearController(1);
+        if (gearController0 != null)
+            gearController0.attachReader(mControllerReader);
+
+        if (gearController1 != null)
+            gearController1.attachReader(mControllerReader);
 
     }
 

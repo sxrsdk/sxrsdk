@@ -251,7 +251,8 @@ public final class SXRGearCursorController extends SXRCursorController
             mControllerModel.setEnable(show);
             mControllerGroup.setEnable(show);
         }
-        else if (show)
+        // else if (show)  XXX taf
+        else if (flag)
         {
             createControllerModel();
         }
@@ -428,7 +429,7 @@ public final class SXRGearCursorController extends SXRCursorController
             }
 
             for (final ControllerEvent event: mControllerEvents) {
-                handleControllerEvent(event);
+                handleControllerEvent(controllerID, event);
             }
         }
     }
@@ -519,7 +520,7 @@ public final class SXRGearCursorController extends SXRCursorController
         controllerPick.run();
     }
 
-    private void handleControllerEvent(final ControllerEvent event)
+    private void handleControllerEvent(final int controllerId, final ControllerEvent event)
     {
         context.getEventManager().sendEvent(context.getApplication(), IApplicationEvents.class,
                                             "onControllerEvent",

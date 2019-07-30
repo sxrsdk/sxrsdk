@@ -11,16 +11,22 @@ import java.util.ArrayList;
 
 final class OvrControllerReader extends SXRGearCursorController.ControllerReaderStubs {
 
-    private FloatBuffer readbackBuffer;
+    private static final int MAX_CONTROLLERS = 2;
+    private FloatBuffer[] readbackBuffer = new FloatBuffer[MAX_CONTROLLERS];
     private final long mPtr;
     private final SXRApplication mApplication;
     private final SXREventListeners.ApplicationEvents mApplicationEvents;
 
     OvrControllerReader(SXRApplication application, long ptrActivityNative) {
+        ByteBuffer readbackBufferA = ByteBuffer.allocateDirect(DATA_SIZE * BYTE_TO_FLOAT);
+        readbackBufferA.order(ByteOrder.nativeOrder());
+        readbackBuffer[0] = readbackBufferA.asFloatBuffer();
+
         ByteBuffer readbackBufferB = ByteBuffer.allocateDirect(DATA_SIZE * BYTE_TO_FLOAT);
         readbackBufferB.order(ByteOrder.nativeOrder());
-        readbackBuffer = readbackBufferB.asFloatBuffer();
-        mPtr = OvrNativeGearController.ctor(readbackBufferB);
+        readbackBuffer[1] = readbackBufferB.asFloatBuffer();
+
+        mPtr = OvrNativeGearController.ctor(readbackBufferA, readbackBufferB);
         OvrNativeGearController.nativeInitializeGearController(ptrActivityNative, mPtr);
 
         mApplication = application;
@@ -30,27 +36,28 @@ final class OvrControllerReader extends SXRGearCursorController.ControllerReader
 
     @Override
     public void getEvents(int controllerID, ArrayList<SXRGearCursorController.ControllerEvent> controllerEvents) {
+
         final SXRGearCursorController.ControllerEvent event = SXRGearCursorController.ControllerEvent.obtain();
 
-        event.handedness = readbackBuffer.get(INDEX_HANDEDNESS);
-        event.pointF.set(readbackBuffer.get(INDEX_TOUCHPAD), readbackBuffer.get(INDEX_TOUCHPAD + 1));
+        event.handedness = readbackBuffer[controllerID].get(INDEX_HANDEDNESS);
+        event.pointF.set(readbackBuffer[controllerID].get(INDEX_TOUCHPAD), readbackBuffer[controllerID].get(INDEX_TOUCHPAD + 1));
 
-        event.touched = readbackBuffer.get(INDEX_TOUCHED) == 1.0f;
-        event.rotation.set(readbackBuffer.get(INDEX_ROTATION + 1),
-                readbackBuffer.get(INDEX_ROTATION + 2),
-                readbackBuffer.get(INDEX_ROTATION + 3),
-                readbackBuffer.get(INDEX_ROTATION));
-        event.position.set(readbackBuffer.get(INDEX_POSITION),
-                readbackBuffer.get(INDEX_POSITION + 1),
-                readbackBuffer.get(INDEX_POSITION + 2));
-        event.key = (int) readbackBuffer.get(INDEX_BUTTON);
+        event.touched = readbackBuffer[controllerID].get(INDEX_TOUCHED) == 1.0f;
+        event.rotation.set(readbackBuffer[controllerID].get(INDEX_ROTATION + 1),
+                readbackBuffer[controllerID].get(INDEX_ROTATION + 2),
+                readbackBuffer[controllerID].get(INDEX_ROTATION + 3),
+                readbackBuffer[controllerID].get(INDEX_ROTATION));
+        event.position.set(readbackBuffer[controllerID].get(INDEX_POSITION),
+                readbackBuffer[controllerID].get(INDEX_POSITION + 1),
+                readbackBuffer[controllerID].get(INDEX_POSITION + 2));
+        event.key = (int) readbackBuffer[controllerID].get(INDEX_BUTTON);
 
         controllerEvents.add(event);
     }
 
     @Override
     public boolean isConnected(int id) {
-        return readbackBuffer.get(INDEX_CONNECTED) == 1.0f;
+        return readbackBuffer[id].get(INDEX_CONNECTED) == 1.0f;
     }
 
     @Override
@@ -91,7 +98,7 @@ final class OvrControllerReader extends SXRGearCursorController.ControllerReader
 }
 
 class OvrNativeGearController {
-    static native long ctor(ByteBuffer buffer);
+    static native long ctor(ByteBuffer buffer0, ByteBuffer buffer1);
 
     static native void delete(long jConfigurationManager);
 

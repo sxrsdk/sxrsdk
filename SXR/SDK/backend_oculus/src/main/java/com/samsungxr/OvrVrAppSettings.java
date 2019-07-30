@@ -6,6 +6,7 @@ final class OvrVrAppSettings extends VrAppSettings {
     public OvrVrAppSettings() {
         super();
         sceneParams = new SceneParams();
+        numControllers = 2;  // XXX taf
     }
 
     public static class SceneParams {

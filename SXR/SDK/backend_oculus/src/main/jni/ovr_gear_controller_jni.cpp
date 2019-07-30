@@ -21,19 +21,16 @@ namespace sxr {
 
 extern "C" {
 
-    JNIEXPORT jlong JNICALL Java_com_samsungxr_OvrNativeGearController_ctor(JNIEnv *env,
-                                                                          jclass clazz, jobject
-                                                                          jreadback_buffer);
+    JNIEXPORT jlong JNICALL Java_com_samsungxr_OvrNativeGearController_ctor(JNIEnv *env, jclass clazz, jobject jreadback_buffer0, jobject jreadback_buffer1);
 
     JNIEXPORT void JNICALL Java_com_samsungxr_OvrNativeGearController_delete(JNIEnv *env,
                                                                            jclass clazz,
                                                                            jlong jController);
 
-    JNIEXPORT jlong JNICALL Java_com_samsungxr_OvrNativeGearController_ctor(JNIEnv *env,
-                                                                          jclass clazz, jobject
-                                                                          jreadback_buffer) {
-        float *data = (float *) env->GetDirectBufferAddress(jreadback_buffer);
-        return reinterpret_cast<jlong>(new GearController(data));
+    JNIEXPORT jlong JNICALL Java_com_samsungxr_OvrNativeGearController_ctor(JNIEnv *env, jclass clazz, jobject jreadback_buffer0, jobject jreadback_buffer1) {
+        float *data0 = (float *) env->GetDirectBufferAddress(jreadback_buffer0);
+        float *data1 = (float *) env->GetDirectBufferAddress(jreadback_buffer1);
+        return reinterpret_cast<jlong>(new GearController(data0, data1));
     }
 
     JNIEXPORT void JNICALL Java_com_samsungxr_OvrNativeGearController_delete(JNIEnv *env,
