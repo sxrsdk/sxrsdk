@@ -179,7 +179,7 @@ public abstract class SXRCursorController implements IEventReceiver
 
     protected Object eventLock = new Object();
     protected SXRNode mCursor = null;
-    protected boolean enable = false;
+    protected boolean enable = true;
     protected Object mCursorLock = new Object();
     protected Dragger mDragger = new Dragger(mCursorLock);
 
