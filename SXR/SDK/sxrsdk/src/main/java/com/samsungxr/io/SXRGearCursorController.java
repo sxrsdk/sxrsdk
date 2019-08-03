@@ -112,6 +112,10 @@ public final class SXRGearCursorController extends SXRCursorController
         BUTTON_RIGHT(0x00080000),
         BUTTON_VOLUME_UP(0x00400000),
         BUTTON_VOLUME_DOWN(0x00800000),
+        BUTTON_X(0x100),
+        BUTTON_Y(0x200),
+        BUTTON_GRIP(0x04000000),
+        BUTTON_TRIGGER(0x020000000),
         BUTTON_HOME(0x01000000);
         private int numVal;
 
@@ -125,42 +129,70 @@ public final class SXRGearCursorController extends SXRCursorController
             return numVal;
         }
 
-        static public CONTROLLER_KEYS[] fromValue(int value) {
-            if (0 == value) {
+        static public CONTROLLER_KEYS[] fromValue(long value)
+        {
+            if (0 == value)
+            {
                 return null;
             }
 
-            int count = Integer.bitCount(value);
+            int count = Long.bitCount(value);
             CONTROLLER_KEYS[] result = new CONTROLLER_KEYS[count];
 
-            if (0 != (value & 0x00000001)) {
+            if ((value & BUTTON_A.getNumVal()) != 0)
+            {
                 result[--count] = BUTTON_A;
             }
-            if (0 != (value & 0x00100000)) {
+            if ((value & BUTTON_ENTER.getNumVal()) != 0)
+            {
                 result[--count] = BUTTON_ENTER;
             }
-            if (0 != (value & 0x00200000)) {
+            if ((value & BUTTON_TRIGGER.getNumVal()) != 0)
+            {
+                result[--count] = BUTTON_TRIGGER;
+            }
+            if ((value & BUTTON_GRIP.getNumVal()) != 0)
+            {
+                result[--count] = BUTTON_GRIP;
+            }
+            if ((value & BUTTON_X.getNumVal()) != 0)
+            {
+                result[--count] = BUTTON_X;
+            }
+            if ((value & BUTTON_Y.getNumVal()) != 0)
+            {
+                result[--count] = BUTTON_Y;
+            }
+            if ((value & BUTTON_BACK.getNumVal()) != 0)
+            {
                 result[--count] = BUTTON_BACK;
             }
-            if (0 != (value & 0x00010000)) {
+            if ((value & BUTTON_UP.getNumVal()) != 0)
+            {
                 result[--count] = BUTTON_UP;
             }
-            if (0 != (value & 0x00020000)) {
+            if ((value & BUTTON_DOWN.getNumVal()) != 0)
+            {
                 result[--count] = BUTTON_DOWN;
             }
-            if (0 != (value & 0x00040000)) {
+            if ((value & BUTTON_LEFT.getNumVal()) != 0)
+            {
                 result[--count] = BUTTON_LEFT;
             }
-            if (0 != (value & 0x00080000)) {
+            if ((value & BUTTON_RIGHT.getNumVal()) != 0)
+            {
                 result[--count] = BUTTON_RIGHT;
             }
-            if (0 != (value & 0x00400000)) {
+            if ((value & BUTTON_UP.getNumVal()) != 0)
+            {
                 result[--count] = BUTTON_VOLUME_UP;
             }
-            if (0 != (value & 0x00800000)) {
+            if ((value & BUTTON_VOLUME_DOWN.getNumVal()) != 0)
+            {
                 result[--count] = BUTTON_VOLUME_DOWN;
             }
-            if (0 != (value & 0x01000000)) {
+            if ((value & BUTTON_HOME.getNumVal()) != 0)
+            {
                 result[--count] = BUTTON_HOME;
             }
             return result;
@@ -199,6 +231,8 @@ public final class SXRGearCursorController extends SXRCursorController
     private int prevButtonVolumeUp = KeyEvent.ACTION_UP;
     private int prevButtonVolumeDown = KeyEvent.ACTION_UP;
     private int prevButtonHome = KeyEvent.ACTION_UP;
+    private int prevButtonX = KeyEvent.ACTION_UP;
+    private int prevButtonY = KeyEvent.ACTION_UP;
     private ControllerEvent currentControllerEvent;
 
     public SXRGearCursorController(SXRContext context, int id)
@@ -527,7 +561,7 @@ public final class SXRGearCursorController extends SXRCursorController
                                             event.touched, event.angularAcceleration,event.angularVelocity);
 
         this.currentControllerEvent = event;
-        int key = event.key;
+        long key = event.key;
         Quaternionf q = event.rotation;
         Vector3f pos = event.position;
         Matrix4f camMtx = context.getMainScene().getMainCameraRig().getTransform().getModelMatrix4f();
@@ -544,17 +578,49 @@ public final class SXRGearCursorController extends SXRCursorController
         mTempRotation.mul(q);
         mTempPivotMtx.rotation(mTempRotation);  // translate pivot by combined event and camera translation
         mTempPivotMtx.setTranslation(x, y, z);
-        synchronized (mPivotRoot) {
+        synchronized (mPivotRoot)
+        {
             mPivotRoot.getTransform().setModelMatrix(mTempPivotMtx);
         }
         setOrigin(x, y, z);
 
-        int handleResult = handleEnterButton(key, event.pointF, event.touched);
-        prevButtonEnter = handleResult == -1 ? prevButtonEnter : handleResult;
+        if (key > 0)
+        {
+            Log.d("CursorController", "button key = %x", key);
+        }
+        int handleResult = handleEnterButton(key, event.pointF, event.touched, CONTROLLER_KEYS.BUTTON_ENTER, KeyEvent.KEYCODE_ENTER);
+        if (handleResult >= 0)
+        {
+            prevButtonEnter = handleResult;
+        }
+        else
+        {
+            handleResult = handleEnterButton(key, event.pointF, event.touched, CONTROLLER_KEYS.BUTTON_TRIGGER, KeyEvent.KEYCODE_ENTER);
+            if (handleResult >= 0)
+            {
+                prevButtonEnter = handleResult;
+            }
+        }
 
-        handleResult = handleAButton(key);
-        prevButtonA = handleResult == -1 ? prevButtonA : handleResult;
-
+        handleResult = handleSecondaryButton(key, CONTROLLER_KEYS.BUTTON_A, KeyEvent.KEYCODE_A);
+        if (handleResult >= 0)
+        {
+            prevButtonA = handleResult;
+        }
+        else
+        {
+            handleResult = handleSecondaryButton(key, CONTROLLER_KEYS.BUTTON_GRIP, KeyEvent.KEYCODE_A);
+            if (handleResult >= 0)
+            {
+                prevButtonA = handleResult;
+            }
+        }
+        handleResult = handleButton(key, CONTROLLER_KEYS.BUTTON_X,
+                                    prevButtonX, KeyEvent.KEYCODE_X);
+        prevButtonX = handleResult == -1 ? prevButtonX : handleResult;
+        handleResult = handleButton(key, CONTROLLER_KEYS.BUTTON_Y,
+                                    prevButtonX, KeyEvent.KEYCODE_Y);
+        prevButtonY = handleResult == -1 ? prevButtonY : handleResult;
         handleResult = handleButton(key, CONTROLLER_KEYS.BUTTON_BACK,
                                     prevButtonBack, KeyEvent.KEYCODE_BACK);
         prevButtonBack = handleResult == -1 ? prevButtonBack : handleResult;
@@ -579,11 +645,10 @@ public final class SXRGearCursorController extends SXRCursorController
         invalidate();
     }
 
-    private int handleEnterButton(int key, PointF pointF, boolean touched)
+    private int handleEnterButton(long key, PointF pointF, boolean touched, CONTROLLER_KEYS button, int keycode)
     {
         long time = SystemClock.uptimeMillis();
-        int handled = handleButton(key, CONTROLLER_KEYS.BUTTON_ENTER, prevButtonEnter,
-                                   KeyEvent.KEYCODE_ENTER);
+        int handled = handleButton(key, button, prevButtonEnter, keycode);
         if ((handled == KeyEvent.ACTION_UP) || (actionDown && !touched))
         {
             pointerCoords.x = pointF.x;
@@ -653,10 +718,10 @@ public final class SXRGearCursorController extends SXRCursorController
         return handled;
     }
 
-    private int handleAButton(int key)
+    private int handleSecondaryButton(long key, CONTROLLER_KEYS button, int keycode)
     {
         long time = SystemClock.uptimeMillis();
-        int handled = handleButton(key, CONTROLLER_KEYS.BUTTON_A, prevButtonA, KeyEvent.KEYCODE_A);
+        int handled = handleButton(key, button, prevButtonA, keycode);
         if (handled == KeyEvent.ACTION_UP)
         {
             setActive(false);
@@ -694,7 +759,7 @@ public final class SXRGearCursorController extends SXRCursorController
         return handled;
     }
 
-    private int handleButton(int key, CONTROLLER_KEYS button, int prevButton, int keyCode)
+    private int handleButton(long key, CONTROLLER_KEYS button, int prevButton, int keyCode)
     {
         if ((key & button.getNumVal()) != 0)
         {
@@ -746,7 +811,7 @@ public final class SXRGearCursorController extends SXRCursorController
         public Vector3f angularVelocity = new Vector3f();
         public Vector3f angularAcceleration = new Vector3f();
         public PointF pointF = new PointF();
-        public int key;
+        public long key;
         public float handedness;
         private boolean recycled = false;
         public boolean touched = false;

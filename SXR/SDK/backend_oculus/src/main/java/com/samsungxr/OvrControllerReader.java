@@ -50,7 +50,7 @@ final class OvrControllerReader extends SXRGearCursorController.ControllerReader
         event.position.set(readbackBuffer[controllerID].get(INDEX_POSITION),
                 readbackBuffer[controllerID].get(INDEX_POSITION + 1),
                 readbackBuffer[controllerID].get(INDEX_POSITION + 2));
-        event.key = (int) readbackBuffer[controllerID].get(INDEX_BUTTON);
+        event.key = (long) readbackBuffer[controllerID].get(INDEX_BUTTON);
 
         controllerEvents.add(event);
     }
