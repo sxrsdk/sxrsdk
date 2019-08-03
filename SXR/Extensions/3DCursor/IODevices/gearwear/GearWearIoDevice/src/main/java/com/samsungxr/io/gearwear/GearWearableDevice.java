@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.gearvrf.io.gearwear;
+package com.samsungxr.io.gearwear;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
