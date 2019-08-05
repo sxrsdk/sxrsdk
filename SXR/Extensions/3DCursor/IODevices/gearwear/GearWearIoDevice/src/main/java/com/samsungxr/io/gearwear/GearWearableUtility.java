@@ -1,4 +1,4 @@
-package com.gearvrf.io.gearwear;
+package com.samsungxr.io.gearwear;
 
 public abstract class GearWearableUtility {
     /**
