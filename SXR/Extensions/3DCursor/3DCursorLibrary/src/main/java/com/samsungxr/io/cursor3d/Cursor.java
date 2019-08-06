@@ -622,7 +622,6 @@ public abstract class Cursor extends SXRBehavior
             SXRCursorController controller = mIODevice.getGvrCursorController();
 
             controller.setCursor(null);
-            controller.setEnable(false);
         }
     }
 
@@ -670,32 +669,29 @@ public abstract class Cursor extends SXRBehavior
      *                     attached.
      */
     public void attachIoDevice(IoDevice ioDevice) throws IOException {
-        if (!isEnabled()) {
-            throw new IllegalStateException("Cursor not enabled");
-        }
         IoDevice oldDevice = getIoDevice();
-        if (oldDevice != null && oldDevice.equals(ioDevice)) {
-            Log.d(TAG, "Current and desired Io device are same");
-            return;
-        }
-
-        if (!isIoDeviceCompatible(ioDevice)) {
-            throw new IllegalArgumentException("IO device not compatible");
-        }
-        IoDevice availableIoDevice = mCursorManager.getAvailableIoDevice(ioDevice);
-        if (availableIoDevice == null) {
-            throw new IOException("IO device cannot be attached");
-        }
-
-        Log.d(TAG, "Attaching ioDevice:" + availableIoDevice.getDeviceId() + " to cursor:"
-                   + mCursorID);
-
-        mCursorManager.removeCursorFromScene(this);
-        setIoDevice(availableIoDevice);
-        mCursorManager.addCursorToScene(this);
-        if (oldDevice != null)
+        if ((oldDevice == null) ||
+            !oldDevice.equals(ioDevice) ||
+            oldDevice.getGvrCursorController() != ioDevice.getGvrCursorController())
         {
-            resetIoDevice(oldDevice);
+            if (!isIoDeviceCompatible(ioDevice))
+            {
+                throw new IllegalArgumentException("IO device not compatible");
+            }
+            IoDevice availableIoDevice = mCursorManager.getAvailableIoDevice(ioDevice);
+            if (availableIoDevice == null)
+            {
+                throw new IOException("IO device cannot be attached");
+            }
+
+            Log.d(TAG, "Attaching ioDevice:" + availableIoDevice.getDeviceId() + " to cursor:" + mCursorID);
+            mCursorManager.removeCursorFromScene(this);
+            setIoDevice(availableIoDevice);
+            mCursorManager.addCursorToScene(this);
+            if (oldDevice != null)
+            {
+                resetIoDevice(oldDevice);
+            }
         }
     }
 
