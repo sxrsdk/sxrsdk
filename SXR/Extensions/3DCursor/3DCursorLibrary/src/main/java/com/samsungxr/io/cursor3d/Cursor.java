@@ -635,6 +635,25 @@ public abstract class Cursor extends SXRBehavior
         mCursorManager.addCursorToScene(this);
     }
 
+    void markIoDeviceUnused()
+    {
+        if (mIODevice != null)
+        {
+            Log.d(TAG, "Marking ioDevice:" + mIODevice.getName() + " unused");
+            SXRCursorController controller = mIODevice.getGvrCursorController();
+
+            controller.setCursor(null);
+        }
+    }
+
+    IoDevice getIoDeviceForPriority(int priorityLevel) {
+        if (priorityLevel < mCompatibleDevices.size()) {
+            return mCompatibleDevices.get(priorityLevel).getIoDevice();
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Get a list of currently available {@link IoDevice}s to use with the {@link Cursor}. The
      * {@link Cursor} defines a list of compatible {@link IoDevice}s in the settings.xml. This
