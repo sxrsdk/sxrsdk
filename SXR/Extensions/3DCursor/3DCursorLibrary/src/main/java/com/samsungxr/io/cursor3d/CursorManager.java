@@ -560,7 +560,6 @@ public final class CursorManager implements IEventReceiver
         IoDevice ioDevice = cursor.getIoDevice();
         SXRCursorController controller = ioDevice.getGvrCursorController();
 
-        controller.setEnable(true);
         controller.setCursor(cursor.getOwnerObject());
         if (controller instanceof SXRGearCursorController)
         {
@@ -591,6 +590,7 @@ public final class CursorManager implements IEventReceiver
             controller.addPickEventListener(SXRSensor.getPickHandler());
             controller.setCursorControl(SXRCursorController.CursorControl.PROJECT_CURSOR_ON_SURFACE);
         }
+        controller.setEnable(true);
     }
 
     void removeCursorFromScene(Cursor cursor) {

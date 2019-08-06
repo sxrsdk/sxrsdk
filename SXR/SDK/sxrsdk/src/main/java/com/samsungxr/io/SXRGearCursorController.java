@@ -361,21 +361,6 @@ public final class SXRGearCursorController extends SXRCursorController
         }
     }
 
-    /**
-     * Set the position of the pick ray.
-     * This function is used internally to update the
-     * pick ray with the new controller position.
-     * @param x the x value of the position.
-     * @param y the y value of the position.
-     * @param z the z value of the position.
-     */
-    @Override
-    public void setPosition(float x, float y, float z)
-    {
-        super.setPosition(x, y, z);
-        invalidate();
-    }
-
     @Override
     public void setEnable(boolean flag)
     {
