@@ -86,13 +86,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class SXRInputManager implements IEventReceiver
 {
     private static final String TAG = SXRInputManager.class.getSimpleName();
-    private static final String WEAR_TOUCH_PAD_SERVICE_PACKAGE_NAME = "com.samsungxr.weartouchpad";
     private final InputManager inputManager;
     private final SXRContext context;
-    private SXRAndroidWearTouchpad androidWearTouchpad;
     private SXRGamepadDeviceManager gamepadDeviceManager;
     private SXRMouseDeviceManager mouseDeviceManager;
-    private final List<SXRGearCursorController> gearCursorControllers = new ArrayList();
     private SXREventReceiver mListeners;
     private int mNumControllers = 1;
     private ArrayList<SXRControllerType> mEnabledControllerTypes;
@@ -107,6 +104,9 @@ public class SXRInputManager implements IEventReceiver
     private static final int CONTROLLER_CACHED_KEY = (SXRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_VENDOR_ID * 31 +
                                                       SXRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_PRODUCT_ID) * 31 +
                                                       SXRControllerType.CONTROLLER.hashCode();
+    private static final int WEAR_CACHED_KEY = (SXRDeviceConstants.SAMSUNG_GEARWEAR_TOUCHPAD_VENDOR_ID * 31 +
+        SXRDeviceConstants.SAMSUNG_GEARWEAR_TOUCHPAD_PRODUCT_ID) * 31 +
+        SXRControllerType.WEARTOUCHPAD.hashCode();
 
 
     /*
@@ -121,13 +121,13 @@ public class SXRInputManager implements IEventReceiver
      */
 
     // maps a given device Id to a controller id
-    private final SparseArray<SXRCursorController> controllerIds;
+    private final SparseArray<SXRCursorController> mControllerIDs;
 
     // maintains the ids already distributed to a given device.
     // We make use of the vendor and product id to identify a device.
-    private final SparseArray<SXRCursorController> cache;
+    private final SparseArray<SXRCursorController> mControllerCache;
 
-    private CopyOnWriteArrayList<SXRCursorController> controllers;
+    private CopyOnWriteArrayList<SXRCursorController> mControllers;
 
     /**
      * Construct an input manager which manages the designated cursor controllers.
@@ -147,22 +147,12 @@ public class SXRInputManager implements IEventReceiver
         this.context = context;
         mListeners = new SXREventReceiver(this);
         inputManager.registerInputDeviceListener(inputDeviceListener, null);
-        controllerIds = new SparseArray<SXRCursorController>();
-        cache = new SparseArray<SXRCursorController>();
+        mControllerIDs = new SparseArray<SXRCursorController>();
+        mControllerCache = new SparseArray<SXRCursorController>();
         mouseDeviceManager = new SXRMouseDeviceManager(context);
         gamepadDeviceManager = new SXRGamepadDeviceManager();
         mNumControllers = numControllers;
-        for (int i = 0; i < numControllers; ++i)
-        {
-            gearCursorControllers.add(new SXRGearCursorController(context, i));
-        }
-        if ((enabledTypes != null) &&
-            enabledTypes.contains(SXRControllerType.WEARTOUCHPAD) &&
-            checkIfWearTouchPadServiceInstalled(context))
-        {
-            androidWearTouchpad = new SXRAndroidWearTouchpad(context);
-        }
-        controllers = new CopyOnWriteArrayList<SXRCursorController>();
+        mControllers = new CopyOnWriteArrayList<SXRCursorController>();
     }
 
     /**
@@ -190,15 +180,50 @@ public class SXRInputManager implements IEventReceiver
     {
         for (SXRCursorController controller : getCursorControllers())
         {
-            if (!controllers.contains(controller))
+            if (!mControllers.contains(controller))
             {
-                controllers.add(controller);
+                mControllers.add(controller);
             }
             if (controller.isConnected())
             {
                 addCursorController(controller);
             }
         }
+    }
+
+    /**
+     * Adds an external controller which does not show up in Android device list.
+     * The GearVR controllers and the Gear Wear controller are examples of this.
+     * @param controller
+     */
+    public boolean addExternalController(SXRCursorController controller)
+    {
+        if (controller.getControllerType() == SXRControllerType.WEARTOUCHPAD)
+        {
+            if ((mEnabledControllerTypes != null) &&
+                mEnabledControllerTypes.contains(SXRControllerType.WEARTOUCHPAD) &&
+                (mControllerCache.get(WEAR_CACHED_KEY) == null))
+            {
+                mControllerCache.put(WEAR_CACHED_KEY, controller);
+                return true;
+            }
+        }
+        else if (controller.getControllerType() == SXRControllerType.CONTROLLER)
+        {
+            if ((mEnabledControllerTypes != null) &&
+                mEnabledControllerTypes.contains(SXRControllerType.CONTROLLER))
+            {
+                SXRGearCursorController gearController = (SXRGearCursorController) controller;
+                int key = CONTROLLER_CACHED_KEY + gearController.getControllerID();
+                if ((gearController.getControllerID() < mNumControllers) &&
+                    (mControllerCache.get(key) == null))
+                {
+                    mControllerCache.put(key, controller);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -298,7 +323,7 @@ public class SXRInputManager implements IEventReceiver
     public void removeCursorController(SXRCursorController controller)
     {
         controller.setEnable(false);
-        controllers.remove(controller);
+        mControllers.remove(controller);
         controller.getSXRContext().getEventManager().sendEvent(this, ICursorControllerListener.class,
                 "onCursorControllerRemoved", controller);
     }
@@ -312,7 +337,7 @@ public class SXRInputManager implements IEventReceiver
      */
     public void setScene(SXRScene scene)
     {
-        for (SXRCursorController controller : controllers)
+        for (SXRCursorController controller : mControllers)
         {
             controller.setScene(scene);
             controller.invalidate();
@@ -329,23 +354,13 @@ public class SXRInputManager implements IEventReceiver
      */
     public void scanDevices()
     {
-        for (int deviceId : inputManager.getInputDeviceIds()) {
-            addDevice(deviceId);
-        }
-        for (SXRGearCursorController controller : gearCursorControllers)
+        for (int deviceId : inputManager.getInputDeviceIds())
         {
-            cache.put(CONTROLLER_CACHED_KEY + controller.getControllerID(), controller);
+            if (deviceId >= 0)
+            {
+                addDevice(deviceId);
+            }
         }
-    }
-
-    private boolean checkIfWearTouchPadServiceInstalled(SXRContext context) {
-        PackageManager pm = context.getActivity().getPackageManager();
-        try {
-            pm.getPackageInfo(WEAR_TOUCH_PAD_SERVICE_PACKAGE_NAME, PackageManager.GET_ACTIVITIES);
-            return true;
-        } catch (PackageManager.NameNotFoundException e) {
-        }
-        return false;
     }
 
     /**
@@ -362,11 +377,13 @@ public class SXRInputManager implements IEventReceiver
      * @return a list of all the {@link SXRCursorController} objects in the
      * system.
      */
-    public List<SXRCursorController> getCursorControllers() {
+    public List<SXRCursorController> getCursorControllers()
+    {
         List<SXRCursorController> result = new ArrayList<SXRCursorController>();
-        for (int index = 0, size = cache.size(); index < size; index++) {
-            int key = cache.keyAt(index);
-            SXRCursorController controller = cache.get(key);
+        for (int index = 0, size = mControllerCache.size(); index < size; index++)
+        {
+            int key = mControllerCache.keyAt(index);
+            SXRCursorController controller = mControllerCache.get(key);
             result.add(controller);
         }
         return result;
@@ -377,39 +394,18 @@ public class SXRInputManager implements IEventReceiver
      * @param type controller type to search for
      * @return controller found or null if no controllers of the given type
      */
-    public SXRCursorController findCursorController(SXRControllerType type) {
-        for (int index = 0, size = cache.size(); index < size; index++)
+    public SXRCursorController findCursorController(SXRControllerType type)
+    {
+        for (int index = 0, size = mControllerCache.size(); index < size; index++)
         {
-            int key = cache.keyAt(index);
-            SXRCursorController controller = cache.get(key);
-            if (controller.getControllerType().equals(type)) {
+            int key = mControllerCache.keyAt(index);
+            SXRCursorController controller = mControllerCache.get(key);
+            if (controller.getControllerType().equals(type))
+            {
                 return controller;
             }
         }
         return null;
-    }
-
-    /**
-     * Get the Gear cursor controller.
-     * This function will return an instance even if
-     * the controller is not connected.
-     * @return SXRGearCursorController object
-     */
-    public SXRGearCursorController getGearController() {
-        return gearCursorControllers.get(0);
-    }
-    /**
-     * Get the Gear cursor controller with the given ID.
-     * This function will return an instance even if
-     * the controller is not connected.
-     * It will throw an exception if the ID exceeds
-     * the maximum number of controllers for the platform.
-     * @return SXRGearCursorController object
-     * @throws ArrayIndexOutOfBoundsException
-     * @see SXRGearCursorController#getControllerID()
-     */
-    public SXRGearCursorController getGearController(int id) {
-        return gearCursorControllers.get(id);
     }
 
     /**
@@ -418,22 +414,13 @@ public class SXRInputManager implements IEventReceiver
      */
     public void updateGearControllers()
     {
-        for (SXRGearCursorController controller : gearCursorControllers)
+        for (SXRCursorController controller : mControllers)
         {
-            controller.pollController();
+            if (controller instanceof SXRGearCursorController)
+            {
+                ((SXRGearCursorController) controller).pollController();
+            }
         }
-    }
-
-    /**
-     * Queries the status of the connection to the Android wear watch.
-     * @see IWearTouchpadEvents
-     * @return true if android wear touchpad is connected, else false.
-     */
-    public boolean isConnectedToAndroidWearTouchpad() {
-        if(androidWearTouchpad != null) {
-            return androidWearTouchpad.isConnectedToWatch();
-        }
-        return false;
     }
 
     /**
@@ -443,7 +430,7 @@ public class SXRInputManager implements IEventReceiver
     public int clear()
     {
         int n = 0;
-        for (SXRCursorController c : controllers)
+        for (SXRCursorController c : mControllers)
         {
             c.stopDrag();
             removeCursorController(c);
@@ -462,80 +449,95 @@ public class SXRInputManager implements IEventReceiver
         inputManager.unregisterInputDeviceListener(inputDeviceListener);
         mouseDeviceManager.forceStopThread();
         gamepadDeviceManager.forceStopThread();
-        controllerIds.clear();
-        cache.clear();
-        controllers.clear();
+        mControllerIDs.clear();
+        mControllerCache.clear();
+        mControllers.clear();
     }
 
     // returns null if no device is found.
-    private SXRCursorController getUniqueControllerId(int deviceId) {
-        SXRCursorController controller = controllerIds.get(deviceId);
-        if (controller != null) {
+    private SXRCursorController getUniqueControllerId(int deviceId)
+    {
+        SXRCursorController controller = mControllerIDs.get(deviceId);
+        if (controller != null)
+        {
             return controller;
         }
         return null;
     }
 
-    private SXRControllerType getSXRInputDeviceType(InputDevice device) {
-        if (device == null) {
+    private SXRControllerType getControllerType(InputDevice device)
+    {
+        if (device == null)
+        {
             return SXRControllerType.UNKNOWN;
         }
         int sources = device.getSources();
 
-        if ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD) {
+        if ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
+        {
             return SXRControllerType.GAMEPAD;
         }
 
         int vendorId = device.getVendorId();
         int productId = device.getProductId();
         boolean isKeyBoard = ((sources & InputDevice.SOURCE_KEYBOARD) == InputDevice.SOURCE_KEYBOARD);
-        boolean isTouchPad =   ((sources & InputDevice.SOURCE_TOUCHPAD) == InputDevice.SOURCE_TOUCHPAD);
-        boolean isMouse =   ((sources & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE);
+        boolean isTouchPad = ((sources & InputDevice.SOURCE_TOUCHPAD) == InputDevice.SOURCE_TOUCHPAD);
+        boolean isMouse =    ((sources & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE);
 
-        if (isKeyBoard || isTouchPad) {
+        if (isKeyBoard || isTouchPad)
+        {
             // Allow gpio keyboard to be a gaze controller if enabled, also allow
             // any keyboard/touchpad device without a product/vendor id (assumed to be
             // system devices) to control the gaze controller.
-            if (vendorId == SXRDeviceConstants.GPIO_KEYBOARD_VENDOR_ID
-                    && productId == SXRDeviceConstants.GPIO_KEYBOARD_PRODUCT_ID
-                    || (vendorId == 0 && productId == 0)) {
+            if (((vendorId == SXRDeviceConstants.GPIO_KEYBOARD_VENDOR_ID) &&
+                 (productId == SXRDeviceConstants.GPIO_KEYBOARD_PRODUCT_ID)) ||
+                ((vendorId == 0) && (productId == 0)))
+            {
                 return SXRControllerType.GAZE;
             }
         }
 
-        if (isMouse) {
+        if (isMouse)
+        {
             // We do not want to add the Oculus touchpad as a mouse device.
-            if (vendorId == SXRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_VENDOR_ID
-                    && productId == SXRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_PRODUCT_ID
-                    || (vendorId == 0 && productId == 0)) {
+            if (((vendorId == SXRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_VENDOR_ID) &&
+                 (productId == SXRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_PRODUCT_ID)) ||
+                ((vendorId == 0) && (productId == 0)))
+            {
                 return SXRControllerType.GAZE;
             }
             return SXRControllerType.MOUSE;
+        }
+        if ((vendorId == SXRDeviceConstants.SAMSUNG_GEARWEAR_TOUCHPAD_VENDOR_ID) &&
+            (productId == SXRDeviceConstants.SAMSUNG_GEARWEAR_TOUCHPAD_PRODUCT_ID))
+        {
+            return SXRControllerType.WEARTOUCHPAD;
         }
         return SXRControllerType.UNKNOWN;
     }
 
     // Return the key if there is one else return -1
-    private int getCacheKey(InputDevice device, SXRControllerType controllerType) {
+    private int getCachedKey(InputDevice device, SXRControllerType controllerType)
+    {
         if (controllerType != SXRControllerType.UNKNOWN &&
-            controllerType != SXRControllerType.EXTERNAL) {
+            controllerType != SXRControllerType.EXTERNAL)
+        {
             // Sometimes a device shows up using two device ids
             // here we try to show both devices as one using the
             // product and vendor id
-
             int key = device.getVendorId();
             key = 31 * key + device.getProductId();
             key = 31 * key + controllerType.hashCode();
-
             return key;
         }
         return -1; // invalid key
     }
 
     // returns controller if a new device is found
-    private SXRCursorController addDevice(int deviceId) {
+    private SXRCursorController addDevice(int deviceId)
+    {
         InputDevice device = inputManager.getInputDevice(deviceId);
-        SXRControllerType controllerType = getSXRInputDeviceType(device);
+        SXRControllerType controllerType = getControllerType(device);
 
         if (mEnabledControllerTypes == null)
         {
@@ -547,23 +549,26 @@ public class SXRInputManager implements IEventReceiver
         }
 
         int key;
-        if (controllerType == SXRControllerType.GAZE) {
+        if (controllerType == SXRControllerType.GAZE)
+        {
             // create the controller if there isn't one. 
-            if (gazeCursorController == null) {
-                gazeCursorController = new SXRGazeCursorController(context, SXRControllerType.GAZE,
-                        SXRDeviceConstants.OCULUS_GEARVR_DEVICE_NAME,
+            if (gazeCursorController == null)
+            {
+                gazeCursorController = new SXRGazeCursorController(context,
                         SXRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_VENDOR_ID,
                         SXRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_PRODUCT_ID);
             }
             // use the cached gaze key
             key = GAZE_CACHED_KEY;
-        } else {
-            key = getCacheKey(device, controllerType);
+        }
+        else
+        {
+            key = getCachedKey(device, controllerType);
         }
 
         if (key != -1)
         {
-            SXRCursorController controller = cache.get(key);
+            SXRCursorController controller = mControllerCache.get(key);
             if (controller == null)
             {
                 if ((mEnabledControllerTypes == null) || !mEnabledControllerTypes.contains(controllerType))
@@ -572,23 +577,23 @@ public class SXRInputManager implements IEventReceiver
                 }
                 if (controllerType == SXRControllerType.MOUSE)
                 {
-                    controller = mouseDeviceManager.getCursorController(context, device.getName(), device.getVendorId(), device.getProductId());
+                    controller = mouseDeviceManager.getCursorController(context, device);
                 }
                 else if (controllerType == SXRControllerType.GAMEPAD)
                 {
-                    controller = gamepadDeviceManager.getCursorController(context, device.getName(), device.getVendorId(), device.getProductId());
+                    controller = gamepadDeviceManager.getCursorController(context, device);
                 }
                 else if (controllerType == SXRControllerType.GAZE)
                 {
                     controller = gazeCursorController;
                 }
-                cache.put(key, controller);
-                controllerIds.put(device.getId(), controller);
+                mControllerCache.put(key, controller);
+                mControllerIDs.put(device.getId(), controller);
                 return controller;
             }
             else
             {
-                controllerIds.put(device.getId(), controller);
+                mControllerIDs.put(device.getId(), controller);
             }
         }
         return null;
@@ -602,20 +607,20 @@ public class SXRInputManager implements IEventReceiver
          * list of controllers to find the device and then do a reverse lookup
          * on the cached controllers to remove the cached entry.
          */
-        SXRCursorController controller = controllerIds.get(deviceId);
+        SXRCursorController controller = mControllerIDs.get(deviceId);
 
         if (controller == null)
         {
             return null;
         }
         // Do a reverse lookup and remove the controller
-        for (int index = 0; index < cache.size(); index++)
+        for (int index = 0; index < mControllerCache.size(); index++)
         {
-            int key = cache.keyAt(index);
-            SXRCursorController cachedController = cache.get(key);
+            int key = mControllerCache.keyAt(index);
+            SXRCursorController cachedController = mControllerCache.get(key);
             if (cachedController == controller)
             {
-                controllerIds.remove(deviceId);
+                mControllerIDs.remove(deviceId);
                 if (controller.getControllerType() == SXRControllerType.MOUSE)
                 {
                     mouseDeviceManager.removeCursorController(controller);
@@ -624,11 +629,11 @@ public class SXRInputManager implements IEventReceiver
                 {
                     gamepadDeviceManager.removeCursorController(controller);
                 }
-                cache.remove(key);
+                mControllerCache.remove(key);
                 return controller;
             }
         }
-        controllerIds.remove(deviceId);
+        mControllerIDs.remove(deviceId);
         return controller;
     }
 
@@ -639,9 +644,11 @@ public class SXRInputManager implements IEventReceiver
      * @return <code>true</code> if the {@link KeyEvent} is handled by the
      * {@link SXRInputManager}, <code>false</code> otherwise.
      */
-    public boolean dispatchKeyEvent(KeyEvent event) {
+    public boolean dispatchKeyEvent(KeyEvent event)
+    {
         SXRCursorController controller = getUniqueControllerId(event.getDeviceId());
-        if (controller != null) {
+        if (controller != null)
+        {
             return controller.dispatchKeyEvent(event);
         }
         return false;
@@ -654,20 +661,24 @@ public class SXRInputManager implements IEventReceiver
      * @return <code>true</code> if the {@link MotionEvent} is handled by the
      * {@link SXRInputManager}, <code>false</code> otherwise.
      */
-    public boolean dispatchMotionEvent(MotionEvent event) {
+    public boolean dispatchMotionEvent(MotionEvent event)
+    {
         SXRCursorController controller = getUniqueControllerId(event.getDeviceId());
-        if ((controller != null) && controller.isEnabled()) {
+        if ((controller != null) && controller.isEnabled())
+        {
             return controller.dispatchMotionEvent(event);
         }
         return false;
     }
 
-    private InputDeviceListener inputDeviceListener = new InputDeviceListener() {
-
+    private InputDeviceListener inputDeviceListener = new InputDeviceListener()
+    {
         @Override
-        public void onInputDeviceRemoved(int deviceId) {
+        public void onInputDeviceRemoved(int deviceId)
+        {
             SXRCursorController controller = removeDevice(deviceId);
-            if (controller != null) {
+            if (controller != null)
+            {
                 controller.setEnable(false);
             }
         }
@@ -678,9 +689,11 @@ public class SXRInputManager implements IEventReceiver
         }
 
         @Override
-        public void onInputDeviceAdded(int deviceId) {
+        public void onInputDeviceAdded(int deviceId)
+        {
             SXRCursorController controller = addDevice(deviceId);
-            if (controller != null) {
+            if (controller != null)
+            {
                 controller.setScene(context.getMainScene());
                 controller.setEnable(true);
                 addCursorController(controller);

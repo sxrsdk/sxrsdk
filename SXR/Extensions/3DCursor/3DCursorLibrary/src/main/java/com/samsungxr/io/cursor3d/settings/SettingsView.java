@@ -33,10 +33,11 @@ import android.widget.ToggleButton;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRScene;
 import com.samsungxr.io.SXRTouchPadGestureListener;
+import com.samsungxr.io.SXRCursorController;
+
 import com.samsungxr.io.cursor3d.Cursor;
 import com.samsungxr.io.cursor3d.CursorManager;
 import com.samsungxr.io.cursor3d.CursorType;
-import com.samsungxr.io.cursor3d.IoDevice;
 import com.samsungxr.io.cursor3d.R;
 import com.samsungxr.utility.Log;
 
@@ -60,20 +61,22 @@ public class SettingsView extends BaseView implements OnCheckedChangeListener
         void onBack(boolean cascading);
 
         /**
-         * Called when the {@link IoDevice} of the settings cursor changes.
+         * Called when the {@link SXRCursorController} of the settings cursor changes.
          *
-         * @param device the new {@link IoDevice} for the settings cursor
+         * @param device the new {@link SXRCursorController} for the settings cursor
          * @return the new controller id for the settings cursor
          */
-        int onDeviceChanged(IoDevice device);
+        void onDeviceChanged(SXRCursorController device);
     }
 
     //Called on main thread
-    public SettingsView(final SXRContext context, final SXRScene
-            scene, CursorManager cursorManager, int settingsCursorId, final Cursor currentCursor,
+    public SettingsView(final SXRContext context,
+                        final SXRScene scene,
+                        CursorManager cursorManager,
+                        final Cursor currentCursor,
                         SettingsChangeListener changeListener)
     {
-        super(context, scene, settingsCursorId, R.layout.settings_layout);
+        super(context, scene, R.layout.settings_layout);
         Log.d(TAG, "new SettingsView, hash=" + this.hashCode());
         final Activity activity = context.getActivity();
         this.changeListener = changeListener;
@@ -141,11 +144,9 @@ public class SettingsView extends BaseView implements OnCheckedChangeListener
         }
 
         @Override
-        public int onDeviceChanged(IoDevice device)
+        public void onDeviceChanged(SXRCursorController device)
         {
-            int settingsCursorId = changeListener.onDeviceChanged(device);
-            setSettingsCursorId(settingsCursorId);
-            return settingsCursorId;
+            changeListener.onDeviceChanged(device);
         }
     };
 
@@ -158,7 +159,7 @@ public class SettingsView extends BaseView implements OnCheckedChangeListener
                 @Override
                 public void run() {
                     new CursorConfigView(context, cursorManager, cursor, currentCursor, scene,
-                            settingsCursorId, configChangeListener);
+                            configChangeListener);
                 }
             });
         }
@@ -283,12 +284,16 @@ public class SettingsView extends BaseView implements OnCheckedChangeListener
             return convertView;
         }
 
-        private void updateIoDevice(final Cursor cursor, final TextView tvIoDevice) {
-            IoDevice ioDevice = cursor.getIoDevice();
-            if (cursor.isEnabled() && ioDevice != null) {
-                tvIoDevice.setText(ioDevice.getName());
+        private void updateIoDevice(final Cursor cursor, final TextView tvIoDevice)
+        {
+            SXRCursorController controller = cursor.getController();
+            if (cursor.isEnabled() && controller != null)
+            {
+                tvIoDevice.setText(controller.getName());
                 tvIoDevice.setTextColor(greenColor);
-            } else {
+            }
+            else
+            {
                 tvIoDevice.setText(R.string.no_io_device);
                 tvIoDevice.setTextColor(redColor);
             }

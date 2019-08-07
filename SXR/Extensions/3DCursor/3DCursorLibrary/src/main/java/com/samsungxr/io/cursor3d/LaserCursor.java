@@ -22,8 +22,9 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRNode;
 import com.samsungxr.ITouchEvents;
-import com.samsungxr.io.cursor3d.CursorAsset.Action;
+import com.samsungxr.io.SXRCursorController;
 import com.samsungxr.utility.Log;
+import com.samsungxr.io.cursor3d.CursorAsset.Action;
 
 /**
  * Class that represents a laser type cursor.
@@ -74,12 +75,6 @@ class LaserCursor extends Cursor {
             return;
         }
         super.setCursorDepth(depth);
-    }
-
-    @Override
-    void setIoDevice(IoDevice ioDevice) {
-        super.setIoDevice(ioDevice);
-        ioDevice.setDisableRotation(true);
     }
 
 }

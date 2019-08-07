@@ -13,46 +13,38 @@
  * limitations under the License.
  */
 
-package com.samsung.mpl.gearwearlibrary.models.events;
+package com.samsungxr.io.gearwearlibrary.events;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Rotary event occurs when the rotating bezel is moved, if the device supports it. The rotation
- * can either be clockwise or counter-clockwise.
+ * Click event that occurs when a user presses down at an initial position, then releases that
+ * press at a location 'close' to the initial position.
  */
-public class Rotary implements Parcelable {
-    public final Direction direction;
+public class Click implements Parcelable {
+    public final int x;
+    public final int y;
 
-    public enum Direction {
-        /**
-         * Clockwise
-         */
-        CW,
-        /**
-         * Counter-clockwise
-         */
-        CCW
+    public Click(int x, int y) {
+        this.x = x;
+        this.y = y;
     }
 
-    public Rotary(Direction direction) {
-        this.direction = direction;
+    protected Click(Parcel in) {
+        x = in.readInt();
+        y = in.readInt();
     }
 
-    protected Rotary(Parcel in) {
-        direction = (Direction) in.readValue(Direction.class.getClassLoader());
-    }
-
-    public static final Creator<Rotary> CREATOR = new Creator<Rotary>() {
+    public static final Creator<Click> CREATOR = new Creator<Click>() {
         @Override
-        public Rotary createFromParcel(Parcel in) {
-            return new Rotary(in);
+        public Click createFromParcel(Parcel in) {
+            return new Click(in);
         }
 
         @Override
-        public Rotary[] newArray(int size) {
-            return new Rotary[size];
+        public Click[] newArray(int size) {
+            return new Click[size];
         }
     };
 
@@ -63,13 +55,15 @@ public class Rotary implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(direction);
+        dest.writeInt(x);
+        dest.writeInt(y);
     }
 
     @Override
     public String toString() {
-        return "Rotary{" +
-                "direction=" + direction +
+        return "Click{" +
+                "x=" + x +
+                ", y=" + y +
                 '}';
     }
 }

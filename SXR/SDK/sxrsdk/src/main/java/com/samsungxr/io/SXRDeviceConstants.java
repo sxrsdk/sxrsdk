@@ -15,7 +15,8 @@
 
 package com.samsungxr.io;
 
-class SXRDeviceConstants {
+public class SXRDeviceConstants
+{
     public static final String OCULUS_GEARVR_DEVICE_NAME = "GearVR";
     public static final int GPIO_KEYBOARD_PRODUCT_ID = 1;
     public static final int GPIO_KEYBOARD_VENDOR_ID = 1;
@@ -28,4 +29,6 @@ class SXRDeviceConstants {
     public static final int SONY_DUALSHOCK_4_CONTROLLER_PRODUCT_ID = 1476;
     public static final int STEELSERIES_CONTROLLER_VENDOR_ID = 273;
     public static final int STEELSERIES_CONTROLLER_PRODUCT_ID = 5145;
+    public static final int SAMSUNG_GEARWEAR_TOUCHPAD_VENDOR_ID = 1256;
+    public static final int SAMSUNG_GEARWEAR_TOUCHPAD_PRODUCT_ID = 9898;
 }

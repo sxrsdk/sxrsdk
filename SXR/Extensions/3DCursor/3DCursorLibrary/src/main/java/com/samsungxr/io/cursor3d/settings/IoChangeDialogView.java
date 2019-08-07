@@ -36,9 +36,11 @@ class IoChangeDialogView extends BaseView implements View.OnClickListener {
 
     DialogResultListener dialogResultListener;
 
-    IoChangeDialogView(final SXRContext context, final SXRScene scene, int
-            settingsCursorId, DialogResultListener dialogResultListener) {
-        super(context, scene, settingsCursorId, R.layout.iochange_dialog_layout, DIALOG_SCALE);
+    IoChangeDialogView(final SXRContext context,
+                       final SXRScene scene,
+                       DialogResultListener dialogResultListener)
+    {
+        super(context, scene, R.layout.iochange_dialog_layout, DIALOG_SCALE);
         this.dialogResultListener = dialogResultListener;
         this.dialogResultListener = dialogResultListener;
     }

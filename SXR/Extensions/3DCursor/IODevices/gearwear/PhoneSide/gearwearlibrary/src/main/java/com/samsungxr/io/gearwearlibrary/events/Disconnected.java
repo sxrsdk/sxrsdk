@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-package com.samsung.mpl.gearwearlibrary.models.events;
+package com.samsungxr.io.gearwearlibrary.events;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Connected event
+ * Disconnected event
  */
-public class Connected implements Parcelable {
+public class Disconnected implements Parcelable {
 
-    public static final Creator<Connected> CREATOR = new Creator<Connected>() {
+    public static final Creator<Disconnected> CREATOR = new Creator<Disconnected>() {
         @Override
-        public Connected createFromParcel(Parcel in) {
-            return new Connected();
+        public Disconnected createFromParcel(Parcel in) {
+            return new Disconnected();
         }
 
         @Override
-        public Connected[] newArray(int size) {
-            return new Connected[size];
+        public Disconnected[] newArray(int size) {
+            return new Disconnected[size];
         }
     };
 
@@ -46,6 +46,6 @@ public class Connected implements Parcelable {
 
     @Override
     public String toString() {
-        return Connected.class.getSimpleName();
+        return Disconnected.class.getSimpleName();
     }
 }
