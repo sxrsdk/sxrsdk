@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.samsung.mpl.gearwearlibrary;
+package com.samsungxr.io.gearwearlibrary;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -21,8 +21,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Parcelable;
 
-import com.samsung.mpl.gearwearlibrary.models.events.Connected;
-import com.samsung.mpl.gearwearlibrary.models.events.Disconnected;
+import com.samsungxr.io.gearwearlibrary.events.Connected;
+import com.samsungxr.io.gearwearlibrary.events.Disconnected;
 
 /**
  * Event manager is used to send Samsung Gear wearable input events to other applications, as

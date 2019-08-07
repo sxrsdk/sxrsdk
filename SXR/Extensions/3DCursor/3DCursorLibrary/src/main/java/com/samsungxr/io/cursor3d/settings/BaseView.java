@@ -38,18 +38,20 @@ abstract class BaseView {
     SXRContext context;
     Activity activity;
     private SXRViewNode layoutNode;
-    int settingsCursorId;
 
-    BaseView(SXRContext context, SXRScene scene, int settingsCursorId, int layoutID) {
-        this(context, scene, settingsCursorId, layoutID, DEFAULT_SCALE);
+    BaseView(SXRContext context, SXRScene scene, int layoutID)
+    {
+        this(context, scene, layoutID, DEFAULT_SCALE);
     }
 
-    BaseView(final SXRContext context, final SXRScene scene,
-             final int settingsCursorId, final int layoutID, final float scale) {
+    BaseView(final SXRContext context,
+             final SXRScene scene,
+             final int layoutID,
+             final float scale)
+    {
         this.context = context;
         this.scene = scene;
         this.activity = context.getActivity();
-        this.settingsCursorId = settingsCursorId;
 
         layoutNode = new SXRViewNode(context, layoutID, new IViewEvents() {
             @Override
@@ -89,10 +91,6 @@ abstract class BaseView {
 
     void enable() {
         scene.addNode(layoutNode);
-    }
-
-    void setSettingsCursorId(int settingsCursorId) {
-        this.settingsCursorId = settingsCursorId;
     }
 
     protected void setGestureDetector(GestureDetector detector) {

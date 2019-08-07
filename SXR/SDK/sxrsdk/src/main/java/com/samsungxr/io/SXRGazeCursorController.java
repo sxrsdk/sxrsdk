@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.InputDevice;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRPerspectiveCamera;
 import com.samsungxr.SXRScene;
@@ -39,10 +40,10 @@ final public class SXRGazeCursorController extends SXRCursorController
     private float mDisplayDepth;
 
     SXRGazeCursorController(SXRContext context,
-                            SXRControllerType controllerType,
-                            String name, int vendorId, int productId)
+                            int vendorId,
+                            int productId)
     {
-        super(context, controllerType, name, vendorId, productId);
+        super(context, SXRControllerType.GAZE, "gearvr", vendorId, productId);
         mConnected = true;
     }
 

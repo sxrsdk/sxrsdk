@@ -13,40 +13,25 @@
  * limitations under the License.
  */
 
-package com.samsung.mpl.gearwearlibrary.models.events;
+package com.samsungxr.io.gearwearlibrary.events;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Back event that can occur in different ways, depending on the device.
- * <p>
- * Examples:
- * <ul>
- * <li>Device: Samsung Gear S2
- * <ol>
- * <li>Swipe down from top edge</li>
- * <li>Back button press</li>
- * </ol>
- * </li>
- * <li>Device: Samsung Gear 2
- * <ol>
- * <li>Swipe down from top edge</li>
- * </ol>
- * </li>
- * </ul>
+ * Occurs when user stops touching the screen (or rotary event occurs)
  */
-public class Back implements Parcelable {
+public class TouchEnd implements Parcelable {
 
-    public static final Creator<Back> CREATOR = new Creator<Back>() {
+    public static final Creator<TouchEnd> CREATOR = new Creator<TouchEnd>() {
         @Override
-        public Back createFromParcel(Parcel in) {
-            return new Back();
+        public TouchEnd createFromParcel(Parcel in) {
+            return new TouchEnd();
         }
 
         @Override
-        public Back[] newArray(int size) {
-            return new Back[size];
+        public TouchEnd[] newArray(int size) {
+            return new TouchEnd[size];
         }
     };
 
@@ -61,6 +46,6 @@ public class Back implements Parcelable {
 
     @Override
     public String toString() {
-        return Back.class.getSimpleName();
+        return TouchEnd.class.getSimpleName();
     }
 }
