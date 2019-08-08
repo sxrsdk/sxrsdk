@@ -45,6 +45,11 @@ public:
         return projection_matrix_;
     }
 
+    void setProjectionMatrix(const glm::mat4& projection_matrix) {
+        projection_matrix_ = projection_matrix;
+    }
+
+
 private:
     CustomCamera(const CustomCamera& camera) = delete;
     CustomCamera(CustomCamera&& camera) = delete;
