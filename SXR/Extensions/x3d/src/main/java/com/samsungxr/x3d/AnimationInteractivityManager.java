@@ -51,7 +51,6 @@ import com.samsungxr.animation.SXRAnimation;
 import com.samsungxr.animation.SXRAnimator;
 import com.samsungxr.animation.SXROnFinish;
 import com.samsungxr.animation.SXRRepeatMode;
-import com.samsungxr.animation.keyframe.SXRAnimationBehavior;
 import com.samsungxr.animation.keyframe.SXRAnimationChannel;
 import com.samsungxr.animation.keyframe.SXRNodeAnimation;
 
@@ -531,8 +530,7 @@ public class AnimationInteractivityManager {
                             .getNodeByName((interactiveObject.getDefinedItem().getName() + x3dObject.TRANSFORM_TRANSLATION_));
                     gvrAnimationChannel = new SXRAnimationChannel(
                             gvrAnimatedObject.getName(),
-                            interactiveObject.getInterpolator().key.length, 0, 0,
-                            SXRAnimationBehavior.LINEAR, SXRAnimationBehavior.LINEAR);
+                            interactiveObject.getInterpolator().key.length, 0, 0);
                     for (int j = 0; j < interactiveObject.getInterpolator().key.length; j++) {
                         gvrAnimationChannel.setPosKeyVector(j,
                                 interactiveObject.getInterpolator().key[j]
@@ -549,8 +547,7 @@ public class AnimationInteractivityManager {
                             .getNodeByName((interactiveObject.getDefinedItem().getName() + x3dObject.TRANSFORM_ROTATION_));
                     gvrAnimationChannel = new SXRAnimationChannel(
                             gvrAnimatedObject.getName(), 0,
-                            interactiveObject.getInterpolator().key.length, 0,
-                            SXRAnimationBehavior.DEFAULT, SXRAnimationBehavior.DEFAULT);
+                            interactiveObject.getInterpolator().key.length, 0);
 
                     for (int j = 0; j < interactiveObject.getInterpolator().key.length; j++) {
                         AxisAngle4f axisAngle4f = new AxisAngle4f(
@@ -572,8 +569,7 @@ public class AnimationInteractivityManager {
                             .getNodeByName((interactiveObject.getDefinedItem().getName() + x3dObject.TRANSFORM_SCALE_));
                     gvrAnimationChannel = new SXRAnimationChannel(
                             gvrAnimatedObject.getName(), 0, 0,
-                            interactiveObject.getInterpolator().key.length, SXRAnimationBehavior.DEFAULT,
-                            SXRAnimationBehavior.DEFAULT);
+                            interactiveObject.getInterpolator().key.length);
                     for (int j = 0; j < interactiveObject.getInterpolator().key.length; j++) {
                         gvrAnimationChannel.setScaleKeyVector(j,
                                 interactiveObject.getInterpolator().key[j]

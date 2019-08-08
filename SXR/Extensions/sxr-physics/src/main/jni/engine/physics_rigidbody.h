@@ -23,10 +23,13 @@
 #include "objects/node.h"
 #include "objects/components/component.h"
 #include "objects/components/transform.h"
+#include "physics_collidable.h"
 
 namespace sxr {
+class PhysicsWorld;
 
-class PhysicsRigidBody : public Component {
+class PhysicsRigidBody : public PhysicsCollidable
+{
  public:
 	enum SimulationType
 	{
@@ -35,18 +38,14 @@ class PhysicsRigidBody : public Component {
 		STATIC = 2
 	};
 
-	PhysicsRigidBody() : Component(PhysicsRigidBody::getComponentType()) {}
+	PhysicsRigidBody() : PhysicsCollidable(PhysicsRigidBody::getComponentType()) {}
 
 	virtual ~PhysicsRigidBody() {}
 
-	static long long getComponentType() {
-	    return COMPONENT_TYPE_PHYSICS_RIGID_BODY;
-	}
+	static long long getComponentType() { return COMPONENT_TYPE_PHYSICS_RIGID_BODY; }
 
 	virtual void setSimulationType(SimulationType t) = 0;
 	virtual SimulationType getSimulationType() const = 0;
-	virtual float getMass() = 0;
-	virtual void setMass(float mass) = 0;
     virtual void setCenterOfMass(Transform* t) = 0;
 	virtual void getRotation(float &w, float &x, float &y, float &z) = 0;
     virtual void getTranslation(float &x, float &y, float &z) = 0;
@@ -65,7 +64,6 @@ class PhysicsRigidBody : public Component {
 	virtual void setAngularVelocity(float x, float y, float z)  = 0;
 	virtual void setAngularFactor(float x, float y, float z)  = 0;
 	virtual void setLinearFactor(float x, float y, float z)  = 0;
-	virtual void setFriction(float n)  = 0;
 	virtual void setRestitution(float n)  = 0;
 
 	virtual void setSleepingThresholds(float linear, float angular)  = 0;
@@ -82,12 +80,10 @@ class PhysicsRigidBody : public Component {
 	virtual void getLinearFactor(float *v3) const = 0;
 	virtual void getDamping(float &angular, float &linear) const = 0;
 
-	virtual const float getFriction() const = 0;
-	virtual const float getRestitution() const = 0;
-	virtual const float getCcdMotionThreshold() const = 0;
-	virtual const float getCcdSweptSphereRadius() const = 0;
-	virtual const float getContactProcessingThreshold() const = 0;
-	virtual void updateConstructionInfo() = 0;
+	virtual float getRestitution() const = 0;
+	virtual float getCcdMotionThreshold() const = 0;
+	virtual float getCcdSweptSphereRadius() const = 0;
+	virtual float getContactProcessingThreshold() const = 0;
 
     virtual void reset(bool rebuildCollider = true) = 0;
 };

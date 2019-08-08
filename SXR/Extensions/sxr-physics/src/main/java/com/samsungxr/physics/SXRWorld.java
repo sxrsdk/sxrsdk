@@ -20,7 +20,6 @@ import android.util.LongSparseArray;
 
 import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRComponentGroup;
-import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRNode.ComponentVisitor;
@@ -28,8 +27,8 @@ import com.samsungxr.SXRScene;
 import com.samsungxr.SXRTransform;
 import com.samsungxr.IEventReceiver;
 import com.samsungxr.IEvents;
-import com.samsungxr.INodeEvents;
 import com.samsungxr.animation.SXRSkeleton;
+import com.samsungxr.io.SXRCursorController;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -51,12 +50,22 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
 
     static {
         System.loadLibrary("sxr-physics");
+        System.loadLibrary("LinearMath");
+        System.loadLibrary("BulletCollision");
+        System.loadLibrary("BulletDynamics");
+        System.loadLibrary("Bullet3Common");
+        System.loadLibrary("Bullet3Collision");
+        System.loadLibrary("Bullet3Dynamics");
+        System.loadLibrary("Bullet3Geometry");
+        System.loadLibrary("BulletSoftBody");
+        System.loadLibrary("Bullet2FileLoader");
+        System.loadLibrary("BulletWorldImporter");
     }
 
     private final LongSparseArray<SXRPhysicsWorldObject> mPhysicsObject = new LongSparseArray<SXRPhysicsWorldObject>();
     private final SXRCollisionMatrix mCollisionMatrix;
 
-    private final PhysicsDragger mPhysicsDragger;
+    private PhysicsDragger mPhysicsDragger = null;
     private SXRRigidBody mRigidBodyDragMe = null;
 
     /**
@@ -65,6 +74,20 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
      */
     public interface IPhysicsEvents extends IEvents
     {
+        /**
+         * Called when a joint is added to a physics world.
+         * @param world  physics world the body is added to.
+         * @param joint  joint added.
+         */
+        public void onAddJoint(final SXRWorld world, final SXRPhysicsJoint joint);
+
+        /**
+         * Called when a joint is removed from a physics world.
+         * @param world  physics world the body is removed from.
+         * @param joint  joint removed.
+         */
+        public void onRemoveJoint(final SXRWorld world, final SXRPhysicsJoint joint);
+
         /**
          * Called when a rigid body is added to a physics world.
          * @param world physics world the body is added to.
@@ -104,8 +127,18 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
      * @param scene The {@link SXRScene} this world belongs to.
      */
     public SXRWorld(SXRScene scene) {
-        this(scene, null);
+        this(scene, null, false);
     }
+
+    /**
+     * Constructs new instance to simulate the Physics World of the Scene.
+     *
+     * @param scene The {@link SXRScene} this world belongs to.
+     */
+    public SXRWorld(SXRScene scene, boolean isMultiBody) {
+        this(scene, null, isMultiBody);
+    }
+
 
     /**
      * Constructs new instance to simulate the Physics World of the Scene.
@@ -114,37 +147,75 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
      * @param interval interval (in milliseconds) at which the collisions will be updated.
      */
     public SXRWorld(SXRScene scene, long interval) {
-        this(scene, null, interval);
+        this(scene, null, interval, false);
     }
 
     /**
      * Constructs new instance to simulate the Physics World of the Scene. Defaults to a 15ms
      * update interval.
      *
-     * @param scene The {@link SXRScene} this world belongs to.
+     * @param scene           The {@link SXRScene} this world belongs to.
      * @param collisionMatrix a matrix that represents the collision relations of the bodies on the scene
      */
     public SXRWorld(SXRScene scene, SXRCollisionMatrix collisionMatrix) {
-        this(scene, collisionMatrix, DEFAULT_INTERVAL);
+        this(scene, collisionMatrix, DEFAULT_INTERVAL, false);
+    }
+
+    /**
+     * Constructs new instance to simulate the Physics World of the Scene. Defaults to a 15ms
+     * update interval.
+     *
+     * @param scene           The {@link SXRScene} this world belongs to.
+     * @param collisionMatrix a matrix that represents the collision relations of the bodies on the scene
+     * @param isMultiBody     use MultiBody dynamics
+     */
+    public SXRWorld(SXRScene scene, SXRCollisionMatrix collisionMatrix, boolean isMultiBody) {
+        this(scene, collisionMatrix, DEFAULT_INTERVAL, isMultiBody);
     }
 
     /**
      * Constructs new instance to simulate the Physics World of the Scene.
      *
-     * @param scene The {@link SXRScene} this world belongs to.
-     * @param collisionMatrix a matrix that represents the collision relations of the bodies on the scene
-     * @param interval interval (in milliseconds) at which the collisions will be updated.
+     * @param scene           The {@link SXRScene} this world belongs to.
+     * @param collisionMatrix a matrix that represents the collision relations of the bodies on the scene.
+     * @param interval        interval (in milliseconds) at which the collisions will be updated.
+     * @param isMultiBody     use MultiBody dynamics
      */
-    public SXRWorld(SXRScene scene, SXRCollisionMatrix collisionMatrix, long interval) {
-        super(scene.getSXRContext(), NativePhysics3DWorld.ctor());
+    public SXRWorld(SXRScene scene, SXRCollisionMatrix collisionMatrix, long interval, boolean isMultiBody)
+    {
+        super(scene.getSXRContext(), NativePhysics3DWorld.ctor(isMultiBody));
+        mIsEnabled = false;
         mListeners = new SXREventReceiver(this);
-        mPhysicsDragger = new PhysicsDragger(scene.getSXRContext());
         mCollisionMatrix = collisionMatrix;
         mWorldTask = new SXRWorldTask(interval);
         mPhysicsContext = SXRPhysicsContext.getInstance();
         scene.getRoot().attachComponent(this);
     }
 
+    /***
+     * Indicates which controller should be used for dragging.
+     * <p>
+     * The drag is performed on the physics thread
+     * and is synchronized with physics.
+     * You can use {@link SXRCursorController#startDrag(SXRNode)} for
+     * dragging but it does not run on the physics thread and
+     * you may get unexpected results for objects being
+     * moved by physics
+     * @param controller {@link SXRCursorController} to use for dragging,
+     *                   If null, dragging is disabled.
+     * @see #startDrag(SXRNode, float, float, float)
+     */
+    public void setDragController(SXRCursorController controller)
+    {
+        if (controller != null)
+        {
+            mPhysicsDragger = new PhysicsDragger(controller);
+        }
+        else
+        {
+            mPhysicsDragger = null;
+        }
+    }
 
     static public long getComponentType() {
         return NativePhysics3DWorld.getComponentType();
@@ -157,16 +228,26 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
      *
      * @param gvrConstraint The {@link SXRConstraint} to add.
      */
-    public void addConstraint(final SXRConstraint gvrConstraint) {
-        mPhysicsContext.runOnPhysicsThread(new Runnable() {
+    public void addConstraint(final SXRConstraint gvrConstraint)
+    {
+        mPhysicsContext.runOnPhysicsThread(new Runnable()
+        {
             @Override
-            public void run() {
-                if (contains(gvrConstraint)) {
+            public void run()
+            {
+                if (contains(gvrConstraint))
+                {
                     return;
                 }
-                if (((gvrConstraint.mBodyA != null) && !contains(gvrConstraint.mBodyA)) ||
-                    ((gvrConstraint.mBodyB != null && !contains(gvrConstraint.mBodyB)))) {
-                    throw new UnsupportedOperationException("Rigid body not found in the physics world.");
+                SXRPhysicsWorldObject bodyB = gvrConstraint.mBodyB;
+                SXRPhysicsWorldObject bodyA = gvrConstraint.mBodyA;
+
+                if ((bodyB != null) && (bodyB instanceof SXRRigidBody))
+                {
+                    if (!contains(bodyB) || ((bodyA != null) && !contains(bodyA)))
+                    {
+                        throw new UnsupportedOperationException("Rigid body used by constraint is not found in the physics world.");
+                    }
                 }
                 NativePhysics3DWorld.addConstraint(getNative(), gvrConstraint.getNative());
                 mPhysicsObject.put(gvrConstraint.getNative(), gvrConstraint);
@@ -195,15 +276,31 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
 
     /**
      * Start the drag operation of a node with a rigid body.
-     *
+     * <p>
+     * The drag operation is run on the physics thread and is
+     * synchronized with physics. It should be used instead of
+     * {@link SXRCursorController#startDrag(SXRNode)} for objects
+     * which are controlled by physics.
+     * <p>
+     * To enable dragging, you need to call {@link #setDragController(SXRCursorController)}
+     * to indicate which controller to use for dragging.
      * @param sceneObject Scene object with a rigid body attached to it.
      * @param hitX rel position in x-axis.
      * @param hitY rel position in y-axis.
      * @param hitZ rel position in z-axis.
      * @return true if success, otherwise returns false.
+     * @throws UnsupportedOperationException if no controller has been specified
+     * @see #stopDrag()
+     * @see #setDragController(SXRCursorController)
+     * @see SXRCursorController#startDrag(SXRNode)
      */
     public boolean startDrag(final SXRNode sceneObject,
-                             final float hitX, final float hitY, final float hitZ) {
+                             final float hitX, final float hitY, final float hitZ)
+    {
+        if (mPhysicsDragger == null)
+        {
+            throw new UnsupportedOperationException("You must call selectDragController before dragging");
+        }
         final SXRRigidBody dragMe = (SXRRigidBody)sceneObject.getComponent(SXRRigidBody.getComponentType());
         if (dragMe == null || dragMe.getSimulationType() != SXRRigidBody.DYNAMIC || !contains(dragMe))
             return false;
@@ -232,9 +329,26 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     }
 
     /**
-     * Stop the drag action.
+     * Stop dragging the current object being dragged.
+     * <p>
+     * The drag operation is stopped on the physics thread and is
+     * synchronized with physics. It should be used instead of
+     * {@link SXRCursorController#stopDrag()} for objects
+     * which are controlled by physics.
+     * <p>
+     * To enable dragging, you need to call {@link #setDragController(SXRCursorController)}
+     * to indicate which controller to use for dragging.
+     * If dragging is not enabled or nothing is being dragged,
+     * this function just returns.
+     * @see #startDrag(SXRNode, float, float, float)
+     * @see #setDragController(SXRCursorController)
+     * @see SXRCursorController#stopDrag()
      */
     public void stopDrag() {
+        if (mPhysicsDragger == null)
+        {
+            return;
+        }
         mPhysicsDragger.stopDrag();
 
         mPhysicsContext.runOnPhysicsThread(new Runnable() {
@@ -291,6 +405,28 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     }
 
     /**
+     * Add a {@link SXRPhysicsJoint} root to this physics world.
+     *
+     * @param body The {@link SXRPhysicsJoint} to add.
+     */
+    public void addBody(final SXRPhysicsJoint body)
+    {
+        mPhysicsContext.runOnPhysicsThread(new Runnable() {
+            @Override
+            public void run()
+            {
+                if (contains(body))
+                {
+                    return;
+                }
+                NativePhysics3DWorld.addJoint(getNative(), body.getNative());
+                mPhysicsObject.put(body.getNative(), body);
+                getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onAddJoint", SXRWorld.this, body);
+            }
+        });
+    }
+
+    /**
      * Remove a {@link SXRRigidBody} from this physics world.
      *
      * @param gvrBody the {@link SXRRigidBody} to remove.
@@ -303,6 +439,24 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
                     NativePhysics3DWorld.removeRigidBody(getNative(), gvrBody.getNative());
                     mPhysicsObject.remove(gvrBody.getNative());
                     getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onRemoveRigidBody", SXRWorld.this, gvrBody);
+                }
+            }
+        });
+    }
+
+    /**
+     * Remove a {@link SXRRigidBody} from this physics world.
+     *
+     * @param joint the {@link SXRPhysicsJoint} to remove.
+     */
+    public void removeBody(final SXRPhysicsJoint joint) {
+        mPhysicsContext.runOnPhysicsThread(new Runnable() {
+            @Override
+            public void run() {
+                if (contains(joint)) {
+                    NativePhysics3DWorld.removeJoint(getNative(), joint.getNative());
+                    mPhysicsObject.remove(joint.getNative());
+                    getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onRemoveJoint", SXRWorld.this, joint);
                 }
             }
         });
@@ -461,7 +615,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
 
             generateCollisionEvents();
             getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onStepPhysics", SXRWorld.this);
-
+/*
             SXRRigidBody[] bodies = getUpdated();
             if (bodies != null)
             {
@@ -477,6 +631,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
                     }
                 }
             }
+ */
             lastSimulTime = simulationTime;
 
             simulationTime = intervalMillis + simulationTime - SystemClock.uptimeMillis();
@@ -565,7 +720,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
 }
 
 class NativePhysics3DWorld {
-    static native long ctor();
+    static native long ctor(boolean isMultiBody);
 
     static native long getComponentType();
 
@@ -577,6 +732,10 @@ class NativePhysics3DWorld {
                                  float relX, float relY, float relZ);
 
     static native void stopDrag(long jphysics_world);
+
+    static native void addJoint(long jphysics_world, long jjoint);
+
+    static native void removeJoint(long jphysics_world, long jjoint);
 
     static native void addRigidBody(long jphysics_world, long jrigid_body);
 

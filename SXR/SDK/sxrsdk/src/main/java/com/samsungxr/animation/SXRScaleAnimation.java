@@ -19,7 +19,14 @@ import com.samsungxr.SXRHybridObject;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 
-/** Size animation. */
+/**
+ * Animates the scale component of a transform.
+ * <p>
+ * The position and scale components are unchanged and
+ * may be simultaneously updated by another animation.
+ * @see SXRTransformAnimation
+ * @see SXRPositionAnimation
+ */
 public class SXRScaleAnimation extends SXRTransformAnimation
 {
     private final float mStartX, mStartY, mStartZ;
@@ -44,8 +51,8 @@ public class SXRScaleAnimation extends SXRTransformAnimation
      * @param scaleZ
      *            Target z scale
      */
-    public SXRScaleAnimation(SXRTransform target, float duration, float scaleX,
-            float scaleY, float scaleZ)
+    public SXRScaleAnimation(SXRTransform target, float duration,
+                             float scaleX, float scaleY, float scaleZ)
     {
         super(target, duration);
         if (duration < 0)
@@ -100,7 +107,7 @@ public class SXRScaleAnimation extends SXRTransformAnimation
      *            Target z scale
      */
     public SXRScaleAnimation(SXRNode target, float duration,
-            float scaleX, float scaleY, float scaleZ)
+                             float scaleX, float scaleY, float scaleZ)
     {
         this(target.getTransform(), duration, scaleX, scaleY, scaleZ);
         String name = target.getName();
@@ -128,6 +135,29 @@ public class SXRScaleAnimation extends SXRTransformAnimation
     public SXRScaleAnimation(SXRNode target, float duration, float scale)
     {
         this(target, duration, scale, scale, scale);
+    }
+
+    /**
+     * Construct one scale animation based on another.
+     * <p>
+     * Both animations will affect the same target node.
+     * @param src {@link SXRScaleAnimation} to copy.
+     */
+    public SXRScaleAnimation(final SXRScaleAnimation src)
+    {
+        super(src.mTransform, src.mDuration);
+        mStartX = src.mStartX;
+        mStartY = src.mStartY;
+        mStartZ = src.mStartZ;
+        mDeltaX = src.mDeltaX;
+        mDeltaY = src.mDeltaY;
+        mDeltaZ = src.mDeltaZ;
+    }
+
+    @Override
+    public SXRAnimation copy()
+    {
+        return new SXRScaleAnimation(this);
     }
 
     @Override

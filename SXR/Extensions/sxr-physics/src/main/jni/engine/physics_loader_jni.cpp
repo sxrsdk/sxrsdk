@@ -13,17 +13,12 @@
  * limitations under the License.
  */
 
-#include <android/asset_manager.h>
-#include <android/asset_manager_jni.h>
-
 #include "physics_world.h"
 #include "physics_rigidbody.h"
 #include "physics_constraint.h"
-#include "physics_loader.h"
-
 #include "bullet/bullet_fileloader.h"
 
-static char tag[] = "PhysLoaderJNI";
+static char tag[] = "PHYSICS";
 
 namespace sxr {
 extern "C" {

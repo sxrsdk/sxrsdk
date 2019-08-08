@@ -18,7 +18,7 @@
 #define BULLET_FIXEDCONSTRAINT_H
 
 #include "../physics_fixedconstraint.h"
-#include "bullet_object.h"
+#include "../physics_collidable.h"
 
 class btFixedConstraint;
 
@@ -27,11 +27,11 @@ namespace sxr {
     class PhysicsRigidBody;
     class BulletRigidBody;
 
-    class BulletFixedConstraint : public PhysicsFixedConstraint,
-                                         BulletObject  {
+    class BulletFixedConstraint : public PhysicsFixedConstraint
+    {
 
     public:
-        explicit BulletFixedConstraint(PhysicsRigidBody* rigidBodyB);
+        explicit BulletFixedConstraint(PhysicsCollidable* bodyA);
 
         BulletFixedConstraint(btFixedConstraint *constraint);
 
@@ -45,12 +45,11 @@ namespace sxr {
 
         float getBreakingImpulse() const;
 
-        void updateConstructionInfo();
+        void updateConstructionInfo(PhysicsWorld* world);
 
     private:
-        btFixedConstraint *mFixedConstraint;
-        BulletRigidBody *mRigidBodyB; //this is A
-
+        btFixedConstraint* mFixedConstraint;
+        PhysicsCollidable* mRigidBodyA;
         float mBreakingImpulse;
     };
 

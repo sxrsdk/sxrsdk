@@ -24,28 +24,28 @@ import com.samsungxr.SXRNode;
 
 /**
  * Represents a constraint that restricts translation of two {@linkplain SXRRigidBody rigid bodies}
- * to keep fixed distance from a local pivot.
+ * or {@linkplain SXRPhysicsJoint joins} to keep fixed distance from a local pivot.
  */
-public class SXRPoint2PointConstraint extends SXRConstraint {
-
+public class SXRPoint2PointConstraint extends SXRConstraint
+{
     /**
      * Constructs new instance of point-to-point constraint.
      *
-     * @param gvrContext the context of the app
-     * @param rigidBodyB the second rigid body (not the owner) in this constraint
-     * @param pivotInA the pivot point (x, y and z coordinates) related to body A (the owner)
-     * @param pivotInB the pivot point related to body B
+     * @param ctx       the context of the app
+     * @param bodyA     the first rigid body (not the owner) in this constraint
+     * @param pivotInA  the pivot point (x, y and z coordinates) related to body A
+     * @param pivotInB  the pivot point related to body B (the owner)
      */
-    public SXRPoint2PointConstraint(SXRContext gvrContext, SXRRigidBody rigidBodyB,
-                                    float pivotInA[], float pivotInB[]) {
-        this(gvrContext,
-                Native3DPoint2PointConstraint.ctor(rigidBodyB.getNative(), pivotInA, pivotInB));
-
-        mBodyB = rigidBodyB;
+    public SXRPoint2PointConstraint(SXRContext ctx, SXRPhysicsWorldObject bodyA,
+                                    float pivotInA[], float pivotInB[])
+    {
+        this(ctx, Native3DPoint2PointConstraint.ctor(bodyA.getNative(), pivotInA, pivotInB));
+        mBodyA = bodyA;
     }
 
     /** Used only by {@link SXRPhysicsLoader} */
-    SXRPoint2PointConstraint(SXRContext gvrContext, long nativeConstraint) {
+    SXRPoint2PointConstraint(SXRContext gvrContext, long nativeConstraint)
+    {
         super(gvrContext, nativeConstraint);
     }
 
@@ -63,7 +63,8 @@ public class SXRPoint2PointConstraint extends SXRConstraint {
      *
      * @param pivot an array containing x, y and z coordinates of new pivot
      */
-    public void setPivotInA(final float pivot[]) {
+    public void setPivotInA(final float pivot[])
+    {
         Native3DPoint2PointConstraint.setPivotInA(getNative(), pivot[0], pivot[1], pivot[2]);
     }
 
@@ -81,12 +82,14 @@ public class SXRPoint2PointConstraint extends SXRConstraint {
      *
      * @param pivot an array containing x, y and z coordinates of new pivot
      */
-    public void setPivotInB(final float pivot[]) {
+    public void setPivotInB(final float pivot[])
+    {
         Native3DPoint2PointConstraint.setPivotInB(getNative(), pivot[0], pivot[1], pivot[2]);
     }
 }
 
-class Native3DPoint2PointConstraint {
+class Native3DPoint2PointConstraint
+{
     static native long ctor(long rbB, float pivotInA[], float pivotInB[]);
 
     static native void setPivotInA(long nativeConstraint, float x, float y, float z);

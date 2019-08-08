@@ -20,17 +20,18 @@
 #ifndef PHYSICS_WORLD_H_
 #define PHYSICS_WORLD_H_
 
-#include "physics_common.h"
 #include "physics_rigidbody.h"
+#include "physics_joint.h"
 #include "physics_constraint.h"
 #include "../objects/node.h"
 #include <list>
 
 namespace sxr {
+class PhysicsConstraint;
 
 struct ContactPoint {
-	PhysicsRigidBody* body0 = 0;
-	PhysicsRigidBody* body1 = 0;
+	PhysicsCollidable* body0 = 0;
+	PhysicsCollidable* body1 = 0;
 	float normal[3] = {0.0f, 0.0f, 0.0f};
 	float distance = 0.0f;
 	bool isHit = true;
@@ -38,7 +39,10 @@ struct ContactPoint {
 
 class PhysicsWorld : public Component {
 public:
-    PhysicsWorld() : Component(PhysicsWorld::getComponentType()){}
+    PhysicsWorld() : Component(PhysicsWorld::getComponentType())
+    {
+
+    }
 
     virtual ~PhysicsWorld() {}
 
@@ -46,6 +50,7 @@ public:
         return COMPONENT_TYPE_PHYSICS_WORLD;
     }
 
+    virtual bool isMultiBody() = 0;
     virtual void addConstraint(PhysicsConstraint *constraint) = 0;
 
     virtual void removeConstraint(PhysicsConstraint *constraint) = 0;
@@ -57,6 +62,10 @@ public:
 
     virtual void addRigidBody(PhysicsRigidBody *body) = 0;
 
+    virtual void addJoint(PhysicsJoint *body) = 0;
+
+    virtual void removeJoint(PhysicsJoint *body) = 0;
+
     virtual void addRigidBody(PhysicsRigidBody *body, int collisiontype, int collidesWith) = 0;
 
     virtual void removeRigidBody(PhysicsRigidBody *body) = 0;
@@ -67,9 +76,9 @@ public:
 
     virtual void setGravity(float gx, float gy, float gz) = 0;
 
-    virtual int getUpdated(std::vector<PhysicsRigidBody*>& bodies) = 0;
+    virtual int getUpdated(std::vector<PhysicsCollidable*>& bodies) = 0;
 
-    virtual PhysicsVec3 getGravity() const = 0;
+    virtual const glm::vec3& getGravity() const = 0;
 };
 
 }

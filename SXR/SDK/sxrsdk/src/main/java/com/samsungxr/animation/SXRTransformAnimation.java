@@ -26,7 +26,10 @@ import org.joml.Vector3f;
 
 
 /**
- * Represents animation based on a sequence of key frames.
+ * Animation which affects a transform over time.
+ * <p>
+ * This class is intended to be a base class
+ * for subclasses which actually animate the transform.
  */
 public class SXRTransformAnimation extends SXRAnimation implements PrettyPrint
 {
@@ -35,7 +38,6 @@ public class SXRTransformAnimation extends SXRAnimation implements PrettyPrint
     protected final Vector3f mScale = new Vector3f();
     protected final Quaternionf mRotation = new Quaternionf();
     protected final SXRTransform mTransform;
-
 
     /**
      * Constructor.
@@ -57,6 +59,13 @@ public class SXRTransformAnimation extends SXRAnimation implements PrettyPrint
         }
     }
 
+
+    @Override
+    public SXRAnimation copy()
+    {
+        return new SXRTransformAnimation(mTransform, mDuration);
+    }
+
     @Override
     public void prettyPrint(StringBuffer sb, int indent)
     {
@@ -72,11 +81,6 @@ public class SXRTransformAnimation extends SXRAnimation implements PrettyPrint
         StringBuffer sb = new StringBuffer();
         prettyPrint(sb, 0);
         return sb.toString();
-    }
-
-    Matrix4f getCurrentMatrix()
-    {
-        return mTempMtx;
     }
 
     public void setPosition(float x, float y, float z)

@@ -23,44 +23,76 @@ namespace sxr {
 
     extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DConstraint_getComponentType(JNIEnv * env, jobject obj);
+    Java_com_samsungxr_physics_Native3DConstraint_getComponentType(JNIEnv * env, jclass obj);
 
     JNIEXPORT jint JNICALL
-    Java_com_samsungxr_physics_Native3DConstraint_getConstraintType(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConstraint_getConstraintType(JNIEnv * env, jclass obj,
                                                                   jlong jconstraint);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DConstraint_setBreakingImpulse(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConstraint_setBreakingImpulse(JNIEnv * env, jclass obj,
                                                                    jlong jconstraint,
                                                                    jfloat impulse);
 
     JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DConstraint_getBreakingImpulse(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConstraint_getBreakingImpulse(JNIEnv * env, jclass obj,
                                                                    jlong jconstraint);
+
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_physics_Native3DConstraint_addChildComponent(JNIEnv * env, jclass obj,
+                                                                     jlong jconstraint,
+                                                                     jlong jchild);
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_physics_Native3DConstraint_removeChildComponent(JNIEnv * env, jclass obj,
+                                                                    jlong jconstraint,
+                                                                    jlong jchild);
     }
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DConstraint_getComponentType(JNIEnv * env, jobject obj) {
+    Java_com_samsungxr_physics_Native3DConstraint_getComponentType(JNIEnv * env, jclass obj)
+    {
         return PhysicsConstraint::getComponentType();
     }
 
     JNIEXPORT jint JNICALL
-    Java_com_samsungxr_physics_Native3DConstraint_getConstraintType(JNIEnv * env, jobject obj,
-                                                                  jlong jconstraint) {
+    Java_com_samsungxr_physics_Native3DConstraint_getConstraintType(JNIEnv * env, jclass obj,
+                                                                  jlong jconstraint)
+    {
         return reinterpret_cast<PhysicsConstraint*>(jconstraint)->getConstraintType();
     }
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DConstraint_setBreakingImpulse(JNIEnv * env, jobject obj,
+    Java_com_samsungxr_physics_Native3DConstraint_setBreakingImpulse(JNIEnv * env, jclass obj,
                                                                    jlong jconstraint,
-                                                                   jfloat impulse) {
+                                                                   jfloat impulse)
+    {
         reinterpret_cast<PhysicsConstraint*>(jconstraint)->setBreakingImpulse(impulse);
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DConstraint_getBreakingImpulse(JNIEnv * env, jobject obj,
-                                                                   jlong jconstraint) {
+    Java_com_samsungxr_physics_Native3DConstraint_getBreakingImpulse(JNIEnv * env, jclass obj,
+                                                                   jlong jconstraint)
+    {
         return reinterpret_cast<PhysicsConstraint*>(jconstraint)->getBreakingImpulse();
+    }
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_physics_Native3DConstraint_addChildComponent(JNIEnv * env, jclass obj,
+                                                                    jlong jconstraint,
+                                                                    jlong jchild)
+    {
+        PhysicsConstraint* parent = reinterpret_cast<PhysicsConstraint*>(jconstraint);
+        PhysicsConstraint* child = reinterpret_cast<PhysicsConstraint*>(jchild);
+        parent->addChildComponent(child);
+    }
+
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_physics_Native3DConstraint_removeChildComponent(JNIEnv * env, jclass obj,
+                                                                       jlong jconstraint,
+                                                                       jlong jchild)
+    {
+        PhysicsConstraint* parent = reinterpret_cast<PhysicsConstraint*>(jconstraint);
+        PhysicsConstraint* child = reinterpret_cast<PhysicsConstraint*>(jchild);
+        parent->removeChildComponent(child);
     }
 
 }

@@ -13,29 +13,46 @@
  * limitations under the License.
  */
 #include <algorithm>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <contrib/glm/ext.hpp>
+
 #include "bullet_world.h"
 #include "bullet_rigidbody.h"
+#include "bullet_joint.h"
+#include "bullet_sxr_utils.h"
+#include "util/sxr_log.h"
 
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
+#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
-
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
+#include <BulletDynamics/Featherstone/btMultiBody.h>
+#include <BulletDynamics/Featherstone/btMultiBodyLink.h>
+#include <BulletDynamics/Featherstone/btMultiBodyLinkCollider.h>
 #include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h>
+#include <BulletDynamics/Featherstone/btMultiBodyConstraintSolver.h>
+#include <BulletDynamics/Featherstone/btMultiBodyDynamicsWorld.h>
 
-#include <android/log.h>
 
 namespace sxr {
 
-BulletWorld::BulletWorld() {
-    initialize();
+BulletWorld::BulletWorld(bool isMultiBody)
+{
+    initialize(isMultiBody);
 }
 
 BulletWorld::~BulletWorld() {
     finalize();
 }
 
-void BulletWorld::initialize() {
+bool BulletWorld::isMultiBody() { return mIsMultiBody; }
+
+void BulletWorld::initialize(bool isMultiBody)
+{
+    mIsMultiBody = isMultiBody;
+
     // Default setup for memory, collision setup.
     mCollisionConfiguration = new btDefaultCollisionConfiguration();
 
@@ -46,25 +63,48 @@ void BulletWorld::initialize() {
     mOverlappingPairCache = new btDbvtBroadphase();
 
     ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
-    mSolver = new btSequentialImpulseConstraintSolver;
-
-    mPhysicsWorld = new btDiscreteDynamicsWorld(mDispatcher, mOverlappingPairCache, mSolver,
-                                                mCollisionConfiguration);
-
-    mPhysicsWorld->setGravity(btVector3(0, -10, 0));
-
+    if (isMultiBody)
+    {
+        mSolver = new btMultiBodyConstraintSolver();
+        mPhysicsWorld = new btMultiBodyDynamicsWorld(mDispatcher,
+                mOverlappingPairCache,
+                (btMultiBodyConstraintSolver*) mSolver,
+                mCollisionConfiguration);
+        mPhysicsWorld->getSolverInfo().m_globalCfm = 1e-3;
+    }
+    else
+    {
+        mSolver = new btSequentialImpulseConstraintSolver();
+        mPhysicsWorld = new btDiscreteDynamicsWorld(mDispatcher,
+                mOverlappingPairCache,
+                mSolver,
+                mCollisionConfiguration);
+    }
+    mPhysicsWorld->setGravity(btVector3(0, -9.81f, 0));
     mDraggingConstraint = nullptr;
 }
 
-void BulletWorld::finalize() {
-    for (int i = mPhysicsWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
+void BulletWorld::finalize()
+{
+    for (int i = mPhysicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
+    {
         btCollisionObject *obj = mPhysicsWorld->getCollisionObjectArray()[i];
-        if (obj) {
+        if (obj)
+        {
             mPhysicsWorld->removeCollisionObject(obj);
             delete obj;
         }
     }
 
+    if (isMultiBody())
+    {
+        btMultiBodyDynamicsWorld* world = static_cast<btMultiBodyDynamicsWorld*>(mPhysicsWorld);
+        for (int i = 0; i < world->getNumMultibodies(); ++i)
+        {
+            btMultiBody* mb = world->getMultiBody(i);
+            world->removeMultiBody(mb);
+        }
+    }
     if (nullptr != mDraggingConstraint)
     {
         delete mDraggingConstraint;
@@ -85,11 +125,13 @@ void BulletWorld::finalize() {
     delete mCollisionConfiguration;
 }
 
-btDynamicsWorld* BulletWorld::getPhysicsWorld() const {
+btDynamicsWorld* BulletWorld::getPhysicsWorld() const
+{
     return mPhysicsWorld;
 }
 
-int BulletWorld::getUpdated(std::vector<PhysicsRigidBody*>& updated) {
+int BulletWorld::getUpdated(std::vector<PhysicsCollidable*>& updated)
+{
     int n = mBodiesChanged.size();
 
     if (n > 0)
@@ -100,24 +142,40 @@ int BulletWorld::getUpdated(std::vector<PhysicsRigidBody*>& updated) {
     return n;
 }
 
-void BulletWorld::markUpdated(PhysicsRigidBody* body) {
+void BulletWorld::markUpdated(PhysicsCollidable* body)
+{
     mBodiesChanged.push_back(body);
 }
 
+void BulletWorld::addConstraint(PhysicsConstraint *constraint)
+{
+    constraint->updateConstructionInfo(this);
+    Node* owner = constraint->owner_object();
+    PhysicsJoint* joint = static_cast<PhysicsJoint*>(owner->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
 
-void BulletWorld::addConstraint(PhysicsConstraint *constraint) {
-    constraint->updateConstructionInfo();
-    btTypedConstraint *_constr = reinterpret_cast<btTypedConstraint*>(constraint->getUnderlying());
-    mPhysicsWorld->addConstraint(_constr);
+    if (joint == nullptr)
+    {
+        btTypedConstraint *_constr = reinterpret_cast<btTypedConstraint *>(constraint->getUnderlying());
+        mPhysicsWorld->addConstraint(_constr);
+    }
 }
 
-void BulletWorld::removeConstraint(PhysicsConstraint *constraint) {
-    mPhysicsWorld->removeConstraint(reinterpret_cast<btTypedConstraint*>(constraint->getUnderlying()));
+void BulletWorld::removeConstraint(PhysicsConstraint *constraint)
+{
+    Node* owner = constraint->owner_object();
+    PhysicsJoint* joint = static_cast<PhysicsJoint*>(owner->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
+
+    if (joint == nullptr)
+    {
+        mPhysicsWorld->removeConstraint(
+                reinterpret_cast<btTypedConstraint *>(constraint->getUnderlying()));
+    }
 }
 
 void BulletWorld::startDrag(Node *pivot_obj, PhysicsRigidBody *target,
-                            float relx, float rely, float relz) {
-    btRigidBody *rb = reinterpret_cast<BulletRigidBody*>(target)->getRigidBody();
+                            float relx, float rely, float relz)
+{
+    btRigidBody* rb = reinterpret_cast<BulletRigidBody*>(target)->getRigidBody();
     mActivationState = rb->getActivationState();
     rb->setActivationState(DISABLE_DEACTIVATION);
 
@@ -129,8 +187,9 @@ void BulletWorld::startDrag(Node *pivot_obj, PhysicsRigidBody *target,
     mPivotObject = pivot_obj;
 }
 
-void BulletWorld::stopDrag() {
-    btRigidBody *rb = &mDraggingConstraint->getRigidBodyA();
+void BulletWorld::stopDrag()
+{
+    btRigidBody* rb = &mDraggingConstraint->getRigidBodyA();
     rb->forceActivationState(mActivationState);
     rb->activate();
 
@@ -139,39 +198,146 @@ void BulletWorld::stopDrag() {
     mDraggingConstraint = nullptr;
 }
 
-void BulletWorld::addRigidBody(PhysicsRigidBody *body) {
-    BulletRigidBody *rb = static_cast<BulletRigidBody *>(body);
-    body->updateConstructionInfo();
+void BulletWorld::addRigidBody(PhysicsRigidBody *body)
+{
+    BulletRigidBody* rb = static_cast<BulletRigidBody *>(body);
+    body->updateConstructionInfo(this);
     mPhysicsWorld->addRigidBody(rb->getRigidBody());
     rb->mWorld = this;
 }
 
-void BulletWorld::addRigidBody(PhysicsRigidBody *body, int collisiontype, int collidesWith) {
-    BulletRigidBody *rb = static_cast<BulletRigidBody *>(body);
-    body->updateConstructionInfo();
+void BulletWorld::addRigidBody(PhysicsRigidBody *body, int collisiontype, int collidesWith)
+{
+    BulletRigidBody* rb = static_cast<BulletRigidBody *>(body);
+    body->updateConstructionInfo(this);
     mPhysicsWorld->addRigidBody(rb->getRigidBody(), collidesWith, collisiontype);
     rb->mWorld = this;
 }
 
-void BulletWorld::removeRigidBody(PhysicsRigidBody *body) {
+void BulletWorld::removeRigidBody(PhysicsRigidBody *body)
+{
     mPhysicsWorld->removeRigidBody((static_cast<BulletRigidBody *>(body))->getRigidBody());
 }
 
-void BulletWorld::step(float timeStep, int maxSubSteps) {
+void BulletWorld::addJoint(PhysicsJoint *joint)
+{
+    if (isMultiBody())
+    {
+        joint->updateConstructionInfo(this);
+        if (joint->getBoneID() == 0)
+        {
+            mMultiBodies.push_back((BulletJoint*) joint);
+        }
+    }
+}
+
+void BulletWorld::removeJoint(PhysicsJoint *body)
+{
+    if (isMultiBody() && (body->getBoneID() == 0))
+    {
+        btMultiBodyDynamicsWorld* world = static_cast<btMultiBodyDynamicsWorld*>(mPhysicsWorld);
+        btMultiBody* mb = static_cast<BulletJoint*>(body)->getMultiBody();
+        world->removeMultiBody(mb);
+    }
+}
+
+void BulletWorld::step(float timeStep, int maxSubSteps)
+{
     if (mDraggingConstraint != nullptr)
     {
         auto matrixB = mPivotObject->transform()->getModelMatrix(true);
         mDraggingConstraint->setPivotB(btVector3(matrixB[3][0], matrixB[3][1], matrixB[3][2]));
     }
+    if (mIsMultiBody)
+    {
+        finalizeMultiBody();
+        setPhysicsTransforms();
+        mPhysicsWorld->stepSimulation(timeStep, maxSubSteps);
+        getPhysicsTransforms();
+    }
+    else
+    {
+        mPhysicsWorld->stepSimulation(timeStep, maxSubSteps);
+    }
+}
 
-    mPhysicsWorld->stepSimulation(timeStep, maxSubSteps);
+void BulletWorld::finalizeMultiBody()
+{
+    for (int i = 0; i < mMultiBodies.size(); ++i)
+    {
+        BulletJoint* mb = mMultiBodies[i];
+        mb->validate();
+    }
+    mMultiBodies.clear();
+}
+
+void BulletWorld::setPhysicsTransforms()
+{
+    btMultiBodyDynamicsWorld* world = static_cast<btMultiBodyDynamicsWorld*>(mPhysicsWorld);
+    for (int i = 0; i < world->getNumMultibodies(); ++i)
+    {
+        btMultiBody* mb = world->getMultiBody(i);
+        BulletJoint* joint = static_cast<BulletJoint*>(mb->getUserPointer());
+
+        if (!joint->isReady())
+        {
+            continue;
+        }
+        joint->updateWorldTransform();
+        for (int j = 0; j < mb->getNumLinks(); ++j)
+        {
+            btMultibodyLink& link = mb->getLink(j);
+            joint = (BulletJoint*) link.m_collider->getUserPointer();
+            if (joint->isReady())
+            {
+                joint->updateWorldTransform();
+            }
+        }
+    }
+}
+
+void BulletWorld::getPhysicsTransforms()
+{
+    btMultiBodyDynamicsWorld* world = static_cast<btMultiBodyDynamicsWorld*>(mPhysicsWorld);
+    for (int i = 0; i < world->getNumMultibodies(); ++i)
+    {
+        btMultiBody* mb = world->getMultiBody(i);
+        BulletJoint* joint = static_cast<BulletJoint*>(mb->getUserPointer());
+        Node* owner = joint->owner_object();
+        Transform* t = owner->transform();
+
+        if (!joint->isReady())
+        {
+            continue;
+        }
+        if (joint->enabled())
+        {
+            joint->setWorldTransform(mb->getBaseWorldTransform());
+            LOGE("BULLET: WORLD %s %f, %f, %f", owner->name().c_str(), t->position_x(), t->position_y(), t->position_z());
+        }
+        for (int j = 0; j < mb->getNumLinks(); ++j)
+        {
+            btMultibodyLink& link = mb->getLink(j);
+            btMultiBodyLinkCollider* collider = link.m_collider;
+            joint = (BulletJoint*)  collider->getUserPointer();
+            if (joint->enabled() && joint->isReady())
+            {
+                const btTransform &t = collider->getWorldTransform();
+                joint->setWorldTransform(t);
+            }
+            owner = joint->owner_object();
+            t = owner->transform();
+            LOGE("BULLET: WORLD %s %f, %f, %f", owner->name().c_str(), t->position_x(), t->position_y(), t->position_z());
+        }
+    }
 }
 
 /**
  * Returns by reference the list of new and ceased collisions
  *  that will be the objects of ONENTER and ONEXIT events.
  */
-void BulletWorld::listCollisions(std::list <ContactPoint> &contactPoints) {
+void BulletWorld::listCollisions(std::list <ContactPoint> &contactPoints)
+{
 
 /*
  * Creates a list of all the current collisions on the World
@@ -186,8 +352,8 @@ void BulletWorld::listCollisions(std::list <ContactPoint> &contactPoints) {
         contactManifold = mPhysicsWorld->getDispatcher()->
                 getManifoldByIndexInternal(i);
 
-        contactPt.body0 = (BulletRigidBody *) (contactManifold->getBody0()->getUserPointer());
-        contactPt.body1 = (BulletRigidBody *) (contactManifold->getBody1()->getUserPointer());
+        contactPt.body0 = (PhysicsCollidable*) (contactManifold->getBody0()->getUserPointer());
+        contactPt.body1 = (PhysicsCollidable*) (contactManifold->getBody1()->getUserPointer());
         contactPt.normal[0] = contactManifold->getContactPoint(0).m_normalWorldOnB.getX();
         contactPt.normal[1] = contactManifold->getContactPoint(0).m_normalWorldOnB.getY();
         contactPt.normal[2] = contactManifold->getContactPoint(0).m_normalWorldOnB.getZ();
@@ -203,7 +369,8 @@ void BulletWorld::listCollisions(std::list <ContactPoint> &contactPoints) {
          * collision, then it should be on the return list, because it is an onEnter event
          * */
         auto it = prevCollisions.find(collisionPair);
-        if ( it == prevCollisions.end()) {
+        if ( it == prevCollisions.end())
+        {
             contactPoints.push_front(contactPt);
         } 
         contactManifold = 0;
@@ -214,8 +381,10 @@ void BulletWorld::listCollisions(std::list <ContactPoint> &contactPoints) {
      * if one of its collisions is not on the current collision list, then it should be
      * on the return list, because it is an onExit event
      * */
-    for (auto it = prevCollisions.begin(); it != prevCollisions.end(); ++it) {
-        if (currCollisions.find(it->first) == currCollisions.end()) {
+    for (auto it = prevCollisions.begin(); it != prevCollisions.end(); ++it)
+    {
+        if (currCollisions.find(it->first) == currCollisions.end())
+        {
             ContactPoint cp = it->second;
             cp.isHit = false;
             contactPoints.push_front(cp);
@@ -231,24 +400,24 @@ void BulletWorld::listCollisions(std::list <ContactPoint> &contactPoints) {
 }
 
 
-void BulletWorld::setGravity(float x, float y, float z) {
+void BulletWorld::setGravity(float x, float y, float z)
+{
     mPhysicsWorld->setGravity(btVector3(x, y, z));
 }
 
-void BulletWorld::setGravity(glm::vec3 gravity) {
+void BulletWorld::setGravity(glm::vec3 gravity)
+{
     mPhysicsWorld->setGravity(btVector3(gravity.x, gravity.y, gravity.z));
 }
 
-PhysicsVec3 BulletWorld::getGravity() const
+const glm::vec3& BulletWorld::getGravity() const
 {
     btVector3 g = mPhysicsWorld->getGravity();
 
-    PhysicsVec3 gravity;
-    gravity.x = g.getX();
-    gravity.y = g.getY();
-    gravity.z = g.getZ();
-
-    return gravity;
+    mGravity.x = g.getX();
+    mGravity.y = g.getY();
+    mGravity.z = g.getZ();
+    return mGravity;
 }
 
 }

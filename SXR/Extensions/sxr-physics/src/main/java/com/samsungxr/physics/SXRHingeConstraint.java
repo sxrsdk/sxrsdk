@@ -22,31 +22,31 @@ import com.samsungxr.SXRContext;
  */
 
 /**
- * Represents a hinge constraint that restricts two {@linkplain SXRRigidBody rigid bodies} to only
- * rotate around one axis.
+ * Represents a hinge constraint that restricts two {@linkplain SXRRigidBody rigid bodies}
+ * or {@linkplain SXRPhysicsJoint joints }to only rotate around one axis.
  */
-public class SXRHingeConstraint extends SXRConstraint {
+public class SXRHingeConstraint extends SXRConstraint
+{
 
     /**
      * Constructs a new instance of hinge constraint.
      *
-     * @param gvrContext the context of the app
-     * @param rigidBodyB the second rigid body (not the owner) in this constraint
-     * @param pivotInA the pivot point related to body A (the owner)
-     * @param pivotInB the pivot point related to body B
-     * @param axisInA the axis around which body A can rotate
-     * @param axisInB the axis around which body B can rotate
+     * @param ctx the context of the app
+     * @param bodyA      the first rigid body (not the owner) in this constraint
+     * @param pivotInA   the pivot point related to body A
+     * @param pivotInB   the pivot point related to body B (the owner)
+     * @param axisIn     the axis around which body A can rotate
      */
-    public SXRHingeConstraint(SXRContext gvrContext, SXRRigidBody rigidBodyB, float pivotInA[],
-                                 float pivotInB[], float axisInA[], float axisInB[]) {
-        this(gvrContext, Native3DHingeConstraint.ctor(rigidBodyB.getNative(), pivotInA, pivotInB,
-                axisInA, axisInB));
-
-        mBodyB = rigidBodyB;
+    public SXRHingeConstraint(SXRContext ctx, SXRPhysicsWorldObject bodyA, float pivotInA[],
+                                 float pivotInB[], float axisIn[])
+    {
+        this(ctx, Native3DHingeConstraint.ctor(bodyA.getNative(), pivotInA, pivotInB, axisIn));
+        mBodyA = bodyA;
     }
 
     /** Used only by {@link SXRPhysicsLoader} */
-    SXRHingeConstraint(SXRContext gvrContext, long nativeConstraint) {
+    SXRHingeConstraint(SXRContext gvrContext, long nativeConstraint)
+    {
         super(gvrContext, nativeConstraint);
     }
 
@@ -56,7 +56,8 @@ public class SXRHingeConstraint extends SXRConstraint {
      * @param lower lower limit
      * @param upper upper limit
      */
-    public void setLimits(float lower, float upper) {
+    public void setLimits(float lower, float upper)
+    {
         Native3DHingeConstraint.setLimits(getNative(), lower, upper);
     }
 
@@ -80,9 +81,9 @@ public class SXRHingeConstraint extends SXRConstraint {
     }
 }
 
-class Native3DHingeConstraint {
-    static native long ctor(long rbB, float pivotInA[], float pivotInB[], float axisInA[],
-                            float axisInB[]);
+class Native3DHingeConstraint
+{
+    static native long ctor(long rbB, float pivotInA[], float pivotInB[], float axisIn[]);
 
     static native void setLimits(long nativeConstraint, float lower, float upper);
 

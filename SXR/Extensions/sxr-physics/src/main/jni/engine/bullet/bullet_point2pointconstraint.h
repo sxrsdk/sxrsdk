@@ -18,7 +18,8 @@
 #define BULLET_POINT2POINTCONSTRAINT_H
 
 #include "../physics_point2pointconstraint.h"
-#include "bullet_object.h"
+#include "../physics_collidable.h"
+#include <glm/vec3.hpp>
 
 class btPoint2PointConstraint;
 
@@ -27,18 +28,19 @@ namespace sxr {
     class PhysicsRigidBody;
     class BulletRigidBody;
 
-    class BulletPoint2PointConstraint : public PhysicsPoint2pointConstraint,
-                                               BulletObject {
+    class BulletPoint2PointConstraint : public PhysicsPoint2pointConstraint
+    {
 
     public:
-        explicit BulletPoint2PointConstraint(PhysicsRigidBody* rigidBodyB, float pivotInA[],
-                                             float pivotInB[]);
+        explicit BulletPoint2PointConstraint(PhysicsCollidable* bodyA,
+                                             float pivotInA[],float pivotInB[]);
 
         BulletPoint2PointConstraint(btPoint2PointConstraint *constraint);
 
         virtual ~BulletPoint2PointConstraint();
 
-        virtual void* getUnderlying() {
+        virtual void* getUnderlying()
+        {
             return this->mPoint2PointConstraint;
         }
 
@@ -46,23 +48,23 @@ namespace sxr {
 
         float getBreakingImpulse() const;
 
-        void setPivotInA(PhysicsVec3 pivot);
+        void setPivotInA(const glm::vec3& pivot);
 
-        PhysicsVec3 getPivotInA() const { return mPivotInA; }
+        const glm::vec3& getPivotInA() const { return mPivotInA; }
 
-        void setPivotInB(PhysicsVec3 pivot);
+        void setPivotInB(const glm::vec3& pivot);
 
-        PhysicsVec3 getPivotInB() const { return mPivotInB; }
+        const glm::vec3& getPivotInB() const { return mPivotInB; }
 
-        void updateConstructionInfo();
+        void updateConstructionInfo(PhysicsWorld* world);
 
     private:
-        btPoint2PointConstraint *mPoint2PointConstraint;
-        BulletRigidBody *mRigidBodyB;
+        btPoint2PointConstraint* mPoint2PointConstraint;
+        PhysicsCollidable*       mRigidBodyA;
 
-        float mBreakingImpulse;
-        PhysicsVec3 mPivotInA;
-        PhysicsVec3 mPivotInB;
+        float     mBreakingImpulse;
+        glm::vec3 mPivotInA;
+        glm::vec3 mPivotInB;
     };
 }
 #endif //BULLET_POINT2POINTCONSTRAINT_H

@@ -135,20 +135,22 @@ btConvexHullShape *createConvexHullShapeFromMesh(Mesh *mesh) {
     return hull_shape;
 }
 
-btTransform convertTransform2btTransform(Transform *t) {
-    btVector3 pos(t->position_x(), t->position_y(), t->position_z());
-    btQuaternion rot(t->rotation_x(), t->rotation_y(), t->rotation_z(), t->rotation_w());
-
+btTransform convertTransform2btTransform(Transform *t)
+{
+    glm::mat4 m;
+    if (t->owner_object()->parent())
+    {
+        m = t->getModelMatrix(false);
+    }
+    else
+    {
+        m = t->getLocalModelMatrix();
+    }
+    glm::vec4 p(m[3]);
+    glm::quat q = glm::quat_cast(m);
+    btVector3 pos(p.x, p.y, p.z);
+    btQuaternion rot(q.x, q.y, q.z, q.w);
     return btTransform(rot, pos);
-
-}
-
-void convertBtTransform2Transform(btTransform bulletTransform, Transform *transform) {
-    btVector3 pos = bulletTransform.getOrigin();
-    btQuaternion rot = bulletTransform.getRotation();
-
-    transform->set_position(pos.getX(), pos.getY(), pos.getZ());
-    transform->set_rotation(rot.getW(), rot.getX(), rot.getY(), rot.getZ());
 }
 
 }

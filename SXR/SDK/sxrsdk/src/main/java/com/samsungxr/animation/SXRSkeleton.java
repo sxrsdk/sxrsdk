@@ -1197,7 +1197,6 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
                         float cx = (bbox[3] + bbox[0]) / 2;
                         float cy = (bbox[4] + bbox[1]) / 2;
                         float cz = (bbox[5] + bbox[2]) / 2;
-                        Log.d("NOLA", "%s %f, %f, %f", node.getName(), cx, cy, cz);
                         meshes.add(rd.getMesh().getVertexBuffer());
                     }
                     return true;
@@ -1219,6 +1218,11 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             updateBonePose();
             setEnable(true);
         }
+    }
+
+    public void updateNative()
+    {
+        NativeSkeleton.updateBones(getNative(), mParentBones, mBoneNames);
     }
 
     public SXRNode createSkeletonGeometry(SXRNode parent, float boneScale)

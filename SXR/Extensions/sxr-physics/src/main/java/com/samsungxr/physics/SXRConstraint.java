@@ -15,21 +15,24 @@
 
 package com.samsungxr.physics;
 
+import com.samsungxr.IComponentGroup;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRNode;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * Base class to represent a constraint for the movement of two
- * {@linkplain SXRRigidBody rigid bodies}.
- * <p>
+ * {@linkplain SXRRigidBody rigid bodies} or {@linkplain SXRPhysicsJoint joints}
+ * <p>.
  * After created anf fully configured a constraint must be attached to a
  * {@linkplain com.samsungxr.SXRNode node} containing a rigid body that will become
- * the owner of this constraint (body A).
+ * the owner of this constraint (body B).
  */
-abstract class SXRConstraint extends SXRPhysicsWorldObject {
-
+abstract class SXRConstraint extends SXRPhysicsWorldObject
+    {
     static final int fixedConstraintId = 1;
     static final int point2pointConstraintId = 2;
     static final int sliderConstraintId = 3;
@@ -40,34 +43,45 @@ abstract class SXRConstraint extends SXRPhysicsWorldObject {
     protected SXRPhysicsWorldObject mBodyA = null;
     protected SXRPhysicsWorldObject mBodyB = null;
 
-    protected SXRConstraint(SXRContext gvrContext, long nativePointer) {
+    protected SXRConstraint(SXRContext gvrContext, long nativePointer)
+    {
         super(gvrContext, nativePointer);
     }
 
-    protected SXRConstraint(SXRContext gvrContext, long nativePointer, List<NativeCleanupHandler> cleanupHandlers) {
+    protected SXRConstraint(SXRContext gvrContext, long nativePointer, List<NativeCleanupHandler> cleanupHandlers)
+    {
         super(gvrContext, nativePointer, cleanupHandlers);
     }
 
     @Override
-    public void onAttach(SXRNode newOwner) {
-        mBodyA = (SXRRigidBody)newOwner.getComponent(SXRRigidBody.getComponentType());
-        if (mBodyA == null) {
-            throw new UnsupportedOperationException("There is no rigid body attached to owner object.");
+    public void onAttach(SXRNode newOwner)
+    {
+        mBodyB = (SXRRigidBody) newOwner.getComponent(SXRRigidBody.getComponentType());
+        if (mBodyB == null)
+        {
+            mBodyB = (SXRPhysicsJoint) newOwner.getComponent(SXRPhysicsJoint.getComponentType());
+            if (mBodyB == null)
+            {
+                throw new UnsupportedOperationException("There is no rigid body or joint attached to owner object.");
+            }
         }
-
         super.onAttach(newOwner);
     }
 
     @Override
-    protected void addToWorld(SXRWorld world) {
-        if (world != null) {
+    protected void addToWorld(SXRWorld world)
+    {
+        if (world != null)
+        {
             world.addConstraint(this);
         }
     }
 
     @Override
-    protected void removeFromWorld(SXRWorld world) {
-        if (world != null) {
+    protected void removeFromWorld(SXRWorld world)
+    {
+        if (world != null)
+        {
             world.removeConstraint(this);
         }
     }
@@ -77,7 +91,8 @@ abstract class SXRConstraint extends SXRPhysicsWorldObject {
      *
      * @param impulse the breaking impulse value.
      */
-    public void setBreakingImpulse(float impulse) {
+    public void setBreakingImpulse(float impulse)
+    {
         Native3DConstraint.setBreakingImpulse(getNative(), impulse);
     }
 
@@ -86,16 +101,19 @@ abstract class SXRConstraint extends SXRPhysicsWorldObject {
      *
      * @return the breaking impulse value for the constraint.
      */
-    public float getBreakingImpulse() {
+    public float getBreakingImpulse()
+    {
         return Native3DConstraint.getBreakingImpulse(getNative());
     }
 
-    static public long getComponentType() {
+    static public long getComponentType()
+    {
         return Native3DConstraint.getComponentType();
     }
 }
 
-class Native3DConstraint {
+class Native3DConstraint
+{
     static native long getComponentType();
 
     static native int getConstraintType(long nativeConstraint);
@@ -103,4 +121,8 @@ class Native3DConstraint {
     static native void setBreakingImpulse(long nativeConstraint, float impulse);
 
     static native float getBreakingImpulse(long nativeConstraint);
+
+    static native void addChildComponent(long nativeConstraint, long nativeChild);
+
+    static native void removeChildComponent(long nativeConstraint, long nativeChild);
 }

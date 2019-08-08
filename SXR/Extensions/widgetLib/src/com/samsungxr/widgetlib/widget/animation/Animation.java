@@ -336,15 +336,20 @@ public abstract class Animation {
     }
 
     private class Adapter extends SXRAnimation implements AnimationAdapter {
-
+        private Widget mWidget;
         public Adapter(Widget target, float duration) {
             super(target.getNode(), duration);
+            mWidget = target;
         }
 
         @Override
         public void animate(SXRHybridObject target, float ratio) {
             doAnimate(ratio);
         }
+
+        public SXRAnimation copy() { return new Adapter(mWidget, mDuration); }
+
+        public void animate(float t) { doAnimate(t / mDuration); }
     }
 
     private class SXROnFinishProxy implements SXROnFinish {

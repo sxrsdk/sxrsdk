@@ -61,7 +61,8 @@ public class SXRRotationByAxisWithPivotAnimation extends SXRTransformAnimation {
      */
     public SXRRotationByAxisWithPivotAnimation(SXRTransform target,
                                                float duration, float angle, float axisX, float axisY, float axisZ,
-                                               float pivotX, float pivotY, float pivotZ) {
+                                               float pivotX, float pivotY, float pivotZ)
+    {
         super(target, duration);
         mAngle = angle;
         mAxisX = axisX;
@@ -104,7 +105,8 @@ public class SXRRotationByAxisWithPivotAnimation extends SXRTransformAnimation {
      */
     public SXRRotationByAxisWithPivotAnimation(SXRNode target,
                                                float duration, float angle, float axisX, float axisY, float axisZ,
-                                               float pivotX, float pivotY, float pivotZ) {
+                                               float pivotX, float pivotY, float pivotZ)
+    {
         this(target.getTransform(), duration, angle, axisX, axisY, axisZ,
              pivotX, pivotY, pivotZ);
         String name = target.getName();
@@ -112,6 +114,24 @@ public class SXRRotationByAxisWithPivotAnimation extends SXRTransformAnimation {
         {
             setName(name + ".rotation");
         }
+    }
+
+    /**
+     * Construct a copy of another rotation animation.
+     * @param src rotation animation to copy.
+     */
+    public SXRRotationByAxisWithPivotAnimation(final SXRRotationByAxisWithPivotAnimation src)
+    {
+        this(src.mTransform, src.mDuration, src.mAngle,
+                src.mAxisX, src.mAxisY, src.mAxisZ,
+                src.mPivotX, src.mPivotY, src.mPivotZ);
+        mName = src.mName;
+    }
+
+    @Override
+    public SXRAnimation copy()
+    {
+        return new SXRRotationByAxisWithPivotAnimation(this);
     }
 
     @Override

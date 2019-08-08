@@ -20,52 +20,69 @@ import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRNode;
 
 /**
- * Animate a {@link SXRMaterial}.
- * 
- * The constructors cast their {@code target} parameter to a
- * {@code protected final SXRMaterial mMaterial} field.
+ * Animate a component in a {@link SXRMaterial}.
+ * <p>
+ * This class is intended as a base class for subclasses
+ * which actually animate something in the material.
+ * @see SXROpacityAnimation
  */
-public abstract class SXRMaterialAnimation extends SXRAnimation {
+public class SXRMaterialAnimation extends SXRAnimation
+{
 
     private final static Class<?>[] SUPPORTED = { SXRMaterial.class, SXRNode.class };
 
     protected final SXRMaterial mMaterial;
 
     /**
-     * Sets the {@code protected final SXRMaterial mMaterial} field.
+     * Constructs a material animation for a {@link SXRMaterial}.
      * 
-     * @param target
-     *            May be a {@link SXRMaterial} or a {@link SXRNode} -
-     *            does runtime checks.
+     * @param target    {@link SXRMaterial} to animate.
      * @param duration
      *            The animation duration, in seconds.
-     * @throws IllegalArgumentException
-     *             If {@code target} is neither a {@link SXRMaterial} nor a
-     *             {@link SXRNode}
-     * @deprecated Using this overload reduces 'constructor fan-out' and thus
-     *             makes your life a bit easier - but at the cost of replacing
-     *             compile-time type checking with run-time type checking, which
-     *             is more expensive <em>and</em> can miss errors in code if you
-     *             don't test every path through your code.
      */
-    protected SXRMaterialAnimation(SXRHybridObject target, float duration)
+    protected SXRMaterialAnimation(SXRMaterial target, float duration)
     {
         super(target, duration);
         if (duration < 0)
         {
             throw new IllegalArgumentException("Duration cannot be negative");
         }
-        Class<?> type = checkTarget(target, SUPPORTED);
-        if (type == SXRMaterial.class)
+        mMaterial = target;
+    }
+
+    /**
+     * Constructs a material animation for a {@link SXRNode}.
+     * <p>
+     *  Animates the material in the first render pass of the node.
+     * </p>
+     * @param target    {@link SXRNode} with material to animate.
+     * @param duration  The animation duration, in seconds.
+     */
+    protected SXRMaterialAnimation(SXRNode target, float duration)
+    {
+        super(target, duration);
+        if (duration < 0)
         {
-            mMaterial = (SXRMaterial) target;
+            throw new IllegalArgumentException("Duration cannot be negative");
         }
-        else
-         {
-            SXRNode sceneObject = (SXRNode) target;
-            mMaterial = sceneObject.getRenderData().getMaterial();
-        }
+        mMaterial = target.getRenderData().getMaterial();
         mTarget = mMaterial;
+        String name = target.getName();
+        if ((name != null) && (mName == null))
+        {
+            setName(name + ".material");
+        }
+    }
+
+    protected SXRMaterialAnimation(final SXRMaterialAnimation src)
+    {
+        this(src.mMaterial, src.mDuration);
+    }
+
+    @Override
+    public SXRAnimation copy()
+    {
+        return new SXRMaterialAnimation(this);
     }
 
     /**
@@ -78,48 +95,5 @@ public abstract class SXRMaterialAnimation extends SXRAnimation {
         return sceneObject.getRenderData().getMaterial();
     }
 
-    /**
-     * Sets the {@code protected final SXRMaterial mMaterial} field without
-     * doing any runtime checks.
-     * 
-     * @param target
-     *            {@link SXRMaterial} to animate.
-     * @param duration
-     *            The animation duration, in seconds.
-     */
-    protected SXRMaterialAnimation(SXRMaterial target, float duration)
-    {
-        super(target, duration);
-        mMaterial = target;
-    }
-
-    /**
-     * Sets the {@code protected final SXRMaterial mMaterial} field without
-     * doing any runtime checks.
-     * 
-     * <p>
-     * This constructor is included to be orthogonal ;-) but you probably won't
-     * use it, as most derived classes will have final fields of their own to
-     * set. Rather than replicate the final field setting code, the best pattern
-     * is to write a 'master' constructor, and call it <i>via</i>
-     * {@code this(getMaterial(target), duration), ...);} - see
-     * {@link SXROpacityAnimation#SXROpacityAnimation(SXRNode, float, float)}
-     * for an example.
-     * 
-     * @param target
-     *            {@link SXRNode} containing a {@link SXRMaterial}
-     * @param duration
-     *            The animation duration, in seconds.
-     */
-    protected SXRMaterialAnimation(SXRNode target, float duration)
-    {
-        super(target, duration);
-        mMaterial = getMaterial(target);
-        mTarget = mMaterial;
-        String name = target.getName();
-        if ((name != null) && (mName == null))
-        {
-            setName(name + ".material");
-        }
-    }
+    public void animate(float t) { }
 }

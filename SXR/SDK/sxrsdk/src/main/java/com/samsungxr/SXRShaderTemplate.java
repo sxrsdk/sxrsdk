@@ -466,11 +466,11 @@ public class SXRShaderTemplate extends SXRShader
                     writeShader(context, "V-" + signature + ".glsl", vertexShaderSource);
                     writeShader(context, "F-" + signature + ".glsl", fragmentShaderSource);
                 }
-                Log.i(TAG, "SHADER: generated shader #%d %s", nativeShader, signature);
+                Log.v(TAG, "SHADER: generated shader #%d %s", nativeShader, signature);
             }
             else
             {
-                Log.i(TAG, "SHADER: found shader #%d %s", nativeShader, signature);
+                //Log.v(TAG, "SHADER: found shader #%d %s", nativeShader, signature);
             }
             if (nativeShader > 0)
             {
@@ -521,11 +521,11 @@ public class SXRShaderTemplate extends SXRShader
                     writeShader(context, "V-" + signature + ".glsl", vertexShaderSource);
                     writeShader(context, "F-" + signature + ".glsl", fragmentShaderSource);
                 }
-                Log.i(TAG, "SHADER: generated shader #%d %s", nativeShader, signature);
+                Log.v(TAG, "SHADER: generated shader #%d %s", nativeShader, signature);
             }
             else
             {
-                Log.i(TAG, "SHADER: found shader #%d %s", nativeShader, signature);
+                //Log.v(TAG, "SHADER: found shader #%d %s", nativeShader, signature);
             }
             return nativeShader;
         }

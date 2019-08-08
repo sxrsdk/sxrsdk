@@ -20,9 +20,10 @@
 #ifndef EXTENSIONS_BULLET_CONETWISTCONSTRAINT_H
 #define EXTENSIONS_BULLET_CONETWISTCONSTRAINT_H
 
-#include "../physics_common.h"
 #include "../physics_conetwistconstraint.h"
-#include "bullet_object.h"
+#include "../physics_collidable.h"
+#include <glm/glm.hpp>
+#include <glm/mat3x3.hpp>
 
 class btConeTwistConstraint;
 namespace sxr {
@@ -30,11 +31,13 @@ namespace sxr {
     class PhysicsRigidBody;
     class BulletRigidBody;
 
-    class BulletConeTwistConstraint : public PhysicsConeTwistConstraint, BulletObject {
+    class BulletConeTwistConstraint : public PhysicsConeTwistConstraint
+    {
     public:
-        explicit BulletConeTwistConstraint(PhysicsRigidBody *rigidBodyB, PhysicsVec3 pivot,
-                                           PhysicsMat3x3 const &bodyRotation,
-                                           PhysicsMat3x3 const &coneRotation);
+        explicit BulletConeTwistConstraint(PhysicsCollidable* bodyA,
+                                           const glm::vec3& pivot,
+                                           const glm::mat3& bodyRotation,
+                                           const glm::mat3& coneRotation);
 
         BulletConeTwistConstraint(btConeTwistConstraint *constraint);
 
@@ -48,7 +51,8 @@ namespace sxr {
 
         float getTwistLimit() const;
 
-        void* getUnderlying() {
+        void* getUnderlying()
+        {
             return this->mConeTwistConstraint;
         }
 
@@ -56,19 +60,18 @@ namespace sxr {
 
         float getBreakingImpulse() const;
 
-        void updateConstructionInfo();
+        void updateConstructionInfo(PhysicsWorld* world);
     private:
 
-        btConeTwistConstraint *mConeTwistConstraint;
-        BulletRigidBody *mRigidBodyB;
+        btConeTwistConstraint* mConeTwistConstraint;
+        PhysicsCollidable*     mRigidBodyA;
 
-        float mBreakingImpulse;
-        PhysicsVec3 mPivot;
-        PhysicsMat3x3 mBodyRotation;
-        PhysicsMat3x3 mConeRotation;
-
-        float mSwingLimit;
-        float mTwistLimit;
+        float     mBreakingImpulse;
+        glm::vec3 mPivot;
+        glm::mat3 mBodyRotation;
+        glm::mat3 mConeRotation;
+        float     mSwingLimit;
+        float     mTwistLimit;
     };
 
 }

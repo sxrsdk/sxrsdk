@@ -21,51 +21,53 @@
 #define EXTENSIONS_BULLET_SLIDERCONSTRAINT_H
 
 #include "../physics_sliderconstraint.h"
-#include "bullet_object.h"
+#include "../physics_collidable.h"
 
 class btSliderConstraint;
+class btMultiBodySliderConstraint;
 
 namespace sxr {
 
     class PhysicsRigidBody;
     class BulletRigidBody;
 
-    class BulletSliderConstraint : public PhysicsSliderConstraint,
-                                          BulletObject {
+    class BulletSliderConstraint : public PhysicsSliderConstraint
+    {
     public:
-        explicit BulletSliderConstraint(PhysicsRigidBody *rigidBodyB);
+        BulletSliderConstraint(PhysicsCollidable* bodyA);
 
         BulletSliderConstraint(btSliderConstraint *constraint);
 
         virtual ~BulletSliderConstraint();
 
-        void setAngularLowerLimit(float limit);
+        virtual void setAngularLowerLimit(float limit);
 
-        float getAngularLowerLimit() const;
+        virtual float getAngularLowerLimit() const;
 
-        void setAngularUpperLimit(float limit);
+        virtual void setAngularUpperLimit(float limit);
 
-        float getAngularUpperLimit() const;
+        virtual float getAngularUpperLimit() const;
 
-        void setLinearLowerLimit(float limit);
+        virtual void setLinearLowerLimit(float limit);
 
-        float getLinearLowerLimit() const;
+        virtual float getLinearLowerLimit() const;
 
-        void setLinearUpperLimit(float limit);
+        virtual void setLinearUpperLimit(float limit);
 
-        float getLinearUpperLimit() const;
+        virtual float getLinearUpperLimit() const;
 
-        void setBreakingImpulse(float impulse);
+        virtual void setBreakingImpulse(float impulse);
 
-        float getBreakingImpulse() const;
+        virtual float getBreakingImpulse() const;
 
-        void *getUnderlying() { return mSliderConstraint; }
+        void* getUnderlying() { return mSliderConstraint; }
 
-        void updateConstructionInfo();
+        virtual void updateConstructionInfo(PhysicsWorld*);
+
 
     private:
-        btSliderConstraint *mSliderConstraint;
-        BulletRigidBody *mRigidBodyB;
+        btSliderConstraint* mSliderConstraint;
+        PhysicsCollidable* mRigidBodyA;
 
         float mBreakingImpulse;
         float mLowerAngularLimit;

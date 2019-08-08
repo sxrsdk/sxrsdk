@@ -45,12 +45,13 @@ import java.util.List;
  * After all channels have been evaluated, the skinning pose is
  * computed to drive skinned meshes.
  * @see SXRSkeleton
+ * @see SXRAnimationChannel
  * @see com.samsungxr.animation.SXRSkin
  * @see SXRPose
  */
-public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
+public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint
+{
     private SXRSkeleton mSkeleton = null;
-
 
     /**
      * List of animation channels for each of the
@@ -88,6 +89,26 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
             mSkeleton.setBoneOptions(boneId, SXRSkeleton.BONE_ANIMATE);
         }
         mBoneChannels = new SXRAnimationChannel[mSkeleton.getNumBones()];
+    }
+
+    /**
+     * Create a skeleton animation which shares animation data with another.
+     * <p>
+     * Both skeleton animations will share the same animation channels.
+     * @see SXRAnimationChannel
+     */
+    public SXRSkeletonAnimation(final SXRSkeletonAnimation src)
+    {
+        super(src.mTarget, src.mDuration);
+        mName = src.mName;
+        mBoneChannels = src.mBoneChannels;
+        mSkeleton = src.getSkeleton();
+    }
+
+    @Override
+    public SXRAnimation copy()
+    {
+        return new SXRSkeletonAnimation(this);
     }
 
     /**
@@ -134,24 +155,6 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
         if (boneId >= 0)
         {
             return mBoneChannels[boneId];
-        }
-        return null;
-    }
-
-    private SXRNode findParent(SXRNode child, List<String> boneNames)
-    {
-        SXRNode parent = child.getParent();
-
-        if (parent == null)
-        {
-            return null;
-        }
-        String nodeName = parent.getName();
-        int parBoneId = boneNames.indexOf(nodeName);
-
-        if (parBoneId >= 0)
-        {
-            return parent;
         }
         return null;
     }
@@ -235,6 +238,15 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
         }
     }
 
+    /**
+     * Compute the pose for the skeleton at the given time.
+     * <p>
+     * This function does not affect the target skeleton.
+     * </p>
+     * @param timeInSec time to compute the pose for.
+     * @param pose      pose to update.
+     * @return input pose updated with new values.
+     */
     public SXRPose computePose(float timeInSec, SXRPose pose)
     {
         Matrix4f temp = new Matrix4f();
@@ -280,7 +292,8 @@ public class SXRSkeletonAnimation extends SXRAnimation implements PrettyPrint {
     }
 
     @Override
-    public void prettyPrint(StringBuffer sb, int indent) {
+    public void prettyPrint(StringBuffer sb, int indent)
+    {
         sb.append(Log.getSpaces(indent));
         sb.append(SXRSkeletonAnimation.class.getSimpleName());
         sb.append("[name=" + mName + ", duration=" + getDuration() + ", "

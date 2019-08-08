@@ -14,15 +14,32 @@
  */
 
 
-#ifndef BULLET_OBJECT_H
-#define BULLET_OBJECT_H
+#ifndef PHYSICS_COLLIDABLE_H
+#define PHYSICS_COLLIDABLE_H
 
-class Node;
+
 namespace sxr {
+    class PhysicsWorld;
 
-    class BulletObject {
+    class PhysicsCollidable : public Component
+    {
     public:
+        PhysicsCollidable(long componentType) : Component(componentType)  { }
+
+        virtual void setMass(float mass) = 0;
+
+        virtual float getMass() const = 0;
+
+        virtual void setFriction(float n)  = 0;
+
+        virtual float getFriction() const = 0;
+
+        virtual void applyTorque(float x, float y, float z) = 0;
+
+        virtual void applyCentralForce(float x, float y, float z) = 0;
+
+        virtual void updateConstructionInfo(PhysicsWorld*) = 0;
     };
 
 }
-#endif //BULLET_OBJECT_H
+#endif // PHYSICS_COLLIDABLE_H

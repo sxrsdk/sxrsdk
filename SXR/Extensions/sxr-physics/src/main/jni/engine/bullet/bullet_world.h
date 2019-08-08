@@ -20,8 +20,8 @@
 #ifndef BULLET_WORLD_H_
 #define BULLET_WORLD_H_
 
-#include "../physics_common.h"
 #include "../physics_world.h"
+#include "../physics_collidable.h"
 
 #include <utility>
 #include <map>
@@ -30,19 +30,23 @@
 class btDynamicsWorld;
 class btCollisionConfiguration;
 class btCollisionDispatcher;
-class btSequentialImpulseConstraintSolver;
+class btConstraintSolver;
 class btBroadphaseInterface;
 
 namespace sxr {
 
 class PhysicsConstraint;
 class PhysicsRigidBody;
+class BulletJoint;
+
 
 class BulletWorld : public PhysicsWorld {
  public:
-    BulletWorld();
+    BulletWorld(bool isMultiBody);
 
     virtual ~BulletWorld();
+
+    bool isMultiBody();
 
     void addConstraint(PhysicsConstraint *constraint);
 
@@ -59,42 +63,51 @@ class BulletWorld : public PhysicsWorld {
 
     void removeRigidBody(PhysicsRigidBody *body);
 
+    void addJoint(PhysicsJoint *joint);
+
+    void removeJoint(PhysicsJoint *body);
+
     void step(float timeStep, int maxSubSteps);
 
     void listCollisions(std::list <ContactPoint> &contactPoints);
 
-    int getUpdated(std::vector<PhysicsRigidBody*>& bodies);
+    int getUpdated(std::vector<PhysicsCollidable*>& bodies);
 
     void setGravity(float x, float y, float z);
 
     void setGravity(glm::vec3 gravity);
 
-    void markUpdated(PhysicsRigidBody* body);
+    void markUpdated(PhysicsCollidable* body);
 
-    PhysicsVec3 getGravity() const;
+    const glm::vec3& getGravity() const;
 
     btDynamicsWorld* getPhysicsWorld() const;
 
  private:
-    void initialize();
+    void initialize(bool isMultiBody);
 
     void finalize();
 
+    void setPhysicsTransforms();
+
+    void getPhysicsTransforms();
+
+    void finalizeMultiBody();
+
  private:
     std::map<std::pair <long,long>, ContactPoint> prevCollisions;
-    btDynamicsWorld *mPhysicsWorld;
-    btCollisionConfiguration *mCollisionConfiguration;
-    btCollisionDispatcher *mDispatcher;
-    btSequentialImpulseConstraintSolver *mSolver;
-    btBroadphaseInterface *mOverlappingPairCache;
-    btPoint2PointConstraint *mDraggingConstraint;
+    btDynamicsWorld* mPhysicsWorld;
+    btCollisionConfiguration* mCollisionConfiguration;
+    btCollisionDispatcher* mDispatcher;
+    btConstraintSolver* mSolver;
+    btBroadphaseInterface* mOverlappingPairCache;
+    btPoint2PointConstraint* mDraggingConstraint;
     Node *mPivotObject;
     int mActivationState;
-    std::vector<PhysicsRigidBody*> mBodiesChanged;
-
-    //void (*gTmpFilter)(); // btNearCallback
-    //int gNearCallbackCount = 0;
-    //void *gUserData = 0;
+    bool mIsMultiBody;
+    mutable glm::vec3 mGravity;
+    std::vector<PhysicsCollidable*> mBodiesChanged;
+    std::vector<BulletJoint*> mMultiBodies;
 };
 
 }
