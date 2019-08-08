@@ -32,6 +32,7 @@ import com.samsungxr.mixedreality.CVLibrary.CVLibrarySession;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Component to enable AR functionalities on SXRf.
@@ -40,6 +41,7 @@ public class SXRMixedReality implements IMixedReality
 {
     private IMixedReality mSession;
     private SessionState mState;
+    private String mPlatform;
     private Vector3f mTempVec1 = new Vector3f();
     private Vector3f mTempVec2 = new Vector3f();
 
@@ -113,8 +115,24 @@ public class SXRMixedReality implements IMixedReality
         {
             mSession = new CVLibrarySession(scene, enableCloudAnchor);
         }
+        else
+        {
+            throw new IllegalArgumentException("The " + arPlatform + " platform is not supported");
+        }
+        mPlatform = arPlatform;
         mState = SessionState.ON_PAUSE;
     }
+
+    /**
+     * Get the underlying augmented reality platform.
+     * <p>
+     * This will either by "arcore" or "ar-drop-in2".
+     * It is the argument passed to the constructor or the value
+     * of property "debug.samsungxr.hmt"
+     * </p>
+     * @return name of AR platform
+     */
+    public String getPlatform() { return mPlatform; }
 
     @Override
     public float getARToVRScale() { return mSession.getARToVRScale(); }
@@ -127,6 +145,12 @@ public class SXRMixedReality implements IMixedReality
 
     @Override
     public SXREventReceiver getEventReceiver() { return mSession.getEventReceiver(); }
+
+    @Override
+    public boolean isPaused()
+    {
+        return mSession.isPaused();
+    }
 
     @Override
     public void resume() {
@@ -242,13 +266,13 @@ public class SXRMixedReality implements IMixedReality
     }
 
     @Override
-    public void setMarker(Bitmap image) {
-        mSession.setMarker(image);
+    public void addMarker(String name, Bitmap image) {
+        mSession.addMarker(name, image);
     }
 
     @Override
-    public void setMarkers(ArrayList<Bitmap> imagesList) {
-        mSession.setMarkers(imagesList);
+    public void addMarkers(Map<String, Bitmap> imagesList) {
+        mSession.addMarkers(imagesList);
     }
 
     @Override

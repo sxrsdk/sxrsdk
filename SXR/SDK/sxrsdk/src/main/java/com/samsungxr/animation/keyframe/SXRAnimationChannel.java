@@ -7,46 +7,56 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
- * Describes the animation of a single node.<p>
+ * Describes the animation of a single node's transform.
  *
- * The node name ({@link #getNodeName()} specifies the bone/node which is
+ * The node name ({@link #getNodeName()} specifies the bone / node which is
  * affected by this animation channel. The keyframes are given in three
- * separate series of values, one each for position, rotation and scaling.
- * The transformation matrix computed from these values replaces the node's
- * original transformation matrix at a specific time.<p>
- *
+ * separate series of values, one each for position, rotation and scale.
+ * The transformation matrix is computed from these values and is used
+ * to update a node or a bone in a skeleton.
+ * <p>>
  * This means all keys are absolute and not relative to the bone default pose.
  * The order in which the transformations are applied is - as usual -
  * scaling, rotation, translation.
+ * @see SXRSkeletonAnimation
+ * @see com.samsungxr.animation.SXRSkeleton
  */
-public class SXRAnimationChannel implements PrettyPrint {
+public class SXRAnimationChannel implements PrettyPrint
+{
     private static final String TAG = SXRAnimationChannel.class.getSimpleName();
     private static final float[] mTempVec = new float[3];
 
     /**
-     * Constructor.
+     * Construct an animation channel with room for the specified keys.
      *
-     * @param nodeName name of corresponding scene graph node
-     * @param numPosKeys number of position keys
-     * @param numRotKeys number of rotation keys
-     * @param numScaleKeys number of scaling keys
-     * @param preBehavior behavior before animation start
-     * @param postBehavior behavior after animation end
+     * @param nodeName     name of corresponding scene graph node
+     * @param numPosKeys   number of expected position keys,
+     *                     if 0 no position keys are used.
+     * @param numRotKeys   number of expected rotation keys,
+     *                     if 0 no rotation keys are used.
+     * @param numScaleKeys number of expected scaling keys,
+     *                     if 0, no scale keys are used.
      */
-    public SXRAnimationChannel(String nodeName, int numPosKeys, int numRotKeys,
-                               int numScaleKeys, SXRAnimationBehavior preBehavior, SXRAnimationBehavior postBehavior)
+    public SXRAnimationChannel(String nodeName, int numPosKeys, int numRotKeys, int numScaleKeys)
     {
         m_nodeName = nodeName;
         mPosInterpolator = new SXRFloatAnimation(numPosKeys, 4);
         mRotInterpolator = new SXRQuatAnimation(numRotKeys);
         mSclInterpolator = new SXRFloatAnimation(numScaleKeys, 4);
-        mPreState = preBehavior;
-        mPostState = postBehavior;
     }
 
-    public SXRAnimationChannel(String nodeName, float[] posKeys, float[] rotKeys,
-                               float[] scaleKeys, SXRAnimationBehavior preBehavior,
-                               SXRAnimationBehavior postBehavior)
+    /**
+     * Construct an animation channel with the supplied key data.
+     *
+     * @param nodeName      name of corresponding scene graph node
+     * @param posKeys       array of position keys, 3 floats per key.
+     *                      if null no position keys are used.
+     * @param rotKeys       array of rotation keys, 4 floats per key.
+     *                      if null no rotation keys are used.
+     * @param scaleKeys     array of scale keys, 3 floats per key.
+     *                      if null, no scale keys are used.
+     */
+    public SXRAnimationChannel(String nodeName, float[] posKeys, float[] rotKeys, float[] scaleKeys)
     {
         m_nodeName = nodeName;
         if (posKeys != null)
@@ -73,8 +83,17 @@ public class SXRAnimationChannel implements PrettyPrint {
         {
             mSclInterpolator = new SXRFloatAnimation(0, 4);
         }
-        mPreState = preBehavior;
-        mPostState = postBehavior;
+    }
+
+    /**
+     * Construct an animation channel which shares data with another.
+     */
+    public SXRAnimationChannel(final SXRAnimationChannel src)
+    {
+        m_nodeName = src.m_nodeName;
+        mPosInterpolator = src.mPosInterpolator;
+        mRotInterpolator = src.mRotInterpolator;
+        mSclInterpolator =src.mSclInterpolator;
     }
 
     /**
@@ -87,7 +106,6 @@ public class SXRAnimationChannel implements PrettyPrint {
     public String getNodeName() {
         return m_nodeName;
     }
-
 
     /**
      * Resize the position keys.
@@ -132,11 +150,25 @@ public class SXRAnimationChannel implements PrettyPrint {
         mPosInterpolator.getKey(keyIndex, pos);
     }
 
+    /**
+     * Set the values for a given position key.
+     * @param keyIndex  0-based index of key to set
+     * @param time      time (in seconds) for this key.
+     * @param pos       array of 3 float values containing new position.
+     */
     public void setPosKeyVector(int keyIndex, float time, final float[] pos)
     {
         mPosInterpolator.setKey(keyIndex, time, pos);
     }
 
+    /**
+     * Set the values for a given position key.
+     * @param keyIndex  0-based index of key to set
+     * @param time      time (in seconds) for this key.
+     * @param x         new X position.
+     * @param y         new Y position.
+     * @param z         new Z position.
+     */
     public void setPosKeyVector(int keyIndex, float time, float x, float y, float z)
     {
         mTempVec[0] = x;
@@ -176,10 +208,8 @@ public class SXRAnimationChannel implements PrettyPrint {
         return mRotInterpolator.getTime(keyIndex);
     }
 
-
     /**
-     * Returns the rotation as quaternion.<p>
-     *
+     * Returns the rotation as quaternion.
      *
      * @param keyIndex the index of the rotation key
      *
@@ -190,11 +220,24 @@ public class SXRAnimationChannel implements PrettyPrint {
         mRotInterpolator.getKey(keyIndex, rot);
     }
 
+    /**
+     * Set the values for a given rotation key.
+     * @param keyIndex  0-based index of key to set
+     * @param time      time (in seconds) for this key.
+     * @param rot       array of 4 values (x, y, z, w) representing
+     *                  the new rotation quaternions.
+     */
     public void setRotKeyQuaternion(int keyIndex, float time, float[] rot)
     {
         mRotInterpolator.setKey(keyIndex, time, rot);
     }
 
+    /**
+     * Set the values for a given rotation key.
+     * @param keyIndex  0-based index of key to set
+     * @param time      time (in seconds) for this key.
+     * @param rot       new rotation quaternion.
+     */
     public void setRotKeyQuaternion(int keyIndex, float time, Quaternionf rot)
     {
         mRotInterpolator.setKey(keyIndex, time, rot);
@@ -238,47 +281,36 @@ public class SXRAnimationChannel implements PrettyPrint {
      *
      * @return the scaling factor as vector
      */
-    public void getScaleKeyVector(int keyIndex, float[] scale) {
+    public void getScaleKeyVector(int keyIndex, float[] scale)
+    {
         mSclInterpolator.getKey(keyIndex, scale);
     }
 
+    /**
+     * Set the values for a given scale key.
+     * @param keyIndex  0-based index of key to set
+     * @param time      time (in seconds) for this key.
+     * @param scale     array of 3 float values containing new scale factors.
+     */
     public void setScaleKeyVector(int keyIndex, float time, final float[] scale)
     {
         mSclInterpolator.setKey(keyIndex, time, scale);
     }
 
+    /**
+     * Set the values for a given scale keys.
+     * @param keyIndex  0-based index of key to set
+     * @param time      time (in seconds) for this key.
+     * @param x         new X scale.
+     * @param y         new Y scale.
+     * @param z         new Z scale.
+     */
     public void setScaleKeyVector(int keyIndex, float time, float x, float y, float z)
     {
         mTempVec[0] = x;
         mTempVec[1] = y;
         mTempVec[2] = z;
         mSclInterpolator.setKey(keyIndex, time, mTempVec);
-    }
-
-    /**
-     * Defines how the animation behaves before the first key is encountered.
-     * <p>
-     *
-     * The default value is {@link com.samsungxr.jassimp.AiAnimBehavior#DEFAULT} (the original
-     * transformation matrix of the affected node is used).
-     *
-     * @return the animation behavior before the first key
-     */
-    public SXRAnimationBehavior getPreState() {
-        return mPreState;
-    }
-
-
-    /**
-     * Defines how the animation behaves after the last key was processed.<p>
-     *
-     * The default value is {@link com.samsungxr.jassimp.AiAnimBehavior#DEFAULT} (the original
-     * transformation matrix of the affected node is taken).
-     *
-     * @return the animation behavior before after the last key
-     */
-    public SXRAnimationBehavior getPostState() {
-        return mPostState;
     }
 
     /**
@@ -294,7 +326,6 @@ public class SXRAnimationChannel implements PrettyPrint {
         mPosInterpolator.animate(animationTime, mPosKey);
         mSclInterpolator.animate(animationTime, mScaleKey);
         mat.translationRotateScale(mPosKey[0], mPosKey[1], mPosKey[2], mRotKey[0], mRotKey[1], mRotKey[2], mRotKey[3], mScaleKey[0], mScaleKey[1], mScaleKey[2]);
-
     }
 
     @Override
@@ -304,8 +335,7 @@ public class SXRAnimationChannel implements PrettyPrint {
         sb.append(" [nodeName=" + m_nodeName + ", positionKeys="
                 + getNumPosKeys() + ", rotationKeys="
                 + getNumRotKeys() + ", scaleKeys="
-                + getNumScaleKeys() + ", m_preState=" + mPreState
-                + ", m_postState=" + mPostState + "]");
+                + getNumScaleKeys() + "]");
         sb.append(System.lineSeparator());
     }
 
@@ -323,18 +353,7 @@ public class SXRAnimationChannel implements PrettyPrint {
     final protected float[] mPosKey = new float[] {  0, 0, 0 };
     final protected float[] mScaleKey = new float[] { 1, 1, 1 };
     final protected float[] mRotKey = new float[] { 0, 0, 0, 1 };
-    final protected Quaternionf mTempQuat = new Quaternionf(0, 0, 0, 1);
     final protected SXRFloatAnimation mPosInterpolator;
     final protected SXRQuatAnimation mRotInterpolator;
     final protected SXRFloatAnimation mSclInterpolator;
-
-    /**
-     * Pre-animation behavior.
-     */
-    protected final SXRAnimationBehavior mPreState;
-
-    /**
-     * Post-animation behavior.
-     */
-    protected final SXRAnimationBehavior mPostState;
 }

@@ -3,9 +3,6 @@ import com.samsungxr.SXRAndroidResource;
 import com.samsungxr.SXRContext;
 import com.samsungxr.animation.SXRPose;
 import com.samsungxr.animation.SXRSkeleton;
-import com.samsungxr.animation.keyframe.SXRAnimationBehavior;
-import com.samsungxr.animation.keyframe.SXRAnimationChannel;
-import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
 import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -16,8 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class TRSImporter
 {
@@ -148,8 +143,7 @@ public class TRSImporter
             keyIndex++;
             curTime += secondsPerFrame;
         }
-        channel = new SXRAnimationChannel(bonename, positions, rotations, scales,
-                                          SXRAnimationBehavior.DEFAULT, SXRAnimationBehavior.DEFAULT);
+        channel = new SXRAnimationChannel(bonename, positions, rotations, scales);
         skelanim.addChannel(bonename, channel);
         for (int boneIndex = 1; boneIndex < numbones; ++boneIndex)
         {
@@ -170,8 +164,7 @@ public class TRSImporter
                 keyIndex++;
                 curTime += secondsPerFrame;
             }
-            channel = new SXRAnimationChannel(bonename, null, rotations, null,
-                                              SXRAnimationBehavior.DEFAULT, SXRAnimationBehavior.DEFAULT);
+            channel = new SXRAnimationChannel(bonename, null, rotations, null);
             skelanim.addChannel(bonename, channel);
         }
         return skelanim;

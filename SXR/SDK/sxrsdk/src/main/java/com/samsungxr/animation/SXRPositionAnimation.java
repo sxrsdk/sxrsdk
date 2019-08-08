@@ -19,7 +19,14 @@ import com.samsungxr.SXRHybridObject;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTransform;
 
-/** Size animation. */
+/**
+ * Animates the translation component of a transform.
+ * <p>
+ * The rotation and scale components are unchanged and
+ * may be simultaneously updated by another animation.
+ * @see SXRTransformAnimation
+ * @see SXRRotationByAxisAnimation
+ */
 public class SXRPositionAnimation extends SXRTransformAnimation
 {
     private final float mStartX, mStartY, mStartZ;
@@ -78,6 +85,29 @@ public class SXRPositionAnimation extends SXRTransformAnimation
         {
             setName(name + ".position");
         }
+    }
+
+    /**
+     * Construct one position animation based on another.
+     * <p>
+     * Both animations will affect the same target node.
+     * @param src {@link SXRPositionAnimation} to copy.
+     */
+    public SXRPositionAnimation(final SXRPositionAnimation src)
+    {
+        super(src.mTransform, src.mDuration);
+        mStartX = src.mStartX;
+        mStartY = src.mStartY;
+        mStartZ = src.mStartZ;
+        mDeltaX = src.mDeltaX;
+        mDeltaY = src.mDeltaY;
+        mDeltaZ = src.mDeltaZ;
+    }
+
+    @Override
+    public SXRAnimation copy()
+    {
+        return new SXRPositionAnimation(this);
     }
 
     @Override

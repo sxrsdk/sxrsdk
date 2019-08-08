@@ -18,17 +18,14 @@ import java.util.Map;
 import java.util.Set;
 import static java.lang.Math.max;
 
-import com.samsungxr.animation.SXRAnimation;
 import com.samsungxr.animation.SXRAnimator;
 import com.samsungxr.animation.SXRMorphAnimation;
 import com.samsungxr.animation.SXRPose;
 import com.samsungxr.animation.SXRSkeleton;
 import com.samsungxr.animation.SXRSkin;
-import com.samsungxr.animation.keyframe.SXRAnimationBehavior;
 import com.samsungxr.animation.keyframe.SXRAnimationChannel;
 import com.samsungxr.animation.keyframe.SXRNodeAnimation;
 import com.samsungxr.animation.keyframe.SXRSkeletonAnimation;
-import com.samsungxr.jassimp.AiAnimBehavior;
 import com.samsungxr.jassimp.AiAnimMesh;
 import com.samsungxr.jassimp.AiAnimation;
 import com.samsungxr.jassimp.AiBone;
@@ -693,9 +690,7 @@ class  SXRJassimpAdapter
     private SXRAnimationChannel createAnimChannel(AiNodeAnim aiNodeAnim, float ticksPerSec)
     {
         SXRAnimationChannel channel = new SXRAnimationChannel(aiNodeAnim.getNodeName(), aiNodeAnim.getNumPosKeys(),
-                aiNodeAnim.getNumRotKeys(),  aiNodeAnim.getNumScaleKeys(),
-                convertAnimationBehavior(aiNodeAnim.getPreState()),
-                convertAnimationBehavior(aiNodeAnim.getPostState()));
+                aiNodeAnim.getNumRotKeys(),  aiNodeAnim.getNumScaleKeys());
         // Pos keys
         int i;
         float t;
@@ -787,24 +782,6 @@ class  SXRJassimpAdapter
         return true;
     }
 
-    private SXRAnimationBehavior convertAnimationBehavior(AiAnimBehavior behavior)
-    {
-        switch (behavior)
-        {
-            case DEFAULT:
-                return SXRAnimationBehavior.DEFAULT;
-            case CONSTANT:
-                return SXRAnimationBehavior.CONSTANT;
-            case LINEAR:
-                return SXRAnimationBehavior.LINEAR;
-            case REPEAT:
-                return SXRAnimationBehavior.REPEAT;
-            default:
-                // Unsupported setting
-                Log.e(TAG, "Cannot convert animation behavior: %s", behavior);
-                return SXRAnimationBehavior.DEFAULT;
-        }
-    }
 
     public Set<AiPostProcessSteps> toJassimpSettings(EnumSet<SXRImportSettings> settings) {
         Set<AiPostProcessSteps> output = new HashSet<AiPostProcessSteps>();

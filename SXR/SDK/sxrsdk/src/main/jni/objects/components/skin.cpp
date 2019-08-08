@@ -126,6 +126,7 @@ namespace sxr
             const glm::mat4* inverseBind = mInverseBindPose;
             Node* skelOwner = mSkeleton->owner_object();
             Node* skinOwner = owner_object();
+
             glm::mat4 identity(1.0f);
 
             if ((skelOwner != nullptr) && (skinOwner != nullptr))

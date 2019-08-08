@@ -74,6 +74,21 @@ public class SXRPoseInterpolator extends SXRAnimation
     }
 
     /**
+     * Construct one pose interpolator from another.
+     * @param {@link SXRPoseInterpolator} to copy.
+     */
+    public SXRPoseInterpolator(final SXRPoseInterpolator src)
+    {
+        this(src.mDestSkeleton, src.mInputPose, src.mDuration);
+    }
+
+    @Override
+    public SXRAnimation copy()
+    {
+        return new SXRPoseInterpolator(this);
+    }
+
+    /**
      * Calculate the blend pose from two input poses.
      * The blend is from mDuration to 0 for first skeleton animation that is first skeleton animation smoothly disappears
      * The blend is from 0 to mDuration for second skeleton animation that is second skeleton animation smoothly appears

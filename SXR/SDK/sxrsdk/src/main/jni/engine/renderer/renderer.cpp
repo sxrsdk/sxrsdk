@@ -16,6 +16,7 @@
 /***************************************************************************
  * Renders a scene, a screen.
  ***************************************************************************/
+#define VERBOSE_LOGGING 0
 
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/glm.hpp"
@@ -126,11 +127,11 @@ void Renderer::state_sort(std::vector<RenderData*>& render_data_vector) {
     std::sort(render_data_vector.begin(), render_data_vector.end(), compareRenderDataByOrderShaderDistance);
 
     if (DEBUG_RENDERER) {
-        LOGD("SORTING: After sorting");
+        LOGV("SORTING: After sorting");
 
         for (int i = 0; i < render_data_vector.size(); ++i) {
             RenderData* renderData = render_data_vector[i];
-            LOGD(
+            LOGV(
                     "SORTING: pass_count = %d, rendering order = %d, shader_type = %d, camera_distance = %f\n",
                     renderData->pass_count(), renderData->rendering_order(),
                     renderData->get_shader(0),
@@ -192,18 +193,15 @@ void Renderer::cullFromCamera(Scene *scene, jobject javaNode, Camera* camera,
 
     // 2. Iteratively execute frustum culling for each root object (as well as its children objects recursively)
     Node *object = scene->getRoot();
-    if (DEBUG_RENDERER) {
-        LOGD("FRUSTUM: start frustum culling for root %s\n", object->name().c_str());
-    }
+
+    LOGV("FRUSTUM: start frustum culling for root %s\n", object->name().c_str());
 
     rstate.scene->lockColliders();
     rstate.scene->clearVisibleColliders();
     frustum_cull(campos, scene, object, frustum, scene_objects, scene->get_frustum_culling(), 0);
     rstate.scene->unlockColliders();
 
-    if (DEBUG_RENDERER) {
-        LOGD("FRUSTUM: end frustum culling for root %s\n", object->name().c_str());
-    }
+    LOGV("FRUSTUM: end frustum culling for root %s\n", object->name().c_str());
     // 3. do occlusion culling, if enabled
     occlusion_cull(rstate, scene_objects, render_data_vector);
 }

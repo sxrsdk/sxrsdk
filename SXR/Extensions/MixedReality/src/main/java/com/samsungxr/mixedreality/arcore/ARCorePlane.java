@@ -26,6 +26,7 @@ import com.samsungxr.SXRNode;
 import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRPlane;
 import com.samsungxr.mixedreality.SXRTrackingState;
+import com.samsungxr.utility.Log;
 
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -53,7 +54,7 @@ class ARCorePlane extends SXRPlane {
             mPlaneType = Type.VERTICAL;
         }
 
-        mLastPolygon = getPolygon().asReadOnlyBuffer();
+        mLastPolygon = mARPlane.getPolygon().asReadOnlyBuffer();
     }
 
     /**
@@ -80,35 +81,29 @@ class ARCorePlane extends SXRPlane {
     }
 
     @Override
-    public void getCenterPose(@NonNull float[] poseOut) {
-        if (poseOut.length != 16) {
+    public void getCenterPose(@NonNull float[] poseOut)
+    {
+        if (poseOut.length != 16)
+        {
             throw new IllegalArgumentException("Array must be 16");
         }
         mARPlane.getCenterPose().toMatrix(poseOut, 0);
-    }
-
-    @Override
-    public Pose getCenterPose() {
-        return mARPlane.getCenterPose();
+        mSession.ar2gvr(poseOut);
     }
 
     @Override
     public float getWidth() {
-        return mARPlane.getExtentX();
+        return mARPlane.getExtentX() * mSession.getARToVRScale();
     }
 
     @Override
     public float getHeight() {
-        return mARPlane.getExtentZ();
+        return mARPlane.getExtentZ() * mSession.getARToVRScale();
     }
 
-    @Override
-    public FloatBuffer getPolygon() {
-        return mARPlane.getPolygon();
-    }
 
     @Override
-    public SXRAnchor createAnchor(float[] pose, SXRNode owner)
+    public SXRAnchor createAnchor(final float[] pose, SXRNode owner)
     {
         Pose arpose = mSession.makePose(pose);
         Anchor aranchor = mARPlane.createAnchor(arpose);
@@ -118,7 +113,7 @@ class ARCorePlane extends SXRPlane {
     @Override
     public float[] get3dPolygonAsArray()
     {
-        float[] verticesArray = getPolygon().array();
+        float[] verticesArray = mARPlane.getPolygon().array();
         int verticesArraySize = verticesArray.length;
         float sf = mSession.getARToVRScale();
 
@@ -147,7 +142,9 @@ class ARCorePlane extends SXRPlane {
         float[] translation = new float[3];
         float[] rotation = new float[4];
 
-        mSession.convertMatrixPoseToVector(pose.clone(), translation, rotation);
+        pose = pose.clone();
+        mSession.gvr2ar(pose);
+        mSession.convertMatrixPoseToVector(pose, translation, rotation);
         return mARPlane.isPoseInPolygon(new Pose(translation, rotation));
     }
 
@@ -159,22 +156,17 @@ class ARCorePlane extends SXRPlane {
         SXRNode owner = getOwnerObject();
         if (isEnabled() && (owner != null) && owner.isEnabled())
         {
-            float[] mtx = getPose();
-            getOwnerObject().getTransform().setModelMatrix(mtx);
+            mARPlane.getCenterPose().toMatrix(mPose, 0);
+            mSession.ar2gvr(mPose);
+            getOwnerObject().getTransform().setModelMatrix(mPose);
 
         }
     }
 
-    public final float[] getPose()
-    {
-        mARPlane.getCenterPose().toMatrix(mPose, 0);
-        mSession.ar2gvr(mPose);
-        return mPose;
-    }
-
     protected boolean geometryChange()
     {
-        if (mARPlane.getPolygon().compareTo(mLastPolygon) == 0) {
+        if (mARPlane.getPolygon().compareTo(mLastPolygon) == 0)
+        {
             return false;
         }
         mLastPolygon = mARPlane.getPolygon().asReadOnlyBuffer();

@@ -86,6 +86,24 @@ public class SXRAnimator extends SXRBehavior
         mAnimations = new ArrayList<SXRAnimation>();
     }
 
+    /**
+     * Construct one animator from another.
+     * <p>
+     * The animator and all of its animations are copied.
+     * The animation data remains shared.
+     * This permits an animation to be duplicated
+     * so it can animate differently than the original
+     * or be blended with it.
+     */
+    public SXRAnimator(final SXRAnimator src)
+    {
+        this(src.getSXRContext(), src.mAutoStart);
+        for (SXRAnimation a : src.mAnimations)
+        {
+            mAnimations.add(a.copy());
+        }
+    }
+
     static public long getComponentType() { return TYPE_ANIMATOR; }
 
     /**

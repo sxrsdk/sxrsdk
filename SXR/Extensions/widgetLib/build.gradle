@@ -22,11 +22,11 @@ repositories {
 }
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 26
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 23
+        targetSdkVersion 26
         multiDexEnabled true
     }
 
@@ -63,7 +63,7 @@ dependencies {
         implementation(name: 'sxrsdk-release', ext: 'aar')
     }
 
-    implementation 'com.android.support:support-v4:23.4.0'
+    implementation 'com.android.support:support-v4:26.0.1'
     implementation "org.joml:joml-android:${jomlVersion}"
     implementation 'com.google.code.gson:gson:2.8.+'
 }

@@ -36,6 +36,21 @@ public class SXRPoseMapper extends SXRAnimation
         mDestPose = new SXRPose(dstskel);
     }
 
+    /**
+     * Construct one pose mapper from another.
+     * @param src   {@link SXRPoseMapper} to copy.
+     */
+    public SXRPoseMapper(final SXRPoseMapper src)
+    {
+        this(src.mDestSkeleton, src.mSourceSkeleton, src.mDuration);
+    }
+
+    @Override
+    public SXRAnimation copy()
+    {
+        return new SXRPoseMapper(this);
+    }
+
     public SXRAnimation setDuration(float dur)
     {
         mDuration = dur;

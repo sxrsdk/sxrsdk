@@ -25,19 +25,21 @@ import com.samsungxr.mixedreality.SXRTrackingState;
 /**
  * Represents an ARCore Augmented Image
  */
-public class CVLibrarayMarker extends SXRMarker
+public class CVLibraryMarker extends SXRMarker
 {
     private final CVLibrarySession mSession;
+    private final String mName;
 
     //private AugmentedImage mAugmentedImage;
 
-    protected CVLibrarayMarker(SXRContext ctx, CVLibrarySession session) {
-        super(ctx);
+    protected CVLibraryMarker(CVLibrarySession session, String name) {
+        super(session.getContext());
         mSession = session;
+        mName = name;
         mTrackingState = SXRTrackingState.PAUSED;
     }
 
-    public String getName() { return "unknown"; }
+    public String getName() { return mName; }
 
     /**
      * @return Returns the estimated width

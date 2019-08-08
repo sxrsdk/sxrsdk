@@ -447,15 +447,17 @@ public final class SXRApplication implements IEventReceiver, IScriptable {
      * @return
      */
     public boolean dispatchTouchEvent(MotionEvent event) {
-        boolean handled = mViewManager.dispatchMotionEvent(event);
 
-        mViewManager.getEventManager().sendEventWithMask(
+        if (mViewManager != null) {
+            boolean handled = mViewManager.dispatchMotionEvent(event);
+            mViewManager.getEventManager().sendEventWithMask(
                 SEND_EVENT_MASK,
                 this,
                 IApplicationEvents.class,
                 "dispatchTouchEvent", event);
-
-        return handled;
+            return handled;
+        }
+        return false;
     }
 
     /**

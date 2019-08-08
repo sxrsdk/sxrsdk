@@ -26,6 +26,7 @@ import com.samsungxr.IEventReceiver;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * This interface defines the AR functionalities of the MixedReality API.
@@ -53,6 +54,11 @@ public interface IMixedReality extends IEventReceiver
     void pause();
 
     /**
+     * Returns true if the session is paused, else false.
+     */
+    boolean isPaused();
+
+    /**
      *
      * @return the scale factor from AR to VR
      */
@@ -60,7 +66,8 @@ public interface IMixedReality extends IEventReceiver
 
 
     /**
-     * Set the scale factor from AR to VR
+     * Set the scale factor from AR to VR.
+     *
      */
     void setARToVRScale(float scale);
 
@@ -166,18 +173,18 @@ public interface IMixedReality extends IEventReceiver
     SXRLightEstimate getLightEstimate();
 
     /**
-     * Set an image to be detected
+     * Add an image to be detected
      *
      * @param image
      */
-    void setMarker(Bitmap image);
+    void addMarker(String name, Bitmap image);
 
     /**
      * Set a list of reference images to be detected
      *
      * @param imagesList
      */
-    void setMarkers(ArrayList<Bitmap> imagesList);
+    void addMarkers(Map<String, Bitmap> imagesList);
 
     /**
      * Get all detected markers

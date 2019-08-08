@@ -85,6 +85,28 @@ public final class SXRMorphAnimation extends SXRAnimation implements PrettyPrint
     }
 
     /**
+     * Construct one morph animation that is a copy of another.
+     * <b>
+     * Both animations share the same blend shapes but have
+     * independent blend weights.
+     * </b>
+     * @param src   {@link SXRMorphAnimation} to copy.
+     */
+    public SXRMorphAnimation(final SXRMorphAnimation src)
+    {
+        super(src.mTarget, src.mDuration);
+        mKeys = src.mKeys;
+        mKeyInterpolator = src.mKeyInterpolator;
+        mCurrentValues = new float[mKeyInterpolator.getKeySize() - 1];
+    }
+
+    @Override
+    public SXRAnimation copy()
+    {
+        return new SXRMorphAnimation(this);
+    }
+
+    /**
      * Computes the blend weights for the given time and
      * updates them in the target.
      */
@@ -106,8 +128,9 @@ public final class SXRMorphAnimation extends SXRAnimation implements PrettyPrint
      */
     public void setTarget(SXRMeshMorph morph)
     {
-        int numweights = morph.getBlendShapeCount();
-        if (numweights != mKeyInterpolator.getKeySize() - 1)
+        int numweightsTarget = morph.getBlendShapeCount();
+        int numWeightsAnim = mKeyInterpolator.getKeySize() - 1;
+        if (numweightsTarget != numWeightsAnim)
         {
             throw new IllegalArgumentException("The number blend weights on the target morph must match the animation");
         }
