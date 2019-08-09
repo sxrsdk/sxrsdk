@@ -31,7 +31,7 @@ public:
             Camera(), left_clipping_distance_(-1.0f), right_clipping_distance_(
                     1.0f), bottom_clipping_distance_(-1.0f), top_clipping_distance_(
                     1.0f), near_clipping_distance_(0.0f), far_clipping_distance_(
-                    1.0f) {
+                    1.0f), is_custom(false) {
     }
 
     virtual ~OrthogonalCamera() {
@@ -86,6 +86,7 @@ public:
     }
 
     glm::mat4 getProjectionMatrix() const;
+    void setProjectionMatrix(const glm::mat4& matrix);
 
 private:
     OrthogonalCamera(const OrthogonalCamera& camera) = delete;
@@ -100,6 +101,8 @@ private:
     float top_clipping_distance_;
     float near_clipping_distance_;
     float far_clipping_distance_;
+    glm::mat4 projection_matrix_;
+    bool is_custom;
 };
 }
 #endif

@@ -29,6 +29,7 @@
 #include <objects/components/perspective_camera.h>
 #include <objects/components/render_target.h>
 
+#include "glm/glm.hpp"
 #include "util/sxr_log.h"
 
 static const char* activityClassName = "android/app/Activity";
@@ -84,6 +85,7 @@ SXRActivity::SXRActivity(JNIEnv &env, jobject activity, jobject vrAppSettings) :
             char const * msg = "Thread priority security exception. Make sure the APK is signed.";
             vrapi_ShowFatalError(&oculusJavaMainThread_, nullptr, msg, __FILE__, __LINE__);
         }
+
 
         return vrapiInitResult;
     }
@@ -278,14 +280,16 @@ void SXRActivity::onSurfaceChanged(JNIEnv &env, jobject jsurface) {
         }
     }
 
-    projectionMatrix_ = ovrMatrix4f_CreateProjectionFov(
-            vrapi_GetSystemPropertyFloat(&oculusJavaGlThread_,
-                                         VRAPI_SYS_PROP_SUGGESTED_EYE_FOV_DEGREES_X),
-            vrapi_GetSystemPropertyFloat(&oculusJavaGlThread_,
-                                         VRAPI_SYS_PROP_SUGGESTED_EYE_FOV_DEGREES_Y), 0.0f,
-            0.0f, 1.0f,
-            0.0f);
-    texCoordsTanAnglesMatrix_ = ovrMatrix4f_TanAngleMatrixFromProjection(&projectionMatrix_);
+    const double predictedDisplayTime = vrapi_GetPredictedDisplayTime(oculusMobile_, frameIndex);
+    const ovrTracking tracking = vrapi_GetPredictedTracking(oculusMobile_, predictedDisplayTime);
+    ovrTracking2 updatedTracking = vrapi_GetPredictedTracking2(oculusMobile_, tracking.HeadPose.TimeInSeconds);
+
+	ovrMatrix4f projectionMatrix[2];
+    memcpy(&projectionMatrix[0], &updatedTracking.Eye[0].ProjectionMatrix, sizeof(ovrMatrix4f));
+    memcpy(&projectionMatrix[1], &updatedTracking.Eye[1].ProjectionMatrix, sizeof(ovrMatrix4f));
+
+    texCoordsTanAnglesMatrix_[0] = ovrMatrix4f_TanAngleMatrixFromProjection(&projectionMatrix[0]);
+    texCoordsTanAnglesMatrix_[1] = ovrMatrix4f_TanAngleMatrixFromProjection(&projectionMatrix[1]);
 
     //so that android events get generated for the back key; bear in mind that with controller
     //connected this emulation will be turned off in ovr_gear_controller.cpp
@@ -319,9 +323,18 @@ void SXRActivity::onDrawFrame(JNIEnv* env, jobject jViewManager, jobject javaMai
     const double predictedDisplayTime = vrapi_GetPredictedDisplayTime(oculusMobile_, frameIndex);
     const ovrTracking tracking = vrapi_GetPredictedTracking(oculusMobile_, predictedDisplayTime);
 
-    ovrTracking updatedTracking = vrapi_GetPredictedTracking(oculusMobile_,
+    ovrTracking2 updatedTracking = vrapi_GetPredictedTracking2(oculusMobile_,
                                                              tracking.HeadPose.TimeInSeconds);
     updatedTracking.HeadPose.Pose.Position = tracking.HeadPose.Pose.Position;
+
+    // if we're on a position-tracked device, track relative to the floor
+    if( updatedTracking.Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED &&
+        updatedTracking.Status & VRAPI_TRACKING_STATUS_POSITION_VALID) {
+
+        vrapi_SetTrackingSpace(oculusMobile_, VRAPI_TRACKING_SPACE_LOCAL_FLOOR);
+    }
+
+
 
     ovrLayerProjection2 layers[2] = { vrapi_DefaultLayerProjection2(), vrapi_DefaultLayerProjection2() };
 
@@ -331,7 +344,8 @@ void SXRActivity::onDrawFrame(JNIEnv* env, jobject jViewManager, jobject javaMai
 
         eyeLayer.ColorSwapChain = frameBuffer_[gUseMultiview ? 0 : eye].mColorTextureSwapChain;
         eyeLayer.SwapChainIndex = frameBuffer_[gUseMultiview ? 0 : eye].mTextureSwapChainIndex;
-        eyeLayer.TexCoordsFromTanAngles = texCoordsTanAnglesMatrix_;
+        eyeLayer.TexCoordsFromTanAngles = texCoordsTanAnglesMatrix_[eye];
+
         if (CameraRig::CameraRigType::FREEZE != cameraRig_->camera_rig_type()) {
             layers[0].HeadPose = updatedTracking.HeadPose;
         }
@@ -340,7 +354,7 @@ void SXRActivity::onDrawFrame(JNIEnv* env, jobject jViewManager, jobject javaMai
             auto &cursorLayer = layers[1].Textures[eye];
             cursorLayer.ColorSwapChain = cursorBuffer_[gUseMultiview ? 0 : eye].mColorTextureSwapChain;
             cursorLayer.SwapChainIndex = cursorBuffer_[gUseMultiview ? 0 : eye].mTextureSwapChainIndex;
-            cursorLayer.TexCoordsFromTanAngles = texCoordsTanAnglesMatrix_;
+            cursorLayer.TexCoordsFromTanAngles = texCoordsTanAnglesMatrix_[eye];
             layers[1].HeadPose = updatedTracking.HeadPose;
         }
     }
@@ -370,6 +384,103 @@ void SXRActivity::onDrawFrame(JNIEnv* env, jobject jViewManager, jobject javaMai
 
         cameraRig_->getHeadTransform()->set_position(x, y, z);
     }
+
+	ovrMatrix4f viewMatrixTransposed[2];
+	viewMatrixTransposed[0] = ovrMatrix4f_Transpose( &updatedTracking.Eye[0].ViewMatrix );
+	viewMatrixTransposed[1] = ovrMatrix4f_Transpose( &updatedTracking.Eye[1].ViewMatrix );
+
+	ovrMatrix4f projectionMatrixTransposed[2];
+	projectionMatrixTransposed[0] = ovrMatrix4f_Transpose( &updatedTracking.Eye[0].ProjectionMatrix );
+	projectionMatrixTransposed[1] = ovrMatrix4f_Transpose( &updatedTracking.Eye[1].ProjectionMatrix );
+
+    glm::mat4 leftViewMatrix = glm::mat4(
+            viewMatrixTransposed[0].M[0][0], 
+            viewMatrixTransposed[0].M[0][1], 
+            viewMatrixTransposed[0].M[0][2], 
+            viewMatrixTransposed[0].M[0][3],
+
+            viewMatrixTransposed[0].M[1][0], 
+            viewMatrixTransposed[0].M[1][1], 
+            viewMatrixTransposed[0].M[1][2], 
+            viewMatrixTransposed[0].M[1][3],
+
+            viewMatrixTransposed[0].M[2][0], 
+            viewMatrixTransposed[0].M[2][1], 
+            viewMatrixTransposed[0].M[2][2], 
+            viewMatrixTransposed[0].M[2][3],
+
+            viewMatrixTransposed[0].M[3][0], 
+            viewMatrixTransposed[0].M[3][1], 
+            viewMatrixTransposed[0].M[3][2], 
+            viewMatrixTransposed[0].M[3][3]);
+
+    glm::mat4 rightViewMatrix = glm::mat4(
+            viewMatrixTransposed[1].M[0][0], 
+            viewMatrixTransposed[1].M[0][1], 
+            viewMatrixTransposed[1].M[0][2], 
+            viewMatrixTransposed[1].M[0][3],
+
+            viewMatrixTransposed[1].M[1][0], 
+            viewMatrixTransposed[1].M[1][1], 
+            viewMatrixTransposed[1].M[1][2], 
+            viewMatrixTransposed[1].M[1][3],
+
+            viewMatrixTransposed[1].M[2][0], 
+            viewMatrixTransposed[1].M[2][1], 
+            viewMatrixTransposed[1].M[2][2], 
+            viewMatrixTransposed[1].M[2][3],
+
+            viewMatrixTransposed[1].M[3][0], 
+            viewMatrixTransposed[1].M[3][1], 
+            viewMatrixTransposed[1].M[3][2], 
+            viewMatrixTransposed[1].M[3][3]);
+
+    glm::mat4 leftProjMatrix = glm::mat4(
+            projectionMatrixTransposed[0].M[0][0], 
+            projectionMatrixTransposed[0].M[0][1], 
+            projectionMatrixTransposed[0].M[0][2], 
+            projectionMatrixTransposed[0].M[0][3],
+
+            projectionMatrixTransposed[0].M[1][0], 
+            projectionMatrixTransposed[0].M[1][1], 
+            projectionMatrixTransposed[0].M[1][2], 
+            projectionMatrixTransposed[0].M[1][3],
+
+            projectionMatrixTransposed[0].M[2][0], 
+            projectionMatrixTransposed[0].M[2][1], 
+            projectionMatrixTransposed[0].M[2][2], 
+            projectionMatrixTransposed[0].M[2][3],
+
+            projectionMatrixTransposed[0].M[3][0], 
+            projectionMatrixTransposed[0].M[3][1], 
+            projectionMatrixTransposed[0].M[3][2], 
+            projectionMatrixTransposed[0].M[3][3]);
+
+    glm::mat4 rightProjMatrix = glm::mat4(
+            projectionMatrixTransposed[1].M[0][0], 
+            projectionMatrixTransposed[1].M[0][1], 
+            projectionMatrixTransposed[1].M[0][2], 
+            projectionMatrixTransposed[1].M[0][3],
+
+            projectionMatrixTransposed[1].M[1][0], 
+            projectionMatrixTransposed[1].M[1][1], 
+            projectionMatrixTransposed[1].M[1][2], 
+            projectionMatrixTransposed[1].M[1][3],
+
+            projectionMatrixTransposed[1].M[2][0], 
+            projectionMatrixTransposed[1].M[2][1], 
+            projectionMatrixTransposed[1].M[2][2], 
+            projectionMatrixTransposed[1].M[2][3],
+
+            projectionMatrixTransposed[1].M[3][0], 
+            projectionMatrixTransposed[1].M[3][1], 
+            projectionMatrixTransposed[1].M[3][2], 
+            projectionMatrixTransposed[1].M[3][3]);
+
+    cameraRig_->left_camera()->setProjectionMatrix(leftProjMatrix);
+    cameraRig_->left_camera()->setViewMatrix(leftViewMatrix);
+    cameraRig_->right_camera()->setProjectionMatrix(rightProjMatrix);
+    cameraRig_->right_camera()->setViewMatrix(rightViewMatrix);
 
     cameraRig_->updateRotation();
 

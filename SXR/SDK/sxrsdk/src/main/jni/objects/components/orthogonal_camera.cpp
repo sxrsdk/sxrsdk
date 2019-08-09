@@ -25,8 +25,19 @@
 namespace sxr {
 
 glm::mat4 OrthogonalCamera::getProjectionMatrix() const {
+    if(is_custom) {
+        return projection_matrix_;
+    }
+
     return glm::ortho(left_clipping_distance_, right_clipping_distance_,
             bottom_clipping_distance_, top_clipping_distance_,
             near_clipping_distance_, far_clipping_distance_);
 }
+
+void OrthogonalCamera::setProjectionMatrix(const glm::mat4& matrix) {
+        projection_matrix_ = matrix;
+        is_custom = true;
+}
+
+
 }

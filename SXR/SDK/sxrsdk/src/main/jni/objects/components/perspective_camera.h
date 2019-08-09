@@ -30,7 +30,7 @@ public:
     PerspectiveCamera() :
             Camera(), near_clipping_distance_(0.1f), far_clipping_distance_(
                     1000.0f), fov_y_(default_fov_y_), aspect_ratio_(
-                    default_aspect_ratio_) {
+                    default_aspect_ratio_), is_custom(false) {
     }
 
     virtual ~PerspectiveCamera() {
@@ -89,6 +89,7 @@ public:
     }
 
     glm::mat4 getProjectionMatrix() const;
+    void setProjectionMatrix(const glm::mat4& matrix);
 
 private:
     PerspectiveCamera(const PerspectiveCamera& camera) = delete;
@@ -103,6 +104,8 @@ private:
     float far_clipping_distance_;
     float fov_y_; // in radians
     float aspect_ratio_;
+    bool is_custom;
+    glm::mat4 projection_matrix_;
 };
 }
 #endif

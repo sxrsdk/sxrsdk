@@ -65,7 +65,7 @@ class RenderTarget;
         FrameBufferObject frameBuffer_[VRAPI_FRAME_LAYER_EYE_MAX];
         FrameBufferObject cursorBuffer_[VRAPI_FRAME_LAYER_EYE_MAX];
         ovrMatrix4f projectionMatrix_;
-        ovrMatrix4f texCoordsTanAnglesMatrix_;
+        ovrMatrix4f texCoordsTanAnglesMatrix_[2];
         ovrPerformanceParms oculusPerformanceParms_;
 
         bool mResolveDepthConfiguration = false;

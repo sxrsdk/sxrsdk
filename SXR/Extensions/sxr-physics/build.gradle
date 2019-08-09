@@ -6,25 +6,52 @@ repositories {
     }
 }
 
+
+task extractBulletReleaseLibs (type: Copy) {
+    println 'Extracting Bullet Release *.so file(s)....'
+
+    from zipTree("src/main/aar/bullet3-release.aar")
+    into "src/main/jniLibs"
+    include "jni/**/*.so"
+
+    eachFile {
+        def segments = it.getRelativePath().getSegments() as List
+        println segments
+        it.setPath(segments.tail().join("/"))
+        return it
+    }
+    includeEmptyDirs = false
+}
+
+task extractBulletDebugLibs (type: Copy) {
+    println 'Extracting Bullet Debug *.so file(s)....'
+
+    from zipTree("src/main/aar/bullet3-debug.aar")
+    into "src/main/jniLibs"
+    include "jni/**/*.so"
+
+    eachFile {
+        def segments = it.getRelativePath().getSegments() as List
+        println segments
+        it.setPath(segments.tail().join("/"))
+        return it
+    }
+    includeEmptyDirs = false
+}
+
 android {
     compileSdkVersion 26
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 21
-
-        ndk {
-            moduleName "sxr-physics"
-            if (rootProject.hasProperty("SXRSDK_ABI_FILTER")) {
-                abiFilters rootProject.property("SXRSDK_ABI_FILTER")
-            } else {
-                abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
-            }
-        }
-        externalNativeBuild {
-            cmake {
-                arguments.add('-DANDROID_STL=c++_shared')
-            }
+        targetSdkVersion 26
+        packagingOptions {
+            pickFirst 'lib/x86/libc++_shared.so'
+            pickFirst 'lib/arm64-v8a/libc++_shared.so'
+            pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+            pickFirst 'lib/x86_64/libc++_shared.so'
+            doNotStrip 'jniLibs/*/*.so'
+            exclude 'src/main/jniLibs'
         }
     }
 
@@ -32,22 +59,35 @@ android {
         debug {
             debuggable = true
             jniDebuggable = true
+            externalNativeBuild {
+                cmake {
+                    arguments '-DANDROID_PLATFORM=android-21',
+                            '-DANDROID_TOOLCHAIN=clang',
+                            '-DANDROID_STL=c++_shared',
+                            '-DCMAKE_BUILD_TYPE=Debug'
+                }
+            }
+            preBuild.dependsOn(extractBulletDebugLibs)
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
-        }
-        debug {
-            jniDebuggable true
+            externalNativeBuild {
+                cmake {
+                    arguments '-DANDROID_PLATFORM=android-21',
+                            '-DANDROID_TOOLCHAIN=clang',
+                            '-DANDROID_STL=c++_shared',
+                            '-DCMAKE_BUILD_TYPE=Release'
+                }
+            }
+            preBuild.dependsOn(extractBulletReleaseLibs)
         }
     }
-
     sourceSets.main {
         java.srcDirs = ['src/main/java']
         jni.srcDirs = [] // no auto generation of Android.mk
-        jniLibs.srcDir 'src/main/jni/prebuilt' // pre-compiled libraries
+        jniLibs.srcDirs - ['src/main/jniLibs']
     }
-
     externalNativeBuild {
         cmake {
             path 'src/main/jni/CMakeLists.txt'
@@ -74,6 +114,7 @@ clean {}.doLast {
     }
 }
 
+
 task copyJarToBin(type: Copy) {
     outputs.upToDateWhen { false }
     from tasks.matching { it.name.startsWith('bundle') }
@@ -87,3 +128,4 @@ tasks.whenTaskAdded { task ->
         task.finalizedBy(copyJarToBin)
     }
 }
+

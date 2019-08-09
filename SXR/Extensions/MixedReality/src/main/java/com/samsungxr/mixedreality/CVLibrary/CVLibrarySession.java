@@ -49,8 +49,10 @@ import android.app.Activity;
 //import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 //import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 
+import com.google.ar.core.AugmentedImage;
 import com.google.ar.core.Camera;
 import com.google.ar.core.HitResult;
+import com.google.ar.core.TrackingState;
 import com.google.ar.core.exceptions.NotYetAvailableException;
 import com.samsungxr.SXRCameraRig;
 import com.samsungxr.SXRContext;
@@ -64,7 +66,11 @@ import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRScene;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRTexture;
+import com.samsungxr.SXRTransform;
+import com.samsungxr.mixedreality.IAnchorEvents;
+import com.samsungxr.mixedreality.IMarkerEvents;
 import com.samsungxr.mixedreality.IMixedReality;
+import com.samsungxr.mixedreality.IMixedRealityEvents;
 import com.samsungxr.mixedreality.IPlaneEvents;
 import com.samsungxr.mixedreality.SXRAnchor;
 import com.samsungxr.mixedreality.SXRHitResult;
@@ -73,6 +79,9 @@ import com.samsungxr.mixedreality.SXRMarker;
 import com.samsungxr.mixedreality.SXRMixedReality;
 import com.samsungxr.mixedreality.SXRPlane;
 import com.samsungxr.mixedreality.SXRPointCloud;
+import com.samsungxr.mixedreality.SXRTrackingState;
+import com.samsungxr.mixedreality.arcore.ARCoreMarker;
+import com.samsungxr.utility.Log;
 
 import org.joml.Math;
 import org.joml.Matrix4f;
@@ -81,17 +90,19 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
 {
 
     private SXRContext mContext;
-    private float mARtoVRScale = 100;
+    private float mARtoVRScale = 1;
     private SXREventReceiver    mListeners;
     private SXRScene mVRScene;
     private ArrayList<SXRAnchor> mAnchors = new ArrayList<>();
     private ArrayList<SXRPlane> mPlanes = new ArrayList<>();
+    private ArrayList<SXRMarker> mMarkers = new ArrayList<>();
 
     /* From AR to SXR space matrices */
     private float[] mARViewMatrix = new float[16];
@@ -99,6 +110,7 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
     private Vector2f mScreenToCamera = new Vector2f(1, 1);
     private Vector3f mDisplayGeometry;
     private float mScreenDepth;
+    private boolean mIsRunning = false;
 
     //private final HashMap<Anchor, ICloudAnchorListener> pendingAnchors = new HashMap<>();
 
@@ -119,12 +131,34 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
         mScreenToCamera.x = metrics.widthPixels;
         mScreenToCamera.y = metrics.heightPixels;
         configDisplayGeometry(mVRScene.getMainCameraRig());
-        ctx.registerDrawFrameListener(this);
     }
 
-    public void pause() { }
+    public SXRContext getContext() { return mContext; }
 
-    public void resume() { }
+    public void pause()
+    {
+        mContext.unregisterDrawFrameListener(this);
+        mIsRunning = false;
+    }
+
+    public void resume()
+    {
+        mContext.registerDrawFrameListener(this);
+        mIsRunning = true;
+    }
+
+    public void resume()
+    {
+        if (!mIsRunning)
+        {
+            mContext.getEventManager().sendEvent(this,
+                                                 IMixedRealityEvents.class,
+                                                 "onMixedRealityStart",
+                                                 this);
+            mContext.registerDrawFrameListener(this);
+            mIsRunning = true;
+        }
+    }
 
     public float getScreenDepth() { return mScreenDepth; }
 
@@ -132,10 +166,23 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
 
     public void setARToVRScale(float scale) { mARtoVRScale = scale; }
 
-    public void onDrawFrame(float t)
+    public boolean isPaused()
     {
-        updatePlanes(mARViewMatrix, mSXRCamMatrix, mARtoVRScale);
-        updateAnchors(mARViewMatrix, mSXRCamMatrix, mARtoVRScale);
+        return !mIsRunning;
+    }
+
+    public void onDrawFrame(float time)
+    {
+        SXRCameraRig rig = mVRScene.getMainCameraRig();
+        SXRTransform t = rig.getTransform();
+        float x = t.getPositionX();
+        float y = t.getPositionY();
+        float z = t.getPositionZ();
+
+        Log.d("CVLIB", "campos %f, %f, %f", x, y, z);
+        updatePlanes();
+        updateMarkers();
+        updateAnchors();
     }
 
     @Override
@@ -159,7 +206,6 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
         return anchor;
     }
 
-
     @Override
     public void updateAnchorPose(SXRAnchor anchor, float[] pose)
     {
@@ -169,6 +215,8 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
     public void removeAnchor(SXRAnchor anchor)
     {
         mAnchors.remove(anchor);
+        ((CVLibraryAnchor) anchor).setTrackingState(SXRTrackingState.STOPPED);
+        notifyAnchorStateChange(anchor, SXRTrackingState.STOPPED);
         SXRNode owner = anchor.getOwnerObject();
         if (owner != null)
         {
@@ -183,9 +231,7 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
     @Override
     synchronized public void hostAnchor(SXRAnchor anchor, IMixedReality.CloudAnchorCallback listener)
     {
-//        Anchor newAnchor = mSession.hostCloudAnchor(((ARCoreAnchor)anchor).getAnchorAR());
-//        pendingAnchors.put(newAnchor, listener);
-        return;
+        throw new UnsupportedOperationException("Cloud anchors are not supported by CVLib at this time");
     }
 
     /**
@@ -194,16 +240,14 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
      */
     synchronized public void resolveCloudAnchor(String anchorId, IMixedReality.CloudAnchorCallback listener)
     {
-//        Anchor newAnchor = mSession.resolveCloudAnchor(anchorId);
-//        pendingAnchors.put(newAnchor, listener);
-        return;
+        throw new UnsupportedOperationException("Cloud anchors are not supported by CVLib at this time");
     }
 
     public void setEnableCloudAnchor(boolean enableCloudAnchor)
     {
         if (enableCloudAnchor)
         {
-            throw new IllegalArgumentException("Cloud anchors are not supported by CVLib");
+            throw new UnsupportedOperationException("Cloud anchors are not supported by CVLib");
         }
     }
 
@@ -212,35 +256,104 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
         return  new CVLibraryLightEstimate();
     }
 
-    @Override
-    public void setMarker(Bitmap image)
+    private SXRMarker findMarker(String name)
     {
-    }
-
-    @Override
-    public void setMarkers(ArrayList<Bitmap> imagesList)
-    {
-    }
-
-    @Override
-    public ArrayList<SXRMarker> getAllMarkers()
-    {
+        for (SXRMarker m : mMarkers)
+        {
+            if (name.equals(m.getName()))
+            {
+                return m;
+            }
+        }
         return null;
     }
 
-    private void updatePlanes(float[] arViewMatrix, float[] vrCamMatrix, float scale)
+    @Override
+    public void addMarker(String name, Bitmap image)
+    {
+        SXRMarker marker = findMarker(name);
+        if (marker == null)
+        {
+            mMarkers.add(new CVLibraryMarker(this, name));
+        }
+    }
+
+    @Override
+    public void addMarkers(Map<String, Bitmap> markers)
+    {
+        for (Map.Entry<String, Bitmap> e : markers.entrySet())
+        {
+            addMarker(e.getKey(), e.getValue());
+        }
+    }
+
+    @Override
+    public final ArrayList<SXRMarker> getAllMarkers()
+    {
+        return mMarkers;
+    }
+
+    private void updatePlanes()
     {
         if (mPlanes.size() == 0)
         {
             SXRPlane plane = new CVLibraryPlane(mContext, this);
             mPlanes.add(plane);
             mContext.getEventManager().sendEvent(this, IPlaneEvents.class, "onPlaneDetected", plane);
+            notifyPlaneStateChange(plane, SXRTrackingState.TRACKING);
         }
     }
 
-    private void updateAnchors(float[] arViewMatrix, float[] vrCamMatrix, float scale)
+    private void updateMarkers()
     {
+        for (SXRMarker m : mMarkers)
+        {
+            if (m.getTrackingState() == SXRTrackingState.PAUSED)
+            {
+                mContext.getEventManager().sendEvent(this, IMarkerEvents.class, "onMarkerDetected", m);
+                ((CVLibraryMarker) m).setTrackingState(SXRTrackingState.TRACKING);
+                notifyMarkerStateChange(m, SXRTrackingState.TRACKING);
+            }
+        }
+    }
 
+    private void updateAnchors()
+    {
+        for (SXRAnchor a : mAnchors)
+        {
+            if (a.getTrackingState() == SXRTrackingState.PAUSED)
+            {
+                ((CVLibraryAnchor) a).setTrackingState(SXRTrackingState.TRACKING);
+                notifyAnchorStateChange(a, SXRTrackingState.TRACKING);
+            }
+        }
+    }
+
+    private void notifyAnchorStateChange(SXRAnchor anchor, SXRTrackingState trackingState)
+    {
+        mContext.getEventManager().sendEvent(this,
+                IAnchorEvents.class,
+                "onAnchorStateChange",
+                anchor,
+                trackingState);
+    }
+
+    private void notifyPlaneStateChange(SXRPlane plane, SXRTrackingState trackingState)
+    {
+        mContext.getEventManager().sendEvent(this,
+                IPlaneEvents.class,
+                "onPlaneStateChange",
+                plane,
+                trackingState);
+    }
+
+    private void notifyMarkerStateChange(SXRMarker marker, SXRTrackingState trackingState)
+    {
+        mContext.getEventManager().sendEvent(this,
+                IMarkerEvents.class,
+                "onMarkerStateChange",
+                marker,
+                trackingState);
     }
 
     public SXRHitResult hitTest(SXRPicker.SXRPickedObject pick)

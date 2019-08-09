@@ -45,6 +45,10 @@ namespace sxr {
     {
         GLuint programId = static_cast<GLShader*>(shader)->getProgramId();
 
+        if (mVArrayID == -1)
+        {
+            return;
+        }
         GL(glBindVertexArray(mVArrayID));
         if (ibuf)
         {
