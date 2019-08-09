@@ -143,12 +143,6 @@ public class CVLibrarySession implements IMixedReality, SXRDrawFrameListener
 
     public void resume()
     {
-        mContext.registerDrawFrameListener(this);
-        mIsRunning = true;
-    }
-
-    public void resume()
-    {
         if (!mIsRunning)
         {
             mContext.getEventManager().sendEvent(this,
