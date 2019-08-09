@@ -40,6 +40,8 @@
 #include "LinearMath/btScalar.h"
 #include "LinearMath/btVector3.h"
 #include "LinearMath/btTransform.h"
+#include "LinearMath/btMatrix3x3.h"
+#include "../../bullet3/include/LinearMath/btVector3.h"
 
 
 namespace sxr {
@@ -169,7 +171,7 @@ namespace sxr {
         {
             mMultiBody->setBaseWorldTransform(t);
         }
-        else if (mCollider)
+        if (mCollider)
         {
             mCollider->setWorldTransform(t);
         }
@@ -190,19 +192,19 @@ namespace sxr {
         glm::mat4 worldMatrix(glm::make_mat4(matrixData));
         if ((parent != nullptr) && (parent->parent() != nullptr))
         {
-            glm::mat4 parentWorld(parent->transform()->getModelMatrix(true));
+            glm::mat4 parentWorld(parent->transform()->getModelMatrix(false));
             glm::mat4 parentInverseWorld(glm::inverse(parentWorld));
             glm::mat4 localMatrix;
 
             localMatrix = parentInverseWorld * worldMatrix;
             trans->setModelMatrix(localMatrix);
-            LOGD("BULLET: JOINT %s %f, %f, %f", owner->name().c_str(), trans->position_x(), trans->position_y(), trans->position_z());
         }
         else
         {
             trans->set_position(pos.getX(), pos.getY(), pos.getZ());
             trans->set_rotation(rot.getW(), rot.getX(), rot.getY(), rot.getZ());
         }
+        LOGD("BULLET: JOINT %s %f, %f, %f", owner->name().c_str(), trans->position_x(), trans->position_y(), trans->position_z());
         mWorld->markUpdated(this);
     }
 
@@ -262,9 +264,6 @@ namespace sxr {
             {
                 mCollider = new btMultiBodyLinkCollider(mMultiBody, mBoneID);
                 btCollisionShape* shape = convertCollider2CollisionShape(collider);
-                bool isDynamic = getMass() > 0;
-                int collisionFilterGroup = isDynamic ? int(btBroadphaseProxy::DefaultFilter) : int(btBroadphaseProxy::StaticFilter);
-                int collisionFilterMask = isDynamic ? int(btBroadphaseProxy::AllFilter) : int(btBroadphaseProxy::AllFilter ^ btBroadphaseProxy::StaticFilter);
 
                 mCollider->setCollisionShape(shape);
                 mCollider->setIslandTag(0);
@@ -312,9 +311,6 @@ namespace sxr {
         BulletJoint* jointA = static_cast<BulletJoint*>(parent->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
         glm::mat4 tA = parent->transform()->getModelMatrix(true);
         glm::mat4 tB = owner->transform()->getModelMatrix(true);
-        glm::quat rotA(glm::quat_cast(tA));
-        glm::quat rotB(glm::quat_cast(tB));
-        glm::quat rotDiff(glm::inverse(rotA) * rotB);
         btVector3 bodyACOM(tA[3][0], tA[3][1], tA[3][2]);
         btVector3 bodyBCOM(tB[3][0], tB[3][1], tB[3][2]);
         btVector3 diffCOM = bodyBCOM - bodyACOM;
@@ -324,9 +320,9 @@ namespace sxr {
                                    mLink->m_mass,
                                    mLink->m_inertiaLocal,
                                    jointA->getBoneID() - 1,
-                                   btQuaternion(rotDiff.x, rotDiff.y, rotDiff.z, rotDiff.w),
+                                   btQuaternion(0, 0, 0, 1),
                                    bodyACOM2bodyBpivot,
-                                   btVector3(0,0, 0),
+                                   btVector3(0, 0, 0),
                                    true);
         addConstraint();
     }
@@ -339,56 +335,63 @@ namespace sxr {
         BulletJoint* jointA = static_cast<BulletJoint*>(parent->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
         glm::mat4 tA = parent->transform()->getModelMatrix(true);
         glm::mat4 tB = owner->transform()->getModelMatrix(true);
-        glm::vec3 pivotA(0, 0, 0);
-        glm::quat rotA(glm::quat_cast(tA));
-        glm::quat rotB(glm::quat_cast(tB));
-        glm::quat rotDiff(glm::inverse(rotA) * rotB);
-        btVector3 pA(pivotA.x, pivotA.y, pivotA.z);
-        btVector3 bodyACOM(tA[3][0], tA[3][1], tA[3][2]);
-        btVector3 bodyBCOM(tB[3][0], tB[3][1], tB[3][2]);
-        btVector3 bodyACOM2bodyBpivot(pA - bodyBCOM);
-        btVector3 bodyBpivot(bodyACOM + bodyACOM2bodyBpivot);
+        const glm::vec3& pivotA = constraint ? constraint->getParentPivot() : glm::vec3(0, 0, 0);
+        btVector3   bodyACOM(tA[3][0], tA[3][1], tA[3][2]);
+        btVector3   bodyBCOM(tB[3][0], tB[3][1], tB[3][2]);
+        btVector3   bodyApivot(pivotA.x, pivotA.y, pivotA.z);
+        btVector3   diffCOM = bodyBCOM - bodyACOM;
         btMultibodyLink& link = mMultiBody->getLink(getBoneID() - 1);
 
-        if (constraint)
-        {
-            pivotA = constraint->getParentPivot();
-        }
         mMultiBody->setupSpherical(getBoneID() - 1,
                                    mLink->m_mass,
                                    mLink->m_inertiaLocal,
                                    jointA->getBoneID() - 1,
-                                   btQuaternion(rotDiff.x, rotDiff.y, rotDiff.z, rotDiff.w),
-                                   bodyACOM2bodyBpivot,
-                                   bodyBpivot);
+                                   btQuaternion(0, 0, 0, 1),
+                                   diffCOM,
+                                   -diffCOM, true);
         addConstraint();
     }
 
 
+    /***
+     * The hinge joint is set up by choosing a hinge axis in the hinge coordinate system.
+     * Below we choose the X axis. To map the SXR world coordinate system into the
+     * hinge coordinate system we define a rotation frame with the hinge axis as X,
+     * the vector between bodyB and its pivot as Y (up axis) and the remaining
+     * axis is the cross between the two (normal to the plane defined by hinge
+     * and pivot axes). This rotation (in quaternion form) is the rotParentToThis
+     * argument to setupRevolute.
+     *
+     * The vector from bodyB's center to bodyB's pivot is supplied as the
+     * bodyB pivot from the constraint (getPivot()). This vector is the
+     * value for thisPivotToThisComOffset in setupRevolute.
+     *
+     * The parentComToThisPivotOffset argument is the difference between
+     * bodyB center and bodyA center plus the bodyB pivot (the vector
+     * from bodyA center to bodyB's pivot).
+      */
     void BulletJoint::setupHinge(BulletHingeConstraint* constraint)
     {
         Node* owner = owner_object();
         Node* parent = owner->parent();
-        const glm::vec3& pivotA = constraint->getParentPivot();
-        const glm::vec3& pivotB = constraint->getPivot();
-        const glm::vec3& axis = constraint->getJointAxis();
-        btVector3 pivotInB(pivotB.x, pivotB.y, pivotB.z);
-        btVector3 axisIn(axis.x, axis.y, axis.z);
+        int linkIndex = getBoneID()- 1;
         BulletJoint* jointA = static_cast<BulletJoint*>(parent->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
         glm::mat4 tA = parent->transform()->getModelMatrix(true);
         glm::mat4 tB = owner->transform()->getModelMatrix(true);
-        btVector3 bodyACOM(tA[3][0], tA[3][1], tA[3][2]);
-        btVector3 bodyBCOM(tB[3][0], tB[3][1], tB[3][2]);
-        btVector3 bodyACOM2bodyBpivot = bodyBCOM + pivotInB - bodyACOM;
+        const glm::vec3& axis = glm::normalize(constraint->getJointAxis());
+        btVector3   hingeAxis(axis.x, axis.y, axis.z);
+        btVector3   bodyACOM(tA[3][0], tA[3][1], tA[3][2]);
+        btVector3   bodyBCOM(tB[3][0], tB[3][1], tB[3][2]);
+        btVector3   diffCOM(bodyBCOM - bodyACOM);
 
-        mMultiBody->setupRevolute(getBoneID() - 1,
+        mMultiBody->setupRevolute(linkIndex,
                           mLink->m_mass,
                           mLink->m_inertiaLocal,
                           jointA->getBoneID() - 1,
                           btQuaternion(0, 0, 0, 1),
-                          axisIn,
-                          bodyACOM2bodyBpivot,
-                          pivotInB);
+                          hingeAxis,
+                          diffCOM,
+                          -diffCOM, true);
         mLink->m_jointLowerLimit = constraint->getLowerLimit();
         mLink->m_jointUpperLimit = constraint->getUpperLimit();
         addConstraint();
@@ -399,22 +402,22 @@ namespace sxr {
         Node* owner = owner_object();
         Node* parent = owner->parent();
         BulletJoint* jointA = static_cast<BulletJoint*>(parent->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
-        glm::mat4 tA = parent->transform()->getModelMatrix(true);
-        glm::mat4 tB = owner->transform()->getModelMatrix(true);
-        btVector3 bodyACOM(tA[3][0], tA[3][1], tA[3][2]);
-        btVector3 bodyBCOM(tB[3][0], tB[3][1], tB[3][2]);
-        btVector3 diffCOM = bodyBCOM - bodyACOM;
-        btVector3 bodyACOM2bodyBpivot = diffCOM;
-        glm::vec3 jointAxis = PhysicsConstraint::findJointAxis(parent->transform(), owner->transform());
+        glm::mat4   tA = parent->transform()->getModelMatrix(true);
+        glm::mat4   tB = owner->transform()->getModelMatrix(true);
+        btVector3   bodyACOM(tA[3][0], tA[3][1], tA[3][2]);
+        btVector3   bodyBCOM(tB[3][0], tB[3][1], tB[3][2]);
+        btVector3   diffCOM = bodyBCOM - bodyACOM;
+        btVector3   sliderAxis(diffCOM.normalize());
 
         mMultiBody->setupPrismatic(getBoneID() - 1,
                                   mLink->m_mass,
                                   mLink->m_inertiaLocal,
                                   jointA->getBoneID() - 1,
                                   btQuaternion(0, 0, 0, 1),
-                                  btVector3(jointAxis.x, jointAxis.y, jointAxis.z),
-                                  bodyACOM2bodyBpivot,
-                                  btVector3(0, 0, 0), false);
+                                  sliderAxis,
+                                  diffCOM,
+                                  -diffCOM,
+                                  true);
         mLink->m_jointLowerLimit = constraint->getLinearLowerLimit();
         mLink->m_jointUpperLimit = constraint->getLinearUpperLimit();
         addConstraint();
