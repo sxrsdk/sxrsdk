@@ -24,26 +24,60 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Finite state machine that can start and stop animations.
+ * <p>
+ * This FSM has predefined actions to play and stop animations.
+ * It has an {@link SXRAnimationQueue} which contains a set of
+ * loaded animations. The state machine can start or stop
+ * any of these by name.
+ * @see SXRStateMachine
+ */
 public class SXRAnimationStateMachine extends SXRStateMachine implements SXRAnimationQueue.IAnimationQueueEvents
 {
     protected final SXRAnimationQueue mAnimQueue;
 
+    /**
+     * Action to play a specific animation.
+     */
     public static class Play extends Action
     {
         private String  mAnimName;
 
+        /**
+         * Construction an action which plays a given animation.
+         * <p>
+         * The animation must be known to the {@link SXRAnimationQueue}
+         * associated with this state machine.
+         * </p>
+         * @param sm        {@link SXRStateMachine} which owns this action.
+         * @param animName  String with name of animation to play.
+         */
         public Play(SXRStateMachine sm, String animName)
         {
             super(sm, "playanimation");
             mAnimName = animName;
         }
 
+        /**
+         * Construction an action which plays a given animation.
+         * <p>
+         * The animation must be known to the {@link SXRAnimationQueue}
+         * associated with this state machine.
+         * </p>
+         * @param sm        {@link SXRStateMachine} which owns this action.
+         * @param json      JSONObject with animation properties.
+         */
         public Play(SXRStateMachine sm, JSONObject json) throws JSONException
         {
             super(sm, json);
             mAnimName = json.getString("name");
         }
 
+        /**
+         * Get the name of the animation this action will play.
+         * @return String with animation name.
+         */
         public String getAnimationName() { return mAnimName; }
 
         public void run()
@@ -59,23 +93,61 @@ public class SXRAnimationStateMachine extends SXRStateMachine implements SXRAnim
         }
     }
 
+
+    /**
+     * Action to randomly play an animation.
+     * The animation is chosen by matching a name pattern
+     * against the animations currently in the queue.
+     */
     public static class PlayRandom extends Action
     {
         private final String  mAnimName;
         private final List<String> mAnimNames = new ArrayList<String>();
 
+        /**
+         * Construction an action which plays a random animation.
+         * <p>
+         * The input animation name is used as a search pattern
+         * to select a set of animations from the animation queue
+         * associated with this state machine. Any name which contains
+         * the pattern is a candidate for play. One animation is
+         * selected randomly from all of the matching candidates.
+         * The animation must be known to the {@link SXRAnimationQueue}
+         * associated with this state machine.
+         * </p>
+         * @param sm        {@link SXRStateMachine} which owns this action.
+         * @param animName  String with pattern for animation to play.
+         */
         public PlayRandom(SXRStateMachine sm, String animName)
         {
             super(sm, "playrandom");
             mAnimName = animName;
         }
 
+        /**
+         * Construction an action which plays a raqndom animation.
+         * <p>
+         * The input animation name is used as a search pattern
+         * to select a set of animations from the animation queue
+         * associated with this state machine. Any name which contains
+         * the pattern is a candidate for play. One animation is
+         * selected randomly from all of the matching candidates.
+         * The animation must be known to the {@link SXRAnimationQueue}
+         * associated with this state machine.
+         * </p>
+         * @param sm        {@link SXRStateMachine} which owns this action.
+         * @param json      JSONObject with action properties.
+         */
         public PlayRandom(SXRStateMachine sm, JSONObject json) throws JSONException
         {
             super(sm, json);
             mAnimName = json.getString("name");
         }
 
+        /**
+         * Get the name of the animation selection pattern.
+         * @return String with name passed to the constructur.
+         */
         public String getAnimationName() { return mAnimName; }
 
         public void run()
@@ -122,22 +194,47 @@ public class SXRAnimationStateMachine extends SXRStateMachine implements SXRAnim
         }
     }
 
+    /**
+     * Action which stops the currently running animation, if any.
+     */
     public static class Stop extends Action
     {
         private String  mAnimName;
 
+        /**
+         * Construction an action which stops the given animation.
+         * <p>
+         * The animation must be known to the {@link SXRAnimationQueue}
+         * associated with this state machine.
+         * </p>
+         * @param sm        {@link SXRStateMachine} which owns this action.
+         * @param animName  String with name of animation to stop.
+         */
         public Stop(SXRStateMachine sm, String animName)
         {
             super(sm, "stopanimation");
             mAnimName = animName;
         }
 
+        /**
+         * Construction an action which stops a given animation.
+         * <p>
+         * The animation must be known to the {@link SXRAnimationQueue}
+         * associated with this state machine.
+         * </p>
+         * @param sm        {@link SXRStateMachine} which owns this action.
+         * @param json      JSONObject with animation properties.
+         */
         public Stop(SXRStateMachine sm, JSONObject json) throws JSONException
         {
             super(sm, json);
             mAnimName = json.getString("name");
         }
 
+        /**
+         * Get the name of the animation.
+         * @return String with name passed to the constructur.
+         */
         public String getAnimationName() { return mAnimName; }
 
         public void run()
@@ -153,9 +250,14 @@ public class SXRAnimationStateMachine extends SXRStateMachine implements SXRAnim
         }
     }
 
-    public SXRAnimationStateMachine(SXRContext ctx, SXRAnimationQueue queue)
+    /**
+     * Construct an animation state machine which uses
+     * the given animation queue.
+     * @param queue {@link SXRAnimationQueue} for scheduling animations.
+     */
+    public SXRAnimationStateMachine(SXRAnimationQueue queue)
     {
-        super(ctx);
+        super();
         mAnimQueue = queue;
         defineAction("playanimation", Play.class);
         defineAction("stopanimation", Stop.class);

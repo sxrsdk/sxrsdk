@@ -35,7 +35,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
-
+/**
+ * Infrastructure for a finite state machine.
+ * <p>
+ * This class is useful for scheduling events within your application.
+ * The <i>state machine</i> has a set of states, each state has one or
+ * more associated actions. An <i>action</i> is a task that is run when a
+ * state is entered, exited or the when the previous state finishes.
+ * <p>
+ * The {@link SXRStateMachine.Action} class is the base for defining your
+ * own actions. The only built-in action is {@link SXRStateMachine.GoToState}
+ * which transitions to another state. During a transition, the <i>exit</i>
+ * actions for the current state are executed and then the <i>enter</i>
+ * action for the next state is executed.
+ * <p>
+ * A state machine can be imported or exported as a JSON file.
+ * Each action is responsible for its own serialization.
+ * </p>
+ * @see SXRAnimationStateMachine
+ */
 public class SXRStateMachine
 {
     protected State mCurrentState = null;
@@ -43,33 +61,69 @@ public class SXRStateMachine
     protected List<State> mStates;
     protected boolean mIsRunning = false;
 
+    /**
+     * Base class for all state machine actions.
+     * Each action has a unique type which is used
+     * to refer to the action in the JSON description.
+     * An action can convert itself to JSON.
+     * An action must be defined for the state machine
+     * before it can be used.
+     * @see SXRStateMachine#defineAction(String, Class)
+     */
     public static abstract class Action implements Runnable
     {
         protected String mType;
         protected SXRStateMachine mStateMachine;
 
+        /**
+         * Construct an empty action of the given type.
+         * @param sm    {@link SXRStateMachine} the action belongs to.
+         * @param type  String type of the action.
+         */
         public Action(SXRStateMachine sm, String type)
         {
             mStateMachine = sm;
             mType = type;
         }
 
+        /**
+         * Construct an action from a JSON object.
+         * @param sm    {@link SXRStateMachine} the action belongs to.
+         * @param json  JSONObject containing the action properties.
+         */
         public Action(SXRStateMachine sm, JSONObject json)
         {
             mStateMachine = sm;
             mType = json.optString("action");
         }
 
+        /**
+         * Returns the type of the action.
+         * @return type specified in the constructor or JSON file.
+         */
         public String getType() { return mType; }
 
-        public void runIf(String s) { }
+        /**
+         * Execute the action if in the specified state.
+         * @param state     state for executing the action.
+         */
+        public void runIf(String state) { }
 
+        /**
+         * Export the action as a JSON string.
+         * @return JSON description of action.
+         */
         public String asJSON()
         {
             return "\"action\" : \"" + mType + "\"";
         }
     };
 
+    /***
+     * Contains a group of actions.
+     * Use this class when you want more than one action
+     * to be associated with an enter of leave event.
+     */
     public static class ActionGroup extends Action
     {
         protected List<Action> mActions;
@@ -79,13 +133,24 @@ public class SXRStateMachine
             mActions = new ArrayList<Action>();
         }
 
+        /**
+         * Get the list of actions in this group
+         * @return {@link List} of actions.
+         */
         public final List<Action> getActions() { return mActions; }
 
+        /**
+         * Add an action to this group.
+         * @param a action to add.
+         */
         public void addAction(Action a)
         {
             mActions.add(a);
         }
 
+        /**
+         * Execute the actions in this group.
+         */
         public void run()
         {
             for (Action a : mActions)
@@ -103,6 +168,9 @@ public class SXRStateMachine
         }
     };
 
+    /**
+     * Action which causes a transition to a new state.
+     */
     public static class GoToState extends Action
     {
         private String mNextState;
@@ -172,16 +240,6 @@ public class SXRStateMachine
             }
         }
 
-        public void gotoState(String nextState)
-        {
-            Action action = mActions.get("goto");
-
-            if (action != null)
-            {
-                Log.d("STATE", "State %s: %s goto %s", getName(), nextState);
-                action.runIf(nextState);
-            }
-        }
 
         public void addAction(String event, Action action)
         {
@@ -233,13 +291,33 @@ public class SXRStateMachine
         }
     }
 
-    public SXRStateMachine(SXRContext ctx)
+    /**
+     * Construct a new state machine.
+     * Initially it was not have any states or actions.
+     * The {@link GoToState} action is defined.
+     */
+    public SXRStateMachine()
     {
         mActions = new HashMap<String, Class<? extends Action>>();
         mStates = new ArrayList<State>();
         defineAction("goto", GoToState.class);
     }
 
+    /**
+     * Define the implementation for an action on this state machihne.
+     * <p>
+     * A custom action must be derived from {@link SXRStateMachine.Action}
+     * and provide custom implementations for {@link SXRStateMachine.Action#asJSON()}
+     * to export the action as JSON and {@link SXRStateMachine.Action#run}.
+     * <p>
+     * ro execute the action. It must also provide two constructors.
+     * <i>MyAction(SXRStateMachine, String)</i> should define an empty
+     * action of a given type. <i>MyAction(SXRStateMachine, JSONObject)</i>
+     * should set the action properties from a JSON object.
+     * </p>
+     * @param type    String with type of action.
+     * @param clazz   Class which implements the action.
+     */
     public void defineAction(String type, Class<? extends Action> clazz)
     {
         mActions.put(type, clazz);
@@ -253,8 +331,15 @@ public class SXRStateMachine
         }
     }
 
+    /**
+     * Determines whether the state machine is running or not.
+     * @return true if running, else false.
+     */
     public boolean isRunning() { return mIsRunning; }
 
+    /**
+     * Start the state machine and enter the first state.
+     */
     public void start()
     {
         if (mStates.size() == 0)
@@ -266,17 +351,26 @@ public class SXRStateMachine
         mCurrentState.enter();
     }
 
+    /**
+     * Leave the current state and stop the state machine.
+     */
     public void stop()
     {
-        if (mStates.size() == 0)
+        if (mStates.size() > 0)
         {
-            throw new UnsupportedOperationException("Cannot start if there are not states");
+            mCurrentState = mStates.get(0);
+            mCurrentState.leave();
         }
-        mCurrentState = mStates.get(0);
-        mCurrentState.leave();
         mIsRunning = false;
     }
 
+    /**
+     * Transition the state machine to the given state.
+     * <p>
+     * The <i>leave</i> action is executed for the
+     * current state and the <i>enter</i> action is executed for the new state.
+     * @param nextState
+     */
     public void gotoState(String nextState)
     {
         State state = findState(nextState);
@@ -286,10 +380,13 @@ public class SXRStateMachine
         }
         mCurrentState.leave();
         mCurrentState = state;
-        state.gotoState(nextState);
         state.enter();
     }
 
+    /**
+     * Generate a JSON description of the state machine.
+     * @return String with JSON.
+     */
     public String asJSON()
     {
         String s = "";
@@ -304,6 +401,11 @@ public class SXRStateMachine
         return "{ \"states\" : [\n" + s + "\n ]\n}";
     }
 
+    /**
+     * Import a state machine from a JSON string.
+     * @param jsonData  String with JSON date
+     * @return true if successfully parsed, false if parse error
+     */
     public boolean parse(String jsonData)
     {
         try
@@ -352,7 +454,6 @@ public class SXRStateMachine
             return false;
         }
     }
-
 
     protected Action makeAction(String actionType)
     {

@@ -426,6 +426,11 @@ public class SXRAnimationQueue implements SXRDrawFrameListener, IEventReceiver
             SXRAnimator a = findAnimation(name);
             int index = NextAnimIndex(mCurIndex);
 
+            if (a == null)
+            {
+                Log.d("ANIMATION", "Cannot find animation %s", name);
+                return;
+            }
             if (index < 0)
             {
                 index = mCurIndex;
