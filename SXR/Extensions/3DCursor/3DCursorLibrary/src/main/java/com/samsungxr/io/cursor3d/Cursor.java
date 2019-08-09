@@ -15,8 +15,6 @@
 
 package com.samsungxr.io.cursor3d;
 
-import android.view.InputDevice;
-
 import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
 import com.samsungxr.io.SXRCursorController;
@@ -607,7 +605,7 @@ public abstract class Cursor extends SXRBehavior
         Log.d(TAG, Integer.toHexString(hashCode()) + " enabled");
         if (isEnabled() && (getController() == null))
         {
-            mCursorManager.attachDevice(this);
+            mCursorManager.attachController(this);
         }
     }
 
@@ -621,7 +619,6 @@ public abstract class Cursor extends SXRBehavior
             mController.setCursor(null);
         }
         mCursorManager.markCursorUnused(this);
-        close();
     }
 
     void setupController(SXRCursorController controller)
