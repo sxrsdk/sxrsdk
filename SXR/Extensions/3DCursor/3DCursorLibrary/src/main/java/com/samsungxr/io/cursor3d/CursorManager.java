@@ -757,7 +757,7 @@ public final class CursorManager implements IEventReceiver
                 final Cursor cursor = cursorIterator.next();
                 if (!cursor.isActive() && cursor.isEnabled())
                 {
-                    assignDeviceToCursor(cursor);
+                    assignControllerToCursor(cursor);
                 }
             }
         /*
@@ -771,7 +771,7 @@ public final class CursorManager implements IEventReceiver
                     final Cursor cursor = cursorIterator.next();
                     if (cursor.isActive())
                     {
-                        assignDeviceToCursor(cursor);
+                        assignControllerToCursor(cursor);
                     }
                 }
             }
@@ -789,7 +789,7 @@ public final class CursorManager implements IEventReceiver
      *          0 = device replaced on cursor,
      *          -1 = nothing was done
      */
-    int assignDeviceToCursor(final Cursor cursor)
+    int assignControllerToCursor(final Cursor cursor)
     {
         int currentPriority = cursor.getCurrentDevicePriority();
         SXRCursorController savedController  = cursor.getSavedController();
@@ -830,6 +830,11 @@ public final class CursorManager implements IEventReceiver
         return -1;
     }
 
+    /**
+     * Called when a new SXRCursorController is added.
+     * This function will examine the new controller to
+     * see if it can be assigned to a cursor.
+     */
     int assignCursorToController(final SXRCursorController controller)
     {
         synchronized (mCursors)
@@ -912,7 +917,12 @@ public final class CursorManager implements IEventReceiver
         }
     }
 
-    public void attachDevice(final Cursor cursor)
+    /**
+     * Called when a new cursor is activated.
+     * This function tries to find an SXRCursorController
+     * compatible with the new cursor.
+     */
+    public void attachController(final Cursor cursor)
     {
         if (getNumUnusedDevices() == 0)
         {
@@ -922,7 +932,7 @@ public final class CursorManager implements IEventReceiver
         {
             synchronized (mCursors)
             {
-                assignDeviceToCursor(cursor);
+                assignControllerToCursor(cursor);
             }
         }
     }
