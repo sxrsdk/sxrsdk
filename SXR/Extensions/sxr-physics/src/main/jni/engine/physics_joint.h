@@ -41,9 +41,9 @@ class PhysicsJoint :  public PhysicsCollidable
 
 	virtual int getBoneID() = 0;
 
-	virtual void applyCentralForce(float x, float y, float z) = 0;
-
 	virtual void applyTorque(float x, float y, float z) = 0;
+
+	virtual void applyTorque(float t) = 0;
 
 };
 

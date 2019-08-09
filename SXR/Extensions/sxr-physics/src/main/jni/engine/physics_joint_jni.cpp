@@ -43,10 +43,6 @@ extern "C"
     Java_com_samsungxr_physics_NativePhysicsJoint_setFriction(JNIEnv* env, jclass obj, jlong jjoint, jfloat friction);
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_applyCentralForce(JNIEnv* env, jclass obj,
-                                                             jlong jjoint, jfloat x, jfloat y, jfloat z);
-
-    JNIEXPORT void JNICALL
     Java_com_samsungxr_physics_NativePhysicsJoint_applyTorque(JNIEnv* env, jclass obj,
                                                                  jlong jjoint, jfloat x, jfloat y, jfloat z);
 }
@@ -103,14 +99,6 @@ extern "C"
     {
         PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
         return mb->getBoneID();
-    }
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_applyCentralForce(JNIEnv* env, jclass obj,
-                                                                 jlong jjoint, jfloat x, jfloat y, jfloat z)
-    {
-        PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
-        mb->applyCentralForce(x, y, z);
     }
 
     JNIEXPORT void JNICALL

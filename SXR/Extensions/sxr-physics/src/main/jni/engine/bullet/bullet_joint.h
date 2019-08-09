@@ -62,7 +62,7 @@ class BulletJoint : public PhysicsJoint
 
     virtual void applyTorque(float x, float y, float z);
 
-    virtual void applyCentralForce(float x, float y, float z);
+    virtual void applyTorque(float t);
 
     int getBoneID() { return mBoneID; }
 

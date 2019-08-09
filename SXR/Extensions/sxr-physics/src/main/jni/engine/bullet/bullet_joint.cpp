@@ -213,8 +213,8 @@ namespace sxr {
     {
         if (mLink)
         {
-            //mMultiBody->addLinkTorque(getBoneID() - 1, btVector3(x, y, z));
-            mMultiBody->addJointTorque(getBoneID() - 1, x);
+            float torque[] = { x, y, z, 0 };
+            mMultiBody->addJointTorqueMultiDof(getBoneID() - 1, torque);
         }
         else
         {
@@ -222,15 +222,16 @@ namespace sxr {
         }
     }
 
-    void BulletJoint::applyCentralForce(float x, float y, float z)
+    void BulletJoint::applyTorque(float t)
     {
         if (mLink)
         {
-            mMultiBody->addLinkForce(getBoneID() - 1, btVector3(x, y, z));
+            mMultiBody->addJointTorque(getBoneID() - 1, t);
         }
         else
         {
-            mMultiBody->addBaseForce(btVector3(x, y, z));
+            btVector3 torque(t, 0, 0);
+            mMultiBody->addBaseTorque(torque);
         }
     }
 
@@ -338,7 +339,6 @@ namespace sxr {
         const glm::vec3& pivotA = constraint ? constraint->getParentPivot() : glm::vec3(0, 0, 0);
         btVector3   bodyACOM(tA[3][0], tA[3][1], tA[3][2]);
         btVector3   bodyBCOM(tB[3][0], tB[3][1], tB[3][2]);
-        btVector3   bodyApivot(pivotA.x, pivotA.y, pivotA.z);
         btVector3   diffCOM = bodyBCOM - bodyACOM;
         btMultibodyLink& link = mMultiBody->getLink(getBoneID() - 1);
 
@@ -347,8 +347,8 @@ namespace sxr {
                                    mLink->m_inertiaLocal,
                                    jointA->getBoneID() - 1,
                                    btQuaternion(0, 0, 0, 1),
-                                   diffCOM,
-                                   -diffCOM, true);
+                                   btVector3(0, 0, 0),
+                                   diffCOM, true);
         addConstraint();
     }
 
@@ -390,8 +390,8 @@ namespace sxr {
                           jointA->getBoneID() - 1,
                           btQuaternion(0, 0, 0, 1),
                           hingeAxis,
-                          diffCOM,
-                          -diffCOM, true);
+                          btVector3(0, 0, 0),
+                          diffCOM, true);
         mLink->m_jointLowerLimit = constraint->getLowerLimit();
         mLink->m_jointUpperLimit = constraint->getUpperLimit();
         addConstraint();
@@ -415,8 +415,8 @@ namespace sxr {
                                   jointA->getBoneID() - 1,
                                   btQuaternion(0, 0, 0, 1),
                                   sliderAxis,
+                                  btVector3(0, 0, 0),
                                   diffCOM,
-                                  -diffCOM,
                                   true);
         mLink->m_jointLowerLimit = constraint->getLinearLowerLimit();
         mLink->m_jointUpperLimit = constraint->getLinearUpperLimit();

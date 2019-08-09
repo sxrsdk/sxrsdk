@@ -136,24 +136,6 @@ public class SXRPhysicsJoint extends SXRPhysicsWorldObject
         return NativePhysicsJoint.getFriction(getNative());
     }
 
-    /**
-     * Apply a central force vector [X, Y, Z] to this {@linkplain SXRPhysicsJoint joint}
-     *
-     * @param x factor on the 'X' axis.
-     * @param y factor on the 'Y' axis.
-     * @param z factor on the 'Z' axis.
-     */
-    public void applyCentralForce(final float x, final float y, final float z)
-    {
-        mPhysicsContext.runOnPhysicsThread(new Runnable() {
-            @Override
-            public void run()
-            {
-                NativePhysicsJoint.applyCentralForce(getNative(), x, y, z);
-            }
-        });
-    }
-
 
     /**
      * Apply a torque vector [X, Y, Z] to this {@linkplain SXRPhysicsJoint joint}
@@ -171,6 +153,22 @@ public class SXRPhysicsJoint extends SXRPhysicsWorldObject
             }
         });
     }
+
+    /**
+     * Apply a torque to a single DOF joint {@linkplain SXRPhysicsJoint joint}
+     *
+     * @param t torque on the joint
+     */
+    public void applyTorque(final float t)
+    {
+        mPhysicsContext.runOnPhysicsThread(new Runnable() {
+            @Override
+            public void run() {
+                NativePhysicsJoint.applyTorque(getNative(), t, 0, 0);
+            }
+        });
+    }
+
     /**
      * Returns the bone ID of this joint.
      */

@@ -36,8 +36,6 @@ namespace sxr {
 
         virtual void applyTorque(float x, float y, float z) = 0;
 
-        virtual void applyCentralForce(float x, float y, float z) = 0;
-
         virtual void updateConstructionInfo(PhysicsWorld*) = 0;
     };
 
