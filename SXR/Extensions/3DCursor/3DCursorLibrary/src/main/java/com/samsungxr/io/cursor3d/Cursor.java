@@ -15,8 +15,6 @@
 
 package com.samsungxr.io.cursor3d;
 
-import android.view.InputDevice;
-
 import com.samsungxr.SXRBehavior;
 import com.samsungxr.SXRContext;
 import com.samsungxr.io.SXRCursorController;
