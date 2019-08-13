@@ -46,6 +46,18 @@ public class SXRGenericConstraint extends SXRConstraint
         mBodyA = bodyA;
     }
 
+    /**
+     * Construct a new instance of a generic constraint.
+     *
+     * @param ctx        the context of the app
+     * @param bodyA      the "fixed" body (not the owner) in this constraint
+     */
+    public SXRGenericConstraint(SXRContext ctx, SXRPhysicsWorldObject bodyA)
+    {
+        this(ctx, Native3DGenericConstraint.ctor(bodyA.getNative(), new float[] { 0, 0, 0 }));
+        mBodyA = bodyA;
+    }
+
     /** Used only by {@link SXRPhysicsLoader} */
     SXRGenericConstraint(SXRContext gvrContext, long nativeConstraint)
     {

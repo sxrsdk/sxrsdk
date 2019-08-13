@@ -44,6 +44,22 @@ public class SXRHingeConstraint extends SXRConstraint
         mBodyA = bodyA;
     }
 
+    /**
+     * Constructs a new instance of hinge constraint.
+     *
+     * @param ctx the context of the app
+     * @param bodyA      the first rigid body (not the owner) in this constraint
+     * @param axisIn     the axis around which body A can rotate
+     */
+    public SXRHingeConstraint(SXRContext ctx, SXRPhysicsWorldObject bodyA, float axisIn[])
+    {
+        this(ctx, Native3DHingeConstraint.ctor(bodyA.getNative(),
+                new float[] { 0, 0, 0 },
+                new float[] { 0, 0, 0 },
+                axisIn));
+        mBodyA = bodyA;
+    }
+
     /** Used only by {@link SXRPhysicsLoader} */
     SXRHingeConstraint(SXRContext gvrContext, long nativeConstraint)
     {
