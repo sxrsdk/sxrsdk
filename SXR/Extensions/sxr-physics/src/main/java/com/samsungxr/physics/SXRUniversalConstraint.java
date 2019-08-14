@@ -16,33 +16,32 @@
 package com.samsungxr.physics;
 
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRTransform;
+
+import org.joml.Vector3f;
+
 
 /**
- * Created by c.bozzetto on 09/06/2017.
- */
-
-/**
- * Represents a generic constraint for two {@linkplain SXRRigidBody rigid bodies} or
+ * Represents a universal constraint for two {@linkplain SXRRigidBody rigid bodies} or
  * {@linkplain SXRPhysicsJoint joints} that are linked by a point related to the first one.
  * The second one is the owner of the constraint). Though it can be moved the
  * first body can be referred as "fixed" since it will keep same distance and rotation from this
  * joint point while the second is the "moving" because one can explicitly set restriction for each
  * translation and rotation axis.
  */
-public class SXRGenericConstraint extends SXRConstraint
+public class SXRUniversalConstraint extends SXRConstraint
 {
     /**
      * Construct a new instance of a generic constraint.
      *
      * @param ctx        the context of the app
      * @param bodyA      the "fixed" body (not the owner) in this constraint
-     * @param pivotA    the pivot point (x, y and z coordinates) in this constraint
-     *                   relative to "fixed" body
      */
-    public SXRGenericConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, final float pivotA[])
+    public SXRUniversalConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA)
     {
-        this(ctx, Native3DGenericConstraint.ctor(bodyA.getNative(), pivotA));
+        this(ctx, NativeUniversalConstraint.ctor(bodyA.getNative(),
+                                                 0, 0, 0,
+                                                 0, 0, 1,
+                                                 0, 1, 0));
         mBodyA = bodyA;
     }
 
@@ -52,60 +51,41 @@ public class SXRGenericConstraint extends SXRConstraint
      * @param ctx        the context of the app
      * @param bodyA      the "fixed" body (not the owner) in this constraint
      */
-    public SXRGenericConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA)
+    public SXRUniversalConstraint(SXRContext ctx,
+                                  SXRPhysicsCollidable bodyA,
+                                  final float anchor[],
+                                  final float Zaxis[],
+                                  final float Yaxis[])
     {
-        this(ctx, Native3DGenericConstraint.ctor(bodyA.getNative(), new float[] { 0, 0, 0 }));
+        this(ctx, NativeUniversalConstraint.ctor(bodyA.getNative(),
+                                                 anchor[0], anchor[1], anchor[2],
+                                                 Zaxis[0], Zaxis[1], Zaxis[2],
+                                                 Yaxis[0], Yaxis[1], Yaxis[1]));
+        mBodyA = bodyA;
+    }
+
+    /**
+     * Construct a new instance of a generic constraint.
+     *
+     * @param ctx        the context of the app
+     * @param bodyA      the "fixed" body (not the owner) in this constraint
+     */
+    public SXRUniversalConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA,
+                                  final Vector3f pivotA,
+                                  final Vector3f Zaxis,
+                                  final Vector3f Yaxis)
+    {
+        this(ctx, NativeUniversalConstraint.ctor(bodyA.getNative(),
+                                                 pivotA.x, pivotA.y, pivotA.z,
+                                                 Zaxis.x, Zaxis.y, Zaxis.z,
+                                                 Yaxis.x, Yaxis.y, Yaxis.z));
         mBodyA = bodyA;
     }
 
     /** Used only by {@link SXRPhysicsLoader} */
-    SXRGenericConstraint(SXRContext gvrContext, long nativeConstraint)
+    SXRUniversalConstraint(SXRContext gvrContext, long nativeConstraint)
     {
         super(gvrContext, nativeConstraint);
-    }
-
-    /**
-     * Sets the lower limits for the "moving" body translation relative to joint point.
-     *
-     * @param limitX the X axis lower translation limit
-     * @param limitY the Y axis lower translation limit
-     * @param limitZ the Z axis lower translation limit
-     */
-    public void setLinearLowerLimits(float limitX, float limitY, float limitZ)
-    {
-        Native3DGenericConstraint.setLinearLowerLimits(getNative(), limitX, limitY, limitZ);
-    }
-
-    /**
-     * Gets the lower limits for the "moving" body translation relative to joint point.
-     *
-     * @return an array containing the lower translation limits for each (X, Y and Z) axis.
-     */
-    public float[] getLinearLowerLimits()
-    {
-        return Native3DGenericConstraint.getLinearLowerLimits(getNative());
-    }
-
-    /**
-     * Sets the upper limits for the "moving" body translation relative to joint point.
-     *
-     * @param limitX the X upper lower translation limit
-     * @param limitY the Y upper lower translation limit
-     * @param limitZ the Z upper lower translation limit
-     */
-    public void setLinearUpperLimits(float limitX, float limitY, float limitZ)
-    {
-        Native3DGenericConstraint.setLinearUpperLimits(getNative(), limitX, limitY, limitZ);
-    }
-
-    /**
-     * Gets the upper limits for the "moving" body translation relative to joint point.
-     *
-     * @return an array containing the upper translation limits for each (X, Y and Z) axis.
-     */
-    public float[] getLinearUpperLimits()
-    {
-        return Native3DGenericConstraint.getLinearUpperLimits(getNative());
     }
 
     /**
@@ -117,7 +97,7 @@ public class SXRGenericConstraint extends SXRConstraint
      */
     public void setAngularLowerLimits(float limitX, float limitY, float limitZ)
     {
-        Native3DGenericConstraint.setAngularLowerLimits(getNative(), limitX, limitY, limitZ);
+        NativeUniversalConstraint.setAngularLowerLimits(getNative(), limitX, limitY, limitZ);
     }
 
     /**
@@ -127,7 +107,7 @@ public class SXRGenericConstraint extends SXRConstraint
      */
     public float[] getAngularLowerLimits()
     {
-        return Native3DGenericConstraint.getAngularLowerLimits(getNative());
+        return NativeUniversalConstraint.getAngularLowerLimits(getNative());
     }
 
     /**
@@ -139,7 +119,7 @@ public class SXRGenericConstraint extends SXRConstraint
      */
     public void setAngularUpperLimits(float limitX, float limitY, float limitZ)
     {
-        Native3DGenericConstraint.setAngularUpperLimits(getNative(), limitX, limitY, limitZ);
+        NativeUniversalConstraint.setAngularUpperLimits(getNative(), limitX, limitY, limitZ);
     }
 
     /**
@@ -149,21 +129,15 @@ public class SXRGenericConstraint extends SXRConstraint
      */
     public float[] getAngularUpperLimits()
     {
-        return Native3DGenericConstraint.getAngularUpperLimits(getNative());
+        return NativeUniversalConstraint.getAngularUpperLimits(getNative());
     }
 }
 
-class Native3DGenericConstraint
+class NativeUniversalConstraint
 {
-    static native long ctor(long rigidBodyB, final float joint[]);
-
-    static native void setLinearLowerLimits(long jconstr, float limX, float limY, float limZ);
-
-    static native float[] getLinearLowerLimits(long jconstr);
-
-    static native void setLinearUpperLimits(long jconstr, float limX, float limY, float limZ);
-
-    static native float[] getLinearUpperLimits(long jconstr);
+    static native long ctor(long rigidBodyB, float anchorX, float anchorY, float anchorZ,
+                            float axis1X, float axis1Y, float axis1Z,
+                            float axis2X, float axis2Y, float axis2Z);
 
     static native void setAngularLowerLimits(long jconstr, float limX, float limY, float limZ);
 

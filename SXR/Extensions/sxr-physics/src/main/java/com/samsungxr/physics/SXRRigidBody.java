@@ -34,7 +34,7 @@ import com.samsungxr.animation.SXRSkeleton;
  * You must setup the values of owner's {@link com.samsungxr.SXRTransform}, like initial position,
  * and the mass value of the rigid body before attach it to its owner.
  */
-public class SXRRigidBody extends SXRPhysicsWorldObject {
+public class SXRRigidBody extends SXRPhysicsCollidable {
     public static final int DYNAMIC  = 0;
     public static final int STATIC = 1;
     public static final int KINEMATIC = 2;

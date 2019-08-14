@@ -39,7 +39,7 @@ public class SXRConeTwistConstraint extends SXRConstraint {
      * @param coneRotation a vector containing the elements of the 3x3 rotation matrix for the conic
      *                     trajectory
      */
-    public SXRConeTwistConstraint(SXRContext ctx, SXRPhysicsWorldObject bodyB, final float vortex[],
+    public SXRConeTwistConstraint(SXRContext ctx, SXRPhysicsCollidable bodyB, final float vortex[],
                            final float bodyRotation[], final float coneRotation[])
     {
         this(ctx, Native3DConeTwistConstraint.ctor(bodyB.getNative(), vortex,

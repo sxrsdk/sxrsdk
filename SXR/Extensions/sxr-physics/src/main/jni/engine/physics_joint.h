@@ -37,7 +37,7 @@ class PhysicsJoint :  public PhysicsCollidable
 
     virtual ~PhysicsJoint() {}
 
-	static long long getComponentType() {return COMPONENT_TYPE_PHYSICS_JOINT; }
+	static long long getComponentType() { return COMPONENT_TYPE_PHYSICS_JOINT; }
 
 	virtual int getBoneID() = 0;
 

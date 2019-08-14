@@ -21,14 +21,6 @@
 
 namespace sxr {
 
-    struct JointFeedback {
-        float torqueA[3] = {0.0f, 0.0f, 0.0f};
-        float forceA[3] = {0.0f, 0.0f, 0.0f};
-        float torqueB[3] = {0.0f, 0.0f, 0.0f};
-        float forceB[3] = {0.0f, 0.0f, 0.0f};
-
-    };
-
     class PhysicsConstraint : public Component
     {
     public:
@@ -41,12 +33,12 @@ namespace sxr {
             return COMPONENT_TYPE_PHYSICS_CONSTRAINT;
         }
 
-        virtual int getConstraintType() const = 0;
-        virtual void *getUnderlying() = 0;
-        virtual void setBreakingImpulse(float impulse) = 0;
+        virtual int   getConstraintType() const = 0;
+        virtual void* getUnderlying() = 0;
+        virtual void  setBreakingImpulse(float impulse) = 0;
         virtual float getBreakingImpulse() const = 0;
-        virtual void updateConstructionInfo(PhysicsWorld*) = 0;
-        virtual void addChildComponent(Component* constraint)
+        virtual void  updateConstructionInfo(PhysicsWorld*) = 0;
+        virtual void  addChildComponent(Component* constraint)
         {
             mConstraints.push_back(static_cast<PhysicsConstraint*>(constraint));
         }
@@ -60,14 +52,6 @@ namespace sxr {
         int getNumChildren() { return mConstraints.size(); }
         PhysicsConstraint* getChildAt(int i) { return mConstraints.at(i); }
 
-        static glm::vec3 findJointAxis(Transform* transA, Transform* transB)
-        {
-            glm::mat4 mtxA = transA->getModelMatrix(true);
-            glm::mat4 mtxB = transB->getModelMatrix(true);
-            glm::vec4 posA = mtxA[3];
-            glm::vec4 posB = mtxB[3];
-            return glm::normalize(glm::vec3(posB - posA));
-        }
 
         enum ConstraintType
         {
@@ -77,6 +61,8 @@ namespace sxr {
             hingeConstraint = 4,
             coneTwistConstraint = 5,
             genericConstraint = 6,
+            universalConstraint = 7,
+            jointMotor = 8
         };
 
         std::vector<PhysicsConstraint*> mConstraints;

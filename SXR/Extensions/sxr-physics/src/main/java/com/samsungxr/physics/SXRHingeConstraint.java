@@ -37,7 +37,7 @@ public class SXRHingeConstraint extends SXRConstraint
      * @param pivotInB   the pivot point related to body B (the owner)
      * @param axisIn     the axis around which body A can rotate
      */
-    public SXRHingeConstraint(SXRContext ctx, SXRPhysicsWorldObject bodyA, float pivotInA[],
+    public SXRHingeConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, float pivotInA[],
                                  float pivotInB[], float axisIn[])
     {
         this(ctx, Native3DHingeConstraint.ctor(bodyA.getNative(), pivotInA, pivotInB, axisIn));
@@ -51,7 +51,7 @@ public class SXRHingeConstraint extends SXRConstraint
      * @param bodyA      the first rigid body (not the owner) in this constraint
      * @param axisIn     the axis around which body A can rotate
      */
-    public SXRHingeConstraint(SXRContext ctx, SXRPhysicsWorldObject bodyA, float axisIn[])
+    public SXRHingeConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, float axisIn[])
     {
         this(ctx, Native3DHingeConstraint.ctor(bodyA.getNative(),
                 new float[] { 0, 0, 0 },

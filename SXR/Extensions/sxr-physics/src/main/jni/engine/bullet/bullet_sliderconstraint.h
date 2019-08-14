@@ -67,7 +67,7 @@ namespace sxr {
 
     private:
         btSliderConstraint* mSliderConstraint;
-        PhysicsCollidable* mRigidBodyA;
+        PhysicsCollidable* mBodyA;
 
         float mBreakingImpulse;
         float mLowerAngularLimit;

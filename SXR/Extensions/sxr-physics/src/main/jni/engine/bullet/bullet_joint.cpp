@@ -33,6 +33,11 @@
 #include "util/sxr_log.h"
 
 #include "BulletDynamics/Featherstone/btMultiBodyDynamicsWorld.h"
+#include "BulletDynamics/Featherstone/btMultiBodyJointMotor.h"
+#include "BulletDynamics/Featherstone/btMultiBody.h"
+#include "BulletDynamics/Featherstone/btMultiBodyLink.h"
+#include "BulletDynamics/Featherstone/btMultiBodyLinkCollider.h"
+
 #include "BulletCollision/CollisionDispatch/btCollisionObject.h"
 #include "BulletCollision/CollisionShapes/btEmptyShape.h"
 #include "BulletCollision/BroadphaseCollision/btBroadphaseProxy.h"
@@ -41,7 +46,6 @@
 #include "LinearMath/btVector3.h"
 #include "LinearMath/btTransform.h"
 #include "LinearMath/btMatrix3x3.h"
-#include "../../bullet3/include/LinearMath/btVector3.h"
 
 
 namespace sxr {
@@ -215,6 +219,7 @@ namespace sxr {
         {
             float torque[] = { x, y, z, 0 };
             mMultiBody->addJointTorqueMultiDof(getBoneID() - 1, torque);
+            mMultiBody->addLinkTorque(getBoneID() - 1, btVector3(x, y, z));
         }
         else
         {
@@ -332,27 +337,22 @@ namespace sxr {
 
     void BulletJoint::setupSpherical(BulletGeneric6dofConstraint* constraint)
     {
-        Node* owner = owner_object();
-        Node* parent = owner->parent();
+        Node*         owner = owner_object();
+        Node*         parent = owner->parent();
         BulletJoint* jointA = static_cast<BulletJoint*>(parent->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
-        glm::mat4 tA = parent->transform()->getModelMatrix(true);
-        glm::mat4 tB = owner->transform()->getModelMatrix(true);
-        glm::quat rotA = glm::normalize(glm::quat_cast(tA));
-        glm::quat rotB = glm::normalize(glm::quat_cast(tB));
-        btVector3   bodyACOM(tA[3][0], tA[3][1], tA[3][2]);
-        btVector3   bodyBCOM(tB[3][0], tB[3][1], tB[3][2]);
-        btVector3   diffCOM = bodyBCOM - bodyACOM;
+        Transform*   transA = parent->transform();
+        Transform*   transB = owner->transform();
+        btQuaternion rotA(transA->rotation_x(), transA->rotation_y(), transA->rotation_z(), transA->rotation_w());
+        btVector3    posB(transB->position_x(), transB->position_y(), transB->position_z());
         btMultibodyLink& link = mMultiBody->getLink(getBoneID() - 1);
-        float       jointAngle[] = { rotB.x, rotB.y, rotB.z, rotB.w };
 
         mMultiBody->setupSpherical(getBoneID() - 1,
                                    mLink->m_mass,
                                    mLink->m_inertiaLocal,
                                    jointA->getBoneID() - 1,
-                                   btQuaternion(rotA.x, rotA.y, rotA.z, rotA.w),
+                                   rotA,
                                    btVector3(0, 0, 0),
-                                   diffCOM, true);
-//        mMultiBody->setJointPosMultiDof(getBoneID() - 1, jointAngle);
+                                   posB, true);
         addConstraint();
     }
 
@@ -376,27 +376,25 @@ namespace sxr {
       */
     void BulletJoint::setupHinge(BulletHingeConstraint* constraint)
     {
-        Node* owner = owner_object();
-        Node* parent = owner->parent();
-        int linkIndex = getBoneID()- 1;
+        Node*        owner = owner_object();
+        Node*        parent = owner->parent();
+        int          linkIndex = getBoneID()- 1;
         BulletJoint* jointA = static_cast<BulletJoint*>(parent->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
-        glm::mat4 tA = parent->transform()->getModelMatrix(true);
-        glm::mat4 tB = owner->transform()->getModelMatrix(true);
-        glm::quat rotA = glm::normalize(glm::quat_cast(tA));
+        Transform*   transA = parent->transform();
+        Transform*   transB = owner->transform();
+        btQuaternion rotA(transA->rotation_x(), transA->rotation_y(), transA->rotation_z(), transA->rotation_w());
+        btVector3    posB(transB->position_x(), transB->position_y(), transB->position_z());
         const glm::vec3& axis = glm::normalize(constraint->getJointAxis());
         btVector3   hingeAxis(axis.x, axis.y, axis.z);
-        btVector3   bodyACOM(tA[3][0], tA[3][1], tA[3][2]);
-        btVector3   bodyBCOM(tB[3][0], tB[3][1], tB[3][2]);
-        btVector3   diffCOM(bodyBCOM - bodyACOM);
 
         mMultiBody->setupRevolute(linkIndex,
                           mLink->m_mass,
                           mLink->m_inertiaLocal,
                           jointA->getBoneID() - 1,
-                          btQuaternion(rotA.x, rotA.y, rotA.z, rotA.w),
+                          rotA,
                           hingeAxis,
                           btVector3(0, 0, 0),
-                          diffCOM, true);
+                          posB, true);
         mLink->m_jointLowerLimit = constraint->getLowerLimit();
         mLink->m_jointUpperLimit = constraint->getUpperLimit();
         addConstraint();
@@ -407,23 +405,21 @@ namespace sxr {
         Node* owner = owner_object();
         Node* parent = owner->parent();
         BulletJoint* jointA = static_cast<BulletJoint*>(parent->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
-        glm::mat4   tA = parent->transform()->getModelMatrix(true);
-        glm::mat4   tB = owner->transform()->getModelMatrix(true);
-        glm::quat   rotA = glm::normalize(glm::quat_cast(tA));
-        btVector3   bodyACOM(tA[3][0], tA[3][1], tA[3][2]);
-        btVector3   bodyBCOM(tB[3][0], tB[3][1], tB[3][2]);
-        btVector3   diffCOM = bodyBCOM - bodyACOM;
-        btVector3   sliderAxis(diffCOM);
-        float       jointDist = diffCOM.length();
+        Transform*   transA = parent->transform();
+        Transform*   transB = owner->transform();
+        btQuaternion rotA(transA->rotation_x(), transA->rotation_y(), transA->rotation_z(), transA->rotation_w());
+        btVector3    posB(transB->position_x(), transB->position_y(), transB->position_z());
+        btVector3   sliderAxis(posB);
+        float       jointDist = posB.length();
 
         mMultiBody->setupPrismatic(getBoneID() - 1,
                                   mLink->m_mass,
                                   mLink->m_inertiaLocal,
                                   jointA->getBoneID() - 1,
-                                  btQuaternion(rotA.x, rotA.y, rotA.z, rotA.w),
+                                  rotA,
                                   sliderAxis.normalized(),
                                   btVector3(0, 0, 0),
-                                  diffCOM,
+                                  posB,
                                   true);
         mLink->m_jointLowerLimit = constraint->getLinearLowerLimit();
         mLink->m_jointUpperLimit = constraint->getLinearUpperLimit();

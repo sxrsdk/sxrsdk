@@ -239,8 +239,8 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
                 {
                     return;
                 }
-                SXRPhysicsWorldObject bodyB = gvrConstraint.mBodyB;
-                SXRPhysicsWorldObject bodyA = gvrConstraint.mBodyA;
+                SXRPhysicsCollidable bodyB = gvrConstraint.mBodyB;
+                SXRPhysicsCollidable bodyA = gvrConstraint.mBodyA;
 
                 if ((bodyB != null) && (bodyB instanceof SXRRigidBody))
                 {

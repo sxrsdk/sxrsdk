@@ -12,11 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-//
-// Created by c.bozzetto on 30/05/2017.
-//
-
 #include "physics_hingeconstraint.h"
 #include "physics_rigidbody.h"
 #include "bullet/bullet_hingeconstraint.h"
@@ -24,9 +19,10 @@
 namespace sxr {
     extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DHingeConstraint_ctor(JNIEnv *env, jclass obj,
-                                                          jlong bodyA, jfloatArray pivotInA,
-                                                          jfloatArray pivotInB, jfloatArray axis);
+    Java_com_samsungxr_physics_Native3DHingeConstraint_ctor(JNIEnv *env, jclass obj, jlong bodyA,
+                                                            jfloat pivotAX, jfloat pivotAY, jfloat pivotAZ,
+                                                            jfloat pivotBX, jfloat pivotBY, jfloat pivotBZ,
+                                                            jfloat axisX, jfloat axisY, jfloat axisZ);
 
     JNIEXPORT jlong JNICALL
     Java_com_samsungxr_physics_Native3DHingeConstraint_getComponentType(JNIEnv *env, jobject obj);
@@ -46,22 +42,16 @@ namespace sxr {
     }
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DHingeConstraint_ctor(JNIEnv * env, jclass obj,
-                                                          jlong jbodyA, jfloatArray pivotInA,
-                                                          jfloatArray pivotInB, jfloatArray axisIn)
-    {
-        float *pA = env->GetFloatArrayElements(pivotInA, 0);
-        float *pB = env->GetFloatArrayElements(pivotInB, 0);
-        float *axis = env->GetFloatArrayElements(axisIn, 0);
-        glm::vec3 pivotA(pA[0], pA[1], pA[2]);
-        glm::vec3 pivotB(pB[0], pB[1], pB[2]);
-        glm::vec3 a(axis[0], axis[1], axis[2]);
-        env->ReleaseFloatArrayElements(pivotInA, pA, 0);
-        env->ReleaseFloatArrayElements(pivotInB, pB, 0);
-        env->ReleaseFloatArrayElements(axisIn, axis, 0);
-
+    Java_com_samsungxr_physics_Native3DHingeConstraint_ctor(JNIEnv * env, jclass obj, jlong jbodyA,
+                                                            jfloat pivotAX, jfloat pivotAY, jfloat pivotAZ,
+                                                            jfloat pivotBX, jfloat pivotBY, jfloat pivotBZ,
+                                                            jfloat axisX, jfloat axisY, jfloat axisZ)
+{
+        glm::vec3 pivotA(pivotAX, pivotAY, pivotAZ);
+        glm::vec3 pivotB(pivotBX, pivotBY, pivotBZ);
+        glm::vec3 axis(axisX, axisY, axisZ);
         PhysicsCollidable* bodyA = reinterpret_cast<PhysicsCollidable*>(jbodyA);
-        return reinterpret_cast<jlong> (new BulletHingeConstraint(bodyA, pivotA, pivotB, a));
+        return reinterpret_cast<jlong> (new BulletHingeConstraint(bodyA, pivotA, pivotB, axis));
     }
 
     JNIEXPORT jlong JNICALL

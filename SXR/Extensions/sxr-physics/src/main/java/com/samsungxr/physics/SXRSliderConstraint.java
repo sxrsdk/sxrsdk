@@ -34,7 +34,7 @@ public class SXRSliderConstraint extends SXRConstraint
      * @param ctx   the context of the app
      * @param bodyA the second rigid body (not the owner) in this constraint.
      */
-    public SXRSliderConstraint(SXRContext ctx, SXRPhysicsWorldObject bodyA)
+    public SXRSliderConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA)
     {
         this(ctx, Native3DSliderConstraint.ctor(bodyA.getNative()));
         mBodyA = bodyA;

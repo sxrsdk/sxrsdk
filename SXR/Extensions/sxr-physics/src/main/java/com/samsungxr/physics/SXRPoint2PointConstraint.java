@@ -36,7 +36,7 @@ public class SXRPoint2PointConstraint extends SXRConstraint
      * @param pivotInA  the pivot point (x, y and z coordinates) related to body A
      * @param pivotInB  the pivot point related to body B (the owner)
      */
-    public SXRPoint2PointConstraint(SXRContext ctx, SXRPhysicsWorldObject bodyA,
+    public SXRPoint2PointConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA,
                                     float pivotInA[], float pivotInB[])
     {
         this(ctx, Native3DPoint2PointConstraint.ctor(bodyA.getNative(), pivotInA, pivotInB));

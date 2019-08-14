@@ -40,8 +40,8 @@ abstract class SXRConstraint extends SXRPhysicsWorldObject
     static final int coneTwistConstraintId = 5;
     static final int genericConstraintId = 6;
 
-    protected SXRPhysicsWorldObject mBodyA = null;
-    protected SXRPhysicsWorldObject mBodyB = null;
+    protected SXRPhysicsCollidable mBodyA = null;
+    protected SXRPhysicsCollidable mBodyB = null;
 
     protected SXRConstraint(SXRContext gvrContext, long nativePointer)
     {

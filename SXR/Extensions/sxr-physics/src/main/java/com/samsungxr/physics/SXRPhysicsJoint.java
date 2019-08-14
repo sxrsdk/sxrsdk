@@ -24,7 +24,7 @@ import com.samsungxr.animation.SXRSkeleton;
  * Represents a joint in a multibody chain like a ragdoll.
  * <p>
  */
-public class SXRPhysicsJoint extends SXRPhysicsWorldObject
+public class SXRPhysicsJoint extends SXRPhysicsCollidable
 {
     private final SXRPhysicsContext mPhysicsContext;
 

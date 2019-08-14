@@ -34,9 +34,8 @@ namespace sxr {
 
     BulletSliderConstraint::BulletSliderConstraint(PhysicsCollidable* bodyA)
     {
-        mRigidBodyA = reinterpret_cast<BulletRigidBody*>(bodyA);
-        mSliderConstraint = 0;
-
+        mBodyA = bodyA;
+        mSliderConstraint = nullptr;
         mBreakingImpulse = SIMD_INFINITY;
 
         // Default values from btSliderConstraint
@@ -46,10 +45,10 @@ namespace sxr {
         mUpperLinearLimit = -1.0f;
     }
 
-    BulletSliderConstraint::BulletSliderConstraint(btSliderConstraint *constraint)
+    BulletSliderConstraint::BulletSliderConstraint(btSliderConstraint* constraint)
     {
         mSliderConstraint = constraint;
-        mRigidBodyA = static_cast<BulletRigidBody*>(constraint->getRigidBodyA().getUserPointer());
+        mBodyA = static_cast<BulletRigidBody*>(constraint->getRigidBodyA().getUserPointer());
         constraint->setUserConstraintPtr(this);
     }
 
@@ -194,8 +193,8 @@ void BulletSliderConstraint::updateConstructionInfo(PhysicsWorld* world)
         btMatrix3x3 rotB(btQuaternion(tB->rotation_x(), tB->rotation_y(), tB->rotation_z(), tB->rotation_w()));
         btTransform frameInB(rotB);
         btRigidBody* rbB = rigidBodyB->getRigidBody();
-        btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mRigidBodyA)->getRigidBody();
-        btTransform frameInA = convertTransform2btTransform(mRigidBodyA->owner_object()->transform());
+        btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
+        btTransform frameInA = convertTransform2btTransform(mBodyA->owner_object()->transform());
         btVector3 posA = frameInA.getOrigin();
         btVector3 posB(tB->position_x(), tB->position_y(), tB->position_z());
         btVector3 sliderAxis = posA - posB;
@@ -216,6 +215,7 @@ void BulletSliderConstraint::updateConstructionInfo(PhysicsWorld* world)
     else
     {
         BulletJoint* jointB = (BulletJoint*) owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_JOINT);
+
         if (jointB)
         {
             jointB->setupSlider(this);

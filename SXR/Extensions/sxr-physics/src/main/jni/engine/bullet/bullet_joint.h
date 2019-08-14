@@ -25,6 +25,7 @@
 #include <LinearMath/btMotionState.h>
 
 class btDynamicsWorld;
+class btMultiBodyJointMotor;
 
 namespace sxr {
 

@@ -32,7 +32,7 @@ public class SXRFixedConstraint extends SXRConstraint
      * @param ctx   the context of the app
      * @param bodyA the first rigid body or joint (not the owner) in this constraint
      */
-    public SXRFixedConstraint(SXRContext ctx, SXRPhysicsWorldObject bodyA)
+    public SXRFixedConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA)
     {
         this(ctx, Native3DFixedConstraint.ctor(bodyA.getNative()));
 
