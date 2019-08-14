@@ -157,6 +157,10 @@ public class SXRPhysicsLoader {
                 constraint = new SXRConeTwistConstraint(ctx, nativeConstraint);
             } else if (constraintType == SXRConstraint.genericConstraintId) {
                 constraint = new SXRGenericConstraint(ctx, nativeConstraint);
+            } else if (constraintType == SXRConstraint.universalConstraintId) {
+                constraint = new SXRGenericConstraint(ctx, nativeConstraint);
+            } else if (constraintType == SXRConstraint.jointMotorId) {
+                constraint = new SXRPhysicsJointMotor(ctx, nativeConstraint);
             }
 
             if (constraint != null) {

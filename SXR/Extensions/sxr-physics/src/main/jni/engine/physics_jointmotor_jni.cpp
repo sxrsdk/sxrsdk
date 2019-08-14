@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <string>
+
 #include "bullet/bullet_jointmotor.h"
-#include "jni_utils.h"
 
 namespace sxr {
 extern "C"
@@ -22,9 +21,6 @@ extern "C"
     JNIEXPORT jlong JNICALL
     Java_com_samsungxr_physics_NativePhysicsJointMotor_create(JNIEnv* env, jclass obj, jfloat maxImpulse);
 
-    JNIEXPORT jint JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_getBoneID(JNIEnv* env, jclass obj, jlong jjoint);
-    
     JNIEXPORT void JNICALL
     Java_com_samsungxr_physics_NativePhysicsJointMotor_setVelocityTarget(JNIEnv* env, jclass obj, jlong jjoint,
                                                                     jint dof, jfloat velocity);
