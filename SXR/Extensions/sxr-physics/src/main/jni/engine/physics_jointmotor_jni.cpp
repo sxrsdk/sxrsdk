@@ -49,10 +49,10 @@ extern "C"
 
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_setVelocityTarget(JNIEnv* env, jclass obj, jlong jjoint, jfloat vel)
+    Java_com_samsungxr_physics_NativePhysicsJointMotor_setVelocityTarget(JNIEnv* env, jclass obj, jlong jjoint, jint dof, jfloat vel)
     {
         PhysicsJointMotor* m = reinterpret_cast<PhysicsJointMotor*>(jjoint);
-        return m->setVelocityTarget(vel);
+        return m->setVelocityTarget(dof, vel);
     }
 
     JNIEXPORT void JNICALL

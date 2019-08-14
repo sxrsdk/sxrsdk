@@ -138,21 +138,21 @@ void BulletUniversalConstraint::updateConstructionInfo(PhysicsWorld* world)
     if (bodyB)
     {
         btRigidBody* rbB = bodyB->getRigidBody();
-        btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mRigidBodyA)->getRigidBody();
+        btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
         btVector3    p(mPivotA.x, mPivotA.y, mPivotA.z);
         Transform*   tB = owner_object()->transform();
         btMatrix3x3  rotB(btQuaternion(tB->rotation_x(), tB->rotation_y(), tB->rotation_z(), tB->rotation_w()));
         btTransform  frameInB(rotB);
-        btTransform  frameInA = convertTransform2btTransform(mRigidBodyA->owner_object()->transform());
+        btTransform  frameInA = convertTransform2btTransform(mBodyA->owner_object()->transform());
         btVector3    posA = frameInA.getOrigin();
         btVector3    posB(tB->position_x(), tB->position_y(), tB->position_z());
 
 
         frameInA.setOrigin(frameInA.getOrigin() + p);
         frameInB.setOrigin(frameInA.getOrigin() - frameInB.getOrigin());
-        mConstraint = new btUniversalConstraint(*rbA, *rbB, frameInA, frameInB, false);
-        mConstraint->setLinearLowerLimit(Common2Bullet(mLinearLowerLimits));
-        mConstraint->setLinearUpperLimit(Common2Bullet(mLinearUpperLimits));
+        mConstraint = new btUniversalConstraint(*rbA, *rbB, p,
+                btVector3(mAxis1.x, mAxis1.y, mAxis1.z),
+                btVector3(mAxis2.x, mAxis2.y, mAxis2.z));
         mConstraint->setAngularLowerLimit(Common2Bullet(mAngularLowerLimits));
         mConstraint->setAngularUpperLimit(Common2Bullet(mAngularUpperLimits));
         mConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
@@ -162,7 +162,7 @@ void BulletUniversalConstraint::updateConstructionInfo(PhysicsWorld* world)
         BulletJoint* jointB = (BulletJoint*) owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_JOINT);
         if (jointB)
         {
-            jointB->setupSpherical(this);
+            jointB->setupSpherical(nullptr);
         }
     }
 }

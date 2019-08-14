@@ -48,7 +48,7 @@ namespace sxr {
 
         virtual const glm::vec3& getAngularUpperLimits() const;
 
-        void* getUnderlying() { return mGeneric6DofConstraint;}
+        void* getUnderlying() { return mConstraint;}
 
         virtual void setBreakingImpulse(float impulse);
 

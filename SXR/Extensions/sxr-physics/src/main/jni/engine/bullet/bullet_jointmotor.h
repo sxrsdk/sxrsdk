@@ -20,6 +20,7 @@
 
 
 class btDynamicsWorld;
+class btMultiBodyConstraint;
 class btMultiBodyJointMotor;
 
 namespace sxr {
@@ -39,13 +40,18 @@ public:
     virtual void setPositionTarget(float px, float py, float pz);
     virtual void setPositionTarget(float px, float py, float pz, float pw);
     virtual void updateConstructionInfo(PhysicsWorld* world);
+    virtual int   getConstraintType() const;
+    virtual void* getUnderlying();
+    virtual void  setBreakingImpulse(float impulse);
+    virtual float getBreakingImpulse() const;
 
 protected:
     float                   mMaxImpulse;
     float                   mVelocityTarget[4];
     float                   mPositionTarget[4];
     int                     mDOFCount;
-    btMultiBodyJointMotor*  mMotors[4];
+    bool                    mSpherical;
+    btMultiBodyConstraint*  mMotors[4];
 };
 
 }

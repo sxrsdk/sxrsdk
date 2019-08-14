@@ -90,7 +90,7 @@ class BulletJoint : public PhysicsJoint
 
 private:
     void destroy();
-    void updateCollisionShapeLocalScaling();void defaultJoint(Node* owner);
+    void updateCollisionShapeLocalScaling();
 
 protected:
     btMultiBodyLinkCollider* mCollider;
