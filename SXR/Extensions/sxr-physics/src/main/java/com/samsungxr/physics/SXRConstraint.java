@@ -39,6 +39,8 @@ abstract class SXRConstraint extends SXRPhysicsWorldObject
     static final int hingeConstraintId = 4;
     static final int coneTwistConstraintId = 5;
     static final int genericConstraintId = 6;
+    static final int universalConstraintId = 7;
+    static final int jointMotorId = 8;
 
     protected SXRPhysicsCollidable mBodyA = null;
     protected SXRPhysicsCollidable mBodyB = null;

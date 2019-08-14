@@ -17,11 +17,15 @@ add_library(sxr-physics SHARED
     engine/bullet/bullet_sliderconstraint.cpp
     engine/bullet/bullet_conetwistconstraint.cpp
     engine/bullet/bullet_generic6dofconstraint.cpp
+    engine/bullet/bullet_universalconstraint.cpp
+    engine/bullet/bullet_jointMotor.cpp
     engine/physics_world_jni.cpp
     engine/physics_loader_jni.cpp
     engine/physics_rigidbody_jni.cpp
     engine/physics_joint_jni.cpp
     engine/physics_constraint_jni.cpp
+    engine/physics_jointmotor_jni.cpp
+    engine/physics_universalconstraint_jni.cpp
     engine/physics_fixedconstraint_jni.cpp
     engine/physics_point2pointconstraint_jni.cpp
     engine/physics_hingeconstraint_jni.cpp
