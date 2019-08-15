@@ -29,6 +29,7 @@
 #include "bullet_sliderconstraint.h"
 #include "bullet_fixedconstraint.h"
 #include "bullet_generic6dofconstraint.h"
+#include "bullet_jointmotor.h"
 #include "bullet_sxr_utils.h"
 #include "util/sxr_log.h"
 
@@ -56,22 +57,27 @@ namespace sxr {
               mCollider(nullptr),
               mLink(nullptr),
               mBoneID(0),
-              mConstraintsAdded(0)
+              mAxis(1, 0, 0),
+              mWorld(nullptr),
+              mJointType(JointType::baseJoint),
+              mLinksAdded(0)
     {
         mMultiBody = new btMultiBody(numBones - 1, mass, btVector3(0, 0, 0), (mass == 0), false);
         mMultiBody->setUserPointer(this);
         mMultiBody->setBaseMass(mass);
         mMultiBody->setCanSleep(false);
         mMultiBody->setHasSelfCollision(false);
-        mWorld = nullptr;
     }
 
-    BulletJoint::BulletJoint(BulletJoint* parent, int boneID, float mass)
-            : PhysicsJoint(parent, boneID, mass),
+    BulletJoint::BulletJoint(BulletJoint* parent, JointType jointType, int boneID, float mass)
+            : PhysicsJoint(parent, jointType, boneID, mass),
               mMultiBody(nullptr),
               mCollider(nullptr),
               mBoneID(boneID),
-              mConstraintsAdded(0)
+              mAxis(1, 0, 0),
+              mJointType(jointType),
+              mWorld(nullptr),
+              mLinksAdded(0)
     {
         mMultiBody = parent->getMultiBody();
         btMultibodyLink& link = mMultiBody->getLink(boneID - 1);
@@ -79,34 +85,34 @@ namespace sxr {
         link.m_parent = parent->getBoneID();
         link.m_userPtr = this;
         mLink = &link;
-        mWorld = nullptr;
     }
 
     BulletJoint::BulletJoint(btMultiBody* multiBody)
             : PhysicsJoint(multiBody->getNumLinks(), multiBody->getBaseMass()),
               mMultiBody(multiBody),
+              mAxis(1, 0, 0),
               mLink(nullptr),
-              mLinksAdded(0),
-              mConstraintsAdded(0)
+              mWorld(nullptr),
+              mLinksAdded(0)
     {
         mMultiBody->setUserPointer(this);
-        mWorld = nullptr;
-    }
-
-    BulletJoint::BulletJoint(btMultibodyLink* link)
-            : PhysicsJoint(link->m_mass, 0),
-              mMultiBody(nullptr),
-              mLink(link),
-              mLinksAdded(0),
-              mConstraintsAdded(0)
-    {
-        link->m_userPtr = this;
-        mWorld = nullptr;
     }
 
     BulletJoint::~BulletJoint()
     {
         destroy();
+    }
+
+    PhysicsJoint* BulletJoint::getParent()
+    {
+        if ((mLink == nullptr) || (mMultiBody == nullptr))
+        {
+            return nullptr;
+        }
+        int parentIndex = mLink->m_parent;
+        btMultibodyLink& parentLink = mMultiBody->getLink(parentIndex);
+        const void* p = parentLink.m_userPtr;
+        return (PhysicsJoint*) p;
     }
 
     void BulletJoint::setMass(float mass)
@@ -301,6 +307,13 @@ namespace sxr {
                 BulletJoint* root = static_cast<BulletJoint*> (mMultiBody->getUserPointer());
 
                 ++(root->mLinksAdded);
+                switch (mJointType)
+                {
+                    case JointType::fixedJoint: setupFixed(); break;
+                    case JointType::prismaticJoint: setupSlider(); break;
+                    case JointType::revoluteJoint: setupHinge(); break;
+                    default: setupSpherical(); break;
+                }
             }
             else
             {
@@ -310,12 +323,11 @@ namespace sxr {
         updateWorldTransform();
     }
 
-    void BulletJoint::setupFixed(BulletFixedConstraint* constraint)
+    void BulletJoint::setupFixed()
     {
         Node* owner = owner_object();
-        Node* parent = owner->parent();
-        BulletJoint* jointA = static_cast<BulletJoint*>(parent->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
-        glm::mat4 tA = parent->transform()->getModelMatrix(true);
+        BulletJoint* jointA = reinterpret_cast<BulletJoint*>(getParent());
+        glm::mat4 tA = jointA->owner_object()->transform()->getModelMatrix(true);
         glm::mat4 tB = owner->transform()->getModelMatrix(true);
         glm::quat rotA = glm::normalize(glm::quat_cast(tA));
         btVector3 bodyACOM(tA[3][0], tA[3][1], tA[3][2]);
@@ -331,16 +343,19 @@ namespace sxr {
                                    bodyACOM2bodyBpivot,
                                    btVector3(0, 0, 0),
                                    true);
-        addConstraint();
+        BulletJoint* root = reinterpret_cast<BulletJoint*> (mMultiBody->getUserPointer());
+        if (root->isReady())
+        {
+            root->finalize();
+        }
     }
 
 
-    void BulletJoint::setupSpherical(BulletGeneric6dofConstraint* constraint)
+    void BulletJoint::setupSpherical()
     {
         Node*         owner = owner_object();
-        Node*         parent = owner->parent();
-        BulletJoint* jointA = static_cast<BulletJoint*>(parent->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
-        Transform*   transA = parent->transform();
+        BulletJoint* jointA = reinterpret_cast<BulletJoint*>(getParent());
+        Transform*   transA = jointA->owner_object()->transform();
         Transform*   transB = owner->transform();
         btQuaternion rotA(transA->rotation_x(), transA->rotation_y(), transA->rotation_z(), transA->rotation_w());
         btVector3    posB(transB->position_x(), transB->position_y(), transB->position_z());
@@ -353,7 +368,11 @@ namespace sxr {
                                    rotA,
                                    btVector3(0, 0, 0),
                                    posB, true);
-        addConstraint();
+        BulletJoint* root = reinterpret_cast<BulletJoint*> (mMultiBody->getUserPointer());
+        if (root->isReady())
+        {
+            root->finalize();
+        }
     }
 
 
@@ -374,18 +393,16 @@ namespace sxr {
      * bodyB center and bodyA center plus the bodyB pivot (the vector
      * from bodyA center to bodyB's pivot).
       */
-    void BulletJoint::setupHinge(BulletHingeConstraint* constraint)
+    void BulletJoint::setupHinge()
     {
         Node*        owner = owner_object();
-        Node*        parent = owner->parent();
         int          linkIndex = getBoneID()- 1;
-        BulletJoint* jointA = static_cast<BulletJoint*>(parent->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
-        Transform*   transA = parent->transform();
+        BulletJoint* jointA = reinterpret_cast<BulletJoint*>(getParent());
+        Transform*   transA = jointA->owner_object()->transform();
         Transform*   transB = owner->transform();
         btQuaternion rotA(transA->rotation_x(), transA->rotation_y(), transA->rotation_z(), transA->rotation_w());
         btVector3    posB(transB->position_x(), transB->position_y(), transB->position_z());
-        const glm::vec3& axis = glm::normalize(constraint->getJointAxis());
-        btVector3   hingeAxis(axis.x, axis.y, axis.z);
+        btVector3   hingeAxis(mAxis.x, mAxis.y, mAxis.z);
 
         mMultiBody->setupRevolute(linkIndex,
                           mLink->m_mass,
@@ -395,22 +412,22 @@ namespace sxr {
                           hingeAxis,
                           btVector3(0, 0, 0),
                           posB, true);
-        mLink->m_jointLowerLimit = constraint->getLowerLimit();
-        mLink->m_jointUpperLimit = constraint->getUpperLimit();
-        addConstraint();
+        BulletJoint* root = reinterpret_cast<BulletJoint*> (mMultiBody->getUserPointer());
+        if (root->isReady())
+        {
+            root->finalize();
+        }
     }
 
-    void BulletJoint::setupSlider(BulletSliderConstraint* constraint)
+    void BulletJoint::setupSlider()
     {
         Node* owner = owner_object();
-        Node* parent = owner->parent();
-        BulletJoint* jointA = static_cast<BulletJoint*>(parent->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
-        Transform*   transA = parent->transform();
+        BulletJoint* jointA = reinterpret_cast<BulletJoint*>(getParent());
+        Transform*   transA = jointA->owner_object()->transform();
         Transform*   transB = owner->transform();
         btQuaternion rotA(transA->rotation_x(), transA->rotation_y(), transA->rotation_z(), transA->rotation_w());
         btVector3    posB(transB->position_x(), transB->position_y(), transB->position_z());
         btVector3   sliderAxis(posB);
-        float       jointDist = posB.length();
 
         mMultiBody->setupPrismatic(getBoneID() - 1,
                                   mLink->m_mass,
@@ -421,53 +438,17 @@ namespace sxr {
                                   btVector3(0, 0, 0),
                                   posB,
                                   true);
-        mLink->m_jointLowerLimit = constraint->getLinearLowerLimit();
-        mLink->m_jointUpperLimit = constraint->getLinearUpperLimit();
-        addConstraint();
-    }
-
-    void BulletJoint::addConstraint()
-    {
-        if (mWorld->isMultiBody())
+        BulletJoint* root = static_cast<BulletJoint*> (mMultiBody->getUserPointer());
+        if (root->isReady())
         {
-            BulletJoint* root = static_cast<BulletJoint*> (mMultiBody->getUserPointer());
-
-            if (root != this)
-            {
-                ++(root->mConstraintsAdded);
-                if (isReady())
-                {
-                    root->finalize();
-                }
-            }
+            root->finalize();
         }
-    }
-
-    bool BulletJoint::validate()
-    {
-        int n = mMultiBody->getNumLinks();
-        int numInvalid = 0;
-        if (mLinksAdded < n)
-        {
-            return false;
-        }
-        for (int i = 0; i < n; ++i)
-        {
-            btMultibodyLink& link = mMultiBody->getLink(i);
-            if (link.m_jointType == btMultibodyLink::eInvalid)
-            {
-                BulletJoint* j = (BulletJoint*) link.m_collider->getUserPointer();
-                j->setupSpherical(nullptr);
-                ++numInvalid;
-            }
-        }
-        return false;
     }
 
     void BulletJoint::finalize()
     {
         mMultiBody->finalizeMultiDof();
-        static_cast<btMultiBodyDynamicsWorld *>(mWorld->getPhysicsWorld())->addMultiBody(mMultiBody);
+        reinterpret_cast<btMultiBodyDynamicsWorld *>(mWorld->getPhysicsWorld())->addMultiBody(mMultiBody);
     }
 
     bool BulletJoint::isReady() const
@@ -478,7 +459,7 @@ namespace sxr {
         }
         else
         {
-            return mConstraintsAdded == mMultiBody->getNumLinks();
+            return mLinksAdded == mMultiBody->getNumLinks();
         }
     }
 

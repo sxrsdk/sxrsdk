@@ -107,6 +107,7 @@ void BulletRigidBody::updateConstructionInfo(PhysicsWorld* world)
     if (mConstructionInfo.m_collisionShape != nullptr)
     {
         // This rigid body was not loaded so its construction must be finished
+        mWorld = static_cast<BulletWorld*>(world);
         Collider *collider = (Collider *) owner_object()->getComponent(COMPONENT_TYPE_COLLIDER);
         if (collider)
         {

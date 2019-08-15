@@ -27,6 +27,11 @@ import com.samsungxr.animation.SXRSkeleton;
 public class SXRPhysicsJoint extends SXRPhysicsCollidable
 {
     private final SXRPhysicsContext mPhysicsContext;
+    static final int FIXED = 1;
+    static final int SPHERICAL = 2;
+    static final int REVOLUTE = 3;
+    static final int PRISMATIC = 4;
+    static final int PLANAR = 5;
 
     /**
      * Constructs the root joint of a multibody chain.
@@ -46,13 +51,15 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
      * This joint is linked to the parent joint in the physics world.
      * This parent should be consistent with the node hierarchy
      * the joints are attached to.
-     * @param parent   The parent joint of this one.
-     * @param boneID   0 based bone ID indicating which bone of the skeleton
-     *                 this joint belongs to
+     * @param parent    The parent joint of this one.
+     * @param jointType Type of joint: one of (FIXED, SPHERICAL, REVOLUTE, PRISMATIC, PLANAR)
+     * @param boneID    0 based bone ID indicating which bone of the skeleton
+     *                  this joint belongs to
+     * @param mass      mass of this joint
      */
-    public SXRPhysicsJoint(SXRPhysicsJoint parent, int boneID, float mass)
+    public SXRPhysicsJoint(SXRPhysicsJoint parent, int jointType, int boneID, float mass)
     {
-        super(parent.getSXRContext(), NativePhysicsJoint.ctorLink(parent.getNative(), boneID, mass));
+        super(parent.getSXRContext(), NativePhysicsJoint.ctorLink(parent.getNative(), jointType, boneID, mass));
         if (boneID < 1)
         {
             throw new IllegalArgumentException("BoneID must be greater than zero");
@@ -65,6 +72,11 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
     {
         super(ctx, nativeJoint);
         mPhysicsContext = SXRPhysicsContext.getInstance();
+    }
+
+    public void setAxis(float x, float y, float z)
+    {
+        NativePhysicsJoint.setAxis(getNative(), x, y, z);
     }
 
     static public long getComponentType() {
@@ -210,50 +222,14 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
             world.removeBody(this);
         }
     }
-
-    protected void attachSkeleton(SXRSkeleton skel, float defaultMass)
-    {
-        SXRNode rootBone = skel.getBone(0);
-        SXRPhysicsJoint joint = (SXRPhysicsJoint) rootBone.getComponent(SXRPhysicsJoint.getComponentType());
-        if (joint == null)
-        {
-            joint = new SXRPhysicsJoint(skel.getSXRContext(), defaultMass, skel.getNumBones() - 1);
-        }
-        SXRPhysicsJoint rootJoint = joint;
-        for (int i = 1; i < skel.getNumBones(); ++i)
-        {
-            SXRNode bone = skel.getBone(i);
-            if (bone != null)
-            {
-                joint = (SXRPhysicsJoint) bone.getComponent(SXRPhysicsJoint.getComponentType());
-                if (joint == null)
-                {
-                    SXRNode parent = skel.getBone(skel.getParentBoneIndex(i));
-                    SXRPhysicsJoint parentJoint = this;
-
-                    if (parent != null)
-                    {
-                        SXRPhysicsJoint pj = (SXRPhysicsJoint) parent.getComponent(SXRPhysicsJoint.getComponentType());
-
-                        if (pj != null)
-                        {
-                            parentJoint = pj;
-                        }
-                    }
-                    joint = new SXRPhysicsJoint(parentJoint, i, defaultMass);
-                    bone.attachComponent(joint);
-                }
-            }
-        }
-        rootBone.attachComponent(rootJoint);
-    }
 }
+
 
 class NativePhysicsJoint
 {
     static native long ctorRoot(float mass, int numBones);
 
-    static native long ctorLink(long parent_joint, int boneid, float mass);
+    static native long ctorLink(long parent_joint, int jointType, int boneid, float mass);
 
     static native long getComponentType();
 
@@ -265,7 +241,7 @@ class NativePhysicsJoint
 
     static native float getFriction(long joint);
 
-    static native void applyCentralForce(long joint, float x, float y, float z);
+    static native void setAxis(long joint, float x, float y, float z);
 
     static native void applyTorque(long joint, float x, float y, float z);
 }

@@ -20,6 +20,7 @@ import com.samsungxr.SXRBoxCollider;
 import com.samsungxr.SXRCapsuleCollider;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRNode;
+import com.samsungxr.SXRSphereCollider;
 import com.samsungxr.utility.Log;
 
 import org.joml.Vector3f;
@@ -33,37 +34,35 @@ import java.util.Map;
 
 class PhysicsAVTLoader
 {
+    private final String TAG = "AVT";;
     private final SXRNode mRoot;
     private final SXRContext mContext;
+    private final SXRWorld mWorld;
     private final Map<String, JSONObject> mTargetBones = new HashMap<String, JSONObject>();
 
     public PhysicsAVTLoader(SXRNode root)
     {
         mRoot = root;
         mContext = root.getSXRContext();
+        mWorld = (SXRWorld) root.getComponent(SXRWorld.getComponentType());
     }
 
     public void parse(byte[] inputData) throws IOException
     {
-        mTargetBones.clear();
         String s = new String(inputData);
-        Log.e("PHYSICS", "loading physics file");
+        Log.e(TAG, "loading physics file");
         try
         {
             JSONObject start = new JSONObject(s);
-            JSONObject multibody = start.getJSONObject("Multi Body").getJSONObject("value");
-            JSONObject basebone = multibody.getJSONObject("Base Bone");
-            JSONArray childbones = multibody.getJSONObject("Child Bones").getJSONArray("property_value");
-            float mass = (float) basebone.getDouble("Mass");
-            SXRPhysicsJoint rootJoint = new SXRPhysicsJoint(mContext, mass, childbones.length());
-
-            mTargetBones.put(basebone.getString("Name"), basebone);
-            parseBone(basebone, rootJoint);
-            for (int i = 0; i < childbones.length(); ++i)
+            if (mWorld.isMultiBody())
             {
-                parseJoint(childbones.getJSONObject(i).getJSONObject("value"), i);
+                parseMultiBodyPhysics(start);
             }
-            Log.e("PHYSICS", "loading done");
+            else
+            {
+                parsePhysics(start);
+            }
+            Log.e(TAG, "loading done");
         }
         catch (JSONException ex)
         {
@@ -76,15 +75,31 @@ class PhysicsAVTLoader
         JSONObject multibody = root.getJSONObject("Multi Body").getJSONObject("value");
         JSONObject basebone = multibody.getJSONObject("Base Bone");
         JSONArray childbones = multibody.getJSONObject("Child Bones").getJSONArray("property_value");
+
+        mTargetBones.clear();
+        mTargetBones.put(basebone.getString("Name"), basebone);
+        SXRRigidBody body = parseRigidBody(basebone);
+        for (int i = 0; i < childbones.length(); ++i)
+        {
+            parseRigidBody(childbones.getJSONObject(i).getJSONObject("value"));
+        }
+    }
+
+    private void parseMultiBodyPhysics(JSONObject root) throws JSONException
+    {
+        JSONObject multibody = root.getJSONObject("Multi Body").getJSONObject("value");
+        JSONObject basebone = multibody.getJSONObject("Base Bone");
+        JSONArray childbones = multibody.getJSONObject("Child Bones").getJSONArray("property_value");
         float mass = (float) basebone.getDouble("Mass");
 
+        mTargetBones.clear();
         mTargetBones.put(basebone.getString("Name"), basebone);
         parseCollider(basebone.getJSONObject("Collider").getJSONObject("value"), basebone.getString("Target Bone"));
         SXRPhysicsJoint rootJoint = new SXRPhysicsJoint(mContext, mass, childbones.length());
         parseBone(basebone, rootJoint);
         for (int i = 0; i < childbones.length(); ++i)
         {
-            parseJoint(childbones.getJSONObject(i).getJSONObject("value"), i);
+            parseJoint(childbones.getJSONObject(i).getJSONObject("value"), i + 1);
         }
     }
 
@@ -132,7 +147,7 @@ class PhysicsAVTLoader
                     capsule.setDirection(SXRCapsuleCollider.CapsuleDirection.Z_AXIS);
                 }
                 owner.attachComponent(capsule);
-                Log.e("PHYSICS", "capsule collider %s height %f radius %f %s axis",
+                Log.e(TAG, "capsule collider %s height %f radius %f %s axis",
                         collider.getString("Name"), height, radius, direction);
             }
             else if (type.equals("dmBoxCollider"))
@@ -150,7 +165,22 @@ class PhysicsAVTLoader
                                    (float) size.getDouble("Y"),
                                    (float) size.getDouble("Z"));
                 owner.attachComponent(box);
-                Log.e("PHYSICS", "box collider %s", collider.getString("Name"));
+                Log.e(TAG, "box collider %s", collider.getString("Name"));
+            }
+            else if (type.equals("dmSphereCollider"))
+            {
+                SXRNode owner = mRoot.getNodeByName(targetBone);
+
+                if (owner == null)
+                {
+                    throw new JSONException("Cannot find bone " + targetBone + " needed by " + c.getString("Name") + " collider");
+                }
+
+                float radius = (float) c.getDouble("Radius");
+                SXRSphereCollider sphere = new SXRSphereCollider(ctx);
+                sphere.setRadius(radius);
+                owner.attachComponent(sphere);
+                Log.e(TAG, "box collider %s", collider.getString("Name"));
             }
             else
             {
@@ -173,7 +203,25 @@ class PhysicsAVTLoader
                 return joint;
             }
         }
-        Log.e("PHYSICS", "Cannot find bone %s referenced by AVT file", nodeName);
+        Log.e(TAG, "Cannot find bone %s referenced by AVT file", nodeName);
+        return null;
+    }
+
+    private SXRRigidBody findParentBody(String parentName) throws JSONException
+    {
+        JSONObject parent = mTargetBones.get(parentName);
+        String nodeName = parent.getString("Target Bone");
+        SXRNode parentNode = mRoot.getNodeByName(nodeName);
+
+        if (parentNode != null)
+        {
+            SXRRigidBody body = (SXRRigidBody) parentNode.getComponent(SXRRigidBody.getComponentType());
+            if (body != null)
+            {
+                return body;
+            }
+        }
+        Log.e(TAG, "Cannot find bone %s referenced by AVT file", nodeName);
         return null;
     }
 
@@ -184,24 +232,22 @@ class PhysicsAVTLoader
 
         if (node == null)
         {
-            Log.e("PHYSICS","Cannot find bone " + nodeName + " referenced by AVT file");
+            Log.e(TAG,"Cannot find bone " + nodeName + " referenced by AVT file");
             return null;
         }
         String name = link.getString("Name");
         String parentName = link.getString("Parent");
         String type = link.getString("Joint Type");
-        SXRConstraint constraint;
+        int jointType;
         JSONArray dofdata = link.getJSONArray("DOF Data");
         float mass = (float) link.getDouble("Mass");
         SXRPhysicsJoint parentJoint = findParentJoint(parentName);
 
         if (parentJoint == null)
         {
+            Log.e(TAG, "Parent %s not found for child %s", parentName, name);
             return null;
         }
-        SXRPhysicsJoint joint = new SXRPhysicsJoint(parentJoint, boneID, mass);
-;
-        parseBone(link, joint);
         mTargetBones.put(name, link);
         if (type.equals("ball"))
         {
@@ -214,7 +260,7 @@ class PhysicsAVTLoader
             pivotA[0] = (float) p.getDouble("X");
             pivotA[1] = (float) p.getDouble("Y");
             pivotA[2] = (float) p.getDouble("Z");
-            SXRGenericConstraint ball = new SXRGenericConstraint(mContext, joint, pivotA);
+/*
             ball.setAngularLowerLimits( (float) Math.toRadians(dofx.getDouble("limitLow")),
                                         (float) Math.toRadians(dofy.getDouble("limitLow")),
                                         (float) Math.toRadians(dofz.getDouble("limitLow")));
@@ -222,7 +268,9 @@ class PhysicsAVTLoader
                                         (float) Math.toRadians(dofy.getDouble("limitHigh")),
                                         (float) Math.toRadians(dofz.getDouble("limitHigh")));
             constraint = ball;
-            Log.e("PHYSICS", "Ball joint between %s and %s joint(%f, %f, %f)",
+*/
+            jointType = SXRPhysicsJoint.SPHERICAL;
+            Log.e(TAG, "Ball joint between %s and %s joint(%f, %f, %f)",
                   parentName, name, pivotA[0], pivotA[1], pivotA[2]);
         }
         else if (type.equals("universal"))  // TODO: figure out universal joint
@@ -235,6 +283,7 @@ class PhysicsAVTLoader
             pivotA[0] = (float) p.getDouble("X");
             pivotA[1] = (float) p.getDouble("Y");
             pivotA[2] = (float) p.getDouble("Z");
+/*
             SXRGenericConstraint ball = new SXRGenericConstraint(mContext, joint,  pivotA);
             ball.setAngularLowerLimits( (float) Math.toRadians(dofx.getDouble("limitLow")),
                     (float) Math.toRadians(dofy.getDouble("limitLow")),
@@ -243,8 +292,123 @@ class PhysicsAVTLoader
                     (float) Math.toRadians(dofy.getDouble("limitHigh")),
                     0);
             constraint = ball;
-            Log.e("PHYSICS", "Universal joint between %s and %s joint(%f, %f, %f)",
+*/
+            jointType = SXRPhysicsJoint.SPHERICAL;
+            Log.e(TAG, "Universal joint between %s and %s joint(%f, %f, %f)",
                     parentName, name, pivotA[0], pivotA[1], pivotA[2]);
+        }
+        else if (type.equals("hinge"))
+        {
+            float[] axisA = new float[3];
+            float[] pivotA = new float[3];
+            float[] pivotB = new float[3];
+            JSONObject v = link.getJSONObject("Axis A");
+            JSONObject parent = mTargetBones.get(parentName);
+
+            axisA[0] = (float)  v.getDouble("X");
+            axisA[1] = (float)  v.getDouble("Y");
+            axisA[2] = (float)  v.getDouble("Z");
+            v = parent.getJSONObject("Pivot Pos.");
+            pivotB[0] = (float)  v.getDouble("X");
+            pivotB[1] = (float)  v.getDouble("Y");
+            pivotB[2] = (float)  v.getDouble("Z");
+/*
+            SXRHingeConstraint hinge = new SXRHingeConstraint(mContext, joint,
+                                    pivotA, pivotB, axisA);
+            constraint = hinge;
+            JSONObject dof = dofdata.getJSONObject(0);
+            hinge.setLimits((float) Math.toRadians(dof.getDouble("limitLow")),
+                            (float) Math.toRadians(dof.getDouble("limitHigh")));
+            Log.e(TAG, "Hinge joint between %s (%s, %s, %s) and %s (%f, %f, %f)",
+                    parentName, name, pivotA[0], pivotA[1], pivotA[2], pivotB[0], pivotB[1], pivotB[2]);
+*/
+            jointType = SXRPhysicsJoint.REVOLUTE;
+        }
+        else if (type.equals("fixed"))
+        {
+/*
+            SXRFixedConstraint fixed = new SXRFixedConstraint(mContext, joint);
+            constraint = fixed;
+*/
+            Log.e(TAG, "Fixed joint between %s and %s", parentName, name);
+            jointType = SXRPhysicsJoint.FIXED;
+        }
+        else
+        {
+            throw new JSONException(type + " is an unknown constraint type");
+        }
+        SXRPhysicsJoint joint = new SXRPhysicsJoint(parentJoint, jointType, boneID, mass);
+        parseBone(link, joint);
+        return joint;
+    }
+
+    private SXRRigidBody parseRigidBody(JSONObject link) throws JSONException
+    {
+        String nodeName = link.getString("Target Bone");
+        SXRNode node = mRoot.getNodeByName(nodeName);
+
+        if (node == null)
+        {
+            Log.e(TAG,"Cannot find bone " + nodeName + " referenced by AVT file");
+            return null;
+        }
+        String name = link.getString("Name");
+        String parentName = link.getString("Parent");
+        String type = link.getString("Joint Type");
+        SXRConstraint constraint;
+        JSONArray dofdata = link.getJSONArray("DOF Data");
+        float mass = (float) link.getDouble("Mass");
+        SXRRigidBody parentBody = findParentBody(parentName);
+        SXRRigidBody body = new SXRRigidBody(mContext, mass);
+
+        if (node == null)
+        {
+            throw new JSONException("Cannot find bone " + nodeName + " referenced by AVT file");
+        }
+        parseCollider(link.getJSONObject("Collider").getJSONObject("value"), nodeName);
+        mTargetBones.put(name, link);
+        if (type.equals("ball"))
+        {
+            JSONObject dofx = dofdata.getJSONObject(0);
+            JSONObject dofy = dofdata.getJSONObject(1);
+            JSONObject dofz = dofdata.getJSONObject(2);
+            JSONObject p = link.getJSONObject("Pivot Pos.");
+            float[] pivotA = new float[3];
+
+            pivotA[0] = (float) p.getDouble("X");
+            pivotA[1] = (float) p.getDouble("Y");
+            pivotA[2] = (float) p.getDouble("Z");
+            SXRGenericConstraint ball = new SXRGenericConstraint(mContext, parentBody, pivotA);
+            ball.setAngularLowerLimits( (float) Math.toRadians(dofx.getDouble("limitLow")),
+                                        (float) Math.toRadians(dofy.getDouble("limitLow")),
+                                        (float) Math.toRadians(dofz.getDouble("limitLow")));
+            ball.setAngularUpperLimits((float) Math.toRadians(dofx.getDouble("limitHigh")),
+                                       (float) Math.toRadians(dofy.getDouble("limitHigh")),
+                                       (float) Math.toRadians(dofz.getDouble("limitHigh")));
+            constraint = ball;
+            Log.e(TAG, "Ball joint between %s and %s joint(%f, %f, %f)",
+                  parentName, name, pivotA[0], pivotA[1], pivotA[2]);
+        }
+        else if (type.equals("universal"))  // TODO: figure out universal joint
+        {
+            JSONObject dofx = dofdata.getJSONObject(0);
+            JSONObject dofy = dofdata.getJSONObject(1);
+            JSONObject p = link.getJSONObject("Pivot Pos.");
+            float[] pivotA = new float[3];
+
+            pivotA[0] = (float) p.getDouble("X");
+            pivotA[1] = (float) p.getDouble("Y");
+            pivotA[2] = (float) p.getDouble("Z");
+            SXRGenericConstraint ball = new SXRGenericConstraint(mContext, parentBody,  pivotA);
+            ball.setAngularLowerLimits( (float) Math.toRadians(dofx.getDouble("limitLow")),
+                                        (float) Math.toRadians(dofy.getDouble("limitLow")),
+                                        0);
+            ball.setAngularUpperLimits((float) Math.toRadians(dofx.getDouble("limitHigh")),
+                                       (float) Math.toRadians(dofy.getDouble("limitHigh")),
+                                       0);
+            constraint = ball;
+            Log.e(TAG, "Universal joint between %s and %s joint(%f, %f, %f)",
+                  parentName, name, pivotA[0], pivotA[1], pivotA[2]);
         }
         else if (type.equals("hinge"))
         {
@@ -263,20 +427,20 @@ class PhysicsAVTLoader
             pivotB[1] = (float)  v.getDouble("Y");
             pivotB[2] = (float)  v.getDouble("Z");
 
-            SXRHingeConstraint hinge = new SXRHingeConstraint(mContext, joint,
-                                    pivotA, pivotB, axisA);
+            SXRHingeConstraint hinge = new SXRHingeConstraint(mContext, parentBody,
+                                                              pivotA, pivotB, axisA);
             constraint = hinge;
             JSONObject dof = dofdata.getJSONObject(0);
             hinge.setLimits((float) Math.toRadians(dof.getDouble("limitLow")),
                             (float) Math.toRadians(dof.getDouble("limitHigh")));
-            Log.e("PHYSICS", "Hinge joint between %s (%s, %s, %s) and %s (%f, %f, %f)",
-                    parentName, name, pivotA[0], pivotA[1], pivotA[2], pivotB[0], pivotB[1], pivotB[2]);
+            Log.e(TAG, "Hinge joint between %s (%s, %s, %s) and %s (%f, %f, %f)",
+                  parentName, name, pivotA[0], pivotA[1], pivotA[2], pivotB[0], pivotB[1], pivotB[2]);
         }
         else if (type.equals("fixed"))
         {
-            SXRFixedConstraint fixed = new SXRFixedConstraint(mContext, joint);
+            SXRFixedConstraint fixed = new SXRFixedConstraint(mContext, parentBody);
             constraint = fixed;
-            Log.e("PHYSICS", "Fixed joint between %s and %s", parentName, name);
+            Log.e(TAG, "Fixed joint between %s and %s", parentName, name);
         }
         else
         {
@@ -286,9 +450,9 @@ class PhysicsAVTLoader
         {
             constraint.setBreakingImpulse((float) link.getDouble("Breaking Reaction Impulse"));
         }
+        node.attachComponent(body);
         node.attachComponent(constraint);
-        node.attachComponent(joint);
-        return joint;
+        return body;
     }
 
     private void parseBone(JSONObject link, SXRPhysicsJoint joint) throws JSONException
@@ -302,7 +466,8 @@ class PhysicsAVTLoader
         parseCollider(link.getJSONObject("Collider").getJSONObject("value"), nodeName);
         JSONObject props = link.getJSONObject("Physic Material");
         joint.setFriction((float) props.getDouble("Friction"));
-        Log.e("PHYSICS", "rigidbody %s bone = %s boneID = %d",
+        node.attachComponent(joint);
+        Log.e(TAG, "link %s bone = %s boneID = %d",
                 link.getString("Name"), nodeName, joint.getBoneID());
     }
 

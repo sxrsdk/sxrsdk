@@ -26,6 +26,7 @@
 
 class btDynamicsWorld;
 class btMultiBodyJointMotor;
+class btMultiBodyConstraint;
 
 namespace sxr {
 
@@ -41,11 +42,9 @@ class BulletJoint : public PhysicsJoint
  public:
     BulletJoint(float mass, int numBones);
 
-    BulletJoint(BulletJoint* parent, int boneID, float mass);
+    BulletJoint(BulletJoint* parent, JointType type, int boneID, float mass);
 
     BulletJoint(btMultiBody* multibody);
-
-    BulletJoint(btMultibodyLink* link);
 
     virtual ~BulletJoint();
 
@@ -56,6 +55,14 @@ class BulletJoint : public PhysicsJoint
     virtual void setMass(float mass);
 
     virtual float getMass() const;
+
+    virtual JointType getJointType() const { return mJointType; }
+
+    virtual PhysicsJoint* getParent();
+
+    virtual const glm::vec3& getAxis() const { return mAxis; }
+
+    virtual void setAxis(const glm::vec3& axis) { mAxis = axis; }
 
     virtual float getFriction() const { return mLink ? mLink->m_jointFriction : 0; }
 
@@ -73,19 +80,17 @@ class BulletJoint : public PhysicsJoint
 
     virtual void updateConstructionInfo(PhysicsWorld* world);
 
-    virtual void setupSpherical(BulletGeneric6dofConstraint* constraint);
+    virtual void setupSpherical();
 
-    virtual void setupHinge(BulletHingeConstraint* constraint);
+    virtual void setupHinge();
 
-    virtual void setupSlider(BulletSliderConstraint* constraint);
+    virtual void setupSlider();
 
-    virtual void setupFixed(BulletFixedConstraint* constraint);
+    virtual void setupFixed();
 
     void updateWorldTransform();
 
     bool isReady() const;
-    void addConstraint();
-    bool validate();
     void finalize();
 
 private:
@@ -93,13 +98,14 @@ private:
     void updateCollisionShapeLocalScaling();
 
 protected:
+    BulletWorld*             mWorld;
     btMultiBodyLinkCollider* mCollider;
     btMultiBody*             mMultiBody;
     btMultibodyLink*         mLink;
-    BulletWorld*             mWorld;
+    JointType                mJointType;
+    glm::vec3                mAxis;
     int                      mBoneID;
     int                      mLinksAdded;
-    int                      mConstraintsAdded;
 };
 
 }

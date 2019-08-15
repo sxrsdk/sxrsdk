@@ -212,16 +212,6 @@ void BulletSliderConstraint::updateConstructionInfo(PhysicsWorld* world)
         mSliderConstraint->setUpperLinLimit(mUpperLinearLimit);
         mSliderConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
     }
-    else
-    {
-        BulletJoint* jointB = (BulletJoint*) owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_JOINT);
-
-        if (jointB)
-        {
-            jointB->setupSlider(this);
-        }
-    }
-
 
 }
 

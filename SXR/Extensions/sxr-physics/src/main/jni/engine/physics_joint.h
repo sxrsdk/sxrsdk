@@ -32,14 +32,32 @@ class PhysicsJoint :  public PhysicsCollidable
 {
  public:
 
-	PhysicsJoint(float mass, int numBones) : PhysicsCollidable(PhysicsJoint::getComponentType()) {}
-	PhysicsJoint(PhysicsJoint* parent, int boneID, float mass) : PhysicsCollidable(PhysicsJoint::getComponentType()) {}
+	enum JointType
+	{
+		baseJoint = 0,
+		fixedJoint = 1,
+		sphericalJoint = 2,
+		revoluteJoint = 3,
+		prismaticJoint = 4,
+		planarJoint = 5,
+	};
+
+	PhysicsJoint(float mass, int numBones) : PhysicsCollidable(PhysicsJoint::getComponentType()) { }
+	PhysicsJoint(PhysicsJoint* parent, JointType type, int boneID, float mass) : PhysicsCollidable(PhysicsJoint::getComponentType()) { }
 
     virtual ~PhysicsJoint() {}
 
 	static long long getComponentType() { return COMPONENT_TYPE_PHYSICS_JOINT; }
 
+	virtual JointType getJointType() const = 0;
+
 	virtual int getBoneID() = 0;
+
+	virtual PhysicsJoint* getParent() = 0;
+
+	virtual const glm::vec3& getAxis() const = 0;
+
+	virtual void setAxis(const glm::vec3& axis) = 0;
 
 	virtual void applyTorque(float x, float y, float z) = 0;
 

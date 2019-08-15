@@ -22,7 +22,7 @@ extern "C"
     Java_com_samsungxr_physics_NativePhysicsJoint_ctorRoot(JNIEnv* env, jclass obj, jfloat mass, jint numBones);
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_ctorLink(JNIEnv* env, jclass obj, jobject jparent, jint boneID, jfloat mass);
+    Java_com_samsungxr_physics_NativePhysicsJoint_ctorLink(JNIEnv* env, jclass obj, jobject jparent, jint jointType, jint boneID, jfloat mass);
 
     JNIEXPORT jlong JNICALL
     Java_com_samsungxr_physics_NativePhysicsJoint_getComponentType(JNIEnv* env, jclass obj);
@@ -45,6 +45,10 @@ extern "C"
     JNIEXPORT void JNICALL
     Java_com_samsungxr_physics_NativePhysicsJoint_applyTorque(JNIEnv* env, jclass obj,
                                                                  jlong jjoint, jfloat x, jfloat y, jfloat z);
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_physics_NativePhysicsJoint_setAxis(JNIEnv* env, jclass obj, jlong jjoint,
+                                                                 jfloat x, jfloat y, jfloat z);
+
 }
 
     JNIEXPORT jlong JNICALL
@@ -54,10 +58,10 @@ extern "C"
     }
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_ctorLink(JNIEnv* env, jclass obj, jobject jparent, jint boneID, jfloat mass)
+    Java_com_samsungxr_physics_NativePhysicsJoint_ctorLink(JNIEnv* env, jclass obj, jobject jparent, jint jointType, jint boneID, jfloat mass)
     {
         BulletJoint* parent = reinterpret_cast<BulletJoint*>(jparent);
-        return reinterpret_cast<jlong>(new BulletJoint(parent, boneID, mass));
+        return reinterpret_cast<jlong>(new BulletJoint(parent, PhysicsJoint::JointType(jointType), boneID, mass));
     }
 
     JNIEXPORT jlong JNICALL
@@ -107,6 +111,15 @@ extern "C"
     {
         PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
         mb->applyTorque(x, y, z);
+    }
+
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_physics_NativePhysicsJoint_setAxis(JNIEnv* env, jclass obj, jlong jjoint,
+                                                          jfloat x, jfloat y, jfloat z)
+    {
+        PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
+        glm::vec3 axis(x, y, z);
+        mb->setAxis(axis);
     }
 
 

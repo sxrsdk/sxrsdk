@@ -92,8 +92,6 @@ class BulletWorld : public PhysicsWorld {
 
     void getPhysicsTransforms();
 
-    void finalizeMultiBody();
-
  private:
     std::map<std::pair <long,long>, ContactPoint> prevCollisions;
     btDynamicsWorld* mPhysicsWorld;

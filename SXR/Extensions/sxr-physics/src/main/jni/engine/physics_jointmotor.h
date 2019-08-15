@@ -27,7 +27,8 @@ class PhysicsJointMotor :  public PhysicsConstraint
 	PhysicsJointMotor() : PhysicsConstraint() { }
 	virtual ~PhysicsJointMotor() {}
 
-	virtual void setVelocityTarget(int dof, float v) = 0;
+    virtual int getConstraintType() const { return PhysicsConstraint::jointMotor; }
+    virtual void setVelocityTarget(int dof, float v) = 0;
 	virtual void setVelocityTarget(float x, float y, float z) = 0;
 	virtual void setPositionTarget(int dof, float p) = 0;
 	virtual void setPositionTarget(float px, float py, float pz) = 0;

@@ -19,6 +19,7 @@
 #include "objects/components/component_types.h"
 #include "bullet_joint.h"
 #include "bullet_jointmotor.h"
+#include "bullet_world.h"
 #include "bullet_sxr_utils.h"
 #include "util/sxr_log.h"
 
@@ -84,7 +85,7 @@ namespace sxr {
     {
         if ((dof >= 0) && (dof < 3))
         {
-            btMultiBodyJointMotor* motor = static_cast<btMultiBodyJointMotor*> (mMotors[dof]);
+            btMultiBodyJointMotor* motor = reinterpret_cast<btMultiBodyJointMotor*> (mMotors[dof]);
             mVelocityTarget[dof] = v;
             if (motor != nullptr)
             {
@@ -95,7 +96,7 @@ namespace sxr {
 
     void BulletJointMotor::setVelocityTarget(float vx, float vy, float vz)
     {
-        btMultiBodyJointMotor* motor = static_cast<btMultiBodyJointMotor*> (mMotors[0]);
+        btMultiBodyJointMotor* motor = reinterpret_cast<btMultiBodyJointMotor*> (mMotors[0]);
 
         mVelocityTarget[0] = vx;
         mVelocityTarget[1] = vy;
@@ -104,18 +105,18 @@ namespace sxr {
         {
             if (mSpherical)
             {
-                btMultiBodySphericalJointMotor* sm = static_cast<btMultiBodySphericalJointMotor*> (mMotors[0]);
+                btMultiBodySphericalJointMotor* sm = reinterpret_cast<btMultiBodySphericalJointMotor*> (mMotors[0]);
                 sm->setVelocityTarget(btVector3(vx, vy, vz));
                 return;
             }
             motor->setVelocityTarget(vx);
         }
-        motor = static_cast<btMultiBodyJointMotor*> (mMotors[1]);
+        motor = reinterpret_cast<btMultiBodyJointMotor*> (mMotors[1]);
         if (motor != nullptr)
         {
             motor->setVelocityTarget(vy);
         }
-        motor = static_cast<btMultiBodyJointMotor*> (mMotors[2]);
+        motor = reinterpret_cast<btMultiBodyJointMotor*> (mMotors[2]);
         if (motor != nullptr)
         {
             motor->setVelocityTarget(vz);
@@ -126,7 +127,7 @@ namespace sxr {
     {
         if ((dof >= 0) && (dof < 3))
         {
-            btMultiBodyJointMotor* motor = static_cast<btMultiBodyJointMotor*> (mMotors[dof]);
+            btMultiBodyJointMotor* motor = reinterpret_cast<btMultiBodyJointMotor*> (mMotors[dof]);
             mPositionTarget[dof] = p;
             if (motor != nullptr)
             {
@@ -137,7 +138,7 @@ namespace sxr {
 
     void BulletJointMotor::setPositionTarget(float px, float py, float pz)
     {
-        btMultiBodyJointMotor* motor = static_cast<btMultiBodyJointMotor*> (mMotors[0]);
+        btMultiBodyJointMotor* motor = reinterpret_cast<btMultiBodyJointMotor*> (mMotors[0]);
         mPositionTarget[0] = px;
         mPositionTarget[1] = py;
         mPositionTarget[2] = pz;
@@ -145,12 +146,12 @@ namespace sxr {
         {
             motor->setPositionTarget(px);
         }
-        motor = static_cast<btMultiBodyJointMotor*> (mMotors[1]);
+        motor = reinterpret_cast<btMultiBodyJointMotor*> (mMotors[1]);
         if (motor != nullptr)
         {
             motor->setPositionTarget(py);
         }
-        motor = static_cast<btMultiBodyJointMotor*> (mMotors[2]);
+        motor = reinterpret_cast<btMultiBodyJointMotor*> (mMotors[2]);
         if (motor != nullptr)
         {
             motor->setPositionTarget(pz);
@@ -161,12 +162,12 @@ namespace sxr {
     {
         if (mSpherical)
         {
-            btMultiBodySphericalJointMotor* motor = static_cast<btMultiBodySphericalJointMotor*> (mMotors[0]);
+            btMultiBodySphericalJointMotor* motor = reinterpret_cast<btMultiBodySphericalJointMotor*> (mMotors[0]);
             motor->setPositionTarget(btQuaternion(px, py, pz, pw));
             return;
         }
         setPositionTarget(px, py, pz);
-        btMultiBodyJointMotor* motor = static_cast<btMultiBodyJointMotor*> (mMotors[0]);
+        btMultiBodyJointMotor* motor = reinterpret_cast<btMultiBodyJointMotor*> (mMotors[0]);
         mPositionTarget[3] = pw;
         if (motor != nullptr)
         {
@@ -185,34 +186,42 @@ namespace sxr {
     void BulletJointMotor::updateConstructionInfo(PhysicsWorld* world)
     {
         Node* owner = owner_object();
-        BulletJoint* joint = static_cast<BulletJoint*>(owner->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
+        BulletJoint* joint = reinterpret_cast<BulletJoint*>(owner->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
+        BulletWorld* bw = reinterpret_cast<BulletWorld*>(world);
         if ((joint != nullptr) && (mDOFCount == 0))
         {
-            mSpherical = joint->getLink()->m_jointType == btMultibodyLink::eSpherical;
-            mDOFCount = (joint->getLink()->m_dofCount > 4) ? 4 : joint->getLink()->m_dofCount;
-            if (mDOFCount == 1)
+            btMultibodyLink* link = joint->getLink();
+            btMultiBody* mb = joint->getMultiBody();
+            btMultiBodyDynamicsWorld* w = static_cast<btMultiBodyDynamicsWorld*>(bw->getPhysicsWorld());
+            int linkIndex = joint->getBoneID() - 1;
+
+            mSpherical = link->m_jointType == btMultibodyLink::eSpherical;
+            mDOFCount = (link->m_dofCount > 4) ? 4 : link->m_dofCount;
+            if (mDOFCount == 0)
             {
-                mMotors[0] = new btMultiBodyJointMotor(joint->getMultiBody(), joint->getBoneID() - 1, mVelocityTarget[0], mMaxImpulse);
                 return;
             }
-            for (int i = 0; i < mDOFCount; ++i)
+            if (mDOFCount == 1)
             {
-                if (mSpherical)
+                mMotors[0] = new btMultiBodyJointMotor(mb, linkIndex, mVelocityTarget[0], mMaxImpulse);
+                w->addMultiBodyConstraint(mMotors[0]);
+            }
+            else if (mSpherical)
+            {
+                mMotors[0] = new btMultiBodySphericalJointMotor(mb, linkIndex, mMaxImpulse);
+
+                w->addMultiBodyConstraint(mMotors[0]);
+            }
+            else
+            {
+                for (int i = 0; i < mDOFCount; ++i)
                 {
-                    mMotors[i] = new btMultiBodySphericalJointMotor(joint->getMultiBody(),
-                                                           joint->getBoneID() - 1, mMaxImpulse);
-                }
-                else
-                {
-                    mMotors[i] = new btMultiBodyJointMotor(joint->getMultiBody(),
-                                                           joint->getBoneID() - 1, i,
-                                                           mVelocityTarget[i], mMaxImpulse);
+                    mMotors[i] = new btMultiBodyJointMotor(mb, linkIndex,
+                                                           i, mVelocityTarget[i], mMaxImpulse);
+                    w->addMultiBodyConstraint(mMotors[i]);
                 }
             }
         }
-
     }
-
-
 
 }

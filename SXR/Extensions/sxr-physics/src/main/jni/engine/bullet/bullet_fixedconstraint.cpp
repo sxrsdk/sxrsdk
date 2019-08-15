@@ -8,76 +8,72 @@
 
 static const char tag[] = "PHYSICS";
 
-namespace sxr {
-
-BulletFixedConstraint::BulletFixedConstraint(PhysicsCollidable* bodyA)
+namespace sxr
 {
-    mFixedConstraint = 0;
-    mRigidBodyA = bodyA;
-    mBreakingImpulse = SIMD_INFINITY;
-}
 
-BulletFixedConstraint::BulletFixedConstraint(btFixedConstraint *constraint)
-{
-    mFixedConstraint = constraint;
-    mRigidBodyA = nullptr; // TODO: what should this be?
-    constraint->setUserConstraintPtr(this);
-}
+    BulletFixedConstraint::BulletFixedConstraint(PhysicsCollidable *bodyA)
+    {
+        mFixedConstraint = 0;
+        mRigidBodyA = bodyA;
+        mBreakingImpulse = SIMD_INFINITY;
+    }
 
-BulletFixedConstraint::~BulletFixedConstraint() {
-    if (0 != mFixedConstraint) {
-        delete mFixedConstraint;
+    BulletFixedConstraint::BulletFixedConstraint(btFixedConstraint *constraint)
+    {
+        mFixedConstraint = constraint;
+        mRigidBodyA = nullptr; // TODO: what should this be?
+        constraint->setUserConstraintPtr(this);
     }
-}
 
-void BulletFixedConstraint::setBreakingImpulse(float impulse)
-{
-    if (0 != mFixedConstraint)
+    BulletFixedConstraint::~BulletFixedConstraint()
     {
-        mFixedConstraint->setBreakingImpulseThreshold(impulse);
-    }
-    else
-    {
-        mBreakingImpulse = impulse;
-    }
-}
-
-float BulletFixedConstraint::getBreakingImpulse() const
-{
-    if (0 != mFixedConstraint)
-    {
-        return mFixedConstraint->getBreakingImpulseThreshold();
-    }
-    else
-    {
-        return mBreakingImpulse;
-    }
-}
-
-void BulletFixedConstraint::updateConstructionInfo(PhysicsWorld* world)
-{
-    if (mFixedConstraint != nullptr)
-    {
-        return;
-    }
-    BulletRigidBody* bodyB = (BulletRigidBody*) owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_RIGID_BODY);
-
-    if (bodyB)
-    {
-        btRigidBody* rbB = bodyB->getRigidBody();
-        btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mRigidBodyA)->getRigidBody();
-        mFixedConstraint = new btFixedConstraint(*rbA, *rbB,
-                                                 rbB->getWorldTransform(),
-                                                 rbA->getWorldTransform());
-        mFixedConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
-    }
-    else
-    {
-        BulletJoint* jointB = (BulletJoint*) owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_JOINT);
-        if (jointB)
+        if (0 != mFixedConstraint)
         {
-            jointB->setupFixed(this);
+            delete mFixedConstraint;
         }
     }
-}
+
+    void BulletFixedConstraint::setBreakingImpulse(float impulse)
+    {
+        if (0 != mFixedConstraint)
+        {
+            mFixedConstraint->setBreakingImpulseThreshold(impulse);
+        }
+        else
+        {
+            mBreakingImpulse = impulse;
+        }
+    }
+
+    float BulletFixedConstraint::getBreakingImpulse() const
+    {
+        if (0 != mFixedConstraint)
+        {
+            return mFixedConstraint->getBreakingImpulseThreshold();
+        }
+        else
+        {
+            return mBreakingImpulse;
+        }
+    }
+
+    void BulletFixedConstraint::updateConstructionInfo(PhysicsWorld *world)
+    {
+        if (mFixedConstraint != nullptr)
+        {
+            return;
+        }
+        BulletRigidBody *bodyB = (BulletRigidBody *) owner_object()
+                ->getComponent(COMPONENT_TYPE_PHYSICS_RIGID_BODY);
+
+        if (bodyB)
+        {
+            btRigidBody *rbB = bodyB->getRigidBody();
+            btRigidBody *rbA = reinterpret_cast<BulletRigidBody *>(mRigidBodyA)->getRigidBody();
+            mFixedConstraint = new btFixedConstraint(*rbA, *rbB,
+                                                     rbB->getWorldTransform(),
+                                                     rbA->getWorldTransform());
+            mFixedConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
+        }
+    }
 }

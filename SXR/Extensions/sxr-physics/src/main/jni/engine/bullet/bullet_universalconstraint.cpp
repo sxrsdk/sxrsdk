@@ -157,13 +157,5 @@ void BulletUniversalConstraint::updateConstructionInfo(PhysicsWorld* world)
         mConstraint->setAngularUpperLimit(Common2Bullet(mAngularUpperLimits));
         mConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
     }
-    else
-    {
-        BulletJoint* jointB = (BulletJoint*) owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_JOINT);
-        if (jointB)
-        {
-            jointB->setupSpherical(nullptr);
-        }
-    }
 }
 }

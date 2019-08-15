@@ -151,24 +151,35 @@ void BulletWorld::addConstraint(PhysicsConstraint *constraint)
 {
     constraint->updateConstructionInfo(this);
     Node* owner = constraint->owner_object();
-    PhysicsJoint* joint = static_cast<PhysicsJoint*>(owner->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
+    PhysicsJoint* joint = reinterpret_cast<PhysicsJoint*>(owner->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
+    PhysicsRigidBody* body = reinterpret_cast<PhysicsRigidBody*>(owner->getComponent(COMPONENT_TYPE_PHYSICS_RIGID_BODY));
 
-    if (joint == nullptr)
+    if ((joint != nullptr) && mIsMultiBody && (constraint->getConstraintType() == PhysicsConstraint::jointMotor))
     {
-        btTypedConstraint *_constr = reinterpret_cast<btTypedConstraint *>(constraint->getUnderlying());
-        mPhysicsWorld->addConstraint(_constr);
+        btMultiBodyConstraint* constr = reinterpret_cast<btMultiBodyConstraint *>(constraint->getUnderlying());
+        reinterpret_cast<btMultiBodyDynamicsWorld*>(mPhysicsWorld)->addMultiBodyConstraint(constr);
     }
+    else if (body != nullptr)
+    {
+        btTypedConstraint* constr = reinterpret_cast<btTypedConstraint *>(constraint->getUnderlying());
+        mPhysicsWorld->addConstraint(constr);
+    }
+
 }
 
 void BulletWorld::removeConstraint(PhysicsConstraint *constraint)
 {
     Node* owner = constraint->owner_object();
-    PhysicsJoint* joint = static_cast<PhysicsJoint*>(owner->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
+    PhysicsJoint* joint = reinterpret_cast<PhysicsJoint*>(owner->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
+    PhysicsRigidBody* body = reinterpret_cast<PhysicsRigidBody*>(owner->getComponent(COMPONENT_TYPE_PHYSICS_RIGID_BODY));
 
-    if (joint == nullptr)
+    if (body != nullptr)
     {
-        mPhysicsWorld->removeConstraint(
-                reinterpret_cast<btTypedConstraint *>(constraint->getUnderlying()));
+        mPhysicsWorld->removeConstraint(reinterpret_cast<btTypedConstraint *>(constraint->getUnderlying()));
+    }
+    else if (mIsMultiBody && (joint != nullptr) && (constraint->getConstraintType() == PhysicsConstraint::jointMotor))
+    {
+        reinterpret_cast<btMultiBodyDynamicsWorld*>(mPhysicsWorld)->removeMultiBodyConstraint(reinterpret_cast<btMultiBodyConstraint *>(constraint->getUnderlying()));
     }
 }
 
@@ -200,7 +211,7 @@ void BulletWorld::stopDrag()
 
 void BulletWorld::addRigidBody(PhysicsRigidBody *body)
 {
-    BulletRigidBody* rb = static_cast<BulletRigidBody *>(body);
+    BulletRigidBody* rb = reinterpret_cast<BulletRigidBody *>(body);
     body->updateConstructionInfo(this);
     mPhysicsWorld->addRigidBody(rb->getRigidBody());
     rb->mWorld = this;
@@ -208,7 +219,7 @@ void BulletWorld::addRigidBody(PhysicsRigidBody *body)
 
 void BulletWorld::addRigidBody(PhysicsRigidBody *body, int collisiontype, int collidesWith)
 {
-    BulletRigidBody* rb = static_cast<BulletRigidBody *>(body);
+    BulletRigidBody* rb = reinterpret_cast<BulletRigidBody *>(body);
     body->updateConstructionInfo(this);
     mPhysicsWorld->addRigidBody(rb->getRigidBody(), collidesWith, collisiontype);
     rb->mWorld = this;
@@ -216,7 +227,7 @@ void BulletWorld::addRigidBody(PhysicsRigidBody *body, int collisiontype, int co
 
 void BulletWorld::removeRigidBody(PhysicsRigidBody *body)
 {
-    mPhysicsWorld->removeRigidBody((static_cast<BulletRigidBody *>(body))->getRigidBody());
+    mPhysicsWorld->removeRigidBody((reinterpret_cast<BulletRigidBody *>(body))->getRigidBody());
 }
 
 void BulletWorld::addJoint(PhysicsJoint *joint)
@@ -235,8 +246,8 @@ void BulletWorld::removeJoint(PhysicsJoint *body)
 {
     if (isMultiBody() && (body->getBoneID() == 0))
     {
-        btMultiBodyDynamicsWorld* world = static_cast<btMultiBodyDynamicsWorld*>(mPhysicsWorld);
-        btMultiBody* mb = static_cast<BulletJoint*>(body)->getMultiBody();
+        btMultiBodyDynamicsWorld* world = reinterpret_cast<btMultiBodyDynamicsWorld*>(mPhysicsWorld);
+        btMultiBody* mb = reinterpret_cast<BulletJoint*>(body)->getMultiBody();
         world->removeMultiBody(mb);
     }
 }
@@ -250,8 +261,7 @@ void BulletWorld::step(float timeStep, int maxSubSteps)
     }
     if (mIsMultiBody)
     {
-        finalizeMultiBody();
-        setPhysicsTransforms();
+        //setPhysicsTransforms();
         mPhysicsWorld->stepSimulation(timeStep, maxSubSteps);
         getPhysicsTransforms();
     }
@@ -261,23 +271,13 @@ void BulletWorld::step(float timeStep, int maxSubSteps)
     }
 }
 
-void BulletWorld::finalizeMultiBody()
-{
-    for (int i = 0; i < mMultiBodies.size(); ++i)
-    {
-        BulletJoint* mb = mMultiBodies[i];
-        mb->validate();
-    }
-    mMultiBodies.clear();
-}
-
 void BulletWorld::setPhysicsTransforms()
 {
-    btMultiBodyDynamicsWorld* world = static_cast<btMultiBodyDynamicsWorld*>(mPhysicsWorld);
+    btMultiBodyDynamicsWorld* world = reinterpret_cast<btMultiBodyDynamicsWorld*>(mPhysicsWorld);
     for (int i = 0; i < world->getNumMultibodies(); ++i)
     {
         btMultiBody* mb = world->getMultiBody(i);
-        BulletJoint* joint = static_cast<BulletJoint*>(mb->getUserPointer());
+        BulletJoint* joint = reinterpret_cast<BulletJoint*>(mb->getUserPointer());
 
         if (!joint->isReady())
         {
@@ -298,7 +298,7 @@ void BulletWorld::setPhysicsTransforms()
 
 void BulletWorld::getPhysicsTransforms()
 {
-    btMultiBodyDynamicsWorld* world = static_cast<btMultiBodyDynamicsWorld*>(mPhysicsWorld);
+    btMultiBodyDynamicsWorld* world = reinterpret_cast<btMultiBodyDynamicsWorld*>(mPhysicsWorld);
     for (int i = 0; i < world->getNumMultibodies(); ++i)
     {
         btMultiBody* mb = world->getMultiBody(i);

@@ -198,13 +198,5 @@ void BulletGeneric6dofConstraint::updateConstructionInfo(PhysicsWorld* world)
         mGeneric6DofConstraint->setAngularUpperLimit(Common2Bullet(mAngularUpperLimits));
         mGeneric6DofConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
     }
-    else
-    {
-        BulletJoint* jointB = (BulletJoint*) owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_JOINT);
-        if (jointB)
-        {
-            jointB->setupSpherical(this);
-        }
-    }
 }
 }

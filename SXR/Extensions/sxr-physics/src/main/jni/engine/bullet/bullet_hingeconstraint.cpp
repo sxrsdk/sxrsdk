@@ -132,14 +132,6 @@ namespace sxr {
                 mHingeConstraint->setLimit(mTempLower, mTempUpper);
                 mHingeConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
             }
-            else
-            {
-                BulletJoint* jointB = reinterpret_cast<BulletJoint*>(owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_JOINT));
-                if (jointB)
-                {
-                    jointB->setupHinge(this);
-                }
-            }
         }
     }
 }
