@@ -45,6 +45,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     private SXRWorldTask mWorldTask;
     private static final long DEFAULT_INTERVAL = 15;
     private SXREventReceiver mListeners;
+    private boolean mIsMultibody = false;
 
     private long mNativeLoader;
 
@@ -185,6 +186,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     {
         super(scene.getSXRContext(), NativePhysics3DWorld.ctor(isMultiBody));
         mIsEnabled = false;
+        mIsMultibody = isMultiBody;
         mListeners = new SXREventReceiver(this);
         mCollisionMatrix = collisionMatrix;
         mWorldTask = new SXRWorldTask(interval);
@@ -220,6 +222,8 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     static public long getComponentType() {
         return NativePhysics3DWorld.getComponentType();
     }
+
+    public boolean isMultiBody() { return mIsMultibody; }
 
     public SXREventReceiver getEventReceiver() { return mListeners; }
 

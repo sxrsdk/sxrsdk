@@ -209,6 +209,10 @@ class PhysicsAVTLoader
 
     private SXRRigidBody findParentBody(String parentName) throws JSONException
     {
+        if (parentName == null)
+        {
+            return null;
+        }
         JSONObject parent = mTargetBones.get(parentName);
         String nodeName = parent.getString("Target Bone");
         SXRNode parentNode = mRoot.getNodeByName(nodeName);
@@ -236,7 +240,7 @@ class PhysicsAVTLoader
             return null;
         }
         String name = link.getString("Name");
-        String parentName = link.getString("Parent");
+        String parentName = link.optString("Parent", null);
         String type = link.getString("Joint Type");
         int jointType;
         JSONArray dofdata = link.getJSONArray("DOF Data");
@@ -353,10 +357,7 @@ class PhysicsAVTLoader
             return null;
         }
         String name = link.getString("Name");
-        String parentName = link.getString("Parent");
-        String type = link.getString("Joint Type");
-        SXRConstraint constraint;
-        JSONArray dofdata = link.getJSONArray("DOF Data");
+        String parentName = link.optString("Parent", null);
         float mass = (float) link.getDouble("Mass");
         SXRRigidBody parentBody = findParentBody(parentName);
         SXRRigidBody body = new SXRRigidBody(mContext, mass);
@@ -367,6 +368,13 @@ class PhysicsAVTLoader
         }
         parseCollider(link.getJSONObject("Collider").getJSONObject("value"), nodeName);
         mTargetBones.put(name, link);
+        if (parentBody == null)
+        {
+            return null;
+        }
+        String type = link.getString("Joint Type");
+        SXRConstraint constraint;
+        JSONArray dofdata = link.getJSONArray("DOF Data");
         if (type.equals("ball"))
         {
             JSONObject dofx = dofdata.getJSONObject(0);
