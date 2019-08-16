@@ -325,9 +325,6 @@ void BulletWorld::getPhysicsTransforms()
                 const btTransform &t = collider->getWorldTransform();
                 joint->setWorldTransform(t);
             }
-            owner = joint->owner_object();
-            t = owner->transform();
-            LOGE("BULLET: WORLD %s %f, %f, %f", owner->name().c_str(), t->position_x(), t->position_y(), t->position_z());
         }
     }
 }

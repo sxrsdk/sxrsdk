@@ -30,7 +30,11 @@ extern "C"
     JNIEXPORT jint JNICALL
     Java_com_samsungxr_physics_NativePhysicsJoint_getBoneID(JNIEnv* env, jclass obj, jlong jjoint);
 
-    JNIEXPORT jfloat JNICALL
+    JNIEXPORT jlong JNICALL
+    Java_com_samsungxr_physics_NativePhysicsJoint_getSkeleton(JNIEnv* env, jclass obj, jlong jjoint);
+
+
+JNIEXPORT jfloat JNICALL
     Java_com_samsungxr_physics_NativePhysicsJoint_getMass(JNIEnv* env, jclass obj, jlong jjoint);
 
     JNIEXPORT void JNICALL
@@ -120,6 +124,14 @@ extern "C"
         PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
         glm::vec3 axis(x, y, z);
         mb->setAxis(axis);
+    }
+
+    JNIEXPORT jlong JNICALL
+    Java_com_samsungxr_physics_NativePhysicsJoint_getSkeleton(JNIEnv* env, jclass obj, jlong jjoint)
+    {
+        PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
+        jlong nativePtr = reinterpret_cast<jlong>(mb->getSkeleton());
+        return nativePtr;
     }
 
 

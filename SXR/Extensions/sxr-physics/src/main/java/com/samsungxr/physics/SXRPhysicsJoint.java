@@ -18,6 +18,7 @@ package com.samsungxr.physics;
 import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRNode;
+import com.samsungxr.animation.SXRPoseMapper;
 import com.samsungxr.animation.SXRSkeleton;
 
 /**
@@ -27,6 +28,9 @@ import com.samsungxr.animation.SXRSkeleton;
 public class SXRPhysicsJoint extends SXRPhysicsCollidable
 {
     private final SXRPhysicsContext mPhysicsContext;
+    private SXRSkeleton mSkeleton = null;
+    private SXRPoseMapper mPoseMapper = null;
+
     static final int FIXED = 1;
     static final int SPHERICAL = 2;
     static final int REVOLUTE = 3;
@@ -81,6 +85,40 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
 
     static public long getComponentType() {
         return NativePhysicsJoint.getComponentType();
+    }
+
+    /**
+     * Adds a pose mapper to map the physics skeleton associated with
+     * this joint (if any) to another skeleton in the scene.
+     * @param skel  {@link SXRSkeleton} to map the physics pose to
+     */
+    public void mapPoseToSkeleton(SXRSkeleton skel, float duration)
+    {
+        if (mPoseMapper != null)
+        {
+            if ((mPoseMapper.getTargetSkeleton() == skel) &&
+                (mPoseMapper.getSourceSkeleton() == mSkeleton))
+            {
+                return;
+            }
+        }
+        if (mSkeleton == null)
+        {
+            mSkeleton = getSkeleton();
+            if (mSkeleton == null)
+            {
+                throw new IllegalArgumentException("Error cannot access physics skeleton, attach all the joint components before pose mapping");
+            }
+        }
+        mPoseMapper = new SXRPoseMapper(mSkeleton, skel, duration);
+    }
+
+    public void onStep()
+    {
+        if (mPoseMapper != null)
+        {
+            mPoseMapper.animate(0);
+        }
     }
 
     /**
@@ -210,6 +248,10 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
     {
         if (world != null)
         {
+            if (!world.isMultiBody())
+            {
+                throw new IllegalArgumentException("SXRPhysicsJoint can only be added if multibody is enabled on the physics world");
+            }
             world.addBody(this);
         }
     }
@@ -221,6 +263,20 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
         {
             world.removeBody(this);
         }
+    }
+
+    protected SXRSkeleton getSkeleton()
+    {
+        if (mSkeleton != null)
+        {
+            return mSkeleton;
+        }
+        long nativeSkeleton = NativePhysicsJoint.getSkeleton(getNative());
+        if (nativeSkeleton != 0)
+        {
+            mSkeleton = new SXRSkeleton(getSXRContext(), nativeSkeleton);
+        }
+        return mSkeleton;
     }
 }
 
@@ -244,4 +300,6 @@ class NativePhysicsJoint
     static native void setAxis(long joint, float x, float y, float z);
 
     static native void applyTorque(long joint, float x, float y, float z);
+
+    static native long getSkeleton(long joint);
 }

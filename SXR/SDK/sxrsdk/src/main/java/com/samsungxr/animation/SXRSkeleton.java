@@ -452,22 +452,21 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
      * @see #setPose
      * @see SXRPose
      */
-    public void applyPose(SXRPose newpose, int poseSpace)
+    public void applyPose(SXRPose newpose, int poseSpace, int boneFilter)
     {
         synchronized (this)
         {
             int numbones = getNumBones();
 
-            /*
-             * Apply input pose that contains only local rotations.
-             */
             if (poseSpace == ROTATION_ONLY)
             {
                 for (int i = 0; i < numbones; ++i)
                 {
                     SXRPose.Bone srcBone = newpose.getBone(i);
 
-                    if ((srcBone.Changed != 0) && !isLocked(i))
+                    if ((srcBone.Changed != 0) &&
+                        !isLocked(i) &&
+                        ((boneFilter == 0) || ((boneFilter & getBoneOptions(i)) != 0)))
                     {
                         newpose.getLocalRotation(i, mTempQuatA);
                         mPose.setLocalRotation(i, mTempQuatA.x, mTempQuatA.y, mTempQuatA.z, mTempQuatA.w);
@@ -475,11 +474,6 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
                     }
                 }
             }
-            /*
-             * Apply the world rotations from the input pose to
-             * the skeleton's current pose. The rotations are
-             * already relative to the skeleton root.
-             */
             else
             {
                 newpose.sync();
@@ -487,7 +481,9 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
                 {
                     for (int i = 0; i < numbones; ++i)
                     {
-                        if (!isLocked(i))
+                        if (!isLocked(i) &&
+                            ((boneFilter == 0) ||
+                             ((boneFilter & getBoneOptions(i)) != 0)))
                         {
                             SXRPose.Bone srcBone = newpose.getBone(i);
                             srcBone.getLocalMatrix(mTempMtx);
@@ -500,6 +496,12 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             updateBonePose();
         }
     }
+
+
+    public void applyPose(SXRPose newpose, int poseSpace)
+    {
+        applyPose(newpose, poseSpace, 0);
+     }
 
     /**
      * Updates the current pose of a skeleton and applies the

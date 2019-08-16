@@ -146,11 +146,16 @@ btTransform convertTransform2btTransform(Transform *t)
     {
         m = t->getLocalModelMatrix();
     }
-    glm::vec4 p(m[3]);
-    glm::quat q = glm::quat_cast(m);
-    btVector3 pos(p.x, p.y, p.z);
-    btQuaternion rot(q.x, q.y, q.z, q.w);
-    return btTransform(rot, pos);
+    return convertTransform2btTransform(m);
 }
+
+    btTransform convertTransform2btTransform(const glm::mat4& m)
+    {
+        glm::vec4 p(m[3]);
+        glm::quat q = glm::quat_cast(m);
+        btVector3 pos(p.x, p.y, p.z);
+        btQuaternion rot(q.x, q.y, q.z, q.w);
+        return btTransform(rot, pos);
+    }
 
 }

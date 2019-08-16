@@ -41,6 +41,8 @@ namespace sxr {
 
     btTransform convertTransform2btTransform(Transform *t);
 
+    btTransform convertTransform2btTransform(const glm::mat4& m);
+
     void convertBtTransform2Transform(btTransform bulletTransform, Transform *transform);
 
     inline btVector3 Common2Bullet(const glm::vec3& pv)

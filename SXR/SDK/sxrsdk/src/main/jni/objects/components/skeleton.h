@@ -37,6 +37,8 @@ public:
     void setWorldPose(const float* input);
     const glm::mat4* getLocalBoneMatrix(int boneId) const;
     const glm::mat4* getWorldBoneMatrix(int boneId) const;
+    glm::mat4* getLocalBoneMatrix(int boneId);
+
     const int*    getBoneParents() const;
     int getBoneParent(int boneId) const;
     int getBoneIndex(const char* name) const;

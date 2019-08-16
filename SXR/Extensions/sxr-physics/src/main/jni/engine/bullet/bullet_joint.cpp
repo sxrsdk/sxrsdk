@@ -15,11 +15,12 @@
 #include <math.h>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_inverse.hpp"
-#include <glm/gtx/quaternion.hpp>
-#include <glm/mat4x4.hpp>
-#include <contrib/glm/gtc/type_ptr.hpp>
+#include "glm/gtx/quaternion.hpp"
+#include "glm/mat4x4.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 #include "objects/node.h"
+#include "objects/components/skeleton.h"
 #include "objects/components/component_types.h"
 #include "objects/components/transform.h"
 #include "objects/components/collider.h"
@@ -58,6 +59,7 @@ namespace sxr {
               mLink(nullptr),
               mBoneID(0),
               mAxis(1, 0, 0),
+              mSkeleton(nullptr),
               mWorld(nullptr),
               mJointType(JointType::baseJoint),
               mLinksAdded(0)
@@ -75,6 +77,7 @@ namespace sxr {
               mCollider(nullptr),
               mBoneID(boneID),
               mAxis(1, 0, 0),
+              mSkeleton(nullptr),
               mJointType(jointType),
               mWorld(nullptr),
               mLinksAdded(0)
@@ -91,6 +94,7 @@ namespace sxr {
             : PhysicsJoint(multiBody->getNumLinks(), multiBody->getBaseMass()),
               mMultiBody(multiBody),
               mAxis(1, 0, 0),
+              mSkeleton(nullptr),
               mLink(nullptr),
               mWorld(nullptr),
               mLinksAdded(0)
@@ -103,7 +107,7 @@ namespace sxr {
         destroy();
     }
 
-    PhysicsJoint* BulletJoint::getParent()
+    PhysicsJoint* BulletJoint::getParent() const
     {
         if ((mLink == nullptr) || (mMultiBody == nullptr))
         {
@@ -113,6 +117,12 @@ namespace sxr {
         btMultibodyLink& parentLink = mMultiBody->getLink(parentIndex);
         const void* p = parentLink.m_userPtr;
         return (PhysicsJoint*) p;
+    }
+
+    Skeleton* BulletJoint::getSkeleton() const
+    {
+        BulletJoint* root = static_cast<BulletJoint*> (mMultiBody->getUserPointer());
+        return root->mSkeleton;
     }
 
     void BulletJoint::setMass(float mass)
@@ -166,14 +176,36 @@ namespace sxr {
     void BulletJoint::getWorldTransform(btTransform& centerOfMassWorldTrans) const
     {
         Transform* trans = owner_object()->transform();
-        centerOfMassWorldTrans = convertTransform2btTransform(trans);
+        Skeleton* skel = getSkeleton();
+
+        if (skel)
+        {
+            const glm::mat4* m = skel->getWorldBoneMatrix(getBoneID());
+            centerOfMassWorldTrans = convertTransform2btTransform(*m);
+        }
+        else
+        {
+            centerOfMassWorldTrans = convertTransform2btTransform(trans);
+        }
     }
 
     void BulletJoint::updateWorldTransform()
     {
+        btTransform t;
+        Skeleton* skel = getSkeleton();
         Node* owner = owner_object();
-        Transform* trans = owner->transform();
-        btTransform t  = convertTransform2btTransform(trans);
+
+        if (skel)
+        {
+            const glm::mat4* m = skel->getWorldBoneMatrix(getBoneID());
+            t = convertTransform2btTransform(*m);
+        }
+        else
+        {
+            Transform* trans = owner->transform();
+
+            t = convertTransform2btTransform(trans);
+        }
         btVector3 pos = t.getOrigin();
 
         LOGE("BULLET: UPDATE %s, %f, %f, %f", owner->name().c_str(), pos.getX(), pos.getY(), pos.getZ());
@@ -190,34 +222,92 @@ namespace sxr {
     void BulletJoint::setWorldTransform(const btTransform& centerOfMassWorldTrans)
     {
         Node* owner = owner_object();
-        Transform* trans = owner->transform();
         btTransform aux; getWorldTransform(aux);
         btTransform physicBody = centerOfMassWorldTrans;
         btVector3 pos = physicBody.getOrigin();
         btQuaternion rot = physicBody.getRotation();
         Node* parent = owner->parent();
+        Skeleton* skel = getSkeleton();
         float matrixData[16];
 
         centerOfMassWorldTrans.getOpenGLMatrix(matrixData);
         glm::mat4 worldMatrix(glm::make_mat4(matrixData));
-        if ((parent != nullptr) && (parent->parent() != nullptr))
+        if (skel)
         {
-            glm::mat4 parentWorld(parent->transform()->getModelMatrix(false));
-            glm::mat4 parentInverseWorld(glm::inverse(parentWorld));
+            int boneID = getBoneID();
+            int parentBoneID = mLink->m_parent + 1;
+            glm::mat4& skelLocalMatrix = *skel->getLocalBoneMatrix(boneID);
             glm::mat4 localMatrix;
 
-            localMatrix = parentInverseWorld * worldMatrix;
-            trans->setModelMatrix(localMatrix);
+            if (boneID > 0)
+            {
+                const glm::mat4& parentWorld = *skel->getWorldBoneMatrix(parentBoneID);
+                glm::mat4 parentInverseWorld(glm::inverse(parentWorld));
+
+                localMatrix = parentInverseWorld * worldMatrix;
+            }
+            else
+            {
+                if (parent != nullptr)
+                {
+                    glm::mat4 parentWorld(parent->transform()->getModelMatrix(false));
+                    glm::mat4 parentInverseWorld(glm::inverse(parentWorld));
+
+                    localMatrix = parentInverseWorld * worldMatrix;
+                }
+                else
+                {
+                    glm::quat q(rot.getX(), rot.getY(), rot.getZ(), rot.getW());
+                    glm::mat4 localMatrix = glm::mat4_cast(q);
+                }
+            }
+            localMatrix[3] = skelLocalMatrix[3];
+            skelLocalMatrix = localMatrix;
+            LOGD("BULLET: JOINT %s %f, %f, %f", owner->name().c_str(),
+                    localMatrix[3][0], localMatrix[3][1], localMatrix[3][2]);
         }
         else
         {
-            trans->set_position(pos.getX(), pos.getY(), pos.getZ());
-            trans->set_rotation(rot.getW(), rot.getX(), rot.getY(), rot.getZ());
+            Transform* trans = owner->transform();
+            if ((parent != nullptr) && (parent->parent() != nullptr))
+            {
+                glm::mat4 parentWorld(parent->transform()->getModelMatrix(false));
+                glm::mat4 parentInverseWorld(glm::inverse(parentWorld));
+                glm::mat4 localMatrix;
+
+                localMatrix = parentInverseWorld * worldMatrix;
+                trans->setModelMatrix(localMatrix);
+            }
+            else
+            {
+                trans->set_position(pos.getX(), pos.getY(), pos.getZ());
+                trans->set_rotation(rot.getW(), rot.getX(), rot.getY(), rot.getZ());
+            }
+            LOGD("BULLET: JOINT %s %f, %f, %f", owner->name().c_str(), trans->position_x(), trans->position_y(), trans->position_z());
         }
-        LOGD("BULLET: JOINT %s %f, %f, %f", owner->name().c_str(), trans->position_x(), trans->position_y(), trans->position_z());
         mWorld->markUpdated(this);
     }
 
+    Skeleton* BulletJoint::createSkeleton()
+    {
+        int numbones = mMultiBody->getNumLinks() + 1;
+        int boneParents[numbones];
+        const char* boneNames[numbones];
+
+        boneParents[0] = -1;
+        boneNames[0] = owner_object()->name().c_str();
+        for (int i = 1; i < numbones; ++i)
+        {
+            btMultibodyLink& link = mMultiBody->getLink(i - 1);
+            const BulletJoint* j = reinterpret_cast<const BulletJoint*>(link.m_userPtr);
+            Node* owner = j->owner_object();
+            boneNames[i] = owner->name().c_str();
+            boneParents[i] = link.m_parent + 1;
+        }
+        Skeleton* skel = new Skeleton(boneParents, numbones);
+        skel->updateBones(boneParents, boneNames, numbones);
+        return skel;
+    }
 
     void BulletJoint::applyTorque(float x, float y, float z)
     {
@@ -325,22 +415,22 @@ namespace sxr {
 
     void BulletJoint::setupFixed()
     {
-        Node* owner = owner_object();
-        BulletJoint* jointA = reinterpret_cast<BulletJoint*>(getParent());
-        glm::mat4 tA = jointA->owner_object()->transform()->getModelMatrix(true);
-        glm::mat4 tB = owner->transform()->getModelMatrix(true);
-        glm::quat rotA = glm::normalize(glm::quat_cast(tA));
-        btVector3 bodyACOM(tA[3][0], tA[3][1], tA[3][2]);
-        btVector3 bodyBCOM(tB[3][0], tB[3][1], tB[3][2]);
+        int parentIndex = mLink->m_parent;
+        btMultibodyLink& parentLink = mMultiBody->getLink(parentIndex);
+        const BulletJoint* jointA = reinterpret_cast<const BulletJoint*>(parentLink.m_userPtr);
+        btTransform worldA;  jointA->getWorldTransform(worldA);
+        btTransform worldB; getWorldTransform(worldB);
+        btQuaternion rot(worldA.getRotation());
+        btVector3 bodyACOM(worldA.getOrigin());
+        btVector3 bodyBCOM(worldB.getOrigin());
         btVector3 diffCOM = bodyBCOM - bodyACOM;
-        btVector3 bodyACOM2bodyBpivot = diffCOM;
 
         mMultiBody->setupFixed(getBoneID() - 1,
                                    mLink->m_mass,
                                    mLink->m_inertiaLocal,
                                    jointA->getBoneID() - 1,
-                                   btQuaternion(rotA.x, rotA.y, rotA.z, rotA.w),
-                                   bodyACOM2bodyBpivot,
+                                   rot,
+                                   diffCOM,
                                    btVector3(0, 0, 0),
                                    true);
         BulletJoint* root = reinterpret_cast<BulletJoint*> (mMultiBody->getUserPointer());
@@ -353,12 +443,13 @@ namespace sxr {
 
     void BulletJoint::setupSpherical()
     {
-        Node*         owner = owner_object();
-        BulletJoint* jointA = reinterpret_cast<BulletJoint*>(getParent());
-        Transform*   transA = jointA->owner_object()->transform();
-        Transform*   transB = owner->transform();
-        btQuaternion rotA(transA->rotation_x(), transA->rotation_y(), transA->rotation_z(), transA->rotation_w());
-        btVector3    posB(transB->position_x(), transB->position_y(), transB->position_z());
+        int parentIndex = mLink->m_parent;
+        btMultibodyLink& parentLink = mMultiBody->getLink(parentIndex);
+        const BulletJoint*  jointA = reinterpret_cast<const BulletJoint*>(parentLink.m_userPtr);
+        btTransform   worldA;  jointA->getWorldTransform(worldA);
+        btTransform   worldB; getWorldTransform(worldB);
+        btQuaternion  rotA(worldA.getRotation());
+        btVector3     posB(worldB.getOrigin());
         btMultibodyLink& link = mMultiBody->getLink(getBoneID() - 1);
 
         mMultiBody->setupSpherical(getBoneID() - 1,
@@ -395,16 +486,16 @@ namespace sxr {
       */
     void BulletJoint::setupHinge()
     {
-        Node*        owner = owner_object();
-        int          linkIndex = getBoneID()- 1;
-        BulletJoint* jointA = reinterpret_cast<BulletJoint*>(getParent());
-        Transform*   transA = jointA->owner_object()->transform();
-        Transform*   transB = owner->transform();
-        btQuaternion rotA(transA->rotation_x(), transA->rotation_y(), transA->rotation_z(), transA->rotation_w());
-        btVector3    posB(transB->position_x(), transB->position_y(), transB->position_z());
-        btVector3   hingeAxis(mAxis.x, mAxis.y, mAxis.z);
+        int parentIndex = mLink->m_parent;
+        btMultibodyLink& parentLink = mMultiBody->getLink(parentIndex);
+        const BulletJoint*  jointA = reinterpret_cast<const BulletJoint*>(parentLink.m_userPtr);
+        btTransform   worldA; jointA->getWorldTransform(worldA);
+        btTransform   worldB; getWorldTransform(worldB);
+        btQuaternion  rotA(worldA.getRotation());
+        btVector3     posB(worldB.getOrigin());
+        btVector3     hingeAxis(mAxis.x, mAxis.y, mAxis.z);
 
-        mMultiBody->setupRevolute(linkIndex,
+        mMultiBody->setupRevolute(getBoneID() - 1,
                           mLink->m_mass,
                           mLink->m_inertiaLocal,
                           jointA->getBoneID() - 1,
@@ -421,13 +512,14 @@ namespace sxr {
 
     void BulletJoint::setupSlider()
     {
-        Node* owner = owner_object();
-        BulletJoint* jointA = reinterpret_cast<BulletJoint*>(getParent());
-        Transform*   transA = jointA->owner_object()->transform();
-        Transform*   transB = owner->transform();
-        btQuaternion rotA(transA->rotation_x(), transA->rotation_y(), transA->rotation_z(), transA->rotation_w());
-        btVector3    posB(transB->position_x(), transB->position_y(), transB->position_z());
-        btVector3   sliderAxis(posB);
+        int parentIndex = mLink->m_parent;
+        btMultibodyLink& parentLink = mMultiBody->getLink(parentIndex);
+        const BulletJoint*  jointA = reinterpret_cast<const BulletJoint*>(parentLink.m_userPtr);
+        btTransform   worldA; jointA->getWorldTransform(worldA);
+        btTransform   worldB; getWorldTransform(worldB);
+        btQuaternion  rotA(worldA.getRotation());
+        btVector3     posB(worldB.getOrigin());
+        btVector3     sliderAxis(posB);
 
         mMultiBody->setupPrismatic(getBoneID() - 1,
                                   mLink->m_mass,
@@ -449,6 +541,7 @@ namespace sxr {
     {
         mMultiBody->finalizeMultiDof();
         reinterpret_cast<btMultiBodyDynamicsWorld *>(mWorld->getPhysicsWorld())->addMultiBody(mMultiBody);
+        mSkeleton = createSkeleton();
     }
 
     bool BulletJoint::isReady() const

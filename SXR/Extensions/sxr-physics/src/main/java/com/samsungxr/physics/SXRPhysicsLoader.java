@@ -64,7 +64,7 @@ public class SXRPhysicsLoader {
         loadPhysicsFile(resource, scene.getRoot(), ignoreUpAxis);
     }
 
-    public static void loadPhysicsFile(SXRAndroidResource resource, SXRNode sceneRoot, boolean ignoreUpAxis) throws IOException
+    public static SXRNode loadPhysicsFile(SXRAndroidResource resource, SXRNode sceneRoot, boolean ignoreUpAxis) throws IOException
     {
         String filename = resource.getResourceFilename();
         int i = filename.lastIndexOf('.');
@@ -80,11 +80,12 @@ public class SXRPhysicsLoader {
             if (ext.toLowerCase().equals(".bullet"))
             {
                 loadBulletFile(inputData, sceneRoot, ignoreUpAxis);
+                return sceneRoot;
             }
             else if (ext.equals(".avt"))
             {
                 PhysicsAVTLoader loader = new PhysicsAVTLoader(sceneRoot);
-                loader.parse(inputData);
+                return loader.parse(inputData);
             }
             else
             {

@@ -51,9 +51,9 @@ class PhysicsJoint :  public PhysicsCollidable
 
 	virtual JointType getJointType() const = 0;
 
-	virtual int getBoneID() = 0;
+	virtual int getBoneID() const = 0;
 
-	virtual PhysicsJoint* getParent() = 0;
+	virtual PhysicsJoint* getParent() const = 0;
 
 	virtual const glm::vec3& getAxis() const = 0;
 
@@ -62,6 +62,8 @@ class PhysicsJoint :  public PhysicsCollidable
 	virtual void applyTorque(float x, float y, float z) = 0;
 
 	virtual void applyTorque(float t) = 0;
+
+	virtual Skeleton* getSkeleton() const = 0;
 
 };
 

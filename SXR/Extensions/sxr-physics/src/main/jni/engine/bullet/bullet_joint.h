@@ -31,6 +31,7 @@ class btMultiBodyConstraint;
 namespace sxr {
 
 class Node;
+class Skeleton;
 class BulletWorld;
 class BulletHingeConstraint;
 class BulletSliderConstraint;
@@ -58,7 +59,9 @@ class BulletJoint : public PhysicsJoint
 
     virtual JointType getJointType() const { return mJointType; }
 
-    virtual PhysicsJoint* getParent();
+    virtual PhysicsJoint* getParent() const;
+
+    virtual Skeleton* getSkeleton() const;
 
     virtual const glm::vec3& getAxis() const { return mAxis; }
 
@@ -72,7 +75,7 @@ class BulletJoint : public PhysicsJoint
 
     virtual void applyTorque(float t);
 
-    int getBoneID() { return mBoneID; }
+    int getBoneID() const { return mBoneID; }
 
     virtual void getWorldTransform(btTransform &worldTrans) const;
 
@@ -91,14 +94,16 @@ class BulletJoint : public PhysicsJoint
     void updateWorldTransform();
 
     bool isReady() const;
-    void finalize();
 
 private:
+    void finalize();
     void destroy();
     void updateCollisionShapeLocalScaling();
+    Skeleton* createSkeleton();
 
 protected:
     BulletWorld*             mWorld;
+    Skeleton*                mSkeleton;
     btMultiBodyLinkCollider* mCollider;
     btMultiBody*             mMultiBody;
     btMultibodyLink*         mLink;

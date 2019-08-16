@@ -33,6 +33,9 @@ import com.samsungxr.io.SXRCursorController;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Represents a physics world where all {@link SXRNode} with {@link SXRRigidBody} component
  * attached to are simulated.
@@ -46,6 +49,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     private static final long DEFAULT_INTERVAL = 15;
     private SXREventReceiver mListeners;
     private boolean mIsMultibody = false;
+    private List<SXRPhysicsJoint> mMultiBodies = null;
 
     private long mNativeLoader;
 
@@ -191,6 +195,10 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         mCollisionMatrix = collisionMatrix;
         mWorldTask = new SXRWorldTask(interval);
         mPhysicsContext = SXRPhysicsContext.getInstance();
+        if (isMultiBody)
+        {
+            mMultiBodies = new ArrayList<SXRPhysicsJoint>();
+        }
         scene.getRoot().attachComponent(this);
     }
 
@@ -425,6 +433,10 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
                 }
                 NativePhysics3DWorld.addJoint(getNative(), body.getNative());
                 mPhysicsObject.put(body.getNative(), body);
+                if (body.getBoneID() == 0)
+                {
+                    mMultiBodies.add(body);
+                }
                 getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onAddJoint", SXRWorld.this, body);
             }
         });
@@ -460,6 +472,10 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
                 if (contains(joint)) {
                     NativePhysics3DWorld.removeJoint(getNative(), joint.getNative());
                     mPhysicsObject.remove(joint.getNative());
+                    if (joint.getBoneID() == 0)
+                    {
+                        mMultiBodies.remove(joint);
+                    }
                     getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onRemoveJoint", SXRWorld.this, joint);
                 }
             }
@@ -569,15 +585,16 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         NativePhysics3DWorld.getGravity(getNative(), gravity);
     }
 
-    SXRRigidBody[] getUpdated() {
+    SXRPhysicsCollidable[] getUpdated()
+    {
         long[] pointers = NativePhysics3DWorld.getUpdated(getNative());
         if (pointers != null)
         {
-            SXRRigidBody[] bodies = new SXRRigidBody[pointers.length];
+            SXRPhysicsCollidable[] bodies = new SXRPhysicsCollidable[pointers.length];
             for (int i = 0; i < pointers.length; ++i)
             {
                 SXRPhysicsWorldObject obj = mPhysicsObject.get(pointers[i]);
-                SXRRigidBody body = (SXRRigidBody) obj;
+                SXRPhysicsCollidable body = (SXRPhysicsCollidable) obj;
                 bodies[i] = body;
             }
             return bodies;
@@ -618,32 +635,20 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
             NativePhysics3DWorld.step(getNative(), timeStep, maxSubSteps);
 
             generateCollisionEvents();
-            getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onStepPhysics", SXRWorld.this);
-/*
-            SXRRigidBody[] bodies = getUpdated();
-            if (bodies != null)
+            for (SXRPhysicsJoint joint : mMultiBodies)
             {
-                for (SXRRigidBody body : bodies)
-                {
-                    SXRSkeleton skel =
-                        (SXRSkeleton) body.getComponent(SXRSkeleton.getComponentType());
-
-                    if (skel != null)
-                    {
-                        skel.poseFromBones(SXRSkeleton.BONE_PHYSICS);
-                        skel.getPose().sync();
-                    }
-                }
+                joint.onStep();
             }
- */
+            getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onStepPhysics", SXRWorld.this);
+
             lastSimulTime = simulationTime;
 
-            simulationTime = intervalMillis + simulationTime - SystemClock.uptimeMillis();
+            simulationTime += intervalMillis - SystemClock.uptimeMillis();
             if (simulationTime < 0) {
                 simulationTime += intervalMillis;
             }
             // Time of the next simulation;
-            simulationTime = simulationTime + SystemClock.uptimeMillis();
+            simulationTime += simulationTime +SystemClock.uptimeMillis();
 
             mPhysicsContext.runAtTimeOnPhysicsThread(this, simulationTime);
         }
@@ -676,6 +681,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
             });
         }
     }
+
 
     private ComponentVisitor mRigidBodiesVisitor = new ComponentVisitor() {
 
