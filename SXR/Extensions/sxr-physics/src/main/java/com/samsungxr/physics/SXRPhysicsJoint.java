@@ -110,13 +110,14 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
                 throw new IllegalArgumentException("Error cannot access physics skeleton, attach all the joint components before pose mapping");
             }
         }
-        mPoseMapper = new SXRPoseMapper(mSkeleton, skel, duration);
+        mPoseMapper = new SXRPoseMapper(skel, mSkeleton, duration);
     }
 
     public void onStep()
     {
         if (mPoseMapper != null)
         {
+            mSkeleton.getNativePose();
             mPoseMapper.animate(0);
         }
     }

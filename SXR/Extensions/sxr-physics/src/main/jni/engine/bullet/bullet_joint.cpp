@@ -59,7 +59,6 @@ namespace sxr {
               mLink(nullptr),
               mBoneID(0),
               mAxis(1, 0, 0),
-              mSkeleton(nullptr),
               mWorld(nullptr),
               mJointType(JointType::baseJoint),
               mLinksAdded(0)
@@ -77,7 +76,6 @@ namespace sxr {
               mCollider(nullptr),
               mBoneID(boneID),
               mAxis(1, 0, 0),
-              mSkeleton(nullptr),
               mJointType(jointType),
               mWorld(nullptr),
               mLinksAdded(0)
@@ -94,7 +92,6 @@ namespace sxr {
             : PhysicsJoint(multiBody->getNumLinks(), multiBody->getBaseMass()),
               mMultiBody(multiBody),
               mAxis(1, 0, 0),
-              mSkeleton(nullptr),
               mLink(nullptr),
               mWorld(nullptr),
               mLinksAdded(0)
@@ -121,8 +118,8 @@ namespace sxr {
 
     Skeleton* BulletJoint::getSkeleton() const
     {
-        BulletJoint* root = static_cast<BulletJoint*> (mMultiBody->getUserPointer());
-        return root->mSkeleton;
+        const BulletJoint* root = static_cast<const BulletJoint*> (mMultiBody->getUserPointer());
+        return static_cast<Skeleton*>(root->owner_object()->getComponent(COMPONENT_TYPE_SKELETON));
     }
 
     void BulletJoint::setMass(float mass)
@@ -235,7 +232,7 @@ namespace sxr {
         if (skel)
         {
             int boneID = getBoneID();
-            int parentBoneID = mLink->m_parent + 1;
+            int parentBoneID = mLink ? mLink->m_parent + 1 : 0;
             glm::mat4& skelLocalMatrix = *skel->getLocalBoneMatrix(boneID);
             glm::mat4 localMatrix;
 
@@ -293,7 +290,12 @@ namespace sxr {
         int numbones = mMultiBody->getNumLinks() + 1;
         int boneParents[numbones];
         const char* boneNames[numbones];
+        Skeleton* skel = static_cast<Skeleton*>(owner_object()->getComponent(COMPONENT_TYPE_SKELETON));
 
+        if (skel != nullptr)
+        {
+            return skel;
+        }
         boneParents[0] = -1;
         boneNames[0] = owner_object()->name().c_str();
         for (int i = 1; i < numbones; ++i)
@@ -304,8 +306,9 @@ namespace sxr {
             boneNames[i] = owner->name().c_str();
             boneParents[i] = link.m_parent + 1;
         }
-        Skeleton* skel = new Skeleton(boneParents, numbones);
+        skel = new Skeleton(boneParents, numbones);
         skel->updateBones(boneParents, boneNames, numbones);
+        owner_object()->attachComponent(skel);
         return skel;
     }
 
@@ -541,7 +544,7 @@ namespace sxr {
     {
         mMultiBody->finalizeMultiDof();
         reinterpret_cast<btMultiBodyDynamicsWorld *>(mWorld->getPhysicsWorld())->addMultiBody(mMultiBody);
-        mSkeleton = createSkeleton();
+        createSkeleton();
     }
 
     bool BulletJoint::isReady() const

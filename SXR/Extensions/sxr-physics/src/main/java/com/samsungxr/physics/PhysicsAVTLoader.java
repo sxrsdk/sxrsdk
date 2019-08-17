@@ -21,6 +21,7 @@ import com.samsungxr.SXRCapsuleCollider;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRSphereCollider;
+import com.samsungxr.SXRTransform;
 import com.samsungxr.animation.SXRSkeleton;
 import com.samsungxr.utility.Log;
 
@@ -61,12 +62,8 @@ class PhysicsAVTLoader
             JSONObject start = new JSONObject(s);
             if (mWorld.isMultiBody())
             {
-                SXRSkeleton skel = parseSkeleton(start);
-
-                rootNode = skel.getBone(0);
-                rootNode.attachComponent(skel);
-                mRoot.addChildObject(rootNode);
-                SXRPhysicsJoint rootJoint = parseMultiBodyPhysics(start);
+              SXRPhysicsJoint rootJoint = parseMultiBodyPhysics(start);
+              return rootJoint.getOwnerObject();
             }
             else
             {
@@ -90,30 +87,60 @@ class PhysicsAVTLoader
         mTargetBones.clear();
         mTargetBones.put(basebone.getString("Name"), basebone);
         parseRigidBody(basebone);
+
         for (int i = 0; i < childbones.length(); ++i)
         {
             parseRigidBody(childbones.getJSONObject(i).getJSONObject("value"));
         }
     }
 
-    private SXRSkeleton parseSkeleton(JSONObject root) throws JSONException
+    private SXRSkeleton parseSkeleton(JSONObject basebone, JSONArray bonelist) throws JSONException
     {
-        JSONArray bonelist = root.getJSONArray("Bone Markers");
-        int numbones = bonelist.length();
+        int numbones = bonelist.length() + 1;
         String bonenames[] = new String[numbones];
         int boneparents[] = new int[numbones];
         SXRNode bones[] = new SXRNode[numbones];
+        String parentName = basebone.optString("Parent Name", "");
+        String boneName = basebone.getString("Target Bone");
+        bonenames[0] = boneName;
+        bones[0] = new SXRNode(mContext);
+        bones[0].setName(boneName);
+        boneparents[0] = -1;
 
-        for (int i = 0; i <  numbones; ++i)
+        mRoot.addChildObject(bones[0]);
+        mTargetBones.put(basebone.getString("Name"), basebone);
+
+        for (int i = 1; i <  numbones; ++i)
         {
-            JSONObject bone = bonelist.getJSONObject(i).getJSONObject("value");
-            String parentName = bone.optString("Parent Name", "");
-            bonenames[i] = bone.getString("Name");
-            bones[i] = new SXRNode(mContext);
+            JSONObject bone = bonelist.getJSONObject(i - 1).getJSONObject("value");
+            parentName = bone.optString("Parent", "");
+            boneName = bone.getString("Target Bone");
+            bonenames[i] = boneName;
             boneparents[i] = -1;
-            bones[i].setName(bonenames[i]);
+            SXRNode node = new SXRNode(mContext);
+            bones[i] = node;
+            node.setName(bonenames[i]);
+            SXRTransform trans = node.getTransform();
+            JSONObject xform = bone.getJSONObject("Transform");
+            JSONObject position = xform.getJSONObject("Position");
+            JSONObject orientation = xform.getJSONObject("Orientation");
+            JSONObject scale = xform.getJSONObject("Scale");
+
+            trans.setRotation((float) orientation.getDouble("W"),
+                              (float) orientation.getDouble("X"),
+                              (float) orientation.getDouble("Y"),
+                              (float) orientation.getDouble("Z"));
+            trans.setPosition((float) position.getDouble("X"),
+                              (float) position.getDouble("Y"),
+                              (float) position.getDouble("Z"));
+            trans.setScale((float) scale.getDouble("X"),
+                           (float) scale.getDouble("Y"),
+                           (float) scale.getDouble("Z"));
+            mTargetBones.put(bone.getString("Name"), bone);
             if (!parentName.isEmpty())
             {
+                JSONObject parentBone = mTargetBones.get(parentName);
+                parentName = parentBone.getString("Target Bone");
                 for (int j = 0; j < i; ++j)
                 {
                     if (parentName.equals(bonenames[j]))
@@ -131,6 +158,9 @@ class PhysicsAVTLoader
             skel.setBone(i, bones[i]);
         }
         mSkeleton = skel;
+        bones[0].attachComponent(skel);
+        skel.poseFromBones();
+        skel.getPose().sync();
         return skel;
     }
 
@@ -139,13 +169,13 @@ class PhysicsAVTLoader
         JSONObject multibody = root.getJSONObject("Multi Body").getJSONObject("value");
         JSONObject basebone = multibody.getJSONObject("Base Bone");
         JSONArray childbones = multibody.getJSONObject("Child Bones").getJSONArray("property_value");
-        int numbones = mSkeleton.getNumBones();
-        JSONObject orderedbones[] = new JSONObject[numbones];
         float mass = (float) basebone.getDouble("Mass");
 
         mTargetBones.clear();
         mTargetBones.put(basebone.getString("Name"), basebone);
-        SXRPhysicsJoint rootJoint = new SXRPhysicsJoint(mContext, mass, childbones.length());
+        SXRPhysicsJoint rootJoint = new SXRPhysicsJoint(mContext, mass, childbones.length() + 1);
+
+        parseSkeleton(basebone, childbones);
         parseBone(basebone, rootJoint);
         for (int i = 0; i < childbones.length(); ++i)
         {
@@ -157,15 +187,7 @@ class PhysicsAVTLoader
             {
                 throw new IllegalArgumentException("AVT file skeleton missing bone " + nodeName + " reference by MultiBody physics");
             }
-            orderedbones[boneID] = link;
-        }
-        for (int j = 0; j < numbones; ++j)
-        {
-            JSONObject link = orderedbones[j];
-            if (link != null)
-            {
-                parseJoint(link);
-            }
+            parseJoint(link);
         }
         return rootJoint;
     }
@@ -516,10 +538,13 @@ class PhysicsAVTLoader
         SXRNode node = mSkeleton.getBone(joint.getBoneID());
         parseCollider(link.getJSONObject("Collider").getJSONObject("value"), nodeName);
         JSONObject props = link.getJSONObject("Physic Material");
+
         joint.setFriction((float) props.getDouble("Friction"));
         node.attachComponent(joint);
-        Log.e(TAG, "link %s bone = %s boneID = %d",
-                link.getString("Name"), nodeName, joint.getBoneID());
+        Log.e(TAG, "link %s bone = %s boneID = %d ",
+              link.getString("Name"),
+              nodeName,
+              joint.getBoneID());
     }
 
 }
