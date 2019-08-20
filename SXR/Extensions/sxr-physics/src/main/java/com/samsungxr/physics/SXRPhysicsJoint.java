@@ -115,10 +115,14 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
 
     public void onStep()
     {
-        if (mPoseMapper != null)
+        if (mSkeleton != null)
         {
             mSkeleton.getNativePose();
-            mPoseMapper.animate(0);
+            mSkeleton.poseToBones();
+            if (mPoseMapper != null)
+            {
+                mPoseMapper.animate(0);
+            }
         }
     }
 
@@ -266,8 +270,13 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
         }
     }
 
-    protected SXRSkeleton getSkeleton()
+    public SXRSkeleton getSkeleton()
     {
+        if (mSkeleton != null)
+        {
+            return mSkeleton;
+        }
+        mSkeleton = (SXRSkeleton) getComponent(SXRSkeleton.getComponentType());
         if (mSkeleton != null)
         {
             return mSkeleton;

@@ -1275,7 +1275,7 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
             mCylProto.getRenderData().setMaterial(flatMaterialCyl);
             SXRNode rootGeo = makeSpheres();
 
-            if (rootGeo.getParent() == null)
+            if ((root != null) && (rootGeo.getParent() == null))
             {
                 root.addChildObject(rootGeo);
             }
