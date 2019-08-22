@@ -36,6 +36,7 @@ import com.samsungxr.utility.Log;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -113,8 +114,6 @@ class PhysicsAVTLoader
         String bonenames[] = new String[numbones];
         int boneparents[] = new int[numbones];
         SXRNode bones[] = new SXRNode[numbones];
-        String parentName = basebone.optString("Parent Name", "");
-        String boneName = basebone.getString("Target Bone");
         Matrix4f worldMtx = new Matrix4f();
 
         boneparents[0] = -1;
@@ -123,8 +122,8 @@ class PhysicsAVTLoader
         for (int i = 0; i <  numbones; ++i)
         {
             JSONObject bone = (i == 0) ? basebone : bonelist.getJSONObject(i - 1).getJSONObject("value");
-            parentName = bone.optString("Parent", "");
-            boneName = bone.getString("Target Bone");
+            String parentName = bone.optString("Parent", "");
+            String boneName = bone.getString("Target Bone");
             bonenames[i] = boneName;
             boneparents[i] = -1;
             SXRNode node = new SXRNode(mContext);
@@ -141,6 +140,7 @@ class PhysicsAVTLoader
                     {
                         boneparents[i] = j;
                         bones[j].addChildObject(bones[i]);
+                        break;
                     }
                 }
             }
@@ -148,7 +148,6 @@ class PhysicsAVTLoader
         SXRSkeleton skel = new SXRSkeleton(mContext, boneparents);
         SXRPose worldPose = new SXRPose(skel);
 
-        mRoot.addChildObject(bones[0]);
         for (int i = 0; i <  numbones; ++i)
         {
             JSONObject bone = (i == 0) ? basebone : bonelist.getJSONObject(i - 1).getJSONObject("value");
@@ -159,10 +158,10 @@ class PhysicsAVTLoader
             worldMtx.translationRotate((float) position.getDouble("X"),
                                        (float) position.getDouble("Y"),
                                        (float) position.getDouble("Z"),
-                                       (float) orientation.getDouble("W"),
                                        (float) orientation.getDouble("X"),
                                        (float) orientation.getDouble("Y"),
-                                       (float) orientation.getDouble("Z"));
+                                       (float) orientation.getDouble("Z"),
+                                       (float) orientation.getDouble("W"));
             worldPose.setWorldMatrix(i, worldMtx);
             skel.setBoneName(i, bonenames[i]);
             skel.setBone(i, bones[i]);
@@ -172,6 +171,7 @@ class PhysicsAVTLoader
         skel.setPose(worldPose);
         skel.poseToBones();
         bones[0].attachComponent(skel);
+        mRoot.addChildObject(bones[0]);
         return skel;
     }
 
@@ -247,7 +247,7 @@ class PhysicsAVTLoader
             m.scale((float) scale.getDouble("X"),
                     (float) scale.getDouble("Y"),
                     (float) scale.getDouble("Z"));
-            m.setTranslation(pivotB);
+//            m.setTranslation(pivotB);
             if (type.equals("dmCapsuleCollider"))
             {
                 SXRCapsuleCollider capsule = new SXRCapsuleCollider(ctx);
@@ -274,7 +274,6 @@ class PhysicsAVTLoader
                 SXRRenderData rd = new SXRRenderData(mContext, mColliderMtl);
 
                 rd.setMesh(cubeMesh);
-                cubeMesh.transform(m, true);
                 owner.attachComponent(rd);
                 owner.attachComponent(capsule);
                 Log.e(TAG, "capsule collider %s height %f radius %f %s axis",
@@ -293,7 +292,6 @@ class PhysicsAVTLoader
                 SXRRenderData rd = new SXRRenderData(mContext, mColliderMtl);
 
                 rd.setMesh(cubeMesh);
-                cubeMesh.transform(m, true);
                 box.setHalfExtents(x, y, z);
                 owner.attachComponent(rd);
                 owner.attachComponent(box);
@@ -310,8 +308,8 @@ class PhysicsAVTLoader
 
                 rd.setMesh(sp.getRenderData().getMesh());
                 rd.getMesh().transform(m, true);
-                owner.attachComponent(rd);
                 sphere.setRadius(radius);
+                owner.attachComponent(rd);
                 owner.attachComponent(sphere);
                 Log.e(TAG, "sphere collider %s radius %f", colliderRoot.getString("Name"), radius);
                 return sphere;
@@ -375,7 +373,10 @@ class PhysicsAVTLoader
         JSONArray dofdata = link.getJSONArray("DOF Data");
         float mass = (float) link.getDouble("Mass");
         SXRPhysicsJoint parentJoint = findParentJoint(parentName);
-        float[] pivotA = new float[3];
+        float[] pivotB = new float[3];
+        Vector3f axis = null;
+        JSONObject trans = link.getJSONObject("Transform");
+        JSONObject pos = trans.getJSONObject("Position");
 
         if (parentJoint == null)
         {
@@ -383,84 +384,63 @@ class PhysicsAVTLoader
             return null;
         }
         mTargetBones.put(name, link);
+        JSONObject p = link.getJSONObject("Pivot Pos.");
+
+        pivotB[0] = (float) (p.getDouble("X") - pos.getDouble("X"));
+        pivotB[1] = (float) (p.getDouble("Y") - pos.getDouble("Y"));
+        pivotB[2] = (float) (p.getDouble("Z") - pos.getDouble("Z"));
         if (type.equals("ball"))
         {
+/*
             JSONObject dofx = dofdata.getJSONObject(0);
             JSONObject dofy = dofdata.getJSONObject(1);
             JSONObject dofz = dofdata.getJSONObject(2);
-            JSONObject p = link.getJSONObject("Pivot Pos.");
 
-            pivotA[0] = (float) p.getDouble("X");
-            pivotA[1] = (float) p.getDouble("Y");
-            pivotA[2] = (float) p.getDouble("Z");
-/*
             ball.setAngularLowerLimits( (float) Math.toRadians(dofx.getDouble("limitLow")),
                                         (float) Math.toRadians(dofy.getDouble("limitLow")),
                                         (float) Math.toRadians(dofz.getDouble("limitLow")));
             ball.setAngularUpperLimits((float) Math.toRadians(dofx.getDouble("limitHigh")),
                                         (float) Math.toRadians(dofy.getDouble("limitHigh")),
                                         (float) Math.toRadians(dofz.getDouble("limitHigh")));
-            constraint = ball;
 */
             jointType = SXRPhysicsJoint.SPHERICAL;
             Log.e(TAG, "Ball joint between %s and %s joint(%f, %f, %f)",
-                  parentName, name, pivotA[0], pivotA[1], pivotA[2]);
+                  parentName, name, pivotB[0], pivotB[1], pivotB[2]);
         }
         else if (type.equals("universal"))  // TODO: figure out universal joint
         {
+/*
             JSONObject dofx = dofdata.getJSONObject(0);
             JSONObject dofy = dofdata.getJSONObject(1);
-            JSONObject p = link.getJSONObject("Pivot Pos.");
 
-            pivotA[0] = (float) p.getDouble("X");
-            pivotA[1] = (float) p.getDouble("Y");
-            pivotA[2] = (float) p.getDouble("Z");
-/*
-            SXRGenericConstraint ball = new SXRGenericConstraint(mContext, joint,  pivotA);
             ball.setAngularLowerLimits( (float) Math.toRadians(dofx.getDouble("limitLow")),
                     (float) Math.toRadians(dofy.getDouble("limitLow")),
                     0);
             ball.setAngularUpperLimits((float) Math.toRadians(dofx.getDouble("limitHigh")),
                     (float) Math.toRadians(dofy.getDouble("limitHigh")),
                     0);
-            constraint = ball;
 */
             jointType = SXRPhysicsJoint.SPHERICAL;
             Log.e(TAG, "Universal joint between %s and %s joint(%f, %f, %f)",
-                    parentName, name, pivotA[0], pivotA[1], pivotA[2]);
+                    parentName, name, pivotB[0], pivotB[1], pivotB[2]);
         }
         else if (type.equals("hinge"))
         {
-            float[] axisA = new float[3];
-            float[] pivotB = new float[3];
             JSONObject v = link.getJSONObject("Axis A");
-            JSONObject parent = mTargetBones.get(parentName);
-
-            axisA[0] = (float)  v.getDouble("X");
-            axisA[1] = (float)  v.getDouble("Y");
-            axisA[2] = (float)  v.getDouble("Z");
-            v = parent.getJSONObject("Pivot Pos.");
-            pivotB[0] = (float)  v.getDouble("X");
-            pivotB[1] = (float)  v.getDouble("Y");
-            pivotB[2] = (float)  v.getDouble("Z");
+            axis = new Vector3f((float) v.getDouble("X"),
+                                (float) v.getDouble("Y"),
+                                (float) v.getDouble("Z"));
 /*
-            SXRHingeConstraint hinge = new SXRHingeConstraint(mContext, joint,
-                                    pivotA, pivotB, axisA);
-            constraint = hinge;
             JSONObject dof = dofdata.getJSONObject(0);
             hinge.setLimits((float) Math.toRadians(dof.getDouble("limitLow")),
                             (float) Math.toRadians(dof.getDouble("limitHigh")));
-            Log.e(TAG, "Hinge joint between %s (%s, %s, %s) and %s (%f, %f, %f)",
-                    parentName, name, pivotA[0], pivotA[1], pivotA[2], pivotB[0], pivotB[1], pivotB[2]);
 */
             jointType = SXRPhysicsJoint.REVOLUTE;
+            Log.e(TAG, "Hinge joint between %s  and %s (%f, %f, %f)",
+                    parentName, name, pivotB[0], pivotB[1], pivotB[2]);
         }
         else if (type.equals("fixed"))
         {
-/*
-            SXRFixedConstraint fixed = new SXRFixedConstraint(mContext, joint);
-            constraint = fixed;
-*/
             Log.e(TAG, "Fixed joint between %s and %s", parentName, name);
             jointType = SXRPhysicsJoint.FIXED;
         }
@@ -469,6 +449,11 @@ class PhysicsAVTLoader
             throw new JSONException(type + " is an unknown constraint type");
         }
         SXRPhysicsJoint joint = new SXRPhysicsJoint(parentJoint, jointType, boneID, mass);
+        joint.setPivot(pivotB[0], pivotB[1], pivotB[2]);
+        if (axis != null)
+        {
+            joint.setAxis(axis.x, axis.y, axis.z);
+        }
         parseBone(link, joint);
         return joint;
     }

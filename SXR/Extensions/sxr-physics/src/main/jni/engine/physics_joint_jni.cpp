@@ -53,6 +53,9 @@ JNIEXPORT jfloat JNICALL
     Java_com_samsungxr_physics_NativePhysicsJoint_setAxis(JNIEnv* env, jclass obj, jlong jjoint,
                                                                  jfloat x, jfloat y, jfloat z);
 
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_physics_NativePhysicsJoint_setPivot(JNIEnv* env, jclass obj, jlong jjoint,
+                                                                 jfloat x, jfloat y, jfloat z);
 }
 
     JNIEXPORT jlong JNICALL
@@ -132,6 +135,15 @@ JNIEXPORT jfloat JNICALL
         PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
         jlong nativePtr = reinterpret_cast<jlong>(mb->getSkeleton());
         return nativePtr;
+    }
+
+    JNIEXPORT void JNICALL
+    Java_com_samsungxr_physics_NativePhysicsJoint_setPivot(JNIEnv* env, jclass obj, jlong jjoint,
+                                                          jfloat x, jfloat y, jfloat z)
+    {
+        PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
+        glm::vec3 pivot(x, y, z);
+        mb->setPivot(pivot);
     }
 
 

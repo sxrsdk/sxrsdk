@@ -53,6 +53,10 @@ class PhysicsJoint :  public PhysicsCollidable
 
 	virtual int getBoneID() const = 0;
 
+	virtual const glm::vec3& getPivot() const = 0;
+
+	virtual void setPivot(const glm::vec3& pivot) = 0;
+
 	virtual PhysicsJoint* getParent() const = 0;
 
 	virtual const glm::vec3& getAxis() const = 0;
@@ -63,7 +67,7 @@ class PhysicsJoint :  public PhysicsCollidable
 
 	virtual void applyTorque(float t) = 0;
 
-	virtual Skeleton* getSkeleton() const = 0;
+	virtual Skeleton* getSkeleton() = 0;
 
 };
 

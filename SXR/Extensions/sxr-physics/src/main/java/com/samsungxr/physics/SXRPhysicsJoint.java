@@ -83,6 +83,11 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
         NativePhysicsJoint.setAxis(getNative(), x, y, z);
     }
 
+    public void setPivot(float x, float y, float z)
+    {
+        NativePhysicsJoint.setPivot(getNative(), x, y, z);
+    }
+
     static public long getComponentType() {
         return NativePhysicsJoint.getComponentType();
     }
@@ -90,7 +95,8 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
     /**
      * Adds a pose mapper to map the physics skeleton associated with
      * this joint (if any) to another skeleton in the scene.
-     * @param skel  {@link SXRSkeleton} to map the physics pose to
+     * @param skel     {@link SXRSkeleton} to map the physics pose to
+     * @param duration duration of pose mapping (in seconds)
      */
     public void mapPoseToSkeleton(SXRSkeleton skel, float duration)
     {
@@ -308,6 +314,8 @@ class NativePhysicsJoint
     static native float getFriction(long joint);
 
     static native void setAxis(long joint, float x, float y, float z);
+
+    static native void setPivot(long joint, float x, float y, float z);
 
     static native void applyTorque(long joint, float x, float y, float z);
 

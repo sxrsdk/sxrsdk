@@ -44,9 +44,9 @@ public class SXRPhysicsLoader {
      * @param fileName Physics settings file name.
      * @param scene The scene containing the objects to attach physics components.
      */
-    public static void loadPhysicsFile(SXRScene scene, String fileName) throws IOException
+    public static SXRNode loadPhysicsFile(SXRScene scene, String fileName) throws IOException
     {
-        loadPhysicsFile(scene, fileName, false);
+        return loadPhysicsFile(scene, fileName, false);
     }
 
     /**
@@ -58,10 +58,10 @@ public class SXRPhysicsLoader {
      * @param ignoreUpAxis Set to true if up-axis information from file must be ignored.
      * @param scene The scene containing the objects to attach physics components.
      */
-    public static void loadPhysicsFile(SXRScene scene, String fileName, boolean ignoreUpAxis) throws IOException
+    public static SXRNode loadPhysicsFile(SXRScene scene, String fileName, boolean ignoreUpAxis) throws IOException
     {
         SXRAndroidResource resource = toAndroidResource(scene.getSXRContext(), fileName);
-        loadPhysicsFile(resource, scene.getRoot(), ignoreUpAxis);
+        return loadPhysicsFile(resource, scene.getRoot(), ignoreUpAxis);
     }
 
     public static SXRNode loadPhysicsFile(SXRAndroidResource resource, SXRNode sceneRoot, boolean ignoreUpAxis) throws IOException

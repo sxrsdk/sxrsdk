@@ -59,6 +59,7 @@ namespace sxr {
               mLink(nullptr),
               mBoneID(0),
               mAxis(1, 0, 0),
+              mPivot(0, 0, 0),
               mWorld(nullptr),
               mJointType(JointType::baseJoint),
               mLinksAdded(0)
@@ -76,6 +77,7 @@ namespace sxr {
               mCollider(nullptr),
               mBoneID(boneID),
               mAxis(1, 0, 0),
+              mPivot(0, 0, 0),
               mJointType(jointType),
               mWorld(nullptr),
               mLinksAdded(0)
@@ -83,7 +85,7 @@ namespace sxr {
         mMultiBody = parent->getMultiBody();
         btMultibodyLink& link = mMultiBody->getLink(boneID - 1);
         link.m_mass = mass;
-        link.m_parent = parent->getBoneID();
+        link.m_parent = parent->getBoneID() - 1;
         link.m_userPtr = this;
         mLink = &link;
     }
@@ -92,6 +94,7 @@ namespace sxr {
             : PhysicsJoint(multiBody->getNumLinks(), multiBody->getBaseMass()),
               mMultiBody(multiBody),
               mAxis(1, 0, 0),
+              mPivot(0, 0, 0),
               mLink(nullptr),
               mWorld(nullptr),
               mLinksAdded(0)
@@ -111,15 +114,24 @@ namespace sxr {
             return nullptr;
         }
         int parentIndex = mLink->m_parent;
+        if (parentIndex < 0)
+        {
+            return static_cast<PhysicsJoint*>(mMultiBody->getUserPointer());
+        }
         btMultibodyLink& parentLink = mMultiBody->getLink(parentIndex);
         const void* p = parentLink.m_userPtr;
         return (PhysicsJoint*) p;
     }
 
-    Skeleton* BulletJoint::getSkeleton() const
+    Skeleton* BulletJoint::getSkeleton()
     {
         const BulletJoint* root = static_cast<const BulletJoint*> (mMultiBody->getUserPointer());
-        return static_cast<Skeleton*>(root->owner_object()->getComponent(COMPONENT_TYPE_SKELETON));
+        Skeleton* skel = static_cast<Skeleton*>(root->owner_object()->getComponent(COMPONENT_TYPE_SKELETON));
+        if (skel == nullptr)
+        {
+            return  createSkeleton();
+        }
+        return skel;
     }
 
     void BulletJoint::setMass(float mass)
@@ -173,7 +185,8 @@ namespace sxr {
     void BulletJoint::getWorldTransform(btTransform& centerOfMassWorldTrans) const
     {
         Transform* trans = owner_object()->transform();
-        Skeleton* skel = getSkeleton();
+        const BulletJoint* root = static_cast<const BulletJoint*> (mMultiBody->getUserPointer());
+        Skeleton* skel = static_cast<Skeleton*>(root->owner_object()->getComponent(COMPONENT_TYPE_SKELETON));
 
         if (skel)
         {
@@ -189,7 +202,8 @@ namespace sxr {
     void BulletJoint::updateWorldTransform()
     {
         btTransform t;
-        Skeleton* skel = getSkeleton();
+        const BulletJoint* root = static_cast<const BulletJoint*> (mMultiBody->getUserPointer());
+        Skeleton* skel = static_cast<Skeleton*>(root->owner_object()->getComponent(COMPONENT_TYPE_SKELETON));
         Node* owner = owner_object();
 
         if (skel)
@@ -224,7 +238,8 @@ namespace sxr {
         btVector3 pos = physicBody.getOrigin();
         btQuaternion rot = physicBody.getRotation();
         Node* parent = owner->parent();
-        Skeleton* skel = getSkeleton();
+        const BulletJoint* root = static_cast<const BulletJoint*> (mMultiBody->getUserPointer());
+        Skeleton* skel = static_cast<Skeleton*>(root->owner_object()->getComponent(COMPONENT_TYPE_SKELETON));
         float matrixData[16];
 
         centerOfMassWorldTrans.getOpenGLMatrix(matrixData);
@@ -418,24 +433,23 @@ namespace sxr {
 
     void BulletJoint::setupFixed()
     {
-        int parentIndex = mLink->m_parent;
-        btMultibodyLink& parentLink = mMultiBody->getLink(parentIndex);
-        const BulletJoint* jointA = reinterpret_cast<const BulletJoint*>(parentLink.m_userPtr);
-        btTransform worldA;  jointA->getWorldTransform(worldA);
-        btTransform worldB; getWorldTransform(worldB);
-        btQuaternion rot(worldA.getRotation());
-        btVector3 bodyACOM(worldA.getOrigin());
-        btVector3 bodyBCOM(worldB.getOrigin());
-        btVector3 diffCOM = bodyBCOM - bodyACOM;
+        const BulletJoint* jointA = reinterpret_cast<const BulletJoint*>(getParent());
+        btVector3          pivotB(mPivot.x, mPivot.y, mPivot.z);
+        btTransform        worldA;  jointA->getWorldTransform(worldA);
+        btTransform        worldB; getWorldTransform(worldB);
+        btQuaternion       rot(worldA.getRotation());
+        btVector3          bodyACOM(worldA.getOrigin());
+        btVector3          bodyBCOM(worldB.getOrigin());
+        btVector3          diffCOM = bodyBCOM + pivotB - bodyACOM;
 
         mMultiBody->setupFixed(getBoneID() - 1,
-                                   mLink->m_mass,
-                                   mLink->m_inertiaLocal,
-                                   jointA->getBoneID() - 1,
-                                   rot,
-                                   diffCOM,
-                                   btVector3(0, 0, 0),
-                                   true);
+                               mLink->m_mass,
+                               mLink->m_inertiaLocal,
+                               jointA->getBoneID() - 1,
+                               rot,
+                               diffCOM,
+                               -pivotB,
+                               true);
         BulletJoint* root = reinterpret_cast<BulletJoint*> (mMultiBody->getUserPointer());
         if (root->isReady())
         {
@@ -446,22 +460,23 @@ namespace sxr {
 
     void BulletJoint::setupSpherical()
     {
-        int parentIndex = mLink->m_parent;
-        btMultibodyLink& parentLink = mMultiBody->getLink(parentIndex);
-        const BulletJoint*  jointA = reinterpret_cast<const BulletJoint*>(parentLink.m_userPtr);
-        btTransform   worldA;  jointA->getWorldTransform(worldA);
-        btTransform   worldB; getWorldTransform(worldB);
-        btQuaternion  rotA(worldA.getRotation());
-        btVector3     posB(worldB.getOrigin());
-        btMultibodyLink& link = mMultiBody->getLink(getBoneID() - 1);
+        const BulletJoint* jointA = reinterpret_cast<const BulletJoint*>(getParent());
+        btVector3          pivotB(mPivot.x, mPivot.y, mPivot.z);
+        btTransform        worldA;  jointA->getWorldTransform(worldA);
+        btTransform        worldB; getWorldTransform(worldB);
+        btQuaternion       rotA(worldA.getRotation());
+        btVector3          bodyACOM(worldA.getOrigin());
+        btVector3          bodyBCOM(worldB.getOrigin());
+        btVector3          diffCOM = bodyBCOM + pivotB - bodyACOM;
+        btMultibodyLink&   link = mMultiBody->getLink(getBoneID() - 1);
 
         mMultiBody->setupSpherical(getBoneID() - 1,
                                    mLink->m_mass,
                                    mLink->m_inertiaLocal,
                                    jointA->getBoneID() - 1,
                                    rotA,
-                                   btVector3(0, 0, 0),
-                                   posB, true);
+                                   diffCOM,
+                                   -pivotB, true);
         BulletJoint* root = reinterpret_cast<BulletJoint*> (mMultiBody->getUserPointer());
         if (root->isReady())
         {
@@ -489,23 +504,24 @@ namespace sxr {
       */
     void BulletJoint::setupHinge()
     {
-        int parentIndex = mLink->m_parent;
-        btMultibodyLink& parentLink = mMultiBody->getLink(parentIndex);
-        const BulletJoint*  jointA = reinterpret_cast<const BulletJoint*>(parentLink.m_userPtr);
-        btTransform   worldA; jointA->getWorldTransform(worldA);
-        btTransform   worldB; getWorldTransform(worldB);
-        btQuaternion  rotA(worldA.getRotation());
-        btVector3     posB(worldB.getOrigin());
-        btVector3     hingeAxis(mAxis.x, mAxis.y, mAxis.z);
+        const BulletJoint*  jointA = reinterpret_cast<const BulletJoint*>(getParent());
+        btVector3           pivotB(mPivot.x, mPivot.y, mPivot.z);
+        btTransform         worldA; jointA->getWorldTransform(worldA);
+        btTransform         worldB; getWorldTransform(worldB);
+        btQuaternion        rotA(worldA.getRotation());
+        btVector3           bodyACOM(worldA.getOrigin());
+        btVector3           bodyBCOM(worldB.getOrigin());
+        btVector3           diffCOM = bodyBCOM + pivotB - bodyACOM;
+        btVector3           hingeAxis(mAxis.x, mAxis.y, mAxis.z);
 
         mMultiBody->setupRevolute(getBoneID() - 1,
                           mLink->m_mass,
                           mLink->m_inertiaLocal,
                           jointA->getBoneID() - 1,
                           rotA,
-                          hingeAxis,
-                          btVector3(0, 0, 0),
-                          posB, true);
+                          hingeAxis.normalized(),
+                          diffCOM,
+                          -pivotB, true);
         BulletJoint* root = reinterpret_cast<BulletJoint*> (mMultiBody->getUserPointer());
         if (root->isReady())
         {
@@ -515,14 +531,15 @@ namespace sxr {
 
     void BulletJoint::setupSlider()
     {
-        int parentIndex = mLink->m_parent;
-        btMultibodyLink& parentLink = mMultiBody->getLink(parentIndex);
-        const BulletJoint*  jointA = reinterpret_cast<const BulletJoint*>(parentLink.m_userPtr);
-        btTransform   worldA; jointA->getWorldTransform(worldA);
-        btTransform   worldB; getWorldTransform(worldB);
-        btQuaternion  rotA(worldA.getRotation());
-        btVector3     posB(worldB.getOrigin());
-        btVector3     sliderAxis(posB);
+        const BulletJoint*  jointA = reinterpret_cast<const BulletJoint*>(getParent());
+        btVector3           pivotB(mPivot.x, mPivot.y, mPivot.z);
+        btTransform         worldA; jointA->getWorldTransform(worldA);
+        btTransform         worldB; getWorldTransform(worldB);
+        btQuaternion        rotA(worldA.getRotation());
+        btVector3           bodyACOM(worldA.getOrigin());
+        btVector3           bodyBCOM(worldB.getOrigin());
+        btVector3           diffCOM = bodyBCOM + pivotB - bodyACOM;
+        btVector3           sliderAxis(bodyBCOM - bodyACOM);
 
         mMultiBody->setupPrismatic(getBoneID() - 1,
                                   mLink->m_mass,
@@ -530,8 +547,8 @@ namespace sxr {
                                   jointA->getBoneID() - 1,
                                   rotA,
                                   sliderAxis.normalized(),
-                                  btVector3(0, 0, 0),
-                                  posB,
+                                  diffCOM,
+                                  -pivotB,
                                   true);
         BulletJoint* root = static_cast<BulletJoint*> (mMultiBody->getUserPointer());
         if (root->isReady())
@@ -544,7 +561,6 @@ namespace sxr {
     {
         mMultiBody->finalizeMultiDof();
         reinterpret_cast<btMultiBodyDynamicsWorld *>(mWorld->getPhysicsWorld())->addMultiBody(mMultiBody);
-        createSkeleton();
     }
 
     bool BulletJoint::isReady() const

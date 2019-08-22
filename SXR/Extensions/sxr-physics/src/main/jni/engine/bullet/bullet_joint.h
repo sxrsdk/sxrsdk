@@ -61,9 +61,13 @@ class BulletJoint : public PhysicsJoint
 
     virtual PhysicsJoint* getParent() const;
 
-    virtual Skeleton* getSkeleton() const;
+    virtual Skeleton* getSkeleton();
 
     virtual const glm::vec3& getAxis() const { return mAxis; }
+
+    virtual const glm::vec3& getPivot() const { return mPivot; }
+
+	virtual void setPivot(const glm::vec3& pivot) { mPivot = pivot; }
 
     virtual void setAxis(const glm::vec3& axis) { mAxis = axis; }
 
@@ -109,6 +113,7 @@ protected:
     btMultibodyLink*         mLink;
     JointType                mJointType;
     glm::vec3                mAxis;
+    glm::vec3                mPivot;
     int                      mBoneID;
     int                      mLinksAdded;
 };

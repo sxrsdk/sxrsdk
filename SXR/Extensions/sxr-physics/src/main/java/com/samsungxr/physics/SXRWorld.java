@@ -635,9 +635,12 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
             NativePhysics3DWorld.step(getNative(), timeStep, maxSubSteps);
 
             generateCollisionEvents();
-            for (SXRPhysicsJoint joint : mMultiBodies)
+            if (mIsMultibody)
             {
-                joint.onStep();
+                for (SXRPhysicsJoint joint : mMultiBodies)
+                {
+                    joint.onStep();
+                }
             }
             getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onStepPhysics", SXRWorld.this);
 
