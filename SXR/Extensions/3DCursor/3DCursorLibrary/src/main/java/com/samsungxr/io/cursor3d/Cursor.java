@@ -56,14 +56,14 @@ public abstract class Cursor extends SXRBehavior
     static private long TYPE_CURSOR = newComponentType(Cursor.class);
     protected static final float MAX_CURSOR_SCALE = 1000;
     protected ITouchEvents mTouchListener = null;
-    protected IoDevice mIODevice;
+    protected SXRCursorController mController;
     protected float mCursorDepth;
     protected final CursorType mCursorType;
 
-    private IoDevice mSavedIODevice;
+    private SXRCursorController mSavedController;
     private Position mStartPosition;
     private String mSavedThemeID;
-    private List<PriorityIoDeviceTuple> mCompatibleDevices;
+    private List<IODevice> mCompatibleDevices;
     private static int sUniqueCursorID = 0;
     private final int mCursorID;
     private CursorTheme mCursorTheme;
@@ -83,14 +83,15 @@ public abstract class Cursor extends SXRBehavior
         OTHER
     }
 
-    Cursor(SXRContext context, CursorType type, CursorManager cursorManager) {
+    Cursor(SXRContext context, CursorType type, CursorManager cursorManager)
+    {
         super(cursorManager.getSXRContext());
         mType = getComponentType();
         mCursorType = type;
         mCursorID = sUniqueCursorID++;
         SXRNode owner = new SXRNode(context);
         mAudioManager = CursorAudioManager.getInstance(context.getContext());
-        mCompatibleDevices = new ArrayList<PriorityIoDeviceTuple>();
+        mCompatibleDevices = new ArrayList<IODevice>();
         mTempPosition = new Vector3f();
         mDirection = new Vector3f();
         mCursorManager = cursorManager;
@@ -109,21 +110,20 @@ public abstract class Cursor extends SXRBehavior
         return TYPE_CURSOR;
     }
 
-    void setIoDevice(IoDevice newIoDevice)
+    void setController(SXRCursorController newController)
     {
-        mIODevice = newIoDevice;
-        setupIoDevice(newIoDevice);
+        mController = newController;
+        setupController(newController);
     }
 
-    void resetIoDevice(IoDevice ioDevice)
+    void resetController(SXRCursorController controller)
     {
-        if (mIODevice == ioDevice)
+        if (mController == controller)
         {
-            mIODevice = null;
+            mController = null;
         }
-        ioDevice.setEnable(false);
-        ioDevice.getGvrCursorController().removePickEventListener(getTouchListener());
-        ioDevice.resetNode();
+        controller.setEnable(false);
+        controller.removePickEventListener(getTouchListener());
     }
 
     /**
@@ -177,7 +177,7 @@ public abstract class Cursor extends SXRBehavior
 
     // Means that the ioDevice is active
     boolean isActive() {
-        return isEnabled() && (mIODevice != null) && mIODevice.isEnabled();
+        return isEnabled() && (mController != null) && mController.isEnabled();
     }
 
     /**
@@ -198,9 +198,11 @@ public abstract class Cursor extends SXRBehavior
      * @param y y value of the position
      * @param z z value of the position
      */
-    public void setPosition(float x, float y, float z) {
-        if (isActive()) {
-            mIODevice.setPosition(x, y, z);
+    public void setPosition(float x, float y, float z)
+    {
+        if (isActive())
+        {
+            mController.setPosition(x, y, z);
         }
     }
 
@@ -335,10 +337,11 @@ public abstract class Cursor extends SXRBehavior
      * to run a new process loop on its existing information against the changed
      * scene graph to generate possible {@link ICursorEvents}.
      */
-    public void invalidate() {
-        //generate a new event
-        if (mIODevice != null) {
-            mIODevice.invalidate();
+    public void invalidate()
+    {
+        if (mController != null)
+        {
+            mController.invalidate();
         }
     }
 
@@ -346,21 +349,24 @@ public abstract class Cursor extends SXRBehavior
         return mCursorDepth;
     }
 
-    void setCursorDepth(float depth) {
+    void setCursorDepth(float depth)
+    {
         mCursorDepth = depth;
-        if (mIODevice != null) {
-            mIODevice.getGvrCursorController().setCursorDepth(mCursorDepth);
-            mIODevice.setPosition(0.0f, 0.0f, -mCursorDepth);
+        if (mController != null)
+        {
+            mController.setCursorDepth(mCursorDepth);
         }
     }
 
     /**
      * Perform all Cursor cleanup here.
      */
-    void close() {
-        mIODevice = null;
+    void close()
+    {
+        mController = null;
         SXRNode owner = getOwnerObject();
-        if (owner.getParent() != null) {
+        if (owner.getParent() != null)
+        {
             owner.getParent().removeChildObject(owner);
         }
     }
@@ -400,16 +406,17 @@ public abstract class Cursor extends SXRBehavior
         mCursorAsset.set(this);
     }
 
-    void setSavedIoDevice(IoDevice savedIoDevice) {
-        mSavedIODevice = savedIoDevice;
+    void setSavedController(SXRCursorController savedController)
+    {
+        mSavedController = savedController;
     }
 
-    IoDevice getSavedIoDevice() {
-        return mSavedIODevice;
+    SXRCursorController getSavedController() {
+        return mSavedController;
     }
 
-    void clearSavedIoDevice() {
-        mSavedIODevice = null;
+    void clearSavedController() {
+        mSavedController = null;
     }
 
     void setName(String name)
@@ -447,27 +454,26 @@ public abstract class Cursor extends SXRBehavior
     }
 
     /**
-     * Returns the {@link IoDevice} currently attached to the {@link Cursor}.
+     * Returns the {@link SXRCursorController} currently attached to the {@link Cursor}.
      *
-     * @return the {@link IoDevice} attached. <code>null</code> is no device is attached.
+     * @return the {@link SXRCursorController} attached. <code>null</code> is no device is attached.
      */
-    public IoDevice getIoDevice() {
-        return mIODevice;
-    }
+    public SXRCursorController getController() { return mController; }
 
     /**
-     * Returns the priority for the {@link IoDevice} currently attached to the {@link Cursor}.
+     * Returns the priority for the {@link SXRCursorController} currently attached to the {@link Cursor}.
      *
      * @return -1 if no device attached, otherwise returns device priority
      */
-    int getCurrentDevicePriority() {
-        if (mIODevice == null)
+    int getCurrentDevicePriority()
+    {
+        if (mController == null)
         {
             return -1;
         }
-        for (PriorityIoDeviceTuple tuple : mCompatibleDevices)
+        for (IODevice tuple : mCompatibleDevices)
         {
-            if (tuple.getIoDevice().equals(mIODevice))
+            if (tuple.getController() == mController)
             {
                 return tuple.getPriority();
             }
@@ -476,50 +482,63 @@ public abstract class Cursor extends SXRBehavior
     }
 
     /**
-     * Returns the priority for the given {@link IoDevice} for this {@link Cursor}.
+     * Returns the priority for the given {@link SXRCursorController} for this {@link Cursor}.
      *
      * @return -1 if device not compatible with this cursor, otherwise returns device priority
      */
-    int getDevicePriority(IoDevice device)
+    int getDevicePriority(SXRCursorController controller)
     {
-        for (PriorityIoDeviceTuple tuple : mCompatibleDevices)
+        for (IODevice tuple : mCompatibleDevices)
         {
-            if (tuple.getIoDevice().equals(device))
+            if (tuple.getController() == controller)
             {
                 return tuple.getPriority();
+            }
+            if (tuple.getController() == null)
+            {
+                if ((controller.getName().toLowerCase().startsWith(tuple.getDeviceID()) &&
+                    (tuple.getVendorID() == controller.getVendorId()) &&
+                    (tuple.getProductID() == controller.getProductId())))
+                {
+
+                    tuple.setController(controller);
+                    return tuple.getPriority();
+                }
             }
         }
         return -1;
     }
 
     /**
-     * Returns a list of {@link IoDevice}s compatible with the {@link Cursor}.
+     * Returns a list of {@link SXRCursorController}s compatible with the {@link Cursor}.
      * The resulting list is sorted in priority order with highest priority
      * devices first.
-     * @return list of compatible {@link IoDevice}s
+     * @return list of compatible {@link SXRCursorController}s
      */
-    public List<IoDevice> getCompatibleIoDevices() {
-        List<IoDevice> ioDevices = new LinkedList<IoDevice>();
-        for (PriorityIoDeviceTuple tuple : mCompatibleDevices) {
-            ioDevices.add(tuple.getIoDevice());
+    public List<SXRCursorController> getCompatibleControllers()
+    {
+        List<SXRCursorController> controllers = new LinkedList<SXRCursorController>();
+        for (IODevice tuple : mCompatibleDevices)
+        {
+            controllers.add(tuple.getController());
         }
-        return ioDevices;
+        return controllers;
     }
 
-    List<PriorityIoDeviceTuple> getIoDevices() {
+    List<IODevice> getControllers() {
         return mCompatibleDevices;
     }
 
     /**
-     * Determines whether the input {@link IoDevice} is compatible with the {@link Cursor}.
+     * Determines whether the input {@link SXRCursorController} is compatible with the {@link Cursor}.
      * @return true if device is compatible, else false
+     * @param controller
      */
-    public boolean isDeviceCompatible(final IoDevice device)
+    public boolean isControllerCompatible(final SXRCursorController controller)
     {
-        List<IoDevice> ioDevices = new LinkedList<IoDevice>();
-        for (PriorityIoDeviceTuple tuple : mCompatibleDevices)
+        for (IODevice tuple : mCompatibleDevices)
         {
-            if (tuple.getIoDevice().equals(device))
+            if (tuple.getController() == controller)
             {
                 return true;
             }
@@ -584,53 +603,36 @@ public abstract class Cursor extends SXRBehavior
     public void activate()
     {
         Log.d(TAG, Integer.toHexString(hashCode()) + " enabled");
-        if (isEnabled() && (getIoDevice() == null))
+        if (isEnabled() && (getController() == null))
         {
-            mCursorManager.attachDevice(this);
+            mCursorManager.attachController(this);
         }
     }
 
     public void deactivate()
     {
         Log.d(TAG, Integer.toHexString(hashCode()) + " disabled");
-        markIoDeviceUnused();
-        mCursorManager.markCursorUnused(this);
-        close();
-    }
-
-    void setupIoDevice(IoDevice ioDevice) {
-        // should have a normal asset
-        setAsset(mCursorTheme.getAsset(Action.DEFAULT));
-        ioDevice.setEnable(true);
-        ioDevice.setPosition(0.0f, 0.0f, -mCursorDepth);
-        ioDevice.getGvrCursorController().addPickEventListener(getTouchListener());
-    }
-
-    void transferIoDevice(Cursor oldCursor) {
-        IoDevice targetIoDevice = oldCursor.getIoDevice();
-        mCursorManager.removeCursorFromScene(oldCursor);
-        setIoDevice(targetIoDevice);
-        mCursorManager.addCursorToScene(this);
-    }
-
-
-    void markIoDeviceUnused()
-    {
-        if (mIODevice != null)
+        if (mController != null)
         {
-            Log.d(TAG, "Marking ioDevice:" + mIODevice.getName() + " unused");
-            SXRCursorController controller = mIODevice.getGvrCursorController();
+            Log.d(TAG, "Marking ioDevice:" + mController.getName() + " unused");
 
-            controller.setCursor(null);
+            mController.setCursor(null);
         }
+        mCursorManager.markCursorUnused(this);
     }
 
-    IoDevice getIoDeviceForPriority(int priorityLevel) {
-        if (priorityLevel < mCompatibleDevices.size()) {
-            return mCompatibleDevices.get(priorityLevel).getIoDevice();
-        } else {
-            return null;
-        }
+    void setupController(SXRCursorController controller)
+    {
+        setAsset(mCursorTheme.getAsset(Action.DEFAULT));
+        controller.addPickEventListener(getTouchListener());
+    }
+
+    void transferController(Cursor oldCursor)
+    {
+        SXRCursorController targetController = oldCursor.getController();
+        mCursorManager.removeCursorFromScene(oldCursor);
+        mController = targetController;
+        mCursorManager.addCursorToScene(this);
     }
 
     /**
@@ -642,16 +644,22 @@ public abstract class Cursor extends SXRBehavior
      *
      * @return a list of available {@link IoDevice}.
      */
-    public List<IoDevice> getAvailableIoDevices() {
-        List<IoDevice> returnList = new ArrayList<IoDevice>();
-        for (PriorityIoDeviceTuple compatibleIoDeviceTuple : mCompatibleDevices) {
-            IoDevice compatibleIoDevice = compatibleIoDeviceTuple.getIoDevice();
-            if (compatibleIoDevice.equals(mIODevice)) {
-                returnList.add(mIODevice);
-            } else {
-                IoDevice ioDevice = mCursorManager.getIoDevice(compatibleIoDevice);
-                if (ioDevice != null) {
-                    returnList.add(ioDevice);
+    public List<SXRCursorController> getAvailableControllers()
+    {
+        List<SXRCursorController> returnList = new ArrayList<SXRCursorController>();
+        for (IODevice device : mCompatibleDevices)
+        {
+            SXRCursorController compatibleController = device.getController();
+            if (compatibleController == mController)
+            {
+                returnList.add(mController);
+            }
+            else
+            {
+                SXRCursorController controller = mCursorManager.getAvailableController(compatibleController);
+                if (controller != null)
+                {
+                    returnList.add(controller);
                 }
             }
         }
@@ -659,49 +667,40 @@ public abstract class Cursor extends SXRBehavior
     }
 
     /**
-     * Use this method to attach an available {@link IoDevice} to the {@link Cursor}. The
-     * currently attached {@link IoDevice} is released and a new {@link IoDevice} is attached to
+     * Use this method to attach an available {@link SXRCursorController} to the {@link Cursor}. The
+     * currently attached {@link SXRCursorController} is released and a new {@link SXRCursorController} is attached to
      * the {@link Cursor}.
      *
-     * @param ioDevice the IoDevice to attach, this {@link IoDevice} should be one of the objects
-     *                 returned by {@link Cursor#getAvailableIoDevices()}
-     * @throws IOException The call return an {@link IOException} if this {@link IoDevice} cannot be
+     * @param controller the controller to attach, this {@link SXRCursorController} should be one of the objects
+     *                 returned by {@link Cursor#getAvailableControllers()}
+     * @throws IOException The call return an {@link IOException} if this {@link SXRCursorController} cannot be
      *                     attached.
      */
-    public void attachIoDevice(IoDevice ioDevice) throws IOException {
-        IoDevice oldDevice = getIoDevice();
-        if ((oldDevice == null) ||
-            !oldDevice.equals(ioDevice) ||
-            oldDevice.getGvrCursorController() != ioDevice.getGvrCursorController())
+    public void attachController(SXRCursorController controller) throws IOException
+    {
+        SXRCursorController oldController = getController();
+
+        if ((oldController == null) || (oldController != controller))
         {
-            if (!isIoDeviceCompatible(ioDevice))
+            if (!isControllerCompatible(controller))
             {
                 throw new IllegalArgumentException("IO device not compatible");
             }
-            IoDevice availableIoDevice = mCursorManager.getAvailableIoDevice(ioDevice);
-            if (availableIoDevice == null)
+            SXRCursorController availableController = mCursorManager.getAvailableController(controller);
+            if (availableController == null)
             {
-                throw new IOException("IO device cannot be attached");
+                throw new IOException("Cursor Controller cannot be attached");
             }
 
-            Log.d(TAG, "Attaching ioDevice:" + availableIoDevice.getDeviceId() + " to cursor:" + mCursorID);
+            Log.d(TAG, "Attaching controller:" + controller.getName() + " to cursor:" + mCursorID);
             mCursorManager.removeCursorFromScene(this);
-            setIoDevice(availableIoDevice);
+            mController = controller;
             mCursorManager.addCursorToScene(this);
-            if (oldDevice != null)
+            if (oldController != null)
             {
-                resetIoDevice(oldDevice);
+                resetController(oldController);
             }
         }
-    }
-
-    private boolean isIoDeviceCompatible(IoDevice ioDevice) {
-        for (PriorityIoDeviceTuple compatibleIoDevice : mCompatibleDevices) {
-            if (compatibleIoDevice.getIoDevice().equals(ioDevice)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

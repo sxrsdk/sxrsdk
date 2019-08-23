@@ -81,11 +81,9 @@ class SXRGamepadDeviceManager {
         controllers = new SparseArray<SXRGamepadController>();
     }
 
-    SXRCursorController getCursorController(SXRContext context, String name,
-                                          int vendorId, int productId) {
+    SXRCursorController getCursorController(SXRContext context, InputDevice device) {
         startThread();
-        SXRGamepadController controller = new SXRGamepadController(context,
-                SXRControllerType.GAMEPAD, name, vendorId, productId, this);
+        SXRGamepadController controller = new SXRGamepadController(context, this);
         int id = controller.getId();
         controllers.append(id, controller);
         return controller;
@@ -117,29 +115,28 @@ class SXRGamepadDeviceManager {
         private SXRTransform tempTrans;
 
         public SXRGamepadController(SXRContext context,
-                                    SXRControllerType controllerType, String name, int vendorId,
-                                    int productId, SXRGamepadDeviceManager deviceManager) {
-            super(context, controllerType, name, vendorId, productId);
-            tempTrans = new SXRNode(context).getTransform();
+                                    SXRGamepadDeviceManager deviceManager)
+        {
+            super(context, SXRControllerType.GAMEPAD, "android_gamepad", SXRDeviceConstants.SAMSUNG_GAMEPAD_VENDOR_ID, SXRDeviceConstants.SAMSUNG_GAMEPAD_PRODUCT_ID);
             tempTrans.setPosition(0.0f, 0.0f, -1.0f);
             this.deviceManager = deviceManager;
         }
 
         @Override
         public void setEnable(boolean flag) {
-            if (!enable && flag) {
-                enable = true;
+            if (!mEnabled && flag) {
+                mEnabled = true;
                 deviceManager.startThread();
                 //set the enabled flag on the handler thread
                 deviceManager.thread.setEnable(getId(), true);
                 mConnected = true;
-            } else if (enable && !flag) {
-                enable = false;
+            } else if (mEnabled && !flag) {
+                mEnabled = false;
                 //set the disabled flag on the handler thread
                 deviceManager.thread.setEnable(getId(), false);
                 deviceManager.stopThread();
                 mConnected = false;
-                context.getInputManager().removeCursorController(this);
+                mContext.getInputManager().removeCursorController(this);
             }
         }
 
@@ -217,7 +214,7 @@ class SXRGamepadDeviceManager {
         }
 
         private void processControllerEvent(float x, float y, float z) {
-            SXRScene scene = context.getMainScene();
+            SXRScene scene = mContext.getMainScene();
             if (scene != null) {
                 float[] viewMatrix = scene.getMainCameraRig().getHeadTransform()
                         .getModelMatrix();

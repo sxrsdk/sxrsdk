@@ -13,45 +13,50 @@
  * limitations under the License.
  */
 
-package com.samsung.mpl.gearwearlibrary.models.events;
+package com.samsungxr.io.gearwearlibrary.events;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Swipe event occurs when user presses down on the screen and moves to a different position,
- * above a threshold speed (determined by the device).
+ * Occurs when user initially touches on the screen
  */
-public class Swipe implements Parcelable {
-    public final Direction direction;
+public class TouchStart implements Parcelable {
+    /**
+     * x-position
+     */
+    public final int x;
 
     /**
-     * Swipe directions
+     * y-position
      */
-    public enum Direction {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
+    public final int y;
+
+    /**
+     * Create a touch start event
+     *
+     * @param x x-position
+     * @param y y-position
+     */
+    public TouchStart(int x, int y) {
+        this.x = x;
+        this.y = y;
     }
 
-    public Swipe(Direction direction) {
-        this.direction = direction;
+    protected TouchStart(Parcel in) {
+        x = in.readInt();
+        y = in.readInt();
     }
 
-    protected Swipe(Parcel in) {
-        direction = (Direction) in.readValue(Direction.class.getClassLoader());
-    }
-
-    public static final Creator<Swipe> CREATOR = new Creator<Swipe>() {
+    public static final Creator<TouchStart> CREATOR = new Creator<TouchStart>() {
         @Override
-        public Swipe createFromParcel(Parcel in) {
-            return new Swipe(in);
+        public TouchStart createFromParcel(Parcel in) {
+            return new TouchStart(in);
         }
 
         @Override
-        public Swipe[] newArray(int size) {
-            return new Swipe[size];
+        public TouchStart[] newArray(int size) {
+            return new TouchStart[size];
         }
     };
 
@@ -62,13 +67,15 @@ public class Swipe implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(direction);
+        dest.writeInt(x);
+        dest.writeInt(y);
     }
 
     @Override
     public String toString() {
-        return "Swipe{" +
-                "direction=" + direction +
+        return "TouchStart{" +
+                "x=" + x +
+                ", y=" + y +
                 '}';
     }
 }

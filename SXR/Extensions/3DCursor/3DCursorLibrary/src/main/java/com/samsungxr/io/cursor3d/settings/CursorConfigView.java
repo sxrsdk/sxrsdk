@@ -32,11 +32,11 @@ import android.widget.TextView;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRScene;
 import com.samsungxr.io.SXRTouchPadGestureListener;
+import com.samsungxr.io.SXRCursorController;
 import com.samsungxr.io.cursor3d.Cursor;
 import com.samsungxr.io.cursor3d.CursorManager;
 import com.samsungxr.io.cursor3d.CursorTheme;
 import com.samsungxr.io.cursor3d.CursorType;
-import com.samsungxr.io.cursor3d.IoDevice;
 import com.samsungxr.io.cursor3d.R;
 import com.samsungxr.io.cursor3d.settings.SettingsView.SettingsChangeListener;
 import com.samsungxr.utility.Log;
@@ -63,20 +63,23 @@ class CursorConfigView extends BaseView implements View.OnClickListener {
     int selectedThemeIndex = 0;
     List<View> themeViews;
     int selectedIoDeviceIndex = 0;
-    private List<IoDevice> ioDevicesDisplayed;
-    private HashSet<IoDevice> availableIoDevices;
+    private List<SXRCursorController> ioDevicesDisplayed;
+    private HashSet<SXRCursorController> availableIoDevices;
     List<View> ioDeviceViews;
     private SettingsChangeListener changeListener;
 
     //Called on main thread
-    CursorConfigView(final SXRContext context, CursorManager cursorManager, Cursor cursor, Cursor
-            currentCursor, final SXRScene scene, int
-                             settingsCursorId, SettingsChangeListener changeListener) {
-        super(context, scene, settingsCursorId, R.layout.cursor_configuration_layout);
+    CursorConfigView(final SXRContext context,
+                     CursorManager cursorManager,
+                     Cursor cursor,
+                     Cursor currentCursor,
+                     final SXRScene scene,
+                     SettingsChangeListener changeListener)
+    {
+        super(context, scene, R.layout.cursor_configuration_layout);
         final Activity activity = context.getActivity();
         loadDrawables(activity);
-        layoutInflater = (LayoutInflater) activity.getSystemService(Context
-                .LAYOUT_INFLATER_SERVICE);
+        layoutInflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.cursorManager = cursorManager;
         this.cursor = cursor;
         this.currentCursor = currentCursor;
@@ -107,19 +110,19 @@ class CursorConfigView extends BaseView implements View.OnClickListener {
         }
 
         LinearLayout llIoDevices = (LinearLayout) view.findViewById(R.id.llIoDevices);
-        ioDevicesDisplayed = cursor.getAvailableIoDevices();
-        availableIoDevices = new HashSet<IoDevice>(ioDevicesDisplayed);
-        List<IoDevice> usedIoDevices = cursorManager.getUsedIoDevices();
-        HashSet<IoDevice> compatibleIoDevices = new HashSet<IoDevice>(cursor
-                .getCompatibleIoDevices());
-        for (IoDevice usedIoDevice : usedIoDevices) {
-            if (compatibleIoDevices.contains(usedIoDevice) && !availableIoDevices.contains
-                    (usedIoDevice))
-                ioDevicesDisplayed.add(usedIoDevice);
+        ioDevicesDisplayed = cursor.getAvailableControllers();
+        availableIoDevices = new HashSet<SXRCursorController>(ioDevicesDisplayed);
+        List<SXRCursorController> usedIoDevices = cursorManager.getUsedControllers();
+        HashSet<SXRCursorController> compatibleControllers = new HashSet<SXRCursorController>(cursor.getCompatibleControllers());
+        for (SXRCursorController usedController : usedIoDevices)
+        {
+            if (compatibleControllers.contains(usedController) && !availableIoDevices.contains(usedController))
+                ioDevicesDisplayed.add(usedController);
         }
         ioDeviceViews = new ArrayList<View>();
-        for (IoDevice ioDevice : ioDevicesDisplayed) {
-            addIoDevice(ioDevice, llIoDevices, cursorManager.isDeviceActive(ioDevice));
+        for (SXRCursorController ioDevice : ioDevicesDisplayed)
+        {
+            addController(ioDevice, llIoDevices, cursorManager.isControllerActive(ioDevice));
         }
     }
 
@@ -216,7 +219,7 @@ class CursorConfigView extends BaseView implements View.OnClickListener {
         }
     };
 
-    private void addIoDevice(IoDevice ioDevice, ViewGroup parent, boolean isActive) {
+    private void addController(SXRCursorController controller, ViewGroup parent, boolean isActive) {
 
         View convertView = layoutInflater.inflate(R.layout.iodevice_element_layout, parent, false);
 
@@ -225,49 +228,65 @@ class CursorConfigView extends BaseView implements View.OnClickListener {
         RelativeLayout rlIoDeviceElement = (RelativeLayout) convertView.findViewById(R.id
                 .rlIoDeviceElement);
 
-        String ioDeviceName = ioDevice.getName();
-        if (ioDeviceName == null) {
-            ioDeviceName = ioDevice.getDeviceId();
+        String ioDeviceName = controller.getName();
+        if (ioDeviceName == null)
+        {
+            ioDeviceName = controller.getDevice().getName();
         }
         tvIoDeviceName.setText(ioDeviceName);
-        if (isActive) {
+        if (isActive)
+        {
             rlIoDeviceElement.setBackground(ioDeviceSelected);
-        } else {
+        }
+        else
+            {
             rlIoDeviceElement.setBackground(ioDeviceNormal);
         }
 
-        if (availableIoDevices.contains(ioDevice)) {
+        if (availableIoDevices.contains(controller))
+        {
             vConnectedStatus.setBackground(greenCircle);
-        } else {
+        }
+        else
+            {
             vConnectedStatus.setBackground(greyCircle);
         }
 
         parent.addView(convertView);
         ioDeviceViews.add(convertView);
-        if (isActive) {
+        if (isActive)
+        {
             selectedIoDeviceIndex = ioDeviceViews.size() - 1;
         }
         convertView.setOnClickListener(ioDeviceOnClickListener);
     }
 
-    private View.OnClickListener ioDeviceOnClickListener = new View.OnClickListener() {
+    private View.OnClickListener ioDeviceOnClickListener = new View.OnClickListener()
+    {
         @Override
-        public void onClick(View v) {
+        public void onClick(View v)
+        {
             int newIoDevicePosition = ioDeviceViews.indexOf(v);
             Log.d(TAG, "Clicked on position:" + newIoDevicePosition);
 
-            IoDevice newIoDevice = ioDevicesDisplayed.get(newIoDevicePosition);
-            if (availableIoDevices.contains(newIoDevice) && newIoDevicePosition !=
-                    selectedIoDeviceIndex) {
-                if (cursor != currentCursor) {
-                    try {
-                        cursor.attachIoDevice(newIoDevice);
-                    } catch (IOException e) {
-                        Log.e(TAG, "Device " + newIoDevice.getName() + "cannot be attached");
+            SXRCursorController newController = ioDevicesDisplayed.get(newIoDevicePosition);
+            if (availableIoDevices.contains(newController) && newIoDevicePosition != selectedIoDeviceIndex)
+            {
+                if (cursor != currentCursor)
+                {
+                    try
+                    {
+                        cursor.attachController(newController);
+                    }
+                    catch (IOException e)
+                    {
+                        Log.e(TAG, "Device " + newController.getName() + "cannot be attached");
                     }
                     markIoDeviceSelected(newIoDevicePosition);
-                } else {
-                    createIoChangeDialog(newIoDevice, newIoDevicePosition);
+                }
+                else
+                {
+                    createIoChangeDialog(newController, newIoDevicePosition);
                 }
             }
         }
@@ -285,23 +304,22 @@ class CursorConfigView extends BaseView implements View.OnClickListener {
         rlIoDeviceElement.setBackground(ioDeviceNormal);
     }
 
-    private void createIoChangeDialog(final IoDevice ioDevice, final int newIoDevicePosition) {
+    private void createIoChangeDialog(final SXRCursorController ioDevice, final int newIoDevicePosition) {
         context.runOnGlThread(new Runnable() {
             @Override
             public void run() {
-                new IoChangeDialogView(context, scene, settingsCursorId, new IoChangeDialogView
-                        .DialogResultListener() {
+                new IoChangeDialogView(context, scene, new IoChangeDialogView.DialogResultListener()
+                {
                     @Override
-                    public void onConfirm() {
-                        setSettingsCursorId(changeListener.onDeviceChanged(ioDevice));
+                    public void onConfirm()
+                    {
+                        changeListener.onDeviceChanged(ioDevice);
                         markIoDeviceSelected(newIoDevicePosition);
                         navigateBack(true);
                     }
 
                     @Override
-                    public void onCancel() {
-
-                    }
+                    public void onCancel() { }
                 });
             }
         });

@@ -13,50 +13,46 @@
  * limitations under the License.
  */
 
-package com.samsung.mpl.gearwearlibrary.models.events;
+package com.samsungxr.io.gearwearlibrary.events;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Occurs when user initially touches on the screen
+ * Rotary event occurs when the rotating bezel is moved, if the device supports it. The rotation
+ * can either be clockwise or counter-clockwise.
  */
-public class TouchStart implements Parcelable {
-    /**
-     * x-position
-     */
-    public final int x;
+public class Rotary implements Parcelable {
+    public final Direction direction;
 
-    /**
-     * y-position
-     */
-    public final int y;
-
-    /**
-     * Create a touch start event
-     *
-     * @param x x-position
-     * @param y y-position
-     */
-    public TouchStart(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public enum Direction {
+        /**
+         * Clockwise
+         */
+        CW,
+        /**
+         * Counter-clockwise
+         */
+        CCW
     }
 
-    protected TouchStart(Parcel in) {
-        x = in.readInt();
-        y = in.readInt();
+    public Rotary(Direction direction) {
+        this.direction = direction;
     }
 
-    public static final Creator<TouchStart> CREATOR = new Creator<TouchStart>() {
+    protected Rotary(Parcel in) {
+        direction = (Direction) in.readValue(Direction.class.getClassLoader());
+    }
+
+    public static final Creator<Rotary> CREATOR = new Creator<Rotary>() {
         @Override
-        public TouchStart createFromParcel(Parcel in) {
-            return new TouchStart(in);
+        public Rotary createFromParcel(Parcel in) {
+            return new Rotary(in);
         }
 
         @Override
-        public TouchStart[] newArray(int size) {
-            return new TouchStart[size];
+        public Rotary[] newArray(int size) {
+            return new Rotary[size];
         }
     };
 
@@ -67,15 +63,13 @@ public class TouchStart implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(x);
-        dest.writeInt(y);
+        dest.writeValue(direction);
     }
 
     @Override
     public String toString() {
-        return "TouchStart{" +
-                "x=" + x +
-                ", y=" + y +
+        return "Rotary{" +
+                "direction=" + direction +
                 '}';
     }
 }

@@ -13,38 +13,40 @@
  * limitations under the License.
  */
 
-package com.samsung.mpl.gearwearlibrary.models.events;
+package com.samsungxr.io.gearwearlibrary.events;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Click event that occurs when a user presses down at an initial position, then releases that
- * press at a location 'close' to the initial position.
+ * Back event that can occur in different ways, depending on the device.
+ * <p>
+ * Examples:
+ * <ul>
+ * <li>Device: Samsung Gear S2
+ * <ol>
+ * <li>Swipe down from top edge</li>
+ * <li>Back button press</li>
+ * </ol>
+ * </li>
+ * <li>Device: Samsung Gear 2
+ * <ol>
+ * <li>Swipe down from top edge</li>
+ * </ol>
+ * </li>
+ * </ul>
  */
-public class Click implements Parcelable {
-    public final int x;
-    public final int y;
+public class Back implements Parcelable {
 
-    public Click(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    protected Click(Parcel in) {
-        x = in.readInt();
-        y = in.readInt();
-    }
-
-    public static final Creator<Click> CREATOR = new Creator<Click>() {
+    public static final Creator<Back> CREATOR = new Creator<Back>() {
         @Override
-        public Click createFromParcel(Parcel in) {
-            return new Click(in);
+        public Back createFromParcel(Parcel in) {
+            return new Back();
         }
 
         @Override
-        public Click[] newArray(int size) {
-            return new Click[size];
+        public Back[] newArray(int size) {
+            return new Back[size];
         }
     };
 
@@ -55,15 +57,10 @@ public class Click implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(x);
-        dest.writeInt(y);
     }
 
     @Override
     public String toString() {
-        return "Click{" +
-                "x=" + x +
-                ", y=" + y +
-                '}';
+        return Back.class.getSimpleName();
     }
 }

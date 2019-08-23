@@ -46,25 +46,29 @@ final class SXRMouseDeviceManager {
         controllers = new SparseArray<>();
     }
 
-    SXRCursorController getCursorController(SXRContext context, String name, int vendorId, int productId) {
+    SXRCursorController getCursorController(SXRContext context, InputDevice device)
+    {
         Log.d(TAG, "Creating Mouse Device");
         startThread();
-        SXRMouseController controller = new SXRMouseController(context,
-                SXRControllerType.MOUSE, name, vendorId, productId, this);
+        SXRMouseController controller = new SXRMouseController(context, device, this);
         int id = controller.getId();
-        synchronized (controllers) {
+        synchronized (controllers)
+        {
             controllers.append(id, controller);
         }
         return controller;
     }
 
-    void removeCursorController(SXRCursorController controller) {
+    void removeCursorController(SXRCursorController controller)
+    {
         int id = controller.getId();
-        synchronized (controllers) {
+        synchronized (controllers)
+        {
             controllers.remove(id);
 
             // stopThread the thread if no more devices are online
-            if (controllers.size() == 0) {
+            if (controllers.size() == 0)
+            {
                 forceStopThread();
             }
         }
@@ -77,40 +81,51 @@ final class SXRMouseDeviceManager {
 
         private SXRMouseDeviceManager deviceManager;
 
-        SXRMouseController(SXRContext context, SXRControllerType controllerType, String name, int
-                vendorId, int productId, SXRMouseDeviceManager deviceManager) {
-            super(context, controllerType, name, vendorId, productId);
+        SXRMouseController(SXRContext context,
+                           InputDevice device,
+                           SXRMouseDeviceManager deviceManager)
+        {
+            super(context, SXRControllerType.MOUSE, device);
+            mName = "mouse";
             this.deviceManager = deviceManager;
             mConnected = true;
         }
 
         @Override
-        public void setEnable(boolean flag) {
+        public void setEnable(boolean flag)
+        {
             if (mCursor != null)
             {
                 mCursor.setEnable(flag);
             }
-            if (!enable && flag) {
-                enable = true;
+            if (!mEnabled && flag)
+            {
+                mEnabled = true;
                 deviceManager.startThread();
                 //set the enabled flag on the handler thread
                 deviceManager.thread.setEnable(getId(), true);
                 mConnected = true;
-            } else if (enable && !flag) {
-                enable = false;
+            }
+            else if (mEnabled && !flag)
+            {
+                mEnabled = false;
                 //set the disabled flag on the handler thread
                 deviceManager.thread.setEnable(getId(), false);
                 deviceManager.stopThread();
                 mConnected = false;
-                context.getInputManager().removeCursorController(this);
+                mContext.getInputManager().removeCursorController(this);
             }
         }
 
         @Override
-        public void setScene(SXRScene scene) {
-            if (!deviceManager.threadStarted) {
+        public void setScene(SXRScene scene)
+        {
+            if (!deviceManager.threadStarted)
+            {
                 super.setScene(scene);
-            } else {
+            }
+            else
+            {
                 deviceManager.thread.setScene(getId(), scene);
             }
         }
@@ -169,7 +184,7 @@ final class SXRMouseDeviceManager {
 
         private boolean processMouseEvent(float x, float y, float z, MotionEvent e)
         {
-            if (scene == null)
+            if (mScene == null)
             {
                 return false;
             }
@@ -181,7 +196,7 @@ final class SXRMouseDeviceManager {
                 depth = mCursorDepth;
             }
 
-            SXRPerspectiveCamera camera = scene.getMainCameraRig().getCenterCamera();
+            SXRPerspectiveCamera camera = mScene.getMainCameraRig().getCenterCamera();
             float aspectRatio = camera.getAspectRatio();
             float fovY = camera.getFovY();
             float frustumHeightMultiplier = (float) Math.tan(Math.toRadians(fovY / 2)) * 2.0f;

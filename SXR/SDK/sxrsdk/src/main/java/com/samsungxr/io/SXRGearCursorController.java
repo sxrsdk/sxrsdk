@@ -215,6 +215,7 @@ public final class SXRGearCursorController extends SXRCursorController
     private boolean mShowControllerModel = false;
     private Matrix4f mTempPivotMtx = new Matrix4f();
     private Quaternionf mTempRotation = new Quaternionf();
+    private final int mControllerID;
     private final MotionEvent.PointerCoords pointerCoords = new MotionEvent.PointerCoords();
     private final MotionEvent.PointerProperties[] pointerPropertiesArray;
     private final MotionEvent.PointerCoords[] pointerCoordsArray;
@@ -222,7 +223,6 @@ public final class SXRGearCursorController extends SXRCursorController
     private long prevATime;
     private boolean actionDown = false;
     private float touchDownX = 0.0f;
-    private final int controllerID;
     private static final float DEPTH_SENSITIVITY = 0.01f;
 
     private int prevButtonEnter = KeyEvent.ACTION_UP;
@@ -237,8 +237,11 @@ public final class SXRGearCursorController extends SXRCursorController
 
     public SXRGearCursorController(SXRContext context, int id)
     {
-        super(context, SXRControllerType.CONTROLLER);
-        controllerID = id;
+        super(context, SXRControllerType.CONTROLLER,
+              "controller" + new Integer(id).toString(),
+              SXRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_VENDOR_ID,
+              SXRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_PRODUCT_ID);
+        mControllerID = id;
         mPivotRoot = new SXRNode(context);
         mPivotRoot.setName("GearCursorController_Pivot");
         mControllerGroup = new SXRNode(context);
@@ -246,7 +249,8 @@ public final class SXRGearCursorController extends SXRCursorController
         mPivotRoot.addChildObject(mControllerGroup);
         mControllerGroup.addChildObject(mDragRoot);
         mControllerGroup.attachComponent(mPicker);
-        position.set(0.0f, 0.0f, -1.0f);
+        mPosition.set(0.0f, 0.0f, -1.0f);
+        mName = "controller" + new Integer(id).toString();
         MotionEvent.PointerProperties properties = new MotionEvent.PointerProperties();
         properties.id = 0;
         properties.toolType = MotionEvent.TOOL_TYPE_FINGER;
@@ -267,7 +271,7 @@ public final class SXRGearCursorController extends SXRCursorController
      * instance is created.
      * @return controller ID
      */
-    public int getControllerID() { return controllerID; }
+    public int getControllerID() { return mControllerID; }
 
     /**
      * Show or hide the controller model and picking ray.
@@ -372,7 +376,7 @@ public final class SXRGearCursorController extends SXRCursorController
     {
         if (mRayModel == null)
         {
-            mRayModel = new SXRLineNode(context, 1, new Vector4f(1, 0, 0, 1),
+            mRayModel = new SXRLineNode(mContext, 1, new Vector4f(1, 0, 0, 1),
                                                new Vector4f(1, 0, 0, 0));
             final SXRRenderData renderData = mRayModel.getRenderData();
             final SXRMaterial rayMaterial = renderData.getMaterial();
@@ -390,9 +394,8 @@ public final class SXRGearCursorController extends SXRCursorController
             EnumSet<SXRImportSettings> settings = SXRImportSettings.getRecommendedSettingsWith(
                     EnumSet.of(SXRImportSettings.NO_LIGHTING));
 
-            mControllerModel =
-                    context.getAssetLoader().loadModel(mControllerReader.getModelFileName(), settings, true,
-                                                       null);
+            mControllerModel = mContext.getAssetLoader().loadModel(mControllerReader.getModelFileName(),
+                                                                   settings, true, null);
         }
         catch (IOException ex)
         {
@@ -410,7 +413,7 @@ public final class SXRGearCursorController extends SXRCursorController
             SXRNode parent = mPivotRoot.getParent();
 
             mPicker.setScene(scene);
-            this.scene = scene;
+            this.mScene = scene;
             if (parent != null) {
                 parent.removeChildObject(mPivotRoot);
             }
@@ -426,28 +429,32 @@ public final class SXRGearCursorController extends SXRCursorController
     {
         boolean wasConnected = mConnected;
 
-        mConnected = (mControllerReader != null) && mControllerReader.isConnected(controllerID);
+        mConnected = (mControllerReader != null) && mControllerReader.isConnected(mControllerID);
         if (!wasConnected && mConnected)
         {
-            context.getInputManager().addCursorController(this);
+            mContext.getInputManager().addCursorController(this);
         }
         else if (wasConnected && !mConnected)
         {
-            context.getInputManager().removeCursorController(this);
+            mContext.getInputManager().removeCursorController(this);
             return;
         }
         if (isEnabled())
         {
             mControllerEvents.clear();
-            try {
-                mControllerReader.getEvents(controllerID, mControllerEvents);
-            } catch (final RuntimeException exc) {
+            try
+            {
+                mControllerReader.getEvents(mControllerID, mControllerEvents);
+            }
+            catch (final RuntimeException exc)
+            {
                 Log.e(TAG, "getEvents threw: " + exc.toString());
                 exc.printStackTrace();
             }
 
-            for (final ControllerEvent event: mControllerEvents) {
-                handleControllerEvent(controllerID, event);
+            for (final ControllerEvent event: mControllerEvents)
+            {
+                handleControllerEvent(mControllerID, event);
             }
         }
     }
@@ -540,7 +547,7 @@ public final class SXRGearCursorController extends SXRCursorController
 
     private void handleControllerEvent(final int controllerId, final ControllerEvent event)
     {
-        context.getEventManager().sendEvent(context.getApplication(), IApplicationEvents.class,
+        mContext.getEventManager().sendEvent(mContext.getApplication(), IApplicationEvents.class,
                                             "onControllerEvent",
                                             CONTROLLER_KEYS.fromValue(event.key), event.position, event.rotation, event.pointF,
                                             event.touched, event.angularAcceleration,event.angularVelocity);
@@ -549,7 +556,7 @@ public final class SXRGearCursorController extends SXRCursorController
         long key = event.key;
         Quaternionf q = event.rotation;
         Vector3f pos = event.position;
-        Matrix4f camMtx = context.getMainScene().getMainCameraRig().getTransform().getModelMatrix4f();
+        Matrix4f camMtx = mContext.getMainScene().getMainCameraRig().getTransform().getModelMatrix4f();
         float x = camMtx.m30();
         float y = camMtx.m31();
         float z = camMtx.m32();
@@ -622,9 +629,9 @@ public final class SXRGearCursorController extends SXRCursorController
                                     prevButtonHome, KeyEvent.KEYCODE_HOME);
         prevButtonHome = handleResult == -1 ? prevButtonHome : handleResult;
         event.recycle();
-        if (keyEvent.size() > 0 || motionEvent.size() > 0)
+        if (mKeyEvents.size() > 0 || mMotionEvents.size() > 0)
         {
-            mPropagateEvents.init(keyEvent, motionEvent);
+            mPropagateEvents.init(mKeyEvents, mMotionEvents);
             getSXRContext().getActivity().runOnUiThread(mPropagateEvents);
         }
         invalidate();

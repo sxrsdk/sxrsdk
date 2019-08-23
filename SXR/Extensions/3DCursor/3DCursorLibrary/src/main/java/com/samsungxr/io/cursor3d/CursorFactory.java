@@ -16,14 +16,15 @@
 package com.samsungxr.io.cursor3d;
 
 import com.samsungxr.SXRContext;
+import com.samsungxr.io.SXRCursorController;
 import com.samsungxr.utility.Log;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 
 class CursorFactory {
 
@@ -69,7 +70,7 @@ class CursorFactory {
         boolean savedIoDeviceAvailable = false;
         if (savedIoDeviceId == null || vendorId == null || productId == null) {
             Log.d(TAG, "SavedIoDevice not specified");
-            cursor.setSavedIoDevice(null);
+            cursor.setSavedController(null);
         } else {
             try {
                 savedIoVendorId = Integer.parseInt(vendorId);
@@ -94,24 +95,27 @@ class CursorFactory {
             // Starts by looking for the entry tag
             if (name.equals(IO)) {
                 //TODO check if priority is repeated
-                cursor.getIoDevices().add(IoDeviceFactory.readIoDeviceFromSettingsXml(parser));
+                cursor.getControllers().add(IoDeviceFactory.readIoDeviceFromSettingsXml(parser));
             } else {
                 throw new XmlPullParserException("Illegal start tag inside theme");
             }
         }
 
         if (savedIoDeviceAvailable) {
-            for (PriorityIoDeviceTuple tuple : cursor.getIoDevices()) {
-                IoDevice device = tuple.getIoDevice();
-                if (device.getVendorId() == savedIoVendorId && device.getProductId() ==
-                        savedIoProductId && device.getDeviceId().equals(savedIoDeviceId)) {
-                    cursor.setSavedIoDevice(device);
+            for (IODevice tuple : cursor.getControllers()) {
+                SXRCursorController controller = tuple.getController();
+                if ((controller != null) &&
+                    (controller.getVendorId() == savedIoVendorId) &&
+                    (controller.getProductId() == savedIoProductId) &&
+                    (controller.getName().equals(savedIoDeviceId)))
+                {
+                    cursor.setSavedController(controller);
                     break;
                 }
             }
         }
 
-        Collections.sort(cursor.getIoDevices());
+        Collections.sort(cursor.getControllers());
         return cursor;
     }
 
@@ -143,35 +147,42 @@ class CursorFactory {
         cursor.setSavedThemeId(themeId);
     }
 
-    static void writeCursor(Cursor cursor, BufferedWriter writer) throws IOException {
+    static void writeCursor(Cursor cursor, BufferedWriter writer) throws IOException
+    {
         writer.write(XML_START_TAG);
         // append attributes
         XMLUtils.writeXmlAttribute(NAME, cursor.getName(), writer);
         XMLUtils.writeXmlAttribute(TYPE, cursor.getCursorType(), writer);
 
-        IoDevice ioDevice = cursor.getIoDevice();
-        if (ioDevice != null) {
-            XMLUtils.writeXmlAttribute(SAVED_VENDOR_ID, ioDevice.getVendorId(),
-                    writer);
-            XMLUtils.writeXmlAttribute(SAVED_PRODUCT_ID, ioDevice.getProductId(), writer);
-            XMLUtils.writeXmlAttribute(SAVED_DEVICE_ID, ioDevice.getDeviceId(), writer);
+        SXRCursorController controller = cursor.getController();
+        if (controller != null)
+        {
+            XMLUtils.writeXmlAttribute(SAVED_VENDOR_ID, controller.getVendorId(), writer);
+            XMLUtils.writeXmlAttribute(SAVED_PRODUCT_ID, controller.getProductId(), writer);
+            XMLUtils.writeXmlAttribute(SAVED_DEVICE_ID, controller.getName(), writer);
         }
         XMLUtils.writeXmlAttribute(POSITION, cursor.getStartPosition(), writer);
         XMLUtils.writeXmlAttribute(ACTIVE, XMLUtils.xmlFromBoolean(cursor.isEnabled()), writer);
         CursorTheme cursorTheme = cursor.getCursorTheme();
         String savedThemeId = cursor.clearSavedThemeId();
-        if (cursorTheme != null) {
+        if (cursorTheme != null)
+        {
             XMLUtils.writeXmlAttribute(THEME_ID, cursorTheme.getId(), writer);
-        } else if (savedThemeId != null) {
+        }
+        else if (savedThemeId != null)
+        {
             XMLUtils.writeXmlAttribute(THEME_ID, savedThemeId, writer);
-        } else {
+        }
+        else
+        {
             throw new RuntimeException("Need a themeId for saving cursor state");
         }
 
         writer.write(XMLUtils.CLOSING_BRACE);
 
-        for (PriorityIoDeviceTuple tuple : cursor.getIoDevices()) {
-            IoDeviceFactory.writeIoDevice(tuple.getIoDevice(), writer, tuple.getPriority());
+        for (IODevice tuple : cursor.getControllers())
+        {
+            IoDeviceFactory.writeIoDevice(tuple, writer, tuple.getPriority());
         }
 
         writer.write(XML_END_TAG);

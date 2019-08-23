@@ -70,13 +70,12 @@ public final class CursorManager implements IEventReceiver
     private SXRScene scene;
     // List of all the cursors available to the user.
     private final List<Cursor> mCursors = new ArrayList<>();;
-    private final List<IoDevice> mIODevices = new ArrayList<IoDevice>();
+    private final List<SXRCursorController> mControllers = new ArrayList<>();
     private float mCursorDepth;
     private Map<String, CursorTheme> themes;
     private final GlobalSettings globalSettings;
-    //Create a laser cursor to use on the settings menu
     private LaserCursor settingsCursor;
-    private float settingsIoDeviceFarDepth, settingsIoDeviceNearDepth;
+    private float settingsCursorDepth;
     private ICursorActivationListener activationListener;
     private List<SelectableBehavior> selectableBehaviors;
     private SXRBoundsPicker objectCursorPicker;
@@ -99,41 +98,20 @@ public final class CursorManager implements IEventReceiver
      * @param context The SXRf Context
      */
     public CursorManager(SXRContext context) {
-        this(context, null, null);
+        this(context, null);
     }
 
-    /**
-     * Create a {@link CursorManager}.
-     * <p/>
-     * Any {@link Cursor} object created would be added to the provided
-     * {@link SXRScene} by default.
-     *
-     * @param context The SXRf Context
-     * @param scene   the default {@link SXRScene} to use while adding/removing Cursor objects.
-     */
-    public CursorManager(SXRContext context, SXRScene scene) {
-        this(context, scene, null);
-    }
 
     /**
      * Create a {@link CursorManager}
-     * <p/>
-     * All {@link IoDevice}s passed in the constructor will be associated with a {@link
-     * Cursor} if a match is found at initialization. Any {@link IoDevice} added after
-     * initialization will be
-     * only be assigned to a {@link Cursor} if that particular {@link Cursor} has not been attached
-     * to any {@link IoDevice} yet.
-     *
      * @param context   The SXRf Context
      * @param scene     the default {@link SXRScene} to use while adding/removing Cursor
      *                  objects.
      * @param ioDevices A list of {@link IoDevice}s to add to the {@link
      *                  CursorManager} at initialization.
      */
-    public CursorManager(SXRContext context, SXRScene scene, List<IoDevice> ioDevices) {
-        if (context == null) {
-            throw new IllegalArgumentException("SXRContext cannot be null");
-        }
+    public CursorManager(SXRContext context, SXRScene scene)
+    {
         this.scene = scene;
         this.context = context;
         listeners = new SXREventReceiver(this);
@@ -164,13 +142,6 @@ public final class CursorManager implements IEventReceiver
         }
 
         SXRInputManager inputMgr = context.getInputManager();
-        if (ioDevices != null)
-        {
-            for (IoDevice ioDevice : ioDevices)
-            {
-                inputMgr.addCursorController(ioDevice.getGvrCursorController());
-            }
-        }
         inputMgr.getEventReceiver().addListener(cursorIoDeviceListener);
         inputMgr.scanControllers();
 
@@ -206,10 +177,10 @@ public final class CursorManager implements IEventReceiver
 
     private int getNumUnusedDevices()
     {
-        synchronized (mIODevices)
+        synchronized (mControllers)
         {
             int n = 0;
-            for (IoDevice d : mIODevices)
+            for (SXRCursorController d : mControllers)
             {
                 if (!d.isEnabled())
                 {
@@ -224,9 +195,8 @@ public final class CursorManager implements IEventReceiver
         return themes;
     }
 
-    public boolean isDeviceActive(IoDevice device)
+    public boolean isControllerActive(SXRCursorController controller)
     {
-        SXRCursorController controller = device.getGvrCursorController();
         if ((controller != null) && controller.isEnabled())
             return (controller.getCursor() != null);
         return false;
@@ -238,14 +208,14 @@ public final class CursorManager implements IEventReceiver
      * connected but not controlling a {@link Cursor}.
      * @return The list of used {@link IoDevice}s
      */
-    public List<IoDevice> getUsedIoDevices()
+    public List<SXRCursorController> getUsedControllers()
     {
-        final ArrayList<IoDevice> used = new ArrayList<>();
-        synchronized (mIODevices)
+        final ArrayList<SXRCursorController> used = new ArrayList<>();
+        synchronized (mControllers)
         {
-            for (IoDevice d : mIODevices)
+            for (SXRCursorController d : mControllers)
             {
-                if (isDeviceActive(d))
+                if (isControllerActive(d))
                 {
                     used.add(d);
                 }
@@ -259,14 +229,14 @@ public final class CursorManager implements IEventReceiver
      * {@link Cursor}.
      * @return The list of unused {@link IoDevice}s
      */
-    private List<IoDevice> getAvailableIoDevices()
+    private List<SXRCursorController> getAvailableControllers()
     {
-        final ArrayList<IoDevice> used = new ArrayList<>();
-        synchronized (mIODevices)
+        final ArrayList<SXRCursorController> used = new ArrayList<>();
+        synchronized (mControllers)
         {
-            for (IoDevice d : mIODevices)
+            for (SXRCursorController d : mControllers)
             {
-                if (!isDeviceActive(d))
+                if (!isControllerActive(d))
                 {
                     used.add(d);
                 }
@@ -275,32 +245,14 @@ public final class CursorManager implements IEventReceiver
         return used;
     }
 
-    IoDevice getAvailableIoDevice(IoDevice targetIoDevice)
+    SXRCursorController getAvailableController(SXRCursorController controller)
     {
-        IoDevice d = getIoDevice(targetIoDevice);
-        if (!isDeviceActive(d))
+        if (!isControllerActive(controller))
         {
-            return d;
+            return controller;
         }
         return null;
     }
-
-    IoDevice getIoDevice(IoDevice targetIoDevice)
-    {
-        synchronized (mIODevices)
-        {
-            int i = mIODevices.indexOf(targetIoDevice);
-            if (i == -1)
-            {
-                return null;
-            }
-            else
-            {
-                return mIODevices.get(i);
-            }
-        }
-    }
-
 
     void addCursor(Cursor cursor) {
         synchronized (mCursors) {
@@ -370,13 +322,12 @@ public final class CursorManager implements IEventReceiver
      */
     public void enableSettingsCursor(Cursor cursor) {
         menuCursor = cursor;
-        IoDevice device = cursor.getIoDevice();
+        SXRCursorController device = cursor.getController();
         if (device != null)
         {
-            settingsIoDeviceFarDepth = device.getFarDepth();
-            settingsIoDeviceNearDepth = device.getNearDepth();
+            settingsCursorDepth = device.getCursorDepth();
         }
-        settingsCursor.transferIoDevice(cursor);
+        settingsCursor.transferController(cursor);
     }
 
     /**
@@ -388,13 +339,12 @@ public final class CursorManager implements IEventReceiver
      */
     public void disableSettingsCursor() {
         if (menuCursor != null) {
-            if (menuCursor.getIoDevice() == null)
+            if (menuCursor.getController() == null)
             {
-                menuCursor.transferIoDevice(settingsCursor);
+                menuCursor.transferController(settingsCursor);
             }
-            IoDevice device = menuCursor.getIoDevice();
-            device.setFarDepth(settingsIoDeviceFarDepth);
-            device.setNearDepth(settingsIoDeviceNearDepth);
+            SXRCursorController device = menuCursor.getController();
+            device.setCursorDepth(settingsCursorDepth);
             menuCursor = null;
         }
     }
@@ -405,22 +355,22 @@ public final class CursorManager implements IEventReceiver
         {
             return true;
         }
-        IoDevice d = oldCursor.getIoDevice();
+        SXRCursorController controller = oldCursor.getController();
 
-        if ((d != null) && newCursor.isDeviceCompatible(d))
+        if ((controller != null) && newCursor.isControllerCompatible(controller))
         {
             newCursor.setEnable(true);
-            newCursor.transferIoDevice(oldCursor);
+            newCursor.transferController(oldCursor);
             return true;
         }
         for (Cursor c : getActiveCursors())
         {
             if ((c != newCursor) && c.isEnabled())
             {
-                d = c.getIoDevice();
-                if (newCursor.isDeviceCompatible(d))
+                controller = c.getController();
+                if (newCursor.isControllerCompatible(controller))
                 {
-                    newCursor.transferIoDevice(c);
+                    newCursor.transferController(c);
                     return true;
                 }
             }
@@ -437,25 +387,28 @@ public final class CursorManager implements IEventReceiver
         enableSettingsCursor(cursor);
         context.runOnGlThread(new Runnable() {
             @Override
-            public void run() {
-                new SettingsView(context, scene, CursorManager.this,
-                        settingsCursor.getIoDevice().getCursorControllerId(), cursor, new
-                        SettingsChangeListener() {
-                            @Override
-                            public void onBack(boolean cascading) {
-                                disableSettingsCursor();
-                            }
+            public void run()
+            {
+                new SettingsView(context,
+                                 scene,
+                                 CursorManager.this,
+                                 cursor, new SettingsChangeListener()
+                {
+                    @Override
+                    public void onBack(boolean cascading) {
+                        disableSettingsCursor();
+                    }
 
-                            @Override
-                            public int onDeviceChanged(IoDevice device) {
-                                // we are changing the io device on the settings cursor
-                                removeCursorFromScene(settingsCursor);
-                                IoDevice clickedDevice = getAvailableIoDevice(device);
-                                settingsCursor.setIoDevice(clickedDevice);
-                                addCursorToScene(settingsCursor);
-                                return device.getCursorControllerId();
-                            }
-                        });
+                    @Override
+                    public void onDeviceChanged(SXRCursorController device)
+                    {
+                        // we are changing the io device on the settings cursor
+                        removeCursorFromScene(settingsCursor);
+                        SXRCursorController clickedDevice = getAvailableController(device);
+                        settingsCursor.setController(clickedDevice);
+                        addCursorToScene(settingsCursor);
+                    }
+                });
             }
         });
     }
@@ -557,8 +510,7 @@ public final class CursorManager implements IEventReceiver
     }
 
     void addCursorToScene(Cursor cursor) {
-        IoDevice ioDevice = cursor.getIoDevice();
-        SXRCursorController controller = ioDevice.getGvrCursorController();
+        SXRCursorController controller = cursor.getController();
 
         controller.setCursor(cursor.getOwnerObject());
         if (controller instanceof SXRGearCursorController)
@@ -593,13 +545,14 @@ public final class CursorManager implements IEventReceiver
         controller.setEnable(true);
     }
 
-    void removeCursorFromScene(Cursor cursor) {
-        IoDevice ioDevice = cursor.getIoDevice();
+    void removeCursorFromScene(Cursor cursor)
+    {
+        SXRCursorController controller = cursor.getController();
 
-        if (ioDevice != null)
+        if (controller != null)
         {
             cursor.close();
-            ioDevice.getGvrCursorController().removePickEventListener(cursor.getTouchListener());
+            controller.removePickEventListener(cursor.getTouchListener());
         }
         if (cursor instanceof ObjectCursor)
         {
@@ -618,13 +571,20 @@ public final class CursorManager implements IEventReceiver
      * @param scene The SXRScene.
      * @param add   <code>true</code> for add, <code>false</code> to remove
      */
-    private void updateCursorsInScene(SXRScene scene, boolean add) {
-        synchronized (mCursors) {
-            for (Cursor cursor : mCursors) {
-                if (cursor.isActive()) {
-                    if (add) {
+    private void updateCursorsInScene(SXRScene scene, boolean add)
+    {
+        synchronized (mCursors)
+        {
+            for (Cursor cursor : mCursors)
+            {
+                if (cursor.isActive())
+                {
+                    if (add)
+                    {
                         addCursorToScene(cursor);
-                    } else {
+                    }
+                    else
+                    {
                         removeCursorFromScene(cursor);
                     }
                 }
@@ -650,8 +610,10 @@ public final class CursorManager implements IEventReceiver
      * does not have a {@link SXRMesh} or in case the object was already
      * set as selectable.
      */
-    public boolean addSelectableObject(SXRNode object) {
-        if (null == object) {
+    public boolean addSelectableObject(SXRNode object)
+    {
+        if (null == object)
+        {
             throw new IllegalArgumentException("SXRNode cannot be null");
         }
         addSelectableBehavior(object);
@@ -668,48 +630,59 @@ public final class CursorManager implements IEventReceiver
      * @return <code>true</code> on success or <code>false</code> if {@link SXRNode} was not
      * set as selectable using the {@link CursorManager#addSelectableObject(SXRNode)}
      */
-    public boolean removeSelectableObject(SXRNode object) {
-        if (null == object) {
+    public boolean removeSelectableObject(SXRNode object)
+    {
+        if (null == object)
+        {
             throw new IllegalArgumentException("SXRNode cannot be null");
         }
         removeSelectableBehavior(object);
         return true;
     }
 
-    private void addSelectableBehavior(SXRNode object) {
-        SelectableBehavior selectableBehavior = (SelectableBehavior) object.getComponent(
-                SelectableBehavior.getComponentType());
-        if (selectableBehavior == null) {
-            selectableBehavior = (SelectableBehavior) object.getComponent(MovableBehavior.
-                    getComponentType());
+    private void addSelectableBehavior(SXRNode object)
+    {
+        SelectableBehavior selectableBehavior = (SelectableBehavior) object.getComponent(SelectableBehavior.getComponentType());
+
+        if (selectableBehavior == null)
+        {
+            selectableBehavior = (SelectableBehavior) object.getComponent(MovableBehavior.getComponentType());
         }
-        if (selectableBehavior != null) {
+        if (selectableBehavior != null)
+        {
             Log.d(TAG, "Adding a Selectable Object");
             synchronized (selectableBehaviors)
             {
                 selectableBehaviors.add(selectableBehavior);
             }
-            if (activationListener == null) {
+            if (activationListener == null)
+            {
                 createLocalActivationListener();
             }
-            synchronized (mCursors) {
-                for (Cursor cursor : mCursors) {
+            synchronized (mCursors)
+            {
+                for (Cursor cursor : mCursors)
+                {
                     selectableBehavior.onCursorActivated(cursor);
                 }
             }
-        } else {
+        }
+        else
+        {
             Log.d(TAG, "Scene Object is not selectable");
         }
     }
 
-    private void removeSelectableBehavior(SXRNode object) {
-        SelectableBehavior selectableBehavior = (SelectableBehavior) object.getComponent(
-                SelectableBehavior.getComponentType());
-        if (selectableBehavior == null) {
-            selectableBehavior = (SelectableBehavior) object.getComponent(MovableBehavior.
-                    getComponentType());
+    private void removeSelectableBehavior(SXRNode object)
+    {
+        SelectableBehavior selectableBehavior = (SelectableBehavior) object.getComponent(SelectableBehavior.getComponentType());
+
+        if (selectableBehavior == null)
+        {
+            selectableBehavior = (SelectableBehavior) object.getComponent(MovableBehavior.getComponentType());
         }
-        if (selectableBehavior != null) {
+        if (selectableBehavior != null)
+        {
             synchronized (selectableBehaviors)
             {
                 selectableBehaviors.remove(selectableBehavior);
@@ -718,7 +691,8 @@ public final class CursorManager implements IEventReceiver
         object.detachComponent(SXRSwitch.getComponentType());
     }
 
-    private float getDistance(SXRNode object) {
+    private float getDistance(SXRNode object)
+    {
         // distance is simple since the origin is 0,0,0
         float x = object.getTransform().getPositionX();
         float y = object.getTransform().getPositionY();
@@ -726,7 +700,8 @@ public final class CursorManager implements IEventReceiver
         return (float) Math.sqrt(x * x + y * y + z * z);
     }
 
-    private float getDistance(float x, float y, float z) {
+    private float getDistance(float x, float y, float z)
+    {
         return (float) Math.sqrt(x * x + y * y + z * z);
     }
 
@@ -757,16 +732,20 @@ public final class CursorManager implements IEventReceiver
      *
      * Usually called on destroy.
      */
-    public void close() {
+    public void close()
+    {
         // Use this to perform post cleanup.
-        synchronized (mCursors) {
-            for (Cursor cursor : mCursors) {
+        synchronized (mCursors)
+        {
+            for (Cursor cursor : mCursors)
+            {
                 cursor.close();
             }
         }
     }
 
-    void assignIoDevicesToCursors(boolean scanUsedCursors) {
+    void assignIoDevicesToCursors(boolean scanUsedCursors)
+    {
         Log.d(TAG, "Assigning cursors to availableIoDevices");
         /*
          * First scan all the unused cursors and make sure each one has a device.
@@ -778,7 +757,7 @@ public final class CursorManager implements IEventReceiver
                 final Cursor cursor = cursorIterator.next();
                 if (!cursor.isActive() && cursor.isEnabled())
                 {
-                    assignDeviceToCursor(cursor);
+                    assignControllerToCursor(cursor);
                 }
             }
         /*
@@ -792,7 +771,7 @@ public final class CursorManager implements IEventReceiver
                     final Cursor cursor = cursorIterator.next();
                     if (cursor.isActive())
                     {
-                        assignDeviceToCursor(cursor);
+                        assignControllerToCursor(cursor);
                     }
                 }
             }
@@ -810,27 +789,26 @@ public final class CursorManager implements IEventReceiver
      *          0 = device replaced on cursor,
      *          -1 = nothing was done
      */
-    int assignDeviceToCursor(final Cursor cursor)
+    int assignControllerToCursor(final Cursor cursor)
     {
         int currentPriority = cursor.getCurrentDevicePriority();
-        IoDevice savedDevice  = cursor.getSavedIoDevice();
+        SXRCursorController savedController  = cursor.getSavedController();
 
         /*
          * Give preference to the saved device for this cursor
          */
-        if ((savedDevice != null) && (currentPriority < 0))
+        if ((savedController != null) && (currentPriority < 0))
         {
-            int priority = cursor.getDevicePriority(savedDevice);
-            cursor.clearSavedIoDevice();
-            return attachCursorToDevice(cursor, savedDevice, 1, priority);
+            int priority = cursor.getDevicePriority(savedController);
+            return attachCursorToController(cursor, savedController, 1, priority);
         }
-        List<IoDevice> availableDevices = getAvailableIoDevices();
-        for (IoDevice d : availableDevices)
+        List<SXRCursorController> availableControllers = getAvailableControllers();
+        for (SXRCursorController d : availableControllers)
         {
-            IoDevice availableIoDevice = d;
-            int priority = cursor.getDevicePriority(availableIoDevice);
+            SXRCursorController availableController = d;
+            int priority = cursor.getDevicePriority(availableController);
 
-            Log.d(TAG, "Trying to attach available ioDevice:" + IoDeviceFactory.getXmlString(availableIoDevice) + " to cursor:" + cursor.getId());
+            Log.d(TAG, "Trying to attach available controller:" + availableController.getName() + " to cursor:" + cursor.getId());
         /*
          * If the unused device is compatible with this cursor and
          * has a higher priority than the current device associated
@@ -841,18 +819,23 @@ public final class CursorManager implements IEventReceiver
             {
                 if (currentPriority < 0)
                 {
-                    return attachCursorToDevice(cursor, availableIoDevice, 1, priority);
+                    return attachCursorToController(cursor, availableController, 1, priority);
                 }
                 else if (priority < currentPriority)
                 {
-                    return attachCursorToDevice(cursor, availableIoDevice, 0, priority);
+                    return attachCursorToController(cursor, availableController, 0, priority);
                 }
             }
         }
         return -1;
     }
 
-    int assignCursorToDevice(final IoDevice device)
+    /**
+     * Called when a new SXRCursorController is added.
+     * This function will examine the new controller to
+     * see if it can be assigned to a cursor.
+     */
+    int assignCursorToController(final SXRCursorController controller)
     {
         synchronized (mCursors)
         {
@@ -865,19 +848,19 @@ public final class CursorManager implements IEventReceiver
                 {
                     continue;
                 }
-                int priority = cursor.getDevicePriority(device);
+                int priority = cursor.getDevicePriority(controller);
                 int oldPriority = cursor.getCurrentDevicePriority();
 
-                Log.d(TAG, "Trying to attach available ioDevice:" + IoDeviceFactory.getXmlString(device) + " to inactive cursor:" + cursor.getId());
+                Log.d(TAG, "Trying to attach available controller: " + controller.getName() + " to inactive cursor: " + cursor.getId());
                 if (priority > 0)
                 {
                     if (oldPriority < 0)
                     {
-                        return attachCursorToDevice(cursor, device, 1, priority);
+                        return attachCursorToController(cursor, controller, 1, priority);
                     }
                     else if (priority < oldPriority)
                     {
-                        return attachCursorToDevice(cursor, device, 0, priority);
+                        return attachCursorToController(cursor, controller, 0, priority);
                     }
                 }
             }
@@ -891,19 +874,19 @@ public final class CursorManager implements IEventReceiver
                 {
                     continue;
                 }
-                int priority = cursor.getDevicePriority(device);
+                int priority = cursor.getDevicePriority(controller);
                 int oldPriority = cursor.getCurrentDevicePriority();
 
-                Log.d(TAG, "Trying to attach available ioDevice:" + IoDeviceFactory.getXmlString(device) + " to active cursor:" + cursor.getId());
+                Log.d(TAG, "Trying to attach available controller: " + controller.getName() + " to active cursor: " + cursor.getId());
                 if (priority > 0)
                 {
                     if (oldPriority < 0)
                     {
-                        return attachCursorToDevice(cursor, device, 1, priority);
+                        return attachCursorToController(cursor, controller, 1, priority);
                     }
                     else if (priority < oldPriority)
                     {
-                        return attachCursorToDevice(cursor, device, 0, priority);
+                        return attachCursorToController(cursor, controller, 0, priority);
                     }
                 }
             }
@@ -911,30 +894,35 @@ public final class CursorManager implements IEventReceiver
         return -1;
     }
 
-    private int attachCursorToDevice(final Cursor cursor, final IoDevice device, int action, int priority)
+    private int attachCursorToController(final Cursor cursor, final SXRCursorController controller, int action, int priority)
     {
         getSXRContext().getEventManager().sendEvent(getSXRContext().getInputManager(),
                                                     SXRInputManager.ICursorControllerSelectListener.class,
                                                     "onCursorControllerSelected",
-                                                    device.getGvrCursorController(),
+                                                    controller,
                                                     null);
         if (action == 0)
         {
-            Log.d(TAG, "Replacing ioDevice:" + IoDeviceFactory.getXmlString(cursor.getIoDevice()) + " for cursor:" + cursor.getId() + " with ioDevice:" + IoDeviceFactory.getXmlString(device) + " with priority " + priority);
+            Log.d(TAG, "Replacing controller: " + controller.getName() + " for cursor: " + cursor.getId() + " with priority " + priority);
             removeCursorFromScene(cursor);
-            cursor.setIoDevice(device);
+            cursor.setController(controller);
             addCursorToScene(cursor);
             return 0;
         }
         else
         {
-            Log.d(TAG, "Attaching ioDevice:" + IoDeviceFactory.getXmlString(device) + " with priority " + priority + " to cursor:" + cursor.getId());
-            addNewCursor(cursor, device);
+            Log.d(TAG, "Attaching controller: " + controller.getName() + " with priority " + priority + " to cursor: " + cursor.getId());
+            addNewCursor(cursor, controller);
             return 1;
         }
     }
 
-    public void attachDevice(final Cursor cursor)
+    /**
+     * Called when a new cursor is activated.
+     * This function tries to find an SXRCursorController
+     * compatible with the new cursor.
+     */
+    public void attachController(final Cursor cursor)
     {
         if (getNumUnusedDevices() == 0)
         {
@@ -944,7 +932,7 @@ public final class CursorManager implements IEventReceiver
         {
             synchronized (mCursors)
             {
-                assignDeviceToCursor(cursor);
+                assignControllerToCursor(cursor);
             }
         }
     }
@@ -956,11 +944,11 @@ public final class CursorManager implements IEventReceiver
             for (int i = 0; i < mCursors.size(); i++)
             {
                 Cursor cursor = mCursors.get(i);
-                if ((cursor == null) || (cursor.getIoDevice() == null))
+                if ((cursor == null) || (cursor.getController() == null))
                 {
                     continue;
                 }
-                if (controller == cursor.getIoDevice().getGvrCursorController())
+                if (controller == cursor.getController())
                 {
                     return cursor;
                 }
@@ -984,13 +972,13 @@ public final class CursorManager implements IEventReceiver
         return null;
     }
 
-    public Cursor findCursorByDevice(IoDevice device)
+    public Cursor findCursorByController(SXRCursorController controller)
     {
         synchronized (mCursors)
         {
             for (Cursor c : mCursors)
             {
-                if (c.isDeviceCompatible(device))
+                if (c.isControllerCompatible(controller))
                 {
                     return c;
                 }
@@ -1014,51 +1002,45 @@ public final class CursorManager implements IEventReceiver
         return null;
     }
 
-    private void addNewCursor(Cursor cursor, IoDevice ioDevice) {
-        cursor.setIoDevice(ioDevice);
-        if (scene != null) {
+    private void addNewCursor(Cursor cursor, SXRCursorController controller)
+    {
+        cursor.setController(controller);
+        if (scene != null)
+        {
             addCursorToScene(cursor);
         }
         context.getEventManager().sendEvent(this, ICursorActivationListener.class, "onActivated", cursor);
     }
 
-    private SXRInputManager.ICursorControllerListener cursorIoDeviceListener = new SXRInputManager.ICursorControllerListener() {
+    private SXRInputManager.ICursorControllerListener cursorIoDeviceListener = new SXRInputManager.ICursorControllerListener()
+    {
         @Override
-        public void onCursorControllerAdded(SXRCursorController controller) {
-            IoDevice ioDevice = IoDeviceLoader.getIoDevice(controller);
-            Log.d(TAG, "IoDevice added:" + ioDevice.getDeviceId());
-            synchronized (mIODevices)
-            {
-                if (!mIODevices.contains(ioDevice))
-                {
-                    mIODevices.add(ioDevice);
-                }
-            }
+        public void onCursorControllerAdded(SXRCursorController controller)
+        {
+            Log.d(TAG, "Controller added:" + controller.getName());
             controller.setScene(CursorManager.this.scene);
-
             synchronized (mCursors)
             {
                 for (Cursor c : mCursors)
                 {
-                    if (c.getIoDevice() == ioDevice)
+                    if (c.getController() == controller)
                     {
                         return;
                     }
                 }
             }
-            assignCursorToDevice(ioDevice);
+            assignCursorToController(controller);
         }
 
         @Override
         public void onCursorControllerRemoved(SXRCursorController controller)
         {
-            IoDevice removedIoDevice = IoDeviceLoader.getIoDevice(controller);
-            Log.d(TAG, "IoDevice removed:" + removedIoDevice.getDeviceId());
-            synchronized (mIODevices)
+            Log.d(TAG, "Controller removed:" + controller.getName());
+            synchronized (mControllers)
             {
-                if (!mIODevices.remove(removedIoDevice))
+                if (!mControllers.remove(controller))
                 {
-                    Log.d(TAG, "Did not find ioDevice in cursormanager list");
+                    Log.d(TAG, "Did not find controller in cursormanager list");
                     return;
                 }
             }
@@ -1068,9 +1050,9 @@ public final class CursorManager implements IEventReceiver
                 {
                     Cursor cursor = cursorIterator.next();
 
-                    if (removedIoDevice.equals(cursor.getIoDevice()))
+                    if (controller == cursor.getController())
                     {
-                        cursor.resetIoDevice(removedIoDevice);
+                        cursor.resetController(controller);
                         if (scene != null)
                         {
                             removeCursorFromScene(cursor);
@@ -1216,7 +1198,7 @@ public final class CursorManager implements IEventReceiver
             if (hit.isTouched())
             {
                 float depth = cursor.getCursorDepth();
-                if (depth != cursor.getIoDevice().getGvrCursorController().getCursorDepth())
+                if (depth != cursor.getController().getCursorDepth())
                 {
                     getSXRContext().getEventManager().sendEvent(cursor.getOwnerObject(),
                                                                 ICursorEvents.class,
@@ -1238,7 +1220,7 @@ public final class CursorManager implements IEventReceiver
                 if (cursor != null)
                 {
                     float depth = cursor.getCursorDepth();
-                    if (depth != cursor.getIoDevice().getGvrCursorController().getCursorDepth())
+                    if (depth != cursor.getController().getCursorDepth())
                     {
                         getSXRContext().getEventManager().sendEvent(cursor.getOwnerObject(),
                                                                     ICursorEvents.class,
@@ -1282,7 +1264,7 @@ public final class CursorManager implements IEventReceiver
 
             @Override
             public void onActivated(Cursor cursor) {
-                SXRCursorController controller = cursor.getIoDevice().getGvrCursorController();
+                SXRCursorController controller = cursor.getController();
                 Log.d(TAG, "On CursorActivated");
                 synchronized (selectableBehaviors)
                 {
