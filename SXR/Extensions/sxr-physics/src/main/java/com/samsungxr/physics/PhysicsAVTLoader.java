@@ -99,9 +99,7 @@ class PhysicsAVTLoader
         JSONArray childbones = multibody.getJSONObject("Child Bones").getJSONArray("property_value");
 
         mTargetBones.clear();
-        mTargetBones.put(basebone.getString("Name"), basebone);
         parseRigidBody(basebone);
-
         for (int i = 0; i < childbones.length(); ++i)
         {
             parseRigidBody(childbones.getJSONObject(i).getJSONObject("value"));
@@ -196,7 +194,7 @@ class PhysicsAVTLoader
 
             if (boneID < 0)
             {
-                throw new IllegalArgumentException("AVT file skeleton missing bone " + nodeName + " reference by MultiBody physics");
+                throw new IllegalArgumentException("AVT file skeleton missing bone " + nodeName + " referenced by MultiBody physics");
             }
             parseJoint(link);
         }
@@ -224,18 +222,33 @@ class PhysicsAVTLoader
             JSONObject c = colliders.getJSONObject(i).getJSONObject("Collider");
             JSONObject xform = colliders.getJSONObject(i).getJSONObject("Transform");
             String type = c.optString("type");
+            SXRNode owner;
 
+            c = c.getJSONObject("value");
             if (type == null)
             {
                 return null;
             }
-            int boneIndex = mSkeleton.getBoneIndex(targetBone);
-
-            if (boneIndex < 0)
+            if (mSkeleton != null)
             {
-                throw new JSONException("Cannot find bone " + targetBone + " needed by " + c.getString("Name") + " collider");
+                int boneIndex = mSkeleton.getBoneIndex(targetBone);
+
+                if (boneIndex < 0)
+                {
+                    Log.e(TAG, "Cannot find bone " + targetBone +
+                        " needed by " + c.getString("Name") + " collider");
+                    return null;
+                }
+                owner = mSkeleton.getBone(boneIndex);
             }
-            SXRNode owner = mSkeleton.getBone(boneIndex);
+            else
+            {
+                owner = mRoot.getNodeByName(targetBone);
+            }
+            if (owner == null)
+            {
+                throw new IllegalArgumentException("Target bone " + targetBone + " referenced in AVT file not found in scene");
+            }
             JSONObject scale = xform.getJSONObject("Scale");
             Vector3f s = new Vector3f();
             Matrix4f m = new Matrix4f();
@@ -243,36 +256,37 @@ class PhysicsAVTLoader
             s.set((float) scale.getDouble("X"),
                   (float) scale.getDouble("Y"),
                   (float) scale.getDouble("Z"));
-            c = c.getJSONObject("value");
-            m.scale((float) scale.getDouble("X"),
-                    (float) scale.getDouble("Y"),
-                    (float) scale.getDouble("Z"));
-//            m.setTranslation(pivotB);
+            m.translation(-pivotB.x, -pivotB.y, -pivotB.z);
             if (type.equals("dmCapsuleCollider"))
             {
                 SXRCapsuleCollider capsule = new SXRCapsuleCollider(ctx);
                 String direction = c.getString("Direction");
                 float radius = (float) c.getDouble("Radius") * s.x;
-                float height = (float) c.getDouble("Half Height") * 2.0f * s.y;
+                float height = ((float) (c.getDouble("Half Height") * 2) + radius) * s.y;
+                SXRRenderData rd = new SXRRenderData(mContext, mColliderMtl);
+                SXRMesh cubeMesh = null;
 
                 capsule.setRadius(radius);
                 capsule.setHeight(height);
                 if (direction.equals("X"))
                 {
                     capsule.setDirection(SXRCapsuleCollider.CapsuleDirection.X_AXIS);
+                    cubeMesh = SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
+                                                      true, new Vector3f(height + radius, radius, radius));
                 }
                 else if (direction.equals("Y"))
                 {
                     capsule.setDirection(SXRCapsuleCollider.CapsuleDirection.Y_AXIS);
+                    cubeMesh = SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
+                                                      true, new Vector3f(radius, height + radius, radius));
                 }
                 else if (direction.equals("Z"))
                 {
                     capsule.setDirection(SXRCapsuleCollider.CapsuleDirection.Z_AXIS);
+                    cubeMesh = SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
+                                                      true, new Vector3f(radius, radius, height + radius));
                 }
-                SXRMesh cubeMesh = SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
-                                                          true, new Vector3f(radius, height + radius, radius));
-                SXRRenderData rd = new SXRRenderData(mContext, mColliderMtl);
-
+                cubeMesh.transform(m, false);
                 rd.setMesh(cubeMesh);
                 owner.attachComponent(rd);
                 owner.attachComponent(capsule);
@@ -291,6 +305,7 @@ class PhysicsAVTLoader
                                                       true, new Vector3f(2 * x * s.x, 2 * y * s.y, 2 * s.z * z));
                 SXRRenderData rd = new SXRRenderData(mContext, mColliderMtl);
 
+                cubeMesh.transform(m, false);
                 rd.setMesh(cubeMesh);
                 box.setHalfExtents(x, y, z);
                 owner.attachComponent(rd);
@@ -306,6 +321,10 @@ class PhysicsAVTLoader
                 SXRSphereNode sp = new SXRSphereNode(ctx, true, mColliderMtl);
                 SXRRenderData rd = new SXRRenderData(ctx, mColliderMtl);
 
+                m.scale((float) scale.getDouble("X"),
+                        (float) scale.getDouble("Y"),
+                        (float) scale.getDouble("Z"));
+                m.setTranslation(-pivotB.x, -pivotB.y, -pivotB.z);
                 rd.setMesh(sp.getRenderData().getMesh());
                 rd.getMesh().transform(m, true);
                 sphere.setRadius(radius);
@@ -377,18 +396,17 @@ class PhysicsAVTLoader
         Vector3f axis = null;
         JSONObject trans = link.getJSONObject("Transform");
         JSONObject pos = trans.getJSONObject("Position");
+        JSONObject piv = link.getJSONObject("Pivot Pos.");
 
         if (parentJoint == null)
         {
             Log.e(TAG, "Parent %s not found for child %s", parentName, name);
             return null;
         }
+        pivotB[0] = (float) (piv.getDouble("X") - pos.getDouble("X"));
+        pivotB[1] = (float) (piv.getDouble("Y") - pos.getDouble("Y"));
+        pivotB[2] = (float) (piv.getDouble("Z") - pos.getDouble("Z"));
         mTargetBones.put(name, link);
-        JSONObject p = link.getJSONObject("Pivot Pos.");
-
-        pivotB[0] = (float) (p.getDouble("X") - pos.getDouble("X"));
-        pivotB[1] = (float) (p.getDouble("Y") - pos.getDouble("Y"));
-        pivotB[2] = (float) (p.getDouble("Z") - pos.getDouble("Z"));
         if (type.equals("ball"))
         {
 /*
@@ -474,19 +492,31 @@ class PhysicsAVTLoader
         SXRRigidBody parentBody = findParentBody(parentName);
         SXRRigidBody body = new SXRRigidBody(mContext, mass);
 
-        if (node == null)
-        {
-            throw new JSONException("Cannot find bone " + nodeName + " referenced by AVT file");
-        }
-        parseCollider(link.getJSONObject("Collider").getJSONObject("value"), nodeName);
         mTargetBones.put(name, link);
+
         if (parentBody == null)
         {
-            return null;
+            SXRSkeleton skel = (SXRSkeleton) node.getComponent(SXRSkeleton.getComponentType());
+            if (skel != null)
+            {
+                mSkeleton = skel;
+                if (parseCollider(link, nodeName) == null)
+                {
+                    return null;
+                }
+            }
+            node.attachComponent(body);
+            return body;
         }
         String type = link.getString("Joint Type");
         SXRConstraint constraint;
         JSONArray dofdata = link.getJSONArray("DOF Data");
+        if (parseCollider(link, nodeName) == null)
+        {
+            return null;
+        }
+        node.attachComponent(body);
+
         if (type.equals("ball"))
         {
             JSONObject dofx = dofdata.getJSONObject(0);
@@ -570,7 +600,6 @@ class PhysicsAVTLoader
         {
             constraint.setBreakingImpulse((float) link.getDouble("Breaking Reaction Impulse"));
         }
-        node.attachComponent(body);
         node.attachComponent(constraint);
         return body;
     }

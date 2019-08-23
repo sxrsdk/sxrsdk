@@ -313,7 +313,11 @@ void BulletWorld::getPhysicsTransforms()
         if (joint->enabled())
         {
             joint->setWorldTransform(mb->getBaseWorldTransform());
-            LOGE("BULLET: WORLD %s %f, %f, %f", owner->name().c_str(), t->position_x(), t->position_y(), t->position_z());
+            LOGE("BULLET: WORLD %s %f, %f, %f",
+                 owner->name().c_str(),
+                 t->position_x(),
+                 t->position_y(),
+                 t->position_z());
         }
         for (int j = 0; j < mb->getNumLinks(); ++j)
         {
@@ -324,6 +328,11 @@ void BulletWorld::getPhysicsTransforms()
             {
                 const btTransform &t = collider->getWorldTransform();
                 joint->setWorldTransform(t);
+                LOGE("BULLET: WORLD %s %f, %f, %f",
+                     joint->owner_object()->name().c_str(),
+                     t.getOrigin().getX(),
+                     t.getOrigin().getY(),
+                     t.getOrigin().getZ());
             }
         }
     }

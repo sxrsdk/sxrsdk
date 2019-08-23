@@ -116,7 +116,6 @@ void BulletRigidBody::updateConstructionInfo(PhysicsWorld* world)
             {
                 delete mConstructionInfo.m_collisionShape;
             }
-            mRigidBody->setMotionState(this);
             mRigidBody->setMassProps(mConstructionInfo.m_mass, mConstructionInfo.m_localInertia);
             mConstructionInfo.m_collisionShape = convertCollider2CollisionShape(collider);
             if (isDynamic)
@@ -203,42 +202,32 @@ void BulletRigidBody::setWorldTransform(const btTransform &centerOfMassWorldTran
 {
     Node* owner = owner_object();
     Transform* trans = owner->transform();
-    btTransform aux; getWorldTransform(aux);
+    btTransform physicBody = (centerOfMassWorldTrans * m_centerOfMassOffset);
+    btVector3 pos = physicBody.getOrigin();
+    btQuaternion rot = physicBody.getRotation();
+    Node* parent = owner->parent();
+    float matrixData[16];
 
-    if(std::abs(aux.getOrigin().getX() - prevPos.getOrigin().getX()) >= 0.1f ||
-       std::abs(aux.getOrigin().getY() - prevPos.getOrigin().getY()) >= 0.1f ||
-       std::abs(aux.getOrigin().getZ() - prevPos.getOrigin().getZ()) >= 0.1f)
+    physicBody.getOpenGLMatrix(matrixData);
+    glm::mat4 worldMatrix(glm::make_mat4(matrixData));
+    if ((parent != nullptr) && (parent->parent() != nullptr))
     {
-        mRigidBody->setWorldTransform(aux);
-        prevPos = aux;
-        //TODO: incomplete solution
+        glm::mat4 parentWorld(parent->transform()->getModelMatrix(true));
+        glm::mat4 parentInverseWorld(glm::inverse(parentWorld));
+        glm::mat4 localMatrix;
+
+        localMatrix = parentInverseWorld * worldMatrix;
+        trans->setModelMatrix(localMatrix);
     }
     else
     {
-        btTransform physicBody = (centerOfMassWorldTrans * m_centerOfMassOffset);
-        btVector3 pos = physicBody.getOrigin();
-        btQuaternion rot = physicBody.getRotation();
-        Node* parent = owner->parent();
-        float matrixData[16];
-
-        physicBody.getOpenGLMatrix(matrixData);
-        glm::mat4 worldMatrix(glm::make_mat4(matrixData));
-        if ((parent != nullptr) && (parent->parent() != nullptr))
-        {
-            glm::mat4 parentWorld(parent->transform()->getModelMatrix(true));
-            glm::mat4 parentInverseWorld(glm::inverse(parentWorld));
-            glm::mat4 localMatrix;
-
-            localMatrix = parentInverseWorld * worldMatrix;
-            trans->setModelMatrix(localMatrix);
-        }
-        else
-        {
-            trans->set_position(pos.getX(), pos.getY(), pos.getZ());
-            trans->set_rotation(rot.getW(), rot.getX(), rot.getY(), rot.getZ());
-        }
-        prevPos = physicBody;
+        trans->set_position(pos.getX(), pos.getY(), pos.getZ());
+        trans->set_rotation(rot.getW(), rot.getX(), rot.getY(), rot.getZ());
     }
+    LOGD("PHYSICS: rigid body %s pos = %f, %f, %f", owner->name().c_str(),
+            trans->position_x(),
+            trans->position_y(),
+            trans->position_z());
     if (mSimType == DYNAMIC)
     {
         mWorld->markUpdated(this);

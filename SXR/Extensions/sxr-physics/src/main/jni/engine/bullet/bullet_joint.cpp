@@ -184,7 +184,6 @@ namespace sxr {
 
     void BulletJoint::getWorldTransform(btTransform& centerOfMassWorldTrans) const
     {
-        Transform* trans = owner_object()->transform();
         const BulletJoint* root = static_cast<const BulletJoint*> (mMultiBody->getUserPointer());
         Skeleton* skel = static_cast<Skeleton*>(root->owner_object()->getComponent(COMPONENT_TYPE_SKELETON));
 
@@ -195,6 +194,7 @@ namespace sxr {
         }
         else
         {
+            Transform* trans = owner_object()->transform();
             centerOfMassWorldTrans = convertTransform2btTransform(trans);
         }
     }
@@ -271,9 +271,11 @@ namespace sxr {
                 {
                     glm::quat q(rot.getX(), rot.getY(), rot.getZ(), rot.getW());
                     glm::mat4 localMatrix = glm::mat4_cast(q);
+                    localMatrix[3][0] = pos.getX();
+                    localMatrix[3][1] = pos.getY();
+                    localMatrix[3][2] = pos.getZ();
                 }
             }
-            localMatrix[3] = skelLocalMatrix[3];
             skelLocalMatrix = localMatrix;
             LOGD("BULLET: JOINT %s %f, %f, %f", owner->name().c_str(),
                     localMatrix[3][0], localMatrix[3][1], localMatrix[3][2]);
