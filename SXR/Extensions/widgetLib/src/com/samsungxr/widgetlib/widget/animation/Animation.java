@@ -4,6 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.samsungxr.SXRHybridObject;
+import com.samsungxr.SXRNode;
 import com.samsungxr.animation.SXRAnimation;
 import com.samsungxr.animation.SXRAnimationEngine;
 import com.samsungxr.animation.SXRInterpolator;
@@ -336,10 +337,15 @@ public abstract class Animation {
     }
 
     private class Adapter extends SXRAnimation implements AnimationAdapter {
-        private Widget mWidget;
+        Widget mWidget;
         public Adapter(Widget target, float duration) {
             super(target.getNode(), duration);
             mWidget = target;
+        }
+
+        @Override
+        public void animate(float time) {
+            doAnimate(time / getDuration());
         }
 
         @Override
@@ -347,9 +353,9 @@ public abstract class Animation {
             doAnimate(ratio);
         }
 
-        public SXRAnimation copy() { return new Adapter(mWidget, mDuration); }
-
-        public void animate(float t) { doAnimate(t / mDuration); }
+        public SXRAnimation copy() {
+            return new Adapter(mWidget, getDuration());
+        }
     }
 
     private class SXROnFinishProxy implements SXROnFinish {

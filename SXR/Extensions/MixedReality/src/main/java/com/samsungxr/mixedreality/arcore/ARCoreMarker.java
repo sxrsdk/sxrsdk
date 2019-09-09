@@ -36,6 +36,7 @@ public class ARCoreMarker extends SXRMarker
 {
     private final AugmentedImage mAugmentedImage;
     private final ARCoreSession mSession;
+    private SXRAnchor mAnchor;
 
     protected ARCoreMarker(ARCoreSession session, AugmentedImage augmentedImage)
     {
@@ -43,7 +44,13 @@ public class ARCoreMarker extends SXRMarker
         mSession = session;
         mAugmentedImage = augmentedImage;
         mTrackingState = SXRTrackingState.PAUSED;
+        mAnchor = null;
     }
+
+    /**
+     * @return the ARCore AugmentedImage associated with this marker
+     */
+    public AugmentedImage getImage() { return mAugmentedImage; }
 
     /**
      * @return the name of the marker
@@ -56,7 +63,7 @@ public class ARCoreMarker extends SXRMarker
      */
     @Override
     public float getExtentX() {
-        return mAugmentedImage.getExtentX();
+        return mAugmentedImage.getExtentX() * mSession.getARToVRScale();
     }
 
     /**
@@ -64,7 +71,7 @@ public class ARCoreMarker extends SXRMarker
      */
     @Override
     public float getExtentZ() {
-        return mAugmentedImage.getExtentZ();
+        return mAugmentedImage.getExtentZ() * mSession.getARToVRScale();
     }
 
     /**
@@ -77,12 +84,15 @@ public class ARCoreMarker extends SXRMarker
         return centerPose;
     }
 
+    public SXRAnchor getAnchor() { return mAnchor; }
+
     @Override
     public SXRAnchor createAnchor(SXRNode owner)
     {
-        Pose arpose = mSession.makePose(getCenterPose());
+        Pose arpose = mAugmentedImage.getCenterPose();
         Anchor aranchor = mAugmentedImage.createAnchor(arpose);
-        return mSession.addAnchor(aranchor, owner);
+        mAnchor = mSession.addAnchor(aranchor, owner);
+        return mAnchor;
     }
 
     /**

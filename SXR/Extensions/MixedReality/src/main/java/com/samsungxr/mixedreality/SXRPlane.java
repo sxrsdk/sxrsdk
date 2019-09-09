@@ -55,12 +55,6 @@ public abstract class SXRPlane extends SXRBehavior
      */
     public abstract void getCenterPose(@NonNull float[] poseOut);
 
-    /**
-     * Gets the center pose.
-     *
-     * @return the pose of the center of the detected plane.
-     */
-    public abstract Pose getCenterPose();
 
     public Type getPlaneType()
     {
@@ -76,11 +70,6 @@ public abstract class SXRPlane extends SXRBehavior
      * @return The plane height
      */
     public abstract float getHeight();
-
-    /**
-     * @return The polygon that best represents the plane
-     */
-    public abstract FloatBuffer getPolygon();
 
     /**
      * Create a array of float containing the 3 coordinates
