@@ -229,7 +229,7 @@ class PhysicsAVTLoader
             {
                 return null;
             }
-            if (mSkeleton != null)
+            if (mWorld.isMultiBody() && (mSkeleton != null))
             {
                 int boneIndex = mSkeleton.getBoneIndex(targetBone);
 
@@ -497,13 +497,13 @@ class PhysicsAVTLoader
         if (parentBody == null)
         {
             SXRSkeleton skel = (SXRSkeleton) node.getComponent(SXRSkeleton.getComponentType());
-            if (skel != null)
+            if (mWorld.isMultiBody() && (skel != null))
             {
                 mSkeleton = skel;
-                if (parseCollider(link, nodeName) == null)
-                {
-                    return null;
-                }
+            }
+            if (parseCollider(link, nodeName) == null)
+            {
+                return null;
             }
             node.attachComponent(body);
             return body;
