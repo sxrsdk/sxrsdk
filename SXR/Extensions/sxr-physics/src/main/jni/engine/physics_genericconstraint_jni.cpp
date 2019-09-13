@@ -27,108 +27,101 @@
 namespace sxr {
 
     extern "C" {
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_ctor(
-            JNIEnv *env, jclass obj, jlong bodyA, jfloatArray const pivotA);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_setLinearLowerLimits(
-            JNIEnv *env, jclass obj, jlong jconstr, jfloat limitX, jfloat limitY, jfloat limitZ);
-
-    JNIEXPORT jfloatArray JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_getLinearLowerLimits(
-            JNIEnv *env, jclass obj, jlong jconstr);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_setLinearUpperLimits(
-            JNIEnv *env, jclass obj, jlong jconstr, jfloat limitX, jfloat limitY, jfloat limitZ);
-
-    JNIEXPORT jfloatArray JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_getLinearUpperLimits(
-            JNIEnv *env, jclass obj, jlong jconstr);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_setAngularLowerLimits(
-            JNIEnv *env, jclass obj, jlong jconstr, jfloat limitX, jfloat limitY, jfloat limitZ);
-
-    JNIEXPORT jfloatArray JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_getAngularLowerLimits(
-            JNIEnv *env, jclass obj, jlong jconstr);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_setAngularUpperLimits(
-            JNIEnv *env, jclass obj, jlong jconstr, jfloat limitX, jfloat limitY, jfloat limitZ);
-
-    JNIEXPORT jfloatArray JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_getAngularUpperLimits(
-            JNIEnv *env, jclass obj, jlong jconstr);
-    }
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_ctor(JNIEnv *env, jclass obj,
-            jlong jbodyA, jfloatArray const jpivotA)
+    Java_com_samsungxr_physics_Native3DGenericConstraint_ctor(JNIEnv *env, jclass obj, jlong jbodyA,
+                                                              jfloat pivotAx, jfloat pivotAy, jfloat pivotAz,
+                                                              jfloat pivotBx, jfloat pivotBy, jfloat pivotBz)
     {
-        PhysicsRigidBody* bodyA = reinterpret_cast<PhysicsRigidBody*>(jbodyA);
-        jfloat* pivotA = env->GetFloatArrayElements(jpivotA, 0);
-        glm::vec3 pivot(pivotA[0], pivotA[1], pivotA[2]);
-        env->ReleaseFloatArrayElements(jpivotA, pivotA, 0);
-        return reinterpret_cast<jlong>(new BulletGeneric6dofConstraint(bodyA, pivot));
+        PhysicsRigidBody *bodyA = reinterpret_cast<PhysicsRigidBody *>(jbodyA);
+        glm::vec3 pivotA(pivotAx, pivotAy, pivotAz);
+        glm::vec3 pivotB(pivotBx, pivotBy, pivotBz);
+        return reinterpret_cast<jlong>(new BulletGeneric6dofConstraint(bodyA, pivotA, pivotB));
     }
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_setLinearLowerLimits(JNIEnv *env, jclass obj,
-                jlong jconstr, jfloat limitX, jfloat limitY, jfloat limitZ)
+    Java_com_samsungxr_physics_Native3DGenericConstraint_setLinearLowerLimits(JNIEnv *env,
+                                                                              jclass obj,
+                                                                              jlong jconstr,
+                                                                              jfloat limitX,
+                                                                              jfloat limitY,
+                                                                              jfloat limitZ)
     {
-        reinterpret_cast<PhysicsGenericConstraint*>(jconstr)->setLinearLowerLimits(limitX, limitY, limitZ);
+        reinterpret_cast<PhysicsGenericConstraint *>(jconstr)
+                ->setLinearLowerLimits(limitX, limitY, limitZ);
     }
 
     JNIEXPORT jfloatArray JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_getLinearLowerLimits(JNIEnv *env, jclass obj, jlong jconstr)
+    Java_com_samsungxr_physics_Native3DGenericConstraint_getLinearLowerLimits(JNIEnv *env,
+                                                                              jclass obj,
+                                                                              jlong jconstr)
     {
         jfloatArray temp = env->NewFloatArray(3);
-        const glm::vec3& l = reinterpret_cast<PhysicsGenericConstraint*>(jconstr)->getLinearLowerLimits();
+        const glm::vec3 &l = reinterpret_cast<PhysicsGenericConstraint *>(jconstr)
+                ->getLinearLowerLimits();
         env->SetFloatArrayRegion(temp, 0, 3, glm::value_ptr(l));
         return temp;
     }
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_setLinearUpperLimits(JNIEnv *env, jclass obj,
-                jlong jconstr, jfloat limitX, jfloat limitY, jfloat limitZ)
+    Java_com_samsungxr_physics_Native3DGenericConstraint_setLinearUpperLimits(JNIEnv *env,
+                                                                              jclass obj,
+                                                                              jlong jconstr,
+                                                                              jfloat limitX,
+                                                                              jfloat limitY,
+                                                                              jfloat limitZ)
     {
-        reinterpret_cast<PhysicsGenericConstraint*>(jconstr)->setLinearUpperLimits(limitX, limitY, limitZ);
+        reinterpret_cast<PhysicsGenericConstraint *>(jconstr)
+                ->setLinearUpperLimits(limitX, limitY, limitZ);
     }
 
     JNIEXPORT jfloatArray JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_getLinearUpperLimits(JNIEnv *env, jclass obj, jlong jconstr)
+    Java_com_samsungxr_physics_Native3DGenericConstraint_getLinearUpperLimits(JNIEnv *env,
+                                                                              jclass obj,
+                                                                              jlong jconstr)
     {
         jfloatArray temp = env->NewFloatArray(3);
-        const glm::vec3& l = reinterpret_cast<PhysicsGenericConstraint*>(jconstr)->getLinearUpperLimits();
+        const glm::vec3 &l = reinterpret_cast<PhysicsGenericConstraint *>(jconstr)
+                ->getLinearUpperLimits();
 
         env->SetFloatArrayRegion(temp, 0, 3, glm::value_ptr(l));
         return temp;
     }
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_setAngularLowerLimits(JNIEnv *env, jclass obj,
-            jlong jconstr, jfloat limitX, jfloat limitY, jfloat limitZ)
+    Java_com_samsungxr_physics_Native3DGenericConstraint_setAngularLowerLimits(JNIEnv *env,
+                                                                               jclass obj,
+                                                                               jlong jconstr,
+                                                                               jfloat limitX,
+                                                                               jfloat limitY,
+                                                                               jfloat limitZ)
     {
-        reinterpret_cast<PhysicsGenericConstraint*>(jconstr)->setAngularLowerLimits(limitX, limitY, limitZ);
+        reinterpret_cast<PhysicsGenericConstraint *>(jconstr)
+                ->setAngularLowerLimits(limitX, limitY, limitZ);
     }
 
     JNIEXPORT jfloatArray JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_getAngularLowerLimits(JNIEnv *env, jclass obj, jlong jconstr)
+    Java_com_samsungxr_physics_Native3DGenericConstraint_getAngularLowerLimits(JNIEnv *env,
+                                                                               jclass obj,
+                                                                               jlong jconstr)
     {
         jfloatArray temp = env->NewFloatArray(3);
-        const glm::vec3& l = reinterpret_cast<PhysicsGenericConstraint*>(jconstr)->getAngularLowerLimits();
+        const glm::vec3 &l = reinterpret_cast<PhysicsGenericConstraint *>(jconstr)
+                ->getAngularLowerLimits();
         env->SetFloatArrayRegion(temp, 0, 3, glm::value_ptr(l));
         return temp;
     }
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DGenericConstraint_setAngularUpperLimits(JNIEnv *env, jclass obj,
-                jlong jconstr, jfloat limitX, jfloat limitY, jfloat limitZ)
-     {
-        reinterpret_cast<PhysicsGenericConstraint*>(jconstr)->setAngularUpperLimits(limitX, limitY, limitZ);
+    Java_com_samsungxr_physics_Native3DGenericConstraint_setAngularUpperLimits(JNIEnv *env,
+                                                                               jclass obj,
+                                                                               jlong jconstr,
+                                                                               jfloat limitX,
+                                                                               jfloat limitY,
+                                                                               jfloat limitZ)
+    {
+        reinterpret_cast<PhysicsGenericConstraint *>(jconstr)
+                ->setAngularUpperLimits(limitX, limitY, limitZ);
     }
 
     JNIEXPORT jfloatArray JNICALL
@@ -136,10 +129,12 @@ namespace sxr {
             JNIEnv *env, jclass obj, jlong jconstr)
     {
         jfloatArray temp = env->NewFloatArray(3);
-        const glm::vec3& l = reinterpret_cast<PhysicsGenericConstraint*>(jconstr)->getAngularUpperLimits();
+        const glm::vec3 &l = reinterpret_cast<PhysicsGenericConstraint *>(jconstr)
+                ->getAngularUpperLimits();
 
         env->SetFloatArrayRegion(temp, 0, 3, glm::value_ptr(l));
         return temp;
+    }
     }
 
 }

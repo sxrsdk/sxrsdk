@@ -24,7 +24,11 @@ namespace sxr {
     class PhysicsConstraint : public Component
     {
     public:
-        PhysicsConstraint() : Component(PhysicsConstraint::getComponentType()){}
+        PhysicsConstraint() :
+        Component(PhysicsConstraint::getComponentType()),
+        mPivotA(0, 0, 0),
+        mPivotB(0, 0, 0)
+        { }
 
         virtual ~PhysicsConstraint() {}
 
@@ -37,6 +41,9 @@ namespace sxr {
         virtual void* getUnderlying() = 0;
         virtual void  setBreakingImpulse(float impulse) = 0;
         virtual float getBreakingImpulse() const = 0;
+        virtual PhysicsCollidable* getBodyA() const { return mBodyA; }
+        virtual const glm::vec3& getPivotA() const { return mPivotA; }
+        virtual const glm::vec3& getPivotB() const { return mPivotB; }
         virtual void  updateConstructionInfo(PhysicsWorld*) = 0;
         virtual void  addChildComponent(Component* constraint)
         {
@@ -66,6 +73,9 @@ namespace sxr {
         };
 
         std::vector<PhysicsConstraint*> mConstraints;
+        PhysicsCollidable* mBodyA;
+        glm::vec3         mPivotA;
+        glm::vec3         mPivotB;
     };
 
 }

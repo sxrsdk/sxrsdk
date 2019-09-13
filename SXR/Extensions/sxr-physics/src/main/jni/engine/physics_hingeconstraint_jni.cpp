@@ -18,64 +18,50 @@
 
 namespace sxr {
     extern "C" {
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DHingeConstraint_ctor(JNIEnv *env, jclass obj, jlong bodyA,
-                                                            jfloat pivotAX, jfloat pivotAY, jfloat pivotAZ,
-                                                            jfloat pivotBX, jfloat pivotBY, jfloat pivotBZ,
-                                                            jfloat axisX, jfloat axisY, jfloat axisZ);
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DHingeConstraint_getComponentType(JNIEnv *env, jobject obj);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DHingeConstraint_setLimits(JNIEnv * env , jclass obj,
-                                                               jlong jhinge_constraint,
-                                                               jfloat lower , jfloat upper);
-
-    JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DHingeConstraint_getLowerLimit(JNIEnv * env, jclass obj,
-                                                                   jlong jhinge_constraint);
-
-    JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DHingeConstraint_getUpperLimit(JNIEnv * env, jclass obj,
-                                                                   jlong jhinge_constraint);
-    }
-
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DHingeConstraint_ctor(JNIEnv * env, jclass obj, jlong jbodyA,
-                                                            jfloat pivotAX, jfloat pivotAY, jfloat pivotAZ,
-                                                            jfloat pivotBX, jfloat pivotBY, jfloat pivotBZ,
-                                                            jfloat axisX, jfloat axisY, jfloat axisZ)
-{
+    Java_com_samsungxr_physics_Native3DHingeConstraint_ctor(JNIEnv *env, jclass obj, jlong jbodyA,
+                                                            jfloat pivotAX, jfloat pivotAY,
+                                                            jfloat pivotAZ,
+                                                            jfloat pivotBX, jfloat pivotBY,
+                                                            jfloat pivotBZ,
+                                                            jfloat axisX, jfloat axisY,
+                                                            jfloat axisZ)
+    {
         glm::vec3 pivotA(pivotAX, pivotAY, pivotAZ);
         glm::vec3 pivotB(pivotBX, pivotBY, pivotBZ);
         glm::vec3 axis(axisX, axisY, axisZ);
-        PhysicsCollidable* bodyA = reinterpret_cast<PhysicsCollidable*>(jbodyA);
+        PhysicsCollidable *bodyA = reinterpret_cast<PhysicsCollidable *>(jbodyA);
         return reinterpret_cast<jlong> (new BulletHingeConstraint(bodyA, pivotA, pivotB, axis));
     }
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DHingeConstraint_getComponentType(JNIEnv * env, jobject obj) {
+    Java_com_samsungxr_physics_Native3DHingeConstraint_getComponentType(JNIEnv *env, jobject obj)
+    {
         return PhysicsConstraint::getComponentType();
     }
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DHingeConstraint_setLimits(JNIEnv * env, jclass obj,
-                                                               jlong jhinge_constraint,
-                                                               jfloat lower, jfloat upper) {
-        reinterpret_cast<PhysicsHingeConstraint*>(jhinge_constraint)->setLimits(lower, upper);
+    Java_com_samsungxr_physics_Native3DHingeConstraint_setLimits(JNIEnv *env, jclass obj,
+                                                                 jlong jhinge_constraint,
+                                                                 jfloat lower, jfloat upper)
+    {
+        reinterpret_cast<PhysicsHingeConstraint *>(jhinge_constraint)->setLimits(lower, upper);
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DHingeConstraint_getLowerLimit(JNIEnv * env, jclass obj,
-                                                                   jlong jhinge_constraint) {
-        return reinterpret_cast<PhysicsHingeConstraint*>(jhinge_constraint)->getLowerLimit();
+    Java_com_samsungxr_physics_Native3DHingeConstraint_getLowerLimit(JNIEnv *env, jclass obj,
+                                                                     jlong jhinge_constraint)
+    {
+        return reinterpret_cast<PhysicsHingeConstraint *>(jhinge_constraint)->getLowerLimit();
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DHingeConstraint_getUpperLimit(JNIEnv * env, jclass obj,
-                                                                   jlong jhinge_constraint) {
-        return reinterpret_cast<PhysicsHingeConstraint*>(jhinge_constraint)->getUpperLimit();
+    Java_com_samsungxr_physics_Native3DHingeConstraint_getUpperLimit(JNIEnv *env, jclass obj,
+                                                                     jlong jhinge_constraint)
+    {
+        return reinterpret_cast<PhysicsHingeConstraint *>(jhinge_constraint)->getUpperLimit();
+    }
     }
 
 }

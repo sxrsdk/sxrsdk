@@ -34,7 +34,7 @@ namespace sxr {
     class BulletGeneric6dofConstraint : public PhysicsGenericConstraint
     {
     public:
-        BulletGeneric6dofConstraint(PhysicsCollidable* bodyA, const glm::vec3& pivotA);
+        BulletGeneric6dofConstraint(PhysicsCollidable* bodyA, const glm::vec3& pivotA, const glm::vec3& pivotB);
 
         BulletGeneric6dofConstraint(btGeneric6DofConstraint *constraint);
 
@@ -64,19 +64,14 @@ namespace sxr {
 
         virtual void updateConstructionInfo(PhysicsWorld* world);
 
-        virtual const glm::vec3& getParentPivot() { return mPivotA; }
-
     private:
 
         btGeneric6DofConstraint* mGeneric6DofConstraint;
-        PhysicsCollidable*       mRigidBodyA;
-
         float             mBreakingImpulse;
         mutable glm::vec3 mLinearLowerLimits;
         mutable glm::vec3 mLinearUpperLimits;
         mutable glm::vec3 mAngularLowerLimits;
         mutable glm::vec3 mAngularUpperLimits;
-        glm::vec3         mPivotA;
     };
 
 }

@@ -17,6 +17,9 @@ package com.samsungxr.physics;
 
 import com.samsungxr.SXRContext;
 
+import org.joml.Matrix3f;
+import org.joml.Vector3f;
+
 /**
  * Created by c.bozzetto on 06/06/2017.
  */
@@ -32,18 +35,49 @@ public class SXRConeTwistConstraint extends SXRConstraint {
      *
      * @param ctx          the context of the app
      * @param bodyB        the second rigid body (not the owner) in this constraint
-     * @param vortex       the vortex position (x, y and z coordinates) of the conic swing relative to
-     *                     first body (the owner)
+     * @param pivotA       the vortex position (x, y and z coordinates) of the conic swing relative to
+     *                     fixed body (the owner)
+     * @param pivotB       the vortex position (x, y and z coordinates) of the conic swing relative to
+     *                     moving body (the owner)
      * @param bodyRotation a vector containing the elements of the 3x3 rotation matrix for the
      *                     swinging body
      * @param coneRotation a vector containing the elements of the 3x3 rotation matrix for the conic
      *                     trajectory
      */
-    public SXRConeTwistConstraint(SXRContext ctx, SXRPhysicsCollidable bodyB, final float vortex[],
+    public SXRConeTwistConstraint(SXRContext ctx, SXRPhysicsCollidable bodyB,
+                           final float pivotA[], final float pivotB[],
                            final float bodyRotation[], final float coneRotation[])
     {
-        this(ctx, Native3DConeTwistConstraint.ctor(bodyB.getNative(), vortex,
+        this(ctx, Native3DConeTwistConstraint.ctor(bodyB.getNative(),
+                pivotA[0], pivotA[1], pivotA[2],
+                pivotB[0], pivotB[1], pivotB[2],
                 bodyRotation, coneRotation));
+
+        mBodyB = bodyB;
+    }
+
+    /**
+     * Construct a new instance of a conic twist constraint.
+     *
+     * @param ctx          the context of the app
+     * @param bodyB        the second rigid body (not the owner) in this constraint
+     * @param pivotA       the vortex position (x, y and z coordinates) of the conic swing relative to
+     *                     fixed body (the owner)
+     * @param pivotB       the vortex position (x, y and z coordinates) of the conic swing relative to
+     *                     moving body (the owner)
+     * @param bodyRotation a vector containing the elements of the 3x3 rotation matrix for the
+     *                     swinging body
+     * @param coneRotation a vector containing the elements of the 3x3 rotation matrix for the conic
+     *                     trajectory
+     */
+    public SXRConeTwistConstraint(SXRContext ctx, SXRPhysicsCollidable bodyB,
+                                  final Vector3f pivotA, final Vector3f pivotB,
+                                  final float bodyRotation[], final float coneRotation[])
+    {
+        this(ctx, Native3DConeTwistConstraint.ctor(bodyB.getNative(),
+                                                   pivotA.x, pivotA.y, pivotA.z,
+                                                   pivotB.x, pivotB.y, pivotB.z,
+                                                   bodyRotation, coneRotation));
 
         mBodyB = bodyB;
     }
@@ -95,7 +129,10 @@ public class SXRConeTwistConstraint extends SXRConstraint {
 
 class Native3DConeTwistConstraint
 {
-    static native long ctor(long rigidBody, final float pivot[], final float bodyRotation[],
+    static native long ctor(long rigidBody,
+                            float pivotAx, float pivotAy, float pivotAz,
+                            float pivotBx, float pivotBy, float pivotBz,
+                            final float bodyRotation[],
                             final float coneRotation[]);
 
     static native void setSwingLimit(long jconstraint, float limit);

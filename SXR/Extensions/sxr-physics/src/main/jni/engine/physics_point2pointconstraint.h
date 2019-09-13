@@ -27,14 +27,6 @@ public:
 
     virtual ~PhysicsPoint2pointConstraint() {}
 
-    virtual void setPivotInA(const glm::vec3& pivot) = 0;
-
-    virtual const glm::vec3& getPivotInA() const = 0;
-
-    virtual void setPivotInB(const glm::vec3& pivot) = 0;
-
-    virtual const glm::vec3& getPivotInB() const = 0;
-
     int getConstraintType() const { return PhysicsConstraint::point2pointConstraint; }
 };
 

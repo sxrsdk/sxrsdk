@@ -34,7 +34,7 @@ namespace sxr {
     class BulletSliderConstraint : public PhysicsSliderConstraint
     {
     public:
-        BulletSliderConstraint(PhysicsCollidable* bodyA);
+        BulletSliderConstraint(PhysicsCollidable* bodyA, const glm::vec3& pivotA, const glm::vec3& pivotB);
 
         BulletSliderConstraint(btSliderConstraint *constraint);
 
@@ -67,7 +67,6 @@ namespace sxr {
 
     private:
         btSliderConstraint* mSliderConstraint;
-        PhysicsCollidable* mBodyA;
 
         float mBreakingImpulse;
         float mLowerAngularLimit;

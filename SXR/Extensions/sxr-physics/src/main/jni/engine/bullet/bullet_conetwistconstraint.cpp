@@ -29,14 +29,16 @@ const char tag[] = "PHYSICS";
 
 namespace sxr {
     BulletConeTwistConstraint::BulletConeTwistConstraint(PhysicsCollidable* bodyA,
-                                                         const glm::vec3& pivot,
+                                                         const glm::vec3& pivotA,
+                                                         const glm::vec3& pivotB,
                                                          const glm::mat3& bodyRotation,
                                                          const glm::mat3& coneRotation)
     {
         mConeTwistConstraint = 0;
-        mRigidBodyA = bodyA;
+        mBodyA = bodyA;
         mBreakingImpulse = SIMD_INFINITY;
-        mPivot = pivot;
+        mPivotA = pivotA;
+        mPivotB = pivotB;
         mBodyRotation = bodyRotation;
         mConeRotation = coneRotation;
         mSwingLimit = SIMD_PI * 0.25f;
@@ -46,7 +48,7 @@ namespace sxr {
     BulletConeTwistConstraint::BulletConeTwistConstraint(btConeTwistConstraint *constraint)
     {
         mConeTwistConstraint = constraint;
-        mRigidBodyA = static_cast<BulletRigidBody*>(constraint->getRigidBodyA().getUserPointer());
+        mBodyA = static_cast<BulletRigidBody*>(constraint->getRigidBodyA().getUserPointer());
         constraint->setUserConstraintPtr(this);
     }
 
@@ -139,23 +141,20 @@ void BulletConeTwistConstraint::updateConstructionInfo(PhysicsWorld* world)
     }
 
     btRigidBody* rbB = reinterpret_cast<BulletRigidBody*>(owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_RIGID_BODY))->getRigidBody();
-    btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mRigidBodyA)->getRigidBody();
-    // Original pivot is relative to body A (the one that swings)
-    btVector3 p(mPivot.x, mPivot.y, mPivot.z);
+    btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
+    btVector3 pA(mPivotA.x, mPivotA.y, mPivotA.z);
+    btVector3 pB(mPivotB.x, mPivotB.y, mPivotB.z);
 
     btMatrix3x3 m((btScalar) mBodyRotation[0][0], (btScalar) mBodyRotation[0][1], (btScalar) mBodyRotation[0][2],
                   (btScalar) mBodyRotation[1][0], (btScalar) mBodyRotation[1][1], (btScalar) mBodyRotation[1][2],
                   (btScalar) mBodyRotation[2][0], (btScalar) mBodyRotation[2][1], (btScalar) mBodyRotation[2][2]);
-    btTransform fA(m, p);
+    btTransform fA(m, pA);
 
     m.setValue((btScalar) mConeRotation[0][0], (btScalar) mConeRotation[0][1], (btScalar) mConeRotation[0][2],
                (btScalar) mConeRotation[1][0], (btScalar) mConeRotation[1][1], (btScalar) mConeRotation[1][2],
                (btScalar) mConeRotation[2][0], (btScalar) mConeRotation[2][1], (btScalar) mConeRotation[2][2]);
 
-    // Pivot for body B must be calculated
-    p = rbA->getWorldTransform().getOrigin() + p;
-    p -= rbB->getWorldTransform().getOrigin();
-    btTransform fB(m, p);
+    btTransform fB(m, pB);
 
     mConeTwistConstraint = new btConeTwistConstraint(*rbA, *rbB, fA, fB);
     mConeTwistConstraint->setLimit(mSwingLimit, mSwingLimit, mTwistLimit);

@@ -32,9 +32,11 @@ static const char tag[] = "BulletSliderConstrN";
 
 namespace sxr {
 
-    BulletSliderConstraint::BulletSliderConstraint(PhysicsCollidable* bodyA)
+    BulletSliderConstraint::BulletSliderConstraint(PhysicsCollidable* bodyA, const glm::vec3& pivotA, const glm::vec3& pivotB)
     {
         mBodyA = bodyA;
+        mPivotA = pivotA;
+        mPivotB = pivotB;
         mSliderConstraint = nullptr;
         mBreakingImpulse = SIMD_INFINITY;
 
@@ -194,18 +196,16 @@ void BulletSliderConstraint::updateConstructionInfo(PhysicsWorld* world)
         btTransform frameInB(rotB);
         btRigidBody* rbB = rigidBodyB->getRigidBody();
         btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
-        btTransform frameInA = convertTransform2btTransform(mBodyA->owner_object()->transform());
-        btVector3 posA = frameInA.getOrigin();
-        btVector3 posB(tB->position_x(), tB->position_y(), tB->position_z());
-        btVector3 sliderAxis = posA - posB;
+        btTransform worldFrameA = convertTransform2btTransform(mBodyA->owner_object()->transform());
+        btTransform worldFrameB = convertTransform2btTransform(owner_object()->transform());
+        btVector3 sliderAxis = worldFrameA.getOrigin() - worldFrameB.getOrigin();
         btMatrix3x3 rotX2SliderAxis;
         btVector3 Xaxis(1, 0, 0);
 
         rotX2SliderAxis = btMatrix3x3(shortestArcQuatNormalize2(Xaxis, sliderAxis));
-        frameInA.setOrigin(btVector3(0, 0, 0));
-        frameInA.getBasis() *= rotX2SliderAxis;
-        frameInB.getBasis() *= rotX2SliderAxis;
-        mSliderConstraint = new btSliderConstraint(*rbA, *rbB, frameInA, frameInB, true);
+        btTransform frameA(rotX2SliderAxis, btVector3(mPivotA.x, mPivotA.y, mPivotA.z));
+        btTransform frameB(rotX2SliderAxis, btVector3(mPivotB.x, mPivotB.y, mPivotB.z));
+        mSliderConstraint = new btSliderConstraint(*rbA, *rbB, frameA, frameB, true);
         mSliderConstraint->setLowerAngLimit(mLowerAngularLimit);
         mSliderConstraint->setUpperAngLimit(mUpperAngularLimit);
         mSliderConstraint->setLowerLinLimit(mLowerLinearLimit);

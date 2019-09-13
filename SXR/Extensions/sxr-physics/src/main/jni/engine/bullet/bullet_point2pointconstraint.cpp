@@ -13,24 +13,20 @@ static const char tag[] = "PHYSICS";
 namespace sxr {
 
     BulletPoint2PointConstraint::BulletPoint2PointConstraint(PhysicsCollidable* bodyA,
-            float pivotInA[], float pivotInB[])
+            const glm::vec3& pivotA, const glm::vec3& pivotB)
     {
         mPoint2PointConstraint = 0;
-        mRigidBodyA = reinterpret_cast<BulletRigidBody*>(bodyA);
+        mBodyA = reinterpret_cast<BulletRigidBody*>(bodyA);
         mBreakingImpulse = SIMD_INFINITY;
-        mPivotInA.x = pivotInA[0];
-        mPivotInA.y = pivotInA[1];
-        mPivotInA.z = pivotInA[2];
-        mPivotInB.x = pivotInB[0];
-        mPivotInB.y = pivotInB[1];
-        mPivotInB.z = pivotInB[2];
+        mPivotA = pivotA;
+        mPivotB = pivotB;
     };
 
     // This constructor is only used when loading physics from bullet file
     BulletPoint2PointConstraint::BulletPoint2PointConstraint(btPoint2PointConstraint *constraint)
     {
         mPoint2PointConstraint = constraint;
-        mRigidBodyA = static_cast<BulletRigidBody*>(constraint->getRigidBodyA().getUserPointer());
+        mBodyA = static_cast<BulletRigidBody*>(constraint->getRigidBodyA().getUserPointer());
         constraint->setUserConstraintPtr(this);
     }
 
@@ -42,21 +38,6 @@ namespace sxr {
         }
     };
 
-    void BulletPoint2PointConstraint::setPivotInA(const glm::vec3& pivot)
-    {
-        mPivotInA = pivot;
-
-        btVector3 p(pivot.x, pivot.y, pivot.z);
-        mPoint2PointConstraint->setPivotA(p);
-    }
-
-    void BulletPoint2PointConstraint::setPivotInB(const glm::vec3&  pivot)
-    {
-        mPivotInB = pivot;
-
-        btVector3 p(pivot.x, pivot.y, pivot.z);
-        mPoint2PointConstraint->setPivotB(p);
-    }
 
     void BulletPoint2PointConstraint::setBreakingImpulse(float impulse)
     {
@@ -87,15 +68,15 @@ void BulletPoint2PointConstraint::updateConstructionInfo(PhysicsWorld* world)
 {
     if (mPoint2PointConstraint == nullptr)
     {
-        btVector3 pivotInA(mPivotInA.x, mPivotInA.y, mPivotInA.z);
-        btVector3 pivotInB(mPivotInB.x, mPivotInB.y, mPivotInB.z);
+        btVector3 pA(mPivotA.x, mPivotA.y, mPivotA.z);
+        btVector3 pB(mPivotB.x, mPivotB.y, mPivotB.z);
         BulletRigidBody* bodyB = (BulletRigidBody *) owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_RIGID_BODY);
         if (bodyB)
         {
             btRigidBody* rbB = bodyB->getRigidBody();
-            btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mRigidBodyA)->getRigidBody();
+            btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
 
-            mPoint2PointConstraint = new btPoint2PointConstraint(*rbA, *rbB, pivotInA, pivotInB);
+            mPoint2PointConstraint = new btPoint2PointConstraint(*rbA, *rbB, pA, pB);
             mPoint2PointConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
         }
     }

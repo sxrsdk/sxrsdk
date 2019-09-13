@@ -32,19 +32,20 @@ static const char tag[] = "PHYSICS";
 
 namespace sxr {
 
-    BulletGeneric6dofConstraint::BulletGeneric6dofConstraint(PhysicsCollidable* bodyA, const glm::vec3& pivotA)
+    BulletGeneric6dofConstraint::BulletGeneric6dofConstraint(PhysicsCollidable* bodyA, const glm::vec3& pivotA, const glm::vec3& pivotB)
     {
         mGeneric6DofConstraint = 0;
 
-        mRigidBodyA = bodyA;
+        mBodyA = bodyA;
         mBreakingImpulse = SIMD_INFINITY;
         mPivotA = pivotA;
+        mPivotB = pivotB;
     }
 
     BulletGeneric6dofConstraint::BulletGeneric6dofConstraint(btGeneric6DofConstraint *constraint)
     {
         mGeneric6DofConstraint = constraint;
-        mRigidBodyA = static_cast<BulletRigidBody*>(constraint->getRigidBodyA().getUserPointer());
+        mBodyA = static_cast<BulletRigidBody*>(constraint->getRigidBodyA().getUserPointer());
         constraint->setUserConstraintPtr(this);
     }
 
@@ -179,19 +180,17 @@ void BulletGeneric6dofConstraint::updateConstructionInfo(PhysicsWorld* world)
     if (bodyB)
     {
         btRigidBody* rbB = bodyB->getRigidBody();
-        btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mRigidBodyA)->getRigidBody();
-        btVector3    p(mPivotA.x, mPivotA.y, mPivotA.z);
-        Transform*   tB = owner_object()->transform();
-        btMatrix3x3  rotB(btQuaternion(tB->rotation_x(), tB->rotation_y(), tB->rotation_z(), tB->rotation_w()));
-        btTransform  frameInB(rotB);
-        btTransform  frameInA = convertTransform2btTransform(mRigidBodyA->owner_object()->transform());
-        btVector3    posA = frameInA.getOrigin();
-        btVector3    posB(tB->position_x(), tB->position_y(), tB->position_z());
+        btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
+        btVector3    pA(mPivotA.x, mPivotA.y, mPivotA.z);
+        btVector3    pB(mPivotB.x, mPivotB.y, mPivotB.z);
+        btTransform  worldFrameA(convertTransform2btTransform(mBodyA->owner_object()->transform()));
+        btTransform  worldFrameB(convertTransform2btTransform(bodyB->owner_object()->transform()));
+        btTransform  frameB(worldFrameA.inverse() * worldFrameB);
+        btVector3    posDiff(worldFrameB.getOrigin() - worldFrameA.getOrigin() + pB);
+        btTransform  frameA(btQuaternion(0, 0, 0, 1), posDiff);
 
-
-        frameInA.setOrigin(frameInA.getOrigin() + p);
-        frameInB.setOrigin(frameInA.getOrigin() - frameInB.getOrigin());
-        mGeneric6DofConstraint = new btGeneric6DofConstraint(*rbA, *rbB, frameInA, frameInB, false);
+        frameB.setOrigin(worldFrameA.getOrigin() - worldFrameB.getOrigin());
+        mGeneric6DofConstraint = new btGeneric6DofConstraint(*rbA, *rbB, frameA, frameB, false);
         mGeneric6DofConstraint->setLinearLowerLimit(Common2Bullet(mLinearLowerLimits));
         mGeneric6DofConstraint->setLinearUpperLimit(Common2Bullet(mLinearUpperLimits));
         mGeneric6DofConstraint->setAngularLowerLimit(Common2Bullet(mAngularLowerLimits));

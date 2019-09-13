@@ -27,77 +27,57 @@
 namespace sxr {
 
     extern "C" {
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DConeTwistConstraint_ctor(JNIEnv *env, jclass obj,
-                                                              jlong bodyA,
-                                                              const jfloatArray pivot,
-                                                              const jfloatArray bodyRotation,
-                                                              const jfloatArray coneRotation);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DConeTwistConstraint_setSwingLimit(JNIEnv *env, jclass obj,
-                                                                       jlong jconstraint,
-                                                                       jfloat limit);
-
-    JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DConeTwistConstraint_getSwingLimit(JNIEnv *env, jclass obj,
-                                                                       jlong jconstraint);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DConeTwistConstraint_setTwistLimit(JNIEnv *env, jclass obj,
-                                                                       jlong jconstraint,
-                                                                       jfloat limit);
-
-    JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DConeTwistConstraint_getTwistLimit(JNIEnv *env, jclass obj,
-                                                                       jlong jconstraint);
-
-    }
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DConeTwistConstraint_ctor(JNIEnv *env, jclass obj,
-                                                              jlong bodyA,
-                                                              const jfloatArray pivot,
-                                                              const jfloatArray bodyRotation,
-                                                              const jfloatArray coneRotation)
-     {
-        glm::vec3 _pivot(glm::make_vec3(env->GetFloatArrayElements(pivot, 0)));
-        glm::mat3 _b_rot(glm::make_mat3(env->GetFloatArrayElements(bodyRotation, 0)));
-        glm::mat3 _c_rot(glm::make_mat3(env->GetFloatArrayElements(coneRotation, 0)));
+    Java_com_samsungxr_physics_Native3DConeTwistConstraint_ctor(JNIEnv *env, jclass obj, jlong bodyA,
+                                                                jfloat pivotAx, jfloat pivotAy, jfloat pivotAz,
+                                                                jfloat pivotBx, jfloat pivotBy, jfloat pivotBz,
+                                                                jfloatArray bodyRotation,
+                                                                jfloatArray coneRotation)
+    {
+        glm::vec3 pivotA(pivotAx, pivotAy, pivotAz);
+        glm::vec3 pivotB(pivotBx, pivotBy, pivotBz);
+        jfloat* bodyrot = env->GetFloatArrayElements(bodyRotation, 0);
+        jfloat* conerot = env->GetFloatArrayElements(coneRotation, 0);
+        glm::mat3 brot(glm::make_mat3(bodyrot));
+        glm::mat3 crot(glm::make_mat3(conerot));
 
+        env->ReleaseFloatArrayElements(bodyRotation, bodyrot, 0);
+        env->ReleaseFloatArrayElements(coneRotation, conerot, 0);
         return reinterpret_cast<jlong>(new
-                BulletConeTwistConstraint(reinterpret_cast<PhysicsCollidable*>(bodyA),
-                                          _pivot, _b_rot, _c_rot));
+                BulletConeTwistConstraint(reinterpret_cast<PhysicsCollidable *>(bodyA),
+                                          pivotA, pivotB, brot, crot));
     }
 
     JNIEXPORT void JNICALL
     Java_com_samsungxr_physics_Native3DConeTwistConstraint_setSwingLimit(JNIEnv *env, jclass obj,
-                                                                       jlong jconstraint,
-                                                                       jfloat limit)
+                                                                         jlong jconstraint,
+                                                                         jfloat limit)
     {
-        reinterpret_cast<PhysicsConeTwistConstraint*>(jconstraint)->setSwingLimit(limit);
+        reinterpret_cast<PhysicsConeTwistConstraint *>(jconstraint)->setSwingLimit(limit);
     }
 
     JNIEXPORT jfloat JNICALL
     Java_com_samsungxr_physics_Native3DConeTwistConstraint_getSwingLimit(JNIEnv *env, jclass obj,
-                                                                       jlong jconstraint)
+                                                                         jlong jconstraint)
     {
-        return reinterpret_cast<PhysicsConeTwistConstraint*>(jconstraint)->getSwingLimit();
+        return reinterpret_cast<PhysicsConeTwistConstraint *>(jconstraint)->getSwingLimit();
     }
 
     JNIEXPORT void JNICALL
     Java_com_samsungxr_physics_Native3DConeTwistConstraint_setTwistLimit(JNIEnv *env, jclass obj,
-                                                                       jlong jconstraint,
-                                                                       jfloat limit)
+                                                                         jlong jconstraint,
+                                                                         jfloat limit)
     {
-        reinterpret_cast<PhysicsConeTwistConstraint*>(jconstraint)->setTwistLimit(limit);
+        reinterpret_cast<PhysicsConeTwistConstraint *>(jconstraint)->setTwistLimit(limit);
     }
 
     JNIEXPORT jfloat JNICALL
     Java_com_samsungxr_physics_Native3DConeTwistConstraint_getTwistLimit(JNIEnv *env, jclass obj,
-                                                                       jlong jconstraint)
+                                                                         jlong jconstraint)
     {
-        return reinterpret_cast<PhysicsConeTwistConstraint*>(jconstraint)->getTwistLimit();
+        return reinterpret_cast<PhysicsConeTwistConstraint *>(jconstraint)->getTwistLimit();
+    }
     }
 
 }

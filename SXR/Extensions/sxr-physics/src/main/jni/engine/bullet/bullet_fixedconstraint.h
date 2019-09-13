@@ -37,9 +37,7 @@ namespace sxr {
 
         virtual ~BulletFixedConstraint();
 
-        void* getUnderlying() {
-            return this->mFixedConstraint;
-        }
+        void* getUnderlying() { return this->mFixedConstraint; }
 
         void setBreakingImpulse(float impulse);
 
@@ -49,7 +47,6 @@ namespace sxr {
 
     private:
         btFixedConstraint* mFixedConstraint;
-        PhysicsCollidable* mRigidBodyA;
         float mBreakingImpulse;
     };
 

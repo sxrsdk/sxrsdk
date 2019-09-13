@@ -14,14 +14,14 @@ namespace sxr
     BulletFixedConstraint::BulletFixedConstraint(PhysicsCollidable *bodyA)
     {
         mFixedConstraint = 0;
-        mRigidBodyA = bodyA;
+        mBodyA = bodyA;
         mBreakingImpulse = SIMD_INFINITY;
     }
 
     BulletFixedConstraint::BulletFixedConstraint(btFixedConstraint *constraint)
     {
         mFixedConstraint = constraint;
-        mRigidBodyA = nullptr; // TODO: what should this be?
+        mBodyA = nullptr; // TODO: what should this be?
         constraint->setUserConstraintPtr(this);
     }
 
@@ -69,7 +69,7 @@ namespace sxr
         if (bodyB)
         {
             btRigidBody *rbB = bodyB->getRigidBody();
-            btRigidBody *rbA = reinterpret_cast<BulletRigidBody *>(mRigidBodyA)->getRigidBody();
+            btRigidBody *rbA = reinterpret_cast<BulletRigidBody *>(mBodyA)->getRigidBody();
             mFixedConstraint = new btFixedConstraint(*rbA, *rbB,
                                                      rbB->getWorldTransform(),
                                                      rbA->getWorldTransform());

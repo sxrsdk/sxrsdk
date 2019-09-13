@@ -516,19 +516,24 @@ class PhysicsAVTLoader
             return null;
         }
         node.attachComponent(body);
+        JSONObject p = link.getJSONObject("Pivot Pos.");
+        Vector3f pivotB = new Vector3f(
+            (float) p.getDouble("X"),
+            (float) p.getDouble("Y"),
+            (float) p.getDouble("Z"));
+        JSONObject parentLink = mTargetBones.get(parentName);
+        p = parentLink.getJSONObject("Pivot Pos.");
+        Vector3f pivotA = new Vector3f(
+            (float) p.getDouble("X"),
+            (float) p.getDouble("Y"),
+            (float) p.getDouble("Z"));
 
         if (type.equals("ball"))
         {
             JSONObject dofx = dofdata.getJSONObject(0);
             JSONObject dofy = dofdata.getJSONObject(1);
             JSONObject dofz = dofdata.getJSONObject(2);
-            JSONObject p = link.getJSONObject("Pivot Pos.");
-            float[] pivotA = new float[3];
-
-            pivotA[0] = (float) p.getDouble("X");
-            pivotA[1] = (float) p.getDouble("Y");
-            pivotA[2] = (float) p.getDouble("Z");
-            SXRGenericConstraint ball = new SXRGenericConstraint(mContext, parentBody, pivotA);
+            SXRGenericConstraint ball = new SXRGenericConstraint(mContext, parentBody, pivotB);
             ball.setAngularLowerLimits( (float) Math.toRadians(dofx.getDouble("limitLow")),
                                         (float) Math.toRadians(dofy.getDouble("limitLow")),
                                         (float) Math.toRadians(dofz.getDouble("limitLow")));
@@ -537,19 +542,23 @@ class PhysicsAVTLoader
                                        (float) Math.toRadians(dofz.getDouble("limitHigh")));
             constraint = ball;
             Log.e(TAG, "Ball joint between %s and %s joint(%f, %f, %f)",
-                  parentName, name, pivotA[0], pivotA[1], pivotA[2]);
+                  parentName, name, pivotB.x, pivotB.y, pivotB.z);
         }
-        else if (type.equals("universal"))  // TODO: figure out universal joint
+        else if (type.equals("universal"))
         {
             JSONObject dofx = dofdata.getJSONObject(0);
             JSONObject dofy = dofdata.getJSONObject(1);
-            JSONObject p = link.getJSONObject("Pivot Pos.");
-            float[] pivotA = new float[3];
-
-            pivotA[0] = (float) p.getDouble("X");
-            pivotA[1] = (float) p.getDouble("Y");
-            pivotA[2] = (float) p.getDouble("Z");
-            SXRGenericConstraint ball = new SXRGenericConstraint(mContext, parentBody,  pivotA);
+            JSONObject v = link.getJSONObject("Axis A");
+            Vector3f axisA = new Vector3f(
+                (float)  v.getDouble("X"),
+                (float)  v.getDouble("Y"),
+                (float)  v.getDouble("Z"));
+            link.getJSONObject("Axis B");
+            Vector3f axisB = new Vector3f(
+                (float)  v.getDouble("X"),
+                (float)  v.getDouble("Y"),
+                (float)  v.getDouble("Z"));
+            SXRUniversalConstraint ball = new SXRUniversalConstraint(mContext, parentBody,  pivotB, axisA, axisB);
             ball.setAngularLowerLimits( (float) Math.toRadians(dofx.getDouble("limitLow")),
                                         (float) Math.toRadians(dofy.getDouble("limitLow")),
                                         0);
@@ -558,25 +567,15 @@ class PhysicsAVTLoader
                                        0);
             constraint = ball;
             Log.e(TAG, "Universal joint between %s and %s joint(%f, %f, %f)",
-                  parentName, name, pivotA[0], pivotA[1], pivotA[2]);
+                  parentName, name, pivotB.x, pivotB.y, pivotB.z);
         }
         else if (type.equals("hinge"))
         {
-            float[] axisA = new float[3];
-            float[] axisB = new float[3];
-            float[] pivotA = new float[3];
-            float[] pivotB = new float[3];
             JSONObject v = link.getJSONObject("Axis A");
-            JSONObject parent = mTargetBones.get(parentName);
-
-            axisA[0] = (float)  v.getDouble("X");
-            axisA[1] = (float)  v.getDouble("Y");
-            axisA[2] = (float)  v.getDouble("Z");
-            v = parent.getJSONObject("Pivot Pos.");
-            pivotB[0] = (float)  v.getDouble("X");
-            pivotB[1] = (float)  v.getDouble("Y");
-            pivotB[2] = (float)  v.getDouble("Z");
-
+            Vector3f axisA = new Vector3f(
+                        (float)  v.getDouble("X"),
+                        (float)  v.getDouble("Y"),
+                        (float)  v.getDouble("Z"));
             SXRHingeConstraint hinge = new SXRHingeConstraint(mContext, parentBody,
                                                               pivotA, pivotB, axisA);
             constraint = hinge;
@@ -584,7 +583,7 @@ class PhysicsAVTLoader
             hinge.setLimits((float) Math.toRadians(dof.getDouble("limitLow")),
                             (float) Math.toRadians(dof.getDouble("limitHigh")));
             Log.e(TAG, "Hinge joint between %s (%s, %s, %s) and %s (%f, %f, %f)",
-                  parentName, name, pivotA[0], pivotA[1], pivotA[2], pivotB[0], pivotB[1], pivotB[2]);
+                  parentName, name, pivotA.x, pivotA.y, pivotA.z, pivotB.x, pivotB.y, pivotB.z);
         }
         else if (type.equals("fixed"))
         {

@@ -33,9 +33,9 @@ namespace sxr {
         mHingeConstraint = 0;
         mBodyA = bodyA;
         mBreakingImpulse = SIMD_INFINITY;
-        mPivotInA = pivotA;
-        mPivotInB = pivotB;
-        mAxisIn = axis;
+        mPivotA = pivotA;
+        mPivotB = pivotB;
+        mHingeAxis = axis;
 
         // By default angular limit is inactive
         mTempLower = 2.0f;
@@ -119,16 +119,16 @@ namespace sxr {
     {
         if (mHingeConstraint == nullptr)
         {
-            btVector3 pivotInA(mPivotInA.x, mPivotInA.y, mPivotInA.z);
-            btVector3 pivotInB(mPivotInB.x, mPivotInB.y, mPivotInB.z);
-            btVector3 axisIn(mAxisIn.x, mAxisIn.y, mAxisIn.z);
+            btVector3 pA(mPivotA.x, mPivotA.y, mPivotA.z);
+            btVector3 pB(mPivotB.x, mPivotB.y, mPivotB.z);
+            btVector3 axis(mHingeAxis.x, mHingeAxis.y, mHingeAxis.z);
             BulletRigidBody* bodyB = reinterpret_cast<BulletRigidBody*>(owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_RIGID_BODY));
 
             if (bodyB)
             {
                 btRigidBody* rbB = bodyB->getRigidBody();
                 btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
-                mHingeConstraint = new btHingeConstraint(*rbA, *rbB, pivotInA, pivotInB, axisIn, axisIn);
+                mHingeConstraint = new btHingeConstraint(*rbA, *rbB, pA, pB, axis, axis, true);
                 mHingeConstraint->setLimit(mTempLower, mTempUpper);
                 mHingeConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
             }

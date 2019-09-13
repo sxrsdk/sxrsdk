@@ -38,11 +38,7 @@ namespace sxr {
 
         int getConstraintType() const { return PhysicsConstraint::hingeConstraint; }
 
-        virtual const glm::vec3& getParentPivot() = 0;
-
-        virtual const glm::vec3& getPivot() = 0;
-
-        virtual const glm::vec3& getJointAxis() = 0;
+        virtual const glm::vec3& getHingeAxis() = 0;
 
         virtual float getBreakingImpulse() const = 0;
 

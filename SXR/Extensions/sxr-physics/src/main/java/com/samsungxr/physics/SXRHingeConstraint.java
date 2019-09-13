@@ -17,6 +17,8 @@ package com.samsungxr.physics;
 
 import com.samsungxr.SXRContext;
 
+import org.joml.Vector3f;
+
 /**
  * Created by c.bozzetto on 30/05/2017.
  */
@@ -40,7 +42,29 @@ public class SXRHingeConstraint extends SXRConstraint
     public SXRHingeConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, float pivotInA[],
                                  float pivotInB[], float axisIn[])
     {
-        this(ctx, Native3DHingeConstraint.ctor(bodyA.getNative(), pivotInA, pivotInB, axisIn));
+        this(ctx, Native3DHingeConstraint.ctor(bodyA.getNative(),
+                                               pivotInA[0], pivotInA[1], pivotInA[2],
+                                               pivotInB[0], pivotInB[1], pivotInB[2],
+                                               axisIn[0], axisIn[1], axisIn[1]));
+        mBodyA = bodyA;
+    }
+
+    /**
+     * Constructs a new instance of hinge constraint.
+     *
+     * @param ctx the context of the app
+     * @param bodyA      the first rigid body (not the owner) in this constraint
+     * @param pivotInA   the pivot point related to body A
+     * @param pivotInB   the pivot point related to body B (the owner)
+     * @param axisIn     the axis around which body A can rotate
+     */
+    public SXRHingeConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, Vector3f pivotInA,
+                              Vector3f pivotInB, Vector3f axisIn)
+    {
+        this(ctx, Native3DHingeConstraint.ctor(bodyA.getNative(),
+                                               pivotInA.x, pivotInA.y, pivotInA.z,
+                                               pivotInB.x, pivotInB.y, pivotInB.z,
+                                               axisIn.x, axisIn.y, axisIn.z));
         mBodyA = bodyA;
     }
 
@@ -54,12 +78,27 @@ public class SXRHingeConstraint extends SXRConstraint
     public SXRHingeConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, float axisIn[])
     {
         this(ctx, Native3DHingeConstraint.ctor(bodyA.getNative(),
-                new float[] { 0, 0, 0 },
-                new float[] { 0, 0, 0 },
-                axisIn));
+                0, 0, 0,
+                0, 0, 0,
+                axisIn[0], axisIn[1], axisIn[2]));
         mBodyA = bodyA;
     }
 
+    /**
+     * Constructs a new instance of hinge constraint.
+     *
+     * @param ctx the context of the app
+     * @param bodyA      the first rigid body (not the owner) in this constraint
+     * @param axisIn     the axis around which body A can rotate
+     */
+    public SXRHingeConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, Vector3f axisIn)
+    {
+        this(ctx, Native3DHingeConstraint.ctor(bodyA.getNative(),
+                                               0, 0, 0,
+                                               0, 0, 0,
+                                               axisIn.x, axisIn.y, axisIn.z));
+        mBodyA = bodyA;
+    }
     /** Used only by {@link SXRPhysicsLoader} */
     SXRHingeConstraint(SXRContext gvrContext, long nativeConstraint)
     {
@@ -99,7 +138,9 @@ public class SXRHingeConstraint extends SXRConstraint
 
 class Native3DHingeConstraint
 {
-    static native long ctor(long rbB, float pivotInA[], float pivotInB[], float axisIn[]);
+    static native long ctor(long rbB, float pivotAx, float pivotAy, float pivotAz,
+                            float pivotBx, float pivotBy, float pivootBz,
+                            float axisX, float axisY, float axisZ);
 
     static native void setLimits(long nativeConstraint, float lower, float upper);
 

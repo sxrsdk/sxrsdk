@@ -24,95 +24,84 @@
 namespace sxr {
 
     extern "C" {
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_ctor(JNIEnv* env, jclass obj, jlong bodyA);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_setAngularLowerLimit(JNIEnv* env, jclass obj,
-                                                                           jlong jsliderconstraint, jfloat limit);
-
-    JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_getAngularLowerLimit(JNIEnv* env, jclass obj, jlong jsliderconstraint);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_setAngularUpperLimit(JNIEnv* env, jclass obj,
-                                                                           jlong jsliderconstraint, jfloat limit);
-
-    JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_getAngularUpperLimit(JNIEnv* env, jclass obj, jlong jsliderconstraint);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_setLinearLowerLimit(JNIEnv* env, jclass obj,
-                                                                          jlong jsliderconstraint, jfloat limit);
-
-    JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_getLinearLowerLimit(JNIEnv* env, jclass obj, jlong jsliderconstraint);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_setLinearUpperLimit(JNIEnv* env, jclass obj,
-                                                                          jlong jsliderconstraint, jfloat limit);
-
-    JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_getLinearUpperLimit(JNIEnv* env, jclass obj, jlong jsliderconstraint);
-    }
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_ctor(JNIEnv * env, jclass obj, jlong bodyA)
+    Java_com_samsungxr_physics_Native3DSliderConstraint_ctor(JNIEnv *env, jclass obj, jlong bodyA,
+                        jfloat pivotAx, jfloat pivotAy, jfloat pivotAz,
+                        jfloat pivotBx, jfloat pivotBy, jfloat pivotBz)
     {
-        return reinterpret_cast<jlong>(new
-                BulletSliderConstraint(reinterpret_cast<PhysicsRigidBody*>(bodyA)));
+        PhysicsRigidBody* bA = reinterpret_cast<PhysicsRigidBody *>(bodyA);
+        return reinterpret_cast<jlong>(new BulletSliderConstraint(bA,
+                        glm::vec3(pivotAx, pivotAy, pivotAz), glm::vec3(pivotBx, pivotBy, pivotBz)));
     }
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_setAngularLowerLimit(JNIEnv * env,jclass obj,
-                                                                           jlong jsliderconstraint, jfloat limit)
+    Java_com_samsungxr_physics_Native3DSliderConstraint_setAngularLowerLimit(JNIEnv *env,
+                                                                             jclass obj,
+                                                                             jlong jsliderconstraint,
+                                                                             jfloat limit)
     {
-        reinterpret_cast<PhysicsSliderConstraint*>(jsliderconstraint)->setAngularLowerLimit(limit);
+        reinterpret_cast<PhysicsSliderConstraint *>(jsliderconstraint)->setAngularLowerLimit(limit);
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_getAngularLowerLimit(JNIEnv* env, jclass obj, jlong jsliderconstraint)
+    Java_com_samsungxr_physics_Native3DSliderConstraint_getAngularLowerLimit(JNIEnv *env,
+                                                                             jclass obj,
+                                                                             jlong jsliderconstraint)
     {
-        return reinterpret_cast<PhysicsSliderConstraint*>(jsliderconstraint)->getAngularLowerLimit();
+        return reinterpret_cast<PhysicsSliderConstraint *>(jsliderconstraint)
+                ->getAngularLowerLimit();
     }
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_setAngularUpperLimit(JNIEnv* env, jclass obj,
-                                                                           jlong jsliderconstraint, jfloat limit)
+    Java_com_samsungxr_physics_Native3DSliderConstraint_setAngularUpperLimit(JNIEnv *env,
+                                                                             jclass obj,
+                                                                             jlong jsliderconstraint,
+                                                                             jfloat limit)
     {
-        reinterpret_cast<PhysicsSliderConstraint*>(jsliderconstraint)->setAngularUpperLimit(limit);
+        reinterpret_cast<PhysicsSliderConstraint *>(jsliderconstraint)->setAngularUpperLimit(limit);
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_getAngularUpperLimit(JNIEnv* env, jclass obj, jlong jsliderconstraint)
+    Java_com_samsungxr_physics_Native3DSliderConstraint_getAngularUpperLimit(JNIEnv *env,
+                                                                             jclass obj,
+                                                                             jlong jsliderconstraint)
     {
-        return reinterpret_cast<PhysicsSliderConstraint*>(jsliderconstraint)->getAngularUpperLimit();
+        return reinterpret_cast<PhysicsSliderConstraint *>(jsliderconstraint)
+                ->getAngularUpperLimit();
     }
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_setLinearLowerLimit(JNIEnv* env, jclass obj,
-                                                                          jlong jsliderconstraint, jfloat limit)
+    Java_com_samsungxr_physics_Native3DSliderConstraint_setLinearLowerLimit(JNIEnv *env, jclass obj,
+                                                                            jlong jsliderconstraint,
+                                                                            jfloat limit)
     {
-        reinterpret_cast<PhysicsSliderConstraint*>(jsliderconstraint)->setLinearLowerLimit(limit);
+        reinterpret_cast<PhysicsSliderConstraint *>(jsliderconstraint)->setLinearLowerLimit(limit);
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_getLinearLowerLimit(JNIEnv* env, jclass obj, jlong jsliderconstraint)
+    Java_com_samsungxr_physics_Native3DSliderConstraint_getLinearLowerLimit(JNIEnv *env, jclass obj,
+                                                                            jlong jsliderconstraint)
     {
-        return reinterpret_cast<PhysicsSliderConstraint*>(jsliderconstraint)->getLinearLowerLimit();
+        return reinterpret_cast<PhysicsSliderConstraint *>(jsliderconstraint)
+                ->getLinearLowerLimit();
     }
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_setLinearUpperLimit(JNIEnv* env, jclass obj,
-                                                                          jlong jsliderconstraint, jfloat limit)
+    Java_com_samsungxr_physics_Native3DSliderConstraint_setLinearUpperLimit(JNIEnv *env, jclass obj,
+                                                                            jlong jsliderconstraint,
+                                                                            jfloat limit)
     {
-        reinterpret_cast<PhysicsSliderConstraint*>(jsliderconstraint)->setLinearUpperLimit(limit);
+        reinterpret_cast<PhysicsSliderConstraint *>(jsliderconstraint)->setLinearUpperLimit(limit);
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DSliderConstraint_getLinearUpperLimit(JNIEnv* env, jclass obj, jlong jsliderconstraint)
+    Java_com_samsungxr_physics_Native3DSliderConstraint_getLinearUpperLimit(JNIEnv *env, jclass obj,
+                                                                            jlong jsliderconstraint)
     {
-        return reinterpret_cast<PhysicsSliderConstraint*>(jsliderconstraint)->getLinearUpperLimit();
+        return reinterpret_cast<PhysicsSliderConstraint *>(jsliderconstraint)
+                ->getLinearUpperLimit();
+    }
     }
 
 }

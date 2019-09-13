@@ -7,10 +7,10 @@
 
 namespace sxr {
 
-    class PhysicsGenericConstraint : public PhysicsConstraint
+    class PhysicsUniversalConstraint : public PhysicsConstraint
     {
     public:
-        virtual ~PhysicsGenericConstraint() {}
+        virtual ~PhysicsUniversalConstraint() {}
 
         virtual void setAngularLowerLimits(float limitX, float limitY, float limitZ) = 0;
 
@@ -20,11 +20,9 @@ namespace sxr {
 
         virtual const glm::vec3& getAngularUpperLimits() const = 0;
 
-        virtual const glm::vec3& getParentPivot() = 0;
-
-        int getConstraintType() const { return PhysicsConstraint::genericConstraint; }
+        int getConstraintType() const { return PhysicsConstraint::universalConstraint; }
     };
 
 }
 
-#endif //EXTENSIONS_PHYSICS_GENERICCONSTRAINT_H
+#endif //EXTENSIONS_PHYSICS_UNIVERSALCONSTRAINT_H

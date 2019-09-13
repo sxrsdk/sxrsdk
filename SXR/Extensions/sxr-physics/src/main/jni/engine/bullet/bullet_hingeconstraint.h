@@ -54,24 +54,16 @@ namespace sxr {
 
         virtual float getBreakingImpulse() const;
 
-        virtual const glm::vec3& getParentPivot() { return mPivotInA; }
-
-        virtual const glm::vec3& getPivot() { return mPivotInB; }
-
-        virtual const glm::vec3& getJointAxis() { return mAxisIn; }
+        virtual const glm::vec3& getHingeAxis() { return mHingeAxis; }
 
         void updateConstructionInfo(PhysicsWorld* world);
 
     private:
         btHingeConstraint* mHingeConstraint;
-        PhysicsCollidable* mBodyA;
-
         float     mBreakingImpulse;
         float     mTempLower;
         float     mTempUpper;
-        glm::vec3 mPivotInA;
-        glm::vec3 mPivotInB;
-        glm::vec3 mAxisIn;
+        glm::vec3 mHingeAxis;
     };
 }
 #endif //EXTENSIONS_BULLET_HINGECONSTRAINT_H

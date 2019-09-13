@@ -18,72 +18,61 @@
 namespace sxr {
 extern "C"
 {
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_create(JNIEnv* env, jclass obj, jfloat maxImpulse);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_setVelocityTarget(JNIEnv* env, jclass obj, jlong jjoint,
-                                                                    jint dof, jfloat velocity);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_setVelocityTarget3(JNIEnv* env, jclass obj, jlong jjoint,
-                                                                    jfloat vx, jfloat vy, jfloat vz);
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_setPositionTarget(JNIEnv* env, jclass obj, jlong jjoint,
-                                                                    jint dof, jfloat velocity);
-    
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_setPositionTarget3(JNIEnv* env, jclass obj, jlong jjoint,
-                                                                    jfloat px, jfloat py, jfloat pz);
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_setPositionTarget4(JNIEnv* env, jclass obj, jlong jjoint,
-                                                                    jfloat px, jfloat py, jfloat pz, jfloat pw);
-
+JNIEXPORT jlong JNICALL
+Java_com_samsungxr_physics_NativePhysicsJointMotor_create(JNIEnv *env, jclass obj,
+                                                          jfloat maxImpulse)
+{
+    return reinterpret_cast<jlong>(new BulletJointMotor(maxImpulse));
 }
 
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_create(JNIEnv* env, jclass obj, jfloat maxImpulse)
-    {
-        return reinterpret_cast<jlong>(new BulletJointMotor(maxImpulse));
-    }
 
+JNIEXPORT void JNICALL
+Java_com_samsungxr_physics_NativePhysicsJointMotor_setVelocityTarget(JNIEnv *env, jclass obj,
+                                                                     jlong jjoint, jint dof,
+                                                                     jfloat vel)
+{
+    PhysicsJointMotor *m = reinterpret_cast<PhysicsJointMotor *>(jjoint);
+    return m->setVelocityTarget(dof, vel);
+}
 
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_setVelocityTarget(JNIEnv* env, jclass obj, jlong jjoint, jint dof, jfloat vel)
-    {
-        PhysicsJointMotor* m = reinterpret_cast<PhysicsJointMotor*>(jjoint);
-        return m->setVelocityTarget(dof, vel);
-    }
+JNIEXPORT void JNICALL
+Java_com_samsungxr_physics_NativePhysicsJointMotor_setVelocityTarget3(JNIEnv *env, jclass obj,
+                                                                      jlong jjoint,
+                                                                      jfloat vx, jfloat vy,
+                                                                      jfloat vz)
+{
+    PhysicsJointMotor *m = reinterpret_cast<PhysicsJointMotor *>(jjoint);
+    return m->setVelocityTarget(vx, vy, vz);
+}
 
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_setVelocityTarget3(JNIEnv* env, jclass obj, jlong jjoint,
-                                                jfloat vx, jfloat vy, jfloat vz)
-    {
-        PhysicsJointMotor* m = reinterpret_cast<PhysicsJointMotor*>(jjoint);
-        return m->setVelocityTarget(vx, vy, vz);
-    }
+JNIEXPORT void JNICALL
+Java_com_samsungxr_physics_NativePhysicsJointMotor_setPositionTarget(JNIEnv *env, jclass obj,
+                                                                     jlong jjoint, jint dof,
+                                                                     jfloat p)
+{
+    PhysicsJointMotor *m = reinterpret_cast<PhysicsJointMotor *>(jjoint);
+    return m->setPositionTarget(dof, p);
+}
 
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_setPositionTarget(JNIEnv* env, jclass obj, jlong jjoint, jint dof, jfloat p)
-    {
-        PhysicsJointMotor* m = reinterpret_cast<PhysicsJointMotor*>(jjoint);
-        return m->setPositionTarget(dof, p);
-    }
+JNIEXPORT void JNICALL
+Java_com_samsungxr_physics_NativePhysicsJointMotor_setPositionTarget3(JNIEnv *env, jclass obj,
+                                                                      jlong jjoint,
+                                                                      jfloat px, jfloat py,
+                                                                      jfloat pz)
+{
+    PhysicsJointMotor *m = reinterpret_cast<PhysicsJointMotor *>(jjoint);
+    return m->setPositionTarget(px, py, pz);
+}
 
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_setPositionTarget3(JNIEnv* env, jclass obj, jlong jjoint,
-                                    jfloat px, jfloat py, jfloat pz)
-    {
-        PhysicsJointMotor *m = reinterpret_cast<PhysicsJointMotor *>(jjoint);
-        return m->setPositionTarget(px, py, pz);
-    }
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJointMotor_setPositionTarget4(JNIEnv* env, jclass obj, jlong jjoint,
-                                                       jfloat px, jfloat py, jfloat pz, jfloat pw)
-    {
-        PhysicsJointMotor *m = reinterpret_cast<PhysicsJointMotor *>(jjoint);
-        return m->setPositionTarget(px, py, pz, pw);
-    }
+JNIEXPORT void JNICALL
+Java_com_samsungxr_physics_NativePhysicsJointMotor_setPositionTarget4(JNIEnv *env, jclass obj,
+                                                                      jlong jjoint,
+                                                                      jfloat px, jfloat py,
+                                                                      jfloat pz, jfloat pw)
+{
+    PhysicsJointMotor *m = reinterpret_cast<PhysicsJointMotor *>(jjoint);
+    return m->setPositionTarget(px, py, pz, pw);
+}
+}
 
 }

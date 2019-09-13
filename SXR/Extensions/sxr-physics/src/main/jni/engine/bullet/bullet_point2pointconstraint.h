@@ -32,8 +32,7 @@ namespace sxr {
     {
 
     public:
-        explicit BulletPoint2PointConstraint(PhysicsCollidable* bodyA,
-                                             float pivotInA[],float pivotInB[]);
+        BulletPoint2PointConstraint(PhysicsCollidable* bodyA, const glm::vec3& pivotA, const glm::vec3& pivotB);
 
         BulletPoint2PointConstraint(btPoint2PointConstraint *constraint);
 
@@ -48,23 +47,11 @@ namespace sxr {
 
         float getBreakingImpulse() const;
 
-        void setPivotInA(const glm::vec3& pivot);
-
-        const glm::vec3& getPivotInA() const { return mPivotInA; }
-
-        void setPivotInB(const glm::vec3& pivot);
-
-        const glm::vec3& getPivotInB() const { return mPivotInB; }
-
         void updateConstructionInfo(PhysicsWorld* world);
 
     private:
         btPoint2PointConstraint* mPoint2PointConstraint;
-        PhysicsCollidable*       mRigidBodyA;
-
         float     mBreakingImpulse;
-        glm::vec3 mPivotInA;
-        glm::vec3 mPivotInB;
     };
 }
 #endif //BULLET_POINT2POINTCONSTRAINT_H

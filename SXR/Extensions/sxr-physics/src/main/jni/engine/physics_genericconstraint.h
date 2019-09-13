@@ -31,8 +31,6 @@ namespace sxr {
 
         virtual const glm::vec3& getAngularUpperLimits() const = 0;
 
-        virtual const glm::vec3& getParentPivot() = 0;
-
         int getConstraintType() const { return PhysicsConstraint::genericConstraint; }
     };
 

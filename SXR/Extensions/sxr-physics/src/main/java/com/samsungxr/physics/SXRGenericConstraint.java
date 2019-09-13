@@ -18,6 +18,8 @@ package com.samsungxr.physics;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRTransform;
 
+import org.joml.Vector3f;
+
 /**
  * Created by c.bozzetto on 09/06/2017.
  */
@@ -37,12 +39,50 @@ public class SXRGenericConstraint extends SXRConstraint
      *
      * @param ctx        the context of the app
      * @param bodyA      the "fixed" body (not the owner) in this constraint
-     * @param pivotA    the pivot point (x, y and z coordinates) in this constraint
+     * @param pivotA     the pivot point (x, y and z coordinates) in this constraint
      *                   relative to "fixed" body
+     * @param pivotB     the pivot point (x, y and z coordinates) in this constraint
+     *                   relative to owner
      */
-    public SXRGenericConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, final float pivotA[])
+    public SXRGenericConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, final float pivotA[], final float pivotB[])
     {
-        this(ctx, Native3DGenericConstraint.ctor(bodyA.getNative(), pivotA));
+        this(ctx, Native3DGenericConstraint.ctor(bodyA.getNative(),
+                                                 pivotA[0], pivotA[1], pivotA[2],
+                                                 pivotB[0], pivotB[1], pivotB[2]));
+        mBodyA = bodyA;
+    }
+
+    /**
+     * Construct a new instance of a generic constraint.
+     *
+     * @param ctx        the context of the app
+     * @param bodyA      the "fixed" body (not the owner) in this constraint
+     * @param pivotA     the pivot point (x, y and z coordinates) in this constraint
+     *                   relative to "fixed" body
+     * @param pivotB     the pivot point (x, y and z coordinates) in this constraint
+     *                   relative to owner
+     */
+    public SXRGenericConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, final Vector3f pivotA, final Vector3f pivotB)
+    {
+        this(ctx, Native3DGenericConstraint.ctor(bodyA.getNative(),
+                                                 pivotA.x, pivotA.y, pivotA.z,
+                                                 pivotB.x, pivotB.y, pivotB.z));
+        mBodyA = bodyA;
+    }
+
+    /**
+     * Construct a new instance of a generic constraint.
+     *
+     * @param ctx        the context of the app
+     * @param bodyA      the "fixed" body (not the owner) in this constraint
+     * @param pivotB     the pivot point (x, y and z coordinates) in this constraint
+     *                   relative to owner
+     */
+    public SXRGenericConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, final Vector3f pivotB)
+    {
+        this(ctx, Native3DGenericConstraint.ctor(bodyA.getNative(),
+                                                 0, 0, 0,
+                                                 pivotB.x, pivotB.y, pivotB.z));
         mBodyA = bodyA;
     }
 
@@ -54,7 +94,9 @@ public class SXRGenericConstraint extends SXRConstraint
      */
     public SXRGenericConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA)
     {
-        this(ctx, Native3DGenericConstraint.ctor(bodyA.getNative(), new float[] { 0, 0, 0 }));
+        this(ctx, Native3DGenericConstraint.ctor(bodyA.getNative(),
+                                                 0, 0, 0,
+                                                 0, 0, 0));
         mBodyA = bodyA;
     }
 
@@ -155,7 +197,9 @@ public class SXRGenericConstraint extends SXRConstraint
 
 class Native3DGenericConstraint
 {
-    static native long ctor(long rigidBodyB, final float joint[]);
+    static native long ctor(long rigidBodyA,
+                            float pivotAx, float pivotAy, float pivotAz,
+                            float pivotBx, float pivotBy, float pivotBz);
 
     static native void setLinearLowerLimits(long jconstr, float limX, float limY, float limZ);
 

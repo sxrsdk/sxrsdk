@@ -33,12 +33,12 @@ static const char tag[] = "PHYSICS";
 namespace sxr {
 
     BulletUniversalConstraint::BulletUniversalConstraint(PhysicsCollidable* bodyA,
-            const glm::vec3& pivotA, const glm::vec3& axis1, const glm::vec3& axis2)
+                    const glm::vec3& pivotB, const glm::vec3& axis1, const glm::vec3& axis2)
     {
         mConstraint = 0;
         mBodyA = bodyA;
         mBreakingImpulse = SIMD_INFINITY;
-        mPivotA = pivotA;
+        mPivotB= pivotB;
         mAxis1 = axis1;
         mAxis2 = axis2;
     }
@@ -139,17 +139,8 @@ void BulletUniversalConstraint::updateConstructionInfo(PhysicsWorld* world)
     {
         btRigidBody* rbB = bodyB->getRigidBody();
         btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
-        btVector3    p(mPivotA.x, mPivotA.y, mPivotA.z);
-        Transform*   tB = owner_object()->transform();
-        btMatrix3x3  rotB(btQuaternion(tB->rotation_x(), tB->rotation_y(), tB->rotation_z(), tB->rotation_w()));
-        btTransform  frameInB(rotB);
-        btTransform  frameInA = convertTransform2btTransform(mBodyA->owner_object()->transform());
-        btVector3    posA = frameInA.getOrigin();
-        btVector3    posB(tB->position_x(), tB->position_y(), tB->position_z());
+        btVector3    p(mPivotB.x, mPivotB.y, mPivotB.z);
 
-
-        frameInA.setOrigin(frameInA.getOrigin() + p);
-        frameInB.setOrigin(frameInA.getOrigin() - frameInB.getOrigin());
         mConstraint = new btUniversalConstraint(*rbA, *rbB, p,
                 btVector3(mAxis1.x, mAxis1.y, mAxis1.z),
                 btVector3(mAxis2.x, mAxis2.y, mAxis2.z));

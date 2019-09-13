@@ -31,10 +31,10 @@ namespace sxr {
     class PhysicsRigidBody;
     class BulletRigidBody;
 
-    class BulletUniversalConstraint : public PhysicsGenericConstraint
+    class BulletUniversalConstraint : public PhysicsUniversalConstraint
     {
     public:
-        BulletUniversalConstraint(PhysicsCollidable* bodyA, const glm::vec3& pivotA, const glm::vec3& axis1, const glm::vec3& axis2);
+        BulletUniversalConstraint(PhysicsCollidable* bodyA, const glm::vec3& pivotB, const glm::vec3& axis1, const glm::vec3& axis2);
 
         BulletUniversalConstraint(btUniversalConstraint *constraint);
 
@@ -56,17 +56,12 @@ namespace sxr {
 
         virtual void updateConstructionInfo(PhysicsWorld* world);
 
-        virtual const glm::vec3& getParentPivot() { return mPivotA; }
-
     private:
 
         btUniversalConstraint*  mConstraint;
-        PhysicsCollidable*      mBodyA;
-
         float             mBreakingImpulse;
         mutable glm::vec3 mAngularLowerLimits;
         mutable glm::vec3 mAngularUpperLimits;
-        glm::vec3         mPivotA;
         glm::vec3         mAxis1;
         glm::vec3         mAxis2;
     };

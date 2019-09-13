@@ -23,102 +23,34 @@
 namespace sxr {
     extern "C" {
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_ctor(JNIEnv* env, jclass obj,
-        jlong bodyA, jfloatArray pivotInA, jfloatArray pivotInB);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_setPivotInA(JNIEnv* env, jclass obj,
-                                                                       jlong jp2p_constraint,
-                                                                       jfloat x, jfloat y,
-                                                                       jfloat z);
-
-    JNIEXPORT jfloatArray JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_getPivotInA(JNIEnv* env, jclass obj,
-                                                                       jlong jp2p_constraint);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_setPivotInB(JNIEnv* env, jclass obj,
-                                                                       jlong jp2p_constraint,
-                                                                       jfloat x, jfloat y,
-                                                                       jfloat z);
-
-    JNIEXPORT jfloatArray JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_getPivotInB(JNIEnv* env, jclass obj,
-                                                                       jlong jp2p_constraint);
+    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_ctor(JNIEnv *env, jclass obj,
+                                                                  jlong bodyA,
+                                                                  jfloat pivotAx, jfloat pivotAy, jfloat pivotAz,
+                                                                  jfloat pivotBx, jfloat pivotBy, jfloat pivotBz)
+    {
+        glm::vec3 pA(pivotAx, pivotAy, pivotAz);
+        glm::vec3 pB(pivotBx, pivotBy, pivotBz);
+        BulletPoint2PointConstraint* c = new BulletPoint2PointConstraint(reinterpret_cast<PhysicsRigidBody *>(bodyA), pA, pB);
+        return reinterpret_cast<jlong>(c);
+    }
 
 
     JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_setBreakingImpulse(JNIEnv* env,
-                                                                              jclass obj,
-                                                                              jlong jp2p_constraint,
-                                                                              jfloat impulse);
-
-    JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_getBreakingLimit(JNIEnv* env,
-                                                                            jclass obj,
-                                                                            jlong jp2p_constraint);
-    }
-
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_ctor(JNIEnv* env, jclass obj, 
-        jlong bodyA, jfloatArray pivotInA, jfloatArray pivotInB) {
-        jfloat *pA = env->GetFloatArrayElements(pivotInA, 0);
-        jfloat *pB = env->GetFloatArrayElements(pivotInB, 0);
-        return reinterpret_cast<jlong>(new BulletPoint2PointConstraint(
-                    reinterpret_cast<PhysicsRigidBody*>(bodyA), pA, pB));
-    }
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_setPivotInA(JNIEnv* env, jclass obj,
-                                                                       jlong jp2p_constraint,
-                                                                       jfloat x, jfloat y,
-                                                                       jfloat z) {
-        glm::vec3 v(x, y, z);
-        reinterpret_cast<PhysicsPoint2pointConstraint*>(jp2p_constraint)->setPivotInA(v);
-    }
-
-    JNIEXPORT jfloatArray JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_getPivotInA(JNIEnv* env, jclass obj,
-                                                                       jlong jp2p_constraint) {
-        glm::vec3 v =reinterpret_cast<PhysicsPoint2pointConstraint*>(jp2p_constraint)->getPivotInA();
-        jfloatArray result = env->NewFloatArray(3);
-        env->SetFloatArrayRegion(result, 0, 3, glm::value_ptr(v));
-
-        return result;
-    }
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_setPivotInB(JNIEnv* env, jclass obj,
-                                                                       jlong jp2p_constraint,
-                                                                       jfloat x, jfloat y,
-                                                                       jfloat z) {
-        glm::vec3 v(x, y, z);
-        reinterpret_cast<PhysicsPoint2pointConstraint*>(jp2p_constraint)->setPivotInB(v);
-    }
-
-    JNIEXPORT jfloatArray JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_getPivotInB(JNIEnv* env, jclass obj,
-                                                                       jlong jp2p_constraint) {
-        glm::vec3 v = reinterpret_cast<PhysicsPoint2pointConstraint*>(jp2p_constraint)->getPivotInB();
-        jfloatArray result = env->NewFloatArray(3);
-        env->SetFloatArrayRegion(result, 0, 3, glm::value_ptr(v));
-
-        return result;
-    }
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_setBreakingImpulse(JNIEnv* env,
-                                                                              jclass obj,
-                                                                              jlong jp2p_constraint,
-                                                                              jfloat impulse) {
-        reinterpret_cast<PhysicsConstraint*>(jp2p_constraint)->setBreakingImpulse(impulse);
+    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_setBreakingImpulse(JNIEnv *env,
+                                                                                jclass obj,
+                                                                                jlong jp2p_constraint,
+                                                                                jfloat impulse)
+    {
+        reinterpret_cast<PhysicsConstraint *>(jp2p_constraint)->setBreakingImpulse(impulse);
     }
 
     JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_getBreakingLimit(JNIEnv* env,
-                                                                            jclass obj,
-                                                                            jlong jp2p_constraint) {
-        return reinterpret_cast<PhysicsConstraint*>(jp2p_constraint)->getBreakingImpulse();
+    Java_com_samsungxr_physics_Native3DPoint2PointConstraint_getBreakingLimit(JNIEnv *env,
+                                                                              jclass obj,
+                                                                              jlong jp2p_constraint)
+    {
+        return reinterpret_cast<PhysicsConstraint *>(jp2p_constraint)->getBreakingImpulse();
     }
+}
 
 }

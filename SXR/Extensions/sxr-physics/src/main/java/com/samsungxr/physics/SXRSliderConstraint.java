@@ -17,6 +17,8 @@ package com.samsungxr.physics;
 
 import com.samsungxr.SXRContext;
 
+import org.joml.Vector3f;
+
 /**
  * Created by c.bozzetto on 31/05/2017.
  */
@@ -36,7 +38,37 @@ public class SXRSliderConstraint extends SXRConstraint
      */
     public SXRSliderConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA)
     {
-        this(ctx, Native3DSliderConstraint.ctor(bodyA.getNative()));
+        this(ctx, Native3DSliderConstraint.ctor(bodyA.getNative(), 0, 0, 0, 0, 0, 0));
+        mBodyA = bodyA;
+    }
+
+    /**
+     * Constructs a new instance of a slider constraint.
+     *
+     * @param ctx   the context of the app
+     * @param bodyA the second rigid body (not the owner) in this constraint.
+     * @param pivotA The pivot point related to body A
+     * @param pivotB The pivot point related to body B (the owner)
+     */
+    public SXRSliderConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, final float[] pivotA, final float[] pivotB)
+    {
+        this(ctx, Native3DSliderConstraint.ctor(bodyA.getNative(), pivotA[0], pivotA[1], pivotA[2],
+                                                pivotB[0], pivotB[1], pivotB[2]));
+        mBodyA = bodyA;
+    }
+
+    /**
+     * Constructs a new instance of a slider constraint.
+     *
+     * @param ctx   the context of the app
+     * @param bodyA the second rigid body (not the owner) in this constraint.
+     * @param pivotA The pivot point related to body A
+     * @param pivotB The pivot point related to body B (the owner)
+     */
+    public SXRSliderConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, final Vector3f pivotA, final Vector3f pivotB)
+    {
+        this(ctx, Native3DSliderConstraint.ctor(bodyA.getNative(), pivotA.x, pivotA.y, pivotA.z,
+                                                pivotB.x, pivotB.y, pivotB.z));
         mBodyA = bodyA;
     }
 
@@ -129,7 +161,8 @@ public class SXRSliderConstraint extends SXRConstraint
 
 
 class Native3DSliderConstraint {
-    static native long ctor(long rbB);
+    static native long ctor(long rbB, float pivotAx, float pivotAy, float pivotAz,
+                            float pivotBx, float pivotBy, float pivotBz);
 
     static native void setAngularLowerLimit(long nativeConstraint, float limit);
 
