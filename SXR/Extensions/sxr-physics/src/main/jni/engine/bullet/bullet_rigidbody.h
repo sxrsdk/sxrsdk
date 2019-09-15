@@ -37,12 +37,17 @@ class BulletRigidBody : public PhysicsRigidBody, btMotionState
 
     virtual ~BulletRigidBody();
 
-    btRigidBody *getRigidBody() const {
+    btRigidBody* getRigidBody() const
+    {
         return mRigidBody;
     }
 
     virtual void setSimulationType(SimulationType type);
-    virtual SimulationType getSimulationType() const;
+
+    virtual SimulationType getSimulationType() const
+    {
+        return mSimType;
+    }
 
     virtual void setMass(float mass)
     {
@@ -54,7 +59,10 @@ class BulletRigidBody : public PhysicsRigidBody, btMotionState
         return mConstructionInfo.m_mass;
     }
 
-    virtual float getFriction() const;
+    virtual float getFriction() const
+    {
+        return mConstructionInfo.m_friction;
+    }
 
     virtual void setFriction(float f);
 
@@ -120,7 +128,10 @@ class BulletRigidBody : public PhysicsRigidBody, btMotionState
 
     void getDamping(float &angular, float &linear) const;
 
-    float getRestitution() const;
+    float getRestitution() const
+    {
+        return mConstructionInfo.m_restitution;
+    }
 
     float getCcdMotionThreshold() const;
 
@@ -128,24 +139,18 @@ class BulletRigidBody : public PhysicsRigidBody, btMotionState
 
     float getCcdSweptSphereRadius() const;
 
-
     void reset(bool rebuildCollider);
 
 private:
 
     void finalize();
 
-    void updateCollisionShapeLocalScaling();
-
 
 private:
     btRigidBody::btRigidBodyConstructionInfo mConstructionInfo;
     btRigidBody* mRigidBody;
-    btTransform m_centerOfMassOffset;
-    btTransform prevPos;
-    btVector3 mScale;
     SimulationType mSimType;
-    BulletWorld *mWorld;
+    BulletWorld* mWorld;
 
     friend class BulletWorld;
 };
