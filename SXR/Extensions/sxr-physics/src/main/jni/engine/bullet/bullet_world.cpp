@@ -130,23 +130,6 @@ btDynamicsWorld* BulletWorld::getPhysicsWorld() const
     return mPhysicsWorld;
 }
 
-int BulletWorld::getUpdated(std::vector<PhysicsCollidable*>& updated)
-{
-    int n = mBodiesChanged.size();
-
-    if (n > 0)
-    {
-        copy(mBodiesChanged.begin(), mBodiesChanged.end(), back_inserter(updated));
-        mBodiesChanged.clear();
-    }
-    return n;
-}
-
-void BulletWorld::markUpdated(PhysicsCollidable* body)
-{
-    mBodiesChanged.push_back(body);
-}
-
 void BulletWorld::addConstraint(PhysicsConstraint *constraint)
 {
     constraint->updateConstructionInfo(this);

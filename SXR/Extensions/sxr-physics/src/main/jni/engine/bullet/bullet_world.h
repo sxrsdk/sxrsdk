@@ -71,13 +71,9 @@ class BulletWorld : public PhysicsWorld {
 
     void listCollisions(std::list <ContactPoint> &contactPoints);
 
-    int getUpdated(std::vector<PhysicsCollidable*>& bodies);
-
     void setGravity(float x, float y, float z);
 
     void setGravity(glm::vec3 gravity);
-
-    void markUpdated(PhysicsCollidable* body);
 
     const glm::vec3& getGravity() const;
 
@@ -104,7 +100,6 @@ class BulletWorld : public PhysicsWorld {
     int mActivationState;
     bool mIsMultiBody;
     mutable glm::vec3 mGravity;
-    std::vector<PhysicsCollidable*> mBodiesChanged;
     std::vector<BulletJoint*> mMultiBodies;
 };
 

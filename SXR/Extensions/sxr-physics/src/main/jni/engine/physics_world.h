@@ -76,8 +76,6 @@ public:
 
     virtual void setGravity(float gx, float gy, float gz) = 0;
 
-    virtual int getUpdated(std::vector<PhysicsCollidable*>& bodies) = 0;
-
     virtual const glm::vec3& getGravity() const = 0;
 };
 

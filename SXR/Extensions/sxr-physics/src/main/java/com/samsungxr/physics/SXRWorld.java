@@ -585,22 +585,6 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         NativePhysics3DWorld.getGravity(getNative(), gravity);
     }
 
-    SXRPhysicsCollidable[] getUpdated()
-    {
-        long[] pointers = NativePhysics3DWorld.getUpdated(getNative());
-        if (pointers != null)
-        {
-            SXRPhysicsCollidable[] bodies = new SXRPhysicsCollidable[pointers.length];
-            for (int i = 0; i < pointers.length; ++i)
-            {
-                SXRPhysicsWorldObject obj = mPhysicsObject.get(pointers[i]);
-                SXRPhysicsCollidable body = (SXRPhysicsCollidable) obj;
-                bodies[i] = body;
-            }
-            return bodies;
-        }
-        return null;
-    }
 
     private class SXRWorldTask implements Runnable {
         private boolean running = false;
@@ -764,5 +748,4 @@ class NativePhysics3DWorld {
 
     static native SXRCollisionInfo[] listCollisions(long jphysics_world);
 
-    static native long[] getUpdated(long jphysics_world);
 }

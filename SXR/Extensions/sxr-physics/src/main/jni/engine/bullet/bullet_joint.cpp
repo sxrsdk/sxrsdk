@@ -299,7 +299,6 @@ namespace sxr {
             }
             LOGD("BULLET: JOINT %s %f, %f, %f", owner->name().c_str(), trans->position_x(), trans->position_y(), trans->position_z());
         }
-        mWorld->markUpdated(this);
     }
 
     Skeleton* BulletJoint::createSkeleton()
