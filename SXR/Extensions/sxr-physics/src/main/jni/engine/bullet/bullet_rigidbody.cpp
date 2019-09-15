@@ -228,10 +228,6 @@ void BulletRigidBody::setWorldTransform(const btTransform &centerOfMassWorldTran
             trans->position_x(),
             trans->position_y(),
             trans->position_z());
-    if (mSimType == DYNAMIC)
-    {
-        mWorld->markUpdated(this);
-    }
 }
 
 void BulletRigidBody::applyCentralForce(float x, float y, float z)
