@@ -145,9 +145,16 @@ public class SXRRigidBody extends SXRPhysicsCollidable {
      * <tr><td>KINEMATIC</td><td>Collides with other objects, moved by application</td></tr>
      * </table>
      */
-    public void setSimulationType(int type)
+    public void setSimulationType(final int type)
     {
-        NativeRigidBody.setSimulationType(getNative(), type);
+        mPhysicsContext.runOnPhysicsThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                NativeRigidBody.setSimulationType(getNative(), type);
+            }
+        });
     }
 
     /**
