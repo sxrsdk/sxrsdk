@@ -392,20 +392,23 @@ class PhysicsAVTLoader
         JSONArray dofdata = link.getJSONArray("DOF Data");
         float mass = (float) link.getDouble("Mass");
         SXRPhysicsJoint parentJoint = findParentJoint(parentName);
-        float[] pivotB = new float[3];
+        float[] pivotB = new float[] { 0, 0, 0 };
         Vector3f axis = null;
         JSONObject trans = link.getJSONObject("Transform");
         JSONObject pos = trans.getJSONObject("Position");
-        JSONObject piv = link.getJSONObject("Pivot Pos.");
+        JSONObject piv = link.optJSONObject("Pivot Pos.");
 
         if (parentJoint == null)
         {
             Log.e(TAG, "Parent %s not found for child %s", parentName, name);
             return null;
         }
-        pivotB[0] = (float) (piv.getDouble("X") - pos.getDouble("X"));
-        pivotB[1] = (float) (piv.getDouble("Y") - pos.getDouble("Y"));
-        pivotB[2] = (float) (piv.getDouble("Z") - pos.getDouble("Z"));
+        if (piv != null)
+        {
+            pivotB[0] = (float) (piv.getDouble("X") - pos.getDouble("X"));
+            pivotB[1] = (float) (piv.getDouble("Y") - pos.getDouble("Y"));
+            pivotB[2] = (float) (piv.getDouble("Z") - pos.getDouble("Z"));
+        }
         mTargetBones.put(name, link);
         if (type.equals("ball"))
         {
@@ -516,18 +519,24 @@ class PhysicsAVTLoader
             return null;
         }
         node.attachComponent(body);
-        JSONObject p = link.getJSONObject("Pivot Pos.");
-        Vector3f pivotB = new Vector3f(
-            (float) p.getDouble("X"),
-            (float) p.getDouble("Y"),
-            (float) p.getDouble("Z"));
-        JSONObject parentLink = mTargetBones.get(parentName);
-        p = parentLink.getJSONObject("Pivot Pos.");
-        Vector3f pivotA = new Vector3f(
-            (float) p.getDouble("X"),
-            (float) p.getDouble("Y"),
-            (float) p.getDouble("Z"));
+        JSONObject p = link.optJSONObject("Pivot Pos.");
+        Vector3f pivotB = new Vector3f(0, 0, 0);
 
+        if (p != null)
+        {
+            pivotB.set((float) p.getDouble("X"),
+                       (float) p.getDouble("Y"),
+                       (float) p.getDouble("Z"));
+        }
+        JSONObject parentLink = mTargetBones.get(parentName);
+        p = parentLink.optJSONObject("Pivot Pos.");
+        Vector3f pivotA = new Vector3f(0, 0, 0);
+        if (p != null)
+        {
+            pivotA.set((float) p.getDouble("X"),
+                       (float) p.getDouble("Y"),
+                       (float) p.getDouble("Z"));
+        }
         if (type.equals("ball"))
         {
             JSONObject dofx = dofdata.getJSONObject(0);
