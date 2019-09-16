@@ -64,7 +64,8 @@ public class SXRRigidBody extends SXRPhysicsCollidable {
      * @param gvrContext The context of the app.
      * @param mass The mass of this rigid body.\
      */
-    public SXRRigidBody(SXRContext gvrContext, float mass) {
+    public SXRRigidBody(SXRContext gvrContext, float mass)
+    {
         super(gvrContext, NativeRigidBody.ctor(mass));
         mCollisionGroup = -1;
         mPhysicsContext = SXRPhysicsContext.getInstance();
@@ -80,7 +81,8 @@ public class SXRRigidBody extends SXRPhysicsCollidable {
      *                       in the {@link SXRCollisionMatrix}. The rigid body collides with
      *                       everyone if {#collisionGroup} is out of the range 0...15.
      */
-    public SXRRigidBody(SXRContext gvrContext, float mass, int collisionGroup) {
+    public SXRRigidBody(SXRContext gvrContext, float mass, int collisionGroup)
+    {
         super(gvrContext, NativeRigidBody.ctor(mass));
         mCollisionGroup = collisionGroup;
         mPhysicsContext = SXRPhysicsContext.getInstance();
@@ -88,7 +90,8 @@ public class SXRRigidBody extends SXRPhysicsCollidable {
     }
 
     /** Used only by {@link SXRPhysicsLoader} */
-    SXRRigidBody(SXRContext gvrContext, long nativeRigidBody) {
+    SXRRigidBody(SXRContext gvrContext, long nativeRigidBody)
+    {
         super(gvrContext, nativeRigidBody);
         mCollisionGroup = -1;
         mPhysicsContext = SXRPhysicsContext.getInstance();
@@ -124,10 +127,12 @@ public class SXRRigidBody extends SXRPhysicsCollidable {
      * @param worldOwner Scene object to search for a physics world in the scene.
      * @return Physics world from the scene.
      */
-    private static SXRWorld getWorldFromAscendant(SXRNode worldOwner) {
+    private static SXRWorld getWorldFromAscendant(SXRNode worldOwner)
+    {
         SXRComponent world = null;
 
-        while (worldOwner != null && world == null) {
+        while (worldOwner != null && world == null)
+        {
             world = worldOwner.getComponent(SXRWorld.getComponentType());
             worldOwner = worldOwner.getParent();
         }

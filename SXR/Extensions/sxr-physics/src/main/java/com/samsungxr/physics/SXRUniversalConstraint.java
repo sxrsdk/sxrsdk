@@ -21,64 +21,61 @@ import org.joml.Vector3f;
 
 
 /**
- * Represents a universal constraint for two {@linkplain SXRRigidBody rigid bodies} or
- * {@linkplain SXRPhysicsJoint joints} that are linked by a point related to the first one.
- * The second one is the owner of the constraint). Though it can be moved the
- * first body can be referred as "fixed" since it will keep same distance and rotation from this
- * joint point while the second is the "moving" because one can explicitly set restriction for each
- * translation and rotation axis.
+ * Represents a universal constraint for two {@linkplain SXRRigidBody rigid bodies} that keep them
+ * perpendicular. Given two perpendicular rotation axes the universal joint keeps the axes perpendicular.
+ * that is perpendicular to axis 1, it keeps them perpendicular.
+ * Rotation of the two bodies about the direction perpendicular to the two axes will be equal.
  */
 public class SXRUniversalConstraint extends SXRConstraint
 {
     /**
      * Construct a new instance of a generic constraint.
      *
-     * @param ctx        the context of the app
-     * @param bodyA      the "fixed" body (not the owner) in this constraint
-     */
-    public SXRUniversalConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA)
-    {
-        this(ctx, NativeUniversalConstraint.ctor(bodyA.getNative(),
-                                                 0, 0, 0,
-                                                 0, 0, 1,
-                                                 0, 1, 0));
-        mBodyA = bodyA;
-    }
-
-    /**
-     * Construct a new instance of a generic constraint.
-     *
-     * @param ctx        the context of the app
-     * @param bodyA      the "fixed" body (not the owner) in this constraint
+     * @param ctx       the context of the app
+     * @param bodyA     the parent body (not the owner) in this constraint
+     * @param axisA     Parent rotation axis (The Z axis pf the Universal Joint).
+     * @param axisB     Child (the constraint owner) rotation axis (the Y axis of the joint.)
      */
     public SXRUniversalConstraint(SXRContext ctx,
                                   SXRPhysicsCollidable bodyA,
                                   final float anchor[],
-                                  final float Zaxis[],
-                                  final float Yaxis[])
+                                  final float axisA[],
+                                  final float axisB[])
     {
         this(ctx, NativeUniversalConstraint.ctor(bodyA.getNative(),
                                                  anchor[0], anchor[1], anchor[2],
-                                                 Zaxis[0], Zaxis[1], Zaxis[2],
-                                                 Yaxis[0], Yaxis[1], Yaxis[1]));
+                                                 axisA[0], axisA[1], axisA[2],
+                                                 axisB[0], axisB[1], axisB[1]));
+        float dot = axisA[0] * axisB[0] + axisA[1] * axisB[1] + axisA[2] * axisB[2];
+
+        if (Math.abs(dot) > 0.0001f)
+        {
+            throw new IllegalArgumentException("Universal joint axes must be perpendicular");
+        }
         mBodyA = bodyA;
     }
 
     /**
      * Construct a new instance of a generic constraint.
      *
-     * @param ctx        the context of the app
-     * @param bodyA      the "fixed" body (not the owner) in this constraint
-     */
+     * @param ctx       the context of the app
+     * @param bodyA     the parent body (not the owner) in this constraint
+     * @param axisA     Parent rotation axis.
+     * @param axisB     Child (the constraint owner) rotation axis.
+    */
     public SXRUniversalConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA,
                                   final Vector3f pivotA,
-                                  final Vector3f Zaxis,
-                                  final Vector3f Yaxis)
+                                  final Vector3f axisA,
+                                  final Vector3f axisB)
     {
         this(ctx, NativeUniversalConstraint.ctor(bodyA.getNative(),
                                                  pivotA.x, pivotA.y, pivotA.z,
-                                                 Zaxis.x, Zaxis.y, Zaxis.z,
-                                                 Yaxis.x, Yaxis.y, Yaxis.z));
+                                                 axisA.x, axisA.y, axisA.z,
+                                                 axisB.x, axisB.y, axisB.z));
+        if (Math.abs(axisA.dot(axisB)) > 0.0001f)
+        {
+            throw new IllegalArgumentException("Universal joint axes must be perpendicular");
+        }
         mBodyA = bodyA;
     }
 

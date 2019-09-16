@@ -159,6 +159,12 @@ public class SXRGenericConstraint extends SXRConstraint
      */
     public void setAngularLowerLimits(float limitX, float limitY, float limitZ)
     {
+        if ((limitX < -Math.PI) ||
+            (limitY < -Math.PI / 2) ||
+            (limitZ < -Math.PI))
+        {
+            throw new IllegalArgumentException("Angular limits out of range");
+        }
         Native3DGenericConstraint.setAngularLowerLimits(getNative(), limitX, limitY, limitZ);
     }
 
@@ -181,7 +187,12 @@ public class SXRGenericConstraint extends SXRConstraint
      */
     public void setAngularUpperLimits(float limitX, float limitY, float limitZ)
     {
-        Native3DGenericConstraint.setAngularUpperLimits(getNative(), limitX, limitY, limitZ);
+        if ((limitX > Math.PI) ||
+            (limitY > Math.PI / 2) ||
+            (limitZ > Math.PI))
+        {
+            throw new IllegalArgumentException("Angular limits out of range");
+        }        Native3DGenericConstraint.setAngularUpperLimits(getNative(), limitX, limitY, limitZ);
     }
 
     /**

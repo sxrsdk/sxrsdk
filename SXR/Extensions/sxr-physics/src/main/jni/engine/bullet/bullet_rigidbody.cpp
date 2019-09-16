@@ -130,6 +130,7 @@ namespace sxr
             collisionFlags = mRigidBody->getCollisionFlags();
         }
         mRigidBody->setUserPointer(this);
+        mRigidBody->setIslandTag(0);
         switch (mSimType)
         {
             case SimulationType::DYNAMIC:
