@@ -191,25 +191,18 @@ void BulletSliderConstraint::updateConstructionInfo(PhysicsWorld* world)
     BulletRigidBody* rigidBodyB = (BulletRigidBody*) owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_RIGID_BODY);
     if (rigidBodyB)
     {
-        Transform* tB = owner_object()->transform();
-        btMatrix3x3 rotB(btQuaternion(tB->rotation_x(), tB->rotation_y(), tB->rotation_z(), tB->rotation_w()));
-        btTransform frameInB(rotB);
         btRigidBody* rbB = rigidBodyB->getRigidBody();
         btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
         btTransform worldFrameA = convertTransform2btTransform(mBodyA->owner_object()->transform());
         btTransform worldFrameB = convertTransform2btTransform(owner_object()->transform());
-        btTransform localFrameB = worldFrameA.inverse() * worldFrameB;
         btTransform localFrameA = worldFrameB.inverse() * worldFrameA;
-        btVector3 sliderAxisA = localFrameB.getOrigin();
-        btVector3 sliderAxisB = localFrameA.getOrigin();
+        btVector3 sliderAxis = localFrameA.getOrigin();
         btMatrix3x3 rotX2SliderAxis;
         btVector3 Xaxis(1, 0, 0);
 
-        sliderAxisA.normalize();
-        sliderAxisB.normalize();
-        rotX2SliderAxis = btMatrix3x3(shortestArcQuatNormalize2(Xaxis, sliderAxisB));
+        sliderAxis.normalize();
+        rotX2SliderAxis = btMatrix3x3(shortestArcQuatNormalize2(Xaxis, sliderAxis));
         btTransform frameA(rotX2SliderAxis, btVector3(mPivotA.x, mPivotA.y, mPivotA.z));
-//        rotX2SliderAxis = btMatrix3x3(shortestArcQuatNormalize2(Xaxis, sliderAxisB));
         btTransform frameB(rotX2SliderAxis, btVector3(mPivotB.x, mPivotB.y, mPivotB.z));
         mSliderConstraint = new btSliderConstraint(*rbA, *rbB, frameA, frameB, true);
         mSliderConstraint->setLowerAngLimit(mLowerAngularLimit);
