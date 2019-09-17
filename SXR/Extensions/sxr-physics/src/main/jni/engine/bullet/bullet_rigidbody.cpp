@@ -87,9 +87,9 @@ namespace sxr
     void BulletRigidBody::setSimulationType(PhysicsRigidBody::SimulationType type)
     {
         mSimType = type;
-        if (mWorld != nullptr)
+        if (mRigidBody != nullptr)
         {
-            updateConstructionInfo(mWorld);
+            reset(false);
         }
     }
 
