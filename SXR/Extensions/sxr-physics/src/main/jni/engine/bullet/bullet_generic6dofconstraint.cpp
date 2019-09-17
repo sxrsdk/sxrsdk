@@ -183,10 +183,14 @@ void BulletGeneric6dofConstraint::updateConstructionInfo(PhysicsWorld* world)
         btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
         btVector3    pA(mPivotA.x, mPivotA.y, mPivotA.z);
         btVector3    pB(mPivotB.x, mPivotB.y, mPivotB.z);
-        btTransform  frameB(btQuaternion(0, 0, 0, 1), pB);
-        btTransform  frameA(btQuaternion(0, 0, 0, 1), pA);
+        btTransform  worldFrameA = convertTransform2btTransform(mBodyA->owner_object()->transform());
+        btTransform  worldFrameB = convertTransform2btTransform(owner_object()->transform());
+        btTransform  localFrameA = worldFrameB.inverse() * worldFrameA;
+        btTransform  localFrameB = worldFrameA.inverse() * worldFrameB;
 
-        mGeneric6DofConstraint = new btGeneric6DofConstraint(*rbA, *rbB, frameA, frameB, false);
+        localFrameA.setOrigin(pA);
+        localFrameB.setOrigin(pB);
+        mGeneric6DofConstraint = new btGeneric6DofConstraint(*rbA, *rbB, localFrameA, localFrameB, false);
         mGeneric6DofConstraint->setLinearLowerLimit(Common2Bullet(mLinearLowerLimits));
         mGeneric6DofConstraint->setLinearUpperLimit(Common2Bullet(mLinearUpperLimits));
         mGeneric6DofConstraint->setAngularLowerLimit(Common2Bullet(mAngularLowerLimits));
