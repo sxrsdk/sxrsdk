@@ -23,6 +23,9 @@ import com.google.vr.ndk.base.GvrLayout;
 
 import com.samsungxr.io.SXRGearCursorController;
 
+import com.samsungxr.utility.VrAppSettings;
+
+
 class DaydreamViewManager extends SXRViewManager {
     private static final String TAG = DaydreamViewManager.class.getSimpleName();
     private GvrLayout gvrLayout;
@@ -76,7 +79,16 @@ class DaydreamViewManager extends SXRViewManager {
         // Prevent screen from dimming/locking.
         application.getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         mControllerReader = new DayDreamControllerReader(this);
+        VrAppSettings vrAppSettings = application.getAppSettings();
 
+        for (int i = 0; i < vrAppSettings.getNumControllers(); i++)
+        {
+            SXRGearCursorController gearController = new SXRGearCursorController(this, i);
+            if (mInputManager.addExternalController(gearController))
+            {
+                gearController.attachReader(mControllerReader);
+            }
+        }
     }
 
     public long getNativeRenderer(){
@@ -102,9 +114,6 @@ class DaydreamViewManager extends SXRViewManager {
     void onSurfaceCreated()
     {
         super.onSurfaceCreated();
-        SXRGearCursorController gearController = mInputManager.getGearController();
-        if (gearController != null)
-            gearController.attachReader(mControllerReader);
     }
 
     @Override

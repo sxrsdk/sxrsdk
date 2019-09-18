@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.samsung.mpl.gearwearlibrary.models.events;
+package com.samsungxr.io.gearwearlibrary.events;
 
 import android.os.Parcel;
 import android.os.Parcelable;

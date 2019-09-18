@@ -23,10 +23,9 @@ import com.samsungxr.SXRContext;
 import com.samsungxr.SXRPicker;
 import com.samsungxr.SXRNode;
 import com.samsungxr.ITouchEvents;
-import com.samsungxr.io.cursor3d.CursorAsset.Action;
+import com.samsungxr.io.SXRCursorController;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.samsungxr.io.cursor3d.CursorAsset.Action;
 
 class ObjectCursor extends Cursor {
     private static final String TAG = ObjectCursor.class.getSimpleName();
@@ -79,21 +78,17 @@ class ObjectCursor extends Cursor {
         // place the cursor at half the depth scale
         super.setCursorDepth(depth / 2);
 
-        IoDevice device = getIoDevice();
+        SXRCursorController device = getController();
         if (device != null) {
-            device.setNearDepth(POINT_CURSOR_NEAR_DEPTH);
+            device.setCursorDepth(POINT_CURSOR_NEAR_DEPTH);
         }
     }
 
     @Override
-    void setIoDevice(IoDevice ioDevice) {
-        super.setIoDevice(ioDevice);
-        ioDevice.setNearDepth(POINT_CURSOR_NEAR_DEPTH);
+    void setController(SXRCursorController controller)
+    {
+        super.setController(controller);
+        controller.setNearDepth(POINT_CURSOR_NEAR_DEPTH);
     }
 
-    @Override
-    void setupIoDevice(IoDevice ioDevice) {
-        super.setupIoDevice(ioDevice);
-        ioDevice.setDisableRotation(false);
-    }
 }

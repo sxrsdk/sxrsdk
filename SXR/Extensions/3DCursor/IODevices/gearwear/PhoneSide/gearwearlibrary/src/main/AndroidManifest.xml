@@ -14,7 +14,7 @@
   -->
 
 <manifest
-    package="com.samsung.mpl.gearwearlibrary"
+    package="com.samsungxr.io.gearwearlibrary"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application

@@ -61,6 +61,7 @@ class OvrViewManager extends SXRViewManager {
     private SXRMethodCallTracer mTracerDrawEyes2;
     private SXRMethodCallTracer mTracerDrawFrame;
     private SXRMethodCallTracer mTracerDrawFrameGap;
+    private SXRGearCursorController[] gearControllers;
 
     /**
      * Constructs OvrViewManager object with SXRMain which controls GL
@@ -122,6 +123,15 @@ class OvrViewManager extends SXRViewManager {
         mStatsLine.addColumn(mTracerAfterDrawEyes.getStatColumn());
 
         mControllerReader = new OvrControllerReader(application, mApplication.getActivityNative().getNative());
+        for (int i = 0; i < vrAppSettings.getNumControllers(); i++)
+        {
+            SXRGearCursorController gearController = new SXRGearCursorController(this, i);
+            if (mInputManager.addExternalController(gearController))
+            {
+                gearController.attachReader(mControllerReader);
+            }
+        }
+
     }
 
     void onSurfaceChanged(int w, int h) {
@@ -201,15 +211,6 @@ class OvrViewManager extends SXRViewManager {
 
             mMainScene.addStatMessage(System.lineSeparator() + mStatsLine.getStats(SXRStatsLine.FORMAT.MULTILINE));
         }
-    }
-
-    @Override
-    void onSurfaceCreated() {
-        super.onSurfaceCreated();
-        SXRGearCursorController gearController = mInputManager.getGearController();
-        if (gearController != null)
-            gearController.attachReader(mControllerReader);
-
     }
 
     private SXRRenderTarget getRenderTarget(final int eye, final int swapChainIndex, final boolean isMultiview) {

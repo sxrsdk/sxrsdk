@@ -28,9 +28,6 @@ project(':sceneserializer').projectDir = new File('SceneSerializer/sceneserializ
 include ':widgetLib'
 project(':widgetLib').projectDir = new File('widgetLib')
 
-include ':GearWearIoDevice'
-project(':GearWearIoDevice').projectDir = new File('3DCursor/IODevices/gearwear/GearWearIoDevice')
-
 include ':sxr-physics'
 project(':sxr-physics').projectDir = new File('sxr-physics')
 

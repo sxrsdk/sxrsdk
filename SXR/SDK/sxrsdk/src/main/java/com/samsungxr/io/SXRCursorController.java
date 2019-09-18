@@ -17,6 +17,7 @@ package com.samsungxr.io;
 
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.InputDevice;
 
 import com.samsungxr.SXRCamera;
 import com.samsungxr.SXRCollider;
@@ -152,7 +153,7 @@ public abstract class SXRCursorController implements IEventReceiver
                     }
                     else
                     {
-                        scene.addNode(mDragMe);
+                        mScene.addNode(mDragMe);
                     }
                     mDragMe = null;
                     mDragParent = null;
@@ -163,35 +164,37 @@ public abstract class SXRCursorController implements IEventReceiver
     };
 
     private static final String TAG = "SXRCursorController";
-    private static int uniqueControllerId = 0;
-    private final int controllerId;
-    private final SXRControllerType controllerType;
-    private boolean previousActive;
-    private boolean active;
-    protected float nearDepth = 0.50f;
-    protected float farDepth = 50.0f;
-    protected final Vector3f position, origin;
-    protected List<KeyEvent> keyEvent;
-    private List<KeyEvent> processedKeyEvent;
-    protected List<MotionEvent> motionEvent;
+    private static int sUniqueControllerID = 0;
+    private final int mControllerID;
+    private final SXRControllerType mControllerType;
+    private boolean mWasActive;
+    private boolean mIsActive;
+    protected float mNearDepth = 0.50f;
+    protected float mFarDepth = 50.0f;
+    protected final Vector3f mPosition;
+    protected final Vector3f mOrigin;
+    protected List<KeyEvent> mKeyEvents;
+    private List<KeyEvent> mProcessedKeyEvents;
+    protected List<MotionEvent> mMotionEvents;
     private List<MotionEvent> processedMotionEvent;
-    private SXREventReceiver listeners;
+    private SXREventReceiver mListeners;
 
-    protected Object eventLock = new Object();
+    protected Object mEventLock = new Object();
     protected SXRNode mCursor = null;
-    protected boolean enable = false;
+    protected boolean mEnabled = true;
     protected Object mCursorLock = new Object();
     protected Dragger mDragger = new Dragger(mCursorLock);
-
-    protected String name;
-    protected int vendorId, productId;
-    protected SXRScene scene = null;
+    protected String mName;
+    protected int mVendorID;
+    protected int mProductID;
+    protected InputDevice mDevice;
+    protected SXRScene mScene = null;
     protected SXRPicker mPicker = null;
     protected CursorControl mCursorControl = CursorControl.PROJECT_CURSOR_ON_SURFACE;
     protected float mCursorDepth = 1.0f;
     protected SXRNode mCursorScale;
     protected SXRNode mDragRoot;
-    protected SXRContext context;
+    protected SXRContext mContext;
     protected volatile boolean mConnected = false;
     protected int mTouchButtons = MotionEvent.BUTTON_SECONDARY | MotionEvent.BUTTON_PRIMARY;
 
@@ -204,8 +207,9 @@ public abstract class SXRCursorController implements IEventReceiver
      *
      * @param controllerType the type of this {@link SXRCursorController}.
      */
-    public SXRCursorController(SXRContext context, SXRControllerType controllerType) {
-        this(context, controllerType, null);
+    public SXRCursorController(SXRContext context, SXRControllerType controllerType)
+    {
+        this(context, controllerType, "unknown");
     }
 
     /**
@@ -218,8 +222,26 @@ public abstract class SXRCursorController implements IEventReceiver
      * @param controllerType the type of this {@link SXRCursorController}.
      * @param name           the name for this {@link SXRCursorController}
      */
-    public SXRCursorController(SXRContext context, SXRControllerType controllerType, String name) {
+    public SXRCursorController(SXRContext context, SXRControllerType controllerType, String name)
+    {
         this(context, controllerType, name, 0, 0);
+    }
+
+
+    /**
+     * Create an instance of {@link SXRCursorController}.
+     *
+     * @param controllerType the type of this {@link SXRCursorController}.
+     * @param name           the name for this {@link SXRCursorController}
+     * @param vendorId       the vendor id for this {@link SXRCursorController}
+     * @param productId      the product id for this {@link SXRCursorController}
+     */
+    public SXRCursorController(SXRContext context,
+                               SXRControllerType controllerType,
+                               InputDevice device)
+    {
+        this(context, controllerType, device.getName(), device.getVendorId(), device.getProductId());
+        mDevice = device;
     }
 
     /**
@@ -230,22 +252,27 @@ public abstract class SXRCursorController implements IEventReceiver
      * @param vendorId       the vendor id for this {@link SXRCursorController}
      * @param productId      the product id for this {@link SXRCursorController}
      */
-    public SXRCursorController(SXRContext context, SXRControllerType controllerType, String name,
-                               int vendorId, int productId) {
-        this.context = context;
-        this.controllerId = uniqueControllerId;
-        this.controllerType = controllerType;
-        this.name = name;
-        this.vendorId = vendorId;
-        this.productId = productId;
-        uniqueControllerId++;
-        position = new Vector3f(0, 0, -1);
-        origin = new Vector3f(0, 0, 0);
-        keyEvent = new ArrayList<KeyEvent>();
-        processedKeyEvent = new ArrayList<KeyEvent>();
-        motionEvent = new ArrayList<MotionEvent>();
+    public SXRCursorController(SXRContext context,
+                               SXRControllerType controllerType,
+                               String name,
+                               int vendorId,
+                               int productId)
+    {
+        this.mContext = context;
+        this.mControllerID = sUniqueControllerID;
+        this.mControllerType = controllerType;
+        this.mName = name;
+        this.mVendorID = vendorId;
+        this.mProductID = productId;
+        this.mDevice = null;
+        sUniqueControllerID++;
+        mPosition = new Vector3f(0, 0, -1);
+        mOrigin = new Vector3f(0, 0, 0);
+        mKeyEvents = new ArrayList<KeyEvent>();
+        mProcessedKeyEvents = new ArrayList<KeyEvent>();
+        mMotionEvents = new ArrayList<MotionEvent>();
         processedMotionEvent = new ArrayList<MotionEvent>();
-        listeners = new SXREventReceiver(this);
+        mListeners = new SXREventReceiver(this);
         if (mPicker == null)
         {
             mPicker = new SXRPicker(this, false);
@@ -259,6 +286,12 @@ public abstract class SXRCursorController implements IEventReceiver
     }
 
     /**
+     * Get the Android input device this controller is associated with.
+     * @return InputDevice or null if none is connected
+     */
+    public InputDevice getDevice() { return mDevice; }
+
+    /**
      * By default both primary and secondary buttons will cause a touch event.
      * This function allows you to set which buttons are "active" and
      * will produce ITouchEvents.
@@ -269,7 +302,7 @@ public abstract class SXRCursorController implements IEventReceiver
      */
     public void setTouchButtons(int button) { mTouchButtons = button; }
 
-    /*
+    /**
      * Gets the button states which will cause touch events.
      * @see ITouchEvents
      * @see #setTouchButtons(int)
@@ -283,8 +316,8 @@ public abstract class SXRCursorController implements IEventReceiver
      */
     synchronized public boolean dispatchKeyEvent(KeyEvent event)
     {
-        synchronized (eventLock) {
-            this.keyEvent.add(event);
+        synchronized (mEventLock) {
+            this.mKeyEvents.add(event);
         }
         return true;
     }
@@ -296,8 +329,8 @@ public abstract class SXRCursorController implements IEventReceiver
      */
     synchronized public boolean dispatchMotionEvent(MotionEvent event)
     {
-        synchronized (eventLock) {
-            this.motionEvent.add(event);
+        synchronized (mEventLock) {
+            this.mMotionEvents.add(event);
         }
         return true;
     }
@@ -308,14 +341,14 @@ public abstract class SXRCursorController implements IEventReceiver
      * @return an integer id that identifies this controller.
      */
     public int getId() {
-        return controllerId;
+        return mControllerID;
     }
 
     /**
      * Get the {@link SXRContext} which owns this controller.
      * @return {@link SXRContext} for the controller
      */
-    public SXRContext getSXRContext() { return context; }
+    public SXRContext getSXRContext() { return mContext; }
 
 
     /**
@@ -324,7 +357,7 @@ public abstract class SXRCursorController implements IEventReceiver
      * @link {@link SXREventReceiver} for the controller
      * @see SXREventReceiver#addListener(IEvents)
      */
-    public SXREventReceiver getEventReceiver() { return listeners; }
+    public SXREventReceiver getEventReceiver() { return mListeners; }
 
     /**
      * Set a {@link SXRNode} to be controlled by the
@@ -414,9 +447,10 @@ public abstract class SXRCursorController implements IEventReceiver
      * scene graph to generate possible {@link ISensorEvents} for
      * {@link SXRSensor}s.
      */
-    public void invalidate() {
-        // check if the controller is enabled
-        if (isEnabled()) {
+    public void invalidate()
+    {
+        if (isEnabled())
+        {
             update();
         }
     }
@@ -427,7 +461,7 @@ public abstract class SXRCursorController implements IEventReceiver
      * @return the {@link SXRControllerType} for the {@link SXRCursorController}
      */
     public SXRControllerType getControllerType() {
-        return controllerType;
+        return mControllerType;
     }
 
     /**
@@ -477,8 +511,6 @@ public abstract class SXRCursorController implements IEventReceiver
      * @see #setCursorControl(CursorControl)
      */
     public CursorControl getCursorControl() { return mCursorControl; }
-
-
 
     /**
      * Allows a single {@link SXRNode} to be dragged by the controller.
@@ -537,9 +569,11 @@ public abstract class SXRCursorController implements IEventReceiver
      * @return the list of {@link KeyEvent}s processed by the
      * {@link SXRCursorController}.
      */
-    public List<KeyEvent> getKeyEvents() {
-        synchronized (eventLock) {
-            return processedKeyEvent;
+    public List<KeyEvent> getKeyEvents()
+    {
+        synchronized (mEventLock)
+        {
+            return mProcessedKeyEvents;
         }
     }
 
@@ -559,12 +593,17 @@ public abstract class SXRCursorController implements IEventReceiver
      *
      * @return the {@link KeyEvent} or null if there isn't one.
      */
-    public KeyEvent getKeyEvent() {
-        synchronized (eventLock) {
-            if (processedKeyEvent.isEmpty()) {
+    public KeyEvent getKeyEvent()
+    {
+        synchronized (mEventLock)
+        {
+            if (mProcessedKeyEvents.isEmpty())
+            {
                 return null;
-            } else {
-                return processedKeyEvent.get(processedKeyEvent.size() - 1);
+            }
+            else
+                {
+                return mProcessedKeyEvents.get(mProcessedKeyEvents.size() - 1);
             }
         }
     }
@@ -589,8 +628,10 @@ public abstract class SXRCursorController implements IEventReceiver
      * @return a list of {@link MotionEvent}s processed by the
      * {@link SXRCursorController} .
      */
-    public List<MotionEvent> getMotionEvents() {
-        synchronized (eventLock) {
+    public List<MotionEvent> getMotionEvents()
+    {
+        synchronized (mEventLock)
+        {
             return processedMotionEvent;
         }
     }
@@ -613,11 +654,16 @@ public abstract class SXRCursorController implements IEventReceiver
      * @return the latest {@link MotionEvent} processed by the
      * {@link SXRCursorController} or null.
      */
-    public MotionEvent getMotionEvent() {
-        synchronized (eventLock) {
-            if (processedMotionEvent.isEmpty()) {
+    public MotionEvent getMotionEvent()
+    {
+        synchronized (mEventLock)
+        {
+            if (processedMotionEvent.isEmpty())
+            {
                 return null;
-            } else {
+            }
+            else
+            {
                 return MotionEvent.obtain(processedMotionEvent
                         .get(processedMotionEvent.size() - 1));
             }
@@ -643,8 +689,9 @@ public abstract class SXRCursorController implements IEventReceiver
      *
      * @param listener the {@link com.samsungxr.io.SXRInputManager.ICursorControllerListener} to be added.
      */
-    public void addControllerEventListener(IControllerEvent listener) {
-        listeners.addListener(listener);
+    public void addControllerEventListener(IControllerEvent listener)
+    {
+        mListeners.addListener(listener);
     }
 
     /**
@@ -652,8 +699,9 @@ public abstract class SXRCursorController implements IEventReceiver
      *
      * @param listener {@link IControllerEvent} that was previously added .
      */
-    public void removeControllerEventListener(IControllerEvent listener) {
-        listeners.removeListener(listener);
+    public void removeControllerEventListener(IControllerEvent listener)
+    {
+        mListeners.removeListener(listener);
     }
 
     /**
@@ -698,29 +746,31 @@ public abstract class SXRCursorController implements IEventReceiver
      * @param flag <code>true</code> to enable the {@link SXRCursorController},
      *               <code>false</code> to disable.
      */
-    public void setEnable(boolean flag) {
+    public void setEnable(boolean flag)
+    {
         mPicker.setEnable(flag);
         mDragRoot.setEnable(flag);
-        if (this.enable == flag)
+        if (this.mEnabled == flag)
         {
             // nothing to be done here, return
             return;
         }
-        this.enable = flag;
+        this.mEnabled = flag;
         if (!flag)
         {
             // reset
-            position.set(0, 0, -1);
-            if (previousActive) {
-                active = false;
+            mPosition.set(0, 0, -1);
+            if (mWasActive)
+            {
+                mIsActive = false;
             }
-
-            synchronized (eventLock) {
-                keyEvent.clear();
-                motionEvent.clear();
+            synchronized (mEventLock)
+            {
+                mKeyEvents.clear();
+                mMotionEvents.clear();
             }
             update();
-            context.getInputManager().removeCursorController(this);
+            mContext.getInputManager().removeCursorController(this);
         }
     }
 
@@ -733,7 +783,7 @@ public abstract class SXRCursorController implements IEventReceiver
      * <code>false</code> otherwise.
      */
     public boolean isEnabled() {
-        return enable;
+        return mEnabled;
     }
 
     /**
@@ -753,7 +803,7 @@ public abstract class SXRCursorController implements IEventReceiver
      */
     public void setOrigin(float x, float y, float z)
     {
-        origin.set(x,y,z);
+        mOrigin.set(x, y, z);
     }
 
     /**
@@ -762,7 +812,7 @@ public abstract class SXRCursorController implements IEventReceiver
      */
     public Vector3f getOrigin()
     {
-        return origin;
+        return mOrigin;
     }
 
     /**
@@ -779,9 +829,9 @@ public abstract class SXRCursorController implements IEventReceiver
     {
         if (isEnabled())
         {
-            position.set(x, y, z);
-            position.normalize();
-            mPicker.setPickRay(origin.x, origin.y, origin.z, position.x, position.y, position.z);
+            mPosition.set(x, y, z);
+            mPosition.normalize();
+            mPicker.setPickRay(mOrigin.x, mOrigin.y, mOrigin.z, mPosition.x, mPosition.y, mPosition.z);
         }
     }
 
@@ -794,7 +844,7 @@ public abstract class SXRCursorController implements IEventReceiver
      */
     public Vector3f getPosition(Vector3f pos)
     {
-        pos.set(position);
+        pos.set(mPosition);
         return pos;
     }
 
@@ -807,7 +857,7 @@ public abstract class SXRCursorController implements IEventReceiver
      * @param nearDepth
      */
     public void setNearDepth(float nearDepth) {
-        this.nearDepth = nearDepth;
+        this.mNearDepth = nearDepth;
     }
 
     /**
@@ -819,7 +869,7 @@ public abstract class SXRCursorController implements IEventReceiver
      * @param farDepth
      */
     public void setFarDepth(float farDepth) {
-        this.farDepth = farDepth;
+        this.mFarDepth = farDepth;
     }
 
     /**
@@ -829,7 +879,7 @@ public abstract class SXRCursorController implements IEventReceiver
      * is zero.
      */
     public float getNearDepth() {
-        return nearDepth;
+        return mNearDepth;
     }
 
     /**
@@ -839,7 +889,7 @@ public abstract class SXRCursorController implements IEventReceiver
      * is negative {@link Float#MAX_VALUE}.
      */
     public float getFarDepth() {
-        return farDepth;
+        return mFarDepth;
     }
 
     /**
@@ -849,7 +899,7 @@ public abstract class SXRCursorController implements IEventReceiver
      * return zero.
      */
     public int getProductId() {
-        return productId;
+        return mProductID;
     }
 
     /**
@@ -859,7 +909,7 @@ public abstract class SXRCursorController implements IEventReceiver
      * return zero.
      */
     public int getVendorId() {
-        return vendorId;
+        return mVendorID;
     }
 
     /**
@@ -869,7 +919,15 @@ public abstract class SXRCursorController implements IEventReceiver
      * one, else return <code>null</code>
      */
     public String getName() {
-        return name;
+        return mName;
+    }
+
+    public int hashCode()
+    {
+        int key = mVendorID;
+        key = 31 * mProductID;
+        key = 31 * key + mControllerType.hashCode();
+        return key;
     }
 
     /**
@@ -894,7 +952,7 @@ public abstract class SXRCursorController implements IEventReceiver
                 scene.getMainCameraRig().addChildObject(mDragRoot);
             }
         }
-        this.scene = scene;
+        this.mScene = scene;
     }
 
     /**
@@ -913,7 +971,7 @@ public abstract class SXRCursorController implements IEventReceiver
     {
         if (isEnabled())
         {
-            this.active = active;
+            this.mIsActive = active;
         }
     }
 
@@ -945,9 +1003,9 @@ public abstract class SXRCursorController implements IEventReceiver
             if ((mCursorControl == CursorControl.CURSOR_CONSTANT_DEPTH) ||
                 (mCursorControl == CursorControl.CURSOR_DEPTH_FROM_CONTROLLER))
             {
-                cursorTrans.setPosition(position.x * mCursorDepth,
-                        position.y * mCursorDepth,
-                        position.z * mCursorDepth);
+                cursorTrans.setPosition(mPosition.x * mCursorDepth,
+                                        mPosition.y * mCursorDepth,
+                                        mPosition.z * mCursorDepth);
                 return;
             }
             SXRNode parent = collision.hitObject.getParent();
@@ -967,9 +1025,9 @@ public abstract class SXRCursorController implements IEventReceiver
                 }
                 parent = parent.getParent();
             }
-            float xcursor = position.x * dist;   // vector to hit position
-            float ycursor = position.y * dist;
-            float zcursor = position.z * dist;
+            float xcursor = mPosition.x * dist;   // vector to hit position
+            float ycursor = mPosition.y * dist;
+            float zcursor = mPosition.z * dist;
 
             cursorTrans.getTransform().setPosition(xcursor, ycursor, zcursor);
         }
@@ -983,7 +1041,7 @@ public abstract class SXRCursorController implements IEventReceiver
             {
                 SXRTransform trans = mDragRoot.getTransform();
                 trans.setRotation(1, 0, 0, 0);
-                trans.setPosition(position.x * mCursorDepth, position.y * mCursorDepth, position.z * mCursorDepth);
+                trans.setPosition(mPosition.x * mCursorDepth, mPosition.y * mCursorDepth, mPosition.z * mCursorDepth);
                 mCursorScale.getTransform().setScale(1, 1, 1);
             }
         }
@@ -1044,9 +1102,11 @@ public abstract class SXRCursorController implements IEventReceiver
      *
      * @param keyEvent
      */
-    protected void setKeyEvent(KeyEvent keyEvent) {
-        synchronized (eventLock) {
-            this.keyEvent.add(keyEvent);
+    protected void setKeyEvent(KeyEvent keyEvent)
+    {
+        synchronized (mEventLock)
+        {
+            this.mKeyEvents.add(keyEvent);
         }
     }
 
@@ -1061,9 +1121,11 @@ public abstract class SXRCursorController implements IEventReceiver
      * @param motionEvent the {@link MotionEvent} processed by the
      *                    {@link SXRCursorController}.
      */
-    protected void setMotionEvent(MotionEvent motionEvent) {
-        synchronized (eventLock) {
-            this.motionEvent.add(motionEvent);
+    protected void setMotionEvent(MotionEvent motionEvent)
+    {
+        synchronized (mEventLock)
+        {
+            this.mMotionEvents.add(motionEvent);
         }
     }
 
@@ -1119,7 +1181,7 @@ public abstract class SXRCursorController implements IEventReceiver
     {
         final MotionEvent newEvent = (event != null) ? event : null;
         final ControllerPick controllerPick = new ControllerPick(mPicker, newEvent, isActive);
-        context.runOnGlThread(controllerPick);
+        mContext.runOnGlThread(controllerPick);
     }
 
     /**
@@ -1129,25 +1191,26 @@ public abstract class SXRCursorController implements IEventReceiver
     {
         boolean hasEvents = false;
         // set the newly received key and motion events.
-        synchronized (eventLock)
+        synchronized (mEventLock)
         {
-            hasEvents = (keyEvent.size() > 0) || (motionEvent.size() > 0);
-            processedKeyEvent.addAll(keyEvent);
-            keyEvent.clear();
-            processedMotionEvent.addAll(motionEvent);
-            motionEvent.clear();
+            hasEvents = (mKeyEvents.size() > 0) || (mMotionEvents.size() > 0);
+            mProcessedKeyEvents.addAll(mKeyEvents);
+            mKeyEvents.clear();
+            processedMotionEvent.addAll(mMotionEvents);
+            mMotionEvents.clear();
         }
-        previousActive = active;
-        if ((scene != null) && (mPicker != null))
+        mWasActive = mIsActive;
+        if ((mScene != null) && (mPicker != null))
         {
-            updatePicker(getMotionEvent(), active);
+            updatePicker(getMotionEvent(), mIsActive);
         }
-        context.getEventManager().sendEvent(this, IControllerEvent.class, "onEvent", this, active);
+        mContext.getEventManager().sendEvent(this, IControllerEvent.class, "onEvent", this,
+                                             mIsActive);
 
         // reset the set key and motion events.
-        synchronized (eventLock)
+        synchronized (mEventLock)
         {
-            processedKeyEvent.clear();
+            mProcessedKeyEvents.clear();
             processedMotionEvent.clear();
         }
     }
