@@ -25,6 +25,7 @@
 #include <glm/vec3.hpp>
 #include <glm/mat3x3.hpp>
 
+class btGeneric6DofSpringConstraint;
 class btGeneric6DofConstraint;
 namespace sxr {
 
@@ -56,7 +57,7 @@ namespace sxr {
 
         virtual const glm::vec3& getAngularUpperLimits() const;
 
-        void* getUnderlying() { return mGeneric6DofConstraint;}
+        void* getUnderlying() { return mConstraint;}
 
         virtual void setBreakingImpulse(float impulse);
 
@@ -66,7 +67,7 @@ namespace sxr {
 
     private:
 
-        btGeneric6DofConstraint* mGeneric6DofConstraint;
+        btGeneric6DofConstraint* mConstraint;
         float             mBreakingImpulse;
         mutable glm::vec3 mLinearLowerLimits;
         mutable glm::vec3 mLinearUpperLimits;

@@ -37,8 +37,7 @@ namespace sxr {
         explicit BulletConeTwistConstraint(PhysicsCollidable* bodyA,
                                            const glm::vec3& pivotA,
                                            const glm::vec3& pivotB,
-                                           const glm::mat3& bodyRotation,
-                                           const glm::mat3& coneRotation);
+                                           const glm::vec3& coneAxis);
 
         BulletConeTwistConstraint(btConeTwistConstraint *constraint);
 
@@ -65,11 +64,10 @@ namespace sxr {
     private:
 
         btConeTwistConstraint* mConeTwistConstraint;
-        float     mBreakingImpulse;
-        glm::mat3 mBodyRotation;
-        glm::mat3 mConeRotation;
-        float     mSwingLimit;
-        float     mTwistLimit;
+        float      mBreakingImpulse;
+        glm::vec3  mConeAxis;
+        float      mSwingLimit;
+        float      mTwistLimit;
     };
 
 }

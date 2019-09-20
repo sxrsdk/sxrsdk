@@ -20,6 +20,7 @@
 #include "bullet_hingeconstraint.h"
 #include "bullet_rigidbody.h"
 #include "bullet_joint.h"
+#include "bullet_sxr_utils.h"
 #include <BulletDynamics/ConstraintSolver/btHingeConstraint.h>
 
 const char tag[] = "BulletHingeConstrN";
@@ -117,21 +118,32 @@ namespace sxr {
 
     void BulletHingeConstraint::updateConstructionInfo(PhysicsWorld* world)
     {
-        if (mHingeConstraint == nullptr)
+        if (mHingeConstraint != nullptr)
         {
-            btVector3 pA(mPivotA.x, mPivotA.y, mPivotA.z);
-            btVector3 pB(mPivotB.x, mPivotB.y, mPivotB.z);
-            btVector3 axis(mHingeAxis.x, mHingeAxis.y, mHingeAxis.z);
-            BulletRigidBody* bodyB = reinterpret_cast<BulletRigidBody*>(owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_RIGID_BODY));
+            return;
+        }
+        BulletRigidBody* bodyB = (BulletRigidBody*) owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_RIGID_BODY);
+        if (bodyB)
+        {
+            btRigidBody* rbB = bodyB->getRigidBody();
+            btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
+            btVector3    pA(mPivotA.x, mPivotA.y, mPivotA.z);
+            btVector3    pB(mPivotB.x, mPivotB.y, mPivotB.z);
+            btVector3    axisA(mHingeAxis.x, mHingeAxis.y, mHingeAxis.z);
+            btTransform  worldFrameA = convertTransform2btTransform(mBodyA->owner_object()->transform());
+            btTransform  worldFrameB = convertTransform2btTransform(owner_object()->transform());
+            btTransform  localFrameA = worldFrameB.inverse() * worldFrameA;
+            btTransform  localFrameB = worldFrameA.inverse() * worldFrameB;
 
-            if (bodyB)
-            {
-                btRigidBody* rbB = bodyB->getRigidBody();
-                btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
-                mHingeConstraint = new btHingeConstraint(*rbA, *rbB, pA, pB, axis, axis, true);
-                mHingeConstraint->setLimit(mTempLower, mTempUpper);
-                mHingeConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
-            }
+            axisA.normalize();
+            localFrameA.setOrigin(pA);
+            localFrameB.setOrigin(pB);
+            btVector3 axisB = localFrameB.getBasis() * axisA;
+
+            axisB.normalize();
+            mHingeConstraint = new btHingeConstraint(*rbA, *rbB, pA, pB, axisA, axisB, true);
+            mHingeConstraint->setLimit(mTempLower, mTempUpper);
+            mHingeConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
         }
     }
 }

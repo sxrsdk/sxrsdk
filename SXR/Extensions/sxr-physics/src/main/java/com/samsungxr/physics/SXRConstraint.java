@@ -67,6 +67,10 @@ abstract class SXRConstraint extends SXRPhysicsWorldObject
                 throw new UnsupportedOperationException("There is no rigid body or joint attached to owner object.");
             }
         }
+        if (mBodyB == mBodyA)
+        {
+            throw new UnsupportedOperationException("A constraint must be between two different bodies");
+        }
         super.onAttach(newOwner);
     }
 

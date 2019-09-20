@@ -54,6 +54,8 @@ class PhysicsAVTLoader
     private SXRSkeleton mSkeleton;
     private final Map<String, JSONObject> mTargetBones = new HashMap<String, JSONObject>();
     private SXRMaterial mColliderMtl;
+    private float mAngularDamping;
+    private float mLinearDamping;
 
     public PhysicsAVTLoader(SXRNode root)
     {
@@ -98,6 +100,8 @@ class PhysicsAVTLoader
         JSONObject basebone = multibody.getJSONObject("Base Bone");
         JSONArray childbones = multibody.getJSONObject("Child Bones").getJSONArray("property_value");
 
+        mAngularDamping = (float) multibody.optDouble("Angular Damping", 0.0f);
+        mLinearDamping = (float) multibody.optDouble("Linear Damping", 0.0f);
         mTargetBones.clear();
         parseRigidBody(basebone);
         for (int i = 0; i < childbones.length(); ++i)
@@ -261,31 +265,34 @@ class PhysicsAVTLoader
             {
                 SXRCapsuleCollider capsule = new SXRCapsuleCollider(ctx);
                 String direction = c.getString("Direction");
-                float radius = (float) c.getDouble("Radius") * s.x;
-                float height = ((float) (c.getDouble("Half Height") * 2) + radius) * s.y;
+                float radius = (float) c.getDouble("Radius");
+                float height = (float) c.getDouble("Half Height") * 2.0f;
                 SXRRenderData rd = new SXRRenderData(mContext, mColliderMtl);
                 SXRMesh cubeMesh = null;
 
-                capsule.setRadius(radius);
-                capsule.setHeight(height);
+                capsule.setRadius(radius * s.x);
                 if (direction.equals("X"))
                 {
+                    height *= s.x;
                     capsule.setDirection(SXRCapsuleCollider.CapsuleDirection.X_AXIS);
                     cubeMesh = SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
-                                                      true, new Vector3f(height + radius, radius, radius));
+                                                      true, new Vector3f(height, radius * s.y, radius * s.z));
                 }
                 else if (direction.equals("Y"))
                 {
+                    height *= s.y;
                     capsule.setDirection(SXRCapsuleCollider.CapsuleDirection.Y_AXIS);
                     cubeMesh = SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
-                                                      true, new Vector3f(radius, height + radius, radius));
+                                                      true, new Vector3f(radius * s.x, height, radius * s.z));
                 }
                 else if (direction.equals("Z"))
                 {
+                    height *= s.z;
                     capsule.setDirection(SXRCapsuleCollider.CapsuleDirection.Z_AXIS);
                     cubeMesh = SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
-                                                      true, new Vector3f(radius, radius, height + radius));
+                                                      true, new Vector3f(radius * s.x, radius * s.y, height));
                 }
+                capsule.setHeight(height);
                 cubeMesh.transform(m, false);
                 rd.setMesh(cubeMesh);
                 owner.attachComponent(rd);
@@ -302,7 +309,7 @@ class PhysicsAVTLoader
                 float y = (float) size.getDouble("Y") * s.y;
                 float z = (float) size.getDouble("Z") * s.z;
                 SXRMesh cubeMesh = SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
-                                                      true, new Vector3f(2 * x * s.x, 2 * y * s.y, 2 * s.z * z));
+                                                      true, new Vector3f(2 * x, 2 * y, 2 * z));
                 SXRRenderData rd = new SXRRenderData(mContext, mColliderMtl);
 
                 cubeMesh.transform(m, false);
@@ -320,14 +327,13 @@ class PhysicsAVTLoader
                 SXRSphereCollider sphere = new SXRSphereCollider(ctx);
                 SXRSphereNode sp = new SXRSphereNode(ctx, true, mColliderMtl);
                 SXRRenderData rd = new SXRRenderData(ctx, mColliderMtl);
+                float sf = (float) scale.getDouble("X");
 
-                m.scale((float) scale.getDouble("X"),
-                        (float) scale.getDouble("Y"),
-                        (float) scale.getDouble("Z"));
+                m.scale(sf, sf, sf);
                 m.setTranslation(-pivotB.x, -pivotB.y, -pivotB.z);
                 rd.setMesh(sp.getRenderData().getMesh());
                 rd.getMesh().transform(m, true);
-                sphere.setRadius(radius);
+                sphere.setRadius(radius * s.x);
                 owner.attachComponent(rd);
                 owner.attachComponent(sphere);
                 Log.e(TAG, "sphere collider %s radius %f", colliderRoot.getString("Name"), radius);
@@ -493,8 +499,13 @@ class PhysicsAVTLoader
         String parentName = link.optString("Parent", null);
         float mass = (float) link.getDouble("Mass");
         SXRRigidBody parentBody = findParentBody(parentName);
-        SXRRigidBody body = new SXRRigidBody(mContext, mass);
+        int collisionGroup = link.optInt("Collision Layer ID", 0);
+        SXRRigidBody body = new SXRRigidBody(mContext, mass, collisionGroup);
+        JSONObject props = link.getJSONObject("Physic Material");
+        JSONObject v;
 
+        body.setFriction((float) props.getDouble("Friction"));
+        body.setDamping(mLinearDamping, mAngularDamping);
         mTargetBones.put(name, link);
         if (parentBody == null)
         {
@@ -522,6 +533,7 @@ class PhysicsAVTLoader
         JSONObject pos = trans.getJSONObject("Position");
         JSONObject pivot = link.optJSONObject("Pivot Pos.");
         Vector3f pivotB = new Vector3f(0, 0, 0);
+        Matrix4f worldMtx = node.getTransform().getModelMatrix4f();
 
         if (pivot != null)
         {
@@ -541,50 +553,54 @@ class PhysicsAVTLoader
         }
         if (type.equals("ball"))
         {
-            SXRGenericConstraint ball = new SXRGenericConstraint(mContext, parentBody, pivotA, pivotB);
-
-            JSONObject dofx = dofdata.getJSONObject(0);
-            JSONObject dofy = dofdata.getJSONObject(1);
-            JSONObject dofz = dofdata.getJSONObject(2);
-            float lx = dofx.getBoolean("useLimit") ?
-                       (float) Math.max(Math.toRadians(dofx.getDouble("limitLow")), -Math.PI) : 0;
-            float ly = dofy.getBoolean("useLimit") ?
-                    (float) Math.max(Math.toRadians(dofx.getDouble("limitLow")), -Math.PI / 2) : 0;
-            float lz = dofz.getBoolean("useLimit") ?
-                    (float) Math.max(Math.toRadians(dofx.getDouble("limitLow")), -Math.PI) : 0;
-            ball.setAngularLowerLimits(lx, ly, lz);
-            lx = dofx.getBoolean("useLimit") ?
-                 (float) Math.max(Math.toRadians(dofx.getDouble("limitHigh")), -Math.PI) : 0;
-            ly = dofy.getBoolean("useLimit") ?
-                 (float) Math.max(Math.toRadians(dofx.getDouble("limitHigh")), -Math.PI / 2) : 0;
-            lz = dofz.getBoolean("useLimit") ?
-                 (float) Math.max(Math.toRadians(dofx.getDouble("limitHigh")), -Math.PI) : 0;
-            ball.setAngularUpperLimits(lx, ly, lz);
-            constraint = ball;
+            if (true)
+            {
+                SXRGenericConstraint ball = new SXRGenericConstraint(mContext, parentBody, pivotA, pivotB);
+                float lim = (float) Math.PI / 2.0f;
+                ball.setAngularLowerLimits(-lim, -lim, -lim);
+                ball.setAngularUpperLimits(lim, lim, lim);
+                ball.setLinearLowerLimits(0, 0, 0);
+                ball.setLinearUpperLimits(0, 0, 0);
+                constraint = ball;
+            }
+            else
+            {
+                SXRPoint2PointConstraint ball = new SXRPoint2PointConstraint(mContext, parentBody, pivotA, pivotB);
+                constraint = ball;
+            }
             Log.e(TAG, "Ball joint between %s and %s (%f, %f, %f)",
                   parentName, name, pivotB.x, pivotB.y, pivotB.z);
         }
         else if (type.equals("universal"))
         {
-            JSONObject v = link.getJSONObject("Axis A");
-            Vector3f axisA = new Vector3f(
-                (float)  v.getDouble("X"),
-                (float)  v.getDouble("Y"),
-                (float)  v.getDouble("Z"));
+            v = link.getJSONObject("Axis A");
+            Vector4f aa = new Vector4f(
+                (float) v.getDouble("X"),
+                (float) v.getDouble("Y"),
+                (float) v.getDouble("Z"),
+                    0);
             v = link.getJSONObject("Axis B");
-            Vector3f axisB = new Vector3f(
-                (float)  v.getDouble("X"),
-                (float)  v.getDouble("Y"),
-                (float)  v.getDouble("Z"));
-            SXRUniversalConstraint ball = new SXRUniversalConstraint(mContext, parentBody,  pivotA, axisA, axisB);
+            Vector4f ab = new Vector4f(
+                (float) v.getDouble("X"),
+                (float) v.getDouble("Y"),
+                (float) v.getDouble("Z"),
+                    0);
+            worldMtx.transform(aa);
+            worldMtx.transform(ab);
+            Vector3f axisA = new Vector3f(aa.x, aa.y, aa.z);
+            Vector3f axisB = new Vector3f(ab.x, ab.y, ab.z);
+            axisA.normalize();
+            axisB.normalize();
+            SXRUniversalConstraint ball = new SXRUniversalConstraint(mContext, parentBody, pivotA,
+                                                                     axisA, axisB);
             JSONObject dofx = dofdata.getJSONObject(0);
             JSONObject dofy = dofdata.getJSONObject(1);
-            float lx = dofx.getBoolean("useLimit") ? (float) Math.toRadians(dofx.getDouble("limitLow")) : 0;
-            float ly = dofy.getBoolean("useLimit") ? (float) Math.toRadians(dofy.getDouble("limitLow")) : 0;
+            float lx = dofx.getBoolean("useLimit") ? (float) Math.toRadians(dofx.getDouble("limitLow")) : (float) -Math.PI;
+            float ly = dofy.getBoolean("useLimit") ? (float) Math.toRadians(dofy.getDouble("limitLow")) : (float) -Math.PI;
 
             ball.setAngularLowerLimits(lx, ly, 0);
-            lx = dofx.getBoolean("useLimit") ? (float) Math.toRadians(dofx.getDouble("limitHigh")) : 0;
-            ly = dofy.getBoolean("useLimit") ? (float) Math.toRadians(dofy.getDouble("limitHigh")) : 0;
+            lx = dofx.getBoolean("useLimit") ? (float) Math.toRadians(dofx.getDouble("limitHigh")) : (float) Math.PI;
+            ly = dofy.getBoolean("useLimit") ? (float) Math.toRadians(dofy.getDouble("limitHigh")) : (float) Math.PI;
             ball.setAngularUpperLimits(lx, ly, 0);
             constraint = ball;
             Log.e(TAG, "Universal joint between %s and %s (%f, %f, %f)",
@@ -592,11 +608,11 @@ class PhysicsAVTLoader
         }
         else if (type.equals("hinge"))
         {
-            JSONObject v = link.getJSONObject("Axis A");
+            v = link.optJSONObject("Axis A");
             Vector3f axisA = new Vector3f(
-                        (float)  v.getDouble("X"),
-                        (float)  v.getDouble("Y"),
-                        (float)  v.getDouble("Z"));
+                        (float) v.getDouble("X"),
+                        (float) v.getDouble("Y"),
+                        (float) v.getDouble("Z"));
             SXRHingeConstraint hinge = new SXRHingeConstraint(mContext, parentBody,
                                                               pivotA, pivotB, axisA);
             JSONObject dof = dofdata.getJSONObject(0);
@@ -611,7 +627,8 @@ class PhysicsAVTLoader
         }
         else if (type.equals("fixed"))
         {
-            SXRFixedConstraint fixed = new SXRFixedConstraint(mContext, parentBody);
+           SXRFixedConstraint fixed = new SXRFixedConstraint(mContext, parentBody);
+//            SXRPoint2PointConstraint fixed = new SXRPoint2PointConstraint(mContext, parentBody, pivotA, pivotB);
             constraint = fixed;
             Log.e(TAG, "Fixed joint between %s and %s", parentName, name);
         }

@@ -19,6 +19,7 @@
 
 #include "bullet_conetwistconstraint.h"
 #include "bullet_rigidbody.h"
+#include "bullet_sxr_utils.h"
 
 #include <BulletDynamics/ConstraintSolver/btConeTwistConstraint.h>
 #include <LinearMath/btScalar.h>
@@ -31,16 +32,14 @@ namespace sxr {
     BulletConeTwistConstraint::BulletConeTwistConstraint(PhysicsCollidable* bodyA,
                                                          const glm::vec3& pivotA,
                                                          const glm::vec3& pivotB,
-                                                         const glm::mat3& bodyRotation,
-                                                         const glm::mat3& coneRotation)
+                                                         const glm::vec3& coneAxis)
     {
         mConeTwistConstraint = 0;
         mBodyA = bodyA;
         mBreakingImpulse = SIMD_INFINITY;
         mPivotA = pivotA;
         mPivotB = pivotB;
-        mBodyRotation = bodyRotation;
-        mConeRotation = coneRotation;
+        mConeAxis = glm::normalize(coneAxis);
         mSwingLimit = SIMD_PI * 0.25f;
         mTwistLimit = SIMD_PI;
     }
@@ -139,25 +138,36 @@ void BulletConeTwistConstraint::updateConstructionInfo(PhysicsWorld* world)
     {
         return;
     }
+    BulletRigidBody* bodyB = (BulletRigidBody*) owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_RIGID_BODY);
+    if (bodyB)
+    {
 
-    btRigidBody* rbB = reinterpret_cast<BulletRigidBody*>(owner_object()->getComponent(COMPONENT_TYPE_PHYSICS_RIGID_BODY))->getRigidBody();
-    btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
-    btVector3 pA(mPivotA.x, mPivotA.y, mPivotA.z);
-    btVector3 pB(mPivotB.x, mPivotB.y, mPivotB.z);
+        btRigidBody* rbB = bodyB->getRigidBody();
+        btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
+        btVector3    pA(mPivotA.x, mPivotA.y, mPivotA.z);
+        btVector3    pB(mPivotB.x, mPivotB.y, mPivotB.z);
+        btTransform  worldFrameA = convertTransform2btTransform(mBodyA->owner_object()->transform());
+        btTransform  worldFrameB = convertTransform2btTransform(owner_object()->transform());
+        btTransform  localFrameA = worldFrameB.inverse() * worldFrameA;
+        btTransform  localFrameB = worldFrameA.inverse() * worldFrameB;
+        btVector3    coneAxisA(mConeAxis.x, mConeAxis.y, mConeAxis.z);
+        btVector3    coneAxisB(-coneAxisA);
+        btMatrix3x3  rotX2ConeAxis;
+        btVector3    Xaxis(1, 0, 0);
+        btVector3    negXaxis(-1, 0, 0);
 
-    btMatrix3x3 m((btScalar) mBodyRotation[0][0], (btScalar) mBodyRotation[0][1], (btScalar) mBodyRotation[0][2],
-                  (btScalar) mBodyRotation[1][0], (btScalar) mBodyRotation[1][1], (btScalar) mBodyRotation[1][2],
-                  (btScalar) mBodyRotation[2][0], (btScalar) mBodyRotation[2][1], (btScalar) mBodyRotation[2][2]);
-    btTransform fA(m, pA);
+        coneAxisA.normalize();
+        coneAxisB.normalize();
+        rotX2ConeAxis = btMatrix3x3(shortestArcQuatNormalize2(Xaxis, coneAxisA));
+        localFrameA.getBasis() *= rotX2ConeAxis;
+        rotX2ConeAxis = btMatrix3x3(shortestArcQuatNormalize2(negXaxis, coneAxisB));
+        localFrameB.getBasis() *= rotX2ConeAxis;
+        localFrameA.setOrigin(pA);
+        localFrameB.setOrigin(pB);
 
-    m.setValue((btScalar) mConeRotation[0][0], (btScalar) mConeRotation[0][1], (btScalar) mConeRotation[0][2],
-               (btScalar) mConeRotation[1][0], (btScalar) mConeRotation[1][1], (btScalar) mConeRotation[1][2],
-               (btScalar) mConeRotation[2][0], (btScalar) mConeRotation[2][1], (btScalar) mConeRotation[2][2]);
-
-    btTransform fB(m, pB);
-
-    mConeTwistConstraint = new btConeTwistConstraint(*rbA, *rbB, fA, fB);
-    mConeTwistConstraint->setLimit(mSwingLimit, mSwingLimit, mTwistLimit);
-    mConeTwistConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
+        mConeTwistConstraint = new btConeTwistConstraint(*rbA, *rbB, localFrameA, localFrameB);
+        mConeTwistConstraint->setLimit(mSwingLimit, mSwingLimit, mTwistLimit);
+        mConeTwistConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
+    }
 }
 }

@@ -145,7 +145,7 @@ void BulletWorld::addConstraint(PhysicsConstraint *constraint)
     else if (body != nullptr)
     {
         btTypedConstraint* constr = reinterpret_cast<btTypedConstraint *>(constraint->getUnderlying());
-        mPhysicsWorld->addConstraint(constr);
+        mPhysicsWorld->addConstraint(constr, true);
     }
 
 }

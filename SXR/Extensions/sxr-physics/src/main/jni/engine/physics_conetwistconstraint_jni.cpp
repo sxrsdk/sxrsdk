@@ -32,21 +32,15 @@ namespace sxr {
     Java_com_samsungxr_physics_Native3DConeTwistConstraint_ctor(JNIEnv *env, jclass obj, jlong bodyA,
                                                                 jfloat pivotAx, jfloat pivotAy, jfloat pivotAz,
                                                                 jfloat pivotBx, jfloat pivotBy, jfloat pivotBz,
-                                                                jfloatArray bodyRotation,
-                                                                jfloatArray coneRotation)
+                                                                jfloat axisX, jfloat axisY, jfloat axisZ)
     {
         glm::vec3 pivotA(pivotAx, pivotAy, pivotAz);
         glm::vec3 pivotB(pivotBx, pivotBy, pivotBz);
-        jfloat* bodyrot = env->GetFloatArrayElements(bodyRotation, 0);
-        jfloat* conerot = env->GetFloatArrayElements(coneRotation, 0);
-        glm::mat3 brot(glm::make_mat3(bodyrot));
-        glm::mat3 crot(glm::make_mat3(conerot));
+        glm::vec3 coneAxis(axisX, axisY, axisZ);
 
-        env->ReleaseFloatArrayElements(bodyRotation, bodyrot, 0);
-        env->ReleaseFloatArrayElements(coneRotation, conerot, 0);
         return reinterpret_cast<jlong>(new
                 BulletConeTwistConstraint(reinterpret_cast<PhysicsCollidable *>(bodyA),
-                                          pivotA, pivotB, brot, crot));
+                                          pivotA, pivotB, coneAxis));
     }
 
     JNIEXPORT void JNICALL

@@ -39,19 +39,16 @@ public class SXRConeTwistConstraint extends SXRConstraint {
      *                     fixed body (the owner)
      * @param pivotB       the vortex position (x, y and z coordinates) of the conic swing relative to
      *                     moving body (the owner)
-     * @param bodyRotation a vector containing the elements of the 3x3 rotation matrix for the
-     *                     swinging body
-     * @param coneRotation a vector containing the elements of the 3x3 rotation matrix for the conic
-     *                     trajectory
+     * @param coneAxis     a vector with the cone axis
      */
     public SXRConeTwistConstraint(SXRContext ctx, SXRPhysicsCollidable bodyB,
                            final float pivotA[], final float pivotB[],
-                           final float bodyRotation[], final float coneRotation[])
+                           final float coneAxis[])
     {
         this(ctx, Native3DConeTwistConstraint.ctor(bodyB.getNative(),
                 pivotA[0], pivotA[1], pivotA[2],
                 pivotB[0], pivotB[1], pivotB[2],
-                bodyRotation, coneRotation));
+                coneAxis[0], coneAxis[1], coneAxis[2]));
 
         mBodyB = bodyB;
     }
@@ -65,19 +62,17 @@ public class SXRConeTwistConstraint extends SXRConstraint {
      *                     fixed body (the owner)
      * @param pivotB       the vortex position (x, y and z coordinates) of the conic swing relative to
      *                     moving body (the owner)
-     * @param bodyRotation a vector containing the elements of the 3x3 rotation matrix for the
-     *                     swinging body
-     * @param coneRotation a vector containing the elements of the 3x3 rotation matrix for the conic
-     *                     trajectory
+     * @param coneAxis     a vector with the cone axis
      */
     public SXRConeTwistConstraint(SXRContext ctx, SXRPhysicsCollidable bodyB,
-                                  final Vector3f pivotA, final Vector3f pivotB,
-                                  final float bodyRotation[], final float coneRotation[])
+                                  final Vector3f pivotA,
+                                  final Vector3f pivotB,
+                                  final Vector3f coneAxis)
     {
         this(ctx, Native3DConeTwistConstraint.ctor(bodyB.getNative(),
                                                    pivotA.x, pivotA.y, pivotA.z,
                                                    pivotB.x, pivotB.y, pivotB.z,
-                                                   bodyRotation, coneRotation));
+                                                   coneAxis.x, coneAxis.y, coneAxis.z));
 
         mBodyB = bodyB;
     }
@@ -132,8 +127,7 @@ class Native3DConeTwistConstraint
     static native long ctor(long rigidBody,
                             float pivotAx, float pivotAy, float pivotAz,
                             float pivotBx, float pivotBy, float pivotBz,
-                            final float bodyRotation[],
-                            final float coneRotation[]);
+                            float axisX, float axisY, float axisZ);
 
     static native void setSwingLimit(long jconstraint, float limit);
 

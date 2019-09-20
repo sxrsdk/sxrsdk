@@ -33,7 +33,7 @@ public class SXRUniversalConstraint extends SXRConstraint
      *
      * @param ctx       the context of the app
      * @param bodyA     the parent body (not the owner) in this constraint
-     * @param axisA     Parent rotation axis (The Z axis pf the Universal Joint).
+     * @param axisA     Parent rotation axis (The Z axis of the Universal Joint).
      * @param axisB     Child (the constraint owner) rotation axis (the Y axis of the joint.)
      */
     public SXRUniversalConstraint(SXRContext ctx,

@@ -23,7 +23,7 @@
 #include "bullet_sxr_utils.h"
 
 #include <BulletDynamics/Dynamics/btRigidBody.h>
-#include <BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h>
+#include <BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h>
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
 #include "glm/gtc/type_ptr.hpp"
@@ -34,7 +34,7 @@ namespace sxr {
 
     BulletGeneric6dofConstraint::BulletGeneric6dofConstraint(PhysicsCollidable* bodyA, const glm::vec3& pivotA, const glm::vec3& pivotB)
     {
-        mGeneric6DofConstraint = 0;
+        mConstraint = 0;
 
         mBodyA = bodyA;
         mBreakingImpulse = SIMD_INFINITY;
@@ -44,34 +44,34 @@ namespace sxr {
 
     BulletGeneric6dofConstraint::BulletGeneric6dofConstraint(btGeneric6DofConstraint *constraint)
     {
-        mGeneric6DofConstraint = constraint;
+        mConstraint = constraint;
         mBodyA = static_cast<BulletRigidBody*>(constraint->getRigidBodyA().getUserPointer());
         constraint->setUserConstraintPtr(this);
     }
 
     BulletGeneric6dofConstraint::~BulletGeneric6dofConstraint()
     {
-        if (mGeneric6DofConstraint)
+        if (mConstraint)
         {
-            delete mGeneric6DofConstraint;
+            delete mConstraint;
         }
     }
 
     void BulletGeneric6dofConstraint::setLinearLowerLimits(float limitX, float limitY, float limitZ)
     {
-        if (mGeneric6DofConstraint)
+        if (mConstraint)
         {
-            mGeneric6DofConstraint->setLinearLowerLimit(btVector3(limitX, limitY, limitZ));
+            mConstraint->setLinearLowerLimit(btVector3(limitX, limitY, limitZ));
         }
         mLinearLowerLimits = glm::vec3(limitX, limitY, limitZ);
     }
 
     const glm::vec3& BulletGeneric6dofConstraint::getLinearLowerLimits() const
     {
-        if (mGeneric6DofConstraint)
+        if (mConstraint)
         {
             btVector3 t;
-            mGeneric6DofConstraint->getLinearLowerLimit(t);
+            mConstraint->getLinearLowerLimit(t);
             mLinearLowerLimits.x = t.x();
             mLinearLowerLimits.y = t.y();
             mLinearLowerLimits.z = t.z();
@@ -81,19 +81,19 @@ namespace sxr {
 
     void BulletGeneric6dofConstraint::setLinearUpperLimits(float limitX, float limitY, float limitZ)
     {
-        if (mGeneric6DofConstraint)
+        if (mConstraint)
         {
-            mGeneric6DofConstraint->setLinearUpperLimit(btVector3(limitX, limitY, limitZ));
+            mConstraint->setLinearUpperLimit(btVector3(limitX, limitY, limitZ));
         }
         mLinearUpperLimits = glm::vec3(limitX, limitY, limitZ);
     }
 
     const glm::vec3& BulletGeneric6dofConstraint::getLinearUpperLimits() const
     {
-        if (mGeneric6DofConstraint)
+        if (mConstraint)
         {
             btVector3 t;
-            mGeneric6DofConstraint->getLinearUpperLimit(t);
+            mConstraint->getLinearUpperLimit(t);
             mLinearUpperLimits.x = t.x();
             mLinearUpperLimits.y = t.y();
             mLinearUpperLimits.z = t.z();
@@ -103,19 +103,19 @@ namespace sxr {
 
     void BulletGeneric6dofConstraint::setAngularLowerLimits(float limitX, float limitY, float limitZ)
     {
-        if (mGeneric6DofConstraint)
+        if (mConstraint)
         {
-            mGeneric6DofConstraint->setAngularLowerLimit(btVector3(limitX, limitY, limitZ));
+            mConstraint->setAngularLowerLimit(btVector3(limitX, limitY, limitZ));
         }
         mAngularLowerLimits = glm::vec3(limitX, limitY, limitZ);
     }
 
     const glm::vec3&  BulletGeneric6dofConstraint::getAngularLowerLimits() const
     {
-        if (mGeneric6DofConstraint)
+        if (mConstraint)
         {
             btVector3 t;
-            mGeneric6DofConstraint->getAngularLowerLimit(t);
+            mConstraint->getAngularLowerLimit(t);
             mAngularLowerLimits.x = t.x();
             mAngularLowerLimits.y = t.y();
             mAngularLowerLimits.z = t.z();
@@ -125,19 +125,19 @@ namespace sxr {
 
     void BulletGeneric6dofConstraint::setAngularUpperLimits(float limitX, float limitY, float limitZ)
     {
-        if ( mGeneric6DofConstraint)
+        if ( mConstraint)
         {
-            mGeneric6DofConstraint->setAngularUpperLimit(btVector3(limitX, limitY, limitZ));
+            mConstraint->setAngularUpperLimit(btVector3(limitX, limitY, limitZ));
         }
         mAngularUpperLimits = glm::vec3(limitX, limitY, limitZ);
     }
 
     const glm::vec3& BulletGeneric6dofConstraint::getAngularUpperLimits() const
     {
-        if (mGeneric6DofConstraint)
+        if (mConstraint)
         {
             btVector3 t;
-            mGeneric6DofConstraint->getAngularUpperLimit(t);
+            mConstraint->getAngularUpperLimit(t);
             mAngularUpperLimits.x = t.x();
             mAngularUpperLimits.y = t.y();
             mAngularUpperLimits.z = t.z();
@@ -147,9 +147,9 @@ namespace sxr {
 
     void BulletGeneric6dofConstraint::setBreakingImpulse(float impulse)
     {
-        if (mGeneric6DofConstraint)
+        if (mConstraint)
         {
-            mGeneric6DofConstraint->setBreakingImpulseThreshold(impulse);
+            mConstraint->setBreakingImpulseThreshold(impulse);
         }
         else
         {
@@ -159,9 +159,9 @@ namespace sxr {
 
     float BulletGeneric6dofConstraint::getBreakingImpulse() const
     {
-        if (mGeneric6DofConstraint)
+        if (mConstraint)
         {
-            return mGeneric6DofConstraint->getBreakingImpulseThreshold();
+            return mConstraint->getBreakingImpulseThreshold();
         }
         else
         {
@@ -171,7 +171,7 @@ namespace sxr {
 
 void BulletGeneric6dofConstraint::updateConstructionInfo(PhysicsWorld* world)
 {
-    if (mGeneric6DofConstraint != nullptr)
+    if (mConstraint != nullptr)
     {
         return;
     }
@@ -190,12 +190,12 @@ void BulletGeneric6dofConstraint::updateConstructionInfo(PhysicsWorld* world)
 
         localFrameA.setOrigin(pA);
         localFrameB.setOrigin(pB);
-        mGeneric6DofConstraint = new btGeneric6DofConstraint(*rbA, *rbB, localFrameA, localFrameB, false);
-        mGeneric6DofConstraint->setLinearLowerLimit(Common2Bullet(mLinearLowerLimits));
-        mGeneric6DofConstraint->setLinearUpperLimit(Common2Bullet(mLinearUpperLimits));
-        mGeneric6DofConstraint->setAngularLowerLimit(Common2Bullet(mAngularLowerLimits));
-        mGeneric6DofConstraint->setAngularUpperLimit(Common2Bullet(mAngularUpperLimits));
-        mGeneric6DofConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
+        mConstraint = new btGeneric6DofSpringConstraint(*rbA, *rbB, localFrameA, localFrameB, false);
+        mConstraint->setLinearLowerLimit(Common2Bullet(mLinearLowerLimits));
+        mConstraint->setLinearUpperLimit(Common2Bullet(mLinearUpperLimits));
+        mConstraint->setAngularLowerLimit(Common2Bullet(mAngularLowerLimits));
+        mConstraint->setAngularUpperLimit(Common2Bullet(mAngularUpperLimits));
+        mConstraint->setBreakingImpulseThreshold(mBreakingImpulse);
     }
 }
 }

@@ -193,18 +193,26 @@ void BulletSliderConstraint::updateConstructionInfo(PhysicsWorld* world)
     {
         btRigidBody* rbB = rigidBodyB->getRigidBody();
         btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
-        btTransform worldFrameA = convertTransform2btTransform(mBodyA->owner_object()->transform());
-        btTransform worldFrameB = convertTransform2btTransform(owner_object()->transform());
-        btTransform localFrameA = worldFrameB.inverse() * worldFrameA;
-        btVector3 sliderAxis = localFrameA.getOrigin();
-        btMatrix3x3 rotX2SliderAxis;
-        btVector3 Xaxis(1, 0, 0);
+        btTransform  worldFrameA = convertTransform2btTransform(mBodyA->owner_object()->transform());
+        btTransform  worldFrameB = convertTransform2btTransform(owner_object()->transform());
+        btTransform  localFrameA = worldFrameB.inverse() * worldFrameA;
+        btTransform  localFrameB = worldFrameA.inverse() * worldFrameB;
+        btVector3    sliderAxisA = localFrameA.getOrigin();
+        btVector3    sliderAxisB = localFrameB.getOrigin();
+        btMatrix3x3  rotX2SliderAxis;
+        btVector3    Xaxis(1, 0, 0);
+        btVector3    negXaxis(-1, 0, 0);
 
-        sliderAxis.normalize();
-        rotX2SliderAxis = btMatrix3x3(shortestArcQuatNormalize2(Xaxis, sliderAxis));
-        btTransform frameA(rotX2SliderAxis, btVector3(mPivotA.x, mPivotA.y, mPivotA.z));
-        btTransform frameB(rotX2SliderAxis, btVector3(mPivotB.x, mPivotB.y, mPivotB.z));
-        mSliderConstraint = new btSliderConstraint(*rbA, *rbB, frameA, frameB, true);
+        sliderAxisA.normalize();
+        sliderAxisB.normalize();
+        rotX2SliderAxis = btMatrix3x3(shortestArcQuatNormalize2(Xaxis, sliderAxisA));
+        localFrameA.getBasis() *= rotX2SliderAxis;
+        rotX2SliderAxis = btMatrix3x3(shortestArcQuatNormalize2(negXaxis, sliderAxisB));
+        localFrameB.getBasis() *= rotX2SliderAxis;
+        localFrameA.setOrigin(btVector3(mPivotA.x, mPivotA.y, mPivotA.z));
+        localFrameB.setOrigin(btVector3(mPivotB.x, mPivotB.y, mPivotB.z));
+
+        mSliderConstraint = new btSliderConstraint(*rbA, *rbB, localFrameA, localFrameB, true);
         mSliderConstraint->setLowerAngLimit(mLowerAngularLimit);
         mSliderConstraint->setUpperAngLimit(mUpperAngularLimit);
         mSliderConstraint->setLowerLinLimit(mLowerLinearLimit);
