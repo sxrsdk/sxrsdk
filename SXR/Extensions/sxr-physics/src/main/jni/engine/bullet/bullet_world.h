@@ -32,6 +32,7 @@ class btCollisionConfiguration;
 class btCollisionDispatcher;
 class btConstraintSolver;
 class btBroadphaseInterface;
+class GLDebugDrawer;
 
 namespace sxr {
 
@@ -79,7 +80,13 @@ class BulletWorld : public PhysicsWorld {
 
     btDynamicsWorld* getPhysicsWorld() const;
 
- private:
+    virtual void setDebugMode(int);
+
+    virtual void setupDebugDraw(Scene*, ShaderManager*);
+
+    virtual void debugDrawWorld();
+
+private:
     void initialize(bool isMultiBody);
 
     void finalize();
@@ -101,6 +108,7 @@ class BulletWorld : public PhysicsWorld {
     bool mIsMultiBody;
     mutable glm::vec3 mGravity;
     std::vector<BulletJoint*> mMultiBodies;
+    GLDebugDrawer* mDebugDraw;
 };
 
 }

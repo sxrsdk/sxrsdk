@@ -22,6 +22,7 @@
 #include "bullet_joint.h"
 #include "bullet_sxr_utils.h"
 #include "util/sxr_log.h"
+#include "bullet_debugdraw.h"
 
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
@@ -318,6 +319,31 @@ void BulletWorld::getPhysicsTransforms()
                      t.getOrigin().getZ());
             }
         }
+    }
+}
+
+void BulletWorld::setDebugMode(int mode)
+{
+    if (mDebugDraw)
+    {
+        mDebugDraw->setDebugMode(mode);
+    }
+}
+
+void BulletWorld::setupDebugDraw(Scene* scene, ShaderManager* sm)
+{
+    if (mPhysicsWorld && (mDebugDraw == nullptr) && !mIsMultiBody)
+    {
+        mDebugDraw = new GLDebugDrawer(scene, sm);
+        reinterpret_cast<btDiscreteDynamicsWorld*>(mPhysicsWorld)->setDebugDrawer(mDebugDraw);
+    }
+}
+
+void BulletWorld::debugDrawWorld()
+{
+    if (!mIsMultiBody && mDebugDraw)
+    {
+        reinterpret_cast<btDiscreteDynamicsWorld*>(mPhysicsWorld)->debugDrawWorld();
     }
 }
 

@@ -16,6 +16,7 @@
 package com.samsungxr.physics;
 
 import android.os.SystemClock;
+import android.transition.Scene;
 import android.util.LongSparseArray;
 
 import com.samsungxr.SXRComponent;
@@ -24,6 +25,7 @@ import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRNode.ComponentVisitor;
 import com.samsungxr.SXRScene;
+import com.samsungxr.SXRShaderManager;
 import com.samsungxr.SXRTransform;
 import com.samsungxr.IEventReceiver;
 import com.samsungxr.IEvents;
@@ -49,6 +51,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     private static final long DEFAULT_INTERVAL = 15;
     private SXREventReceiver mListeners;
     private boolean mIsMultibody = false;
+    private boolean mDoDebugDraw = false;
     private List<SXRPhysicsJoint> mMultiBodies = null;
 
     private long mNativeLoader;
@@ -200,6 +203,16 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
             mMultiBodies = new ArrayList<SXRPhysicsJoint>();
         }
         scene.getRoot().attachComponent(this);
+    }
+
+    /**
+     * Enables or disabled debug drawing of the physics world.
+     * @param mode Bullet debug draw mode
+     */
+    public void setDebugMode(int mode)
+    {
+        NativePhysics3DWorld.setDebugMode(getNative(), mode);
+        mDoDebugDraw = (mode != 0);
     }
 
     /***
@@ -593,7 +606,16 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         private int maxSubSteps;
         private long simulationTime;
         private long lastSimulTime;
-
+        private Runnable debugDrawTask = new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                {
+                    debugDrawWorld();
+                }
+            }
+        };
 
         public SXRWorldTask(long milliseconds) {
             intervalMillis = milliseconds;
@@ -627,7 +649,10 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
                 }
             }
             getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onStepPhysics", SXRWorld.this);
-
+            if (mDoDebugDraw)
+            {
+                getSXRContext().runOnGlThreadPostRender(0, debugDrawTask);
+            }
             lastSimulTime = simulationTime;
 
             simulationTime += intervalMillis - SystemClock.uptimeMillis();
@@ -714,6 +739,16 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
             return true;
         }
     };
+
+    public void setupDebugDraw(SXRScene scene, SXRShaderManager shaderManager)
+    {
+        NativePhysics3DWorld.setupDebugDraw(getNative(), scene.getNative(), shaderManager.getNative());
+    }
+
+    public void debugDrawWorld()
+    {
+        NativePhysics3DWorld.debugDrawWorld(getNative());
+    }
 }
 
 class NativePhysics3DWorld {
@@ -747,5 +782,11 @@ class NativePhysics3DWorld {
     static native void setGravity(long jworld, float x, float y, float z);
 
     static native SXRCollisionInfo[] listCollisions(long jphysics_world);
+
+    static native void setupDebugDraw(long jworld, long jscene, long jshader_manager);
+
+    static native void debugDrawWorld(long jworld);
+
+    static native void setDebugMode(long jworld, int mode);
 
 }

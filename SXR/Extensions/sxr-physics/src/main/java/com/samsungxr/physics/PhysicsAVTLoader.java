@@ -56,6 +56,7 @@ class PhysicsAVTLoader
     private SXRMaterial mColliderMtl;
     private float mAngularDamping;
     private float mLinearDamping;
+    private boolean mMakeColliderGeometry = false;
 
     public PhysicsAVTLoader(SXRNode root)
     {
@@ -265,37 +266,40 @@ class PhysicsAVTLoader
             {
                 SXRCapsuleCollider capsule = new SXRCapsuleCollider(ctx);
                 String direction = c.getString("Direction");
-                float radius = (float) c.getDouble("Radius");
-                float height = (float) c.getDouble("Half Height") * 2.0f;
-                SXRRenderData rd = new SXRRenderData(mContext, mColliderMtl);
-                SXRMesh cubeMesh = null;
+                float radius = (float) c.getDouble("Radius") * s.x;
+                float height = ((float) (c.getDouble("Half Height") * 2) + radius) * s.y;
+                Vector3f dimensions = new Vector3f();
 
                 capsule.setRadius(radius * s.x);
                 if (direction.equals("X"))
                 {
                     height *= s.x;
                     capsule.setDirection(SXRCapsuleCollider.CapsuleDirection.X_AXIS);
-                    cubeMesh = SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
-                                                      true, new Vector3f(height, radius * s.y, radius * s.z));
+                    dimensions.x = height + radius;
+                    dimensions.y = dimensions.z = radius;
                 }
                 else if (direction.equals("Y"))
                 {
-                    height *= s.y;
+                    dimensions.y = height + radius;
+                    dimensions.x = dimensions.z = radius;
                     capsule.setDirection(SXRCapsuleCollider.CapsuleDirection.Y_AXIS);
-                    cubeMesh = SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
-                                                      true, new Vector3f(radius * s.x, height, radius * s.z));
                 }
                 else if (direction.equals("Z"))
                 {
-                    height *= s.z;
+                    dimensions.z = height + radius;
+                    dimensions.x = dimensions.y = radius;
                     capsule.setDirection(SXRCapsuleCollider.CapsuleDirection.Z_AXIS);
-                    cubeMesh = SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
-                                                      true, new Vector3f(radius * s.x, radius * s.y, height));
                 }
-                capsule.setHeight(height);
-                cubeMesh.transform(m, false);
-                rd.setMesh(cubeMesh);
-                owner.attachComponent(rd);
+                if (mMakeColliderGeometry)
+                {
+                    SXRRenderData rd = new SXRRenderData(mContext, mColliderMtl);
+                    SXRMesh cubeMesh =  SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
+                                                      true, dimensions);
+
+                    cubeMesh.transform(m, false);
+                    rd.setMesh(cubeMesh);
+                    owner.attachComponent(rd);
+                }
                 owner.attachComponent(capsule);
                 Log.e(TAG, "capsule collider %s height %f radius %f %s axis",
                       colliderRoot.getString("Name"), height, radius, direction);
@@ -308,14 +312,20 @@ class PhysicsAVTLoader
                 float x = (float) size.getDouble("X") * s.x;
                 float y = (float) size.getDouble("Y") * s.y;
                 float z = (float) size.getDouble("Z") * s.z;
-                SXRMesh cubeMesh = SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
-                                                      true, new Vector3f(2 * x, 2 * y, 2 * z));
-                SXRRenderData rd = new SXRRenderData(mContext, mColliderMtl);
 
-                cubeMesh.transform(m, false);
-                rd.setMesh(cubeMesh);
                 box.setHalfExtents(x, y, z);
-                owner.attachComponent(rd);
+                if (mMakeColliderGeometry)
+                {
+                    SXRMesh cubeMesh = SXRCubeNode.createCube(mContext,
+                                               "float3 a_position float3 a_normal",
+                                               true,
+                                               new Vector3f(2 * x * s.x, 2 * y * s.y, 2 * s.z * z));
+                    SXRRenderData rd = new SXRRenderData(mContext, mColliderMtl);
+
+                    cubeMesh.transform(m, false);
+                    rd.setMesh(cubeMesh);
+                    owner.attachComponent(rd);
+                }
                 owner.attachComponent(box);
                 Log.e(TAG, "box collider %s extents  %f, %f, %f",
                       colliderRoot.getString("Name"), x, y, z);
@@ -325,16 +335,21 @@ class PhysicsAVTLoader
             {
                 float radius = (float) c.getDouble("Radius");
                 SXRSphereCollider sphere = new SXRSphereCollider(ctx);
-                SXRSphereNode sp = new SXRSphereNode(ctx, true, mColliderMtl);
-                SXRRenderData rd = new SXRRenderData(ctx, mColliderMtl);
-                float sf = (float) scale.getDouble("X");
 
-                m.scale(sf, sf, sf);
-                m.setTranslation(-pivotB.x, -pivotB.y, -pivotB.z);
-                rd.setMesh(sp.getRenderData().getMesh());
-                rd.getMesh().transform(m, true);
-                sphere.setRadius(radius * s.x);
-                owner.attachComponent(rd);
+                if (mMakeColliderGeometry)
+                {
+                    SXRSphereNode sp = new SXRSphereNode(ctx, true, mColliderMtl);
+                    SXRRenderData rd = new SXRRenderData(ctx, mColliderMtl);
+
+                    m.scale((float) scale.getDouble("X"),
+                            (float) scale.getDouble("Y"),
+                            (float) scale.getDouble("Z"));
+                    m.setTranslation(-pivotB.x, -pivotB.y, -pivotB.z);
+                    rd.setMesh(sp.getRenderData().getMesh());
+                    rd.getMesh().transform(m, true);
+                    sphere.setRadius(radius);
+                    owner.attachComponent(rd);
+                }
                 owner.attachComponent(sphere);
                 Log.e(TAG, "sphere collider %s radius %f", colliderRoot.getString("Name"), radius);
                 return sphere;
