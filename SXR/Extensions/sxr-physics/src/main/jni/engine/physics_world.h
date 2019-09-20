@@ -28,6 +28,8 @@
 
 namespace sxr {
 class PhysicsConstraint;
+class Scene;
+class ShaderManager;
 
 struct ContactPoint {
 	PhysicsCollidable* body0 = 0;
@@ -77,6 +79,12 @@ public:
     virtual void setGravity(float gx, float gy, float gz) = 0;
 
     virtual const glm::vec3& getGravity() const = 0;
+
+    virtual void setupDebugDraw(Scene*, ShaderManager*) = 0;
+
+    virtual void setDebugMode(int) = 0;
+
+    virtual void debugDrawWorld() = 0;
 };
 
 }
