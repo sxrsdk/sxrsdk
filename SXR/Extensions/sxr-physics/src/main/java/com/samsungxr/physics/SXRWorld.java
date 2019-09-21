@@ -530,6 +530,10 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
 
         getSXRContext().getEventManager().sendEvent(bodyB, ICollisionEvents.class, eventName,
                 bodyB, bodyA, info.normal, info.distance);
+
+        getSXRContext().getEventManager().sendEvent(this, ICollisionEvents.class, eventName,
+                                                    bodyA, bodyB, info.normal, info.distance);
+
     }
 
     private void doPhysicsAttach(SXRNode rootNode) {
