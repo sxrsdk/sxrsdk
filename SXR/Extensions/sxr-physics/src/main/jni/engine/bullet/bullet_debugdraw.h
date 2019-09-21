@@ -53,10 +53,12 @@ public:
     const static int MAX_VERTICES;
 
 private:
-    sxr::VertexBuffer* mVertexBuffer;
+    sxr::Mesh*         mMesh;
     sxr::ShaderData*   mMaterial;
     sxr::Scene*        mScene;
     sxr::Node*         mNode;
+    glm::vec3*         mPositions;
+    glm::vec3*         mColors;
     int                mNumVerts;
     int                mMode;
 };

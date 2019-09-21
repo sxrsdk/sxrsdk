@@ -13,10 +13,10 @@ static const char* vertex_shader =
         "attribute vec3 a_position;\n"
         "attribute vec3 a_color;\n"
         "varying vec3 vertex_color;\n"
-        "uniform mat4 u_mvp;\n"
+        "uniform mat4 u_vp;\n"
         "void main()\n"
         "{\n"
-        "\tgl_Position = u_mvp * vec4(a_position, 1);\n"
+        "\tgl_Position = u_vp * vec4(a_position, 1);\n"
         "\tvertex_color = a_color;\n"
         "}";
 
@@ -34,27 +34,28 @@ GLDebugDrawer::GLDebugDrawer(sxr::Scene* scene, sxr::ShaderManager* sm)
 {
     sxr::Renderer* renderer = sxr::Renderer::getInstance();
     int shaderID = sm->addShader("Bullet$a_position$a_color",
-                                 "mat4 u_mvp", "", "float3 a_position float3 a_color",
+                                 "mat4 u_vp", "", "float3 a_position float3 a_color",
                                  vertex_shader, fragment_shader);
     sxr::RenderPass* pass = new sxr::RenderPass();
     sxr::RenderData* rd = renderer->createRenderData();
-    sxr::Mesh* mesh;
+    sxr::Transform* trans = new sxr::Transform();
 
-    mMaterial = renderer->createMaterial("mat4 u_mvp  float line_width", "");
+    mMaterial = renderer->createMaterial("mat4 u_vp  float line_width", "");
     mScene = scene;
     mNode = new sxr::Node();
-    mVertexBuffer = renderer->createVertexBuffer("float3 a_position float3 a_color", MAX_VERTICES);
-    mesh = new sxr::Mesh(*mVertexBuffer);
+    mPositions = new glm::vec3[MAX_VERTICES];
+    mColors = new glm::vec3[MAX_VERTICES];
+    mMesh = new sxr::Mesh("float3 a_position float3 a_color");
     pass->set_material(mMaterial);
     pass->set_shader(shaderID, false);
-    rd->set_mesh(mesh);
+    rd->set_mesh(mMesh);
     rd->set_draw_mode(GL_LINES);
     rd->set_rendering_order(sxr::RenderData::Overlay);
+    pass->set_cull_face(sxr::RenderPass::CullNone);
     rd->add_pass(pass);
     mMaterial->setFloat("line_width", 5.0f);
-    mesh->setVertexBuffer(mVertexBuffer);
+    mNode->attachComponent(trans);
     mNode->attachComponent(rd);
-    mNode->set_enable(false);
     mScene->addNode(mNode);
 }
 
@@ -70,36 +71,47 @@ void GLDebugDrawer::clearLines()
     glm::mat4 view = cam->getViewMatrix();
     glm::mat4 view_proj = cam->getProjectionMatrix();
 
-    view_proj *= view;
+    view_proj = view * view_proj;
     mNumVerts = 0;
-    mMaterial->setFloatVec("u_mvp", glm::value_ptr(view_proj), 16);
+    mMaterial->setFloatVec("u_vp", glm::value_ptr(view_proj), 16);
 }
 
 void GLDebugDrawer::flushLines()
 {
-    mVertexBuffer->markDirty();
+    sxr::Renderer* renderer = sxr::Renderer::getInstance();
+    sxr::VertexBuffer* vbuf = renderer->createVertexBuffer("float3 a_position float3 a_color", mNumVerts);
+    vbuf->setFloatVec("a_position", (float*) &mPositions[0], mNumVerts * 3, 3);
+    vbuf->setFloatVec("a_color", (float*) &mColors[0], mNumVerts * 3, 3);
+    sxr::VertexBuffer* oldbuf = mMesh->getVertexBuffer();
+    mMesh->setVertexBuffer(vbuf);
+    mNode->dirtyHierarchicalBoundingVolume();
+    sxr::BoundingVolume& bv = mNode->getBoundingVolume();
+    if (oldbuf)
+    {
+        delete oldbuf;
+    }
 }
 
 void GLDebugDrawer::drawLine(const btVector3 &from, const btVector3 &to, const btVector3 &color)
 {
-    if (mNumVerts + 12 > MAX_VERTICES)
+    if (mNumVerts + 2 > MAX_VERTICES)
     {
         return;
     }
-    float* vertexData = (float*) mVertexBuffer->getVertexData();
+    glm::vec3* positions = &mPositions[mNumVerts];
+    glm::vec3* colors = &mColors[mNumVerts];
 
-    vertexData += mNumVerts * 12;
-    ++mNumVerts;
-    *vertexData++ = from.x();
-    *vertexData++ = from.y();
-    *vertexData++ = from.z();
-    *vertexData++ = color.x();
-    *vertexData++ = color.y();
-    *vertexData++ = color.z();
-    *vertexData++ = to.x();
-    *vertexData++ = to.y();
-    *vertexData++ = to.z();
-    *vertexData++ = color.x();
-    *vertexData++ = color.y();
-    *vertexData = color.z();
+    mNumVerts += 2;
+    positions->x = from.x();
+    positions->y = from.y();
+    positions->z = from.z();
+    colors->x = color.x();
+    colors->y = color.y();
+    colors->z = color.z();
+    positions->x = to.x();
+    positions->y = to.y();
+    positions->z = to.z();
+    colors->x = color.x();
+    colors->y = color.y();
+    colors->z = color.z();
 }

@@ -38,7 +38,7 @@ namespace sxr {
         mConstraint = 0;
         mBodyA = bodyA;
         mBreakingImpulse = SIMD_INFINITY;
-        mPivotB= pivotB;
+        mPivotB = pivotB;
         mAxis1 = axis1;
         mAxis2 = axis2;
     }
@@ -141,7 +141,7 @@ void BulletUniversalConstraint::updateConstructionInfo(PhysicsWorld* world)
         BulletRigidBody* bodyA = reinterpret_cast<BulletRigidBody*>(mBodyA);
         btRigidBody* rbA = bodyA->getRigidBody();
         float        x, y, z;
-        btVector3    p(mPivotA.x, mPivotA.y, mPivotA.z);
+        btVector3    p(mPivotB.x, mPivotB.y, mPivotB.z);
         btVector3    zaxis(mAxis1.x, mAxis1.y, mAxis1.z);
         btVector3    yaxis(mAxis2.x, mAxis2.y, mAxis2.z);
 

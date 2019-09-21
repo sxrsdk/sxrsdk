@@ -640,6 +640,10 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
 
             NativePhysics3DWorld.step(getNative(), timeStep, maxSubSteps);
 
+            if (mDoDebugDraw)
+            {
+                getSXRContext().runOnGlThread(debugDrawTask);
+            }
             generateCollisionEvents();
             if (mIsMultibody)
             {
@@ -649,10 +653,6 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
                 }
             }
             getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onStepPhysics", SXRWorld.this);
-            if (mDoDebugDraw)
-            {
-                getSXRContext().runOnGlThreadPostRender(0, debugDrawTask);
-            }
             lastSimulTime = simulationTime;
 
             simulationTime += intervalMillis - SystemClock.uptimeMillis();
