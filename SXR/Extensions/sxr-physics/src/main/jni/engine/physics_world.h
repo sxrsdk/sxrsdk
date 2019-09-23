@@ -80,7 +80,7 @@ public:
 
     virtual const glm::vec3& getGravity() const = 0;
 
-    virtual void setupDebugDraw(Scene*, ShaderManager*) = 0;
+    virtual void setupDebugDraw(Node*) = 0;
 
     virtual void setDebugMode(int) = 0;
 

@@ -21,14 +21,22 @@ import android.util.LongSparseArray;
 
 import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRComponentGroup;
+import com.samsungxr.SXRContext;
 import com.samsungxr.SXREventReceiver;
+import com.samsungxr.SXRMaterial;
+import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRNode;
 import com.samsungxr.SXRNode.ComponentVisitor;
+import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRScene;
+import com.samsungxr.SXRShader;
+import com.samsungxr.SXRShaderData;
+import com.samsungxr.SXRShaderId;
 import com.samsungxr.SXRShaderManager;
 import com.samsungxr.SXRTransform;
 import com.samsungxr.IEventReceiver;
 import com.samsungxr.IEvents;
+import com.samsungxr.SXRVertexBuffer;
 import com.samsungxr.animation.SXRSkeleton;
 import com.samsungxr.io.SXRCursorController;
 
@@ -37,6 +45,8 @@ import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.opengl.GLES20.GL_LINES;
 
 /**
  * Represents a physics world where all {@link SXRNode} with {@link SXRRigidBody} component
@@ -744,9 +754,57 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         }
     };
 
-    public void setupDebugDraw(SXRScene scene, SXRShaderManager shaderManager)
+    private class PhysicsDebugShader extends SXRShader
     {
-        NativePhysics3DWorld.setupDebugDraw(getNative(), scene.getNative(), shaderManager.getNative());
+        final String vertex_shader =
+                "precision mediump float;\n" +
+                        "attribute vec3 a_position;\n" +
+                        "attribute vec3 a_color;\n" +
+                        "varying vec3 vertex_color;\n" +
+                        "uniform mat4 u_vp;\n" +
+                        "void main()\n" +
+                        "{\n" +
+                        "\tgl_Position = u_vp * vec4(a_position, 1);\n" +
+                        "\tvertex_color = a_color;\n" +
+                        "}";
+
+        final String fragment_shader =
+                "precision highp float;\n" +
+                        "varying vec3 vertex_color;\n" +
+                        "void main()\n" +
+                        "{\n" +
+                        "    gl_FragColor = vec4(vertex_color, 1);\n" +
+                        "}";
+
+        public PhysicsDebugShader()
+        {
+            super("mat4 u_vp", "", "float3 a_position, float3 a_color", GLSLESVersion.V300);
+        }
+
+        protected void setMaterialDefaults(SXRShaderData material)
+        {
+            material.setMat4("u_mvp",
+                                1, 0, 0, 0,
+                                0, 1, 0,0,
+                                0, 0, 1,0,
+                                0, 0, 0,1);
+        }
+    };
+
+    public SXRNode setupDebugDraw()
+    {
+        SXRContext ctx = getSXRContext();
+        SXRShaderId debugShader = ctx.getShaderManager().getShaderType(PhysicsDebugShader.class);
+        SXRRenderData rd = new SXRRenderData(ctx, new SXRMaterial(ctx, debugShader));
+        SXRMesh mesh = new SXRMesh(new SXRVertexBuffer(ctx, "float3 a_position float3 a_color", 5000), null);
+        SXRNode debugDrawNode = new SXRNode(ctx);
+
+        rd.setMesh(mesh);
+        rd.setRenderingOrder(SXRRenderData.SXRRenderingOrder.OVERLAY);
+        rd.setDrawMode(GL_LINES);
+        debugDrawNode.attachRenderData(rd);
+        NativePhysics3DWorld.setupDebugDraw(getNative(), debugDrawNode.getNative());
+        return debugDrawNode;
     }
 
     public void debugDrawWorld()
@@ -787,7 +845,7 @@ class NativePhysics3DWorld {
 
     static native SXRCollisionInfo[] listCollisions(long jphysics_world);
 
-    static native void setupDebugDraw(long jworld, long jscene, long jshader_manager);
+    static native void setupDebugDraw(long jworld, long jnode);
 
     static native void debugDrawWorld(long jworld);
 

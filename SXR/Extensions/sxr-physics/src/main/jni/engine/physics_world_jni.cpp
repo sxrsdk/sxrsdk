@@ -212,13 +212,11 @@ namespace sxr
 
     JNIEXPORT void JNICALL
     Java_com_samsungxr_physics_NativePhysics3DWorld_setupDebugDraw(JNIEnv *env, jclass obj,
-                                                                   jlong jworld, jlong jscene,
-                                                                   jlong shader_manager)
+                                                                   jlong jworld, jlong jnode)
     {
-        PhysicsWorld *world = reinterpret_cast <PhysicsWorld *> (jworld);
-        Scene *scene = reinterpret_cast <Scene *> (jscene);
-        ShaderManager *sm = reinterpret_cast<ShaderManager *>(shader_manager);
-        world->setupDebugDraw(scene, sm);
+        PhysicsWorld* world = reinterpret_cast <PhysicsWorld *> (jworld);
+        Node* node = reinterpret_cast <Node*> (jnode);
+        world->setupDebugDraw(node);
     }
 
     JNIEXPORT void JNICALL

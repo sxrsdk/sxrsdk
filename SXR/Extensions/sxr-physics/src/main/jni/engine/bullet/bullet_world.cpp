@@ -40,6 +40,14 @@
 namespace sxr {
 
 BulletWorld::BulletWorld(bool isMultiBody)
+:   mDebugDraw(nullptr),
+    mPhysicsWorld(nullptr),
+    mCollisionConfiguration(nullptr),
+    mDispatcher(nullptr),
+    mSolver(nullptr),
+    mOverlappingPairCache(nullptr),
+    mDraggingConstraint(nullptr),
+    mPivotObject(nullptr)
 {
     initialize(isMultiBody);
 }
@@ -330,11 +338,11 @@ void BulletWorld::setDebugMode(int mode)
     }
 }
 
-void BulletWorld::setupDebugDraw(Scene* scene, ShaderManager* sm)
+void BulletWorld::setupDebugDraw(Node* node)
 {
-    if (mPhysicsWorld && (mDebugDraw == nullptr) && !mIsMultiBody)
+    if (node && mPhysicsWorld && (mDebugDraw == nullptr) && !mIsMultiBody)
     {
-        mDebugDraw = new GLDebugDrawer(scene, sm);
+        mDebugDraw = new GLDebugDrawer(node);
         reinterpret_cast<btDiscreteDynamicsWorld*>(mPhysicsWorld)->setDebugDrawer(mDebugDraw);
     }
 }

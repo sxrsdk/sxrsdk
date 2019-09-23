@@ -29,7 +29,7 @@ namespace sxr
 class GLDebugDrawer : public btIDebugDraw
 {
 public:
-    GLDebugDrawer(sxr::Scene*, sxr::ShaderManager*);
+    GLDebugDrawer(sxr::Node*);
 
     virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color);
     virtual void drawContactPoint(const btVector3 &, const btVector3 &, btScalar, int, const btVector3 &) {}
@@ -55,10 +55,10 @@ public:
 private:
     sxr::Mesh*         mMesh;
     sxr::ShaderData*   mMaterial;
-    sxr::Scene*        mScene;
     sxr::Node*         mNode;
     glm::vec3*         mPositions;
     glm::vec3*         mColors;
     int                mNumVerts;
     int                mMode;
+    int                mMaxVerts;
 };

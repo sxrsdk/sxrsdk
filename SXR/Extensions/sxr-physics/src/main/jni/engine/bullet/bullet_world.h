@@ -82,7 +82,7 @@ class BulletWorld : public PhysicsWorld {
 
     virtual void setDebugMode(int);
 
-    virtual void setupDebugDraw(Scene*, ShaderManager*);
+    virtual void setupDebugDraw(Node*);
 
     virtual void debugDrawWorld();
 

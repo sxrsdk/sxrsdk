@@ -56,7 +56,7 @@ class PhysicsAVTLoader
     private SXRMaterial mColliderMtl;
     private float mAngularDamping;
     private float mLinearDamping;
-    private boolean mMakeColliderGeometry = false;
+    private boolean mMakeColliderGeometry = true;
 
     public PhysicsAVTLoader(SXRNode root)
     {
