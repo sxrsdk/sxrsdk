@@ -56,7 +56,7 @@ class PhysicsAVTLoader
     private SXRMaterial mColliderMtl;
     private float mAngularDamping;
     private float mLinearDamping;
-    private boolean mMakeColliderGeometry = true;
+    private boolean mMakeColliderGeometry = false;
 
     public PhysicsAVTLoader(SXRNode root)
     {
@@ -518,6 +518,7 @@ class PhysicsAVTLoader
         SXRRigidBody body = new SXRRigidBody(mContext, mass, collisionGroup);
         JSONObject props = link.getJSONObject("Physic Material");
         JSONObject v;
+        float PIover2 = (float) Math.PI / 2;
 
         body.setFriction((float) props.getDouble("Friction"));
         body.setDamping(mLinearDamping, mAngularDamping);
@@ -571,9 +572,8 @@ class PhysicsAVTLoader
             if (true)
             {
                 SXRGenericConstraint ball = new SXRGenericConstraint(mContext, parentBody, pivotA, pivotB);
-                float lim = (float) Math.PI / 2.0f;
-                ball.setAngularLowerLimits(-lim, -lim, -lim);
-                ball.setAngularUpperLimits(lim, lim, lim);
+                ball.setAngularLowerLimits(-PIover2, -PIover2, -PIover2);
+                ball.setAngularUpperLimits(PIover2, PIover2, PIover2);
                 ball.setLinearLowerLimits(0, 0, 0);
                 ball.setLinearUpperLimits(0, 0, 0);
                 constraint = ball;
@@ -588,6 +588,16 @@ class PhysicsAVTLoader
         }
         else if (type.equals("universal"))
         {
+            if (pivot != null)
+            {
+                pivotB.set((float) (pivot.getDouble("X")),
+                           (float) (pivot.getDouble("Y")),
+                           (float) (pivot.getDouble("Z")));
+            }
+            else
+            {
+                pivotB.set(0, 0, 0);
+            }
             v = link.getJSONObject("Axis A");
             Vector4f aa = new Vector4f(
                 (float) v.getDouble("X"),
@@ -606,17 +616,17 @@ class PhysicsAVTLoader
             Vector3f axisB = new Vector3f(ab.x, ab.y, ab.z);
             axisA.normalize();
             axisB.normalize();
-            SXRUniversalConstraint ball = new SXRUniversalConstraint(mContext, parentBody, pivotA,
-                                                                     axisA, axisB);
-            JSONObject dofx = dofdata.getJSONObject(0);
-            JSONObject dofy = dofdata.getJSONObject(1);
-            float lx = dofx.getBoolean("useLimit") ? (float) Math.toRadians(dofx.getDouble("limitLow")) : (float) -Math.PI;
-            float ly = dofy.getBoolean("useLimit") ? (float) Math.toRadians(dofy.getDouble("limitLow")) : (float) -Math.PI;
 
-            ball.setAngularLowerLimits(lx, ly, 0);
-            lx = dofx.getBoolean("useLimit") ? (float) Math.toRadians(dofx.getDouble("limitHigh")) : (float) Math.PI;
-            ly = dofy.getBoolean("useLimit") ? (float) Math.toRadians(dofy.getDouble("limitHigh")) : (float) Math.PI;
-            ball.setAngularUpperLimits(lx, ly, 0);
+            SXRUniversalConstraint ball = new SXRUniversalConstraint(mContext, parentBody, pivotB, axisA, axisB);
+            JSONObject dof0 = dofdata.getJSONObject(0);
+            JSONObject dof1 = dofdata.getJSONObject(1);
+            float lz = dof0.getBoolean("useLimit") ? (float) Math.toRadians(dof0.getDouble("limitLow")) : -PIover2;
+            float ly = dof1.getBoolean("useLimit") ? (float) Math.toRadians(dof1.getDouble("limitLow")) : -PIover2;
+
+            ball.setAngularLowerLimits(0, ly, lz);
+            lz = dof0.getBoolean("useLimit") ? (float) Math.toRadians(dof0.getDouble("limitHigh")) : PIover2;
+            ly = dof1.getBoolean("useLimit") ? (float) Math.toRadians(dof1.getDouble("limitHigh")) : PIover2;
+            ball.setAngularUpperLimits(0, ly, lz);
             constraint = ball;
             Log.e(TAG, "Universal joint between %s and %s (%f, %f, %f)",
                   parentName, name, pivotB.x, pivotB.y, pivotB.z);
@@ -635,6 +645,10 @@ class PhysicsAVTLoader
             if (dof.getBoolean("useLimit"))
             {
                 hinge.setLimits((float) Math.toRadians(dof.getDouble("limitLow")), (float) Math.toRadians(dof.getDouble("limitHigh")));
+            }
+            else
+            {
+                hinge.setLimits(-PIover2, PIover2);
             }
             constraint = hinge;
             Log.e(TAG, "Hinge joint between %s and %s (%f, %f, %f)",

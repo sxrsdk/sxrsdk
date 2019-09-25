@@ -372,9 +372,7 @@ void BulletWorld::listCollisions(std::list <ContactPoint> &contactPoints)
     for (int i = 0; i < numManifolds; i++) {
         ContactPoint contactPt;
 
-        contactManifold = mPhysicsWorld->getDispatcher()->
-                getManifoldByIndexInternal(i);
-
+        contactManifold = mPhysicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
         contactPt.body0 = (PhysicsCollidable*) (contactManifold->getBody0()->getUserPointer());
         contactPt.body1 = (PhysicsCollidable*) (contactManifold->getBody1()->getUserPointer());
         contactPt.normal[0] = contactManifold->getContactPoint(0).m_normalWorldOnB.getX();

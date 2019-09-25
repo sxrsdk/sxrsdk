@@ -28,12 +28,14 @@ void GLDebugDrawer::setDebugMode(int p)
 void GLDebugDrawer::clearLines()
 {
     sxr::Camera* cam = sxr::Scene::main_scene()->main_camera_rig()->center_camera();
+    glm::mat4 model = mNode->transform()->getLocalModelMatrix();
     glm::mat4 view = cam->getViewMatrix();
-    glm::mat4 view_proj = cam->getProjectionMatrix();
+    glm::mat4 mvp = cam->getProjectionMatrix();
 
-    view_proj = view * view_proj;
+    mvp *= view;
+    mvp *= model;
     mNumVerts = 0;
-    mMaterial->setFloatVec("u_vp", glm::value_ptr(view_proj), 16);
+    mMaterial->setFloatVec("u_vp", glm::value_ptr(mvp), 16);
 }
 
 void GLDebugDrawer::flushLines()

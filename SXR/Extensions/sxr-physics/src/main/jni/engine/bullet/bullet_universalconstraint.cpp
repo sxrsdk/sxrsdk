@@ -145,8 +145,8 @@ void BulletUniversalConstraint::updateConstructionInfo(PhysicsWorld* world)
         btVector3    zaxis(mAxis1.x, mAxis1.y, mAxis1.z);
         btVector3    yaxis(mAxis2.x, mAxis2.y, mAxis2.z);
 
-        bodyA->getTranslation(x, y, z);
-        p += btVector3(x, y, z);
+//        bodyA->getTranslation(x, y, z);
+//        p += btVector3(x, y, z);
         mConstraint = new btUniversalConstraint(*rbA, *rbB, p, zaxis, yaxis);
         mConstraint->setAngularLowerLimit(Common2Bullet(mAngularLowerLimits));
         mConstraint->setAngularUpperLimit(Common2Bullet(mAngularUpperLimits));

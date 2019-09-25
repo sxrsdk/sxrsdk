@@ -754,51 +754,16 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         }
     };
 
-    private class PhysicsDebugShader extends SXRShader
-    {
-        final String vertex_shader =
-                "precision mediump float;\n" +
-                        "attribute vec3 a_position;\n" +
-                        "attribute vec3 a_color;\n" +
-                        "varying vec3 vertex_color;\n" +
-                        "uniform mat4 u_vp;\n" +
-                        "void main()\n" +
-                        "{\n" +
-                        "\tgl_Position = u_vp * vec4(a_position, 1);\n" +
-                        "\tvertex_color = a_color;\n" +
-                        "}";
-
-        final String fragment_shader =
-                "precision highp float;\n" +
-                        "varying vec3 vertex_color;\n" +
-                        "void main()\n" +
-                        "{\n" +
-                        "    gl_FragColor = vec4(vertex_color, 1);\n" +
-                        "}";
-
-        public PhysicsDebugShader()
-        {
-            super("mat4 u_vp", "", "float3 a_position, float3 a_color", GLSLESVersion.V300);
-        }
-
-        protected void setMaterialDefaults(SXRShaderData material)
-        {
-            material.setMat4("u_mvp",
-                                1, 0, 0, 0,
-                                0, 1, 0,0,
-                                0, 0, 1,0,
-                                0, 0, 0,1);
-        }
-    };
-
     public SXRNode setupDebugDraw()
     {
         SXRContext ctx = getSXRContext();
         SXRShaderId debugShader = ctx.getShaderManager().getShaderType(PhysicsDebugShader.class);
-        SXRRenderData rd = new SXRRenderData(ctx, new SXRMaterial(ctx, debugShader));
+        SXRMaterial mtl = new SXRMaterial(ctx, debugShader);
+        SXRRenderData rd = new SXRRenderData(ctx, mtl);
         SXRMesh mesh = new SXRMesh(new SXRVertexBuffer(ctx, "float3 a_position float3 a_color", 5000), null);
         SXRNode debugDrawNode = new SXRNode(ctx);
 
+        mtl.setFloat("line_width", 5.0f);
         rd.setMesh(mesh);
         rd.setRenderingOrder(SXRRenderData.SXRRenderingOrder.OVERLAY);
         rd.setDrawMode(GL_LINES);
