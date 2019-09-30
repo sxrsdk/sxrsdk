@@ -101,9 +101,11 @@ class PhysicsAVTLoader
         JSONObject basebone = multibody.getJSONObject("Base Bone");
         JSONArray childbones = multibody.getJSONObject("Child Bones").getJSONArray("property_value");
 
+        mTargetBones.clear();
+        mTargetBones.put(basebone.getString("Name"), basebone);
         mAngularDamping = (float) multibody.optDouble("Angular Damping", 0.0f);
         mLinearDamping = (float) multibody.optDouble("Linear Damping", 0.0f);
-        mTargetBones.clear();
+        parseSkeleton(basebone, childbones);
         parseRigidBody(basebone);
         for (int i = 0; i < childbones.length(); ++i)
         {
@@ -255,24 +257,23 @@ class PhysicsAVTLoader
                 throw new IllegalArgumentException("Target bone " + targetBone + " referenced in AVT file not found in scene");
             }
             JSONObject scale = xform.getJSONObject("Scale");
-            Vector3f s = new Vector3f();
-            Matrix4f m = new Matrix4f();
+            Vector3f s = new Vector3f(1, 1, 1);
 
             s.set((float) scale.getDouble("X"),
                   (float) scale.getDouble("Y"),
                   (float) scale.getDouble("Z"));
-            m.translation(-pivotB.x, -pivotB.y, -pivotB.z);
             if (type.equals("dmCapsuleCollider"))
             {
                 SXRCapsuleCollider capsule = new SXRCapsuleCollider(ctx);
                 String direction = c.getString("Direction");
-                float radius = (float) c.getDouble("Radius") * s.x;
-                float height = ((float) (c.getDouble("Half Height") * 2) + radius) * s.y;
+                float radius = (float) c.getDouble("Radius");
+                float height = ((float) (c.getDouble("Half Height") * 2) + radius);
                 Vector3f dimensions = new Vector3f();
 
-                capsule.setRadius(radius * s.x);
+                capsule.setRadius(radius);
                 if (direction.equals("X"))
                 {
+                    radius *= s.z;
                     height *= s.x;
                     capsule.setDirection(SXRCapsuleCollider.CapsuleDirection.X_AXIS);
                     dimensions.x = height + radius;
@@ -280,26 +281,22 @@ class PhysicsAVTLoader
                 }
                 else if (direction.equals("Y"))
                 {
+                    height *= s.y;
+                    radius *= s.x;
                     dimensions.y = height + radius;
                     dimensions.x = dimensions.z = radius;
                     capsule.setDirection(SXRCapsuleCollider.CapsuleDirection.Y_AXIS);
                 }
                 else if (direction.equals("Z"))
                 {
+                    height *= s.z;
+                    radius *= s.x;
                     dimensions.z = height + radius;
                     dimensions.x = dimensions.y = radius;
                     capsule.setDirection(SXRCapsuleCollider.CapsuleDirection.Z_AXIS);
                 }
-                if (mMakeColliderGeometry)
-                {
-                    SXRRenderData rd = new SXRRenderData(mContext, mColliderMtl);
-                    SXRMesh cubeMesh =  SXRCubeNode.createCube(mContext, "float3 a_position float3 a_normal",
-                                                      true, dimensions);
-
-                    cubeMesh.transform(m, false);
-                    rd.setMesh(cubeMesh);
-                    owner.attachComponent(rd);
-                }
+                capsule.setHeight(height);
+                capsule.setRadius(radius);
                 owner.attachComponent(capsule);
                 Log.e(TAG, "capsule collider %s height %f radius %f %s axis",
                       colliderRoot.getString("Name"), height, radius, direction);
@@ -314,18 +311,6 @@ class PhysicsAVTLoader
                 float z = (float) size.getDouble("Z") * s.z;
 
                 box.setHalfExtents(x, y, z);
-                if (mMakeColliderGeometry)
-                {
-                    SXRMesh cubeMesh = SXRCubeNode.createCube(mContext,
-                                               "float3 a_position float3 a_normal",
-                                               true,
-                                               new Vector3f(2 * x * s.x, 2 * y * s.y, 2 * s.z * z));
-                    SXRRenderData rd = new SXRRenderData(mContext, mColliderMtl);
-
-                    cubeMesh.transform(m, false);
-                    rd.setMesh(cubeMesh);
-                    owner.attachComponent(rd);
-                }
                 owner.attachComponent(box);
                 Log.e(TAG, "box collider %s extents  %f, %f, %f",
                       colliderRoot.getString("Name"), x, y, z);
@@ -336,20 +321,6 @@ class PhysicsAVTLoader
                 float radius = (float) c.getDouble("Radius");
                 SXRSphereCollider sphere = new SXRSphereCollider(ctx);
 
-                if (mMakeColliderGeometry)
-                {
-                    SXRSphereNode sp = new SXRSphereNode(ctx, true, mColliderMtl);
-                    SXRRenderData rd = new SXRRenderData(ctx, mColliderMtl);
-
-                    m.scale((float) scale.getDouble("X"),
-                            (float) scale.getDouble("Y"),
-                            (float) scale.getDouble("Z"));
-                    m.setTranslation(-pivotB.x, -pivotB.y, -pivotB.z);
-                    rd.setMesh(sp.getRenderData().getMesh());
-                    rd.getMesh().transform(m, true);
-                    sphere.setRadius(radius);
-                    owner.attachComponent(rd);
-                }
                 owner.attachComponent(sphere);
                 Log.e(TAG, "sphere collider %s radius %f", colliderRoot.getString("Name"), radius);
                 return sphere;
