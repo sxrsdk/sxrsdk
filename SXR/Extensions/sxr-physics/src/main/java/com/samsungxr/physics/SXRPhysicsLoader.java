@@ -39,64 +39,98 @@ public class SXRPhysicsLoader {
     }
 
     /**
-     * Loads a physics settings file.
+     * Loads a Bullet physics content file.
+     * <p>
+     * The Bullet binary files only contain physics, there
+     * are no nodes or meshes. The rigid bodies and constraints
+     * from the Bullet file are added to the nodes in the
+     * given scene.
      *
      * @param fileName Physics settings file name.
      * @param scene The scene containing the objects to attach physics components.
      */
-    public static SXRNode loadPhysicsFile(SXRScene scene, String fileName) throws IOException
-    {
-        return loadPhysicsFile(scene, fileName, false);
-    }
-
-    /**
-     * Loads a physics settings file.
-     *
-     * Use this if you want the up-axis information from physics file to be ignored.
-     *
-     * @param fileName Physics settings file name.
-     * @param ignoreUpAxis Set to true if up-axis information from file must be ignored.
-     * @param scene The scene containing the objects to attach physics components.
-     */
-    public static SXRNode loadPhysicsFile(SXRScene scene, String fileName, boolean ignoreUpAxis) throws IOException
+    public static void loadBulletFile(SXRScene scene, String fileName) throws IOException
     {
         SXRAndroidResource resource = toAndroidResource(scene.getSXRContext(), fileName);
-        return loadPhysicsFile(resource, scene.getRoot(), ignoreUpAxis);
-    }
-
-    public static SXRNode loadPhysicsFile(SXRAndroidResource resource, SXRNode sceneRoot, boolean ignoreUpAxis) throws IOException
-    {
-        String filename = resource.getResourceFilename();
-        int i = filename.lastIndexOf('.');
         byte[] inputData = toByteArray(resource);
 
         if (inputData == null || inputData.length == 0)
         {
-            throw new IOException("Failed to load physics file " + filename);
+            throw new IOException("Failed to load physics file " + fileName);
         }
-        if (i > 0)
-        {
-            String ext = filename.substring(i);
-            if (ext.toLowerCase().equals(".bullet"))
-            {
-                loadBulletFile(inputData, sceneRoot, ignoreUpAxis);
-                return sceneRoot;
-            }
-            else if (ext.equals(".avt"))
-            {
-                PhysicsAVTLoader loader = new PhysicsAVTLoader(sceneRoot);
-                return loader.parse(inputData);
-            }
-            else
-            {
-                throw new IOException(ext + "is not a supported physics file format");
-            }
-        }
-        else
-        {
-            throw new IOException("Cannot determine file extension");
-        }
+        loadBulletFile(inputData, scene.getRoot(), false);
     }
+
+    /**
+     * Loads a Bullet physics content file.
+     * <p>
+     * The Bullet binary files only contain physics, there
+     * are no nodes or meshes. The rigid bodies and constraints
+     * from the Bullet file are added to the nodes in the
+     * given scene.
+     *
+     * @param resource {@link SXRAndroidResource} containing the physics components.
+     * @param scene The scene containing the objects to attach physics components.
+     */
+    public static void loadBulletFile(SXRScene scene, SXRAndroidResource resource) throws IOException
+    {
+        byte[] inputData = toByteArray(resource);
+
+        if (inputData == null || inputData.length == 0)
+        {
+            throw new IOException("Failed to load physics file " + resource.getResourceFilename());
+        }
+        loadBulletFile(inputData, scene.getRoot(), false);
+    }
+
+    /**
+     * Loads a skeleton and physics components from an AVT file.
+     * <p>
+     * AVT files describe physics for articulated bodies.
+     * Each file has a skeleton and joints with collision geometries.
+     * @param ctx      {@link SXRContext} to use
+     * @param resource {@link SXRAndroidResource} containing the physics components.
+     * @param isMultibody If true, use {@link SXRPhysicsJoint} and Bullet multibody support,
+     *                    otherwise use {@link SXRRigidBody} and discrete dynamics simulation.
+     */
+    public static SXRPhysicsContent loadAVTFile(SXRContext ctx, SXRAndroidResource resource, boolean isMultibody) throws IOException
+    {
+        byte[] inputData = toByteArray(resource);
+
+        if (inputData == null || inputData.length == 0)
+        {
+            throw new IOException("Failed to load physics file " + resource.getResourceFilename());
+        }
+        PhysicsAVTLoader loader = new PhysicsAVTLoader(ctx, isMultibody);
+        return loader.parse(inputData);
+    }
+
+    /**
+     * Loads a skeleton and physics components from an AVT file.
+     * <p>
+     * AVT files describe physics for articulated bodies.
+     * Each file has a skeleton and joints with collision geometries.
+     * The contents of the AVT file is not added to the current scene.
+     * Instead it is imported and contained in a {@link SXRPhysicsContent}
+     * object (like a physics world but it cannot simulate, just a container).
+     * @param ctx      {@link SXRContext} to use
+     * @param fileName Physics settings file name.
+     * @param isMultibody If true, use {@link SXRPhysicsJoint} and Bullet multibody support,
+     *                    otherwise use {@link SXRRigidBody} and discrete dynamics simulation.
+     */
+    public static SXRPhysicsContent loadAVTFile(SXRContext ctx, String fileName, boolean isMultibody) throws IOException
+    {
+        SXRAndroidResource resource = toAndroidResource(ctx, fileName);
+        byte[] inputData = toByteArray(resource);
+
+        if (inputData == null || inputData.length == 0)
+        {
+            throw new IOException("Failed to load physics file " + fileName);
+        }
+        PhysicsAVTLoader loader = new PhysicsAVTLoader(ctx, isMultibody);
+        return loader.parse(inputData);
+    }
+
 
     private static void loadBulletFile(byte[] inputData, SXRNode sceneRoot, boolean ignoreUpAxis) throws IOException
     {

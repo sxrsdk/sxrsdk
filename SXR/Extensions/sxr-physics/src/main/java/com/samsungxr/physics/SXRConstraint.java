@@ -75,7 +75,7 @@ abstract class SXRConstraint extends SXRPhysicsWorldObject
     }
 
     @Override
-    protected void addToWorld(SXRWorld world)
+    protected void addToWorld(SXRPhysicsContent world)
     {
         if (world != null)
         {
@@ -84,7 +84,7 @@ abstract class SXRConstraint extends SXRPhysicsWorldObject
     }
 
     @Override
-    protected void removeFromWorld(SXRWorld world)
+    protected void removeFromWorld(SXRPhysicsContent world)
     {
         if (world != null)
         {

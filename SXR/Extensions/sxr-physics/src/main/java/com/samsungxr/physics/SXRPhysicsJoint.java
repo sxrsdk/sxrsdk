@@ -255,7 +255,7 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
         }
     }
     @Override
-    protected void addToWorld(SXRWorld world)
+    protected void addToWorld(SXRPhysicsContent world)
     {
         if (world != null)
         {
@@ -268,7 +268,7 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
     }
 
     @Override
-    protected void removeFromWorld(SXRWorld world)
+    protected void removeFromWorld(SXRPhysicsContent world)
     {
         if (world != null)
         {

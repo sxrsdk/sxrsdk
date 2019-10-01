@@ -16,28 +16,21 @@
 package com.samsungxr.physics;
 
 import android.os.SystemClock;
-import android.transition.Scene;
 import android.util.LongSparseArray;
 
-import com.samsungxr.SXRComponent;
-import com.samsungxr.SXRComponentGroup;
+import com.samsungxr.IEventReceiver;
+import com.samsungxr.IEvents;
 import com.samsungxr.SXRContext;
+import com.samsungxr.SXREventManager;
 import com.samsungxr.SXREventReceiver;
 import com.samsungxr.SXRMaterial;
 import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRNode;
-import com.samsungxr.SXRNode.ComponentVisitor;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRScene;
-import com.samsungxr.SXRShader;
-import com.samsungxr.SXRShaderData;
 import com.samsungxr.SXRShaderId;
-import com.samsungxr.SXRShaderManager;
 import com.samsungxr.SXRTransform;
-import com.samsungxr.IEventReceiver;
-import com.samsungxr.IEvents;
 import com.samsungxr.SXRVertexBuffer;
-import com.samsungxr.animation.SXRSkeleton;
 import com.samsungxr.io.SXRCursorController;
 
 import org.joml.Quaternionf;
@@ -54,17 +47,18 @@ import static android.opengl.GLES20.GL_LINES;
  * <p>
  * {@link SXRWorld} is a component that must be attached to the scene's root object.
  */
-public class SXRWorld extends SXRComponent implements IEventReceiver
+public class SXRWorld extends SXRPhysicsContent implements IEventReceiver
 {
     private final SXRPhysicsContext mPhysicsContext;
     private SXRWorldTask mWorldTask;
     private static final long DEFAULT_INTERVAL = 15;
     private SXREventReceiver mListeners;
-    private boolean mIsMultibody = false;
     private boolean mDoDebugDraw = false;
     private List<SXRPhysicsJoint> mMultiBodies = null;
-
-    private long mNativeLoader;
+    private final LongSparseArray<SXRPhysicsWorldObject> mPhysicsObject = new LongSparseArray<SXRPhysicsWorldObject>();
+    private final SXRCollisionMatrix mCollisionMatrix;
+    private PhysicsDragger mPhysicsDragger = null;
+    private SXRRigidBody mRigidBodyDragMe = null;
 
     static {
         System.loadLibrary("sxr-physics");
@@ -79,12 +73,6 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         System.loadLibrary("Bullet2FileLoader");
         System.loadLibrary("BulletWorldImporter");
     }
-
-    private final LongSparseArray<SXRPhysicsWorldObject> mPhysicsObject = new LongSparseArray<SXRPhysicsWorldObject>();
-    private final SXRCollisionMatrix mCollisionMatrix;
-
-    private PhysicsDragger mPhysicsDragger = null;
-    private SXRRigidBody mRigidBodyDragMe = null;
 
     /**
      * Events generated during physics simulation.
@@ -139,12 +127,14 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         public void onStepPhysics(final SXRWorld world);
     }
 
+
     /**
      * Constructs new instance to simulate the Physics World of the Scene.
      *
      * @param scene The {@link SXRScene} this world belongs to.
      */
-    public SXRWorld(SXRScene scene) {
+    public SXRWorld(SXRScene scene)
+    {
         this(scene, null, false);
     }
 
@@ -153,7 +143,8 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
      *
      * @param scene The {@link SXRScene} this world belongs to.
      */
-    public SXRWorld(SXRScene scene, boolean isMultiBody) {
+    public SXRWorld(SXRScene scene, boolean isMultiBody)
+    {
         this(scene, null, isMultiBody);
     }
 
@@ -164,7 +155,8 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
      * @param scene The {@link SXRScene} this world belongs to.
      * @param interval interval (in milliseconds) at which the collisions will be updated.
      */
-    public SXRWorld(SXRScene scene, long interval) {
+    public SXRWorld(SXRScene scene, long interval)
+    {
         this(scene, null, interval, false);
     }
 
@@ -175,7 +167,8 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
      * @param scene           The {@link SXRScene} this world belongs to.
      * @param collisionMatrix a matrix that represents the collision relations of the bodies on the scene
      */
-    public SXRWorld(SXRScene scene, SXRCollisionMatrix collisionMatrix) {
+    public SXRWorld(SXRScene scene, SXRCollisionMatrix collisionMatrix)
+    {
         this(scene, collisionMatrix, DEFAULT_INTERVAL, false);
     }
 
@@ -187,7 +180,8 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
      * @param collisionMatrix a matrix that represents the collision relations of the bodies on the scene
      * @param isMultiBody     use MultiBody dynamics
      */
-    public SXRWorld(SXRScene scene, SXRCollisionMatrix collisionMatrix, boolean isMultiBody) {
+    public SXRWorld(SXRScene scene, SXRCollisionMatrix collisionMatrix, boolean isMultiBody)
+    {
         this(scene, collisionMatrix, DEFAULT_INTERVAL, isMultiBody);
     }
 
@@ -201,9 +195,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
      */
     public SXRWorld(SXRScene scene, SXRCollisionMatrix collisionMatrix, long interval, boolean isMultiBody)
     {
-        super(scene.getSXRContext(), NativePhysics3DWorld.ctor(isMultiBody));
-        mIsEnabled = false;
-        mIsMultibody = isMultiBody;
+        super(scene.getRoot(), isMultiBody);
         mListeners = new SXREventReceiver(this);
         mCollisionMatrix = collisionMatrix;
         mWorldTask = new SXRWorldTask(interval);
@@ -214,6 +206,7 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         }
         scene.getRoot().attachComponent(this);
     }
+
 
     /**
      * Enables or disabled debug drawing of the physics world.
@@ -250,32 +243,45 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         }
     }
 
-    static public long getComponentType() {
-        return NativePhysics3DWorld.getComponentType();
-    }
-
-    public boolean isMultiBody() { return mIsMultibody; }
-
     public SXREventReceiver getEventReceiver() { return mListeners; }
+
+    /**
+     * Merge the input physics world with this one.
+     * There is only one simulation world but other
+     * worlds can be created when files containing
+     * physics are imported. This function merges
+     * an imported world with the simulation world.
+     * <p>
+     * All of the physics components are detached from the
+     * input world and attached to this simulation world.
+     * @see SXRPhysicsContent
+     */
+    public void merge(SXRPhysicsContent world)
+    {
+        SXRNode inputRoot = world.getOwnerObject();
+        if (inputRoot == null)
+        {
+            throw new IllegalArgumentException("The input physics world does not have any scene objects");
+        }
+        inputRoot.detachComponent(SXRWorld.getComponentType());
+        doPhysicsAttach(inputRoot);
+    }
 
     /**
      * Add a {@link SXRConstraint} to this physics world.
      *
-     * @param gvrConstraint The {@link SXRConstraint} to add.
+     * @param constraint The {@link SXRConstraint} to add.
      */
-    public void addConstraint(final SXRConstraint gvrConstraint)
+    @Override
+    public void addConstraint(final SXRConstraint constraint)
     {
         mPhysicsContext.runOnPhysicsThread(new Runnable()
         {
             @Override
             public void run()
             {
-                if (contains(gvrConstraint))
-                {
-                    return;
-                }
-                SXRPhysicsCollidable bodyB = gvrConstraint.mBodyB;
-                SXRPhysicsCollidable bodyA = gvrConstraint.mBodyA;
+                SXRPhysicsCollidable bodyB = constraint.mBodyB;
+                SXRPhysicsCollidable bodyA = constraint.mBodyA;
 
                 if ((bodyB != null) && (bodyB instanceof SXRRigidBody))
                 {
@@ -284,9 +290,13 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
                         throw new UnsupportedOperationException("Rigid body used by constraint is not found in the physics world.");
                     }
                 }
-                NativePhysics3DWorld.addConstraint(getNative(), gvrConstraint.getNative());
-                mPhysicsObject.put(gvrConstraint.getNative(), gvrConstraint);
-                getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onAddConstraint", SXRWorld.this, gvrConstraint);
+                NativePhysics3DWorld.addConstraint(getNative(), constraint.getNative());
+                mPhysicsObject.put(constraint.getNative(), constraint);
+                getSXRContext().getEventManager().sendEvent(SXRWorld.this,
+                        IPhysicsEvents.class,
+                        "onAddConstraint",
+                        SXRWorld.this,
+                        constraint);
             }
         });
     }
@@ -294,16 +304,22 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     /**
      * Remove a {@link SXRFixedConstraint} from this physics world.
      *
-     * @param gvrConstraint the {@link SXRFixedConstraint} to remove.
+     * @param constraint the {@link SXRFixedConstraint} to remove.
      */
-    public void removeConstraint(final SXRConstraint gvrConstraint) {
+    public void removeConstraint(final SXRConstraint constraint) {
         mPhysicsContext.runOnPhysicsThread(new Runnable() {
             @Override
-            public void run() {
-                if (contains(gvrConstraint)) {
-                    NativePhysics3DWorld.removeConstraint(getNative(), gvrConstraint.getNative());
-                    mPhysicsObject.remove(gvrConstraint.getNative());
-                    getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onRemoveConstraint", SXRWorld.this, gvrConstraint);
+            public void run()
+            {
+                if (contains(constraint))
+                {
+                    NativePhysics3DWorld.removeConstraint(getNative(), constraint.getNative());
+                    mPhysicsObject.remove(constraint.getNative());
+                    getSXRContext().getEventManager().sendEvent(SXRWorld.this,
+                            IPhysicsEvents.class,
+                            "onRemoveConstraint",
+                            SXRWorld.this,
+                            constraint);
                 }
             }
         });
@@ -388,8 +404,10 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
 
         mPhysicsContext.runOnPhysicsThread(new Runnable() {
             @Override
-            public void run() {
-                if (mRigidBodyDragMe != null) {
+            public void run()
+            {
+                if (mRigidBodyDragMe != null)
+                {
                     NativePhysics3DWorld.stopDrag(getNative());
                     mRigidBodyDragMe = null;
                 }
@@ -397,44 +415,40 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         });
     }
 
-    /**
-     * Returns true if the physics world contains the the specified rigid body.
-     *
-     * @param physicsObject Physics object to check if it is present in the world.
-     * @return true if the world contains the specified object.
-     */
-    private boolean contains(SXRPhysicsWorldObject physicsObject) {
-        if (physicsObject != null)
-        {
-            return mPhysicsObject.get(physicsObject.getNative()) != null;
-        }
-        return false;
-    }
 
     /**
      * Add a {@link SXRRigidBody} to this physics world.
      *
-     * @param gvrBody The {@link SXRRigidBody} to add.
+     * @param body The {@link SXRRigidBody} to add.
      */
-    public void addBody(final SXRRigidBody gvrBody) {
+    public void addBody(final SXRRigidBody body) {
         mPhysicsContext.runOnPhysicsThread(new Runnable() {
             @Override
-            public void run() {
-                if (contains(gvrBody)) {
+            public void run()
+            {
+                if (contains(body))
+                {
                     return;
                 }
 
-                if (gvrBody.getCollisionGroup() < 0 || gvrBody.getCollisionGroup() > 15
-                        || mCollisionMatrix == null) {
-                    NativePhysics3DWorld.addRigidBody(getNative(), gvrBody.getNative());
-                } else {
-                    NativePhysics3DWorld.addRigidBodyWithMask(getNative(), gvrBody.getNative(),
-                            mCollisionMatrix.getCollisionFilterGroup(gvrBody.getCollisionGroup()),
-                            mCollisionMatrix.getCollisionFilterMask(gvrBody.getCollisionGroup()));
+                if ((body.getCollisionGroup() < 0) ||
+                    (body.getCollisionGroup() > 15) ||
+                    (mCollisionMatrix == null))
+                {
+                    NativePhysics3DWorld.addRigidBody(getNative(), body.getNative());
                 }
-
-                mPhysicsObject.put(gvrBody.getNative(), gvrBody);
-                getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onAddRigidBody", SXRWorld.this, gvrBody);
+                else
+                {
+                    NativePhysics3DWorld.addRigidBodyWithMask(getNative(), body.getNative(),
+                            mCollisionMatrix.getCollisionFilterGroup(body.getCollisionGroup()),
+                            mCollisionMatrix.getCollisionFilterMask(body.getCollisionGroup()));
+                }
+                mPhysicsObject.put(body.getNative(), body);
+                getSXRContext().getEventManager().sendEvent(SXRWorld.this,
+                        IPhysicsEvents.class,
+                       "onAddRigidBody",
+                       SXRWorld.this,
+                        body);
             }
         });
     }
@@ -460,7 +474,11 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
                 {
                     mMultiBodies.add(body);
                 }
-                getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onAddJoint", SXRWorld.this, body);
+                getSXRContext().getEventManager().sendEvent(SXRWorld.this,
+                        IPhysicsEvents.class,
+                        "onAddJoint",
+                        SXRWorld.this,
+                        body);
             }
         });
     }
@@ -468,16 +486,20 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
     /**
      * Remove a {@link SXRRigidBody} from this physics world.
      *
-     * @param gvrBody the {@link SXRRigidBody} to remove.
+     * @param body the {@link SXRRigidBody} to remove.
      */
-    public void removeBody(final SXRRigidBody gvrBody) {
-        mPhysicsContext.runOnPhysicsThread(new Runnable() {
+    public void removeBody(final SXRRigidBody body)
+    {
+        mPhysicsContext.runOnPhysicsThread(new Runnable()
+        {
             @Override
-            public void run() {
-                if (contains(gvrBody)) {
-                    NativePhysics3DWorld.removeRigidBody(getNative(), gvrBody.getNative());
-                    mPhysicsObject.remove(gvrBody.getNative());
-                    getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onRemoveRigidBody", SXRWorld.this, gvrBody);
+            public void run()
+            {
+                if (contains(body))
+                {
+                    NativePhysics3DWorld.removeRigidBody(getNative(), body.getNative());
+                    mPhysicsObject.remove(body.getNative());
+                    getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onRemoveRigidBody", SXRWorld.this, body);
                 }
             }
         });
@@ -488,18 +510,26 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
      *
      * @param joint the {@link SXRPhysicsJoint} to remove.
      */
-    public void removeBody(final SXRPhysicsJoint joint) {
-        mPhysicsContext.runOnPhysicsThread(new Runnable() {
+    public void removeBody(final SXRPhysicsJoint joint)
+    {
+        mPhysicsContext.runOnPhysicsThread(new Runnable()
+        {
             @Override
-            public void run() {
-                if (contains(joint)) {
+            public void run()
+            {
+                if (contains(joint))
+                {
                     NativePhysics3DWorld.removeJoint(getNative(), joint.getNative());
                     mPhysicsObject.remove(joint.getNative());
                     if (joint.getBoneID() == 0)
                     {
                         mMultiBodies.remove(joint);
                     }
-                    getSXRContext().getEventManager().sendEvent(SXRWorld.this, IPhysicsEvents.class, "onRemoveJoint", SXRWorld.this, joint);
+                    getSXRContext().getEventManager().sendEvent(SXRWorld.this,
+                            IPhysicsEvents.class,
+                            "onRemoveJoint",
+                            SXRWorld.this,
+                            joint);
                 }
             }
         });
@@ -513,107 +543,105 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         mWorldTask.stop();
     }
 
-    private void generateCollisionEvents() {
+    private void generateCollisionEvents()
+    {
         SXRCollisionInfo collisionInfos[] = NativePhysics3DWorld.listCollisions(getNative());
 
-        String onEnter = "onEnter";
-        String onExit = "onExit";
-
-        for (SXRCollisionInfo info : collisionInfos) {
-            if (info.isHit) {
-                sendCollisionEvent(info, onEnter);
-            } else if (mPhysicsObject.get(info.bodyA) != null
-                    && mPhysicsObject.get(info.bodyB) != null) {
-                // If both bodies are in the scene.
-                sendCollisionEvent(info, onExit);
+        for (SXRCollisionInfo info : collisionInfos)
+        {
+            if (info.isHit)
+            {
+                sendCollisionEvent(info, "onEnter");
+            }
+            else if ((mPhysicsObject.get(info.bodyA) != null) &&
+                     (mPhysicsObject.get(info.bodyB) != null))
+            {
+                sendCollisionEvent(info, "onExit");
             }
         }
-
     }
 
-    private void sendCollisionEvent(SXRCollisionInfo info, String eventName) {
+    private void sendCollisionEvent(SXRCollisionInfo info, String eventName)
+    {
         SXRNode bodyA = mPhysicsObject.get(info.bodyA).getOwnerObject();
         SXRNode bodyB = mPhysicsObject.get(info.bodyB).getOwnerObject();
+        SXREventManager em =  getSXRContext().getEventManager();
 
-        getSXRContext().getEventManager().sendEvent(bodyA, ICollisionEvents.class, eventName,
-                bodyA, bodyB, info.normal, info.distance);
+        em.sendEvent(bodyA, ICollisionEvents.class, eventName,
+                     bodyA, bodyB, info.normal, info.distance);
 
-        getSXRContext().getEventManager().sendEvent(bodyB, ICollisionEvents.class, eventName,
-                bodyB, bodyA, info.normal, info.distance);
+        em.sendEvent(bodyB, ICollisionEvents.class, eventName,
+                     bodyB, bodyA, info.normal, info.distance);
 
-        getSXRContext().getEventManager().sendEvent(this, ICollisionEvents.class, eventName,
-                                                    bodyA, bodyB, info.normal, info.distance);
+        em.sendEvent(this, ICollisionEvents.class, eventName,
+                     bodyA, bodyB, info.normal, info.distance);
 
     }
 
-    private void doPhysicsAttach(SXRNode rootNode) {
-        rootNode.forAllComponents(mRigidBodiesVisitor, SXRRigidBody.getComponentType());
-        rootNode.forAllComponents(mConstraintsVisitor, SXRConstraint.getComponentType());
-
-        if (isEnabled()){
-            startSimulation();
-        }
-    }
-
-    private void doPhysicsDetach(SXRNode rootNode) {
-        rootNode.forAllComponents(mConstraintsVisitor, SXRConstraint.getComponentType());
-        rootNode.forAllComponents(mRigidBodiesVisitor, SXRRigidBody.getComponentType());
-
-        if (isEnabled()) {
+    protected void doPhysicsDetach(SXRNode rootNode)
+    {
+        super.doPhysicsDetach(rootNode);
+        if (isEnabled())
+        {
             stopSimulation();
         }
     }
 
     @Override
-    public void onAttach(SXRNode newOwner) {
+    public void onAttach(SXRNode newOwner)
+    {
         super.onAttach(newOwner);
-
-        //FIXME: Implement a way to check if already exists a SXRWold attached to the scene
-        if (newOwner.getParent() != null) {
+        if (newOwner.getParent() != null)
+        {
             throw new RuntimeException("SXRWold must be attached to the scene's root object!");
         }
-
         doPhysicsAttach(newOwner);
     }
 
     @Override
-    public void onDetach(SXRNode oldOwner) {
+    public void onDetach(SXRNode oldOwner)
+    {
         super.onDetach(oldOwner);
-
         doPhysicsDetach(oldOwner);
     }
 
     @Override
-    public void onEnable() {
+    public void onEnable()
+    {
         super.onEnable();
-
-        if (getOwnerObject() != null) {
+        if (getOwnerObject() != null)
+        {
             startSimulation();
         }
     }
 
     @Override
-    public void onDisable() {
+    public void onDisable()
+    {
         super.onDisable();
-
         stopSimulation();
     }
 
-    public void setGravity(final float x, final float y, final float z) {
-        mPhysicsContext.runOnPhysicsThread(new Runnable() {
+    public void setGravity(final float x, final float y, final float z)
+    {
+        mPhysicsContext.runOnPhysicsThread(new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 NativePhysics3DWorld.setGravity(getNative(), x, y, z);
             }
         });
     }
 
-    public void getGravity(float[] gravity) {
+    public void getGravity(float[] gravity)
+    {
         NativePhysics3DWorld.getGravity(getNative(), gravity);
     }
 
 
-    private class SXRWorldTask implements Runnable {
+    private class SXRWorldTask implements Runnable
+    {
         private boolean running = false;
         private final long intervalMillis;
         private float timeStep;
@@ -636,19 +664,13 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
         }
 
         @Override
-        public void run() {
-            if (!running) {
+        public void run()
+        {
+            if (!running)
+            {
                 return;
             }
-
-
             simulationTime = SystemClock.uptimeMillis();
-
-            /* To debug physics step
-            if (BuildConfig.DEBUG && timeStep != simulationTime - lastSimulTime) {
-                Log.v("SXRPhysicsWorld", "onStep " + timeStep + "ms" + ", subSteps " + maxSubSteps);
-            }*/
-
             timeStep  = simulationTime - lastSimulTime;
             maxSubSteps = (int) (timeStep * 60) / 1000 + 1;
 
@@ -679,27 +701,32 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
             mPhysicsContext.runAtTimeOnPhysicsThread(this, simulationTime);
         }
 
-        public void start() {
+        public void start()
+        {
             // To avoid concurrency
             mPhysicsContext.runOnPhysicsThread(new Runnable() {
                 @Override
-                public void run() {
-                    if (!running) {
+                public void run()
+                {
+                    if (!running)
+                    {
                         running = true;
                         lastSimulTime = SystemClock.uptimeMillis();
-                        mPhysicsContext.runDelayedOnPhysicsThread(SXRWorldTask.this,
-                                intervalMillis);
+                        mPhysicsContext.runDelayedOnPhysicsThread(SXRWorldTask.this, intervalMillis);
                     }
                 }
             });
         }
 
-        public void stop() {
+        public void stop()
+        {
             // To avoid concurrency
             mPhysicsContext.runOnPhysicsThread(new Runnable() {
                 @Override
-                public void run() {
-                    if (running) {
+                public void run()
+                {
+                    if (running)
+                    {
                         running = false;
                         mPhysicsContext.removeTask(SXRWorldTask.this);
                     }
@@ -707,52 +734,6 @@ public class SXRWorld extends SXRComponent implements IEventReceiver
             });
         }
     }
-
-
-    private ComponentVisitor mRigidBodiesVisitor = new ComponentVisitor() {
-
-        @Override
-        public boolean visit(SXRComponent gvrComponent) {
-            if (!gvrComponent.isEnabled()) {
-                return false;
-            }
-
-            if (SXRWorld.this.owner != null) {
-                addBody((SXRRigidBody) gvrComponent);
-            } else {
-                removeBody((SXRRigidBody) gvrComponent);
-            }
-            return true;
-        }
-    };
-
-    private ComponentVisitor mConstraintsVisitor = new ComponentVisitor() {
-
-        @Override
-        public boolean visit(SXRComponent gvrComponent) {
-            if (!gvrComponent.isEnabled()) {
-                return false;
-            }
-
-            SXRComponentGroup<SXRConstraint> group = (SXRComponentGroup) gvrComponent;
-
-            if (group == null) {
-                if (SXRWorld.this.owner != null) {
-                    addConstraint((SXRConstraint) gvrComponent);
-                } else {
-                    removeConstraint((SXRConstraint) gvrComponent);
-                }
-            } else for (SXRConstraint constraint: group) {
-                if (SXRWorld.this.owner != null) {
-                    addConstraint(constraint);
-                } else {
-                    removeConstraint(constraint);
-                }
-            }
-
-            return true;
-        }
-    };
 
     public SXRNode setupDebugDraw()
     {

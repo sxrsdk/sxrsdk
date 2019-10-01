@@ -22,7 +22,7 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
      *
      * @return The physics world of this {@link SXRRigidBody}
      */
-    public SXRWorld getWorld()
+    public SXRPhysicsContent getWorld()
     {
         return getWorld(getOwnerObject());
     }
@@ -33,7 +33,7 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
      * @param owner Owner of the {@link SXRRigidBody}
      * @return Returns the {@link SXRWorld} of the scene.
      */
-    private static SXRWorld getWorld(SXRNode owner)
+    private static SXRPhysicsContent getWorld(SXRNode owner)
     {
         return getWorldFromAscendant(owner);
     }
@@ -44,7 +44,7 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
      * @param worldOwner Scene object to search for a physics world in the scene.
      * @return Physics world from the scene.
      */
-    private static SXRWorld getWorldFromAscendant(SXRNode worldOwner)
+    private static SXRPhysicsContent getWorldFromAscendant(SXRNode worldOwner)
     {
         SXRComponent world = null;
 
@@ -54,7 +54,7 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
             worldOwner = worldOwner.getParent();
         }
 
-        return (SXRWorld) world;
+        return (SXRPhysicsContent) world;
     }
 
     @Override
@@ -109,9 +109,9 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
         removeFromWorld(getWorld());
     }
 
-    abstract protected void removeFromWorld(SXRWorld world);
+    abstract protected void removeFromWorld(SXRPhysicsContent world);
 
-    protected void addToWorld(SXRWorld world)
+    protected void addToWorld(SXRPhysicsContent world)
     {
         if (world == null)
         {

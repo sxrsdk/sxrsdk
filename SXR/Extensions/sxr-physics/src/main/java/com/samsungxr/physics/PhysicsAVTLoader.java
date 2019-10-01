@@ -50,28 +50,29 @@ class PhysicsAVTLoader
     private final String TAG = "AVT";;
     private final SXRNode mRoot;
     private final SXRContext mContext;
-    private final SXRWorld mWorld;
+    private final SXRPhysicsContent mWorld;
     private SXRSkeleton mSkeleton;
     private final Map<String, JSONObject> mTargetBones = new HashMap<String, JSONObject>();
-    private SXRMaterial mColliderMtl;
     private float mAngularDamping;
     private float mLinearDamping;
-    private boolean mMakeColliderGeometry = false;
 
-    public PhysicsAVTLoader(SXRNode root)
+    public PhysicsAVTLoader(SXRContext ctx, boolean isMultiBody)
+    {
+        this(new SXRNode(ctx), isMultiBody);
+    }
+
+    public PhysicsAVTLoader(SXRNode root, boolean isMultiBody)
     {
         mRoot = root;
         mContext = root.getSXRContext();
         mSkeleton = null;
-        mColliderMtl = new SXRMaterial(mContext, SXRMaterial.SXRShaderType.Phong.ID);
-        mColliderMtl.setDiffuseColor(1, 0, 1, 1);
-        mWorld = (SXRWorld) root.getComponent(SXRWorld.getComponentType());
+        mWorld = new SXRPhysicsContent(root, isMultiBody);
+        mRoot.attachComponent(mWorld);
     }
 
-    public SXRNode parse(byte[] inputData) throws IOException
+    public SXRPhysicsContent parse(byte[] inputData) throws IOException
     {
         String s = new String(inputData);
-        SXRNode rootNode = null;
 
         Log.e(TAG, "loading physics file");
         try
@@ -79,8 +80,7 @@ class PhysicsAVTLoader
             JSONObject start = new JSONObject(s);
             if (mWorld.isMultiBody())
             {
-              SXRPhysicsJoint rootJoint = parseMultiBodyPhysics(start);
-              return rootJoint.getOwnerObject();
+                parseMultiBodyPhysics(start);
             }
             else
             {
@@ -92,7 +92,7 @@ class PhysicsAVTLoader
         {
             throw new IOException(ex);
         }
-        return rootNode;
+        return mWorld;
     }
 
     private void parsePhysics(JSONObject root) throws JSONException
