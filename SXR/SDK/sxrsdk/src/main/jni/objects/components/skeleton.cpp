@@ -129,6 +129,15 @@ namespace sxr {
         return &mWorldBoneMatrices[boneId];
     }
 
+    glm::mat4* Skeleton::getLocalBoneMatrix(int boneId)
+    {
+        if ((boneId < 0) || (boneId > getNumBones()))
+        {
+            return nullptr;
+        }
+        return &mLocalBoneMatrices[boneId];
+    }
+
     const glm::mat4* Skeleton::getLocalBoneMatrix(int boneId) const
     {
         if ((boneId < 0) || (boneId > getNumBones()))

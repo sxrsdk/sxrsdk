@@ -16,7 +16,6 @@
 #ifndef EXTENSIONS_BULLET_FILELOADER_H
 #define EXTENSIONS_BULLET_FILELOADER_H
 
-#include "../physics_common.h"
 #include "../physics_loader.h"
 
 class btBulletWorldImporter;

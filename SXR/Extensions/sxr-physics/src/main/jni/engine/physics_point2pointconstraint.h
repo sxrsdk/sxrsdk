@@ -16,7 +16,6 @@
 #ifndef PHYSICS_POINT2POINT_CONSTRAINT_H_
 #define PHYSICS_POINT2POINT_CONSTRAINT_H_
 
-#include "physics_common.h"
 #include "physics_constraint.h"
 
 namespace sxr {
@@ -27,14 +26,6 @@ class PhysicsPoint2pointConstraint : public PhysicsConstraint {
 public:
 
     virtual ~PhysicsPoint2pointConstraint() {}
-
-    virtual void setPivotInA(PhysicsVec3 pivot) = 0;
-
-    virtual PhysicsVec3 getPivotInA() const = 0;
-
-    virtual void setPivotInB(PhysicsVec3 pivot) = 0;
-
-    virtual PhysicsVec3 getPivotInB() const = 0;
 
     int getConstraintType() const { return PhysicsConstraint::point2pointConstraint; }
 };

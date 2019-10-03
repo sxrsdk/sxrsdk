@@ -65,7 +65,7 @@ namespace sxr
 // an array of size:6 with Xmin, Ymin, Zmin and Xmax, Ymax, Zmax values
     const BoundingVolume &Mesh::getBoundingVolume()
     {
-        if (have_bounding_volume_)
+        if (have_bounding_volume_ && !mVertices->isDirty())
         {
             return bounding_volume;
         }

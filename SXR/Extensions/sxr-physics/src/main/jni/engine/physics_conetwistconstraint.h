@@ -24,7 +24,8 @@
 
 namespace sxr {
 
-    class PhysicsConeTwistConstraint : public PhysicsConstraint {
+    class PhysicsConeTwistConstraint : public PhysicsConstraint
+    {
     public:
         virtual ~PhysicsConeTwistConstraint() {}
 

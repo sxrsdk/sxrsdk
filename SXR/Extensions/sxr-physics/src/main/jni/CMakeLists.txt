@@ -8,7 +8,9 @@ set(strip "${ANDROID_TOOLCHAIN_PREFIX}strip -g -S -d --strip-debug --verbose ${b
 add_library(sxr-physics SHARED
     engine/bullet/bullet_sxr_utils.cpp
     engine/bullet/bullet_rigidbody.cpp
+    engine/bullet/bullet_joint.cpp
     engine/bullet/bullet_world.cpp
+    engine/bullet/bullet_debugdraw.cpp
     engine/bullet/bullet_fileloader.cpp
     engine/bullet/bullet_fixedconstraint.cpp
     engine/bullet/bullet_point2pointconstraint.cpp
@@ -16,10 +18,15 @@ add_library(sxr-physics SHARED
     engine/bullet/bullet_sliderconstraint.cpp
     engine/bullet/bullet_conetwistconstraint.cpp
     engine/bullet/bullet_generic6dofconstraint.cpp
+    engine/bullet/bullet_universalconstraint.cpp
+    engine/bullet/bullet_jointmotor.cpp
     engine/physics_world_jni.cpp
     engine/physics_loader_jni.cpp
     engine/physics_rigidbody_jni.cpp
+    engine/physics_joint_jni.cpp
     engine/physics_constraint_jni.cpp
+    engine/physics_jointmotor_jni.cpp
+    engine/physics_universalconstraint_jni.cpp
     engine/physics_fixedconstraint_jni.cpp
     engine/physics_point2pointconstraint_jni.cpp
     engine/physics_hingeconstraint_jni.cpp
