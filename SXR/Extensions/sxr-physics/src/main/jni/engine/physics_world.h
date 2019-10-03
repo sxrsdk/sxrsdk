@@ -66,6 +66,8 @@ public:
 
     virtual void addJoint(PhysicsJoint *body) = 0;
 
+	virtual void addJointWithMask(PhysicsJoint *body, int collisiontype, int collidesWith) = 0;
+
     virtual void removeJoint(PhysicsJoint *body) = 0;
 
     virtual void addRigidBody(PhysicsRigidBody *body, int collisiontype, int collidesWith) = 0;

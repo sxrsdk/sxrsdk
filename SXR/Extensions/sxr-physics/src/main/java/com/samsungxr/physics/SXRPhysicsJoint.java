@@ -30,6 +30,7 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
     private final SXRPhysicsContext mPhysicsContext;
     private SXRSkeleton mSkeleton = null;
     private SXRPoseMapper mPoseMapper = null;
+    private final int mCollisionGroup;
 
     static final int FIXED = 1;
     static final int SPHERICAL = 2;
@@ -45,7 +46,21 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
      */
     public SXRPhysicsJoint(SXRContext ctx, float mass, int numBones)
     {
+        this(ctx, mass, numBones, -1);
+    }
+
+    /**
+     * Constructs the root joint of a multibody chain.
+     *
+     * @param ctx            The context of the app.
+     * @param mass           mass of the root joint.
+     * @param collisionGroup inteeger between 0 and 16 indicating which
+     *                       collision group the joint belongs to
+     */
+    public SXRPhysicsJoint(SXRContext ctx, float mass, int numBones, int collisionGroup)
+    {
         super(ctx, NativePhysicsJoint.ctorRoot(mass, numBones));
+        mCollisionGroup = collisionGroup;
         mPhysicsContext = SXRPhysicsContext.getInstance();
     }
 
@@ -63,11 +78,31 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
      */
     public SXRPhysicsJoint(SXRPhysicsJoint parent, int jointType, int boneID, float mass)
     {
-        super(parent.getSXRContext(), NativePhysicsJoint.ctorLink(parent.getNative(), jointType, boneID, mass));
+        this(parent, jointType, boneID, mass, -1);
+    }
+
+    /**
+     * Constructs a multibody joint in a chain.
+     * <p>
+     * This joint is linked to the parent joint in the physics world.
+     * This parent should be consistent with the node hierarchy
+     * the joints are attached to.
+     * @param parent    The parent joint of this one.
+     * @param jointType Type of joint: one of (FIXED, SPHERICAL, REVOLUTE, PRISMATIC, PLANAR)
+     * @param boneID    0 based bone ID indicating which bone of the skeleton
+     *                  this joint belongs to
+     * @param mass      mass of this joint
+     */
+    public SXRPhysicsJoint(SXRPhysicsJoint parent, int jointType, int boneID, float mass, int collisionGroup)
+    {
+        super(parent.getSXRContext(),
+              NativePhysicsJoint.ctorLink(parent.getNative(),
+                                          jointType, boneID, mass));
         if (boneID < 1)
         {
             throw new IllegalArgumentException("BoneID must be greater than zero");
         }
+        mCollisionGroup = collisionGroup;
         mPhysicsContext = SXRPhysicsContext.getInstance();
     }
 
@@ -76,6 +111,7 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
     {
         super(ctx, nativeJoint);
         mPhysicsContext = SXRPhysicsContext.getInstance();
+        mCollisionGroup = -1;
     }
 
     public void setAxis(float x, float y, float z)
@@ -169,12 +205,22 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
     }
 
     /**
-     * Returns the mass of the body.
+     * Returns the mass of the joint.
      *
-     * @return The mass of the body.
+     * @return The mass of the joint.
      */
     public float getMass() {
         return NativePhysicsJoint.getMass(getNative());
+    }
+
+    /**
+     * Returns the collision group of this joint..
+     *
+     * @return The collision group id as an int
+     */
+    @Override
+    public int getCollisionGroup() {
+        return mCollisionGroup;
     }
 
     /**

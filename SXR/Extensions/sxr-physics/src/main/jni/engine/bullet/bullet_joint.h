@@ -99,6 +99,8 @@ class BulletJoint : public PhysicsJoint
 
     bool isReady() const;
 
+    void setCollisionProperties(int collisionGroup, int collidesWith);
+
 private:
     void finalize();
     void destroy();

@@ -529,6 +529,7 @@ public class SXRRigidBody extends SXRPhysicsCollidable {
      *
      * @return The collision group id as an int
      */
+    @Override
     public int getCollisionGroup() {
         return mCollisionGroup;
     }

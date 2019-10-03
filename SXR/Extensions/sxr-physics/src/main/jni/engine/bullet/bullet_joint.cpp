@@ -432,6 +432,15 @@ namespace sxr {
         updateWorldTransform();
     }
 
+    void BulletJoint::setCollisionProperties(int collisionGroup, int collidesWith)
+    {
+        if (mCollider)
+        {
+            mCollider->getBroadphaseHandle()->m_collisionFilterGroup = collisionGroup;
+            mCollider->getBroadphaseHandle()->m_collisionFilterMask = collidesWith;
+        }
+    }
+
     void BulletJoint::setupFixed()
     {
         const BulletJoint* jointA = reinterpret_cast<const BulletJoint*>(getParent());

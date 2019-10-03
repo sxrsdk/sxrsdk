@@ -468,7 +468,18 @@ public class SXRWorld extends SXRPhysicsContent implements IEventReceiver
                 {
                     return;
                 }
-                NativePhysics3DWorld.addJoint(getNative(), body.getNative());
+                if ((body.getCollisionGroup() < 0) ||
+                    (body.getCollisionGroup() > 15) ||
+                    (mCollisionMatrix == null))
+                {
+                    NativePhysics3DWorld.addJoint(getNative(), body.getNative());
+                }
+                else
+                {
+                    NativePhysics3DWorld.addJointWithMask(getNative(), body.getNative(),
+                            mCollisionMatrix.getCollisionFilterGroup(body.getCollisionGroup()),
+                            mCollisionMatrix.getCollisionFilterMask(body.getCollisionGroup()));
+                }
                 mPhysicsObject.put(body.getNative(), body);
                 if (body.getBoneID() == 0)
                 {
@@ -774,6 +785,8 @@ class NativePhysics3DWorld {
     static native void stopDrag(long jphysics_world);
 
     static native void addJoint(long jphysics_world, long jjoint);
+
+    static native void addJointWithMask(long jphysics_world, long jjoint, long collisionType, long collidesWith);
 
     static native void removeJoint(long jphysics_world, long jjoint);
 

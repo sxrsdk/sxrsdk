@@ -209,11 +209,11 @@ void BulletWorld::addRigidBody(PhysicsRigidBody *body)
     rb->mWorld = this;
 }
 
-void BulletWorld::addRigidBody(PhysicsRigidBody *body, int collisiontype, int collidesWith)
+void BulletWorld::addRigidBody(PhysicsRigidBody *body, int collisionGroup, int collidesWith)
 {
     BulletRigidBody* rb = reinterpret_cast<BulletRigidBody *>(body);
     body->updateConstructionInfo(this);
-    mPhysicsWorld->addRigidBody(rb->getRigidBody(), collidesWith, collisiontype);
+    mPhysicsWorld->addRigidBody(rb->getRigidBody(), collisionGroup, collidesWith);
     rb->mWorld = this;
 }
 
@@ -227,6 +227,19 @@ void BulletWorld::addJoint(PhysicsJoint *joint)
     if (isMultiBody())
     {
         joint->updateConstructionInfo(this);
+        if (joint->getBoneID() == 0)
+        {
+            mMultiBodies.push_back((BulletJoint*) joint);
+        }
+    }
+}
+
+void BulletWorld::addJointWithMask(PhysicsJoint *joint, int collisionGroup, int collidesWith)
+{
+    if (isMultiBody())
+    {
+        joint->updateConstructionInfo(this);
+        ((BulletJoint*) joint)->setCollisionProperties(collisionGroup, collidesWith);
         if (joint->getBoneID() == 0)
         {
             mMultiBodies.push_back((BulletJoint*) joint);

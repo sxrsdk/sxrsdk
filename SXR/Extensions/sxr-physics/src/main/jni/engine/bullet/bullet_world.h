@@ -66,6 +66,8 @@ class BulletWorld : public PhysicsWorld {
 
     void addJoint(PhysicsJoint *joint);
 
+    void addJointWithMask(PhysicsJoint *body, int collisiontype, int collidesWith);
+
     void removeJoint(PhysicsJoint *body);
 
     void step(float timeStep, int maxSubSteps);

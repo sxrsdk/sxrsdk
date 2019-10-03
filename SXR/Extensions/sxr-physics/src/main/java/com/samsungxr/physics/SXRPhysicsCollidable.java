@@ -19,4 +19,5 @@ abstract class SXRPhysicsCollidable extends SXRPhysicsWorldObject
         super(gvrContext, nativePointer, cleanupHandlers);
     }
 
+    abstract public int getCollisionGroup();
 }
