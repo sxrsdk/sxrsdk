@@ -68,7 +68,7 @@ import static android.opengl.GLES20.GL_LINES;
  */
 public class SXRWorld extends SXRPhysicsContent implements IEventReceiver
 {
-    private final SXRPhysicsContext mPhysicsContext;
+    private final SXRPhysicsContext mPhysicsContext = SXRPhysicsContext.getInstance();
     private SXRWorldTask mWorldTask;
     private static final long DEFAULT_INTERVAL = 15;
     private SXREventReceiver mListeners;
@@ -205,10 +205,10 @@ public class SXRWorld extends SXRPhysicsContent implements IEventReceiver
      *
      * @param scene           The {@link SXRScene} this world belongs to.
      * @param collisionMatrix a matrix that represents the collision relations of the bodies on the scene
-     * @param isMultiBody   import articulated bodies as {@link SXRPhysicsJoint} components
-     *                      and use Featherstone multibody simulation. The default is to
-     *                      import everything as {@link SXRRigidBody} components and
-     *                      use discrete dynamics.
+     * @param isMultiBody     import articulated bodies as {@link SXRPhysicsJoint} components
+     *                        and use Featherstone multibody simulation. The default is to
+     *                        import everything as {@link SXRRigidBody} components and
+     *                        use discrete dynamics.
      */
     public SXRWorld(SXRScene scene, SXRCollisionMatrix collisionMatrix, boolean isMultiBody)
     {
@@ -222,10 +222,10 @@ public class SXRWorld extends SXRPhysicsContent implements IEventReceiver
      * @param scene           The {@link SXRScene} this world belongs to.
      * @param collisionMatrix a matrix that represents the collision relations of the bodies on the scene.
      * @param interval        interval (in milliseconds) at which the collisions will be updated.
-     * @param isMultiBody   import articulated bodies as {@link SXRPhysicsJoint} components
-     *                      and use Featherstone multibody simulation. The default is to
-     *                      import everything as {@link SXRRigidBody} components and
-     *                      use discrete dynamics.
+     * @param isMultiBody     import articulated bodies as {@link SXRPhysicsJoint} components
+     *                        and use Featherstone multibody simulation. The default is to
+     *                        import everything as {@link SXRRigidBody} components and
+     *                        use discrete dynamics.
      */
     public SXRWorld(SXRScene scene, SXRCollisionMatrix collisionMatrix, long interval, boolean isMultiBody)
     {
@@ -233,7 +233,6 @@ public class SXRWorld extends SXRPhysicsContent implements IEventReceiver
         mListeners = new SXREventReceiver(this);
         mCollisionMatrix = collisionMatrix;
         mWorldTask = new SXRWorldTask(interval);
-        mPhysicsContext = SXRPhysicsContext.getInstance();
         scene.getRoot().attachComponent(this);
     }
 
@@ -644,12 +643,11 @@ public class SXRWorld extends SXRPhysicsContent implements IEventReceiver
     @Override
     public void onAttach(SXRNode newOwner)
     {
-        super.onAttach(newOwner);
         if (newOwner.getParent() != null)
         {
-            throw new RuntimeException("SXRWold must be attached to the scene's root object!");
+            throw new UnsupportedOperationException("SXRWorld must be attached to the scene's root object");
         }
-        doPhysicsAttach(newOwner);
+        super.onAttach(newOwner);
     }
 
     @Override
@@ -828,7 +826,7 @@ class NativePhysics3DWorld {
 
     static native void addRigidBody(long jphysics_world, long jrigid_body);
 
-    static native void addRigidBodyWithMask(long jphysics_world, long jrigid_body, long collisionType, long collidesWith);
+    static native void addRigidBodyWithMask(long jphysics_world, long jrigid_body, long collisionGroup, long collidesWith);
 
     static native void removeRigidBody(long jphysics_world, long jrigid_body);
 

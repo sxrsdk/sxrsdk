@@ -88,7 +88,6 @@ public class SXRPhysicsContent extends SXRComponent
         super(root.getSXRContext(), NativePhysics3DWorld.ctor(isMultiBody));
         mIsEnabled = false;
         mIsMultibody = isMultiBody;
-        root.attachComponent(this);
     }
 
     static public long getComponentType()

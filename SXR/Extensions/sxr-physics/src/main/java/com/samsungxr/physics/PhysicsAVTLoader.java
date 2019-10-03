@@ -45,6 +45,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Loader for Avatar physics files which describe a multibody articulated hierarchy.
+ */
 class PhysicsAVTLoader
 {
     private final String TAG = "AVT";;

@@ -226,7 +226,7 @@ public class SXRRigidBody extends SXRPhysicsCollidable
      */
     public void applyCentralForce(final float x, final float y, final float z)
     {
-                mPhysicsContext.runOnPhysicsThread(new Runnable() {
+        mPhysicsContext.runOnPhysicsThread(new Runnable() {
             @Override
            public void run()
            {
