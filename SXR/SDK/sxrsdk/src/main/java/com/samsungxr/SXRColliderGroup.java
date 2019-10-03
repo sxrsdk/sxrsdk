@@ -37,58 +37,58 @@ import java.util.List;
 public class SXRColliderGroup extends SXRCollider implements IComponentGroup<SXRCollider>
 {
     /**
-     * Default implementation for IComponentGroup that
-     * maintains an iterable list of components.
-     *
-     * @param <T> class of component in the group
-     */
-    private final static class Group<T extends SXRComponent> implements Iterable<T>
+ * Default implementation for IComponentGroup that
+ * maintains an iterable list of components.
+ *
+ * @param <T> class of component in the group
+ */
+private final static class Group<T extends SXRComponent> implements Iterable<T>
+{
+    List<T> mComponents = new ArrayList<T>();
+
+    public Iterator<T> iterator()
     {
-        List<T> mComponents = new ArrayList<T>();
-
-        public Iterator<T> iterator()
+        Iterator<T> iter = new Iterator<T>()
         {
-            Iterator<T> iter = new Iterator<T>()
+            int mIndex = 0;
+
+            public boolean hasNext()
             {
-                int mIndex = 0;
+                return mIndex < getSize();
+            }
 
-                public boolean hasNext()
+            public T next()
+            {
+                if (mIndex < getSize())
                 {
-                    return mIndex < getSize();
+                    return mComponents.get(mIndex++);
                 }
+                return null;
+            }
+        };
+        return iter;
+    }
 
-                public T next()
-                {
-                    if (mIndex < getSize())
-                    {
-                        return mComponents.get(mIndex++);
-                    }
-                    return null;
-                }
-            };
-            return iter;
-        }
+    public void addChild(T child)
+    {
+        mComponents.add(child);
+    }
 
-        public void addChild(T child)
-        {
-            mComponents.add(child);
-        }
+    public void removeChild(T child)
+    {
+        mComponents.remove(child);
+    }
 
-        public void removeChild(T child)
-        {
-            mComponents.remove(child);
-        }
+    public int getSize()
+    {
+        return mComponents.size();
+    }
 
-        public int getSize()
-        {
-            return mComponents.size();
-        }
-
-        public T getChildAt(int index)
-        {
-            return mComponents.get(index);
-        }
-    };
+    public T getChildAt(int index)
+    {
+        return mComponents.get(index);
+    }
+};
 
     Group<SXRCollider> mGroup = new Group<>();
 

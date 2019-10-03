@@ -15,25 +15,41 @@
 
 package com.samsungxr.physics;
 
+import com.samsungxr.SXRCollider;
 import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRNode;
+import com.samsungxr.animation.SXRSkeleton;
 
 /**
- * Represents a rigid body that can be static or dynamic. You can set a mass and apply some
- * physics forces.
+ * Represents a rigid body with physical properties that can
+ * collide with other objects.
  * <p>
- * By default it is a static body with infinity mass, value 0, and does not move under simulation.
+ * A rigid body can be static, kinematic or dynamic.
+ * Static bodies don't move at all, kinematic bodies are moved by
+ * animation in the application and dynamic bodies are moved by
+ * the physics engine.
+ * <p>
+ * Rigid bodies also have mass and respond to physical forces.
+ * To participate in collisions, a rigid body must have a
+ * {@link SXRCollider} component attached to its owner
+ * which describes the shape of the rigid body.
+ * <p>
+ * By default a rigid body is static with infinity mass, value 0, and does not move under simulation.
  * A dynamic body with a mass defined is fully simulated.
  * <p>
- * Every {@linkplain com.samsungxr.SXRNode node} can represent a rigid body since
- * it has a {@link SXRRigidBody} component attached to.
- *
- * You must setup the values of owner's {@link com.samsungxr.SXRTransform}, like initial position,
- * and the mass value of the rigid body before attach it to its owner.
+ * The rigid body component is attached to a {@linkplain com.samsungxr.SXRNode node}
+ * and uses the transform of its owner object, updating it if the body is dynamic.
+ * Before attaching a rigid body to a node, make sure the node has the proper
+ * position and orientation. You cannot attach a rigid body to a node
+ * unless it is in the scene and has a collider component.
+ * @see SXRNode
+ * @see SXRCollider
+ * @see SXRWorld
  */
-public class SXRRigidBody extends SXRPhysicsWorldObject {
+public class SXRRigidBody extends SXRPhysicsCollidable
+{
     public static final int DYNAMIC  = 0;
     public static final int STATIC = 1;
     public static final int KINEMATIC = 2;
@@ -44,46 +60,69 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
 
     private final int mCollisionGroup;
     private final SXRPhysicsContext mPhysicsContext;
-
     private final boolean mLoaded;
 
     /**
-     * Constructs new instance to simulate a rigid body in {@link SXRWorld}.
+     * Constructs a new static rigid body with zero mass.
      *
-     * @param gvrContext The context of the app.
+     * @param ctx The context of the app.
      */
-    public SXRRigidBody(SXRContext gvrContext) {
-        this(gvrContext, 0.0f);
+    public SXRRigidBody(SXRContext ctx) {
+        this(ctx, 0.0f);
+    }
+
+
+    /**
+     * Constructs a new rigid body with the given mass in
+     * collision group 0.
+     * <p>
+     * If the input mass is zero, the rigid body will
+     * be designated static and cannot move.
+     * Otherwise, it is marked as dynamic and will
+     * be fully simulated.
+     * </p>
+     * To make a kinematic rigid body, call the
+     * {@link #setSimulationType(int)} funcion.
+     * @param ctx   The context of the app.
+     * @param mass  The mass of this rigid body.
+     */
+    public SXRRigidBody(SXRContext ctx, float mass)
+    {
+        super(ctx, NativeRigidBody.ctor(mass));
+        mCollisionGroup = -1;
+        mPhysicsContext = SXRPhysicsContext.getInstance();
+        mLoaded = false;
     }
 
     /**
-     * Constructs new instance to simulate a rigid body in {@link SXRWorld}.
+     * Constructs a new rigid body with the given mass belonging to
+     * the specified collision group.
+     * <p>
+     * If the input mass is zero, the rigid body will
+     * be designated static and cannot move.
+     * Otherwise, it is marked as dynamic and will
+     * be fully simulated.
+     * </p>
+     * To make a kinematic rigid body, call the
+     * {@link #setSimulationType(int)} funciont.
      *
-     * @param gvrContext The context of the app.
-     * @param mass The mass of this rigid body.
-     */
-    public SXRRigidBody(SXRContext gvrContext, float mass) {
-        this(gvrContext, mass, -1);
-    }
-
-    /**
-     * Constructs new instance to simulate a rigid body in {@link SXRWorld}.
-     *
-     * @param gvrContext The context of the app.
+     * @param ctx The context of the app.
      * @param mass The mass of this rigid body.
      * @param collisionGroup The id of the collision's group that this rigid body belongs to
      *                       in the {@link SXRCollisionMatrix}. The rigid body collides with
      *                       everyone if {#collisionGroup} is out of the range 0...15.
      */
-    public SXRRigidBody(SXRContext gvrContext, float mass, int collisionGroup) {
-        super(gvrContext, Native3DRigidBody.ctor(mass));
+    public SXRRigidBody(SXRContext ctx, float mass, int collisionGroup)
+    {
+        super(ctx, NativeRigidBody.ctor(mass));
         mCollisionGroup = collisionGroup;
         mPhysicsContext = SXRPhysicsContext.getInstance();
         mLoaded = false;
     }
 
     /** Used only by {@link SXRPhysicsLoader} */
-    SXRRigidBody(SXRContext gvrContext, long nativeRigidBody) {
+    SXRRigidBody(SXRContext gvrContext, long nativeRigidBody)
+    {
         super(gvrContext, nativeRigidBody);
         mCollisionGroup = -1;
         mPhysicsContext = SXRPhysicsContext.getInstance();
@@ -91,13 +130,13 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
     }
 
     static public long getComponentType() {
-        return Native3DRigidBody.getComponentType();
+        return NativeRigidBody.getComponentType();
     }
 
     /**
      * Returns the {@linkplain SXRWorld physics world} of this {@linkplain SXRRigidBody rigid body}.
      *
-     * @return The physics world of this {@link SXRRigidBody}
+     * @return The physics world of this {@link SXRRigidBody}, null if not added to a world.
      */
     public SXRWorld getWorld() {
         return getWorld(getOwnerObject());
@@ -106,8 +145,8 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
     /**
      * Returns the {@linkplain SXRWorld physics world} of the {@linkplain com.samsungxr.SXRScene scene}.
      *
-     * @param owner Owner of the {@link SXRRigidBody}
-     * @return Returns the {@link SXRWorld} of the scene.
+     * @param owner  Owner of the {@link SXRRigidBody}
+     * @return Returns the {@link SXRWorld} of the scene, null if node is not in the scene
      */
     private static SXRWorld getWorld(SXRNode owner) {
         return getWorldFromAscendant(owner);
@@ -119,10 +158,12 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param worldOwner Scene object to search for a physics world in the scene.
      * @return Physics world from the scene.
      */
-    private static SXRWorld getWorldFromAscendant(SXRNode worldOwner) {
+    private static SXRWorld getWorldFromAscendant(SXRNode worldOwner)
+    {
         SXRComponent world = null;
 
-        while (worldOwner != null && world == null) {
+        while (worldOwner != null && world == null)
+        {
             world = worldOwner.getComponent(SXRWorld.getComponentType());
             worldOwner = worldOwner.getParent();
         }
@@ -140,9 +181,16 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * <tr><td>KINEMATIC</td><td>Collides with other objects, moved by application</td></tr>
      * </table>
      */
-    public void setSimulationType(int type)
+    public void setSimulationType(final int type)
     {
-        Native3DRigidBody.setSimulationType(getNative(), type);
+        mPhysicsContext.runOnPhysicsThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                NativeRigidBody.setSimulationType(getNative(), type);
+            }
+        });
     }
 
     /**
@@ -157,7 +205,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      */
     public int getSimulationType()
     {
-       return Native3DRigidBody.getSimulationType(getNative());
+       return NativeRigidBody.getSimulationType(getNative());
     }
 
     /**
@@ -166,7 +214,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @return The mass of the body.
      */
     public float getMass() {
-        return Native3DRigidBody.getMass(getNative());
+        return NativeRigidBody.getMass(getNative());
     }
 
     /**
@@ -176,12 +224,14 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param y factor on the 'Y' axis.
      * @param z factor on the 'Z' axis.
      */
-    public void applyCentralForce(final float x, final float y, final float z) {
+    public void applyCentralForce(final float x, final float y, final float z)
+    {
                 mPhysicsContext.runOnPhysicsThread(new Runnable() {
             @Override
-           public void run() {
-                                Native3DRigidBody.applyCentralForce(getNative(), x, y, z);
-                           }
+           public void run()
+           {
+               NativeRigidBody.applyCentralForce(getNative(), x, y, z);
+           }
         });
     }
 
@@ -197,12 +247,13 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param relZ relative position on z-axis to apply the force.
      */
     public void applyForce(final float forceX, final float forceY, final float forceZ,
-                           final float relX, final float relY, final float relZ) {
+                           final float relX, final float relY, final float relZ)
+    {
         mPhysicsContext.runOnPhysicsThread(new Runnable() {
             @Override
             public void run() {
-                Native3DRigidBody.applyForce(getNative(), forceX, forceY, forceZ,
-                        relX, relY, relZ);
+                NativeRigidBody.applyForce(getNative(), forceX, forceY, forceZ,
+                                           relX, relY, relZ);
             }
         });
     }
@@ -214,11 +265,12 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param y impulse factor on the 'Y' axis.
      * @param z impulse factor on the 'Z' axis.
      */
-    public void applyCentralImpulse(final float x, final float y, final float z) {
+    public void applyCentralImpulse(final float x, final float y, final float z)
+    {
         mPhysicsContext.runOnPhysicsThread(new Runnable() {
             @Override
             public void run() {
-                Native3DRigidBody.applyCentralImpulse(getNative(), x, y, z);
+                NativeRigidBody.applyCentralImpulse(getNative(), x, y, z);
             }
         });
     }
@@ -235,12 +287,15 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param relZ relative position on z-axis to apply the force.
      */
     public void applyImpulse(final float impulseX, final float impulseY, final float impulseZ,
-                           final float relX, final float relY, final float relZ) {
-        mPhysicsContext.runOnPhysicsThread(new Runnable() {
+                           final float relX, final float relY, final float relZ)
+    {
+        mPhysicsContext.runOnPhysicsThread(new Runnable()
+        {
             @Override
-            public void run() {
-                Native3DRigidBody.applyImpulse(getNative(), impulseX, impulseY, impulseZ,
-                        relX, relY, relZ);
+            public void run()
+            {
+                NativeRigidBody.applyImpulse(getNative(), impulseX, impulseY, impulseZ,
+                                             relX, relY, relZ);
             }
         });
     }
@@ -252,12 +307,15 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param y factor on the 'Y' axis.
      * @param z factor on the 'Z' axis.
      */
-    public void applyTorque(final float x, final float y, final float z) {
-                mPhysicsContext.runOnPhysicsThread(new Runnable() {
+    public void applyTorque(final float x, final float y, final float z)
+    {
+        mPhysicsContext.runOnPhysicsThread(new Runnable()
+        {
             @Override
-            public void run() {
-                                Native3DRigidBody.applyTorque(getNative(), x, y, z);
-                            }
+            public void run()
+            {
+                NativeRigidBody.applyTorque(getNative(), x, y, z);
+            }
         });
     }
 
@@ -268,11 +326,14 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param y impulse factor on the 'Y' axis.
      * @param z impulse factor on the 'Z' axis.
      */
-    public void applyTorqueImpulse(final float x, final float y, final float z) {
-        mPhysicsContext.runOnPhysicsThread(new Runnable() {
+    public void applyTorqueImpulse(final float x, final float y, final float z)
+    {
+        mPhysicsContext.runOnPhysicsThread(new Runnable()
+        {
             @Override
-            public void run() {
-                Native3DRigidBody.applyTorqueImpulse(getNative(), x, y, z);
+            public void run()
+            {
+                NativeRigidBody.applyTorqueImpulse(getNative(), x, y, z);
             }
         });
     }
@@ -284,8 +345,9 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param y factor on the 'Y' axis.
      * @param z factor on the 'Z' axis.
      */
-    public void setGravity(float x, float y, float z) {
-        Native3DRigidBody.setGravity(getNative(), x, y, z);
+    public void setGravity(float x, float y, float z)
+    {
+        NativeRigidBody.setGravity(getNative(), x, y, z);
     }
 
     /**
@@ -294,8 +356,9 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param linear factor on how much the rigid body resists translation.
      * @param angular factor on how much the rigid body resists rotation.
      */
-    public void setDamping(float linear, float angular) {
-        Native3DRigidBody.setDamping(getNative(), linear, angular);
+    public void setDamping(float linear, float angular)
+    {
+        NativeRigidBody.setDamping(getNative(), linear, angular);
     }
 
     /**
@@ -305,8 +368,9 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param y factor on the 'Y' axis.
      * @param z factor on the 'Z' axis.
      */
-    public void setLinearVelocity(float x, float y, float z) {
-        Native3DRigidBody.setLinearVelocity(getNative(), x, y, z);
+    public void setLinearVelocity(float x, float y, float z)
+    {
+        NativeRigidBody.setLinearVelocity(getNative(), x, y, z);
     }
 
     /**
@@ -316,8 +380,9 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param y factor on the 'Y' axis.
      * @param z factor on the 'Z' axis.
      */
-    public void setAngularVelocity(float x, float y, float z) {
-        Native3DRigidBody.setAngularVelocity(getNative(), x, y, z);
+    public void setAngularVelocity(float x, float y, float z)
+    {
+        NativeRigidBody.setAngularVelocity(getNative(), x, y, z);
     }
 
     /**
@@ -327,8 +392,9 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param y factor on the 'Y' axis.
      * @param z factor on the 'Z' axis.
      */
-    public void setAngularFactor(float x, float y, float z) {
-        Native3DRigidBody.setAngularFactor(getNative(), x, y, z);
+    public void setAngularFactor(float x, float y, float z)
+    {
+        NativeRigidBody.setAngularFactor(getNative(), x, y, z);
     }
 
     /**
@@ -338,8 +404,9 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param y factor on the 'Y' axis.
      * @param z factor on the 'Z' axis.
      */
-    public void setLinearFactor(float x, float y, float z) {
-        Native3DRigidBody.setLinearFactor(getNative(), x, y, z);
+    public void setLinearFactor(float x, float y, float z)
+    {
+        NativeRigidBody.setLinearFactor(getNative(), x, y, z);
     }
 
     /**
@@ -348,8 +415,9 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param linear factor for the linearVelocity
      * @param angular factor for the angularVelocity
      */
-    public void setSleepingThresholds(float linear, float angular) {
-        Native3DRigidBody.setSleepingThresholds(getNative(), linear, angular);
+    public void setSleepingThresholds(float linear, float angular)
+    {
+        NativeRigidBody.setSleepingThresholds(getNative(), linear, angular);
     }
 
     /**
@@ -358,8 +426,9 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param collisionObject rigidbody object on the collision check
      * @param ignore boolean to indicate if the specified object will be ignored or not
      */
-    public void setIgnoreCollisionCheck(SXRRigidBody collisionObject, boolean ignore) {
-        Native3DRigidBody.setIgnoreCollisionCheck(getNative(), collisionObject.getNative(), ignore);
+    public void setIgnoreCollisionCheck(SXRRigidBody collisionObject, boolean ignore)
+    {
+        NativeRigidBody.setIgnoreCollisionCheck(getNative(), collisionObject.getNative(), ignore);
     }
 
     /**
@@ -368,7 +437,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @return The gravity acceleration vector as a float array
      */
     public float[] getGravity() {
-        return Native3DRigidBody.getGravity(getNative());
+        return NativeRigidBody.getGravity(getNative());
     }
 
     /**
@@ -377,7 +446,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @return The linear velocity vector as a float array
      */
     public float[] getLinearVelocity() {
-        return Native3DRigidBody.getLinearVelocity(getNative());
+        return NativeRigidBody.getLinearVelocity(getNative());
     }
 
     /**
@@ -386,7 +455,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @return The angular velocity vector as a float array
      */
     public float[] getAngularVelocity() {
-        return Native3DRigidBody.getAngularVelocity(getNative());
+        return NativeRigidBody.getAngularVelocity(getNative());
     }
 
     /**
@@ -395,7 +464,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @return The angular factor vector as a float array
      */
     public float[] getAngularFactor() {
-        return Native3DRigidBody.getAngularFactor(getNative());
+        return NativeRigidBody.getAngularFactor(getNative());
     }
 
     /**
@@ -404,7 +473,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @return The linear factor vector as a float array
      */
     public float[] getLinearFactor() {
-        return Native3DRigidBody.getLinearFactor(getNative());
+        return NativeRigidBody.getLinearFactor(getNative());
     }
 
     /**
@@ -413,7 +482,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @return The damping factors as a float array
      */
     public float[] getDamping() {
-        return Native3DRigidBody.getDamping(getNative());
+        return NativeRigidBody.getDamping(getNative());
     }
 
     /**
@@ -422,7 +491,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @return The friction factor scalar as a float
      */
     public float getFriction() {
-        return Native3DRigidBody.getFriction(getNative());
+        return NativeRigidBody.getFriction(getNative());
     }
 
     /**
@@ -431,7 +500,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param n the friction factor
      */
     public void setFriction(float n) {
-        Native3DRigidBody.setFriction(getNative(), n);
+        NativeRigidBody.setFriction(getNative(), n);
     }
 
     /**
@@ -440,7 +509,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @return The restitution factor scalar as a float
      */
     public float getRestitution() {
-        return Native3DRigidBody.getRestitution(getNative());
+        return NativeRigidBody.getRestitution(getNative());
     }
 
     /**
@@ -449,7 +518,7 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      * @param n the restitution factor
      */
     public void setRestitution(float n) {
-        Native3DRigidBody.setRestitution(getNative(), n);
+        NativeRigidBody.setRestitution(getNative(), n);
     }
 
     /**
@@ -457,8 +526,9 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      *
      * @return The continuous collision detection motion threshold factor scalar as a float
      */
-    public float getCcdMotionThreshold() {
-        return Native3DRigidBody.getCcdMotionThreshold(getNative());
+    public float getCcdMotionThreshold()
+    {
+        return NativeRigidBody.getCcdMotionThreshold(getNative());
     }
 
     /**
@@ -466,8 +536,9 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      *
      * @param n the continuous collision detection motion threshold factor
      */
-    public void setCcdMotionThreshold(float n) {
-        Native3DRigidBody.setCcdMotionThreshold(getNative(), n);
+    public void setCcdMotionThreshold(float n)
+    {
+        NativeRigidBody.setCcdMotionThreshold(getNative(), n);
     }
 
     /**
@@ -475,8 +546,9 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      *
      * @return The contact processing threshold factor scalar as a float
      */
-    public float getContactProcessingThreshold() {
-        return Native3DRigidBody.getContactProcessingThreshold(getNative());
+    public float getContactProcessingThreshold()
+    {
+        return NativeRigidBody.getContactProcessingThreshold(getNative());
     }
 
     /**
@@ -484,8 +556,9 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      *
      * @return The radius of sphere to continuous collision detection.
      */
-    public float getCcdSweptSphereRadius() {
-        return Native3DRigidBody.getCcdSweptSphereRadius(getNative());
+    public float getCcdSweptSphereRadius()
+    {
+        return NativeRigidBody.getCcdSweptSphereRadius(getNative());
     }
 
     /**
@@ -493,8 +566,9 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      *
      * @param n Radius of sphere to continuous collision detection.
      */
-    public void setCcdSweptSphereRadius(float n) {
-        Native3DRigidBody.setCcdSweptSphereRadius(getNative(), n);
+    public void setCcdSweptSphereRadius(float n)
+    {
+        NativeRigidBody.setCcdSweptSphereRadius(getNative(), n);
     }
 
     /**
@@ -502,15 +576,17 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      *
      * @param n the contact processing threshold factor
      */
-    public void setContactProcessingThreshold(float n) {
-        Native3DRigidBody.setContactProcessingThreshold(getNative(), n);
+    public void setContactProcessingThreshold(float n)
+    {
+        NativeRigidBody.setContactProcessingThreshold(getNative(), n);
     }
 
     /**
      * Returns the collision group of this {@linkplain SXRRigidBody rigid body}.
      *
-     * @return The collision group id as an int
+     * @return The collision group id as an int between 9 and 15.
      */
+    @Override
     public int getCollisionGroup() {
         return mCollisionGroup;
     }
@@ -522,11 +598,14 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
      *
      * @param rebuildCollider rebuilds the physics collider if true.
      */
-    public void reset(final boolean rebuildCollider) {
-        mPhysicsContext.runOnPhysicsThread(new Runnable() {
+    public void reset(final boolean rebuildCollider)
+    {
+        mPhysicsContext.runOnPhysicsThread(new Runnable()
+        {
             @Override
-            public void run() {
-                Native3DRigidBody.reset(getNative(), rebuildCollider);
+            public void run()
+            {
+                NativeRigidBody.reset(getNative(), rebuildCollider);
             }
         });
     }
@@ -539,33 +618,36 @@ public class SXRRigidBody extends SXRPhysicsWorldObject {
     }
 
     @Override
-    public void onAttach(SXRNode newOwner) {
-        if (!mLoaded && newOwner.getCollider() == null) {
+    public void onAttach(SXRNode newOwner)
+    {
+        if (!mLoaded && newOwner.getCollider() == null)
+        {
             throw new UnsupportedOperationException("You must have a collider attached to the node before attaching the rigid body");
-        }
-        final SXRRenderData renderData = newOwner.getRenderData();
-        if (renderData != null && renderData.getMesh() == null) {
-            throw new UnsupportedOperationException("You must have a mesh attached to the node before attaching the rigid body");
         }
         super.onAttach(newOwner);
     }
 
     @Override
-    protected void addToWorld(SXRWorld world) {
-        if (world != null) {
+    protected void addToWorld(SXRPhysicsContent world)
+    {
+        if (world != null)
+        {
             world.addBody(this);
         }
     }
 
     @Override
-    protected void removeFromWorld(SXRWorld world) {
-        if (world != null) {
+    protected void removeFromWorld(SXRPhysicsContent world)
+    {
+        if (world != null)
+        {
             world.removeBody(this);
         }
     }
+
 }
 
-class Native3DRigidBody {
+class NativeRigidBody {
     static native long ctor(float mass);
 
     static native long getComponentType();

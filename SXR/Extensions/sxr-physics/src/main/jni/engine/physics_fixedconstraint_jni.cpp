@@ -19,14 +19,13 @@
 namespace sxr {
 
     extern "C" {
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DFixedConstraint_ctor(JNIEnv * env, jobject obj, jlong rigidBodyB);
-    }
 
     JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_Native3DFixedConstraint_ctor(JNIEnv * env, jobject obj, jlong rigidBodyB) {
+    Java_com_samsungxr_physics_Native3DFixedConstraint_ctor(JNIEnv *env, jclass obj, jlong bodyA)
+    {
         return reinterpret_cast<jlong>(
-                new BulletFixedConstraint(reinterpret_cast<PhysicsRigidBody*>(rigidBodyB)));
+                new BulletFixedConstraint(reinterpret_cast<PhysicsRigidBody *>(bodyA)));
+    }
     }
 
 }

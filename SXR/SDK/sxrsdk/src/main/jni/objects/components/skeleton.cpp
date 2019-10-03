@@ -108,10 +108,16 @@ namespace sxr {
         memcpy(mLocalBoneMatrices, input, mNumBones * sizeof(glm::mat4));
     }
 
-    void Skeleton::getPose(float* output)
+    void Skeleton::getPose(float* output) const
     {
         std::lock_guard<std::mutex> lock(mLock);
         memcpy(output, mLocalBoneMatrices, mNumBones * sizeof(glm::mat4));
+    }
+
+    void Skeleton::getWorldPose(float* output) const
+    {
+        std::lock_guard<std::mutex> lock(mLock);
+        memcpy(output, mWorldBoneMatrices, mNumBones * sizeof(glm::mat4));
     }
 
     void Skeleton::setWorldPose(const float* input)
@@ -127,6 +133,15 @@ namespace sxr {
             return nullptr;
         }
         return &mWorldBoneMatrices[boneId];
+    }
+
+    glm::mat4* Skeleton::getLocalBoneMatrix(int boneId)
+    {
+        if ((boneId < 0) || (boneId > getNumBones()))
+        {
+            return nullptr;
+        }
+        return &mLocalBoneMatrices[boneId];
     }
 
     const glm::mat4* Skeleton::getLocalBoneMatrix(int boneId) const

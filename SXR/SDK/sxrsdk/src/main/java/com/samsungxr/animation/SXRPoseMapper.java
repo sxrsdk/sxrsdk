@@ -13,6 +13,7 @@ public class SXRPoseMapper extends SXRAnimation
     protected SXRSkeleton mDestSkeleton;
     protected int[]       mBoneMap;
     protected SXRPose     mDestPose;
+    protected int         mBoneOptions = 0;
     protected float       mScale = 1.0f;
 
     /**
@@ -62,6 +63,24 @@ public class SXRPoseMapper extends SXRAnimation
     {
         mStartOffset = start;
         return this;
+    }
+
+    /**
+     * Set the bone options for the bones that should be mapped.
+     * @param options (one of SXRSkeleton.BONE_PHYSICS or SXRSkeleton.BONE_ANIMATE
+     */
+    public void setBoneOptions(int options)
+    {
+        mBoneOptions = options;
+    }
+
+    /**
+     * Get the bone options for the bones that should be mapped.
+     * @return SXRSkeleton.BONE_PHYSICS or SXRSkeleton.BONE_ANIMATE
+     */
+    public int getBoneOptions()
+    {
+        return mBoneOptions;
     }
 
     /**
@@ -324,48 +343,8 @@ public class SXRPoseMapper extends SXRAnimation
         synchronized (dstskel)
         {
             dstskel.setPosition(v);
-            dstskel.applyPose(mDestPose, SXRSkeleton.ROTATION_ONLY);
+            dstskel.applyPose(mDestPose, SXRSkeleton.ROTATION_ONLY, mBoneOptions);
         }
-        return true;
-    }
-
-    /**
-     * Maps the pose of the source skeleton onto the destination skeleton in world space.
-     * <p>
-     * The world bone rotations of matching bones are copied.
-     * If the PoseMapper has a bone map, it is used to determine which bones
-     * of the source skeleton correspond to which bones in the destination skeleton.
-     */
-    public boolean mapWorldToTarget()
-    {
-        SXRSkeleton	srcskel = mSourceSkeleton;
-        SXRSkeleton	dstskel = mDestSkeleton;
-
-        if ((dstskel == null) || (srcskel == null))
-        {
-            return false;
-        }
-        if (mBoneMap == null)
-        {
-            mBoneMap = makeBoneMap(srcskel, dstskel);
-        }
-        SXRPose srcpose = srcskel.getPose();
-        SXRPose	dstpose = dstskel.getPose();
-        int			numsrcbones = srcpose.getNumBones();
-        Matrix4f	mtx = new Matrix4f();
-
-        srcpose.sync();
-        for (int i = 0; i < numsrcbones; ++i)
-        {
-            int	boneindex = mBoneMap[i];
-
-            if (boneindex >= 0)
-            {
-                srcpose.getWorldMatrix(i, mtx);
-                dstpose.setWorldMatrix(boneindex, mtx);
-            }
-        }
-        dstpose.sync();
         return true;
     }
 
@@ -378,7 +357,6 @@ public class SXRPoseMapper extends SXRAnimation
      * </p>
      * @param sf    positive scale factor
      * @see SXRSkin#scalePositions(float)
-     * @see SXRVertexBuffer#transform(Matrix4f, boolean)
      */
     public void setScale(float sf)
     {

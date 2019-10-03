@@ -17,38 +17,66 @@ package com.samsungxr.physics;
 
 import com.samsungxr.SXRContext;
 
-/**
- * Created by c.bozzetto on 06/06/2017.
- */
+import org.joml.Matrix3f;
+import org.joml.Vector3f;
 
 /**
  * Represents a constraint for two {@linkplain SXRRigidBody bodies} in which the first one (the
  * owner) swings constrained to a right circular conic trajectory around a vortex while the other
  * body is simply fixed to this vortex (meaning that the vortex will move if the second body moves).
  */
-public class SXRConeTwistConstraint extends SXRConstraint {
+public class SXRConeTwistConstraint extends SXRConstraint
+{
     /**
      * Construct a new instance of a conic twist constraint.
      *
-     * @param gvrContext the context of the app
-     * @param rigidBodyB the second rigid body (not the owner) in this constraint
-     * @param vortex the vortex position (x, y and z coordinates) of the conic swing relative to
-     *               first body (the owner)
-     * @param bodyRotation a vector containing the elements of the 3x3 rotation matrix for the
-     *                     swinging body
-     * @param coneRotation a vector containing the elements of the 3x3 rotation matrix for the conic
-     *                     trajectory
+     * @param ctx          the context of the app
+     * @param bodyB        the second rigid body (not the owner) in this constraint
+     * @param pivotA       the vortex position (x, y and z coordinates) of the conic swing relative to
+     *                     fixed body (the owner)
+     * @param pivotB       the vortex position (x, y and z coordinates) of the conic swing relative to
+     *                     moving body (the owner)
+     * @param coneAxis     a vector with the cone axis
      */
-    public SXRConeTwistConstraint(SXRContext gvrContext, SXRRigidBody rigidBodyB, final float vortex[],
-                           final float bodyRotation[], final float coneRotation[]) {
-        this(gvrContext, Native3DConeTwistConstraint.ctor(rigidBodyB.getNative(), vortex,
-                bodyRotation, coneRotation));
+    public SXRConeTwistConstraint(SXRContext ctx, SXRPhysicsCollidable bodyB,
+                           final float pivotA[], final float pivotB[],
+                           final float coneAxis[])
+    {
+        this(ctx, Native3DConeTwistConstraint.ctor(bodyB.getNative(),
+                pivotA[0], pivotA[1], pivotA[2],
+                pivotB[0], pivotB[1], pivotB[2],
+                coneAxis[0], coneAxis[1], coneAxis[2]));
 
-        mBodyB = rigidBodyB;
+        mBodyB = bodyB;
+    }
+
+    /**
+     * Construct a new instance of a conic twist constraint.
+     *
+     * @param ctx          the context of the app
+     * @param bodyB        the second rigid body (not the owner) in this constraint
+     * @param pivotA       the vortex position (x, y and z coordinates) of the conic swing relative to
+     *                     fixed body (the owner)
+     * @param pivotB       the vortex position (x, y and z coordinates) of the conic swing relative to
+     *                     moving body (the owner)
+     * @param coneAxis     a vector with the cone axis
+     */
+    public SXRConeTwistConstraint(SXRContext ctx, SXRPhysicsCollidable bodyB,
+                                  final Vector3f pivotA,
+                                  final Vector3f pivotB,
+                                  final Vector3f coneAxis)
+    {
+        this(ctx, Native3DConeTwistConstraint.ctor(bodyB.getNative(),
+                                                   pivotA.x, pivotA.y, pivotA.z,
+                                                   pivotB.x, pivotB.y, pivotB.z,
+                                                   coneAxis.x, coneAxis.y, coneAxis.z));
+
+        mBodyB = bodyB;
     }
 
     /** Used only by {@link SXRPhysicsLoader} */
-    SXRConeTwistConstraint(SXRContext gvrContext, long nativeConstraint) {
+    SXRConeTwistConstraint(SXRContext gvrContext, long nativeConstraint)
+    {
         super(gvrContext, nativeConstraint);
     }
 
@@ -57,7 +85,8 @@ public class SXRConeTwistConstraint extends SXRConstraint {
      *
      * @param limit the angular swinging limit in radians
      */
-    public void setSwingLimit(float limit) {
+    public void setSwingLimit(float limit)
+    {
         Native3DConeTwistConstraint.setSwingLimit(getNative(), limit);
     }
 
@@ -75,7 +104,8 @@ public class SXRConeTwistConstraint extends SXRConstraint {
      *
      * @param limit the angular twisting limit in radians
      */
-    public void setTwistLimit(float limit) {
+    public void setTwistLimit(float limit)
+    {
         Native3DConeTwistConstraint.setTwistLimit(getNative(), limit);
     }
 
@@ -89,9 +119,12 @@ public class SXRConeTwistConstraint extends SXRConstraint {
     }
 }
 
-class Native3DConeTwistConstraint {
-    static native long ctor(long rigidBody, final float pivot[], final float bodyRotation[],
-                            final float coneRotation[]);
+class Native3DConeTwistConstraint
+{
+    static native long ctor(long rigidBody,
+                            float pivotAx, float pivotAy, float pivotAz,
+                            float pivotBx, float pivotBy, float pivotBz,
+                            float axisX, float axisY, float axisZ);
 
     static native void setSwingLimit(long jconstraint, float limit);
 

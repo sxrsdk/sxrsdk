@@ -17,98 +17,145 @@
 
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
+#include <contrib/glm/gtc/type_ptr.hpp>
+#include <BulletCollision/CollisionShapes/btEmptyShape.h>
 
 #include "util/sxr_log.h"
 
 namespace sxr {
 
-btCollisionShape *convertCollider2CollisionShape(Collider *collider) {
-    btCollisionShape *shape = NULL;
-
-    if (collider->shape_type() == COLLIDER_SHAPE_BOX) {
+btCollisionShape *convertCollider2CollisionShape(Collider *collider)
+{
+    if (collider == nullptr)
+    {
+        return nullptr;
+    }
+    if (collider->shape_type() == COLLIDER_SHAPE_BOX)
+    {
         return convertBoxCollider2CollisionShape(static_cast<BoxCollider *>(collider));
-    } else if (collider->shape_type() == COLLIDER_SHAPE_SPHERE) {
+    }
+    else if (collider->shape_type() == COLLIDER_SHAPE_SPHERE)
+    {
         return convertSphereCollider2CollisionShape(static_cast<SphereCollider *>(collider));
-    } else if (collider->shape_type() == COLLIDER_SHAPE_MESH) {
+    }
+    else if (collider->shape_type() == COLLIDER_SHAPE_MESH)
+    {
         return convertMeshCollider2CollisionShape(static_cast<MeshCollider *>(collider));
-    } else if (collider->shape_type() == COLLIDER_SHAPE_CAPSULE) {
+    }
+    else if (collider->shape_type() == COLLIDER_SHAPE_CAPSULE)
+    {
         return convertCapsuleCollider2CollisionShape(static_cast<CapsuleCollider *>(collider));
     }
-
     return NULL;
 }
 
-btCollisionShape *convertSphereCollider2CollisionShape(SphereCollider *collider) {
-    btCollisionShape *shape = NULL;
+btCollisionShape *convertSphereCollider2CollisionShape(SphereCollider *collider)
+{
+    Node* owner = collider->owner_object();
+    Mesh* mesh;
+    float radius = collider->get_radius();
 
-    if (collider != NULL) {
-        shape = new btSphereShape(btScalar(collider->get_radius()));
+    if (radius > 0)
+    {
+        return new btSphereShape(radius);
     }
-
-    return shape;
-}
-
-btCollisionShape *convertCapsuleCollider2CollisionShape(CapsuleCollider *collider) {
-    btCollisionShape *shape = NULL;
-
-    if (collider != NULL) {
-        switch (collider->getDirection()) {
-            case CAPSULE_DIRECTION_Y:
-                shape = new btCapsuleShape(collider->getRadius(), collider->getHeight());
-                break;
-            case CAPSULE_DIRECTION_X:
-                shape = new btCapsuleShapeX(collider->getRadius(), collider->getHeight());
-                break;
-            case CAPSULE_DIRECTION_Z:
-                shape = new btCapsuleShapeZ(collider->getRadius(), collider->getHeight());
-                break;
+    if ((owner->render_data() != nullptr) && ((mesh = owner->render_data()->mesh()) != nullptr))
+    {
+        BoundingVolume bv = mesh->getBoundingVolume();
+        if (bv.radius() > 0)
+        {
+            return new btSphereShape(bv.radius());
         }
     }
-
-    return shape;
+    LOGE("PHYSICS: Sphere collider with zero volume");
+    return nullptr;
 }
 
-btCollisionShape *convertBoxCollider2CollisionShape(BoxCollider *collider) {
+btCollisionShape *convertCapsuleCollider2CollisionShape(CapsuleCollider *collider)
+{
     btCollisionShape *shape = NULL;
 
-    if (collider != NULL) {
-        shape = new btBoxShape(btVector3(collider->get_half_extents().x,
-                                         collider->get_half_extents().y,
-                                         collider->get_half_extents().z));
+    switch (collider->getDirection())
+    {
+        case CAPSULE_DIRECTION_Y:
+            shape = new btCapsuleShape(collider->getRadius(), collider->getHeight());
+            break;
+
+        case CAPSULE_DIRECTION_X:
+            shape = new btCapsuleShapeX(collider->getRadius(), collider->getHeight());
+            break;
+
+        case CAPSULE_DIRECTION_Z:
+            shape = new btCapsuleShapeZ(collider->getRadius(), collider->getHeight());
+            break;
     }
-
     return shape;
 }
 
-btCollisionShape *convertMeshCollider2CollisionShape(MeshCollider *collider) {
+btCollisionShape* convertBoxCollider2CollisionShape(BoxCollider *collider)
+{
+    btCollisionShape *shape = NULL;
+    Node* owner = collider->owner_object();
+    btVector3 extents(collider->get_half_extents().x,
+                      collider->get_half_extents().y,
+                      collider->get_half_extents().z);
+    Mesh* mesh;
+
+    if (extents.length() > 0)
+    {
+        return new btBoxShape(extents);
+    }
+    if ((owner->render_data() != nullptr) && ((mesh = owner->render_data()->mesh()) != nullptr))
+    {
+        BoundingVolume bv = mesh->getBoundingVolume();
+        if (bv.radius() > 0)
+        {
+            extents.setX((bv.max_corner().x - bv.min_corner().x) / 2.0f);
+            extents.setY((bv.max_corner().y - bv.min_corner().y) / 2.0f);
+            extents.setZ((bv.max_corner().z - bv.min_corner().z) / 2.0f);
+            return new btBoxShape(extents);
+        }
+    }
+    LOGE("PHYSICS: Box collider with zero volume");
+    return nullptr;
+}
+
+btCollisionShape *convertMeshCollider2CollisionShape(MeshCollider *collider)
+{
     btCollisionShape *shape = NULL;
 
-    if (collider != NULL) {
+    if (collider != NULL)
+    {
         Mesh* mesh = collider->mesh();
-        if (mesh == NULL) {
+        if (mesh == NULL)
+        {
             Node* owner = collider->owner_object();
-            if (owner == NULL) {
+            if (owner == NULL)
+            {
                 return NULL;
             }
             RenderData* rdata = owner->render_data();
-            if (rdata == NULL) {
+            if (rdata == NULL)
+            {
                 return NULL;
             }
             mesh = rdata->mesh();
-            if (mesh == NULL) {
+            if (mesh == NULL)
+            {
                 return NULL;
             }
         }
         shape = createConvexHullShapeFromMesh(mesh);
     }
-
     return shape;
 }
 
-btConvexHullShape *createConvexHullShapeFromMesh(Mesh *mesh) {
+btConvexHullShape *createConvexHullShapeFromMesh(Mesh *mesh)
+{
     btConvexHullShape *hull_shape = NULL;
 
-    if (mesh != NULL) {
+    if (mesh != NULL)
+    {
         btConvexHullShape *initial_hull_shape = NULL;
         btShapeHull *hull_shape_optimizer = NULL;
         unsigned short vertex_index;
@@ -127,29 +174,35 @@ btConvexHullShape *createConvexHullShapeFromMesh(Mesh *mesh) {
         hull_shape = new btConvexHullShape(
                 (btScalar *) hull_shape_optimizer->getVertexPointer(),
                 hull_shape_optimizer->numVertices());
-    } else {
-        LOGD("createConvexHullShapeFromMesh(): NULL mesh object");
     }
-
+    else
+    {
+        LOGE("PHYSICS: createConvexHullShapeFromMesh(): NULL mesh object");
+    }
     return hull_shape;
 }
 
-btTransform convertTransform2btTransform(const Transform *t) {
-    btQuaternion rotation(t->rotation_x(), t->rotation_y(), t->rotation_z(), t->rotation_w());
-
-    btVector3 position(t->position_x(), t->position_y(), t->position_z());
-
-    btTransform transform(rotation, position);
-
-    return transform;
+btTransform convertTransform2btTransform(Transform *t)
+{
+    glm::mat4 m;
+    if (t->owner_object()->parent())
+    {
+        m = t->getModelMatrix(false);
+    }
+    else
+    {
+        m = t->getLocalModelMatrix();
+    }
+    return convertTransform2btTransform(m);
 }
 
-void convertBtTransform2Transform(btTransform bulletTransform, Transform *transform) {
-    btVector3 pos = bulletTransform.getOrigin();
-    btQuaternion rot = bulletTransform.getRotation();
-
-    transform->set_position(pos.getX(), pos.getY(), pos.getZ());
-    transform->set_rotation(rot.getW(), rot.getX(), rot.getY(), rot.getZ());
+btTransform convertTransform2btTransform(const glm::mat4& m)
+{
+    glm::vec4 p(m[3]);
+    glm::quat q = glm::quat_cast(m);
+    btVector3 pos(p.x, p.y, p.z);
+    btQuaternion rot(q.x, q.y, q.z, q.w);
+    return btTransform(rot, pos);
 }
 
 }

@@ -17,30 +17,64 @@ package com.samsungxr.physics;
 
 import com.samsungxr.SXRContext;
 
+import org.joml.Vector3f;
+
 /**
  * Created by c.bozzetto on 31/05/2017.
  */
 
 /**
- * Represents a constraint that allows two {@linkplain SXRRigidBody rigid bodies} to rotate and
- * translate over a single axis.
+ * Represents a constraint that allows two {@linkplain SXRRigidBody rigid bodies}
+ * {@linkplain SXRPhysicsJoint joints} to rotate and translate over a single axis.
  */
-public class SXRSliderConstraint extends SXRConstraint {
+public class SXRSliderConstraint extends SXRConstraint
+{
 
     /**
      * Constructs a new instance of a slider constraint.
      *
-     * @param gvrContext the context of the app
-     * @param rigidBodyB the second rigid body (not the owner) in this constraint.
+     * @param ctx   the context of the app
+     * @param bodyA the second rigid body (not the owner) in this constraint.
      */
-    public SXRSliderConstraint(SXRContext gvrContext, SXRRigidBody rigidBodyB) {
-        this(gvrContext, Native3DSliderConstraint.ctor(rigidBodyB.getNative()));
+    public SXRSliderConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA)
+    {
+        this(ctx, Native3DSliderConstraint.ctor(bodyA.getNative(), 0, 0, 0, 0, 0, 0));
+        mBodyA = bodyA;
+    }
 
-        mBodyB = rigidBodyB;
+    /**
+     * Constructs a new instance of a slider constraint.
+     *
+     * @param ctx   the context of the app
+     * @param bodyA the second rigid body (not the owner) in this constraint.
+     * @param pivotA The pivot point related to body A
+     * @param pivotB The pivot point related to body B (the owner)
+     */
+    public SXRSliderConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, final float[] pivotA, final float[] pivotB)
+    {
+        this(ctx, Native3DSliderConstraint.ctor(bodyA.getNative(), pivotA[0], pivotA[1], pivotA[2],
+                                                pivotB[0], pivotB[1], pivotB[2]));
+        mBodyA = bodyA;
+    }
+
+    /**
+     * Constructs a new instance of a slider constraint.
+     *
+     * @param ctx   the context of the app
+     * @param bodyA the second rigid body (not the owner) in this constraint.
+     * @param pivotA The pivot point related to body A
+     * @param pivotB The pivot point related to body B (the owner)
+     */
+    public SXRSliderConstraint(SXRContext ctx, SXRPhysicsCollidable bodyA, final Vector3f pivotA, final Vector3f pivotB)
+    {
+        this(ctx, Native3DSliderConstraint.ctor(bodyA.getNative(), pivotA.x, pivotA.y, pivotA.z,
+                                                pivotB.x, pivotB.y, pivotB.z));
+        mBodyA = bodyA;
     }
 
     /** Used only by {@link SXRPhysicsLoader} */
-    SXRSliderConstraint(SXRContext gvrContext, long nativeConstraint) {
+    SXRSliderConstraint(SXRContext gvrContext, long nativeConstraint)
+    {
         super(gvrContext, nativeConstraint);
     }
 
@@ -49,7 +83,8 @@ public class SXRSliderConstraint extends SXRConstraint {
      *
      * @param limit the angular limit in radians.
      */
-    public void setAngularLowerLimit(float limit) {
+    public void setAngularLowerLimit(float limit)
+    {
         Native3DSliderConstraint.setAngularLowerLimit(getNative(), limit);
     }
 
@@ -58,7 +93,8 @@ public class SXRSliderConstraint extends SXRConstraint {
      *
      * @return the angular limit in radians.
      */
-    public float getAngularLowerLimit() {
+    public float getAngularLowerLimit()
+    {
         return Native3DSliderConstraint.getAngularLowerLimit(getNative());
     }
 
@@ -67,7 +103,8 @@ public class SXRSliderConstraint extends SXRConstraint {
      *
      * @param limit the angular limit in radians.
      */
-    public void setAngularUpperLimit(float limit) {
+    public void setAngularUpperLimit(float limit)
+    {
         Native3DSliderConstraint.setAngularUpperLimit(getNative(), limit);
     }
 
@@ -76,7 +113,8 @@ public class SXRSliderConstraint extends SXRConstraint {
      *
      * @return the angular limit in radians.
      */
-    public float getAngularUpperLimit() {
+    public float getAngularUpperLimit()
+    {
         return Native3DSliderConstraint.getAngularUpperLimit(getNative());
     }
 
@@ -85,7 +123,8 @@ public class SXRSliderConstraint extends SXRConstraint {
      *
      * @param limit the linear limit.
      */
-    public void setLinearLowerLimit(float limit) {
+    public void setLinearLowerLimit(float limit)
+    {
         Native3DSliderConstraint.setLinearLowerLimit(getNative(), limit);
     }
 
@@ -94,7 +133,8 @@ public class SXRSliderConstraint extends SXRConstraint {
      *
      * @return the linear limit in radians.
      */
-    public float getLinearLowerLimit() {
+    public float getLinearLowerLimit()
+    {
         return Native3DSliderConstraint.getLinearLowerLimit(getNative());
     }
 
@@ -103,7 +143,8 @@ public class SXRSliderConstraint extends SXRConstraint {
      *
      * @param limit the linear limit.
      */
-    public void setLinearUpperLimit(float limit) {
+    public void setLinearUpperLimit(float limit)
+    {
         Native3DSliderConstraint.setLinearUpperLimit(getNative(), limit);
     }
 
@@ -112,14 +153,16 @@ public class SXRSliderConstraint extends SXRConstraint {
      *
      * @return the linear limit in radians.
      */
-    public float getLinearUpperLimit() {
+    public float getLinearUpperLimit()
+    {
         return Native3DSliderConstraint.getLinearUpperLimit(getNative());
     }
 }
 
 
 class Native3DSliderConstraint {
-    static native long ctor(long rbB);
+    static native long ctor(long rbB, float pivotAx, float pivotAy, float pivotAz,
+                            float pivotBx, float pivotBy, float pivotBz);
 
     static native void setAngularLowerLimit(long nativeConstraint, float limit);
 

@@ -167,7 +167,7 @@ public class SXRAvatar implements IEventReceiver, SXRAnimationQueue.IAnimationQu
 
         protected void parseModelDescription(JSONObject root) throws JSONException
         {
-            for (String propName : new String[] { "name", "type", "attachbone", "model", "bonemap", "source" })
+            for (String propName : new String[] { "name", "type", "attachbone", "model", "bonemap", "source", "avt" })
             {
                 if (root.has(propName))
                 {

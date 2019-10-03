@@ -20,12 +20,13 @@
 #ifndef EXTENSIONS_PHYSICS_HINGECONSTRAINT_H
 #define EXTENSIONS_PHYSICS_HINGECONSTRAINT_H
 
-#include "physics_common.h"
 #include "physics_constraint.h"
+#include <glm/vec3.hpp>
 
 namespace sxr {
 
-    class PhysicsHingeConstraint : public PhysicsConstraint {
+    class PhysicsHingeConstraint : public PhysicsConstraint
+    {
     public:
         virtual ~PhysicsHingeConstraint() {}
 
@@ -36,6 +37,12 @@ namespace sxr {
         virtual float getUpperLimit() const = 0;
 
         int getConstraintType() const { return PhysicsConstraint::hingeConstraint; }
+
+        virtual const glm::vec3& getHingeAxis() = 0;
+
+        virtual float getBreakingImpulse() const = 0;
+
+        virtual void setBreakingImpulse(float impulse) = 0;
     };
 
 }
