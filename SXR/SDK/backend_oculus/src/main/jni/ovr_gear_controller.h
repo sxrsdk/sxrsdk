@@ -30,6 +30,8 @@ namespace sxr {
         static const int DISCONNECTED = 0;
         static const int MAX_CONTROLLERS = 2;
 
+        void getHandedness(ovrDeviceID const deviceID);
+
     public :
 
         GearController(float *orientationTrackingReadbackBuffer0, float *orientationTrackingReadbackBuffer1) {

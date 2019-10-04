@@ -76,7 +76,10 @@ public final class SXRGearCursorController extends SXRCursorController
 
         void onResume();
 
-        String getModelFileName();
+        boolean isLeftHand(int index);
+
+        String getLeftModelFileName();
+        String getRightModelFileName();
 
         void getEvents(int controllerID, ArrayList<ControllerEvent> mControllerEvents);
     }
@@ -92,7 +95,15 @@ public final class SXRGearCursorController extends SXRCursorController
         @Override
         public void onResume() { }
         @Override
-        public String getModelFileName(){
+        public boolean isLeftHand(int index) {
+            return false;
+        }
+        @Override
+        public String getLeftModelFileName(){
+            return "gear_vr_controller.obj";
+        }
+        @Override
+        public String getRightModelFileName(){
             return "gear_vr_controller.obj";
         }
 
@@ -212,7 +223,7 @@ public final class SXRGearCursorController extends SXRCursorController
     private final SXRNode mPivotRoot;
     private SXRNode mControllerGroup;
     private ControllerReader mControllerReader;
-    private boolean mShowControllerModel = false;
+    private boolean mShowControllerModel = true;
     private Matrix4f mTempPivotMtx = new Matrix4f();
     private Quaternionf mTempRotation = new Quaternionf();
     private final int mControllerID;
@@ -391,11 +402,14 @@ public final class SXRGearCursorController extends SXRCursorController
         }
         try
         {
-            EnumSet<SXRImportSettings> settings = SXRImportSettings.getRecommendedSettingsWith(
-                    EnumSet.of(SXRImportSettings.NO_LIGHTING));
+            EnumSet<SXRImportSettings> settings = SXRImportSettings.getRecommendedSettingsWith(EnumSet.of(SXRImportSettings.NO_LIGHTING));
 
-            mControllerModel = mContext.getAssetLoader().loadModel(mControllerReader.getModelFileName(),
-                                                                   settings, true, null);
+            getHandedness();
+            if(mControllerReader.isLeftHand(mControllerID)) {
+                mControllerModel = mContext.getAssetLoader().loadModel(mControllerReader.getLeftModelFileName(), settings, true, null);
+            } else {
+                mControllerModel = mContext.getAssetLoader().loadModel(mControllerReader.getRightModelFileName(), settings, true, null);
+            }
         }
         catch (IOException ex)
         {
