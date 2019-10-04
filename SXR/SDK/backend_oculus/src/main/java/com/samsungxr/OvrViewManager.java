@@ -102,7 +102,7 @@ class OvrViewManager extends SXRViewManager {
                 vrAppSettings);
 
         // Debug statistics
-        mStatsLine = new SXRStatsLine("gvrf-stats");
+        mStatsLine = new SXRStatsLine("sxr-stats");
 
         mFPSTracer = new SXRFPSTracer("DrawFPS");
         mTracerDrawFrame = new SXRMethodCallTracer("drawFrame");
