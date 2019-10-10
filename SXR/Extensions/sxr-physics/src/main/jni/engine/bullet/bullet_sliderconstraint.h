@@ -38,6 +38,8 @@ namespace sxr {
 
         BulletSliderConstraint(btSliderConstraint *constraint);
 
+        BulletSliderConstraint(btMultiBodySliderConstraint *constraint);
+
         virtual ~BulletSliderConstraint();
 
         virtual void setAngularLowerLimit(float limit);
@@ -60,14 +62,14 @@ namespace sxr {
 
         virtual float getBreakingImpulse() const;
 
-        void* getUnderlying() { return mSliderConstraint; }
+        void* getUnderlying() { return mMBConstraint ? static_cast<void*>(mMBConstraint) : static_cast<void*>(mConstraint); }
 
         virtual void updateConstructionInfo(PhysicsWorld*);
 
 
     private:
-        btSliderConstraint* mSliderConstraint;
-
+        btSliderConstraint* mConstraint;
+        btMultiBodySliderConstraint* mMBConstraint;
         float mBreakingImpulse;
         float mLowerAngularLimit;
         float mUpperAngularLimit;

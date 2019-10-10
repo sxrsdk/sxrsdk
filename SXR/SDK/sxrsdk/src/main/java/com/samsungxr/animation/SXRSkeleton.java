@@ -680,6 +680,10 @@ public class SXRSkeleton extends SXRComponent implements PrettyPrint
     {
         synchronized (this)
         {
+            if ((boneindex < 0) || (boneindex >= mBones.length))
+            {
+                return null;
+            }
             return mBones[boneindex];
         }
     }

@@ -39,6 +39,7 @@ namespace sxr {
 class PhysicsConstraint;
 class PhysicsRigidBody;
 class BulletJoint;
+class BulletRootJoint;
 
 
 class BulletWorld : public PhysicsWorld {
@@ -109,7 +110,7 @@ private:
     int mActivationState;
     bool mIsMultiBody;
     mutable glm::vec3 mGravity;
-    std::vector<BulletJoint*> mMultiBodies;
+    std::vector<BulletRootJoint*> mMultiBodies;
     GLDebugDrawer* mDebugDraw;
 };
 

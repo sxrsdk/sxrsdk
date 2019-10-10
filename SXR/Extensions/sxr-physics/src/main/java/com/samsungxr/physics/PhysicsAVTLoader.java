@@ -21,20 +21,13 @@ import com.samsungxr.SXRBoxCollider;
 import com.samsungxr.SXRCapsuleCollider;
 import com.samsungxr.SXRCollider;
 import com.samsungxr.SXRContext;
-import com.samsungxr.SXRMaterial;
-import com.samsungxr.SXRMesh;
 import com.samsungxr.SXRNode;
-import com.samsungxr.SXRRenderData;
 import com.samsungxr.SXRSphereCollider;
-import com.samsungxr.SXRTransform;
 import com.samsungxr.animation.SXRPose;
 import com.samsungxr.animation.SXRSkeleton;
-import com.samsungxr.nodes.SXRCubeNode;
-import com.samsungxr.nodes.SXRSphereNode;
 import com.samsungxr.utility.Log;
 
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.json.JSONArray;
@@ -42,7 +35,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,12 +46,13 @@ import java.util.Map;
  */
 class PhysicsAVTLoader
 {
+    private final Map<String, JSONObject> mTargetBones = new HashMap<String, JSONObject>();
     private final String TAG = "AVT";;
-    private final SXRNode mRoot;
     private final SXRContext mContext;
     private final SXRPhysicsContent mWorld;
+    private final SXRNode mRoot;
+    private final String mAttachBoneName;
     private SXRSkeleton mSkeleton;
-    private final Map<String, JSONObject> mTargetBones = new HashMap<String, JSONObject>();
     private float mAngularDamping;
     private float mLinearDamping;
 
@@ -66,10 +63,22 @@ class PhysicsAVTLoader
 
     public PhysicsAVTLoader(SXRNode root, boolean isMultiBody)
     {
+        mAttachBoneName = null;
         mRoot = root;
         mContext = root.getSXRContext();
         mSkeleton = null;
         mWorld = new SXRPhysicsContent(root, isMultiBody);
+        mRoot.attachComponent(mWorld);
+    }
+
+    public PhysicsAVTLoader(SXRSkeleton skel, String attachBone, boolean isMultiBody)
+    {
+        mContext = skel.getSXRContext();
+        mSkeleton = skel;
+        mAttachBoneName = attachBone;
+        mRoot = new SXRNode(mContext);
+        mRoot.setName("PhysicsRoot");
+        mWorld = new SXRPhysicsContent(mRoot, isMultiBody);
         mRoot.attachComponent(mWorld);
     }
 
@@ -118,45 +127,70 @@ class PhysicsAVTLoader
 
     private SXRSkeleton parseSkeleton(JSONObject basebone, JSONArray bonelist) throws JSONException
     {
-        int numbones = bonelist.length() + 1;
-        String bonenames[] = new String[numbones];
-        int boneparents[] = new int[numbones];
-        SXRNode bones[] = new SXRNode[numbones];
+        int maxInputBones = bonelist.length() + 1;
+        String bonenames[] = new String[maxInputBones];
+        int boneparents[] = new int[maxInputBones];
+        SXRNode boneNodes[] = new SXRNode[maxInputBones];
         Matrix4f worldMtx = new Matrix4f();
+        int numInputBones = 0;
 
         boneparents[0] = -1;
+        mTargetBones.clear();
         mTargetBones.put(basebone.getString("Name"), basebone);
 
-        for (int i = 0; i <  numbones; ++i)
+        for (int i = 0; i <  maxInputBones; ++i)
         {
             JSONObject bone = (i == 0) ? basebone : bonelist.getJSONObject(i - 1).getJSONObject("value");
             String parentName = bone.optString("Parent", "");
-            String boneName = bone.getString("Target Bone");
-            bonenames[i] = boneName;
-            boneparents[i] = -1;
+            String targetBone = bone.getString("Target Bone");
+            JSONObject parent = mTargetBones.get(parentName);
             SXRNode node = new SXRNode(mContext);
-            bones[i] = node;
-            node.setName(bonenames[i]);
+
             mTargetBones.put(bone.getString("Name"), bone);
+            /*
+             * Skip all bones which are parents of the attachment point.
+             * These will presumably be in the skeleton we attach to.
+             */
+            if ((mAttachBoneName != null) &&
+                (numInputBones == 0) &&
+                !targetBone.equals(mAttachBoneName))
+            {
+                continue;
+            }
+            boneparents[numInputBones] = -1;
+            parentName = (parent != null) ? parent.getString("Target Bone") : "";
+            bonenames[numInputBones] = targetBone;
+            boneNodes[numInputBones] = node;
+            node.setName(bonenames[numInputBones]);
             if (!parentName.isEmpty())
             {
-                JSONObject parentBone = mTargetBones.get(parentName);
-                parentName = parentBone.getString("Target Bone");
                 for (int j = 0; j < i; ++j)
                 {
                     if (parentName.equals(bonenames[j]))
                     {
-                        boneparents[i] = j;
-                        bones[j].addChildObject(bones[i]);
+                        SXRNode p = boneNodes[j];
+                        boneparents[numInputBones] = j;
+
+                        if (p != null)
+                        {
+                            p.addChildObject(boneNodes[numInputBones]);
+                        }
                         break;
                     }
                 }
             }
+            ++numInputBones;
+        }
+        if (numInputBones < maxInputBones)
+        {
+            bonenames = Arrays.copyOfRange(bonenames, 0, numInputBones);
+            boneNodes = Arrays.copyOfRange(boneNodes, 0, numInputBones);
+            boneparents = Arrays.copyOfRange(boneparents, 0, numInputBones);
         }
         SXRSkeleton skel = new SXRSkeleton(mContext, boneparents);
         SXRPose worldPose = new SXRPose(skel);
 
-        for (int i = 0; i <  numbones; ++i)
+        for (int i = 0; i <  numInputBones; ++i)
         {
             JSONObject bone = (i == 0) ? basebone : bonelist.getJSONObject(i - 1).getJSONObject("value");
             JSONObject xform = bone.getJSONObject("Transform");
@@ -172,14 +206,14 @@ class PhysicsAVTLoader
                                        (float) orientation.getDouble("W"));
             worldPose.setWorldMatrix(i, worldMtx);
             skel.setBoneName(i, bonenames[i]);
-            skel.setBone(i, bones[i]);
+            skel.setBone(i, boneNodes[i]);
         }
-        mSkeleton = skel;
         worldPose.sync();
         skel.setPose(worldPose);
         skel.poseToBones();
-        bones[0].attachComponent(skel);
-        mRoot.addChildObject(bones[0]);
+        mSkeleton = skel;
+        boneNodes[0].attachComponent(skel);
+        mRoot.addChildObject(boneNodes[0]);
         return skel;
     }
 
@@ -188,25 +222,83 @@ class PhysicsAVTLoader
         JSONObject multibody = root.getJSONObject("Multi Body").getJSONObject("value");
         JSONObject basebone = multibody.getJSONObject("Base Bone");
         JSONArray childbones = multibody.getJSONObject("Child Bones").getJSONArray("property_value");
+        int collisionGroup = basebone.optInt("Collision Layer ID", 0);
         float mass = (float) basebone.getDouble("Mass");
+        int firstBoneIndex = 0;
+        SXRPhysicsJoint rootJoint = null;
+        List<JSONObject> newJoints = new ArrayList<JSONObject>();
 
-        mTargetBones.clear();
-        mTargetBones.put(basebone.getString("Name"), basebone);
-        SXRPhysicsJoint rootJoint = new SXRPhysicsJoint(mContext, mass, childbones.length() + 1);
-
-        parseSkeleton(basebone, childbones);
-        parseBone(basebone, rootJoint);
-        for (int i = 0; i < childbones.length(); ++i)
+        if ((mSkeleton != null) && (mAttachBoneName != null))
         {
-            JSONObject link = childbones.getJSONObject(i).getJSONObject("value");
-            String nodeName = link.getString("Target Bone");
-            int boneID = mSkeleton.getBoneIndex(nodeName);
+            firstBoneIndex = mSkeleton.getNumBones();
+        }
+        parseSkeleton(basebone, childbones);
+        JSONObject link = basebone;
+        int i = -1;
+        int jointIndex = 0;
 
-            if (boneID < 0)
+        if (mAttachBoneName != null)
+        {
+            while (true)
             {
-                throw new IllegalArgumentException("AVT file skeleton missing bone " + nodeName + " referenced by MultiBody physics");
+                String nodeName = link.getString("Target Bone");
+                int boneID = mSkeleton.getBoneIndex(nodeName);
+
+                if (nodeName.equals(mAttachBoneName))
+                {
+                    String name = "attachTo_" + mAttachBoneName;
+                    link.put("Target Bone", name);
+                    mSkeleton.setBoneName(i, name);
+                    mSkeleton.getBone(i).setName(name);
+                    newJoints.add(link);
+                }
+                else if (newJoints.size() > 0)
+                {
+                    if (boneID < 0)
+                    {
+                        throw new IllegalArgumentException("AVT file skeleton missing bone " +
+                                                               nodeName +
+                                                               " referenced by MultiBody physics");
+                    }
+                    newJoints.add(link);
+                }
+                if (++i >= childbones.length())
+                {
+                    break;
+                }
+                link = childbones.getJSONObject(i).getJSONObject("value");
             }
-            parseJoint(link);
+        }
+        else
+        {
+            while (true)
+            {
+                String nodeName = link.getString("Target Bone");
+                int boneID = mSkeleton.getBoneIndex(nodeName);
+
+                if ((boneID < 0) && (newJoints.size() > 0))
+                {
+                    throw new IllegalArgumentException("AVT file skeleton missing bone " +
+                                                           nodeName +
+                                                           " referenced by MultiBody physics");
+                }
+                newJoints.add(link);
+                if (++i >= childbones.length())
+                {
+                    break;
+                }
+                link = childbones.getJSONObject(i).getJSONObject("value");
+            }
+        }
+        rootJoint = new SXRPhysicsJoint(mSkeleton, mass, newJoints.size(), collisionGroup);
+        parseBone(newJoints.get(0), rootJoint, firstBoneIndex);
+        rootJoint.setBoneIndex(firstBoneIndex);
+
+        for (int j = 1; j < newJoints.size(); ++j)
+        {
+            JSONObject l = newJoints.get(j);
+            int boneIndex = mSkeleton.getBoneIndex(l.getString("Target Bone"));
+            parseJoint(l, ++jointIndex, firstBoneIndex + boneIndex);
         }
         rootJoint.getSkeleton();
         return rootJoint;
@@ -239,22 +331,7 @@ class PhysicsAVTLoader
             {
                 return null;
             }
-            if (mWorld.isMultiBody() && (mSkeleton != null))
-            {
-                int boneIndex = mSkeleton.getBoneIndex(targetBone);
-
-                if (boneIndex < 0)
-                {
-                    Log.e(TAG, "Cannot find bone " + targetBone +
-                        " needed by " + c.getString("Name") + " collider");
-                    return null;
-                }
-                owner = mSkeleton.getBone(boneIndex);
-            }
-            else
-            {
-                owner = mRoot.getNodeByName(targetBone);
-            }
+            owner = mRoot.getNodeByName(targetBone);
             if (owner == null)
             {
                 throw new IllegalArgumentException("Target bone " + targetBone + " referenced in AVT file not found in scene");
@@ -340,7 +417,7 @@ class PhysicsAVTLoader
     {
         JSONObject parent = mTargetBones.get(parentName);
         String nodeName = parent.getString("Target Bone");
-        SXRNode parentNode = mSkeleton.getBone(mSkeleton.getBoneIndex(nodeName));
+        SXRNode parentNode = mRoot.getNodeByName(nodeName);
 
         if (parentNode != null)
         {
@@ -376,10 +453,8 @@ class PhysicsAVTLoader
         return null;
     }
 
-    private SXRPhysicsJoint parseJoint(JSONObject link) throws JSONException
+    private SXRPhysicsJoint parseJoint(JSONObject link, int jointIndex, int boneID) throws JSONException
     {
-        String nodeName = link.getString("Target Bone");
-        int boneID = mSkeleton.getBoneIndex(nodeName);
         String name = link.getString("Name");
         String parentName = link.optString("Parent", null);
         String type = link.getString("Joint Type");
@@ -405,7 +480,6 @@ class PhysicsAVTLoader
             pivotB[1] = (float) (piv.getDouble("Y") - pos.getDouble("Y"));
             pivotB[2] = (float) (piv.getDouble("Z") - pos.getDouble("Z"));
         }
-        mTargetBones.put(name, link);
         if (type.equals("ball"))
         {
 /*
@@ -465,13 +539,13 @@ class PhysicsAVTLoader
         {
             throw new JSONException(type + " is an unknown constraint type");
         }
-        SXRPhysicsJoint joint = new SXRPhysicsJoint(parentJoint, jointType, boneID, mass, collisionGroup);
+        SXRPhysicsJoint joint = new SXRPhysicsJoint(parentJoint, jointType, jointIndex, mass, collisionGroup);
         joint.setPivot(pivotB[0], pivotB[1], pivotB[2]);
         if (axis != null)
         {
             joint.setAxis(axis.x, axis.y, axis.z);
         }
-        parseBone(link, joint);
+        parseBone(link, joint, boneID);
         return joint;
     }
 
@@ -632,7 +706,6 @@ class PhysicsAVTLoader
         else if (type.equals("fixed"))
         {
            SXRFixedConstraint fixed = new SXRFixedConstraint(mContext, parentBody);
-//            SXRPoint2PointConstraint fixed = new SXRPoint2PointConstraint(mContext, parentBody, pivotA, pivotB);
             constraint = fixed;
             Log.e(TAG, "Fixed joint between %s and %s", parentName, name);
         }
@@ -648,20 +721,21 @@ class PhysicsAVTLoader
         return body;
     }
 
-    private void parseBone(JSONObject link, SXRPhysicsJoint joint) throws JSONException
+    private SXRNode parseBone(JSONObject link, SXRPhysicsJoint joint, int boneID) throws JSONException
     {
         String nodeName = link.getString("Target Bone");
-        SXRNode node = mSkeleton.getBone(joint.getBoneID());
+        SXRNode node = mRoot.getNodeByName(nodeName);
+        JSONObject props = link.getJSONObject("Physic Material");
 
         parseCollider(link, nodeName);
-
-        JSONObject props = link.getJSONObject("Physic Material");
+        joint.setBoneIndex(boneID);
         joint.setFriction((float) props.getDouble("Friction"));
         node.attachComponent(joint);
         Log.e(TAG, "link %s bone = %s boneID = %d ",
               link.getString("Name"),
               nodeName,
-              joint.getBoneID());
+              joint.getJointIndex());
+        return node;
     }
 
 }

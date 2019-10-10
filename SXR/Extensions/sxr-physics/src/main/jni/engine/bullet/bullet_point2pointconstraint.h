@@ -22,6 +22,7 @@
 #include <glm/vec3.hpp>
 
 class btPoint2PointConstraint;
+class btMultiBodyPoint2Point;
 
 namespace sxr {
 
@@ -34,13 +35,15 @@ namespace sxr {
     public:
         BulletPoint2PointConstraint(PhysicsCollidable* bodyA, const glm::vec3& pivotA, const glm::vec3& pivotB);
 
-        BulletPoint2PointConstraint(btPoint2PointConstraint *constraint);
+        BulletPoint2PointConstraint(btPoint2PointConstraint* constraint);
+
+        BulletPoint2PointConstraint(btMultiBodyPoint2Point* constraint);
 
         virtual ~BulletPoint2PointConstraint();
 
         virtual void* getUnderlying()
         {
-            return this->mPoint2PointConstraint;
+            return mMBConstraint ? reinterpret_cast<void*>(mMBConstraint) : reinterpret_cast<void*>(mConstraint);
         }
 
         void setBreakingImpulse(float impulse);
@@ -50,7 +53,8 @@ namespace sxr {
         void updateConstructionInfo(PhysicsWorld* world);
 
     private:
-        btPoint2PointConstraint* mPoint2PointConstraint;
+        btPoint2PointConstraint* mConstraint;
+        btMultiBodyPoint2Point* mMBConstraint;
         float     mBreakingImpulse;
     };
 }

@@ -82,7 +82,7 @@ namespace sxr {
     {
         jfloatArray temp = env->NewFloatArray(3);
         const glm::vec3 &l = reinterpret_cast<PhysicsGenericConstraint *>(jconstr)
-                ->getLinearUpperLimits();
+                                 ->getLinearUpperLimits();
 
         env->SetFloatArrayRegion(temp, 0, 3, glm::value_ptr(l));
         return temp;
@@ -97,7 +97,7 @@ namespace sxr {
                                                                                jfloat limitZ)
     {
         reinterpret_cast<PhysicsGenericConstraint *>(jconstr)
-                ->setAngularLowerLimits(limitX, limitY, limitZ);
+                                 ->setAngularLowerLimits(limitX, limitY, limitZ);
     }
 
     JNIEXPORT jfloatArray JNICALL
@@ -107,7 +107,7 @@ namespace sxr {
     {
         jfloatArray temp = env->NewFloatArray(3);
         const glm::vec3 &l = reinterpret_cast<PhysicsGenericConstraint *>(jconstr)
-                ->getAngularLowerLimits();
+                                    ->getAngularLowerLimits();
         env->SetFloatArrayRegion(temp, 0, 3, glm::value_ptr(l));
         return temp;
     }
@@ -121,7 +121,7 @@ namespace sxr {
                                                                                jfloat limitZ)
     {
         reinterpret_cast<PhysicsGenericConstraint *>(jconstr)
-                ->setAngularUpperLimits(limitX, limitY, limitZ);
+                         ->setAngularUpperLimits(limitX, limitY, limitZ);
     }
 
     JNIEXPORT jfloatArray JNICALL
@@ -130,8 +130,7 @@ namespace sxr {
     {
         jfloatArray temp = env->NewFloatArray(3);
         const glm::vec3 &l = reinterpret_cast<PhysicsGenericConstraint *>(jconstr)
-                ->getAngularUpperLimits();
-
+                         ->getAngularUpperLimits();
         env->SetFloatArrayRegion(temp, 0, 3, glm::value_ptr(l));
         return temp;
     }

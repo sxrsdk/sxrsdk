@@ -443,7 +443,8 @@ public class SXRWorld extends SXRPhysicsContent implements IEventReceiver
      */
     public void addBody(final SXRPhysicsJoint joint)
     {
-        mPhysicsContext.runOnPhysicsThread(new Runnable() {
+        mPhysicsContext.runOnPhysicsThread(new Runnable()
+        {
             @Override
             public void run()
             {
@@ -648,13 +649,6 @@ public class SXRWorld extends SXRPhysicsContent implements IEventReceiver
             throw new UnsupportedOperationException("SXRWorld must be attached to the scene's root object");
         }
         super.onAttach(newOwner);
-    }
-
-    @Override
-    public void onDetach(SXRNode oldOwner)
-    {
-        super.onDetach(oldOwner);
-        doPhysicsDetach(oldOwner);
     }
 
     @Override

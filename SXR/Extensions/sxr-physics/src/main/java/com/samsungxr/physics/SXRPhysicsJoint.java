@@ -57,10 +57,10 @@ import com.samsungxr.animation.SXRSkeleton;
  */
 public class SXRPhysicsJoint extends SXRPhysicsCollidable
 {
-    private final SXRPhysicsContext mPhysicsContext;
-    private SXRSkeleton mSkeleton = null;
-    private SXRPoseMapper mPoseMapper = null;
-    private final int mCollisionGroup;
+    protected final SXRPhysicsContext mPhysicsContext;
+    protected SXRSkeleton             mSkeleton = null;
+    protected final int               mCollisionGroup;
+    protected int                     mBoneIndex = -1;
 
     /**
      * Joint is fixed and does not move.
@@ -89,9 +89,9 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
      * @param mass     mass of the root joint.
      * @oaran numBones number of child joints in the hierarchy.
      */
-    public SXRPhysicsJoint(SXRContext ctx, float mass, int numBones)
+    public SXRPhysicsJoint(SXRContext ctx, float mass, int numJoints)
     {
-        this(ctx, mass, numBones, -1);
+        this(ctx, mass, numJoints, -1);
     }
 
     /**
@@ -103,9 +103,26 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
      * @param collisionGroup inteeger between 0 and 16 indicating which
      *                       collision group the joint belongs to
      */
-    public SXRPhysicsJoint(SXRContext ctx, float mass, int numBones, int collisionGroup)
+    public SXRPhysicsJoint(SXRContext ctx, float mass, int numJoints, int collisionGroup)
     {
-        super(ctx, NativePhysicsJoint.ctorRoot(mass, numBones));
+        super(ctx, NativePhysicsJoint.ctorRoot(mass, numJoints));
+        mCollisionGroup = collisionGroup;
+        mPhysicsContext = SXRPhysicsContext.getInstance();
+    }
+
+    /**
+     * Constructs the root joint of a multibody chain.
+     *
+     * @param skel           {@!link SXRSkeleton} driven by this multibody chain.
+     * @param mass           mass of the root joint.
+     * @oaran numJoints      number of child joints in the hierarchy.
+     * @param collisionGroup inteeger between 0 and 16 indicating which
+     *                       collision group the joint belongs to
+     */
+    public SXRPhysicsJoint(SXRSkeleton skel, float mass, int numJoints, int collisionGroup)
+    {
+        super(skel.getSXRContext(), NativePhysicsJoint.ctorRoot(mass, numJoints));
+        mSkeleton = skel;
         mCollisionGroup = collisionGroup;
         mPhysicsContext = SXRPhysicsContext.getInstance();
     }
@@ -114,15 +131,15 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
      * Constructs a multibody joint in a chain.
      * <p>
      * This joint is linked to the parent joint in the physics world.
-     * @param parent    The parent joint of this one.
-     * @param jointType Type of joint: one of (FIXED, SPHERICAL, REVOLUTE, PRISMATIC, PLANAR)
-     * @param boneID    0 based bone ID indicating which bone of the skeleton
-     *                  this joint belongs to
-     * @param mass      mass of this joint
+     * @param parent        The parent joint of this one.
+     * @param jointType     Type of joint: one of (FIXED, SPHERICAL, REVOLUTE, PRISMATIC, PLANAR)
+     * @param jointIndex    0 based bone ID indicating which bone of the skeleton
+     *                      this joint belongs to
+     * @param mass          mass of this joint
      */
-    public SXRPhysicsJoint(SXRPhysicsJoint parent, int jointType, int boneID, float mass)
+    public SXRPhysicsJoint(SXRPhysicsJoint parent, int jointType, int jointIndex, float mass)
     {
-        this(parent, jointType, boneID, mass, -1);
+        this(parent, jointType, jointIndex, mass, -1);
     }
 
     /**
@@ -131,21 +148,23 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
      * This joint is linked to the parent joint in the physics world.
      * This parent should be consistent with the node hierarchy
      * the joints are attached to.
-     * @param parent    The parent joint of this one.
-     * @param jointType Type of joint: one of (FIXED, SPHERICAL, REVOLUTE, PRISMATIC, PLANAR)
-     * @param boneID    0 based bone ID indicating which bone of the skeleton
-     *                  this joint belongs to
-     * @param mass      mass of this joint
+     * @param parent        The parent joint of this one.
+     * @param jointType     Type of joint: one of (FIXED, SPHERICAL, REVOLUTE, PRISMATIC, PLANAR)
+     * @param jointIndex    0 based bone ID indicating which bone of the skeleton
+     *                      this joint belongs to
+     * @param mass          mass of this joint
      */
-    public SXRPhysicsJoint(SXRPhysicsJoint parent, int jointType, int boneID, float mass, int collisionGroup)
+    public SXRPhysicsJoint(SXRPhysicsJoint parent, int jointType, int jointIndex, float mass, int collisionGroup)
     {
         super(parent.getSXRContext(),
               NativePhysicsJoint.ctorLink(parent.getNative(),
-                                          jointType, boneID, mass));
-        if (boneID < 1)
+                                          jointType, jointIndex, mass));
+        if (jointIndex < 1)
         {
             throw new IllegalArgumentException("BoneID must be greater than zero");
         }
+        mSkeleton = parent.mSkeleton;
+        mBoneIndex = parent.mBoneIndex + 1;
         mCollisionGroup = collisionGroup;
         mPhysicsContext = SXRPhysicsContext.getInstance();
     }
@@ -281,6 +300,23 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
     }
 
     /**
+     * Apply a force vector [X, Y, Z] to this {@linkplain SXRPhysicsJoint joint}
+     *
+     * @param x factor on the 'X' axis.
+     * @param y factor on the 'Y' axis.
+     * @param z factor on the 'Z' axis.
+     */
+    public void applyCentralForce(final float x, final float y, final float z)
+    {
+        mPhysicsContext.runOnPhysicsThread(new Runnable() {
+            @Override
+            public void run() {
+                NativePhysicsJoint.applyCentralForce(getNative(), x, y, z);
+            }
+        });
+    }
+
+    /**
      * Apply a torque to a single DOF joint {@linkplain SXRPhysicsJoint joint}
      *
      * @param t torque on the joint
@@ -296,9 +332,26 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
     }
 
     /**
-     * Returns the bone ID of this joint.
+     * Returns the 0 based index of this joint.
      */
-    public int getBoneID() { return NativePhysicsJoint.getBoneID(getNative()); }
+    public int getJointIndex() { return NativePhysicsJoint.getJointIndex(getNative()) + 1; }
+
+    /**
+     * Returns the bone index of this joint with respect to the {@link SXRSkeleton} it belongs to.
+     * <p>
+     * A single {@link SXRSkeleton} may host multiple multibody chains.
+     * </p>
+     */
+    public int getBoneIndex() { return mBoneIndex; }
+
+    /**
+     * Sets the bone index in the {@link SXRSkeleton} this joint should affect.
+     * <p>
+     * This defaults to the joint index but can be overridden with this function.
+     * </p>
+     * @param index  0-based bone index in skeleton
+     */
+    public void setBoneIndex(int index) { mBoneIndex = index; }
 
     @Override
     public void onAttach(SXRNode newOwner)
@@ -311,10 +364,11 @@ public class SXRPhysicsJoint extends SXRPhysicsCollidable
     }
 
     @Override
-    public void onDisable() {
+    public void onDisable()
+    {
         super.onDisable();
 
-        if (getBoneID() == 0)
+        if (getJointIndex() == 0)
         {
             removeFromWorld(getWorld());
         }
@@ -372,7 +426,7 @@ class NativePhysicsJoint
 
     static native float getMass(long joint);
 
-    static native int getBoneID(long joint);
+    static native int getJointIndex(long joint);
 
     static native void setFriction(long joint, float friction);
 
@@ -383,6 +437,8 @@ class NativePhysicsJoint
     static native void setPivot(long joint, float x, float y, float z);
 
     static native void applyTorque(long joint, float x, float y, float z);
+
+    static native void applyCentralForce(long joint, float x, float y, float z);
 
     static native long getSkeleton(long joint);
 }

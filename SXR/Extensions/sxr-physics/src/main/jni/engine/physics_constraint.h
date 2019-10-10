@@ -26,6 +26,7 @@ namespace sxr {
     public:
         PhysicsConstraint() :
         Component(PhysicsConstraint::getComponentType()),
+        mBodyA(nullptr),
         mPivotA(0, 0, 0),
         mPivotB(0, 0, 0)
         { }

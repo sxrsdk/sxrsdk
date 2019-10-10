@@ -9,6 +9,7 @@ add_library(sxr-physics SHARED
     engine/bullet/bullet_sxr_utils.cpp
     engine/bullet/bullet_rigidbody.cpp
     engine/bullet/bullet_joint.cpp
+    engine/bullet/bullet_root_joint.cpp
     engine/bullet/bullet_world.cpp
     engine/bullet/bullet_debugdraw.cpp
     engine/bullet/bullet_fileloader.cpp

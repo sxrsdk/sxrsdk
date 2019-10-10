@@ -50,7 +50,7 @@ namespace sxr {
                                                                              jlong jsliderconstraint)
     {
         return reinterpret_cast<PhysicsSliderConstraint *>(jsliderconstraint)
-                ->getAngularLowerLimit();
+                                ->getAngularLowerLimit();
     }
 
     JNIEXPORT void JNICALL
@@ -68,7 +68,7 @@ namespace sxr {
                                                                              jlong jsliderconstraint)
     {
         return reinterpret_cast<PhysicsSliderConstraint *>(jsliderconstraint)
-                ->getAngularUpperLimit();
+                                ->getAngularUpperLimit();
     }
 
     JNIEXPORT void JNICALL
@@ -84,7 +84,7 @@ namespace sxr {
                                                                             jlong jsliderconstraint)
     {
         return reinterpret_cast<PhysicsSliderConstraint *>(jsliderconstraint)
-                ->getLinearLowerLimit();
+                                ->getLinearLowerLimit();
     }
 
     JNIEXPORT void JNICALL
@@ -100,8 +100,8 @@ namespace sxr {
                                                                             jlong jsliderconstraint)
     {
         return reinterpret_cast<PhysicsSliderConstraint *>(jsliderconstraint)
-                ->getLinearUpperLimit();
+                                ->getLinearUpperLimit();
     }
-    }
+}
 
 }

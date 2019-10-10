@@ -21,6 +21,7 @@
 #include "../physics_collidable.h"
 
 class btFixedConstraint;
+class btMultiBodyFixedConstraint;
 
 namespace sxr {
 
@@ -33,11 +34,13 @@ namespace sxr {
     public:
         explicit BulletFixedConstraint(PhysicsCollidable* bodyA);
 
-        BulletFixedConstraint(btFixedConstraint *constraint);
+        BulletFixedConstraint(btFixedConstraint* constraint);
+
+        BulletFixedConstraint(btMultiBodyFixedConstraint* constraint);
 
         virtual ~BulletFixedConstraint();
 
-        void* getUnderlying() { return this->mFixedConstraint; }
+        void* getUnderlying() { return mMBConstraint ? reinterpret_cast<void*>(mMBConstraint) : reinterpret_cast<void*>(mConstraint); }
 
         void setBreakingImpulse(float impulse);
 
@@ -46,7 +49,8 @@ namespace sxr {
         void updateConstructionInfo(PhysicsWorld* world);
 
     private:
-        btFixedConstraint* mFixedConstraint;
+        btFixedConstraint* mConstraint;
+        btMultiBodyFixedConstraint* mMBConstraint;
         float mBreakingImpulse;
     };
 

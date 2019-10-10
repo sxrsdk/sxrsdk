@@ -30,7 +30,7 @@ namespace sxr {
     {
         glm::vec3 pA(pivotAx, pivotAy, pivotAz);
         glm::vec3 pB(pivotBx, pivotBy, pivotBz);
-        BulletPoint2PointConstraint* c = new BulletPoint2PointConstraint(reinterpret_cast<PhysicsRigidBody *>(bodyA), pA, pB);
+        BulletPoint2PointConstraint* c = new BulletPoint2PointConstraint(reinterpret_cast<PhysicsRigidBody*>(bodyA), pA, pB);
         return reinterpret_cast<jlong>(c);
     }
 
@@ -41,7 +41,7 @@ namespace sxr {
                                                                                 jlong jp2p_constraint,
                                                                                 jfloat impulse)
     {
-        reinterpret_cast<PhysicsConstraint *>(jp2p_constraint)->setBreakingImpulse(impulse);
+        reinterpret_cast<PhysicsConstraint*>(jp2p_constraint)->setBreakingImpulse(impulse);
     }
 
     JNIEXPORT jfloat JNICALL

@@ -48,7 +48,7 @@ namespace sxr {
 
         float getUpperLimit() const;
 
-        void* getUnderlying() { return mHingeConstraint; }
+        void* getUnderlying() { return mConstraint; }
 
         void setBreakingImpulse(float impulse);
 
@@ -59,7 +59,7 @@ namespace sxr {
         void updateConstructionInfo(PhysicsWorld* world);
 
     private:
-        btHingeConstraint* mHingeConstraint;
+        btHingeConstraint* mConstraint;
         float     mBreakingImpulse;
         float     mTempLower;
         float     mTempUpper;

@@ -143,7 +143,7 @@ void BulletConeTwistConstraint::updateConstructionInfo(PhysicsWorld* world)
     {
 
         btRigidBody* rbB = bodyB->getRigidBody();
-        btRigidBody* rbA = reinterpret_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
+        btRigidBody* rbA = static_cast<BulletRigidBody*>(mBodyA)->getRigidBody();
         btVector3    pA(mPivotA.x, mPivotA.y, mPivotA.z);
         btVector3    pB(mPivotB.x, mPivotB.y, mPivotB.z);
         btTransform  worldFrameA = convertTransform2btTransform(mBodyA->owner_object()->transform());

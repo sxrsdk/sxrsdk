@@ -193,7 +193,7 @@ namespace sxr {
             btMultibodyLink* link = joint->getLink();
             btMultiBody* mb = joint->getMultiBody();
             btMultiBodyDynamicsWorld* w = static_cast<btMultiBodyDynamicsWorld*>(bw->getPhysicsWorld());
-            int linkIndex = joint->getBoneID() - 1;
+            int linkIndex = joint->getJointIndex();
 
             mSpherical = link->m_jointType == btMultibodyLink::eSpherical;
             mDOFCount = (link->m_dofCount > 4) ? 4 : link->m_dofCount;

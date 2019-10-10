@@ -18,133 +18,106 @@
 namespace sxr {
 extern "C"
 {
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_ctorRoot(JNIEnv* env, jclass obj, jfloat mass, jint numBones);
-
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_ctorLink(JNIEnv* env, jclass obj, jobject jparent, jint jointType, jint boneID, jfloat mass);
-
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_getComponentType(JNIEnv* env, jclass obj);
-
-    JNIEXPORT jint JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_getBoneID(JNIEnv* env, jclass obj, jlong jjoint);
-
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_getSkeleton(JNIEnv* env, jclass obj, jlong jjoint);
-
-
-JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_getMass(JNIEnv* env, jclass obj, jlong jjoint);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_setMass(JNIEnv* env, jclass obj, jlong jjoint, jfloat mass);
-
-    JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_getFriction(JNIEnv* env, jclass obj, jlong jjoint);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_setFriction(JNIEnv* env, jclass obj, jlong jjoint, jfloat friction);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_applyTorque(JNIEnv* env, jclass obj,
-                                                                 jlong jjoint, jfloat x, jfloat y, jfloat z);
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_setAxis(JNIEnv* env, jclass obj, jlong jjoint,
-                                                                 jfloat x, jfloat y, jfloat z);
-
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_setPivot(JNIEnv* env, jclass obj, jlong jjoint,
-                                                                 jfloat x, jfloat y, jfloat z);
+JNIEXPORT jlong JNICALL
+Java_com_samsungxr_physics_NativePhysicsJoint_ctorRoot(JNIEnv *env, jclass obj, jfloat mass, jint numBones)
+{
+    return reinterpret_cast<jlong>(new BulletRootJoint(mass, numBones));
 }
 
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_ctorRoot(JNIEnv* env, jclass obj, jfloat mass, jint numBones)
-    {
-        return reinterpret_cast<jlong>(new BulletJoint(mass, numBones));
-    }
+JNIEXPORT jlong JNICALL
+Java_com_samsungxr_physics_NativePhysicsJoint_ctorLink(JNIEnv *env, jclass obj, jobject jparent,
+                                                       jint jointType, jint jointIndex, jfloat mass)
+{
+    BulletJoint *parent = reinterpret_cast<BulletJoint *>(jparent);
+    return reinterpret_cast<jlong>(new BulletJoint(parent, PhysicsJoint::JointType(jointType),
+                                                   jointIndex, mass));
+}
 
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_ctorLink(JNIEnv* env, jclass obj, jobject jparent, jint jointType, jint boneID, jfloat mass)
-    {
-        BulletJoint* parent = reinterpret_cast<BulletJoint*>(jparent);
-        return reinterpret_cast<jlong>(new BulletJoint(parent, PhysicsJoint::JointType(jointType), boneID, mass));
-    }
+JNIEXPORT jlong JNICALL
+Java_com_samsungxr_physics_NativePhysicsJoint_getComponentType(JNIEnv *env, jclass obj)
+{
+    return PhysicsJoint::getComponentType();
+}
 
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_getComponentType(JNIEnv* env, jclass obj)
-    {
-        return PhysicsJoint::getComponentType();
-    }
+JNIEXPORT jfloat JNICALL
+Java_com_samsungxr_physics_NativePhysicsJoint_getMass(JNIEnv *env, jclass obj, jlong jjoint)
+{
+    PhysicsJoint *mb = reinterpret_cast<PhysicsJoint *>(jjoint);
+    return mb->getMass();
+}
 
-    JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_getMass(JNIEnv* env, jclass obj, jlong jjoint)
-    {
-        PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
-        return mb->getMass();
-    }
+JNIEXPORT void JNICALL
+Java_com_samsungxr_physics_NativePhysicsJoint_setMass(JNIEnv *env, jclass obj, jlong jjoint,
+                                                      jfloat mass)
+{
+    PhysicsJoint *mb = reinterpret_cast<PhysicsJoint *>(jjoint);
+    mb->setMass(mass);
+}
 
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_setMass(JNIEnv* env, jclass obj, jlong jjoint, jfloat mass)
-    {
-        PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
-        mb->setMass(mass);
-    }
+JNIEXPORT jfloat JNICALL
+Java_com_samsungxr_physics_NativePhysicsJoint_getFriction(JNIEnv *env, jclass obj, jlong jjoint)
+{
+    PhysicsJoint *mb = reinterpret_cast<PhysicsJoint *>(jjoint);
+    return mb->getFriction();
+}
 
-    JNIEXPORT jfloat JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_getFriction(JNIEnv* env, jclass obj, jlong jjoint)
-    {
-        PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
-        return mb->getFriction();
-    }
+JNIEXPORT void JNICALL
+Java_com_samsungxr_physics_NativePhysicsJoint_setFriction(JNIEnv *env, jclass obj, jlong jjoint,
+                                                          jfloat friction)
+{
+    PhysicsJoint *mb = reinterpret_cast<PhysicsJoint *>(jjoint);
+    mb->setFriction(friction);
+}
 
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_setFriction(JNIEnv* env, jclass obj, jlong jjoint, jfloat friction)
-    {
-        PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
-        mb->setFriction(friction);
-    }
+JNIEXPORT jint JNICALL
+Java_com_samsungxr_physics_NativePhysicsJoint_getJointIndex(JNIEnv *env, jclass obj, jlong jjoint)
+{
+    PhysicsJoint *mb = reinterpret_cast<PhysicsJoint *>(jjoint);
+    return mb->getJointIndex();
+}
 
-    JNIEXPORT jint JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_getBoneID(JNIEnv* env, jclass obj, jlong jjoint)
-    {
-        PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
-        return mb->getBoneID();
-    }
+JNIEXPORT void JNICALL
+Java_com_samsungxr_physics_NativePhysicsJoint_applyCentralForce(JNIEnv *env, jclass obj, jlong jjoint,
+                                                                jfloat x, jfloat y, jfloat z)
+{
+    PhysicsJoint *mb = reinterpret_cast<PhysicsJoint *>(jjoint);
+    mb->applyCentralForce(x, y, z);
+}
 
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_applyTorque(JNIEnv* env, jclass obj,
-                                                           jlong jjoint, jfloat x, jfloat y, jfloat z)
-    {
-        PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
-        mb->applyTorque(x, y, z);
-    }
+JNIEXPORT void JNICALL
+Java_com_samsungxr_physics_NativePhysicsJoint_applyTorque(JNIEnv *env, jclass obj,
+                                                          jlong jjoint, jfloat x, jfloat y,
+                                                          jfloat z)
+{
+    PhysicsJoint *mb = reinterpret_cast<PhysicsJoint *>(jjoint);
+    mb->applyTorque(x, y, z);
+}
 
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_setAxis(JNIEnv* env, jclass obj, jlong jjoint,
-                                                          jfloat x, jfloat y, jfloat z)
-    {
-        PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
-        glm::vec3 axis(x, y, z);
-        mb->setAxis(axis);
-    }
+JNIEXPORT void JNICALL
+Java_com_samsungxr_physics_NativePhysicsJoint_setAxis(JNIEnv *env, jclass obj, jlong jjoint,
+                                                      jfloat x, jfloat y, jfloat z)
+{
+    PhysicsJoint *mb = reinterpret_cast<PhysicsJoint *>(jjoint);
+    glm::vec3 axis(x, y, z);
+    mb->setAxis(axis);
+}
 
-    JNIEXPORT jlong JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_getSkeleton(JNIEnv* env, jclass obj, jlong jjoint)
-    {
-        PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
-        jlong nativePtr = reinterpret_cast<jlong>(mb->getSkeleton());
-        return nativePtr;
-    }
+JNIEXPORT jlong JNICALL
+Java_com_samsungxr_physics_NativePhysicsJoint_getSkeleton(JNIEnv *env, jclass obj, jlong jjoint)
+{
+    PhysicsJoint *mb = reinterpret_cast<PhysicsJoint *>(jjoint);
+    jlong nativePtr = reinterpret_cast<jlong>(mb->getSkeleton());
+    return nativePtr;
+}
 
-    JNIEXPORT void JNICALL
-    Java_com_samsungxr_physics_NativePhysicsJoint_setPivot(JNIEnv* env, jclass obj, jlong jjoint,
-                                                          jfloat x, jfloat y, jfloat z)
-    {
-        PhysicsJoint* mb = reinterpret_cast<PhysicsJoint*>(jjoint);
-        glm::vec3 pivot(x, y, z);
-        mb->setPivot(pivot);
-    }
+JNIEXPORT void JNICALL
+Java_com_samsungxr_physics_NativePhysicsJoint_setPivot(JNIEnv *env, jclass obj, jlong jjoint,
+                                                       jfloat x, jfloat y, jfloat z)
+{
+    PhysicsJoint *mb = reinterpret_cast<PhysicsJoint *>(jjoint);
+    glm::vec3 pivot(x, y, z);
+    mb->setPivot(pivot);
+}
 
-
+}
 }

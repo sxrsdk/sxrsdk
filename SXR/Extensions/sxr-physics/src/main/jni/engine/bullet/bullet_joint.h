@@ -38,31 +38,26 @@ class BulletHingeConstraint;
 class BulletSliderConstraint;
 class BulletFixedConstraint;
 class BulletGeneric6dofConstraint;
+class BulletRootJoint;
 
 class BulletJoint : public PhysicsJoint
 {
  public:
-    BulletJoint(float mass, int numBones);
+    BulletJoint(BulletJoint* parent, JointType type, int jointIndex, float mass);
 
-    BulletJoint(BulletJoint* parent, JointType type, int boneID, float mass);
-
-    BulletJoint(btMultiBody* multibody);
-
-    virtual ~BulletJoint();
+    virtual ~BulletJoint() { }
 
     btMultiBody* getMultiBody() const { return mMultiBody; }
 
-    btMultibodyLink* getLink() const { return mLink; }
+    btMultibodyLink* getLink() const { return &(mMultiBody->getLink(mJointIndex)); }
 
     virtual void setMass(float mass);
 
-    virtual float getMass() const;
+    virtual float getMass() const { return mMass; }
 
     virtual JointType getJointType() const { return mJointType; }
 
-    virtual PhysicsJoint* getParent() const;
-
-    virtual Skeleton* getSkeleton();
+    virtual PhysicsJoint* getParent() const { return mParent; }
 
     virtual const glm::vec3& getAxis() const { return mAxis; }
 
@@ -72,53 +67,95 @@ class BulletJoint : public PhysicsJoint
 
     virtual void setAxis(const glm::vec3& axis) { mAxis = axis; }
 
-    virtual float getFriction() const { return mLink ? mLink->m_jointFriction : 0; }
+    virtual float getFriction() const;
 
     virtual void setFriction(float f);
+
+    virtual void applyCentralForce(float x, float y, float z);
 
     virtual void applyTorque(float x, float y, float z);
 
     virtual void applyTorque(float t);
 
-    int getBoneID() const { return mBoneID; }
+    int getJointIndex() const { return mJointIndex; }
 
-    virtual void getWorldTransform(btTransform &worldTrans) const;
+    virtual void getWorldTransform(btTransform& t);
 
-    virtual void setWorldTransform(const btTransform &worldTrans);
+    virtual void setPhysicsTransform();
 
-    virtual void updateConstructionInfo(PhysicsWorld* world);
+    virtual void getPhysicsTransform();
 
-    bool isReady() const;
+    virtual Skeleton* getSkeleton();
 
-    void updateWorldTransform();
+	virtual void updateConstructionInfo(PhysicsWorld* world);
 
-    void getLocalTransform(const btTransform &worldTrans, glm::mat4 worldMatrices[], glm::mat4 localMatrices[]);
+    virtual BulletRootJoint* findRoot();
 
-    void setCollisionProperties(int collisionGroup, int collidesWith);
+	void setCollisionProperties(int collisionGroup, int collidesWith);
 
 protected:
+    BulletJoint(float mass, int numBones);
+    virtual void updateCollider(Node* owner);
     void setupSpherical();
     void setupHinge();
     void setupSlider();
     void setupFixed();
-    void finalize();
-    void destroy();
-    void updateCollisionShapeLocalScaling();
-    Skeleton* createSkeleton();
 
 protected:
     BulletWorld*             mWorld;
-    Skeleton*                mSkeleton;
+    BulletJoint*             mParent;
     btMultiBodyLinkCollider* mCollider;
     btMultiBody*             mMultiBody;
-    btMultibodyLink*         mLink;
     JointType                mJointType;
     glm::vec3                mAxis;
     glm::vec3                mPivot;
-    int                      mBoneID;
-    int                      mLinksAdded;
+    int                      mJointIndex;
+    float                    mMass;
 };
 
+class BulletRootJoint : public BulletJoint
+{
+public:
+    BulletRootJoint(float mass, int numBones);
+
+    BulletRootJoint(btMultiBody* multibody);
+
+    virtual ~BulletRootJoint();
+
+    virtual Skeleton* getSkeleton();
+
+    virtual void updateConstructionInfo(PhysicsWorld* world);
+
+    virtual void setMass(float mass);
+
+    virtual void applyCentralForce(float x, float y, float z);
+
+    virtual void applyTorque(float x, float y, float z);
+
+    virtual void applyTorque(float t);
+
+    void setPhysicsTransforms();
+
+    void getPhysicsTransforms();
+
+    virtual void setPhysicsTransform();
+
+    virtual BulletRootJoint* findRoot();
+
+	bool addLink(PhysicsJoint* joint, PhysicsWorld* world);
+
+protected:
+	virtual void updateCollider(Node* owner);
+    void finalize();
+    void destroy();
+    Skeleton* createSkeleton();
+
+protected:
+    std::vector<BulletJoint*> mJoints;
+    Skeleton*   mSkeleton;
+    int         mNumJoints;
+    int         mLinksAdded;
+};
 }
 
 #endif /* BULLET_JOINT_H_ */
