@@ -44,6 +44,7 @@ public class SXRVideoNode extends SXRNode {
         public static final int MONO = 0;
         public static final int HORIZONTAL_STEREO = 1;
         public static final int VERTICAL_STEREO = 2;
+        public static final int HORIZONTAL_180_STEREO = 3;
     };
 
     private static class ApplicationEventsListener extends SXREventListeners.ApplicationEvents {
@@ -171,6 +172,9 @@ public class SXRVideoNode extends SXRNode {
                 break;
             case SXRVideoType.HORIZONTAL_STEREO:
                 materialType = SXRShaderType.OESHorizontalStereo.ID;
+                break;
+            case SXRVideoType.HORIZONTAL_180_STEREO:
+                materialType = SXRShaderType.OESHorizontal180Stereo.ID;
                 break;
             case SXRVideoType.VERTICAL_STEREO:
                 materialType = SXRShaderType.OESVerticalStereo.ID;
