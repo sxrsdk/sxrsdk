@@ -12,10 +12,10 @@ in vec2 diffuse_coord;
 out vec4 outColor;
 void main()
 {
-    vec4 color = vec4(0.0, 0.0, 0.0, 0.0);
-    if(diffuse_coord.x < 1.0) {
-        vec2 tex_coord = vec2(0.5 * (diffuse_coord.x + u_right), diffuse_coord.y);
-        color = texture(u_texture, tex_coord);
+    vec2 tex_coord = vec2(0.5 * (diffuse_coord.x + u_right), diffuse_coord.y);
+    vec4 color = texture(u_texture, tex_coord);
+    if(diffuse_coord.x > 1.0) {
+        color = vec4(0.0, 0.0, 0.0, 0.0);
     } 
     outColor = vec4(color.r * u_color.r * u_opacity, color.g * u_color.g * u_opacity, color.b * u_color.b * u_opacity, color.a * u_opacity);
 }
