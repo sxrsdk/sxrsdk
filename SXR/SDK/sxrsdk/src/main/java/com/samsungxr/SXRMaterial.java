@@ -21,6 +21,7 @@ import com.samsungxr.shaders.SXRCubemapReflectionShader;
 import com.samsungxr.shaders.SXRCubemapShader;
 import com.samsungxr.shaders.SXRHorizontalFlipShader;
 import com.samsungxr.shaders.SXRLightmapShader;
+import com.samsungxr.shaders.SXROESHorizontal180StereoShader;
 import com.samsungxr.shaders.SXROESHorizontalStereoShader;
 import com.samsungxr.shaders.SXROESShader;
 import com.samsungxr.shaders.SXROESVerticalStereoShader;
@@ -94,6 +95,10 @@ public class SXRMaterial extends  SXRShaderData
 
         public abstract static class OES {
             public static final SXRShaderId ID = new SXRShaderId(SXROESShader.class);
+        }
+
+        public abstract static class OESHorizontal180Stereo {
+            public static final SXRShaderId ID = new SXRShaderId(SXROESHorizontal180StereoShader.class);
         }
 
         public abstract static class OESHorizontalStereo {
