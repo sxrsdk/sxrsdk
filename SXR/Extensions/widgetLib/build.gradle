@@ -54,7 +54,7 @@ android {
     }
 }
 
-project.ext.jomlVersion = "1.9.1-SNAPSHOT"
+project.ext.jomlVersion = "1.9.3-SNAPSHOT"
 
 dependencies {
     if (findProject(':sxrsdk')) {
@@ -63,9 +63,9 @@ dependencies {
         implementation(name: 'sxrsdk-release', ext: 'aar')
     }
 
-    implementation 'com.android.support:support-v4:26.0.1'
+    implementation 'com.android.support:support-v4:26.1.0'
     implementation "org.joml:joml-android:${jomlVersion}"
-    implementation 'com.google.code.gson:gson:2.8.+'
+    implementation 'com.google.code.gson:gson:2.8.5'
 }
 clean {}.doLast {
     def sxrLibs = project.rootDir.absolutePath + "/../sxr-libs"
