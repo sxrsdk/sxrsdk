@@ -14,6 +14,7 @@ import com.samsungxr.widgetlib.widget.FlingHandler;
  */
 abstract public class ScrollableContentScene implements ContentSceneController.ContentScene {
     private String TAG = tag(ScrollableContentScene.class);
+    private final int SCROLL_THRESHOLD = 50;
     private FlingHandler mFlingHandler = new FlingHandler() {
         private float startX;
         private float endX;
@@ -58,9 +59,13 @@ abstract public class ScrollableContentScene implements ContentSceneController.C
             endX = startX = 0;
 
             if (endY - startY > 0) {
-                scrollUp();
+                if(endY - startY > SCROLL_THRESHOLD) {
+                    scrollUp();
+                }
             } else {
-                scrollDown();
+                if(startY - endY > SCROLL_THRESHOLD) {
+                    scrollDown();
+                }
             }
             endY = startY = 0;
         }
