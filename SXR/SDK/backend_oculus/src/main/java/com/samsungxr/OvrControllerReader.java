@@ -77,12 +77,12 @@ final class OvrControllerReader extends SXRGearCursorController.ControllerReader
 
     @Override
     public String getLeftModelFileName() {
-        return "L_Quest_Controller.gltf";
+        return "L_Quest_Controller.fbx";
     }
 
     @Override
     public String getRightModelFileName() {
-        return "R_Quest_Controller.gltf";
+        return "R_Quest_Controller.fbx";
     }
 
 
