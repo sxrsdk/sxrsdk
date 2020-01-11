@@ -56,6 +56,11 @@ final class OvrControllerReader extends SXRGearCursorController.ControllerReader
     }
 
     @Override
+    public boolean isLeftHand(int id) {
+        return readbackBuffer[id].get(INDEX_HANDEDNESS) == 0.0f;
+    }
+
+    @Override
     public boolean isConnected(int id) {
         return readbackBuffer[id].get(INDEX_CONNECTED) == 1.0f;
     }
@@ -69,6 +74,17 @@ final class OvrControllerReader extends SXRGearCursorController.ControllerReader
             super.finalize();
         }
     }
+
+    @Override
+    public String getLeftModelFileName() {
+        return "L_Quest_Controller.fbx";
+    }
+
+    @Override
+    public String getRightModelFileName() {
+        return "R_Quest_Controller.fbx";
+    }
+
 
     private static final class ApplicationEvents extends SXREventListeners.ApplicationEvents {
         private final SXRApplication mApplication;

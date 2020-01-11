@@ -59,7 +59,7 @@ namespace sxr {
         return true;
     }
 
-    void GearController::onControllerConnected(const ovrDeviceID deviceID) {
+    void GearController::getHandedness(const ovrDeviceID deviceID) {
         ovrInputTrackedRemoteCapabilities remoteCapabilities;
         remoteCapabilities.Header.Type = ovrControllerType_TrackedRemote;
         remoteCapabilities.Header.DeviceID = mRemoteDeviceId[deviceID];
@@ -71,6 +71,10 @@ namespace sxr {
             remoteInputState.Header.ControllerType = ovrControllerType_TrackedRemote;
             result = vrapi_GetCurrentInputState(mOvrMobile, mRemoteDeviceId[deviceID], &remoteInputState.Header);
         }
+    }
+
+    void GearController::onControllerConnected(const ovrDeviceID deviceID) {
+        getHandedness(deviceID);
         vrapi_SetRemoteEmulation(mOvrMobile, false);
     }
 
@@ -79,6 +83,8 @@ namespace sxr {
         for(int i=0; i<MAX_CONTROLLERS; i++) {
             if (mRemoteDeviceId[i] != ovrDeviceIdType_Invalid) {
                 mOrientationTrackingReadbackBuffer[i][0] = CONNECTED;
+
+                getHandedness(i);
 
                 mOrientationTrackingReadbackBuffer[i][1] = handedness;
                 ovrResult result = vrapi_GetInputTrackingState(mOvrMobile, mRemoteDeviceId[i], predictedDisplayTime, &tracking);
