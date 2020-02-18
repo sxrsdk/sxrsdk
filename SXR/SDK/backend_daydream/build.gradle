@@ -79,15 +79,3 @@ task copyJarToBin(type: Copy) {
     from tasks.matching { it.name.startsWith('bundle') }
     into project.rootDir.absolutePath + "/../sxr-libs"
 }
-
-tasks.whenTaskAdded { task ->
-    if (task.name == 'bundleDebugAar') {
-        task.finalizedBy(copyJarToBin)
-    } else if (task.name == 'bundleReleaseAar') {
-        task.finalizedBy(copyJarToBin)
-    } else if (task.name == 'externalNativeBuildRelease') {
-        task.dependsOn ":sxrsdk:externalNativeBuildRelease"
-    } else if (task.name == 'externalNativeBuildDebug') {
-        task.dependsOn ":sxrsdk:externalNativeBuildDebug"
-    }
-}

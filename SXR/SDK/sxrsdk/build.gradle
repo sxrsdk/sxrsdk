@@ -167,18 +167,3 @@ task copyJarToBin(type: Copy) {
     from tasks.matching { it.name.startsWith('bundle') }
     into project.rootDir.absolutePath + "/../sxr-libs"
 }
-
-tasks.whenTaskAdded { task ->
-    if (task.name == 'externalNativeBuildDebug') {
-        task.dependsOn 'buildInfo'
-    } else if (task.name == 'externalNativeBuildRelease') {
-        task.dependsOn 'buildInfo'
-    } else if (task.name == 'bundleDebugAar') {
-        task.finalizedBy(copyJarToBin)
-    } else if (task.name == 'bundleReleaseAar') {
-        if (!rootProject.hasProperty("do_not_package_for_plugins")) {
-            task.finalizedBy(packageForPlugins)
-        }
-        task.finalizedBy(copyJarToBin)
-    }
-}
