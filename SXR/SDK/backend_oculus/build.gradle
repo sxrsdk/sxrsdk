@@ -138,8 +138,13 @@ clean {}.doLast {
     }
 }
 
-task copyJarToBin(type: Copy) {
-    outputs.upToDateWhen { false }
-    from tasks.matching { it.name.startsWith('bundle') }
-    into project.rootDir.absolutePath + "/../sxr-libs"
+tasks.whenTaskAdded { task ->
+    if (task.name == 'bundleDebugAar' || task.name == 'bundleReleaseAar') {
+        task.doLast{
+            copy {
+                from task.outputs.files[0]
+                into project.rootDir.absolutePath + "/../sxr-libs"
+            }
+        }
+    }
 }
