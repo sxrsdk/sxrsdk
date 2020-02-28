@@ -135,35 +135,16 @@ clean {}.doLast {
     if (file(sxrLibs).exists()) {
         project.delete(sxrLibs + '/' + project.name + '-release.aar')
         project.delete(sxrLibs + '/' + project.name + '-debug.aar')
-        project.delete(sxrLibs + '/' + project.name + '-for-plugins.zip')
     }
 }
 
-task packageForPlugins(type: Zip) {
-    outputs.upToDateWhen { false }
-
-    baseName project.name + '-for-plugins'
-
-    from './build/intermediates/bundles/release/classes.jar'
-    rename 'classes.jar', project.name + '-classes.jar'
-
-    from './src/main/libs/'
-    include '*.jar'
-
-    from './build/intermediates/ndkBuild/release/obj/local/armeabi-v7a/'
-    include '*.so'
-
-    doLast {
-        copy {
-            from 'build/distributions/'
-            into project.rootDir.absolutePath + "/../sxr-libs"
-            include project.name + '-for-plugins.zip'
+tasks.whenTaskAdded { task ->
+    if (task.name == 'bundleDebugAar' || task.name == 'bundleReleaseAar') {
+        task.doLast{
+            copy {
+                from task.outputs.files[0]
+                into project.rootDir.absolutePath + "/../sxr-libs"
+            }
         }
     }
-}
-
-task copyJarToBin(type: Copy) {
-    outputs.upToDateWhen { false }
-    from tasks.matching { it.name.startsWith('bundle') }
-    into project.rootDir.absolutePath + "/../sxr-libs"
 }
