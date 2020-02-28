@@ -44,9 +44,9 @@ before_script:
       
 script:
     - cd $PROJECT_DIR/SXR/SDK
-    - ./gradlew assembleDebug
+    - ./gradlew assemble
     - cd $PROJECT_DIR/SXR/Extensions
-    - ./gradlew assembleDebug
+    - ./gradlew assemble
     - cd $PROJECT_DIR/demos
     - echo "useLocalDependencies=true" >> gradle.properties
     - ./gradlew assembleMonoscopicDebug
