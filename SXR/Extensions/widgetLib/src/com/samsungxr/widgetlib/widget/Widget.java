@@ -588,9 +588,18 @@ public class Widget implements Layout.WidgetContainer {
         }
     }
 
+
+    public void setScrollable(boolean enabled) {
+        mScrollable = enabled;
+    }
+    public boolean isScrollable() {
+        return mScrollable;
+    }
+
     /**
      * @return Whether touch and back key events are enabled for this object.
      */
+
     public boolean isTouchable() {
         return mIsTouchable;
     }
@@ -3852,6 +3861,8 @@ public class Widget implements Layout.WidgetContainer {
     private boolean mFocusEnabled = true;
     private boolean mChildrenFollowFocus = false;
     private boolean mFollowParentFocus = false;
+    private boolean mScrollable = false;
+
     private HandlesEvent mHandlesFocusEvent = new HandlesEvent() {
 
         @Override

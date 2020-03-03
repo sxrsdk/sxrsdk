@@ -205,6 +205,7 @@ class WidgetPickHandler implements SXRInputManager.ICursorControllerSelectListen
         }
 
         public void onMotionOutside(final SXRPicker picker, final MotionEvent event) {
+            Log.d(TAG,"onMotionOutside");
             WidgetLib.getMainThread().runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
@@ -240,21 +241,58 @@ class WidgetPickHandler implements SXRInputManager.ICursorControllerSelectListen
 
         public void onInside(final SXRNode sceneObj, SXRPicker.SXRPickedObject collision) {
             final MotionEvent event = collision.motionEvent;
+            final SXRPicker picker = collision.picker;
             if (event != null) {
                 Log.d(Log.SUBSYSTEM.INPUT, TAG, "onMotionInside() event = %s", event);
 
                 final Widget widget = WidgetBehavior.getTarget(sceneObj);
-                if (widget != null && widget.isTouchable() && mTouched.contains(widget)) {
-                    Log.d(TAG, "onMotionInside() widget %s ", widget.getName());
-                    WidgetLib.getMainThread().runOnMainThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            GestureDetector gestureDetector = new GestureDetector(
-                                    sceneObj.getSXRContext().getContext(), mGestureListener);
-                            gestureDetector.onTouchEvent(event);
+                if(widget != null) {
+                    Log.d(TAG, "onMotionInside(): widget %s", widget.getName() );
+                    if(widget.isScrollable()) {
+                        Log.d(TAG, "widget %s is scrollable", widget.getName());
+
+                        WidgetLib.getMainThread().runOnMainThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mFlingHandler != null) {
+                                    GestureDetector gestureDetector = new GestureDetector(
+                                            picker.getSXRContext().getContext(), mGestureListener);
+
+                                    gestureDetector.onTouchEvent(event);
+                                    Vector3f pos = new Vector3f();
+                                    Log.d(Log.SUBSYSTEM.INPUT, TAG, "Yufi onMotionInside() event = %s mFling = %s", event, mFling);
+
+                                    switch (event.getAction()) {
+                                        case ACTION_DOWN:
+                                            mFlingHandler.onStartFling(event, picker.getController().getPosition(pos));
+                                            break;
+                                        case ACTION_MOVE:
+                                            mFlingHandler.onFling(event, picker.getController().getPosition(pos));
+                                            break;
+                                        case ACTION_UP:
+                                            mFlingHandler.onEndFling(mFling);
+                                            break;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        if (widget.isTouchable() && mTouched.contains(widget)) {
+                            Log.d(TAG, "onMotionInside() widget %s ", widget.getName());
+                            WidgetLib.getMainThread().runOnMainThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    GestureDetector gestureDetector = new GestureDetector(
+                                            sceneObj.getSXRContext().getContext(), mGestureListener);
+                                    gestureDetector.onTouchEvent(event);
+                                }
+                            });
                         }
-                    });
+                    }
                 }
+
+
             }
         }
 
