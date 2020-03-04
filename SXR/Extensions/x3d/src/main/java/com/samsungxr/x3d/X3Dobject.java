@@ -31,8 +31,13 @@ import com.samsungxr.io.SXRCursorController;
 import com.samsungxr.SXRMeshCollider;
 import com.samsungxr.io.SXRControllerType;
 import com.samsungxr.io.SXRInputManager;
+import com.samsungxr.mixedreality.SXRAnchor;
+import com.samsungxr.mixedreality.SXRMixedReality;
+import com.samsungxr.mixedreality.SXRTrackingState;
+import com.samsungxr.mixedreality.arcore.ARCoreAnchor;
 import com.samsungxr.nodes.SXRVideoNode;
 import com.samsungxr.nodes.SXRVideoNodePlayer;
+import com.samsungxr.x3d.ar.ARMain;
 import com.samsungxr.utility.Log;
 
 import java.io.FileNotFoundException;
@@ -161,6 +166,8 @@ public class X3Dobject {
     private static final String TRANSFORM_SCALE_ORIENTATION_ = "_Transform_Scale_Orientation_";
     private static final String TRANSFORM_NEGATIVE_SCALE_ORIENTATION_ = "_Transform_Neg_Scale_Orientation_";
 
+    //private final String VIEWPOINT_AR_CAMERA = "camera";
+
     // Append this incremented value to SXRScene names to insure unique
     // SXRNodes
     // when new SXRScene objects are generated to support animation
@@ -244,7 +251,7 @@ public class X3Dobject {
     private Vector<TimeSensor> timeSensors = new Vector<TimeSensor>();
     private Vector<Interpolator> interpolators = new Vector<Interpolator>();
 
-    private Vector<InlineObject> inlineObjects = new Vector<InlineObject>();
+    public Vector<InlineObject> inlineObjects = new Vector<InlineObject>();
     private Utility utility = null;
 
     /**
@@ -292,7 +299,10 @@ public class X3Dobject {
     private boolean blockLighting = false;
     private boolean blockTexturing = false;
 
-
+    // Augmented Reality variables
+    private ARMain arMain = null;
+    private SXRNode arInitAnchorNode = null;
+    private X3Dobject x3dObject = null;
 
 
     // The Text_Font Params class and Reset() function handle
@@ -584,6 +594,8 @@ public class X3Dobject {
             gvrContext.getMainScene().setBackgroundColor(0, 0, 0, 1);  // black background default
 
             lodManager = new LODmanager(root);
+
+            x3dObject = this;
 
             animationInteractivityManager = new AnimationInteractivityManager(
                     this, gvrContext, root, mDefinedItems, interpolators,
@@ -2327,6 +2339,7 @@ public class X3Dobject {
                             {
                                     0, 0, 10
                             };
+                    //boolean camera = false;
                     boolean retainUserOffsets = false;
 
                     attributeValue = attributes.getValue("DEF");
@@ -2369,20 +2382,18 @@ public class X3Dobject {
                         retainUserOffsets = utility.parseBooleanString(attributeValue);
                         Log.e(TAG, "Viewpoint retainUserOffsets attribute not implemented. ");
                     }
-                    // Add viewpoint to the list.
-                    // Since viewpoints can be under a Transform, save the parent.
-                    Viewpoint viewpoint = new Viewpoint(centerOfRotation, description,
-                            fieldOfView, jump, name, orientation, position, retainUserOffsets,
-                            currentNode);
-                    viewpoints.add(viewpoint);
 
-                    if ( !name.equals("") ) {
-                        DefinedItem definedItem = new DefinedItem(name);
-                        definedItem.setViewpoint(viewpoint);
-                        mDefinedItems.add(definedItem); // Array list of DEFined items
-                    }
+                        // Add viewpoint to the list.
+                        // Since viewpoints can be under a Transform, save the parent.
+                        Viewpoint viewpoint = new Viewpoint(centerOfRotation, description,
+                                fieldOfView, jump, name, orientation, position, retainUserOffsets, currentNode);
+                        viewpoints.add(viewpoint);
 
-
+                        if (!name.equals("")) {
+                            DefinedItem definedItem = new DefinedItem(name);
+                            definedItem.setViewpoint(viewpoint);
+                            mDefinedItems.add(definedItem); // Array list of DEFined items
+                        }
                 } // end <Viewpoint> node
 
 
@@ -2581,9 +2592,14 @@ public class X3Dobject {
                     // Inline data saved, and added after the inital .x3d program is parsed
                     String name = "";
                     String[] url = new String[1];
+                    boolean load = true;
                     attributeValue = attributes.getValue("DEF");
                     if (attributeValue != null) {
                         name = attributeValue;
+                    }
+                    attributeValue = attributes.getValue("load");
+                    if (attributeValue != null) {
+                        load = utility.parseBooleanString(attributeValue);
                     }
                     attributeValue = attributes.getValue("url");
                     if (attributeValue != null) {
@@ -2591,7 +2607,7 @@ public class X3Dobject {
                         SXRNode inlineSXRNode = currentNode; // preserve
                         // the
                         // currentNode
-                        if (lodManager.isActive()  &&
+                        if (lodManager.isActive() &&
                                 (inlineSXRNode.getComponent(SXRLODGroup.getComponentType()) != null)) {
                             inlineSXRNode = AddSXRNode();
                             inlineSXRNode.setName("inlineSXRNode"
@@ -2605,10 +2621,14 @@ public class X3Dobject {
                             lodManager.increment();
                         }
                         InlineObject inlineObject = new InlineObject(inlineSXRNode,
-                                url);
+                                url, name, load);
                         inlineObjects.add(inlineObject);
+                        if ( !name.isEmpty()) {
+                            DefinedItem definedItem = new DefinedItem(name);
+                            definedItem.setInlineObject(inlineObject);
+                            mDefinedItems.add(definedItem); // Array list of DEFined items
+                        }
                     }
-
                     // LOD has it's own SXRNode which has a
                     // SXRLODGroup component attached
                     if (lodManager.isActive() && lodManager.transformLODNode == null) {
@@ -3150,8 +3170,8 @@ public class X3Dobject {
                     attributeValue = attributes.getValue("visibilityLimit");
                     if (attributeValue != null) {
                         visibilityLimit = utility.parseSingleFloatString(attributeValue, false, true);
-                        Log.e(TAG,
-                                "NavigationInfo visibilityLimit attribute not implemented. ");
+                        SXRCameraRig mainCameraRig = gvrContext.getMainScene().getMainCameraRig();
+                        mainCameraRig.setFarClippingDistance( visibilityLimit * 100 );
                     }
                     if (headlight) {
                         SXRNode headlightNode = new SXRNode(gvrContext);
@@ -3808,9 +3828,23 @@ public class X3Dobject {
 
                 /********** Scene **********/
                 else if (qName.equalsIgnoreCase("scene")) {
-                    ;
-
-                }  //  end <Sene> node
+                    attributeValue = attributes.getValue("ar");
+                    if (attributeValue != null) {
+                        boolean ar = utility.parseBooleanString(attributeValue);
+                        if ( ar ) {
+                            try {
+                                arInitAnchorNode = new SXRNode( gvrContext );
+                                currentNode =  new SXRNode( gvrContext );
+                                arInitAnchorNode.addChildObject( currentNode );
+                                arMain = new ARMain(gvrContext, root, shaderSettings, x3DShader,
+                                        animationInteractivityManager, x3dObject);
+                                arMain.resume();
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error invoking X3D's Augmented Reality: " + e);
+                            }
+                        }
+                    }
+                }  //  end <Scene> node
 
                 /***** end of parsing the nodes currently parsed *****/
                 else {
@@ -4218,44 +4252,51 @@ public class X3Dobject {
              * if-then-else statement
              ********/
             else if (qName.equalsIgnoreCase("scene")) {
-                // Now that the scene is over, we can set construct the animations since
-                // we now have all the ROUTES, and set up either the default or an actual
-                // camera based on a <Viewpoint> in the scene.
+                    // Now that the scene is over, we can set construct the animations since
+                    // we now have all the ROUTES, and set up either the default or an actual
+                    // camera based on a <Viewpoint> in the scene.
 
-                // First, set up the camera / Viewpoint
-                // The camera rig is indirectly attached to the root
+                    // First, set up the camera / Viewpoint
+                    // The camera rig is indirectly attached to the root
 
                 if (cameraRigAtRoot != null) {
 
                     SXRCameraRig mainCameraRig = gvrContext.getMainScene().getMainCameraRig();
+                    if (arMain == null) {
 
-                    float[] cameraPosition = {0, 0, 10}; // X3D's default camera position
-                    if ( !viewpoints.isEmpty()) {
+                        float[] cameraPosition = {0, 0, 10}; // X3D's default camera position
+                        if (!viewpoints.isEmpty()) {
 
-                        // X3D file contained a <Viewpoint> node.
-                        // Per X3D spec., when there is 1 or more Viewpoints in the
-                        // X3D file, init with the first viewpoint in the X3D file
-                        Viewpoint viewpoint = viewpoints.firstElement();
-                        viewpoint.setIsBound(true);
-                        cameraPosition = viewpoint.getPosition();
-                    } // <Viewpoint> node existed
-                    mainCameraRig.getTransform().setPosition(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
-                    SXRCursorController gazeController = null;
-                    SXRInputManager inputManager = gvrContext.getInputManager();
+                            // X3D file contained a <Viewpoint> node.
+                            // Per X3D spec., when there is 1 or more Viewpoints in the
+                            // X3D file, init with the first viewpoint in the X3D file
+                            Viewpoint viewpoint = viewpoints.firstElement();
+                            viewpoint.setIsBound(true);
+                            cameraPosition = viewpoint.getPosition();
+                        } // <Viewpoint> node existed
+                        mainCameraRig.getTransform().setPosition(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
+                        SXRCursorController gazeController = null;
+                        SXRInputManager inputManager = gvrContext.getInputManager();
 
-                    // Set up cursor based on camera position
-                    List<SXRCursorController> controllerList = inputManager.getCursorControllers();
+                        // Set up cursor based on camera position
+                        List<SXRCursorController> controllerList = inputManager.getCursorControllers();
 
-                    for(SXRCursorController controller: controllerList){
-                        if(controller.getControllerType() == SXRControllerType.GAZE);
-                        {
-                            gazeController = controller;
-                            gazeController.setCursorControl(SXRCursorController.CursorControl.PROJECT_CURSOR_ON_SURFACE);
-                            break;
+                        for (SXRCursorController controller : controllerList) {
+                            if (controller.getControllerType() == SXRControllerType.GAZE) ;
+                            {
+                                gazeController = controller;
+                                gazeController.setCursorControl(SXRCursorController.CursorControl.PROJECT_CURSOR_ON_SURFACE);
+                                break;
+                            }
                         }
-                    }
-                    if ( gazeController != null) {
-                        gazeController.setOrigin(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
+                        if (gazeController != null) {
+                            gazeController.setOrigin(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
+                        }
+                    }  // end arMain == null
+                    else {
+                        //AR content
+                        mainCameraRig.getTransform().setPosition(0, 0, 0);
+                        arMain.setInitAnchorNode( true, arInitAnchorNode);
                     }
                 } // end setting based on new camera rig
 
@@ -4329,22 +4370,27 @@ public class X3Dobject {
                                 filename = filename.substring(0, filename.length()-1);
                             }
 
-                            gvrResourceVolume = new SXRResourceVolume(gvrContext, urls[j]);
-                            gvrAndroidResource = gvrResourceVolume.openResource( filename );
+                            if ( arMain == null ) {
+                                if ( inlineObject.getLoad() ) {
+                                    gvrResourceVolume = new SXRResourceVolume(gvrContext, urls[j]);
+                                    gvrAndroidResource = gvrResourceVolume.openResource(filename);
 
-                            if ( filename.toLowerCase().endsWith(".x3d")) {
-                                inputStream = gvrAndroidResource.getStream();
-                                currentNode = inlineObject.getInlineSXRNode();
-                                saxParser.parse(inputStream, userhandler);
-                            }
-                            else {
-                                SXRExternalScene gvrExternalScene = new SXRExternalScene(gvrContext, urls[j], false);
-                                currentNode = inlineObject.getInlineSXRNode();
-                                if (currentNode == null) root.attachComponent(gvrExternalScene);
-                                else currentNode.attachComponent(gvrExternalScene);
-                                SXRScene gvrScene = gvrContext.getMainScene();
-                                gvrExternalScene.load(gvrScene);
-                                SXRAnimator gvrAnimator = gvrExternalScene.getAnimator();
+                                    if (filename.toLowerCase().endsWith(".x3d")) {
+                                        inputStream = gvrAndroidResource.getStream();
+                                        currentNode = inlineObject.getInlineSXRNode();
+                                        saxParser.parse(inputStream, userhandler);
+                                    } else {
+                                        // handles glTF, OBJ, fbx or ply files
+                                        SXRExternalScene gvrExternalScene = new SXRExternalScene(gvrContext, urls[j], false);
+                                        currentNode = inlineObject.getInlineSXRNode();
+                                        if (currentNode == null)
+                                            root.attachComponent(gvrExternalScene);
+                                        else currentNode.attachComponent(gvrExternalScene);
+                                        SXRScene gvrScene = gvrContext.getMainScene();
+                                        gvrExternalScene.load(gvrScene);
+                                        SXRAnimator gvrAnimator = gvrExternalScene.getAnimator();
+                                    }
+                                }
                             }
                         } catch (FileNotFoundException e) {
                             Log.e(TAG,
@@ -4362,17 +4408,18 @@ public class X3Dobject {
                 }
             }
 
-            try {
-                animationInteractivityManager.initAnimationsAndInteractivity();
-                // Need to build a JavaScript function that constructs the
-                // X3D data type objects used with a SCRIPT.
-                // Scripts can also have an initialize() method.
-                animationInteractivityManager.InitializeScript();
+            if (arMain == null) {
+                // not an ARscene
+                try {
+                    animationInteractivityManager.initAnimationsAndInteractivity();
+                    // Need to build a JavaScript function that constructs the
+                    // X3D data type objects used with a SCRIPT.
+                    // Scripts can also have an initialize() method.
+                    animationInteractivityManager.InitializeScript();
+                } catch (Exception exception) {
+                    Log.e(TAG, "Error initialing X3D <ROUTE> or <Script> node related to Animation or Interactivity.");
+                }
             }
-            catch (Exception exception) {
-                Log.e(TAG, "Error initialing X3D <ROUTE> or <Script> node related to Animation or Interactivity.");
-            }
-
         } catch (Exception exception) {
 
             Log.e(TAG, "X3D/XML Parsing Exception = " + exception);

@@ -1589,6 +1589,12 @@ public class AnimationInteractivityManager {
                                 scriptParameters.add(gvrComponent.isEnabled());
                             }
                         }
+                        else if (definedItem.getInlineObject() != null) {
+                            scriptParameters.add(argument0);
+                        }
+                        else {
+                            Log.e(TAG, "X3Dobject Set JavaScript Argument, SFBool not definedItem");
+                        }
                     }
                     else if (eventUtility != null) {
                         scriptParameters.add( eventUtility.getToggle() );
@@ -1924,6 +1930,7 @@ public class AnimationInteractivityManager {
                     else if (fieldType.equalsIgnoreCase("MFString")) {
                         //TODO: will need to handle multiple strings particularly for Text node
                         SXRTexture gvrTexture = definedItem.getSXRTexture();
+                        InlineObject inlineObject = definedItem.getInlineObject();
                         if (gvrTexture != null) {
                             // have a url containting a texture map
                             if ( StringFieldMatch( scriptObject.getFromDefinedItemField(field), "url") ) {
@@ -1937,7 +1944,21 @@ public class AnimationInteractivityManager {
                             }
                             else Log.e(TAG, "ImageTexture SCRIPT node url field not found");
                         }
-                        else Log.e(TAG, "Unable to set MFString in SCRIPT node");
+                        else if (inlineObject != null){
+                            if ( StringFieldMatch( scriptObject.getFromDefinedItemField(field), "url") ) {
+                                String[] url = inlineObject.getURL();
+                                if ( url != null ) {
+                                    scriptParameters.add("\'" + url[0] + "\'");
+                                }
+                                else {
+                                    Log.e(TAG, "InlineObject name not DEFined");
+                                }
+                            }
+                            else Log.e(TAG, "InlineObject SCRIPT node url field not found");
+                        }
+                        else {
+                            Log.e(TAG, "Unable to set MFString in SCRIPT node");
+                        }
                     } // end MFString
                 }  //  end if definedItem != null
             }  //  end INPUT_ONLY, INPUT_OUTPUT (only ways to pass parameters to JS parser
@@ -2275,6 +2296,12 @@ public class AnimationInteractivityManager {
                                         gvrComponent.setEnable(sfBool.getValue());
                                     }
                                 }  //  end if the Node has a light component attached
+                                else if ( scriptObjectToDefinedItem.getInlineObject() != null) {
+                                    scriptObjectToDefinedItem.getInlineObject().setLoad( sfBool.getValue() );
+                                }
+                                else  {
+                                    Log.e(TAG, "Not setting SFBool '" + scriptObject.getFieldName(fieldNode) + "' value from SCRIPT '" + scriptObject.getName() + "'." );
+                                }
                             }  //  end scriptObjectToDefinedItem != null
                             else if ( scriptObjectToEventUtility != null) {
                                 scriptObjectToEventUtility.setToggle(sfBool.getValue());
@@ -2629,7 +2656,14 @@ public class AnimationInteractivityManager {
                                     Log.e(TAG, "Error: No url associated with MFString '" + scriptObject.getFieldName(fieldNode) + "' value from SCRIPT '" + scriptObject.getName() + "'.");
                                 }
                             }  // end SXRTexture != null
-
+                            else if (scriptObjectToDefinedItem.getInlineObject() != null) {
+                                if (StringFieldMatch(scriptObject.getToDefinedItemField(fieldNode), "url")) {
+                                    scriptObjectToDefinedItem.getInlineObject().setUrl( mfString.get1Value(0) );
+                                }
+                                else {
+                                    Log.e(TAG, "AnimationInteractivityManager SetResultsFromScript MFString NOT URL");
+                                }
+                            }
                             else if (scriptObjectToDefinedItem.getSXRVideoNode() != null) {
                                 //  MFString change to a SXRVideoNode object
                                 if (StringFieldMatch(scriptObject.getToDefinedItemField(fieldNode), "url")) {

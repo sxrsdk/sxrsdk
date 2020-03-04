@@ -29,17 +29,31 @@ public class InlineObject {
 
   private SXRNode inlineSXRNode = null;
   private String[] url = {};
+  private boolean mLoad = true;
+  private String mName = "";
 
   public InlineObject() { }
 
-  public InlineObject(SXRNode inlineSXRNode, String[] url) {
+  public InlineObject(SXRNode inlineSXRNode, String[] url, String name, boolean load) {
      this.inlineSXRNode = inlineSXRNode;
      this.url = url;
+      mLoad = load;
   }
 
   public String[] getURL() {
      return this.url;
   }
+
+  public void setUrl(String url) {
+      if (this.url != null) this.url[0] = url;
+  }
+
+    public void setUrl(String[] _url) {
+      this.url = new String[_url.length];
+      for (int i = 0; i < this.url.length; i++) {
+          this.url[i] = _url[i];
+      }
+    }
 
   public int getTotalURL() {
      return url.length;
@@ -48,6 +62,14 @@ public class InlineObject {
   public SXRNode getInlineSXRNode() {
      return this.inlineSXRNode;
   }
+
+    public boolean getLoad() {
+        return mLoad;
+    }
+
+    public void setLoad( boolean load) {
+        mLoad = load;
+    }
 
 }
 
