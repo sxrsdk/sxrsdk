@@ -20,13 +20,13 @@ import android.util.Log;
 
 import com.samsungxr.SXRAndroidResource;
 import com.samsungxr.SXRCollider;
-import com.samsungxr.SXRComponent;
 import com.samsungxr.SXRComponentGroup;
 import com.samsungxr.SXRContext;
 import com.samsungxr.SXRMeshCollider;
 import com.samsungxr.SXRResourceVolume;
 import com.samsungxr.SXRScene;
 import com.samsungxr.SXRNode;
+import com.samsungxr.animation.SXRSkeleton;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,47 +40,159 @@ public class SXRPhysicsLoader {
     }
 
     /**
-     * Loads a physics settings file.
+     * Loads a Bullet physics content file.
+     * <p>
+     * The Bullet binary files only contain physics, there
+     * are no nodes or meshes. The rigid bodies and constraints
+     * from the Bullet file are added to the nodes in the
+     * given scene.
      *
-     * @param gvrContext The context of the app.
-     * @param fileName Physics settings file name.
-     * @param scene The scene containing the objects to attach physics components.
+     * @param fileName Name of file containing physics content.
+     * @param scene    The scene containing the objects to attach physics components.
      */
-    public static void loadPhysicsFile(SXRContext gvrContext, String fileName, SXRScene scene) throws IOException
+    public static void loadBulletFile(SXRScene scene, String fileName) throws IOException
     {
-        loadPhysicsFile(gvrContext, fileName, false, scene);
+        SXRAndroidResource resource = toAndroidResource(scene.getSXRContext(), fileName);
+        byte[] inputData = toByteArray(resource);
+
+        if (inputData == null || inputData.length == 0)
+        {
+            throw new IOException("Failed to load physics file " + fileName);
+        }
+        loadBulletFile(inputData, scene.getRoot(), false);
     }
 
     /**
-     * Loads a physics settings file.
+     * Loads a Bullet physics content file.
+     * <p>
+     * The Bullet binary files only contain physics, there
+     * are no nodes or meshes. The rigid bodies and constraints
+     * from the Bullet file are added to the nodes in the
+     * given scene.
      *
-     * Use this if you want the up-axis information from physics file to be ignored.
-     *
-     * @param gvrContext The context of the app.
-     * @param fileName Physics settings file name.
-     * @param ignoreUpAxis Set to true if up-axis information from file must be ignored.
-     * @param scene The scene containing the objects to attach physics components.
+     * @param resource {@link SXRAndroidResource} containing the physics content..
+     * @param scene    The scene containing the objects to attach physics components.
      */
-    public static void loadPhysicsFile(SXRContext gvrContext, String fileName, boolean ignoreUpAxis, SXRScene scene) throws IOException
+    public static void loadBulletFile(SXRScene scene, SXRAndroidResource resource) throws IOException
     {
-        byte[] inputData = null;
-        try {
-            inputData = toByteArray(toAndroidResource(gvrContext, fileName));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        byte[] inputData = toByteArray(resource);
 
-        if (inputData == null || inputData.length == 0) {
-            throw new IOException("Fail to load bullet file " + fileName);
+        if (inputData == null || inputData.length == 0)
+        {
+            throw new IOException("Failed to load physics file " + resource.getResourceFilename());
         }
+        loadBulletFile(inputData, scene.getRoot(), false);
+    }
 
+    /**
+     * Loads a skeleton and physics components from a JSON file describing the avatar.
+     * <p>
+     * Avatar files describe physics for articulated bodies.
+     * Each file has a skeleton and joints with collision geometries.
+     * @param ctx         {@link SXRContext} to use
+     * @param resource    {@link SXRAndroidResource} containing the physics components.
+     * @param isMultibody If true, use {@link SXRPhysicsJoint} and Bullet multibody support,
+     *                    otherwise use {@link SXRRigidBody} and discrete dynamics simulation.
+     */
+    public static SXRPhysicsContent loadAvatarFile(SXRContext ctx, SXRAndroidResource resource, boolean isMultibody) throws IOException
+    {
+        byte[] inputData = toByteArray(resource);
+
+        if (inputData == null || inputData.length == 0)
+        {
+            throw new IOException("Failed to load physics file " + resource.getResourceFilename());
+        }
+        PhysicsAVTLoader loader = new PhysicsAVTLoader(ctx, isMultibody);
+        return loader.parse(inputData);
+    }
+
+    /**
+     * Loads physics components from a JSON file describing the avatar and associates
+     * them to the skeleton provided
+     * <p>
+     * Avatar files describe physics for articulated bodies.
+     * Each file has a skeleton and joints with collision geometries.
+     * @param skel        {@link SXRSkeleton} to use
+     * @param attachBone  name of bone in skeleton to associate with the root joint in physics.
+     * @param resource    {@link SXRAndroidResource} containing the physics components.
+     * @param isMultibody If true, use {@link SXRPhysicsJoint} and Bullet multibody support,
+     *                    otherwise use {@link SXRRigidBody} and discrete dynamics simulation.
+     */
+    public static SXRPhysicsContent loadAvatarFile(SXRSkeleton skel, String attachBone, SXRAndroidResource resource, boolean isMultibody) throws IOException
+    {
+        byte[] inputData = toByteArray(resource);
+
+        if (inputData == null || inputData.length == 0)
+        {
+            throw new IOException("Failed to load physics file " + resource.getResourceFilename());
+        }
+        PhysicsAVTLoader loader = new PhysicsAVTLoader(skel, attachBone, isMultibody);
+        return loader.parse(inputData);
+    }
+
+    /**
+     * Loads a skeleton and physics components from a JSON file describing the avatar.
+     * <p>
+     * Avatar files describe physics for articulated bodies.
+     * Each file has a skeleton and joints with collision geometries.
+     * The contents of the AVT is not added to the current scene.
+     * Instead it is imported and contained in a {@link SXRPhysicsContent}
+     * object (like a physics world but it cannot simulate, just a container).
+     * @param ctx         {@link SXRContext} to use
+     * @param fileName    Physics settings file name.
+     * @param isMultibody If true, use {@link SXRPhysicsJoint} and Bullet multibody support,
+     *                    otherwise use {@link SXRRigidBody} and discrete dynamics simulation.
+     */
+    public static SXRPhysicsContent loadAvatarFile(SXRContext ctx, String fileName, boolean isMultibody) throws IOException
+    {
+        SXRAndroidResource resource = toAndroidResource(ctx, fileName);
+        byte[] inputData = toByteArray(resource);
+
+        if (inputData == null || inputData.length == 0)
+        {
+            throw new IOException("Failed to load physics file " + fileName);
+        }
+        PhysicsAVTLoader loader = new PhysicsAVTLoader(ctx, isMultibody);
+        return loader.parse(inputData);
+    }
+
+    /**
+     * Loads physics components from a JSON file describing the avatar and associates
+     * them to the skeleton provided
+     * <p>
+     * Avatar files describe physics for articulated bodies.
+     * Each file has a skeleton and joints with collision geometries.
+     * The contents of the AVT is not added to the current scene.
+     * Instead it is imported and contained in a {@link SXRPhysicsContent}
+     * object (like a physics world but it cannot simulate, just a container).
+     * @param skel        {@link SXRSkeleton} to use
+     * @param attachBone  name of bone in skeleton to associate with the root joint in physics.
+     * @param fileName    Physics settings file name.
+     * @param isMultibody If true, use {@link SXRPhysicsJoint} and Bullet multibody support,
+     *                    otherwise use {@link SXRRigidBody} and discrete dynamics simulation.
+     */
+    public static SXRPhysicsContent loadAvatarFile(SXRSkeleton skel, String fileName, String attachBone, boolean isMultibody) throws IOException
+    {
+        SXRAndroidResource resource = toAndroidResource(skel.getSXRContext(), fileName);
+        byte[] inputData = toByteArray(resource);
+
+        if (inputData == null || inputData.length == 0)
+        {
+            throw new IOException("Failed to load physics file " + fileName);
+        }
+        PhysicsAVTLoader loader = new PhysicsAVTLoader(skel, attachBone, isMultibody);
+        return loader.parse(inputData);
+    }
+
+    private static void loadBulletFile(byte[] inputData, SXRNode sceneRoot, boolean ignoreUpAxis) throws IOException
+    {
         long loader = NativePhysics3DLoader.ctor(inputData, inputData.length, ignoreUpAxis);
 
-        if (loader == 0) {
-            throw new IOException("Fail to parse bullet file " + fileName);
+        if (loader == 0)
+        {
+            throw new IOException("Failed to parse bullet file");
         }
-
-        SXRNode sceneRoot = scene.getRoot();
+        SXRContext ctx = sceneRoot.getSXRContext();
         ArrayMap<Long, SXRNode> rbObjects = new ArrayMap<>();
 
         long nativeRigidBody;
@@ -93,20 +205,11 @@ public class SXRPhysicsLoader {
             }
 
             if (sceneObject.getComponent(SXRCollider.getComponentType()) == null) {
-                SXRMeshCollider collider = new SXRMeshCollider(gvrContext, true);
+                SXRMeshCollider collider = new SXRMeshCollider(ctx, true);
                 // Collider for picking.
                 sceneObject.attachComponent(collider);
             }
-
-            if (sceneObject.getParent() != sceneRoot) {
-                // Rigid bodies must be at scene root.
-                float[] modelmtx = sceneObject.getTransform().getModelMatrix();
-                sceneObject.getParent().removeChildObject(sceneObject);
-                sceneObject.getTransform().setModelMatrix(modelmtx);
-                sceneRoot.addChildObject(sceneObject);
-            }
-
-            SXRRigidBody rigidBody = new SXRRigidBody(gvrContext, nativeRigidBody);
+            SXRRigidBody rigidBody = new SXRRigidBody(ctx, nativeRigidBody);
             sceneObject.attachComponent(rigidBody);
             rbObjects.put(nativeRigidBody, sceneObject);
         }
@@ -130,32 +233,34 @@ public class SXRPhysicsLoader {
             SXRConstraint constraint = null;
 
             if (constraintType == SXRConstraint.fixedConstraintId) {
-                constraint = new SXRFixedConstraint(gvrContext, nativeConstraint);
+                constraint = new SXRFixedConstraint(ctx, nativeConstraint);
             } else if (constraintType == SXRConstraint.point2pointConstraintId) {
-                constraint = new SXRPoint2PointConstraint(gvrContext, nativeConstraint);
+                constraint = new SXRPoint2PointConstraint(ctx, nativeConstraint);
             } else if (constraintType == SXRConstraint.sliderConstraintId) {
-                constraint = new SXRSliderConstraint(gvrContext, nativeConstraint);
+                constraint = new SXRSliderConstraint(ctx, nativeConstraint);
             } else if (constraintType == SXRConstraint.hingeConstraintId) {
-                constraint = new SXRHingeConstraint(gvrContext, nativeConstraint);
+                constraint = new SXRHingeConstraint(ctx, nativeConstraint);
             } else if (constraintType == SXRConstraint.coneTwistConstraintId) {
-                constraint = new SXRConeTwistConstraint(gvrContext, nativeConstraint);
+                constraint = new SXRConeTwistConstraint(ctx, nativeConstraint);
             } else if (constraintType == SXRConstraint.genericConstraintId) {
-                constraint = new SXRGenericConstraint(gvrContext, nativeConstraint);
+                constraint = new SXRGenericConstraint(ctx, nativeConstraint);
+            } else if (constraintType == SXRConstraint.universalConstraintId) {
+                constraint = new SXRGenericConstraint(ctx, nativeConstraint);
+            } else if (constraintType == SXRConstraint.jointMotorId) {
+                constraint = new SXRPhysicsJointMotor(ctx, nativeConstraint);
             }
 
             if (constraint != null) {
                 SXRComponentGroup<SXRConstraint> group;
                 group = (SXRComponentGroup)sceneObject.getComponent(SXRConstraint.getComponentType());
                 if (group == null) {
-                    group = new SXRComponentGroup<>(gvrContext, SXRConstraint.getComponentType());
+                    group = new SXRComponentGroup<>(ctx, SXRConstraint.getComponentType());
                     sceneObject.attachComponent(group);
                 }
-
                 group.addChildComponent(constraint);
                 constraint.setOwnerObject(sceneObject);
             }
         }
-
         NativePhysics3DLoader.delete(loader);
     }
 

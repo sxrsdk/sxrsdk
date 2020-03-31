@@ -16,8 +16,6 @@
 #ifndef FRAMEWORK_BULLET_SXR_UTILS_H
 #define FRAMEWORK_BULLET_SXR_UTILS_H
 
-#include "../physics_common.h"
-
 #include "objects/components/sphere_collider.h"
 #include "objects/components/box_collider.h"
 #include "objects/components/mesh_collider.h"
@@ -41,15 +39,19 @@ namespace sxr {
 
     btConvexHullShape *createConvexHullShapeFromMesh(Mesh *mesh);
 
-    btTransform convertTransform2btTransform(const Transform *t);
+    btTransform convertTransform2btTransform(Transform *t);
+
+    btTransform convertTransform2btTransform(const glm::mat4& m);
 
     void convertBtTransform2Transform(btTransform bulletTransform, Transform *transform);
 
-    inline btVector3 Common2Bullet(PhysicsVec3 const &pv) {
+    inline btVector3 Common2Bullet(const glm::vec3& pv)
+    {
         return btVector3(pv.x, pv.y, pv.z);
     }
 
-    inline btQuaternion Common2Bullet(PhysicsQuat const &quat) {
+    inline btQuaternion Common2Bullet(const glm::quat& quat)
+    {
         return btQuaternion(quat.x, quat.y, quat.z, quat.w);
     }
 }

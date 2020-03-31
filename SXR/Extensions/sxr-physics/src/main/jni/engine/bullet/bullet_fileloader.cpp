@@ -48,7 +48,7 @@ static void createBulletRigidBodies(btBulletWorldImporter *importer)
 {
     for (int i = 0; i < importer->getNumRigidBodies(); i++)
     {
-        btRigidBody *rb = reinterpret_cast<btRigidBody*>(importer->getRigidBodyByIndex(i));
+        btRigidBody *rb = static_cast<btRigidBody*>(importer->getRigidBodyByIndex(i));
 
         if (nullptr == importer->getNameForPointer(rb))
         {

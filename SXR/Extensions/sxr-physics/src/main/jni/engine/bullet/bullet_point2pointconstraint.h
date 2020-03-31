@@ -18,51 +18,44 @@
 #define BULLET_POINT2POINTCONSTRAINT_H
 
 #include "../physics_point2pointconstraint.h"
-#include "bullet_object.h"
+#include "../physics_collidable.h"
+#include <glm/vec3.hpp>
 
 class btPoint2PointConstraint;
+class btMultiBodyPoint2Point;
 
 namespace sxr {
 
     class PhysicsRigidBody;
     class BulletRigidBody;
 
-    class BulletPoint2PointConstraint : public PhysicsPoint2pointConstraint,
-                                               BulletObject {
+    class BulletPoint2PointConstraint : public PhysicsPoint2pointConstraint
+    {
 
     public:
-        explicit BulletPoint2PointConstraint(PhysicsRigidBody* rigidBodyB, float pivotInA[],
-                                             float pivotInB[]);
+        BulletPoint2PointConstraint(PhysicsCollidable* bodyA, const glm::vec3& pivotA, const glm::vec3& pivotB);
 
-        BulletPoint2PointConstraint(btPoint2PointConstraint *constraint);
+        BulletPoint2PointConstraint(btPoint2PointConstraint* constraint);
+
+        BulletPoint2PointConstraint(btMultiBodyPoint2Point* constraint);
 
         virtual ~BulletPoint2PointConstraint();
 
-        virtual void* getUnderlying() {
-            return this->mPoint2PointConstraint;
+        virtual void* getUnderlying()
+        {
+            return mMBConstraint ? reinterpret_cast<void*>(mMBConstraint) : reinterpret_cast<void*>(mConstraint);
         }
 
         void setBreakingImpulse(float impulse);
 
         float getBreakingImpulse() const;
 
-        void setPivotInA(PhysicsVec3 pivot);
-
-        PhysicsVec3 getPivotInA() const { return mPivotInA; }
-
-        void setPivotInB(PhysicsVec3 pivot);
-
-        PhysicsVec3 getPivotInB() const { return mPivotInB; }
-
-        void updateConstructionInfo();
+        void updateConstructionInfo(PhysicsWorld* world);
 
     private:
-        btPoint2PointConstraint *mPoint2PointConstraint;
-        BulletRigidBody *mRigidBodyB;
-
-        float mBreakingImpulse;
-        PhysicsVec3 mPivotInA;
-        PhysicsVec3 mPivotInB;
+        btPoint2PointConstraint* mConstraint;
+        btMultiBodyPoint2Point* mMBConstraint;
+        float     mBreakingImpulse;
     };
 }
 #endif //BULLET_POINT2POINTCONSTRAINT_H

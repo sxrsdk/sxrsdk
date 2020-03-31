@@ -17,19 +17,19 @@
 #define BULLET_RIGIDBODY_H_
 
 #include "../physics_rigidbody.h"
-#include "bullet_object.h"
-
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <LinearMath/btMotionState.h>
+
 
 class btDynamicsWorld;
 
 namespace sxr {
-class Node;
 
-class BulletRigidBody : public PhysicsRigidBody,
-                               BulletObject,
-                               btMotionState {
+class Node;
+class BulletWorld;
+
+class BulletRigidBody : public PhysicsRigidBody, btMotionState
+{
  public:
     BulletRigidBody();
 
@@ -37,30 +37,46 @@ class BulletRigidBody : public PhysicsRigidBody,
 
     virtual ~BulletRigidBody();
 
-    btRigidBody *getRigidBody() const {
+    btRigidBody* getRigidBody() const
+    {
         return mRigidBody;
     }
 
     virtual void setSimulationType(SimulationType type);
-    virtual SimulationType getSimulationType() const;
 
-    void setMass(float mass) {
+    virtual SimulationType getSimulationType() const
+    {
+        return mSimType;
+    }
+
+    virtual void setMass(float mass)
+    {
         mConstructionInfo.m_mass = btScalar(mass);
     }
 
-    float getMass() {
+    virtual float getMass() const
+    {
         return mConstructionInfo.m_mass;
     }
 
-    void setCenterOfMass(const Transform *t);
+    virtual float getFriction() const
+    {
+        return mConstructionInfo.m_friction;
+    }
+
+    virtual void setFriction(float f);
+
+    virtual void updateConstructionInfo(PhysicsWorld* world);
+
+    void setCenterOfMass(Transform *t);
 
     void getRotation(float &w, float &x, float &y, float &z);
 
     void getTranslation(float &x, float &y, float &z);
 
-    void getWorldTransform(btTransform &worldTrans) const;
+    virtual void getWorldTransform(btTransform &worldTrans) const;
 
-    void setWorldTransform(const btTransform &worldTrans);
+    virtual void setWorldTransform(const btTransform &worldTrans);
 
     void applyCentralForce(float x, float y, float z);
 
@@ -76,32 +92,6 @@ class BulletRigidBody : public PhysicsRigidBody,
 
     void applyTorqueImpulse(float x, float y, float z);
 
-    float center_x() const;
-
-    float center_y() const;
-
-    float center_z() const;
-
-    void set_center(float x, float y, float z);
-
-    float rotation_w() const;
-
-    float rotation_x() const;
-
-    float rotation_y() const;
-
-    float rotation_z() const;
-
-    void set_rotation(float w, float x, float y, float z);
-
-    float scale_x() const;
-
-    float scale_y() const;
-
-    float scale_z() const;
-
-    void set_scale(float x, float y, float z);
-
     void setGravity(float x, float y, float z);
 
     void setDamping(float linear, float angular);
@@ -113,8 +103,6 @@ class BulletRigidBody : public PhysicsRigidBody,
     void setAngularFactor(float x, float y, float z);
 
     void setLinearFactor(float x, float y, float z);
-
-    void setFriction(float n);
 
     void setRestitution(float n);
 
@@ -140,17 +128,16 @@ class BulletRigidBody : public PhysicsRigidBody,
 
     void getDamping(float &angular, float &linear) const;
 
-    const float getFriction() const;
+    float getRestitution() const
+    {
+        return mConstructionInfo.m_restitution;
+    }
 
-    const float getRestitution() const;
+    float getCcdMotionThreshold() const;
 
-    const float getCcdMotionThreshold() const;
+    float getContactProcessingThreshold() const;
 
-    const float getContactProcessingThreshold() const;
-
-    const float getCcdSweptSphereRadius() const;
-
-    void updateConstructionInfo();
+    float getCcdSweptSphereRadius() const;
 
     void reset(bool rebuildCollider);
 
@@ -158,18 +145,12 @@ private:
 
     void finalize();
 
-    void updateColisionShapeLocalScaling();
-
 
 private:
     btRigidBody::btRigidBodyConstructionInfo mConstructionInfo;
-    btRigidBody *mRigidBody;
-    btTransform m_centerOfMassOffset;
-    btTransform prevPos;
-    btVector3 mScale;
+    btRigidBody* mRigidBody;
     SimulationType mSimType;
-
-    btDynamicsWorld *mWorld;
+    BulletWorld* mWorld;
 
     friend class BulletWorld;
 };

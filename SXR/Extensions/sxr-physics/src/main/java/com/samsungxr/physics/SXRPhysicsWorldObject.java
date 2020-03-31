@@ -12,7 +12,8 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
         super(gvrContext, nativePointer);
     }
 
-    protected SXRPhysicsWorldObject(SXRContext gvrContext, long nativePointer, List<NativeCleanupHandler> cleanupHandlers) {
+    protected SXRPhysicsWorldObject(SXRContext gvrContext, long nativePointer, List<NativeCleanupHandler> cleanupHandlers)
+    {
         super(gvrContext, nativePointer, cleanupHandlers);
     }
 
@@ -21,7 +22,8 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
      *
      * @return The physics world of this {@link SXRRigidBody}
      */
-    public SXRWorld getWorld() {
+    public SXRPhysicsContent getWorld()
+    {
         return getWorld(getOwnerObject());
     }
 
@@ -31,7 +33,8 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
      * @param owner Owner of the {@link SXRRigidBody}
      * @return Returns the {@link SXRWorld} of the scene.
      */
-    private static SXRWorld getWorld(SXRNode owner) {
+    private static SXRPhysicsContent getWorld(SXRNode owner)
+    {
         return getWorldFromAscendant(owner);
     }
 
@@ -41,62 +44,78 @@ abstract class SXRPhysicsWorldObject extends SXRComponent {
      * @param worldOwner Scene object to search for a physics world in the scene.
      * @return Physics world from the scene.
      */
-    private static SXRWorld getWorldFromAscendant(SXRNode worldOwner) {
+    private static SXRPhysicsContent getWorldFromAscendant(SXRNode worldOwner)
+    {
         SXRComponent world = null;
 
-        while (worldOwner != null && world == null) {
+        while (worldOwner != null && world == null)
+        {
             world = worldOwner.getComponent(SXRWorld.getComponentType());
             worldOwner = worldOwner.getParent();
         }
 
-        return (SXRWorld) world;
+        return (SXRPhysicsContent) world;
     }
 
     @Override
-    public void onAttach(SXRNode newOwner) {
+    public void onAttach(SXRNode newOwner)
+    {
         super.onAttach(newOwner);
-        if (isEnabled()) {
+        if (isEnabled())
+        {
             addToWorld(getWorld(newOwner));
         }
     }
 
     @Override
-    public void onDetach(SXRNode oldOwner) {
+    public void onDetach(SXRNode oldOwner)
+    {
         super.onDetach(oldOwner);
-        if (isEnabled()) {
+        if (isEnabled())
+        {
             removeFromWorld(getWorld(oldOwner));
         }
     }
 
     @Override
-    public void onNewOwnersParent(SXRNode newOwnersParent) {
-        if (isEnabled()) {
+    public void onNewOwnersParent(SXRNode newOwnersParent)
+    {
+        if (isEnabled())
+        {
             addToWorld(getWorld(newOwnersParent));
         }
     }
 
     @Override
-    public void onRemoveOwnersParent(SXRNode oldOwnersParent) {
-        if (isEnabled()) {
+    public void onRemoveOwnersParent(SXRNode oldOwnersParent)
+    {
+        if (isEnabled())
+        {
             removeFromWorld(getWorld(oldOwnersParent));
         }
     }
 
     @Override
-    public void onEnable() {
+    public void onEnable()
+    {
         super.onEnable();
-
         addToWorld(getWorld());
     }
 
     @Override
-    public void onDisable() {
+    public void onDisable()
+    {
         super.onDisable();
-
         removeFromWorld(getWorld());
     }
 
-    abstract protected void removeFromWorld(SXRWorld world);
+    abstract protected void removeFromWorld(SXRPhysicsContent world);
 
-    abstract protected void addToWorld(SXRWorld world);
+    protected void addToWorld(SXRPhysicsContent world)
+    {
+        if (world == null)
+        {
+            throw new UnsupportedOperationException("Add your node to the scene before attaching physics conponents");
+        }
+    }
 }

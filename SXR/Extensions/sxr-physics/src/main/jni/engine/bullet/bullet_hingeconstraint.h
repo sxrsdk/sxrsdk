@@ -21,7 +21,8 @@
 #define EXTENSIONS_BULLET_HINGECONSTRAINT_H
 
 #include "../physics_hingeconstraint.h"
-#include "bullet_object.h"
+#include "../physics_collidable.h"
+#include <glm/vec3.hpp>
 
 class btHingeConstraint;
 
@@ -29,13 +30,13 @@ namespace sxr {
 
     class PhysicsRigidBody;
     class BulletRigidBody;
-    class BulletHingeConstraint : public PhysicsHingeConstraint,
-                                  BulletObject {
+    class BulletHingeConstraint : public PhysicsHingeConstraint
+    {
 
     public:
-        explicit BulletHingeConstraint(PhysicsRigidBody *rigidBodyB, float const pivotInA[],
-                                       float const pivotInB[], float const axisInA[],
-                                       float const axisInB[]);
+        BulletHingeConstraint(PhysicsCollidable* bodyA,
+                const glm::vec3& pivotA, const glm::vec3& pivotB,
+                const glm::vec3 axis);
 
         BulletHingeConstraint(btHingeConstraint *constraint);
 
@@ -47,26 +48,22 @@ namespace sxr {
 
         float getUpperLimit() const;
 
-        void *getUnderlying() { return mHingeConstraint; }
+        void* getUnderlying() { return mConstraint; }
 
         void setBreakingImpulse(float impulse);
 
-        float getBreakingImpulse() const;
+        virtual float getBreakingImpulse() const;
 
-        void updateConstructionInfo();
+        virtual const glm::vec3& getHingeAxis() { return mHingeAxis; }
+
+        void updateConstructionInfo(PhysicsWorld* world);
 
     private:
-        btHingeConstraint *mHingeConstraint;
-        BulletRigidBody *mRigidBodyB;
-
-        float mBreakingImpulse;
-        float mTempLower;
-        float mTempUpper;
-
-        PhysicsVec3 mPivotInA;
-        PhysicsVec3 mPivotInB;
-        PhysicsVec3 mAxisInA;
-        PhysicsVec3 mAxisInB;
+        btHingeConstraint* mConstraint;
+        float     mBreakingImpulse;
+        float     mTempLower;
+        float     mTempUpper;
+        glm::vec3 mHingeAxis;
     };
 }
 #endif //EXTENSIONS_BULLET_HINGECONSTRAINT_H

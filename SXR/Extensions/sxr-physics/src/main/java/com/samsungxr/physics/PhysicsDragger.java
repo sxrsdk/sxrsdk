@@ -30,19 +30,12 @@ class PhysicsDragger {
 
     private SXRNode mPivotObject = null;
     private SXRNode mDragMe = null;
-    private SXRCursorController mCursorController = null;
+    private final SXRCursorController mCursorController;
 
-    PhysicsDragger(SXRContext gvrContext) {
-        mContext = gvrContext;
-
-        gvrContext.getInputManager().selectController(new SXRInputManager.ICursorControllerSelectListener() {
-            @Override
-            public void onCursorControllerSelected(SXRCursorController newController, SXRCursorController oldController) {
-                synchronized (mLock) {
-                    mCursorController = newController;
-                }
-            }
-        });
+    PhysicsDragger(SXRCursorController controller)
+    {
+        mContext = controller.getSXRContext();
+        mCursorController = controller;
     }
 
     private static SXRNode onCreatePivotObject(SXRContext gvrContext) {
